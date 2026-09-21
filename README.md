@@ -16,6 +16,12 @@ Hatchling stays headless until the execution engine is useful on its own.
 - Agent providers must share the same `run_stage(input) -> result/evidence` contract.
 - Local autonomy is explicit and policy bounded.
 
+## Runtime Direction
+
+Hatchling is moving toward a C implementation of a work runtime kernel plus CLI, daemon, evidence CAS, adapter protocol, cost layer, and policy layer.
+
+The current Python package is a smoke-testable prototype for the core model. The long-term implementation structure is governed by [project-docs](/Volumes/Extreme SSD/Hatchling-project/Hatchling/project-docs/README.md).
+
 ## Runtime MVP
 
 The first product engine structure lives under `src/hatchling/`.
