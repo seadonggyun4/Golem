@@ -3,15 +3,15 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hatchling-awe"
+name = "golem-awe"
 version = "0.1.0"
-description = "Hatchling headless Agentic Work Engine runtime."
+description = "Golem headless Agentic Work Engine runtime."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
 [project.scripts]
-hatchling = "hatchling.cli:main"
+golem = "golem.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

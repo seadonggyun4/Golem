@@ -1,6 +1,6 @@
 {
   "id": "sample-work-capsule",
-  "goal": "Exercise the Hatchling MVP work cycle.",
+  "goal": "Exercise the Golem MVP work cycle.",
   "scope": [
     "samples/**"
   ],

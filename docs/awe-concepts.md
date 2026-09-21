@@ -1,8 +1,8 @@
-# AWE Concepts in Hatchling
+# AWE Concepts in Golem
 
-`AWE — Agentic Work Engine` is the category name. `Hatchling` is the product and implementation.
+`AWE — Agentic Work Engine` is the category name. `Golem` is the product and implementation.
 
-Hatchling implements a headless runtime model for evidence-bound agent work. The central planning object is a `Work Capsule`; each execution is a `WorkRun` made of provider-specific `StageRun` attempts.
+Golem implements a headless runtime model for evidence-bound agent work. The central planning object is a `Work Capsule`; each execution is a `WorkRun` made of provider-specific `StageRun` attempts.
 
 ## Promoted Concepts
 
@@ -17,7 +17,7 @@ Hatchling implements a headless runtime model for evidence-bound agent work. The
 
 ## Runtime Discipline
 
-Hatchling keeps the runtime small and evidence-bound:
+Golem keeps the runtime small and evidence-bound:
 
 - status, attempt, budget, evidence, retry, and cancel shape
 - lease and heartbeat checks

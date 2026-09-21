@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.21)
+project(GolemConsumer LANGUAGES C)
+find_package(Golem 0.1.0 EXACT CONFIG REQUIRED)
+add_executable(consumer main.c)
+target_link_libraries(consumer PRIVATE Golem::golem)
+enable_testing()
+add_test(NAME installed_consumer COMMAND consumer)

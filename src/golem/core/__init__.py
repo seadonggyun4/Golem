@@ -1,0 +1,1 @@
+"""Core Golem domain model."""

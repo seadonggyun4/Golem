@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+find_dependency(OpenSSL 3.0 COMPONENTS Crypto)
+find_dependency(PkgConfig)
+pkg_check_modules(JSONC REQUIRED IMPORTED_TARGET json-c>=0.15)
+include("${CMAKE_CURRENT_LIST_DIR}/GolemTargets.cmake")
+check_required_components(Golem)

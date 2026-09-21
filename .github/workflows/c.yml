@@ -1,0 +1,47 @@
+name: C foundation
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        preset: [dev, release, asan]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ninja (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev
+      - name: Install Ninja (macOS)
+        if: runner.os == 'macOS'
+        run: brew list ninja || brew install ninja
+      - name: Install OpenSSL (macOS)
+        if: runner.os == 'macOS'
+        run: brew list openssl@3 || brew install openssl@3
+      - name: Install JSON dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install pkg-config json-c
+      - run: cmake --preset ${{ matrix.preset }}
+      - run: cmake --build --preset ${{ matrix.preset }}
+      - run: ctest --preset ${{ matrix.preset }}
+      - name: Linux leak checks
+        if: runner.os == 'Linux' && matrix.preset == 'asan'
+        run: ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 ctest --test-dir build/asan --output-on-failure
+      - run: cmake --install build/${{ matrix.preset }} --prefix "${{ runner.temp }}/golem"
+      - run: cmake -S tests/consumer -B build/consumer -G Ninja -DCMAKE_PREFIX_PATH="${{ runner.temp }}/golem"
+      - run: cmake --build build/consumer
+      - run: ctest --test-dir build/consumer --output-on-failure
+      - name: Python prototype regression
+        run: PYTHONPATH=src python3 -m unittest discover -s tests
+  adapter-fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y clang ninja-build libssl-dev pkg-config libjson-c-dev
+      - run: cmake -S . -B build/fuzz -G Ninja -DCMAKE_C_COMPILER=clang -DGOLEM_BUILD_FUZZERS=ON -DGOLEM_ENABLE_SANITIZERS=ON -DBUILD_TESTING=OFF -DGOLEM_BUILD_CLI=OFF
+      - run: cmake --build build/fuzz
+      - run: cmake -E copy_directory fuzz/corpus/adapter_json build/fuzz/corpus
+      - run: build/fuzz/golem_fuzz_adapter_json -runs=10000 -max_len=16385 build/fuzz/corpus

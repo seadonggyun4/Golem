@@ -10,6 +10,7 @@ __pycache__/
 htmlcov/
 dist/
 build/
+CMakeUserPresets.json
 *.egg-info/
 
 # Virtual environments
@@ -17,8 +18,18 @@ build/
 venv/
 env/
 
-# Local Hatchling runtime state
+# Local Golem runtime state
+.golem/
 .hatchling/
+
+# Credentials and machine-local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
 
 # Local development planning docs
 project-docs/

@@ -21,7 +21,7 @@ Projects may override the graph, but every override must still produce predecess
 
 ## Loop Reentry
 
-QA and audit failures do not blindly return to development. Hatchling classifies the failure and returns to the most relevant stage:
+QA and audit failures do not blindly return to development. Golem classifies the failure and returns to the most relevant stage:
 
 - `planning_gap` -> `planning`
 - `ux_mismatch` -> `ux`
@@ -33,7 +33,7 @@ QA and audit failures do not blindly return to development. Hatchling classifies
 
 ## Headless Projections
 
-Hatchling may emit:
+Golem may emit:
 
 - JSON records for machines
 - Markdown projections for humans
