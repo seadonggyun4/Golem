@@ -1,0 +1,38 @@
+{
+  "id": "sample-work-capsule",
+  "goal": "Exercise the Hatchling MVP work cycle.",
+  "scope": [
+    "samples/**"
+  ],
+  "permissions": {
+    "planning": "AUTO_LOCAL",
+    "ux": "AUTO_LOCAL",
+    "publishing": "AUTO_LOCAL",
+    "development": "AUTO_LOCAL",
+    "qa": "AUTO_LOCAL",
+    "audit": "AUTO_LOCAL"
+  },
+  "stages": [
+    "planning",
+    "ux",
+    "publishing",
+    "development",
+    "qa",
+    "audit"
+  ],
+  "acceptance": [
+    {
+      "id": "AC-001",
+      "text": "All stages produce evidence.",
+      "required_gates": [
+        "audit"
+      ]
+    }
+  ],
+  "expected_artifacts": [
+    "content-addressed evidence"
+  ],
+  "required_gates": [
+    "audit"
+  ]
+}

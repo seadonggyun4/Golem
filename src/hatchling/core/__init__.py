@@ -1,0 +1,1 @@
+"""Core Hatchling domain model."""
