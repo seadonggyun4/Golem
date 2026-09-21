@@ -18,6 +18,7 @@ from hatchling.core.models import (
     WorkRun,
 )
 from hatchling.evidence.store import EvidenceStore
+from hatchling.core.optimization import BudgetPolicy, OptimizationAction, OptimizationProposal
 from hatchling.policies.autonomy import ActionRequest, evaluate_action
 from hatchling.runtime.lease import Lease
 from hatchling.runtime.loop import LoopController
@@ -89,6 +90,16 @@ class HatchlingCoreTests(unittest.TestCase):
         run = controller.run_once(WorkRun("run-1", work), stage_index=3)
         self.assertEqual(run.latest_stage_run().stage, StageName.DEVELOPMENT)
         self.assertEqual(controller.next_stage_index(work, run.latest_stage_run()), work.stages.index(StageName.PUBLISHING))
+
+    def test_optimizer_boundary_can_noop_without_runtime_dependency(self) -> None:
+        proposal = OptimizationProposal(
+            action=OptimizationAction.NO_OP,
+            decision=evaluate_action(make_capsule(), ActionRequest(StageName.PLANNING, "plan")),
+        )
+        budget = BudgetPolicy(stage=StageName.PLANNING, max_billed_cost_micros=1_000)
+        self.assertEqual(proposal.action, OptimizationAction.NO_OP)
+        self.assertEqual(proposal.decision.status, "ALLOW")
+        self.assertEqual(budget.stage, StageName.PLANNING)
 
 
 if __name__ == "__main__":

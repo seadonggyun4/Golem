@@ -12,6 +12,14 @@ from hatchling.core.models import (
     WorkCapsule,
     WorkRun,
 )
+from hatchling.core.optimization import (
+    BudgetPolicy,
+    CostLedgerEntry,
+    OptimizationAction,
+    OptimizationAdvisor,
+    OptimizationProposal,
+    ProviderUsage,
+)
 
 __all__ = [
     "AcceptanceCriterion",
@@ -24,4 +32,10 @@ __all__ = [
     "StageRun",
     "WorkCapsule",
     "WorkRun",
+    "BudgetPolicy",
+    "CostLedgerEntry",
+    "OptimizationAction",
+    "OptimizationAdvisor",
+    "OptimizationProposal",
+    "ProviderUsage",
 ]

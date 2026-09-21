@@ -25,6 +25,7 @@ The first product engine structure lives under `src/hatchling/`.
 - `evidence`: content-addressed evidence store with redaction checks.
 - `adapters`: provider contract plus a local no-op adapter for smoke runs.
 - `policies`: autonomy boundaries such as `AUTO_LOCAL`, `ASK_ON_EXTERNAL_EFFECT`, `ASK_ALWAYS`, and `DENY`.
+- `core.optimization`: optional cost/budget/usage interfaces for optimizers such as Golem, with no runtime dependency.
 
 The default stage graph is:
 
@@ -34,7 +35,7 @@ planning -> ux -> publishing -> development -> qa -> audit
 
 Projects may override it, but downstream stages must receive predecessor evidence digests.
 
-See [docs/awe-concepts.md](/Volumes/Extreme SSD/Hatchling-project/Hatchling/docs/awe-concepts.md) and [docs/mvp-runtime.md](/Volumes/Extreme SSD/Hatchling-project/Hatchling/docs/mvp-runtime.md).
+See [docs/awe-concepts.md](/Volumes/Extreme SSD/Hatchling-project/Hatchling/docs/awe-concepts.md), [docs/mvp-runtime.md](/Volumes/Extreme SSD/Hatchling-project/Hatchling/docs/mvp-runtime.md), and [docs/golem-integration-boundary.md](/Volumes/Extreme SSD/Hatchling-project/Hatchling/docs/golem-integration-boundary.md).
 
 ## Development
 
@@ -58,3 +59,4 @@ PYTHONPATH=src python3 -m hatchling.cli smoke-run
 4. Add budget accounting and stale lease rejection to the loop controller.
 5. Add Markdown and JSON projections for run receipts.
 6. Add signed runner envelopes and capability probes for local and external adapters.
+7. Keep optimizer integrations optional and policy-gated.
