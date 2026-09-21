@@ -20,6 +20,9 @@ env/
 # Local Hatchling runtime state
 .hatchling/
 
+# Local development planning docs
+project-docs/
+
 # Local scratch
 tmp/
 

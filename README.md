@@ -20,7 +20,7 @@ Hatchling stays headless until the execution engine is useful on its own.
 
 Hatchling is moving toward a C implementation of a work runtime kernel plus CLI, daemon, evidence CAS, adapter protocol, cost layer, and policy layer.
 
-The current Python package is a smoke-testable prototype for the core model. The long-term implementation structure is governed by [project-docs](/Volumes/Extreme SSD/Hatchling-project/Hatchling/project-docs/README.md).
+The current Python package is a smoke-testable prototype for the core model.
 
 ## Runtime MVP
 
