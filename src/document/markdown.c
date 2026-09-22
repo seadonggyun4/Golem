@@ -15,6 +15,9 @@ typedef struct md_contract {
     bool seen[11], parents[GOLEM_DOCUMENT_MAX_PARENTS], requirements[256];
     bool bad;
 } md_contract;
+/* Retain callback rejection even when a parser version loses its return code. */
+static int reject(md_contract *c)
+{ c->bad=true; return 1; }
 static const char *const sections[] = {"Purpose","Scope","Parents","Evidence","Decisions",
     "Requirements","Work","Validation","Risks"};
 static const char *extra(const char *kind)
@@ -51,14 +54,14 @@ static bool utf8(golem_bytes b)
 static int enter_block(MD_BLOCKTYPE t,void *detail,void *ctx)
 {
     md_contract *c=ctx; ++c->depth;
-    if(c->depth>128) return 1;
+    if(c->depth>128) return reject(c);
     if(t==MD_BLOCK_H) {
         unsigned level=((MD_BLOCK_H_DETAIL *)detail)->level;
-        if(c->depth!=2 || level>2) { c->bad=true; return 1; }
+        if(c->depth!=2 || level>2) return reject(c);
         c->heading=level; c->heading_size=0; c->heading_text[0]=0;
-        if(level==1 && (c->titles++!=0 || c->section!=-1)) return 1;
+        if(level==1 && (c->titles++!=0 || c->section!=-1)) return reject(c);
     }
-    if(t==MD_BLOCK_HTML) return 1;
+    if(t==MD_BLOCK_HTML) return reject(c);
     return 0;
 }
 static int leave_block(MD_BLOCKTYPE t,void *detail,void *ctx)
@@ -69,9 +72,9 @@ static int leave_block(MD_BLOCKTYPE t,void *detail,void *ctx)
             int index=-1;
             for(int i=0;i<9;++i) if(strcmp(c->heading_text,sections[i])==0) index=i;
             if(strcmp(c->heading_text,extra(dw_text(c->meta,"kind")))==0) index=9;
-            if(index<0 || c->seen[index] || c->titles!=1) return 1;
+            if(index<0 || c->seen[index] || c->titles!=1) return reject(c);
             c->section=index; c->seen[index]=true;
-        } else if(c->heading_size<4) return 1;
+        } else if(c->heading_size<4) return reject(c);
         c->heading=0;
     }
     --c->depth; return 0;
@@ -82,7 +85,7 @@ static int enter_span(MD_SPANTYPE t,void *detail,void *ctx)
     if(t==MD_SPAN_A) {
         MD_ATTRIBUTE *a=&((MD_SPAN_A_DETAIL *)detail)->href;
         if(a->size>=10 && memcmp(a->text,"golem-doc:",10)==0) {
-            if(c->section!=2) return 1;
+            if(c->section!=2) return reject(c);
             struct json_object *p=dw_get(c->meta,"parents"); bool match=false;
             for(size_t i=0;i<json_object_array_length(p);++i) {
                 struct json_object *v=json_object_array_get_idx(p,i);
@@ -90,12 +93,12 @@ static int enter_span(MD_SPANTYPE t,void *detail,void *ctx)
                 int n=snprintf(expected,sizeof(expected),"golem-doc:%s:%u:%s",dw_text(v,"document_id"),
                     (unsigned)dw_uint(v,"revision"),dw_text(v,"digest"));
                 if(n>0 && (size_t)n==a->size && memcmp(expected,a->text,a->size)==0) {
-                    if(c->parents[i]) return 1;
+                    if(c->parents[i]) return reject(c);
                     c->parents[i]=true; match=true;
                 }
             }
-            if(!match) return 1;
-        } else if(c->section==2) return 1; /* Parent links have one unambiguous scheme. */
+            if(!match) return reject(c);
+        } else if(c->section==2) return reject(c); /* Parent links have one unambiguous scheme. */
     }
     return 0;
 }
@@ -117,9 +120,9 @@ static bool placeholder(const char *s,size_t n)
 static int text(MD_TEXTTYPE t,const MD_CHAR *s,MD_SIZE n,void *ctx)
 {
     md_contract *c=ctx;
-    if(t==MD_TEXT_HTML || t==MD_TEXT_NULLCHAR) return 1;
+    if(t==MD_TEXT_HTML || t==MD_TEXT_NULLCHAR) return reject(c);
     if(c->heading) {
-        if(t!=MD_TEXT_NORMAL || n>=sizeof(c->heading_text)-c->heading_size) return 1;
+        if(t!=MD_TEXT_NORMAL || n>=sizeof(c->heading_text)-c->heading_size) return reject(c);
         memcpy(c->heading_text+c->heading_size,s,n); c->heading_size+=n;
         c->heading_text[c->heading_size]=0; return 0;
     }

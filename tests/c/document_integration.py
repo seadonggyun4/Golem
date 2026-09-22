@@ -139,6 +139,13 @@ class Documents(unittest.TestCase):
                 self.body = body
                 self.submit(ok=False)
 
+    def test_duplicate_final_section_never_commits(self):
+        self.start()
+        self.body = BODY + b"\n## Purpose\nDuplicate content.\n"
+        self.submit(ok=False)
+        self.assertEqual(len(list((self.work / "events").glob("*.evt"))), 1)
+        self.assertFalse((self.work / "documents" / "planning" / "r0001.md").exists())
+
     def test_duplicate_json_nested_and_escaped(self):
         self.start()
         m, b = self.inputs()
