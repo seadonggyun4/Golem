@@ -7,6 +7,35 @@
   },
   "configurePresets": [
     {
+      "name": "bindings",
+      "inherits": "release",
+      "binaryDir": "${sourceDir}/build/bindings",
+      "cacheVariables": {
+        "GOLEM_BUILD_BINDINGS": "ON",
+        "GOLEM_BUILD_NODE_BINDING": "ON"
+      }
+    },
+    {
+      "name": "bench",
+      "inherits": "release",
+      "binaryDir": "${sourceDir}/build/bench",
+      "cacheVariables": {
+        "GOLEM_BUILD_BENCHMARKS": "ON",
+        "GOLEM_ENABLE_SANITIZERS": "OFF",
+        "GOLEM_BUILD_FUZZERS": "OFF"
+      }
+    },
+    {
+      "name": "fuzz",
+      "inherits": "asan",
+      "binaryDir": "${sourceDir}/build/fuzz",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "GOLEM_BUILD_FUZZERS": "ON",
+        "GOLEM_BUILD_CLI": "OFF"
+      }
+    },
+    {
       "name": "dev",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/dev",
@@ -34,6 +63,9 @@
     }
   ],
   "buildPresets": [
+    { "name": "bindings", "configurePreset": "bindings" },
+    { "name": "bench", "configurePreset": "bench" },
+    { "name": "fuzz", "configurePreset": "fuzz" },
     {
       "name": "dev",
       "configurePreset": "dev"
@@ -48,6 +80,27 @@
     }
   ],
   "testPresets": [
+    {
+      "name": "bindings",
+      "configurePreset": "bindings",
+      "filter": { "include": { "label": "bindings" } },
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error" }
+    },
+    {
+      "name": "bench",
+      "configurePreset": "bench",
+      "filter": { "include": { "label": "benchmark" } },
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error" }
+    },
+    {
+      "name": "fuzz",
+      "configurePreset": "fuzz",
+      "filter": { "include": { "label": "fuzz" } },
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error" }
+    },
     {
       "name": "dev",
       "configurePreset": "dev",

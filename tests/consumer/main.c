@@ -14,6 +14,8 @@
 #include "golem/gateway.h"
 #include "golem/runtime.h"
 #include "golem/lease.h"
+#include "golem/daemon.h"
+#include "golem/supervisor.h"
 
 static golem_status lease_sink(void *context, const golem_lease_event *event)
 {
@@ -61,6 +63,18 @@ static int verify_runtime_api(const golem_work_capsule *capsule)
 
 static int verify_memory_api(void)
 {
+    golem_policy_artifact artifact = {.revision = 1}, decoded_artifact;
+    uint8_t policy_bytes[GOLEM_POLICY_ARTIFACT_SIZE]; size_t policy_size;
+    if (golem_policy_spec_init(&artifact.policy) != GOLEM_OK ||
+        golem_policy_artifact_encode(&artifact, policy_bytes, sizeof(policy_bytes), &policy_size) != GOLEM_OK ||
+        golem_policy_artifact_decode((golem_bytes){policy_bytes, policy_size}, &decoded_artifact) != GOLEM_OK ||
+        decoded_artifact.revision != 1 || decoded_artifact.policy.permissions[0] != GOLEM_AUTONOMY_DENY) return 1;
+    bool worked = true;
+    if (golem_daemon_tick(NULL, &worked) != GOLEM_ERR_INVALID_ARGUMENT || !worked ||
+        golem_daemon_close(NULL) != GOLEM_OK ||
+        golem_daemon_recover(NULL, NULL) != GOLEM_ERR_INVALID_ARGUMENT ||
+        golem_runtime_recover(NULL, NULL, NULL, NULL, NULL, NULL) != GOLEM_ERR_INVALID_ARGUMENT ||
+        golem_supervisor_run(NULL, NULL, (golem_bytes){NULL, 0}, 1, NULL, NULL, NULL) != GOLEM_ERR_INVALID_ARGUMENT) return 1;
     if (golem_runtime_step(NULL) != GOLEM_ERR_INVALID_ARGUMENT ||
         golem_runtime_run_borrow(NULL) != NULL) return 1;
     golem_adapter *adapter = NULL;

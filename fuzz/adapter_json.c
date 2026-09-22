@@ -1,15 +1,19 @@
 #include "golem/adapter_protocol.h"
-#include <stdlib.h>
-#include <string.h>
+#include "check.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    for (int format = 0; format < 2; ++format) {
+    {
         golem_adapter_envelope e, again;
-        golem_status status = format == 0 ? golem_adapter_envelope_decode((golem_bytes){data, size}, &e, NULL) :
-            golem_adapter_msgpack_decode((golem_bytes){data, size}, &e, NULL);
-        if (status != GOLEM_OK) continue;
+        memset(&e, 0xa5, sizeof(e));
+        unsigned char saved[sizeof(e)]; memcpy(saved, &e, sizeof(e));
+#ifdef GOLEM_FUZZ_MSGPACK
+        golem_status status = golem_adapter_msgpack_decode((golem_bytes){data, size}, &e, NULL);
+#else
+        golem_status status = golem_adapter_envelope_decode((golem_bytes){data, size}, &e, NULL);
+#endif
+        if (status != GOLEM_OK) { REQUIRE(memcmp(saved, &e, sizeof(e)) == 0); return 0; }
         char first[GOLEM_ADAPTER_JSON_MAX + 1], second[GOLEM_ADAPTER_JSON_MAX + 1];
         size_t n, m;
         if (golem_adapter_envelope_encode(&e, first, sizeof(first), &n, NULL) != GOLEM_OK ||
@@ -21,6 +25,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
             golem_adapter_msgpack_decode((golem_bytes){packed, n}, &again, NULL) != GOLEM_OK ||
             golem_adapter_msgpack_encode(&again, canonical, sizeof(canonical), &m, NULL) != GOLEM_OK ||
             n != m || memcmp(packed, canonical, n) != 0) abort();
+        memset(second, 0xa5, sizeof(second));
+        size_t required = 0;
+        REQUIRE(golem_adapter_envelope_encode(&e, second, 1, &required, NULL) == GOLEM_ERR_BUFFER_TOO_SMALL);
+        REQUIRE((unsigned char)second[0] == 0xa5 && required > 1);
+        REQUIRE(golem_adapter_msgpack_encode(&e, second, 1, &required, NULL) == GOLEM_ERR_BUFFER_TOO_SMALL);
+        REQUIRE((unsigned char)second[0] == 0xa5 && required > 1);
     }
     return 0;
 }

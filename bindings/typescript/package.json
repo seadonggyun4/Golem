@@ -1,0 +1,11 @@
+{
+  "name": "@golem-awe/runtime",
+  "version": "0.1.0",
+  "description": "Typed Node-API binding for Golem C validation and replay",
+  "type": "module",
+  "exports": { ".": { "types": "./index.d.ts", "import": "./index.mjs" } },
+  "files": ["index.mjs", "index.d.ts"],
+  "engines": { "node": ">=18" },
+  "scripts": { "typecheck": "tsc --project tests/tsconfig.json" },
+  "devDependencies": { "typescript": "5.9.3" }
+}

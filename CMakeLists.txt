@@ -18,12 +18,30 @@ include(CMakePackageConfigHelpers)
 option(GOLEM_WARNINGS_AS_ERRORS "Treat Golem warnings as errors" ON)
 option(GOLEM_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 option(GOLEM_BUILD_CLI "Build the headless C CLI" ON)
-option(GOLEM_BUILD_FUZZERS "Build Clang libFuzzer protocol checks" OFF)
+option(GOLEM_BUILD_BENCHMARKS "Build opt-in performance measurement tools" OFF)
+option(GOLEM_BUILD_BINDINGS "Build the optional shared language binding ABI" OFF)
+option(GOLEM_BUILD_NODE_BINDING "Build the optional Node-API addon" OFF)
+if(GOLEM_BUILD_NODE_BINDING AND NOT GOLEM_BUILD_BINDINGS)
+    message(FATAL_ERROR "Node binding requires GOLEM_BUILD_BINDINGS=ON")
+endif()
+option(GOLEM_BUILD_FUZZERS "Build instrumented Clang libFuzzer parser checks" OFF)
+set(GOLEM_LIBFUZZER_LIBRARY "" CACHE FILEPATH "Optional libFuzzer archive for AppleClang installations without libFuzzer")
+if(GOLEM_BUILD_FUZZERS AND NOT GOLEM_ENABLE_SANITIZERS)
+    message(FATAL_ERROR "Fuzz builds require GOLEM_ENABLE_SANITIZERS=ON")
+endif()
+if(GOLEM_BUILD_FUZZERS AND NOT BUILD_TESTING)
+    message(FATAL_ERROR "Fuzz builds require BUILD_TESTING=ON for seeded smoke tests")
+endif()
 find_package(OpenSSL 3.0 REQUIRED COMPONENTS Crypto)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONC REQUIRED IMPORTED_TARGET json-c>=0.15)
 
 add_library(golem STATIC
+    src/daemon/storage.c
+    src/daemon/recovery.c
+    src/daemon/queue.c
+    src/daemon/scheduler.c
+    src/daemon/supervisor.c
     src/runtime/loop.c
     src/runtime/lease.c
     src/adapter_protocol/adapter.c
@@ -47,6 +65,7 @@ add_library(golem STATIC
     src/core/work_run.c
     src/core/authorization.c
     src/policy/autonomy.c
+    src/policy/artifact.c
     src/policy/fallback.c
     src/optimization/selection.c
     src/optimization/execution.c
@@ -109,18 +128,18 @@ if(GOLEM_BUILD_FUZZERS)
     if(NOT CMAKE_C_COMPILER_ID MATCHES "^(Clang|AppleClang)$")
         message(FATAL_ERROR "libFuzzer requires Clang")
     endif()
+    if(GOLEM_LIBFUZZER_LIBRARY AND (NOT APPLE OR NOT CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
+            OR NOT EXISTS "${GOLEM_LIBFUZZER_LIBRARY}"))
+        message(FATAL_ERROR "GOLEM_LIBFUZZER_LIBRARY requires AppleClang and an existing macOS libFuzzer archive")
+    endif()
     target_compile_options(golem PRIVATE -fsanitize=fuzzer-no-link)
     target_link_options(golem INTERFACE -fsanitize=fuzzer-no-link)
-    add_executable(golem_fuzz_adapter_json fuzz/adapter_json.c)
-    target_link_libraries(golem_fuzz_adapter_json PRIVATE Golem::golem)
-    target_compile_options(golem_fuzz_adapter_json PRIVATE -fsanitize=fuzzer)
-    target_link_options(golem_fuzz_adapter_json PRIVATE -fsanitize=fuzzer)
-    golem_configure_target(golem_fuzz_adapter_json)
 endif()
 
 if(GOLEM_BUILD_CLI)
     add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c
-        src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c)
+        src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c
+        src/cli/daemon.c src/cli/daemon_worker.c)
     set_target_properties(golem_cli PROPERTIES OUTPUT_NAME golem)
     target_link_libraries(golem_cli PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
     golem_configure_target(golem_cli)
@@ -129,6 +148,15 @@ endif()
 
 if(BUILD_TESTING)
     add_subdirectory(tests/c)
+endif()
+if(BUILD_TESTING OR GOLEM_BUILD_FUZZERS)
+    add_subdirectory(fuzz)
+endif()
+if(GOLEM_BUILD_BENCHMARKS)
+    add_subdirectory(bench)
+endif()
+if(GOLEM_BUILD_BINDINGS)
+    add_subdirectory(bindings)
 endif()
 
 install(TARGETS golem EXPORT GolemTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})

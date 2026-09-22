@@ -56,12 +56,21 @@ typedef struct golem_runtime_report {
  * record is mandatory so no execution silently escapes the journal contract.
  * Serialize calls; callbacks cannot reenter step/drive/cancel/free. Reentry is
  * rejected, not queued. Free is only valid outside callbacks. NULL free is safe.
- * Runtime cannot adopt replayed runs: reconcile uncertain dispatch externally.
+ * Recovery accepts only safe journal boundaries; RUNNING needs reconciliation.
  * No authorization grants; every attempt is LOCAL with NONE authorization. */
 golem_status golem_runtime_create(const char *id, const golem_work_capsule *capsule,
     const golem_runtime_options *options, const golem_runtime_ops *ops, void *context,
     const golem_allocator *allocator, golem_runtime **out);
 void golem_runtime_free(golem_runtime *runtime);
+/* Recover from a caller-held locked journal, retaining history/attempt limits.
+ * Only READY/FAILED accepted; RUNNING, BLOCKED and terminal runs are rejected.
+ * max_attempts must match CREATED; dispatch/reentry counts are reconstructed.
+ * Host MUST verify its persisted evidence and supervision state before calling.
+ * No old lease is restored. Bind a newly acquired lease before executing.
+ * Borrows journal only during call; ops/context/allocator ownership as create.
+ * Output unchanged on error; journal recovery errors may poison its handle. */
+golem_status golem_runtime_recover(golem_journal *journal, const golem_runtime_options *options,
+    const golem_runtime_ops *ops, void *context, const golem_allocator *allocator, golem_runtime **out);
 /* One step executes at most one callback, including optional classified-failure
  * reentry. drive repeats steps until completion or stop. All infrastructure,
  * policy, limit and validation errors latch permanently; inspecting remains safe.

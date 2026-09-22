@@ -1,0 +1,4 @@
+_golem_binding_abi_version
+_golem_binding_call
+_golem_binding_free
+_golem_binding_status_message

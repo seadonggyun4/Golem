@@ -3,6 +3,23 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  public-alpha:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev
+      - if: runner.os == 'macOS'
+        run: brew install cmake ninja openssl@3 pkg-config json-c
+      - run: python3 -m unittest discover -s tools -p 'test_*.py'
+      - run: python3 tools/verify_alpha.py
   build:
     strategy:
       fail-fast: false
@@ -24,7 +41,7 @@ jobs:
       - name: Install JSON dependencies (macOS)
         if: runner.os == 'macOS'
         run: brew install pkg-config json-c
-      - run: cmake --preset ${{ matrix.preset }}
+      - run: cmake --preset ${{ matrix.preset }} -DGOLEM_BUILD_BENCHMARKS=ON -DGOLEM_BUILD_BINDINGS=ON
       - run: cmake --build --preset ${{ matrix.preset }}
       - run: ctest --preset ${{ matrix.preset }}
       - name: Linux leak checks
@@ -36,12 +53,47 @@ jobs:
       - run: ctest --test-dir build/consumer --output-on-failure
       - name: Python prototype regression
         run: PYTHONPATH=src python3 -m unittest discover -s tests
-  adapter-fuzz:
+  language-bindings:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update
+      - if: runner.os == 'Linux'
+        run: sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev
+      - if: runner.os == 'macOS'
+        run: brew install ninja openssl@3 pkg-config json-c
+      - run: cmake --preset bindings
+      - run: cmake --build --preset bindings
+      - run: ctest --preset bindings
+      - run: npm ci --prefix bindings/typescript --ignore-scripts --no-audit --no-fund
+      - run: npm run --prefix bindings/typescript typecheck
+      - run: python -m pip install ./bindings/python
+      - run: cmake --install build/bindings --prefix "${{ github.workspace }}/build/install-bindings"
+      - run: cmake -E copy_directory build/install-bindings build/relocated-bindings
+      - run: cmake -S bindings/tests/consumer -B build/binding-c-consumer -G Ninja -DCMAKE_PREFIX_PATH="${{ github.workspace }}/build/relocated-bindings"
+      - run: cmake --build build/binding-c-consumer
+      - run: ctest --test-dir build/binding-c-consumer --output-on-failure
+      - run: npm pack ./bindings/typescript --ignore-scripts --pack-destination build/bindings
+      - run: npm install --prefix build/node-binding-consumer --ignore-scripts --no-audit --no-fund ./build/bindings/golem-awe-runtime-0.1.0.tgz
+      - run: python bindings/tests/test_installed.py build/relocated-bindings . build/node-binding-consumer/node_modules/@golem-awe/runtime
+      - run: cmake -E copy bindings/typescript/tests/consumer.ts build/node-binding-consumer/consumer.mts
+      - run: node bindings/typescript/node_modules/typescript/bin/tsc --strict --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext build/node-binding-consumer/consumer.mts
+  parser-fuzz:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y clang ninja-build libssl-dev pkg-config libjson-c-dev
-      - run: cmake -S . -B build/fuzz -G Ninja -DCMAKE_C_COMPILER=clang -DGOLEM_BUILD_FUZZERS=ON -DGOLEM_ENABLE_SANITIZERS=ON -DBUILD_TESTING=OFF -DGOLEM_BUILD_CLI=OFF
-      - run: cmake --build build/fuzz
-      - run: cmake -E copy_directory fuzz/corpus/adapter_json build/fuzz/corpus
-      - run: build/fuzz/golem_fuzz_adapter_json -runs=10000 -max_len=16385 build/fuzz/corpus
+      - run: cmake --preset fuzz
+      - run: cmake --build --preset fuzz
+      - run: ctest --preset fuzz

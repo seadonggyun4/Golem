@@ -10,6 +10,7 @@ __pycache__/
 htmlcov/
 dist/
 build/
+node_modules/
 CMakeUserPresets.json
 *.egg-info/
 

@@ -1,3 +1,24 @@
+add_executable(golem_test_policy_artifact test_policy_artifact.c)
+target_link_libraries(golem_test_policy_artifact PRIVATE Golem::golem)
+golem_configure_target(golem_test_policy_artifact)
+add_test(NAME policy_artifact COMMAND golem_test_policy_artifact)
+set_tests_properties(policy_artifact PROPERTIES TIMEOUT 15 LABELS hardening)
+
+add_executable(golem_test_daemon test_daemon.c)
+target_link_libraries(golem_test_daemon PRIVATE Golem::golem)
+golem_configure_target(golem_test_daemon)
+foreach(case lifecycle retry limits uncertain policy corruption recovery invalid)
+    add_test(NAME daemon_${case} COMMAND golem_test_daemon ${case} ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(daemon_${case} PROPERTIES TIMEOUT 60)
+endforeach()
+add_executable(golem_test_supervisor test_supervisor.c)
+target_link_libraries(golem_test_supervisor PRIVATE Golem::golem)
+golem_configure_target(golem_test_supervisor)
+foreach(case echo exit signal hang overflow stderr cancel)
+    add_test(NAME supervisor_${case} COMMAND golem_test_supervisor ${case})
+    set_tests_properties(supervisor_${case} PROPERTIES TIMEOUT 15)
+endforeach()
+
 add_executable(golem_test_lease test_lease.c)
 target_link_libraries(golem_test_lease PRIVATE Golem::golem)
 golem_configure_target(golem_test_lease)
@@ -71,6 +92,23 @@ foreach(case digest receipt roundtrip file corruption paths ownership concurrent
 endforeach()
 if(GOLEM_BUILD_CLI)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_executable(golem_crash_runner crash_runner.c)
+    target_link_libraries(golem_crash_runner PRIVATE Golem::golem OpenSSL::Crypto)
+    golem_configure_target(golem_crash_runner)
+    add_executable(golem_recovery_runner recovery_runner.c)
+    target_link_libraries(golem_recovery_runner PRIVATE Golem::golem OpenSSL::Crypto)
+    golem_configure_target(golem_recovery_runner)
+    foreach(case before-start start-intent started claim execute finish-intent finished prefixes
+            conflict missing-intent corrupt-intent missing-tail-intent metadata legacy symlink locks claim-retained recrash
+            missing-journal invalid-transition publication unpublished)
+        add_test(NAME crash_${case} COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/crash_integration.py $<TARGET_FILE:golem_cli>
+            $<TARGET_FILE:golem_crash_runner> ${CMAKE_CURRENT_BINARY_DIR} ${case} $<TARGET_FILE:golem_recovery_runner>)
+        set_tests_properties(crash_${case} PROPERTIES TIMEOUT 90)
+    endforeach()
+    add_test(NAME daemon_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/daemon_integration.py $<TARGET_FILE:golem_cli> ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(daemon_cli PROPERTIES TIMEOUT 120)
     add_test(NAME cli_integration COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/cli_integration.py $<TARGET_FILE:golem_cli> ${CMAKE_CURRENT_BINARY_DIR})
     set_tests_properties(cli_integration PROPERTIES TIMEOUT 120)

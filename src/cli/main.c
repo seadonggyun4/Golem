@@ -14,6 +14,9 @@ static int usage(void)
         "  golem run --noop CAPSULE --output RUN_DIR\n"
         "  golem replay RUN_DIR_OR_JOURNAL [--require-terminal]\n"
         "  golem cost report RUN_DIR\n"
+        "  golem daemon init ROOT | submit ROOT CAPSULE | status ROOT\n"
+        "  golem daemon recover ROOT\n"
+        "  golem daemon run ROOT --worker /absolute/path/golem [--once|--drain]\n"
         "  golem evidence hash FILE\n"
         "  golem evidence put STORE FILE\n"
         "  golem evidence verify STORE SHA256\n"
@@ -34,6 +37,7 @@ int main(int argc, char **argv)
     if (argc >= 2 && (strcmp(argv[1], "init") == 0 || strcmp(argv[1], "capsule") == 0 ||
         strcmp(argv[1], "run") == 0 || strcmp(argv[1], "replay") == 0 || strcmp(argv[1], "cost") == 0)) return golem_cli_work(argc, argv);
     if (argc >= 2 && strcmp(argv[1], "adapter") == 0) return golem_cli_adapter(argc, argv);
+    if (argc >= 2 && strcmp(argv[1], "daemon") == 0) return golem_cli_daemon(argc, argv);
     if (argc >= 2 && strcmp(argv[1], "lineage") == 0) return golem_cli_lineage(argc, argv);
     if (argc < 3 || strcmp(argv[1], "evidence") != 0) return usage();
     bool hash = strcmp(argv[2], "hash") == 0;

@@ -1,0 +1,13 @@
+{
+  "transition_cycle": 0.20,
+  "transition_replay": 0.20,
+  "journal_encode": 0.20,
+  "journal_decode": 0.20,
+  "journal_append_fsync": 0.35,
+  "digest_4k": 0.20,
+  "digest_1m": 0.20,
+  "json_encode": 0.20,
+  "json_decode": 0.20,
+  "msgpack_encode": 0.20,
+  "msgpack_decode": 0.20
+}

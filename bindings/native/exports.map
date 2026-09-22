@@ -1,0 +1,4 @@
+{
+  global: golem_binding_abi_version; golem_binding_call; golem_binding_free; golem_binding_status_message;
+  local: *;
+};

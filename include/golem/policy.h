@@ -2,6 +2,7 @@
 #define GOLEM_POLICY_H
 
 #include "golem/core.h"
+#include "golem/types.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,6 +38,24 @@ typedef struct golem_policy_spec {
     uint32_t version;
     golem_autonomy permissions[GOLEM_STAGE_COUNT];
 } golem_policy_spec;
+
+#define GOLEM_POLICY_ARTIFACT_SIZE 32u
+#define GOLEM_POLICY_ARTIFACT_VERSION 1u
+typedef struct golem_policy_artifact {
+    uint64_t revision; /* Positive host-assigned revision; not proof of freshness. */
+    golem_policy_spec policy;
+} golem_policy_artifact;
+/* GPOL v1, exactly 32 bytes: magic[4], LE u16 version, zero u16 flags,
+ * LE u64 revision, six u8 permissions in stage order, ten zero reserved bytes.
+ * No native struct serialization, allocation, I/O or implicit policy installation.
+ * Decode validates structure only: callers must authenticate provenance, enforce
+ * revision/freshness and explicitly apply trusted policy. No signature/approval.
+ * Inputs borrowed for call; independent caller-owned outputs, no aliasing.
+ * Errors preserve outputs, except required on BUFFER_TOO_SMALL. NULL/0 encode
+ * is a size query. Future layouts require a new version; unknown versions fail. */
+golem_status golem_policy_artifact_encode(const golem_policy_artifact *artifact,
+    void *buffer, size_t capacity, size_t *required);
+golem_status golem_policy_artifact_decode(golem_bytes bytes, golem_policy_artifact *out);
 typedef struct golem_policy_request {
     golem_stage stage;
     golem_effect effect;

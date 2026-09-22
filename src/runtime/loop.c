@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "golem/runtime.h"
 #include "golem/policy.h"
+#include "golem/replay.h"
 #include "../core/internal.h"
 #include <string.h>
 #include <time.h>
@@ -19,6 +20,7 @@ struct golem_runtime {
     golem_lease *lease;
     golem_lease_token token;
     bool checking;
+    bool stepped;
 };
 
 static golem_status clock_read(golem_runtime *r, uint64_t *out)
@@ -94,11 +96,36 @@ void golem_runtime_free(golem_runtime *r)
     (void)golem_allocator_free(&r->allocator, r->created);
     golem_allocator a = r->allocator; (void)golem_allocator_free(&a, r);
 }
+golem_status golem_runtime_recover(golem_journal *journal, const golem_runtime_options *options,
+    const golem_runtime_ops *ops, void *context, const golem_allocator *allocator, golem_runtime **out)
+{
+    if (journal == NULL || options == NULL || ops == NULL || out == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
+    golem_work_run *run = NULL; golem_replay_report report;
+    golem_status s = golem_journal_recover(journal, NULL, &run, &report, NULL);
+    if (s != GOLEM_OK) return s;
+    if ((run->status != GOLEM_WORK_READY && run->status != GOLEM_WORK_FAILED) || run->max_attempts != options->max_attempts) {
+        golem_work_run_free(run); return GOLEM_ERR_INVALID_STATE;
+    }
+    golem_runtime *r = NULL;
+    s = golem_runtime_create(run->id, run->capsule, options, ops, context, allocator, &r);
+    if (s == GOLEM_OK) {
+        /* Copy replayed state into the run allocated by the requested allocator. */
+        r->run->status = run->status; r->run->position = run->position;
+        memcpy(r->run->passed, run->passed, sizeof(run->passed));
+        memcpy(r->run->attempts, run->attempts, sizeof(run->attempts));
+        r->run->sequence = run->sequence; r->run->latest = run->latest;
+        r->initialized = true; r->dispatched = run->sequence;
+        r->reentries = report.verified_records - 1 - 2 * run->sequence;
+        *out = r;
+    }
+    golem_work_run_free(run); return s;
+}
 golem_status golem_runtime_step(golem_runtime *r)
 {
     if (r == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
     if (r->busy || r->checking) return GOLEM_ERR_INVALID_STATE;
     if (r->stopped) return r->reason;
+    r->stepped = true;
     r->busy = true;
     golem_status s = golem_runtime_checkpoint(r); if (s != GOLEM_OK) return leave(r, s);
     s = initialize(r); if (s != GOLEM_OK) return leave(r, s);
@@ -185,7 +212,7 @@ static golem_status ownership_guard(void *context) { return golem_runtime_checkp
 golem_status golem_runtime_lease_bind(golem_runtime *r, golem_lease *lease, const golem_lease_token *token)
 {
     if (r == NULL || lease == NULL || token == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
-    if (r->busy || r->checking || r->initialized || r->stopped || r->lease != NULL) return GOLEM_ERR_INVALID_STATE;
+    if (r->busy || r->checking || r->stepped || r->stopped || r->lease != NULL) return GOLEM_ERR_INVALID_STATE;
     if (strcmp(golem_lease_resource_borrow(lease), golem_work_run_id_borrow(r->run)) != 0) return GOLEM_ERR_IDENTITY_MISMATCH;
     r->checking = true;
     uint64_t now; golem_status s = clock_read(r, &now);
