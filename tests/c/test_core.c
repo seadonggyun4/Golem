@@ -343,6 +343,7 @@ static int test_policy_cancel(void)
 /* Enumerate all 1,956 nonempty ordered subsets of the six stages. */
 static int check_orders(golem_graph_spec *spec, size_t depth, unsigned mask, size_t *checked)
 {
+    CHECK(depth <= GOLEM_STAGE_COUNT);
     if (depth != 0) {
         spec->count = depth;
         golem_work_run *run = NULL;
@@ -360,6 +361,7 @@ static int check_orders(golem_graph_spec *spec, size_t depth, unsigned mask, siz
         golem_work_run_free(run);
         ++*checked;
     }
+    if (depth == GOLEM_STAGE_COUNT) return EXIT_SUCCESS;
     for (unsigned stage = 0; stage < GOLEM_STAGE_COUNT; ++stage) {
         if ((mask & (1u << stage)) == 0) {
             spec->order[depth] = (golem_stage)stage;
