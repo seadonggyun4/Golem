@@ -51,7 +51,10 @@ static golem_status worker(void *context, const golem_adapter_request *request,
         .failure = fail ? h->failure : GOLEM_FAILURE_NONE, .simulation = true,
         .usage = {.usage_known = true, .cost_known = true}};
     s = golem_evidence_put(store, (golem_bytes){(const uint8_t *)evidence, size - 1}, &result.evidence, d);
-    if (s == GOLEM_OK) *out = result; return s;
+    if (s == GOLEM_OK) {
+        *out = result;
+    }
+    return s;
 }
 static golem_status persist(void *context, golem_journal_type type, golem_bytes payload)
 {

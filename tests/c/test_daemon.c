@@ -144,7 +144,12 @@ static int recovery(const char *root)
     CHECK(start(&f) == 0);
     for (int i = 0; i < 6; ++i) CHECK(tick(&f, true) == 0);
     CHECK(golem_daemon_close(f.daemon) == GOLEM_OK);
-    char path[4096]; (void)snprintf(path, sizeof(path), "%s/jobs/00000000000000000001/journal.bin", root);
+    char path[4096];
+    const char suffix[] = "/jobs/00000000000000000001/journal.bin";
+    size_t root_size = strlen(root);
+    CHECK(root_size <= sizeof(path) - sizeof(suffix));
+    memcpy(path, root, root_size);
+    memcpy(path + root_size, suffix, sizeof(suffix));
     golem_journal *journal = NULL; CHECK(golem_journal_open(path, NULL, &journal, NULL) == GOLEM_OK);
     golem_runtime_ops ops = {sink, unused_execute, NULL}; golem_runtime *runtime = NULL;
     o.max_attempts = 2;
