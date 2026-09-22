@@ -78,6 +78,14 @@ build/release/golem document inspect "$WORK" planning 1
 
 실제 작업에는 프로젝트 범위·QA 명령·권한을 설정하고, Codex 또는 Claude가 [작업 지침 예제](samples/agent-session/AGENTS.fragment.md)와 [세션 프로토콜](docs/agent-session.md)을 따르도록 연결합니다.
 
+## Agent 진입점 설정
+
+프로젝트의 기존 **`AGENTS.md`**에 [공통 규칙 템플릿](samples/agent-session/AGENTS.quickstart.md)을 덧붙이고, **`CLAUDE.md`**에는 이를 참조하는 [Claude 템플릿](samples/agent-session/CLAUDE.quickstart.md)을 추가하세요. 기존 지침을 덮어쓰지 않습니다.
+
+템플릿의 실행 파일·Work 저장 루트·프로토콜 문서·대상 저장소 경로를 실제 값으로 바꾼 뒤, 현재 Codex·Claude에게 해당 진입점을 읽고 작업하도록 요청하세요. 프로젝트별 QA와 권한은 작업 범위에 맞춰 설정합니다.
+
+**[설정 절차·경로 예시·요청 예시](docs/agent-setup.md)**
+
 ## 설치와 문서
 
 | 목적 | 안내 |

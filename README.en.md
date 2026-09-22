@@ -78,6 +78,14 @@ This is a **registration example**, not automatic development or QA acceptance. 
 
 For real work, configure project scope, QA commands and permissions, then connect Codex or Claude using the [agent instruction example](samples/agent-session/AGENTS.fragment.md) and [session protocol](docs/agent-session.md).
 
+## Agent Entrypoints
+
+Append the [common rules template](samples/agent-session/AGENTS.quickstart.md) to your existing **`AGENTS.md`**, then add the [Claude entry block](samples/agent-session/CLAUDE.quickstart.md) to **`CLAUDE.md`**. Preserve existing instructions. The ready-to-use templates are in Korean.
+
+Replace the executable, Work root, protocol docs and target repository placeholders with real paths. Explicitly ask the current Codex or Claude agent to read the entrypoints. Select project-specific QA and permissions within the task's scope.
+
+**[Setup guide, path examples and request template](docs/agent-setup.md)**
+
 ## Installation and Documentation
 
 | Goal | Guide |
