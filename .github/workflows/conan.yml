@@ -10,10 +10,10 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         cli: ['True', 'False']
     runs-on: ${{ matrix.os }}
-    env:
-      CONAN_HOME: ${{ runner.temp }}/golem-conan
     steps:
       - uses: actions/checkout@v4
+      - name: Isolate Conan cache
+        run: echo "CONAN_HOME=$RUNNER_TEMP/golem-conan" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
