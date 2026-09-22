@@ -2,6 +2,8 @@
 
 **Awaken the worker.**
 
+<img src="assets/Golem.png" alt="Golem — Awaken the worker." width="500">
+
 Golem is the product implementation of `AWE — Agentic Work Engine`.
 
 AWE is the academic/category name. Golem is the product name.
