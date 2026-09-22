@@ -8,19 +8,6 @@ Golem is the product implementation of `AWE — Agentic Work Engine`.
 
 AWE is the academic/category name. Golem is the product name.
 
-## License
-
-Copyright 2026 Donggyun Seo. Golem is **source-available**, under the
-[PolyForm Noncommercial License 1.0.0](LICENSE), not an OSI-approved open-source
-license. See [NOTICE](NOTICE) for the required attribution and third-party scope.
-The public license permits its defined noncommercial purposes, including
-permitted modifications and redistribution; its exact terms govern.
-
-Uses outside those permissions require a separate written license from
-Donggyun Seo. Contact [seadonggyun@gmail.com](mailto:seadonggyun@gmail.com);
-see [commercial licensing](COMMERCIAL-LICENSE.md). An inquiry alone grants no
-additional rights. Dependencies retain their own licenses and ownership.
-
 ## Public Alpha
 
 ### Conan Package
@@ -179,7 +166,7 @@ compatibility promise is made. Use disposable non-sensitive workspaces. Real
 provider execution, authenticated runner enrollment, hostile-process sandboxing,
 verified business gates and distributed exactly-once effects are not provided.
 Bindings remain optional. The source-available license and separate commercial
-licensing process above apply to the Alpha as well.
+licensing process in [License](#license) apply to the Alpha as well.
 
 ## Name and Role
 
@@ -1110,3 +1097,16 @@ and are not installed or added to the public ABI.
 5. Add Markdown and JSON projections for run receipts.
 6. Extend the capability protocol with signed runner enrollment and envelopes.
 7. Add optional optimizer wire bridges and durable decision receipts using the implemented boundary.
+
+## License
+
+Copyright 2026 Donggyun Seo. Golem is **source-available**, under the
+[PolyForm Noncommercial License 1.0.0](LICENSE), not an OSI-approved open-source
+license. See [NOTICE](NOTICE) for the required attribution and third-party scope.
+The public license permits its defined noncommercial purposes, including
+permitted modifications and redistribution; its exact terms govern.
+
+Uses outside those permissions require a separate written license from
+Donggyun Seo. Contact [seadonggyun@gmail.com](mailto:seadonggyun@gmail.com);
+see [commercial licensing](COMMERCIAL-LICENSE.md). An inquiry alone grants no
+additional rights. Dependencies retain their own licenses and ownership.
