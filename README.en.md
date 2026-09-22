@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="500" alt="Golem Banner" src="assets/Golem.png" />
+  <img width="650" alt="Golem Banner" src="assets/Golem.png" />
 </div>
 
 <h1 align="center">Golem — Agentic Work Engine</h1>
