@@ -8,15 +8,30 @@ import sys
 import tempfile
 
 
-SOURCE_DIRS = {"cmake", "include", "src", "tests", "fuzz", "samples"}
+SOURCE_TYPES = {
+    "cmake": {".cmake", ".in"}, "include": {".h"}, "src": {".c", ".h", ".py"},
+    "tests": {".c", ".h", ".py", ".hex", ".cmake"},
+    "fuzz": {".c", ".h", ".json"}, "samples": {".json", ".md"},
+}
+PRIVATE_COMPONENTS = {
+    "project-docs", "credentials", "secrets", "reports", "workspace", "workspaces",
+    "build", "dist", "node_modules", "__pycache__",
+}
 SOURCE_FILES = {"CMakeLists.txt", "CMakePresets.json", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"}
 
 
 def selected(name):
     path = Path(name)
-    if path.is_absolute() or ".." in path.parts:
+    if path.is_absolute() or ".." in path.parts or "\\" in name or any(ord(c) < 32 for c in name):
         raise ValueError("unsafe source path")
-    return name in SOURCE_FILES or bool(path.parts and path.parts[0] in SOURCE_DIRS)
+    if name in SOURCE_FILES:
+        return True
+    if not path.parts or path.parts[0] not in SOURCE_TYPES:
+        return False
+    # Top-level allowlisting alone admits nested Work stores and local reports.
+    if any(p.startswith(".") or p.casefold() in PRIVATE_COMPONENTS for p in path.parts):
+        return False
+    return path.name == "CMakeLists.txt" or path.suffix in SOURCE_TYPES[path.parts[0]]
 
 
 def run(args, cwd, env):
@@ -50,6 +65,32 @@ def snapshot(root, destination):
     print(f"Clean C source snapshot: {count} files (no Git metadata or local state)", flush=True)
 
 
+def audit_install(prefix):
+    """Reject unexpected files in the default static C/CLI installation."""
+    required = {"bin/golem", "include/golem/completion.h", "lib/libgolem.a",
+                "share/licenses/Golem/LICENSE", "share/licenses/Golem/NOTICE"}
+    found = set()
+    for path in prefix.rglob("*"):
+        if path.is_symlink():
+            raise ValueError("symlink in installed package")
+        if path.is_dir():
+            continue
+        name = path.relative_to(prefix).as_posix()
+        parts = path.relative_to(prefix).parts
+        allowed = name in ("bin/golem", "lib/libgolem.a")
+        allowed |= len(parts) == 3 and parts[:2] == ("include", "golem") and path.suffix == ".h"
+        allowed |= (len(parts) == 4 and parts[:3] == ("lib", "cmake", "Golem") and
+                    path.name.startswith("Golem") and path.suffix == ".cmake")
+        allowed |= (len(parts) == 4 and parts[:3] == ("share", "licenses", "Golem") and
+                    path.name in ("LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"))
+        if not path.is_file() or not allowed:
+            raise ValueError("unexpected installed package asset")
+        found.add(name)
+    if not required <= found:
+        raise ValueError("incomplete installed C/CLI package")
+    print(f"Installed package inventory: {len(found)} allowlisted files", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=Path(__file__).resolve().parents[1])
@@ -68,10 +109,12 @@ def main():
         run(["cmake", "-S", source, "-B", build, "-G", "Ninja",
              "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_TESTING=ON",
              "-DGOLEM_WARNINGS_AS_ERRORS=ON", "-DGOLEM_BUILD_CLI=ON",
+             "-DCMAKE_INSTALL_LIBDIR=lib",
              "-DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF"], work, env)
         run(["cmake", "--build", build, "--parallel", "2"], work, env)
         run(["ctest", "--test-dir", build, "--output-on-failure", "--no-tests=error"], work, env)
         run(["cmake", "--install", build, "--prefix", prefix], work, env)
+        audit_install(prefix)
         consumer = work / "consumer"
         run(["cmake", "-S", source / "tests/consumer", "-B", consumer, "-G", "Ninja",
              f"-DCMAKE_PREFIX_PATH={prefix}", "-DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF"], work, env)
@@ -79,7 +122,14 @@ def main():
         run(["ctest", "--test-dir", consumer, "--output-on-failure", "--no-tests=error"], work, env)
         # Reuse the behavioral contract against the installed binary, from outside the checkout.
         run([sys.executable, source / "tests/c/cli_integration.py", prefix / "bin/golem", work], work, env)
-    print("Public Alpha gate passed: clean build, full tests, installed C API and noop CLI.")
+        # Exercise the shipped executable, not the build-tree binary, through E28.
+        compiler = shutil.which("cc")
+        if not compiler:
+            raise ValueError("C compiler is required for installed conformance")
+        run([sys.executable, source / "tests/c/conformance_integration.py",
+             prefix / "bin/golem", source, compiler], work, env)
+    print("Public Alpha gate passed: clean build, full tests, installed C API, noop and fixture conformance. "
+          "Actual-agent qualification is separate.")
 
 
 if __name__ == "__main__":

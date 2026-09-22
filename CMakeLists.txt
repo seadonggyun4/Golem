@@ -35,8 +35,35 @@ endif()
 find_package(OpenSSL 3.0 REQUIRED COMPONENTS Crypto)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONC REQUIRED IMPORTED_TARGET json-c>=0.15)
+pkg_check_modules(MD4C REQUIRED IMPORTED_TARGET md4c>=0.4.8)
 
 add_library(golem STATIC
+    src/execution/model.c
+    src/execution/store.c
+    src/execution/runner.c
+    src/execution/report.c
+    src/reentry/model.c
+    src/reentry/store.c
+    src/reentry/workflow.c
+    src/completion/model.c
+    src/completion/recovery.c
+    src/completion/report.c
+    src/completion/store.c
+    src/workflow/graph.c
+    src/workflow/model.c
+    src/workflow/query.c
+    src/agent_session/clock.c
+    src/agent_session/model.c
+    src/agent_session/storage.c
+    src/agent_session/coordinator.c
+    src/discovery/model.c
+    src/discovery/snapshot.c
+    src/discovery/report.c
+    src/common/json.c
+    src/document/schema.c
+    src/document/markdown.c
+    src/document/storage.c
+    src/document/registry.c
     src/daemon/storage.c
     src/daemon/recovery.c
     src/daemon/queue.c
@@ -92,7 +119,7 @@ add_library(golem STATIC
     src/lineage/store.c)
 add_library(Golem::golem ALIAS golem)
 target_compile_features(golem PUBLIC c_std_17)
-target_link_libraries(golem PRIVATE OpenSSL::Crypto PkgConfig::JSONC)
+target_link_libraries(golem PRIVATE OpenSSL::Crypto PkgConfig::JSONC PkgConfig::MD4C)
 set_target_properties(golem PROPERTIES C_STANDARD 17 C_STANDARD_REQUIRED YES C_EXTENSIONS NO POSITION_INDEPENDENT_CODE YES)
 target_include_directories(golem PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -139,7 +166,7 @@ endif()
 if(GOLEM_BUILD_CLI)
     add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c
         src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c
-        src/cli/daemon.c src/cli/daemon_worker.c)
+        src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/agent_session.c src/cli/execution.c src/cli/reentry.c src/cli/completion.c)
     set_target_properties(golem_cli PROPERTIES OUTPUT_NAME golem)
     target_link_libraries(golem_cli PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
     golem_configure_target(golem_cli)

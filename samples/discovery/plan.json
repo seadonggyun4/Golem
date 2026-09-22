@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "timeout_seconds": 30,
+  "repositories": [{
+    "id": "project",
+    "root": "/absolute/private/project",
+    "paths": ["README.md"],
+    "toolchain": "Record the observed toolchain version; no automatic probe runs.",
+    "test_configuration": "Record the relevant test configuration; no tests run during capture."
+  }]
+}

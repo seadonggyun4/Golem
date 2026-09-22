@@ -25,6 +25,12 @@ typedef struct golem_supervisor_result {
  * Caller persists result/logs; no automatic retry or acceptance attestation. */
 golem_status golem_supervisor_run(const char *executable, char *const argv[], golem_bytes input,
     uint64_t timeout_ns, golem_status (*pulse)(void *context), void *context, golem_supervisor_result *out);
+/* Explicit child-only cwd/environment; does not change process-global state.
+ * cwd is absolute; envp must be a NULL-terminated, caller-owned allowlist.
+ * Same lifetime, output and non-sandbox rules as run. macOS/Linux backend. */
+golem_status golem_supervisor_run_at(const char *executable, char *const argv[],
+    const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout_ns,
+    golem_status (*pulse)(void *context), void *context, golem_supervisor_result *out);
 #ifdef __cplusplus
 }
 #endif

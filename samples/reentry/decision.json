@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "operation": "decide",
+  "key": "repair-1",
+  "expected_sequence": 0,
+  "failure_receipt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "classification": "IMPLEMENTATION",
+  "hypothesis": "The observed regression may be caused by the implementation; review the failing assertion.",
+  "confidence": "MEDIUM",
+  "verification": "Revise the development plan, preserve protected tests, repair the code and rerun the pinned gates.",
+  "affected_requirements": ["REQ-1"],
+  "evidence_refs": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+  "policy": {"max_total": 8, "max_stage": 3, "max_no_progress": 1, "max_elapsed_ms": 900000}
+}

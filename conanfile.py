@@ -49,6 +49,7 @@ class GolemConan(ConanFile):
     def requirements(self):
         self.requires("openssl/3.6.0")
         self.requires("json-c/0.18")
+        self.requires("md4c/0.5.2")
 
     def layout(self):
         cmake_layout(self)

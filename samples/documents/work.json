@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "work_id": "example-work",
+  "request": "Document the bounded parser improvement.",
+  "scope": "Document registration only; no product edits.",
+  "non_goals": "No automatic provider dispatch or product acceptance.",
+  "permission": "AUTO_LOCAL",
+  "max_revisions": 32,
+  "acceptance": [
+    {
+      "id": "REQ-1",
+      "criterion": "A registered Markdown revision can be read without changing its bytes."
+    }
+  ],
+  "policy_version": 1
+}

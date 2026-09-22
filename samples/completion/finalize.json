@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "operation": "finalize",
+  "selection_id": "selection",
+  "key": "completion-1",
+  "expected_generation": 9,
+  "issues": []
+}

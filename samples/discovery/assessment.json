@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "work_id": "example-work",
+  "snapshot": {
+    "schema_version": 1,
+    "capture": "allowlist-read-only",
+    "repositories": [{
+      "id": "example-repo",
+      "root_identity": "0000000000000000000000000000000000000000000000000000000000000000",
+      "head": "0000000000000000000000000000000000000000",
+      "index_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "files": [{"path": "src/example.c", "digest": "0000000000000000000000000000000000000000000000000000000000000000", "size": 0, "tracked": true, "dirty": false}],
+      "toolchain": "Synthetic example; no compiler was probed.",
+      "test_configuration": "Synthetic example; no tests were run."
+    }]
+  },
+  "questions": [{
+    "id": "Q-1", "question": "Which validation behavior is needed for this input?",
+    "requirement_id": "REQ-1", "source_budget": 4, "seconds_budget": 900,
+    "elapsed_seconds": 0, "status": "OFFLINE",
+    "conclusion": "The question remains unresolved without relevant source access.",
+    "search_strategy": "Consult the official specification and primary studies.",
+    "eligibility": "Include sources about the relevant input contract; exclude unrelated benchmarks.",
+    "omissions": "Network access and reproduction are not available in this example."
+  }],
+  "references": [],
+  "findings": [{
+    "id": "F-1", "status": "UNCONFIRMED",
+    "observation": "This synthetic fixture records an unverified candidate only.",
+    "hypothesis": "Input validation might not match the intended requirement.",
+    "uncertainty": "Neither a real source file nor a reproduction has been examined.",
+    "repository_id": "example-repo", "path": "src/example.c", "requirement_id": "REQ-1",
+    "reproduction": {"command": "Not executed in this example.", "expected": "Requirement-compliant input validation.", "actual": "No runtime observation was made.", "result": "NOT_RUN", "evidence_digest": ""},
+    "reference_ids": [], "rationale": "Do not treat a hypothesis as a confirmed defect."
+  }],
+  "selections": [{
+    "finding_id": "F-1", "decision": "DEFER", "reason": "Collect local reproduction and relevant research first.",
+    "size": "SMALL", "acceptance": "A documented reproduction and an executable verification criterion.",
+    "needs_ux": false, "needs_publishing": false
+  }],
+  "permission": "ASK", "scope_revision": 1,
+  "non_goals": "No edits, deployment, or unrelated features are authorized by this assessment."
+}

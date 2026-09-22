@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 import subprocess
 import unittest
-from verify_alpha import selected, snapshot
+from verify_alpha import selected, snapshot, audit_install
 
 
 class SourceSnapshotTests(unittest.TestCase):
@@ -15,6 +15,24 @@ class SourceSnapshotTests(unittest.TestCase):
         for name in ("../src/secret", "/src/core.c"):
             with self.assertRaises(ValueError):
                 selected(name)
+
+    def test_nested_private_assets_and_supported_fixtures(self):
+        for name in ("samples/.golem/objects/sha256/ab/data.json", "src/project-docs/private.md",
+                     "tests/credentials/account.json", "samples/run.log", "include/private.key",
+                     "samples/reports/run.md", "tests/build/result.c", "samples/SECRETS/value.json",
+                     "samples/.env", "src/.private/code.c"):
+            self.assertFalse(selected(name), name)
+        for name in ("tests/c/fixtures/journal/v1_default.hex", "tests/c/CMakeLists.txt",
+                     "samples/documents/planning.md", "cmake/GolemConfig.cmake.in", "src/golem/core.py",
+                     "fuzz/corpus/adapter_json/request.json"):
+            self.assertTrue(selected(name), name)
+
+    def test_public_fuzz_corpus_is_retained(self):
+        root = Path(__file__).resolve().parents[1]
+        corpus = sorted((root / "fuzz/corpus").rglob("*.json"))
+        self.assertGreaterEqual(len(corpus), 3)
+        for path in corpus:
+            self.assertTrue(selected(path.relative_to(root).as_posix()), str(path))
 
     def test_git_selection(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -29,6 +47,8 @@ class SourceSnapshotTests(unittest.TestCase):
             (root / "src/deleted.c").write_text("deleted")
             subprocess.run(["git", "add", "src/deleted.c"], cwd=root, check=True)
             (root / "src/deleted.c").unlink()
+            (root / "src/reports").mkdir()
+            (root / "src/reports/private.py").write_text("synthetic private asset")
             output = root / "snapshot"
             output.mkdir()
             snapshot(root, output)
@@ -45,6 +65,25 @@ class SourceSnapshotTests(unittest.TestCase):
             output.mkdir()
             with self.assertRaises(ValueError):
                 snapshot(root, output)
+
+    def test_installed_inventory_is_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            names = ("bin/golem", "include/golem/completion.h", "lib/libgolem.a",
+                     "share/licenses/Golem/LICENSE", "share/licenses/Golem/NOTICE")
+            for name in names:
+                p = root / name
+                p.parent.mkdir(parents=True, exist_ok=True)
+                p.write_text("synthetic public artifact")
+            audit_install(root)
+            extra = root / "private-report.md"
+            extra.write_text("synthetic private report")
+            with self.assertRaises(ValueError):
+                audit_install(root)
+            extra.unlink()
+            (root / "include/golem/secret.h").symlink_to(root / "share/licenses/Golem/LICENSE")
+            with self.assertRaises(ValueError):
+                audit_install(root)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,48 @@
+add_executable(golem_test_completion test_completion.c)
+target_link_libraries(golem_test_completion PRIVATE Golem::golem)
+golem_configure_target(golem_test_completion)
+add_test(NAME completion_api COMMAND golem_test_completion)
+set_tests_properties(completion_api PROPERTIES TIMEOUT 30)
+add_executable(golem_test_reentry test_reentry.c)
+target_link_libraries(golem_test_reentry PRIVATE Golem::golem)
+golem_configure_target(golem_test_reentry)
+add_test(NAME reentry_api COMMAND golem_test_reentry)
+set_tests_properties(reentry_api PROPERTIES TIMEOUT 30)
+
+add_executable(golem_test_execution test_execution.c)
+target_link_libraries(golem_test_execution PRIVATE Golem::golem)
+golem_configure_target(golem_test_execution)
+add_test(NAME execution_api COMMAND golem_test_execution)
+set_tests_properties(execution_api PROPERTIES TIMEOUT 30)
+
+add_executable(golem_test_agent_session test_agent_session.c)
+target_link_libraries(golem_test_agent_session PRIVATE Golem::golem)
+golem_configure_target(golem_test_agent_session)
+add_test(NAME agent_session_api COMMAND golem_test_agent_session)
+set_tests_properties(agent_session_api PROPERTIES TIMEOUT 30)
+
+add_executable(golem_test_workflow test_workflow.c)
+target_link_libraries(golem_test_workflow PRIVATE Golem::golem)
+golem_configure_target(golem_test_workflow)
+add_test(NAME workflow_api COMMAND golem_test_workflow)
+set_tests_properties(workflow_api PROPERTIES TIMEOUT 30)
+
+add_executable(golem_test_discovery test_discovery.c)
+target_link_libraries(golem_test_discovery PRIVATE Golem::golem)
+target_compile_definitions(golem_test_discovery PRIVATE
+    GOLEM_DISCOVERY_SAMPLE="${PROJECT_SOURCE_DIR}/samples/discovery/assessment.json")
+golem_configure_target(golem_test_discovery)
+add_test(NAME discovery_api COMMAND golem_test_discovery)
+set_tests_properties(discovery_api PROPERTIES TIMEOUT 15)
+
+add_executable(golem_test_document test_document.c)
+target_link_libraries(golem_test_document PRIVATE Golem::golem)
+target_compile_definitions(golem_test_document PRIVATE
+    GOLEM_DOCUMENT_SAMPLES="${PROJECT_SOURCE_DIR}/samples/documents")
+golem_configure_target(golem_test_document)
+add_test(NAME document_api COMMAND golem_test_document ${CMAKE_CURRENT_BINARY_DIR})
+set_tests_properties(document_api PROPERTIES TIMEOUT 60)
+
 add_executable(golem_test_policy_artifact test_policy_artifact.c)
 target_link_libraries(golem_test_policy_artifact PRIVATE Golem::golem)
 golem_configure_target(golem_test_policy_artifact)
@@ -92,6 +137,39 @@ foreach(case digest receipt roundtrip file corruption paths ownership concurrent
 endforeach()
 if(GOLEM_BUILD_CLI)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_executable(golem_agent_client agent_client.c)
+    target_link_libraries(golem_agent_client PRIVATE Golem::golem)
+    golem_configure_target(golem_agent_client)
+    add_test(NAME agent_session_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/session_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_agent_client>)
+    set_tests_properties(agent_session_cli PROPERTIES TIMEOUT 240)
+    add_test(NAME execution_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/execution_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
+    set_tests_properties(execution_cli PROPERTIES TIMEOUT 240)
+    add_test(NAME reentry_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/reentry_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
+    set_tests_properties(reentry_cli PROPERTIES TIMEOUT 360)
+    add_test(NAME completion_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/completion_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} -v)
+    set_tests_properties(completion_cli PROPERTIES TIMEOUT 900)
+    add_test(NAME agent_conformance_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/conformance_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
+    set_tests_properties(agent_conformance_cli PROPERTIES TIMEOUT 900 LABELS "conformance;fixture")
+    add_test(NAME document_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/document_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR}/samples/documents ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(document_cli PROPERTIES TIMEOUT 180)
+    add_test(NAME discovery_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/discovery_integration.py $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR})
+    set_tests_properties(discovery_cli PROPERTIES TIMEOUT 180)
+    add_test(NAME workflow_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/workflow_integration.py $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR})
+    set_tests_properties(workflow_cli PROPERTIES TIMEOUT 180)
     add_executable(golem_crash_runner crash_runner.c)
     target_link_libraries(golem_crash_runner PRIVATE Golem::golem OpenSSL::Crypto)
     golem_configure_target(golem_crash_runner)

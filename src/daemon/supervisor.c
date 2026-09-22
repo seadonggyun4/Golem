@@ -1,3 +1,6 @@
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #define _POSIX_C_SOURCE 200809L
 #define _DARWIN_C_SOURCE
 #define _DEFAULT_SOURCE
@@ -38,8 +41,9 @@ static golem_status drain(int fd, uint8_t *buffer, size_t *size, bool *eof)
         memcpy(buffer + *size, chunk, (size_t)n); *size += (size_t)n;
     }
 }
-golem_status golem_supervisor_run(const char *executable, char *const argv[], golem_bytes input,
-    uint64_t timeout, golem_status (*pulse)(void *), void *context, golem_supervisor_result *out)
+static golem_status run(const char *executable, char *const argv[], const char *cwd,
+    char *const envp[], golem_bytes input, uint64_t timeout,
+    golem_status (*pulse)(void *), void *context, golem_supervisor_result *out)
 {
     if (executable == NULL || executable[0] != '/' || argv == NULL || argv[0] == NULL || out == NULL ||
         timeout == 0 || timeout > UINT64_C(3600000000000) || input.size > 16384 || (input.size != 0 && input.data == NULL)) return GOLEM_ERR_INVALID_ARGUMENT;
@@ -55,6 +59,16 @@ golem_status golem_supervisor_run(const char *executable, char *const argv[], go
     actions_init = true;
     if (posix_spawnattr_init(&attributes) != 0) goto cleanup;
     attrs_init = true;
+    /* Keep compatibility with pre-macOS-26 deployment targets. The new POSIX
+     * spelling is not available there; only this compatibility call is exempt. */
+#ifdef __APPLE__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+    if (cwd && posix_spawn_file_actions_addchdir_np(&actions, cwd) != 0) goto cleanup;
+#ifdef __APPLE__
+#pragma clang diagnostic pop
+#endif
     if (posix_spawn_file_actions_adddup2(&actions, in[1], STDIN_FILENO) != 0 ||
         posix_spawn_file_actions_adddup2(&actions, output[1], STDOUT_FILENO) != 0 ||
         posix_spawn_file_actions_adddup2(&actions, error[1], STDERR_FILENO) != 0) goto cleanup;
@@ -65,7 +79,7 @@ golem_status golem_supervisor_run(const char *executable, char *const argv[], go
         posix_spawnattr_setflags(&attributes, POSIX_SPAWN_SETPGROUP | POSIX_SPAWN_SETSIGMASK) != 0) goto cleanup;
     uint64_t start; s = clock_ns(&start); if (s != GOLEM_OK) goto cleanup;
     if (timeout > UINT64_MAX - start) { s = GOLEM_ERR_OVERFLOW; goto cleanup; }
-    if (posix_spawn(&pid, executable, &actions, &attributes, argv, environ) != 0) { pid = -1; s = GOLEM_ERR_IO; goto cleanup; }
+    if (posix_spawn(&pid, executable, &actions, &attributes, argv, envp) != 0) { pid = -1; s = GOLEM_ERR_IO; goto cleanup; }
     (void)close(in[1]); in[1] = -1; (void)close(output[1]); output[1] = -1; (void)close(error[1]); error[1] = -1;
     golem_supervisor_result result = {.exit_code = -1};
     size_t sent = 0; bool stdout_eof = false, stderr_eof = false;
@@ -132,4 +146,14 @@ cleanup:
     if (attrs_init) (void)posix_spawnattr_destroy(&attributes);
     for (size_t i = 0; i < 2; ++i) { if (in[i] >= 0) (void)close(in[i]); if (output[i] >= 0) (void)close(output[i]); if (error[i] >= 0) (void)close(error[i]); }
     return s;
+}
+golem_status golem_supervisor_run(const char *executable, char *const argv[], golem_bytes input,
+    uint64_t timeout, golem_status (*pulse)(void *), void *context, golem_supervisor_result *out)
+{ return run(executable,argv,NULL,environ,input,timeout,pulse,context,out); }
+golem_status golem_supervisor_run_at(const char *executable, char *const argv[], const char *cwd,
+    char *const envp[], golem_bytes input, uint64_t timeout,
+    golem_status (*pulse)(void *), void *context, golem_supervisor_result *out)
+{
+    if(!cwd || cwd[0]!='/' || !envp) return GOLEM_ERR_INVALID_ARGUMENT;
+    return run(executable,argv,cwd,envp,input,timeout,pulse,context,out);
 }

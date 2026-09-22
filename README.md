@@ -10,12 +10,55 @@ AWE is the academic/category name. Golem is the product name.
 
 ## Public Alpha
 
+### Work and Markdown Revisions
+
+Agents can now register real Markdown artifacts in a local Work registry. Golem
+validates their structure and parent references, stores immutable revisions in
+CAS, and materializes `.md` files. The agent authors the content; registration
+does not generate prose, run development, or certify business acceptance.
+
+After building the CLI below, try the synthetic sample in a new private path:
+
+```sh
+ROOT="$(mktemp -d)"
+ROOT="$(cd "$ROOT" && pwd -P)"
+build/release/golem work start "$ROOT/work" samples/documents/work.json
+build/release/golem document validate samples/documents/planning.json samples/documents/planning.md
+build/release/golem document submit "$ROOT/work" samples/documents/planning.json samples/documents/planning.md planning-first
+build/release/golem document inspect "$ROOT/work" planning 1
+```
+
+The Markdown is saved at `$ROOT/work/documents/planning/r0001.md`. Choose your
+own private Work directory, including inside your project; exclude runtime data
+from Git. Check `projection_ready` separately from `committed` in command output.
+See [the document registry contract](docs/document-registry.md) for schemas,
+parent links, revision updates, failure recovery and current limitations.
+An older installed CLI must be rebuilt/reinstalled to expose these commands.
+
+### Project Discovery and Research
+
+The current agent can capture a bounded read-only repository snapshot, record
+research questions and source-reading scope, and explicitly include/defer/exclude
+improvement candidates. Golem rejects unsupported confirmation, missing evidence
+and inconsistent selections. It does not browse or execute a recorded command.
+
+```sh
+build/dev/golem discovery snapshot /private/path/plan.json
+build/dev/golem discovery validate samples/discovery/assessment.json
+build/dev/golem discovery report samples/discovery/assessment.json research
+```
+
+The report command emits a Markdown draft. Schema-2 document metadata binds the
+structured assessment to its immutable Markdown revision. See
+[discovery, research and scope](docs/discovery.md) for the complete workflow.
+`scope_ready` is a consistent proposal, not development authorization or QA PASS.
+
 ### Conan Package
 
 The repository contains a Conan 2 recipe for `golem/0.1.0`. It packages the
 static C library as `Golem::golem`, public headers, legal notices and an optional
 CLI. Initial targets are Linux/macOS, with PIC enabled. Bindings, test binaries,
-private plans and runtime evidence are not exported. OpenSSL and json-c are
+private plans and runtime evidence are not exported. OpenSSL, json-c and MD4C are
 resolved by Conan, not copied from the developer's machine.
 
 **No public Golem remote has been deployed yet.** ConanCenter is used only for
@@ -120,13 +163,13 @@ certification. No provider account, API key, Python runtime package, Node.js,
 UI or external optimizer is required to run the C CLI.
 
 Prerequisites: C17 compiler, Git, CMake 3.21+, Ninja, Python 3.11+ for tests,
-OpenSSL 3 development files, pkg-config and json-c 0.15+.
+OpenSSL 3 development files, pkg-config, json-c 0.15+ and MD4C 0.4.8+.
 
 ```sh
 # Debian/Ubuntu dependencies:
-sudo apt-get install build-essential git cmake ninja-build python3 libssl-dev pkg-config libjson-c-dev
+sudo apt-get install build-essential git cmake ninja-build python3 libssl-dev pkg-config libjson-c-dev libmd4c-dev
 # macOS alternative (with Xcode command-line tools installed):
-# brew install cmake ninja openssl@3 pkg-config json-c python
+# brew install cmake ninja openssl@3 pkg-config json-c md4c python
 
 git clone https://github.com/seadonggyun4/Golem.git
 cd Golem
@@ -178,7 +221,7 @@ Development is driven by real work execution, service improvements, and measured
 
 The runtime CLI, Python import, and C API use `golem`, and the CMake package is `Golem`.
 
-Golem is a headless execution engine that lets multiple agent providers run the same work cycle. It is not a document-writing tool. It is a headless work runtime that helps agents carry work through to completion, while recording every execution as documents and evidence.
+Golem is a headless execution engine that lets multiple agent providers run the same work cycle. It is not merely a document-writing tool: Markdown plans, results and evidence support a work runtime that helps agents carry work through to completion.
 
 ## Product Boundary
 
@@ -286,10 +329,10 @@ See [AWE concepts](docs/awe-concepts.md) and [MVP runtime](docs/mvp-runtime.md).
 ## Development
 
 The C build requires CMake 3.21+, Ninja, a C17 compiler, OpenSSL 3 development
-headers/libraries (Crypto component), pkg-config, and json-c 0.15+.
+headers/libraries (Crypto component), pkg-config, json-c 0.15+ and MD4C 0.4.8+.
 No provider or optimizer dependency is required.
-Install `openssl@3`, `pkg-config`, and `json-c` with Homebrew on macOS, or
-`libssl-dev`, `pkg-config`, and `libjson-c-dev` on Debian/Ubuntu.
+Install `openssl@3`, `pkg-config`, `json-c`, and `md4c` with Homebrew on macOS, or
+`libssl-dev`, `pkg-config`, `libjson-c-dev`, and `libmd4c-dev` on Debian/Ubuntu.
 For nonstandard installations, pass `-DOPENSSL_ROOT_DIR=/path/to/openssl` to CMake.
 
 ```bash
@@ -1088,13 +1131,86 @@ Real baseline reports stay in ignored `build/` or an external private benchmark
 directory; no automatic report upload is configured. Benchmarks are optional
 and are not installed or added to the public ABI.
 
+## Conditional Markdown Workflow
+
+The current agent can select necessary stages, register exact upstream Markdown
+references, and check transitive revision freshness with `golem workflow select`,
+`inputs`, `trace`, and `next`. Required inputs are bound into a generation-checked
+manifest; stale documents cannot silently authorize downstream handoff. UX and
+publishing are conditional on the selected scope. No separate agent is launched,
+and document presence is not QA approval. See [workflow usage and contracts](docs/workflow.md).
+
+## Current-Agent Sessions
+
+`golem session call WORK REQUEST.json` lets the current CLI/GUI agent claim work,
+export verified Markdown context, begin, heartbeat, submit receipts, and explicitly
+resume after interruption. A durable local coordinator rejects stale ownership
+and requires reconciliation for interrupted effects. It does not start another
+agent or equate submission with QA approval. See [session protocol and examples](docs/agent-session.md).
+
+## Document-Driven Development and QA
+
+`golem execution` connects current Markdown plans to observed source changes and
+real, explicitly approved local tests. `prepare` pins a contract and dirty-source
+baseline; `finish` records the development delta; `run` executes bounded argv
+gates; `render` produces immutable development/QA Markdown; `verify` rejects stale
+source evidence. Schema-5 results cannot replace structured failures with prose
+claiming PASS. Current-agent sessions retain their ownership and lease checks.
+
+See [the execution contract and CLI workflow](docs/execution.md) and
+[the contract template](samples/execution/contract.json). Reports register under
+your chosen `WORK/documents/<id>/rNNNN.md`; no separate agent or UI is required.
+The runner is not a sandbox, and passing declared tests is not semantic completion.
+
+## Failure Classification and Reentry
+
+`golem reentry` records evidence-linked failure hypotheses and computes the
+document revisions required before another QA attempt. It preserves unchanged
+upstream plans, passes failure Markdown into the current agent's context, and
+enforces repair budgets, deadlines and duplicate-dispatch protection. Reports are
+projected to `WORK/failures/rNNNN.md`; decisions never grant execution permission.
+See [the reentry contract and workflow](docs/reentry.md).
+
+## Completion and Recovery
+
+`golem completion` validates declared development acceptance against current
+documents, real QA receipts, source snapshots, and unresolved execution state.
+It records immutable completion evidence and restores
+`WORK/completions/rNNNN/completion.md` without rerunning commands. `resume` and
+`workflow next` report DONE only after current checks and Markdown materialization;
+historical receipts are not reused after source or document changes.
+See [completion, reporting and recovery](docs/completion.md) for commands,
+ownership, assurance limits, and the research basis.
+
+## Agent Conformance and Distribution Checks
+
+The current CLI/GUI agent can carry a Work through Markdown, real QA, failure
+revision and completion without launching another provider. Installed-binary
+conformance is separate from actual-agent evaluation:
+
+```sh
+mkdir -p .golem/conformance
+python3 tools/verify_agent.py fixture --cli /absolute/install/prefix/bin/golem \
+  --cc /usr/bin/cc --output .golem/conformance/installed-001
+python3 tools/verify_agent.py observe --cli /absolute/install/prefix/bin/golem \
+  --work /absolute/private/work --selection selection \
+  --output .golem/conformance/observed-001
+```
+
+Use a new output directory for every run. Reports and raw logs are private;
+do not publish them. Fixture PASS and current-Work PASS do not authenticate agent
+identity or declare global release readiness. `tools/verify_alpha.py` additionally
+checks clean-source builds, installed package inventory, C consumers, noop and
+installed-CLI conformance. See [the scenario matrix, canary procedure and
+qualification limits](docs/conformance.md).
+
 ## Next Development Order
 
 1. Extend the noop coordinator with durable provider dispatch/reconciliation records.
-2. Add executable acceptance/gate evaluators and preserve structured acceptance identity.
+2. Extend declared-gate acceptance with independently authenticated review contracts.
 3. Add provider adapters for Codex, Claude, Gemini, and local CLI.
 4. Generalize persisted billing and add cross-process lease authority/recovery without reusing old tokens.
-5. Add Markdown and JSON projections for run receipts.
+5. Extend completion predicates and receipt projections to additional workflow modes.
 6. Extend the capability protocol with signed runner enrollment and envelopes.
 7. Add optional optimizer wire bridges and durable decision receipts using the implemented boundary.
 

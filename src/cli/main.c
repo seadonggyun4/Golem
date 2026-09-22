@@ -10,6 +10,28 @@ static int usage(void)
 {
     fputs("Usage:\n"
         "  golem init DIRECTORY\n"
+        "  golem work start NEW_WORK_DIR SPEC_JSON\n"
+        "  golem session call WORK_DIR REQUEST_JSON\n"
+        "  golem execution validate CONTRACT_JSON\n"
+        "  golem execution call WORK_DIR REQUEST_JSON [--approve-contract SHA256]\n"
+        "  golem execution render WORK_DIR METADATA_JSON\n"
+        "  golem completion validate REQUEST_JSON\n"
+        "  golem completion call WORK_DIR REQUEST_JSON\n"
+        "  golem completion report WORK_DIR SEQUENCE\n"
+        "  golem reentry validate REQUEST_JSON\n"
+        "  golem reentry call WORK_DIR REQUEST_JSON\n"
+        "  golem reentry report WORK_DIR SEQUENCE\n"
+        "  golem discovery snapshot PLAN_JSON\n"
+        "  golem discovery validate ASSESSMENT_JSON\n"
+        "  golem discovery report ASSESSMENT_JSON discovery|research|scope\n"
+        "  golem workflow select WORK_DIR SCOPE_ID REVISION development|documents\n"
+        "  golem workflow inputs WORK_DIR SELECTION_ID TARGET_KIND SOURCE_SHA256 BYTE_BUDGET\n"
+        "  golem workflow trace WORK_DIR DOCUMENT_ID REVISION\n"
+        "  golem workflow next WORK_DIR SELECTION_ID\n"
+        "  golem document validate META_JSON BODY_MD\n"
+        "  golem document submit WORK_DIR META_JSON BODY_MD IDEMPOTENCY_KEY\n"
+        "  golem document inspect WORK_DIR DOCUMENT_ID REVISION\n"
+        "  golem document project WORK_DIR DOCUMENT_ID REVISION\n"
         "  golem capsule validate FILE\n"
         "  golem run --noop CAPSULE --output RUN_DIR\n"
         "  golem replay RUN_DIR_OR_JOURNAL [--require-terminal]\n"
@@ -30,8 +52,23 @@ static int usage(void)
     return 2;
 }
 
+int golem_cli_document(int argc, char **argv);
+int golem_cli_discovery(int argc, char **argv);
+int golem_cli_workflow(int argc, char **argv);
+int golem_cli_agent_session(int argc, char **argv);
+int golem_cli_execution(int argc, char **argv);
+int golem_cli_reentry(int argc, char **argv);
+int golem_cli_completion(int argc, char **argv);
 int main(int argc, char **argv)
 {
+    if(argc>=2 && strcmp(argv[1],"workflow")==0) return golem_cli_workflow(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"session")==0) return golem_cli_agent_session(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"execution")==0) return golem_cli_execution(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"reentry")==0) return golem_cli_reentry(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"completion")==0) return golem_cli_completion(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"discovery")==0) return golem_cli_discovery(argc,argv);
+    if (argc >= 2 && (strcmp(argv[1], "work") == 0 || strcmp(argv[1], "document") == 0))
+        return golem_cli_document(argc, argv);
     if (argc == 2 && strcmp(argv[1], "--help") == 0) { (void)usage(); return 0; }
     if (argc == 2 && strcmp(argv[1], "--version") == 0) { puts(GOLEM_VERSION_STRING); return 0; }
     if (argc >= 2 && (strcmp(argv[1], "init") == 0 || strcmp(argv[1], "capsule") == 0 ||

@@ -106,9 +106,22 @@ static void parsers(void)
     golem_lineage_free(graph); golem_work_run_free(run); golem_work_capsule_free(capsule);
     golem_stage_graph_free(stage_graph);
 }
+static void documents(const char *source)
+{
+    const char *names[] = {"documents/work.json", "documents/planning.json", "documents/planning.md", "discovery/assessment.json", "agent-session/start.json", "agent-session/status.json", "execution/contract.json", "reentry/decision.json", "completion/finalize.json", "completion/resume.json"};
+    for (size_t i = 0; i < sizeof(names)/sizeof(*names); ++i) {
+        char path[4096]; uint8_t bytes[8192];
+        int n = snprintf(path, sizeof(path), "%s/samples/%s", source, names[i]);
+        REQUIRE(n > 0 && (size_t)n < sizeof(path));
+        FILE *f = fopen(path, "rb"); REQUIRE(f != NULL);
+        size_t size = fread(bytes, 1, sizeof(bytes), f);
+        REQUIRE(!ferror(f) && feof(f) && fclose(f) == 0);
+        save("document", strrchr(names[i],'/')+1, bytes, size);
+    }
+}
 int main(int argc, char **argv)
 {
     REQUIRE(argc == 3); root = argv[1]; directory(root);
-    envelopes(argv[2]); journals(argv[2]); parsers();
+    envelopes(argv[2]); journals(argv[2]); parsers(); documents(argv[2]);
     return 0;
 }

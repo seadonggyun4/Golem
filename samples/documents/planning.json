@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "work_id": "example-work",
+  "document_id": "planning",
+  "revision": 1,
+  "kind": "planning",
+  "stage": "planning",
+  "producer_attempt": "local-author-1",
+  "parents": [],
+  "requirement_ids": [
+    "REQ-1"
+  ],
+  "scope_revision": 1,
+  "template_version": 1,
+  "policy_version": 1,
+  "source_snapshot": "0000000000000000000000000000000000000000000000000000000000000000",
+  "supersedes": "",
+  "expected_generation": 1
+}

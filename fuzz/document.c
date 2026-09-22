@@ -1,0 +1,47 @@
+#include "golem/document.h"
+#include "golem/discovery.h"
+#include "golem/workflow.h"
+#include "golem/agent_session.h"
+#include "golem/execution.h"
+#include "golem/reentry.h"
+#include "golem/completion.h"
+#include <stddef.h>
+#include <stdint.h>
+int LLVMFuzzerTestOneInput(const uint8_t *data,size_t size)
+{
+    static const char meta[] =
+        "{\"schema_version\":1,\"work_id\":\"work\",\"document_id\":\"plan\",\"revision\":1,"
+        "\"kind\":\"planning\",\"stage\":\"planning\",\"producer_attempt\":\"attempt\","
+        "\"parents\":[],\"requirement_ids\":[\"REQ-1\"],\"scope_revision\":1,\"template_version\":1,"
+        "\"policy_version\":1,\"source_snapshot\":\"0000000000000000000000000000000000000000000000000000000000000000\","
+        "\"supersedes\":\"\",\"expected_generation\":1}";
+    if(size>GOLEM_DOCUMENT_MAX_BODY+1) return 0;
+    (void)golem_agent_request_validate((golem_bytes){data,size},NULL);
+    (void)golem_reentry_validate((golem_bytes){data,size},NULL);
+    (void)golem_completion_validate((golem_bytes){data,size},NULL);
+    golem_digest contract_digest;
+    (void)golem_execution_contract_validate((golem_bytes){data,size},&contract_digest,NULL);
+    /* Mutate bounded typed edges as well as serialized document envelopes. */
+    if(size>=4) {
+        golem_dependency_node nodes[16];
+        golem_document_freshness states[16];
+        size_t parents[16];
+        static const char *ids[]={"a","b","c","d","e","f","g","h",
+                                  "i","j","k","l","m","n","o","p"};
+        size_t count=size/4; if(count>16) count=16;
+        for(size_t i=0;i<count;++i) {
+            parents[i]=data[4*i+2]%17;
+            nodes[i]=(golem_dependency_node){"work",ids[data[4*i]%16],
+                1u+data[4*i+1]%4u,{{1}},&parents[i],data[4*i+3]%2u};
+        }
+        (void)golem_document_graph_evaluate(nodes,count,NULL,states,count,NULL);
+    }
+    golem_discovery_result result;
+    (void)golem_discovery_validate((golem_bytes){data,size},&result,NULL);
+    size_t required;
+    (void)golem_discovery_report((golem_bytes){data,size},"research",NULL,0,&required,NULL);
+    (void)golem_work_spec_validate((golem_bytes){data,size},NULL);
+    (void)golem_document_validate((golem_bytes){data,size},(golem_bytes){data,size},NULL);
+    (void)golem_document_validate((golem_bytes){(const uint8_t *)meta,sizeof(meta)-1},(golem_bytes){data,size},NULL);
+    return 0;
+}
