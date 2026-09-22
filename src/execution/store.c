@@ -33,7 +33,10 @@ static golem_status enrollment(golem_document_store *s,struct json_object *manif
         if(st==GOLEM_OK && n!=32) st=GOLEM_ERR_CORRUPT_JOURNAL;
         free(data);
     }
-    if(dir>=0) close(dir); return st;
+    if (dir >= 0) {
+        close(dir);
+    }
+    return st;
 }
 golem_status ex_required(golem_document_store *s,struct json_object *m)
 {
