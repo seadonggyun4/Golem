@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.21)
+project(GolemPackageConsumer LANGUAGES C)
+find_package(Golem CONFIG REQUIRED)
+add_executable(consumer main.c)
+target_link_libraries(consumer PRIVATE Golem::golem)
+target_compile_features(consumer PRIVATE c_std_17)

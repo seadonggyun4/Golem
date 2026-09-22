@@ -1,9 +1,11 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "golem-awe"
+license = "PolyForm-Noncommercial-1.0.0"
+license-files = ["LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"]
 version = "0.1.0"
 description = "Golem headless Agentic Work Engine runtime."
 readme = "README.md"

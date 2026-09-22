@@ -9,7 +9,7 @@ import tempfile
 
 
 SOURCE_DIRS = {"cmake", "include", "src", "tests", "fuzz", "samples"}
-SOURCE_FILES = {"CMakeLists.txt", "CMakePresets.json"}
+SOURCE_FILES = {"CMakeLists.txt", "CMakePresets.json", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"}
 
 
 def selected(name):

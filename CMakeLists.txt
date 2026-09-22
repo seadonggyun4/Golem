@@ -160,6 +160,8 @@ if(GOLEM_BUILD_BINDINGS)
 endif()
 
 install(TARGETS golem EXPORT GolemTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES LICENSE NOTICE COMMERCIAL-LICENSE.md
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/Golem)
 install(DIRECTORY include/golem DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(EXPORT GolemTargets NAMESPACE Golem:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Golem)
 configure_package_config_file(cmake/GolemConfig.cmake.in

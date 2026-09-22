@@ -1,0 +1,30 @@
+name: Conan package
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        cli: ['True', 'False']
+    runs-on: ${{ matrix.os }}
+    env:
+      CONAN_HOME: ${{ runner.temp }}/golem-conan
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install conan==2.32.0
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y cmake pkg-config
+      - if: runner.os == 'macOS'
+        run: brew install cmake pkg-config
+      - run: conan profile detect
+      - run: conan create . --build=missing -o 'golem/*:with_cli=${{ matrix.cli }}' -c tools.build:jobs=4
+      - if: matrix.cli == 'True'
+        run: python tools/install_conan_cli.py --prefix "${{ runner.temp }}/golem-install" --bin-dir "${{ runner.temp }}/golem-bin"
+      - if: matrix.cli == 'True'
+        run: python tests/c/cli_integration.py "${{ runner.temp }}/golem-bin/golem" "${{ runner.temp }}"

@@ -8,7 +8,124 @@ Golem is the product implementation of `AWE — Agentic Work Engine`.
 
 AWE is the academic/category name. Golem is the product name.
 
+## License
+
+Copyright 2026 Donggyun Seo. Golem is **source-available**, under the
+[PolyForm Noncommercial License 1.0.0](LICENSE), not an OSI-approved open-source
+license. See [NOTICE](NOTICE) for the required attribution and third-party scope.
+The public license permits its defined noncommercial purposes, including
+permitted modifications and redistribution; its exact terms govern.
+
+Uses outside those permissions require a separate written license from
+Donggyun Seo. Contact [seadonggyun@gmail.com](mailto:seadonggyun@gmail.com);
+see [commercial licensing](COMMERCIAL-LICENSE.md). An inquiry alone grants no
+additional rights. Dependencies retain their own licenses and ownership.
+
 ## Public Alpha
+
+### Conan Package
+
+The repository contains a Conan 2 recipe for `golem/0.1.0`. It packages the
+static C library as `Golem::golem`, public headers, legal notices and an optional
+CLI. Initial targets are Linux/macOS, with PIC enabled. Bindings, test binaries,
+private plans and runtime evidence are not exported. OpenSSL and json-c are
+resolved by Conan, not copied from the developer's machine.
+
+**No public Golem remote has been deployed yet.** ConanCenter is used only for
+dependencies; this recipe does not imply Golem is listed there.
+
+Install from GitHub (CMake 3.21+, a C17 compiler, pkg-config, Python 3.11+
+and the platform build tools are required; dependency source builds also need
+Perl and make). This does not require a Golem server or Conan account:
+
+```sh
+git clone https://github.com/seadonggyun4/Golem.git
+cd Golem
+python3 -m venv build/conan-venv
+build/conan-venv/bin/python -m pip install conan==2.32.0
+# Use a writable cache path without spaces, separate from existing Conan settings.
+export CONAN_HOME="$HOME/.cache/golem-conan"
+build/conan-venv/bin/conan profile detect
+build/conan-venv/bin/conan create . --build=missing
+build/conan-venv/bin/conan create . --build=missing -o 'golem/*:with_cli=False'
+```
+
+Install the CLI built above into a NEW versioned directory:
+
+```sh
+python3 tools/install_conan_cli.py \
+  --conan "$PWD/build/conan-venv/bin/conan" \
+  --prefix "$HOME/.local/opt/golem/0.1.0"
+export PATH="$HOME/.local/bin:$PATH"
+golem --version
+
+WORK="$(mktemp -d)"
+WORK="$(cd "$WORK" && pwd -P)"
+golem init "$WORK/project"
+golem capsule validate "$WORK/project/capsule.json"
+golem run --noop "$WORK/project/capsule.json" --output "$WORK/run"
+golem replay "$WORK/run"
+golem cost report "$WORK/run"
+printf 'Private simulation files: %s\n' "$WORK"
+```
+
+The installer deploys the local Conan cache packages and dependencies, retaining
+their licenses, then creates `~/.local/bin/golem`. It does not download Golem
+from an unpublished remote, change shell startup files, overwrite an existing
+installation or rely on Conan cache paths at execution time. It currently
+requires static dependency libraries. For an upgrade, choose a new prefix and
+review/switch the old command link explicitly. Preserve private run data.
+To remove this installation, remove only the command symlink and its versioned
+prefix after checking `installation.json`; do not delete project evidence.
+
+For C/C++ consumers, use the same Conan cache and declare `golem/0.1.0` in a
+`conanfile.txt` with `CMakeDeps` and `CMakeToolchain` generators:
+
+```ini
+[requires]
+golem/0.1.0
+[generators]
+CMakeDeps
+CMakeToolchain
+[options]
+golem/*:with_cli=False
+```
+
+Run `conan install . --output-folder=build --build=missing` using the installed
+Conan client, configure with `-DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake`
+and `-DCMAKE_BUILD_TYPE=Release`, then use `find_package(Golem CONFIG REQUIRED)`
+and `target_link_libraries(your_target PRIVATE Golem::golem)`.
+Record the Git commit and a Conan lockfile for repeatable deployments. The CLI
+is suitable for orchestration from non-C projects without linking Golem into
+their product. Noop evidence is simulation evidence, never proof of real agent
+work, protocol interoperability or business acceptance.
+
+The consumer test links the installed library, verifies legal files and, when
+enabled, runs init/validate/noop/replay/cost through the packaged CLI. CI validates
+both variants on Linux/macOS and never uploads from push or pull-request jobs.
+The public license applies equally to downloaded and locally built packages.
+
+For a public remote, provision a Conan-compatible server with HTTPS, anonymous
+read access, authenticated restricted write access, backups and retained recipe
+revisions. Keep tokens outside source control. After configuring its real URL:
+
+```sh
+# Placeholders: replace URL and username with the actual provisioned service.
+conan remote add golem-public https://YOUR-SERVER/CONAN-ENDPOINT
+conan remote login golem-public YOUR-USERNAME
+# Review exactly what will be uploaded; do not upload dependency packages.
+conan upload 'golem/0.1.0' -r golem-public --dry-run
+conan upload 'golem/0.1.0' -r golem-public --confirm
+```
+
+Consumers register the same remote and use `golem/0.1.0` in their requirements
+with `CMakeDeps` and `CMakeToolchain`, then link `Golem::golem`. Keep ConanCenter
+enabled for dependencies. Verify anonymous installation using a fresh cache
+before announcing availability. Missing binaries can build with `--build=missing`.
+Use reviewed immutable versions/revisions and consumer lockfiles for reproducible
+resolution. GitHub source hosting alone is not a Conan binary remote.
+
+### Build and Run
 
 The C17 runtime and CLI are available for **local noop evaluation** on macOS
 and Linux. This is an alpha engineering milestone, not a production or security
@@ -61,8 +178,8 @@ Alpha API/ABI and storage formats may change; no automatic migration or stable
 compatibility promise is made. Use disposable non-sensitive workspaces. Real
 provider execution, authenticated runner enrollment, hostile-process sandboxing,
 verified business gates and distributed exactly-once effects are not provided.
-Bindings remain optional. A license must be selected by the repository owner
-before representing this code as licensed open-source software.
+Bindings remain optional. The source-available license and separate commercial
+licensing process above apply to the Alpha as well.
 
 ## Name and Role
 

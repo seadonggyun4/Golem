@@ -1,9 +1,11 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "golem-runtime"
+license = "PolyForm-Noncommercial-1.0.0"
+license-files = ["LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"]
 version = "0.1.0"
 description = "Typed Python binding for the Golem C validation and replay engine"
 requires-python = ">=3.11"
