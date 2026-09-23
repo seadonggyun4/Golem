@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "operation": "outcome-enroll",
+  "key": "enroll-1",
+  "record": {
+    "schema_version": 1,
+    "work_id": "example-work",
+    "case_id": "parser-case",
+    "case_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "selection_id": "selection",
+    "gate_id": "regression",
+    "adjudication_rule": "golem.required-cases.v1",
+    "required_cases": [{"id": "fix", "requirement_id": "REQ-1"}]
+  }
+}

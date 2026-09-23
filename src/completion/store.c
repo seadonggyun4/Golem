@@ -187,16 +187,19 @@ golem_status golem_completion_call(golem_document_store *s,golem_bytes b,golem_e
     if(st==GOLEM_OK && (!s->writable || !strcmp(dw_text(s->spec,"permission"),"DENY"))) st=GOLEM_ERR_POLICY_DENIED;
     if(st==GOLEM_OK && !strcmp(dw_text(s->spec,"permission"),"ASK_ALWAYS")) st=GOLEM_ERR_APPROVAL_REQUIRED;
     if(st==GOLEM_OK && s->completion_count>=CO_MAX_RECORDS) st=GOLEM_ERR_BUDGET_EXHAUSTED;
-    for(size_t i=0;st==GOLEM_OK && i<s->completion_count;++i) {
-        struct json_object *old=dw_get(s->completions[i],"request");
-        if(!strcmp(dw_text(old,"selection_id"),dw_text(r,"selection_id")) &&
-           dw_uint(old,"expected_generation")==dw_uint(r,"expected_generation")) st=GOLEM_ERR_IDENTITY_MISMATCH;
-    }
     if(st==GOLEM_OK) st=re_deadline(s);
     const char *action=NULL;
     if(st==GOLEM_OK) st=co_quiescent(s,&action,&boundary);
     if(st==GOLEM_OK && action) st=GOLEM_ERR_INCOMPLETE_WORK;
     if(st==GOLEM_OK) st=co_evaluate(s,r,true,&assessment);
+    for(size_t i=0;st==GOLEM_OK && i<s->completion_count;++i) {
+        struct json_object *old=dw_get(s->completions[i],"request");
+        struct json_object *prior=dw_get(dw_get(s->completions[i],"record"),"assessment");
+        if(!strcmp(dw_text(old,"selection_id"),dw_text(r,"selection_id")) &&
+           dw_uint(old,"expected_generation")==dw_uint(r,"expected_generation") &&
+           json_object_equal(dw_get(prior,"outcome_adjudications"),dw_get(assessment,"outcome_adjudications")))
+            st=GOLEM_ERR_IDENTITY_MISMATCH;
+    }
     golem_digest root,payload,frame; golem_execution_reply md={0},encoded={0},response={0}; golem_receipt report;
     if(st==GOLEM_OK) st=root_hash(assessment,boundary,&root);
     if(st==GOLEM_OK) {

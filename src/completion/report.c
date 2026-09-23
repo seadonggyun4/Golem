@@ -44,6 +44,15 @@ golem_status co_markdown(struct json_object *r,golem_execution_reply *out)
         struct json_object *g=json_object_array_get_idx(gates,i);
         fprintf(f,"| %s | %llu | %s |\n",dw_text(g,"gate_id"),(unsigned long long)dw_uint(g,"version"),dw_text(g,"status"));
     }
+    struct json_object *outcomes=dw_get(a,"outcome_adjudications");
+    if(outcomes) {
+        fputs("\n### Outcome Adjudications\n\nDeclared observations satisfied their enrolled rules and this QA receipt.\n\n",f);
+        for(size_t i=0;i<json_object_array_length(outcomes);++i) {
+            struct json_object *v=json_object_array_get_idx(outcomes,i);
+            fprintf(f,"- %s: policy `%s`, adjudication `%s`\n",dw_text(v,"case_id"),
+                dw_text(v,"policy_digest"),dw_text(v,"adjudication_digest"));
+        }
+    }
     fputs("\n### Declared Requirement Coverage\n\n| Requirement | Gate | Case | Result |\n| --- | --- | --- | --- |\n",f);
     struct json_object *definitions=dw_get(a,"gate_definitions");
     for(size_t i=0;i<json_object_array_length(definitions);++i) {

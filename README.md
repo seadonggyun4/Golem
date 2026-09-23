@@ -5,7 +5,7 @@
 <h1 align="center">Golem — Agentic Work Engine</h1>
 
 <p align="center">
-  <strong>문서와 검증 결과를 이어받아 일을 끝까지 수행하는 headless work runtime</strong>
+  <strong>A headless work runtime that carries Markdown and verified results through to completion</strong>
 </p>
 
 <p align="center"><em>Awaken the worker.</em></p>
@@ -16,42 +16,48 @@
 [![Agents](https://img.shields.io/badge/agents-Codex%20%7C%20Claude-327866)](docs/agent-session.md)
 [![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE)
 
-**한국어** · [English](README.en.md) · [설치 안내](docs/runtime-reference.md#conan-package) · [작업 프로토콜](docs/agent-session.md)
+[한국어](README.ko.md) · **English** · [Installation](docs/runtime-reference.md#conan-package) · [Agent protocol](docs/agent-session.md)
 
-## Golem이 하는 일
+## What Golem Does
 
-**지원 에이전트: Codex · Claude.** 핵심은 별도 agent를 새로 띄우는 것보다, 지금 작업 중인 agent가 Markdown 문서와 검증 결과를 이어받아 완료까지 진행하도록 만드는 데 있습니다.
+**Supported agents: Codex and Claude.** Golem helps the agent already working with you carry Markdown documents and verification results through to completion. Launching another agent is not the central idea.
 
-에이전트가 조사·문서 작성·코드 수정을 수행하고, Golem은 문서의 관계와 최신성, 실행 증거, 권한 및 완료 조건을 관리합니다. **AWE는 Agentic Work Engine이라는 분류명이며, 제품명은 Golem입니다.** C17 엔진과 CLI·JSON·Markdown을 제공하며 UI는 만들지 않습니다.
+The agent researches, writes documents and edits code. Golem manages document dependencies, freshness, execution evidence, permissions and completion conditions. **AWE (Agentic Work Engine) is the category; Golem is the product.** It provides a C17 engine, CLI, JSON and Markdown, without a UI client.
 
-## 작업 흐름
+## Work Cycle
 
 ```text
-사용자 요청
-→ 현재 agent가 Golem에서 작업 시작/복원
-→ 프로젝트 탐색·관련 자료 조사·개선 범위 선정
-→ 필요한 단계의 Markdown 작성 및 등록
-→ 검증된 문서를 입력으로 개발
-→ 실제 QA 실행 및 결과 Markdown 작성
-→ 실패 원인 분류
-→ 영향받은 문서 개정 → 개발/검수 반복
-→ 완료 조건 검증 및 완료 보고서
+User request
+→ Current agent starts or restores a Work in Golem
+→ Explore the project, research references and select scope
+→ Author and register Markdown for the necessary stages
+→ Develop against validated documents
+→ Run real QA and record results in Markdown
+→ Classify failures
+→ Revise affected documents → repeat development and QA
+→ Verify completion conditions and produce a completion report
 ```
 
-기획 → UX → 퍼블리싱 → 개발 → QA → 검수 중 **필요한 단계만 선택**합니다. 하위 문서는 정확한 상위 revision을 참조하고, 상위 문서가 바뀌면 영향을 받는 문서와 검증 결과의 최신성을 다시 확인합니다.
+Select **only the necessary stages** from planning → UX → publishing → development → QA → audit. Downstream documents reference exact upstream revisions; changes trigger freshness checks on affected documents and verification results.
 
-| 핵심 | 동작 | 상세 |
+| Capability | Behavior | Details |
 | --- | --- | --- |
-| Markdown 산출물 | 본문 저장, 불변 revision, 상위 문서 연결 | [문서 계약](docs/document-registry.md) |
-| 탐색·범위 선정 | 조사 근거와 개선 범위를 기록 | [탐색·조사](docs/discovery.md) |
-| 현재 agent 연동 | 작업 수령·제출·heartbeat·재개 | [세션](docs/agent-session.md) |
-| 문서 기반 개발·QA | 개발 변경과 승인된 실제 테스트를 증거로 연결 | [실행](docs/execution.md) |
-| 실패 재진입 | 원인에 따라 영향 문서 개정, 반복 예산 적용 | [재진입](docs/reentry.md) |
-| 완료·복구 | 최신 문서·QA·소스 검증과 완료 보고서 복원 | [완료](docs/completion.md) |
+| Markdown artifacts | Stored bodies, immutable revisions and parent references | [Document contract](docs/document-registry.md) |
+| Discovery and scope | Record research evidence and improvement scope | [Discovery](docs/discovery.md) |
+| Current-agent integration | Claim, submit, heartbeat and resume | [Sessions](docs/agent-session.md) |
+| Development and QA | Bind source changes and approved real tests to evidence | [Execution](docs/execution.md) |
+| Failure reentry | Revise affected documents with bounded repair budgets | [Reentry](docs/reentry.md) |
+| Completion and recovery | Check current documents, QA and source; restore reports | [Completion](docs/completion.md) |
+| Research records | Immutable case/attempt hypotheses, interventions, observations and next decisions | [ResearchCase / AttemptDecision](docs/research.md) |
+| Outcome adjudication | Block completion on missing, skipped, failed or stale required assessments | [OutcomeAdjudication](docs/outcome.md) |
+| Research metrics | Replay-based counts, latest assessments and explicitly bounded recovery measures | [Metrics](docs/metrics.md) |
+| Comparison cohorts | Fixed non-use/partial/full-use groups, observation revisions and replay comparisons | [Cohorts](docs/cohort.md) |
+| Case study bundles | Structural redaction, scoped evidence inventory and checksum-verified private export | [Bundles](docs/bundle.md) |
+| Derived observability | Read-only OTLP snapshot logs and PROV-JSON, separate from authoritative CAS/journal | [OTel / PROV](docs/observability.md) |
 
-## 빠른 시작
+## Quick Start
 
-macOS 또는 Linux에서 C17 컴파일러, CMake 3.21+, Ninja, Python 3.11+, OpenSSL 3, pkg-config, json-c 0.15+, MD4C 0.4.8+가 필요합니다. [OS별 의존성](docs/runtime-reference.md#build-and-run) 또는 [Conan 설치](docs/runtime-reference.md#conan-package)를 참고하세요.
+Requires macOS or Linux, a C17 compiler, CMake 3.21+, Ninja, Python 3.11+, OpenSSL 3, pkg-config, json-c 0.15+ and MD4C 0.4.8+. See [platform dependencies](docs/runtime-reference.md#build-and-run) or [Conan installation](docs/runtime-reference.md#conan-package).
 
 ```sh
 git clone https://github.com/seadonggyun4/Golem.git
@@ -62,7 +68,7 @@ ctest --preset release
 build/release/golem --version
 ```
 
-새 작업을 만들고 예제 Markdown을 등록합니다. 저장 위치는 직접 지정합니다.
+Create a new Work and register sample Markdown in a location you choose:
 
 ```sh
 mkdir -p .golem/workspace
@@ -73,38 +79,38 @@ build/release/golem document submit "$WORK" samples/documents/planning.json samp
 build/release/golem document inspect "$WORK" planning 1
 ```
 
-생성 문서: `.golem/workspace/first-work/documents/planning/r0001.md`.
-예제는 **등록 확인용**이며 자동 개발 실행이나 QA 통과를 의미하지 않습니다. 기존 Work를 덮어쓰지 말고 새 경로를 사용하세요. 대상 프로젝트에서도 `.golem/`을 Git에서 제외하세요.
+Output: `.golem/workspace/first-work/documents/planning/r0001.md`.
+This is a **registration example**, not automatic development or QA acceptance. Use a new path rather than overwriting a Work. Exclude `.golem/` from Git in your target project too.
 
-실제 작업에는 프로젝트 범위·QA 명령·권한을 설정하고, Codex 또는 Claude가 [작업 지침 예제](samples/agent-session/AGENTS.fragment.md)와 [세션 프로토콜](docs/agent-session.md)을 따르도록 연결합니다.
+For real work, configure project scope, QA commands and permissions, then connect Codex or Claude using the [agent instruction example](samples/agent-session/AGENTS.fragment.md) and [session protocol](docs/agent-session.md).
 
-## Agent 진입점 설정
+## Agent Entrypoints
 
-프로젝트의 기존 **`AGENTS.md`**에 [공통 규칙 템플릿](samples/agent-session/AGENTS.quickstart.md)을 덧붙이고, **`CLAUDE.md`**에는 이를 참조하는 [Claude 템플릿](samples/agent-session/CLAUDE.quickstart.md)을 추가하세요. 기존 지침을 덮어쓰지 않습니다.
+Append the [common rules template](samples/agent-session/AGENTS.quickstart.md) to your existing **`AGENTS.md`**, then add the [Claude entry block](samples/agent-session/CLAUDE.quickstart.md) to **`CLAUDE.md`**. Preserve existing instructions. Korean translations are available as [`AGENTS.quickstart.ko.md`](samples/agent-session/AGENTS.quickstart.ko.md) and [`CLAUDE.quickstart.ko.md`](samples/agent-session/CLAUDE.quickstart.ko.md).
 
-템플릿의 실행 파일·Work 저장 루트·프로토콜 문서·대상 저장소 경로를 실제 값으로 바꾼 뒤, 현재 Codex·Claude에게 해당 진입점을 읽고 작업하도록 요청하세요. 프로젝트별 QA와 권한은 작업 범위에 맞춰 설정합니다.
+Replace the executable, Work root, protocol docs and target repository placeholders with real paths. Explicitly ask the current Codex or Claude agent to read the entrypoints. Select project-specific QA and permissions within the task's scope.
 
-**[설정 절차·경로 예시·요청 예시](docs/agent-setup.md)**
+**[Setup guide, path examples and request template](docs/agent-setup.md)**
 
-## 설치와 문서
+## Installation and Documentation
 
-| 목적 | 안내 |
+| Goal | Guide |
 | --- | --- |
-| GitHub 소스로 Conan 패키지·CLI 설치 | [Conan 설치](docs/runtime-reference.md#conan-package) |
-| C/C++ 라이브러리 연동 | [Golem::golem 빌드·설치](docs/runtime-reference.md#development) |
-| Python·TypeScript 연동 | [언어 바인딩](docs/runtime-reference.md#language-bindings) |
-| 단계 선택·문서 참조·최신성 | [워크플로우](docs/workflow.md) |
-| 검증 절차와 보장 범위 | [통합 검증](docs/conformance.md) |
-| 런타임·성능·운영 상세 | [기술 레퍼런스](docs/runtime-reference.md) |
+| Install the Conan package and CLI from GitHub source | [Conan installation](docs/runtime-reference.md#conan-package) |
+| Embed the C/C++ library | [Build and install Golem::golem](docs/runtime-reference.md#development) |
+| Use Python or TypeScript | [Language bindings](docs/runtime-reference.md#language-bindings) |
+| Select stages and check document freshness | [Workflow](docs/workflow.md) |
+| Understand qualification and verification | [Conformance](docs/conformance.md) |
+| Runtime, performance and operations | [Technical reference](docs/runtime-reference.md) |
 
-현재 배포 방식은 **GitHub + Conan 레시피**입니다. ConanCenter 등록이나 공개 Golem 패키지 서버를 전제로 하지 않습니다.
+Distribution currently uses **GitHub + a Conan recipe**. It does not depend on a ConanCenter listing or a public Golem package server.
 
-## 현재 상태
+## Status
 
-**Public Alpha.** Codex와 Claude를 통한 소규모 로컬 사례에서 Markdown → QA FAIL → 개정·수정 → PASS → 완료 흐름을 확인했습니다. 프로젝트별 QA와 권한 설정이 필요하며, 선언된 테스트의 통과가 문서 내용 전체의 타당성을 보증하지는 않습니다. [검증 범위와 절차](docs/conformance.md)를 참고하세요.
+**Public Alpha.** Small local Codex and Claude cases exercised Markdown → QA FAIL → revision and repair → PASS → completion. Each project needs its own QA and permissions. Passing declared tests is not independent verification of every claim in a document. See [conformance](docs/conformance.md) for scope and reproduction procedures.
 
-## 라이선스
+## License
 
-Copyright 2026 Donggyun Seo. Golem은 [PolyForm Noncommercial 1.0.0](LICENSE)을 따르는 **source-available** 소프트웨어이며 OSI 승인 오픈소스 라이선스가 아닙니다. 허용되는 비상업적 이용·수정·재배포의 정확한 범위는 라이선스 원문을 따릅니다.
+Copyright 2026 Donggyun Seo. Golem is **source-available**, under the [PolyForm Noncommercial License 1.0.0](LICENSE), not an OSI-approved open-source license. Its exact terms govern permitted noncommercial use, modification and redistribution.
 
-허용 범위 밖의 이용에는 Donggyun Seo의 별도 서면 라이선스가 필요합니다. [상용 이용 안내](COMMERCIAL-LICENSE.md) · [필수 고지 및 제3자 범위](NOTICE) · [seadonggyun@gmail.com](mailto:seadonggyun@gmail.com). 문의만으로 추가 권한이 부여되지 않으며, 의존성의 라이선스와 소유권은 각각 유지됩니다.
+Uses outside those permissions require a separate written license from Donggyun Seo. See [commercial licensing](COMMERCIAL-LICENSE.md), [NOTICE](NOTICE) for attribution and third-party scope, or contact [seadonggyun@gmail.com](mailto:seadonggyun@gmail.com). An inquiry alone grants no additional rights. Dependencies retain their own licenses and ownership.

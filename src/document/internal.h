@@ -2,6 +2,7 @@
 #define GOLEM_DOCUMENT_INTERNAL_H
 #include "golem/document.h"
 #include "../common/json.h"
+#include "golem/research.h"
 #define DW_FRAME 80
 #define DW_PATH 4096
 typedef struct dw_entry {
@@ -24,6 +25,10 @@ struct golem_document_store {
     size_t completion_count;
     struct json_object *completions[64];
     golem_digest completion_digests[64];
+    size_t research_count;
+    struct json_object *research[GOLEM_RESEARCH_MAX_EVENTS];
+    golem_digest research_digests[GOLEM_RESEARCH_MAX_EVENTS];
+    golem_digest research_frames[GOLEM_RESEARCH_MAX_EVENTS];
     golem_digest last;
 };
 struct json_object *dw_get(struct json_object *o, const char *key);

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "case_id": "parser-case",
+  "work_id": "example-work",
+  "project_id": "example-project",
+  "case_type": "REGRESSION_CANARY",
+  "research_questions": [{"id": "RQ-1", "question": "Does retaining failed observations prevent loss of the investigation history?"}],
+  "unit_of_analysis": "A bounded local parser regression investigation",
+  "context": {
+    "product": "Synthetic parser fixture, not a production service",
+    "environment": "Local temporary Work",
+    "tool": "Golem research schema 1",
+    "runner": "Current agent; no automatic dispatch",
+    "constraints": "No product acceptance or statistical generalization"
+  },
+  "privacy_level": "PRIVATE",
+  "pre_registered_plan_digest": ""
+}

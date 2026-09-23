@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "operation": "cohort-observe",
+  "key": "observation-key",
+  "record": {
+    "schema_version": 1,
+    "work_id": "example-work",
+    "cohort_id": "study",
+    "cohort_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "case_id": "control",
+    "supersedes": "",
+    "status": "NOT_DONE",
+    "observed_arm": "NON_USE",
+    "environment_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "evidence_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "leakage": false
+  }
+}

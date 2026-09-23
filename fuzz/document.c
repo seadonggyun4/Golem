@@ -5,6 +5,7 @@
 #include "golem/execution.h"
 #include "golem/reentry.h"
 #include "golem/completion.h"
+#include "golem/research.h"
 #include <stddef.h>
 #include <stdint.h>
 int LLVMFuzzerTestOneInput(const uint8_t *data,size_t size)
@@ -19,6 +20,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data,size_t size)
     (void)golem_agent_request_validate((golem_bytes){data,size},NULL);
     (void)golem_reentry_validate((golem_bytes){data,size},NULL);
     (void)golem_completion_validate((golem_bytes){data,size},NULL);
+    (void)golem_research_validate((golem_bytes){data,size},NULL);
+    (void)golem_research_redaction_validate((golem_bytes){data,size},NULL);
+    (void)golem_research_bundle_verify((golem_bytes){data,size},NULL);
     golem_digest contract_digest;
     (void)golem_execution_contract_validate((golem_bytes){data,size},&contract_digest,NULL);
     /* Mutate bounded typed edges as well as serialized document envelopes. */

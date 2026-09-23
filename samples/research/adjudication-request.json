@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "operation": "adjudicate",
+  "key": "adjudication-1",
+  "record": {
+    "schema_version": 1,
+    "work_id": "example-work",
+    "case_id": "parser-case",
+    "case_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "policy_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "qa_receipt": "0000000000000000000000000000000000000000000000000000000000000000",
+    "supersedes": "",
+    "raw_status": "No cases executed; zero errors does not establish PASS.",
+    "observations": [],
+    "open_blockers": ["required-case-not-executed"],
+    "rationale": "Template only; replace identities and receipts with real same-Work evidence."
+  }
+}

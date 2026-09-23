@@ -1,5 +1,6 @@
 #include "internal.h"
 #include "../reentry/internal.h"
+#include "../research/internal.h"
 #include <string.h>
 
 golem_status co_validate(struct json_object *r)
@@ -92,6 +93,8 @@ golem_status co_evaluate(golem_document_store *s,struct json_object *r,bool live
         if(st==GOLEM_OK && !dw_digest(v,"evidence_digest",&key)) st=GOLEM_ERR_PARSE;
         if(st==GOLEM_OK) st=golem_evidence_verify(s->cas,&key,&size,NULL);
     }
+    struct json_object *outcomes=NULL;
+    if(st==GOLEM_OK) st=rs_outcome_completion(s,dw_text(r,"selection_id"),&qa_key,&outcomes);
     struct json_object *policy=json_object_new_object(); golem_digest pd;
     if(!policy || !ex_uint(policy,"schema_version",1) ||
        !ex_text(policy,"predicate","golem.completion.development.v1") ||
@@ -119,6 +122,9 @@ golem_status co_evaluate(golem_document_store *s,struct json_object *r,bool live
            !dw_add(assessment,"independent_review",json_object_new_boolean(false)) ||
            !ex_text(assessment,"assurance","DECLARED_GATES_ONLY")) st=GOLEM_ERR_OUT_OF_MEMORY;
     }
+    if(st==GOLEM_OK && json_object_array_length(outcomes) &&
+       !dw_add(assessment,"outcome_adjudications",json_object_get(outcomes))) st=GOLEM_ERR_OUT_OF_MEMORY;
+    json_object_put(outcomes);
     if(st==GOLEM_OK) *out=assessment; else json_object_put(assessment);
     json_object_put(policy); json_object_put(docs); json_object_put(qa); json_object_put(dev); json_object_put(cp);
     return st;

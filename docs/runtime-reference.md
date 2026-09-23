@@ -1,7 +1,7 @@
 # Runtime and Packaging Reference
 
 Detailed reference retained from the former README. Commands run from the repository root.
-Start with the [Korean README](../README.md) or [English README](../README.en.md).
+Start with the [English README](../README.md) or [Korean README](../README.ko.md).
 Subsystem descriptions apply to their individual APIs, not the entire product.
 
 **Awaken the worker.**
@@ -217,7 +217,7 @@ licensing process in [License](#license) apply to the Alpha as well.
 
 ## Name and Role
 
-**Golem (골램) implements AWE.** Its responsibility is durable, policy-bounded work execution.
+**Golem implements AWE.** Its responsibility is durable, policy-bounded work execution.
 
 Golem assembles agents, tools, policies, and execution stages into a working whole.
 
@@ -1207,6 +1207,14 @@ identity or declare global release readiness. `tools/verify_alpha.py` additional
 checks clean-source builds, installed package inventory, C consumers, noop and
 installed-CLI conformance. See [the scenario matrix, canary procedure and
 qualification limits](conformance.md).
+
+## Derived Research Observability
+
+`golem research observability WORK --case CASE_ID --format otlp|prov --redact POLICY.json`
+emits a private read-only OTLP log snapshot or PROV-JSON transformation graph.
+It reuses the case-study redaction boundary and never writes to CAS/journal or
+changes completion authority. No network exporter, fabricated spans or live time
+series are created. See [the mapping, ownership and privacy contract](observability.md).
 
 ## Next Development Order
 

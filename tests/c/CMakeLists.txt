@@ -1,3 +1,9 @@
+add_executable(golem_test_research test_research.c)
+target_link_libraries(golem_test_research PRIVATE Golem::golem)
+golem_configure_target(golem_test_research)
+add_test(NAME research_api COMMAND golem_test_research ${CMAKE_CURRENT_BINARY_DIR})
+set_tests_properties(research_api PROPERTIES TIMEOUT 30)
+
 add_executable(golem_test_completion test_completion.c)
 target_link_libraries(golem_test_completion PRIVATE Golem::golem)
 golem_configure_target(golem_test_completion)
@@ -148,6 +154,38 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/execution_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
     set_tests_properties(execution_cli PROPERTIES TIMEOUT 240)
+    add_test(NAME research_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/research_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(research_cli PROPERTIES TIMEOUT 180)
+    add_test(NAME outcome_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/outcome_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} -v)
+    set_tests_properties(outcome_cli PROPERTIES TIMEOUT 300)
+    add_test(NAME research_metrics_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/metrics_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(research_metrics_cli PROPERTIES TIMEOUT 180)
+    add_test(NAME research_cohort_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/cohort_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(research_cohort_cli PROPERTIES TIMEOUT 180)
+    add_test(NAME research_bundle_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/bundle_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(research_bundle_cli PROPERTIES TIMEOUT 180)
+    add_test(NAME research_observability_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/observability_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(research_observability_cli PROPERTIES TIMEOUT 180)
+    add_test(NAME outcome_bundle_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/outcome_bundle_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} -v)
+    set_tests_properties(outcome_bundle_cli PROPERTIES TIMEOUT 180)
+    add_test(NAME outcome_metrics_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/outcome_metrics_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} -v)
+    set_tests_properties(outcome_metrics_cli PROPERTIES TIMEOUT 300)
     add_test(NAME reentry_cli COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/reentry_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})

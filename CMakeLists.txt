@@ -38,6 +38,17 @@ pkg_check_modules(JSONC REQUIRED IMPORTED_TARGET json-c>=0.15)
 pkg_check_modules(MD4C REQUIRED IMPORTED_TARGET md4c>=0.4.8)
 
 add_library(golem STATIC
+    src/research/model.c
+    src/research/cohort.c
+    src/research/bundle.c
+    src/research/bundle_format.c
+    src/research/observability.c
+    src/research/compare.c
+    src/research/outcome.c
+    src/research/metrics.c
+    src/research/metrics_report.c
+    src/research/store.c
+    src/research/report.c
     src/execution/model.c
     src/execution/store.c
     src/execution/runner.c
@@ -164,7 +175,7 @@ if(GOLEM_BUILD_FUZZERS)
 endif()
 
 if(GOLEM_BUILD_CLI)
-    add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c
+    add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c src/cli/research.c src/cli/research_bundle.c
         src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c
         src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/agent_session.c src/cli/execution.c src/cli/reentry.c src/cli/completion.c)
     set_target_properties(golem_cli PROPERTIES OUTPUT_NAME golem)

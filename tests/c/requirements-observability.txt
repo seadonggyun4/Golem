@@ -1,0 +1,4 @@
+# Optional independent consumers only; not installed by the C runtime/build.
+opentelemetry-proto==1.44.0
+protobuf==7.36.2
+prov==3.2.2

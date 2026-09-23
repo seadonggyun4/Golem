@@ -1,8 +1,14 @@
+#define _POSIX_C_SOURCE 200809L
+#define _DARWIN_C_SOURCE
+#define _DEFAULT_SOURCE
 #include "golem/adapter_protocol.h"
+#include "golem/research.h"
 #include "golem/journal.h"
 #include "golem/lineage.h"
 #include "check.h"
 #include <errno.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <sys/stat.h>
 
 static const char *root;
@@ -108,7 +114,7 @@ static void parsers(void)
 }
 static void documents(const char *source)
 {
-    const char *names[] = {"documents/work.json", "documents/planning.json", "documents/planning.md", "discovery/assessment.json", "agent-session/start.json", "agent-session/status.json", "execution/contract.json", "reentry/decision.json", "completion/finalize.json", "completion/resume.json"};
+    const char *names[] = {"documents/work.json", "documents/planning.json", "documents/planning.md", "discovery/assessment.json", "agent-session/start.json", "agent-session/status.json", "execution/contract.json", "reentry/decision.json", "completion/finalize.json", "completion/resume.json", "research/request.json", "research/attempt-request.json", "research/outcome-enroll-request.json", "research/adjudication-request.json", "research/cohort-request.json", "research/cohort-observe-request.json", "research/redaction-minimal.json", "research/redaction-linkable.json"};
     for (size_t i = 0; i < sizeof(names)/sizeof(*names); ++i) {
         char path[4096]; uint8_t bytes[8192];
         int n = snprintf(path, sizeof(path), "%s/samples/%s", source, names[i]);
@@ -119,9 +125,41 @@ static void documents(const char *source)
         save("document", strrchr(names[i],'/')+1, bytes, size);
     }
 }
+static void bundles(void)
+{
+    const char spec[] = "{\"schema_version\":1,\"work_id\":\"w\",\"request\":\"Synthetic\","
+        "\"scope\":\"local\",\"non_goals\":\"execution\",\"permission\":\"AUTO_LOCAL\",\"max_revisions\":4,"
+        "\"acceptance\":[{\"id\":\"R1\",\"criterion\":\"record\"}],\"policy_version\":1}";
+    const char request[] = "{\"schema_version\":1,\"operation\":\"case-create\",\"key\":\"case\",\"record\":{"
+        "\"schema_version\":1,\"work_id\":\"w\",\"case_id\":\"c\",\"project_id\":\"p\",\"case_type\":\"BENCHMARK_TASK\","
+        "\"research_questions\":[{\"id\":\"q\",\"question\":\"Synthetic\"}],\"unit_of_analysis\":\"task\","
+        "\"context\":{\"product\":\"test\",\"environment\":\"local\",\"tool\":\"C\",\"runner\":\"C\",\"constraints\":\"none\"},"
+        "\"privacy_level\":\"PRIVATE\",\"pre_registered_plan_digest\":\"\"}}";
+    const char policy[] = "{\"schema_version\":1,\"profile\":\"MINIMAL\",\"acknowledge_linkability\":false}";
+    char path[4096];
+    int n = snprintf(path, sizeof(path), "%s/bundle-source-XXXXXX", root);
+    REQUIRE(n > 0 && (size_t)n < sizeof(path) && mkdtemp(path) != NULL);
+    golem_document_store *s = NULL; golem_execution_reply reply = {0};
+    REQUIRE(golem_document_store_create(path, (golem_bytes){(const uint8_t *)spec, sizeof(spec)-1}, NULL, &s, NULL) == GOLEM_OK);
+    REQUIRE(golem_research_call(s, (golem_bytes){(const uint8_t *)request, sizeof(request)-1}, &reply, NULL) == GOLEM_OK);
+    golem_execution_reply_free(&reply);
+    REQUIRE(golem_research_bundle(s, "c", (golem_bytes){(const uint8_t *)policy, sizeof(policy)-1}, &reply, NULL) == GOLEM_OK);
+    REQUIRE(golem_research_bundle_verify((golem_bytes){reply.data, reply.size}, NULL) == GOLEM_OK);
+    save("document", "case-study-bundle.json", reply.data, reply.size);
+    golem_execution_reply_free(&reply);
+    REQUIRE(golem_research_observability(s, "c", (golem_bytes){(const uint8_t *)policy, sizeof(policy)-1},
+        GOLEM_RESEARCH_EXPORT_OTLP_LOGS, &reply, NULL) == GOLEM_OK);
+    save("document", "derived-otlp.json", reply.data, reply.size);
+    golem_execution_reply_free(&reply);
+    REQUIRE(golem_research_observability(s, "c", (golem_bytes){(const uint8_t *)policy, sizeof(policy)-1},
+        GOLEM_RESEARCH_EXPORT_PROV_JSON, &reply, NULL) == GOLEM_OK);
+    save("document", "derived-prov.json", reply.data, reply.size);
+    golem_execution_reply_free(&reply);
+    REQUIRE(golem_document_store_close(s) == GOLEM_OK);
+}
 int main(int argc, char **argv)
 {
     REQUIRE(argc == 3); root = argv[1]; directory(root);
-    envelopes(argv[2]); journals(argv[2]); parsers(); documents(argv[2]);
+    envelopes(argv[2]); journals(argv[2]); parsers(); documents(argv[2]); bundles();
     return 0;
 }

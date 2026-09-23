@@ -8,6 +8,7 @@
 #include "../execution/internal.h"
 #include "../reentry/internal.h"
 #include "../completion/internal.h"
+#include "../research/internal.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -64,7 +65,9 @@ golem_status dw_preconditions(golem_document_store *s,struct json_object *m)
 golem_status dw_apply(golem_document_store *s,struct json_object *event,const golem_digest *payload,
     const golem_digest *frame)
 {
-    if(dw_uint(event,"schema_version")!=1) return GOLEM_ERR_UNSUPPORTED_VERSION;
+    if(dw_uint(event,"schema_version")!=1 &&
+       !(dw_uint(event,"schema_version")==2 && !strcmp(dw_text(event,"type"),"research") && s->spec))
+        return GOLEM_ERR_UNSUPPORTED_VERSION;
     golem_status st=GOLEM_OK; golem_digest key;
     if(!s->spec) {
         const char *keys[]={"schema_version","type","spec_digest"};
@@ -79,6 +82,7 @@ golem_status dw_apply(golem_document_store *s,struct json_object *event,const go
     }
     if(strcmp(dw_text(event,"type"),"reentry")==0) return re_apply(s,event,payload,frame);
     if(strcmp(dw_text(event,"type"),"completion")==0) return co_apply(s,event,payload,frame);
+    if(strcmp(dw_text(event,"type"),"research")==0) return rs_apply(s,event,payload,frame);
     const char *keys[]={"schema_version","type","metadata_digest","body_digest","idempotency_key"};
     dw_entry entry={0};
     if(!dw_keys(event,keys,5) || strcmp(dw_text(event,"type"),"document")!=0 ||
@@ -179,6 +183,7 @@ golem_status golem_document_store_close(golem_document_store *s)
     for(size_t i=0;i<s->count;++i) json_object_put(s->entries[i].meta);
     for(size_t i=0;i<s->reentry_count;++i) json_object_put(s->reentries[i]);
     for(size_t i=0;i<s->completion_count;++i) json_object_put(s->completions[i]);
+    for(size_t i=0;i<s->research_count;++i) json_object_put(s->research[i]);
     json_object_put(s->spec);
     golem_status st=golem_evidence_close(s->cas);
     if(s->events>=0 && close(s->events)<0) st=GOLEM_ERR_IO;

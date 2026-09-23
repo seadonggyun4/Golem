@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "operation": "case-create",
+  "key": "case-first",
+  "record": {
+    "schema_version": 1,
+    "case_id": "bounded-case",
+    "work_id": "example-work",
+    "project_id": "example-project",
+    "case_type": "REGRESSION_CANARY",
+    "research_questions": [{"id": "RQ-1", "question": "Can the investigation be reconstructed from immutable records?"}],
+    "unit_of_analysis": "One synthetic local investigation",
+    "context": {
+      "product": "Synthetic fixture",
+      "environment": "Private temporary Work",
+      "tool": "Golem research schema 1",
+      "runner": "Current agent",
+      "constraints": "No external effects or product acceptance"
+    },
+    "privacy_level": "PRIVATE",
+    "pre_registered_plan_digest": ""
+  }
+}

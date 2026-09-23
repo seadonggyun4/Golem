@@ -116,7 +116,8 @@ golem_status dw_replay(golem_document_store *s)
     while((item=readdir(dir))!=NULL) {
         if(strcmp(item->d_name,".")==0 || strcmp(item->d_name,"..")==0 || strncmp(item->d_name,".pending-",9)==0) continue;
         unsigned seq=0; char trailing, expected[32];
-        if(sscanf(item->d_name,"%8u.evt%c",&seq,&trailing)!=1 || seq<1 || seq>GOLEM_DOCUMENT_MAX_REVISIONS+129) {
+        if(sscanf(item->d_name,"%8u.evt%c",&seq,&trailing)!=1 || seq<1 ||
+            seq>GOLEM_DOCUMENT_MAX_REVISIONS+129+GOLEM_RESEARCH_MAX_EVENTS) {
             st=GOLEM_ERR_CORRUPT_JOURNAL; break;
         }
         (void)snprintf(expected,sizeof(expected),"%08u.evt",seq);

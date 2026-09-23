@@ -15,6 +15,13 @@ static int usage(void)
         "  golem execution validate CONTRACT_JSON\n"
         "  golem execution call WORK_DIR REQUEST_JSON [--approve-contract SHA256]\n"
         "  golem execution render WORK_DIR METADATA_JSON\n"
+        "  golem research case create WORK_DIR CASE_JSON KEY\n"
+        "  golem research attempt plan|record WORK_DIR ATTEMPT_JSON KEY\n"
+        "  golem research validate REQUEST_JSON\n"
+        "  golem research call WORK_DIR REQUEST_JSON\n"
+        "  golem research status WORK_DIR\n"
+        "  golem research observability WORK --case CASE_ID --format otlp|prov --redact POLICY.json\n"
+        "  golem research inspect|report WORK_DIR SEQUENCE\n"
         "  golem completion validate REQUEST_JSON\n"
         "  golem completion call WORK_DIR REQUEST_JSON\n"
         "  golem completion report WORK_DIR SEQUENCE\n"
@@ -58,6 +65,7 @@ int golem_cli_workflow(int argc, char **argv);
 int golem_cli_agent_session(int argc, char **argv);
 int golem_cli_execution(int argc, char **argv);
 int golem_cli_reentry(int argc, char **argv);
+int golem_cli_research(int argc, char **argv);
 int golem_cli_completion(int argc, char **argv);
 int main(int argc, char **argv)
 {
@@ -65,6 +73,7 @@ int main(int argc, char **argv)
     if(argc>=2 && strcmp(argv[1],"session")==0) return golem_cli_agent_session(argc,argv);
     if(argc>=2 && strcmp(argv[1],"execution")==0) return golem_cli_execution(argc,argv);
     if(argc>=2 && strcmp(argv[1],"reentry")==0) return golem_cli_reentry(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"research")==0) return golem_cli_research(argc,argv);
     if(argc>=2 && strcmp(argv[1],"completion")==0) return golem_cli_completion(argc,argv);
     if(argc>=2 && strcmp(argv[1],"discovery")==0) return golem_cli_discovery(argc,argv);
     if (argc >= 2 && (strcmp(argv[1], "work") == 0 || strcmp(argv[1], "document") == 0))
