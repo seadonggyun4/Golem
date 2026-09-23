@@ -1,6 +1,8 @@
 #define _POSIX_C_SOURCE 200809L
 #define _DARWIN_C_SOURCE
+#ifndef _DEFAULT_SOURCE
 #define _DEFAULT_SOURCE
+#endif
 #include "work.h"
 #include "../evidence/internal.h"
 #include <errno.h>
