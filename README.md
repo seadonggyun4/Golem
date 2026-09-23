@@ -102,6 +102,7 @@ Replace the executable, Work root, protocol docs and target repository placehold
 | Select stages and check document freshness | [Workflow](docs/workflow.md) |
 | Understand qualification and verification | [Conformance](docs/conformance.md) |
 | Runtime, performance and operations | [Technical reference](docs/runtime-reference.md) |
+| Journal inspection, salvage and compatibility | [Integrity and recovery](docs/runtime-integrity.md) |
 
 Distribution currently uses **GitHub + a Conan recipe**. It does not depend on a ConanCenter listing or a public Golem package server.
 

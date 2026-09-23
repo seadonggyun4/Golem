@@ -242,6 +242,9 @@ Golem stays headless until the execution engine is useful on its own.
 Golem implements a C work runtime kernel plus CLI, daemon, evidence CAS, adapter protocol, cost layer, and policy layer.
 
 The current Python package is a smoke-testable prototype for the core model.
+Its console entrypoint is `golem-prototype`; `golem` is reserved for the C CLI.
+See [integrity, recovery and ownership](runtime-integrity.md) for journal salvage,
+historical evaluator compatibility and installation collision guidance.
 
 ## Runtime MVP
 
@@ -1004,7 +1007,7 @@ off outside the `bindings` preset. The engine remains C17; TypeScript is a
 development-only type checker, not a runtime dependency.
 
 The separate Python package is `golem-runtime`, imported as `golem_runtime`.
-It does not replace the earlier `golem-awe` prototype or its CLI. Example from
+It does not replace the earlier `golem-awe` prototype or its `golem-prototype` CLI. Example from
 the repository root using the installed package and synthetic golden journal:
 
 ```python

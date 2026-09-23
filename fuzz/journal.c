@@ -72,6 +72,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         REQUIRE(reader.offset > offset && reader.offset <= size && record.sequence == sequence);
     }
     replay((golem_bytes){data, size});
+    golem_journal_inspection inspection;
+    REQUIRE(golem_journal_inspect((golem_bytes){data, size}, &inspection) == GOLEM_OK);
+    REQUIRE(inspection.valid_bytes == reader.offset);
+    REQUIRE(inspection.stream_status == s);
+    REQUIRE(inspection.valid_bytes <= size);
     /* Reframe arbitrary payloads so CRC is not a coverage barrier to CREATED
      * capsule parsing. Raw framing above remains independently fuzzed. */
     if (size <= GOLEM_JOURNAL_MAX_PAYLOAD) {

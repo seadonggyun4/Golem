@@ -7,13 +7,15 @@ name = "golem-awe"
 license = "PolyForm-Noncommercial-1.0.0"
 license-files = ["LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"]
 version = "0.1.0"
-description = "Golem headless Agentic Work Engine runtime."
+description = "Historical Python prototype of Golem; the supported runtime is the C CLI."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
 [project.scripts]
-golem = "golem.cli:main"
+golem-prototype = "golem.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["golem", "golem.*"]
+namespaces = false

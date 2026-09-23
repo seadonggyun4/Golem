@@ -42,6 +42,8 @@ static int usage(void)
         "  golem capsule validate FILE\n"
         "  golem run --noop CAPSULE --output RUN_DIR\n"
         "  golem replay RUN_DIR_OR_JOURNAL [--require-terminal]\n"
+        "  golem journal inspect FILE [--expect-chain SHA256]\n"
+        "  golem journal salvage FILE NEW_DIRECTORY --expect-source SHA256 --accept-truncated-tail\n"
         "  golem cost report RUN_DIR\n"
         "  golem daemon init ROOT | submit ROOT CAPSULE | status ROOT\n"
         "  golem daemon recover ROOT\n"
@@ -69,6 +71,7 @@ int golem_cli_research(int argc, char **argv);
 int golem_cli_completion(int argc, char **argv);
 int main(int argc, char **argv)
 {
+    if (argc >= 2 && strcmp(argv[1], "journal") == 0) return golem_cli_journal(argc, argv);
     if(argc>=2 && strcmp(argv[1],"workflow")==0) return golem_cli_workflow(argc,argv);
     if(argc>=2 && strcmp(argv[1],"session")==0) return golem_cli_agent_session(argc,argv);
     if(argc>=2 && strcmp(argv[1],"execution")==0) return golem_cli_execution(argc,argv);

@@ -26,7 +26,7 @@ def default_capsule() -> WorkCapsule:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(prog="golem")
+    parser = argparse.ArgumentParser(prog="golem-prototype")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("smoke-run")
     args = parser.parse_args()

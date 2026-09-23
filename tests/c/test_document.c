@@ -94,6 +94,19 @@ int main(int argc,char **argv)
     CHECK(golem_document_project(s,"planning",1,NULL)==GOLEM_ERR_POLICY_DENIED);
     CHECK(golem_document_inspect(s,"planning",1,&retry,NULL)==GOLEM_OK);
     CHECK(golem_document_store_close(s)==GOLEM_OK && mem.live==0);
+    /* Exercise every store-owned allocation during historical reopen, including
+     * CAS JSON scratch. An allocation failure must not publish a partial store. */
+    mem.calls = 0;
+    CHECK(golem_document_store_open(root,false,&a,&s,NULL)==GOLEM_OK);
+    size_t reopen_allocations = mem.calls;
+    CHECK(golem_document_store_close(s)==GOLEM_OK && mem.live==0);
+    for (size_t fail = 0; fail < reopen_allocations; ++fail) {
+        memory failing = {0, fail, 0};
+        golem_allocator allocator = {&failing, alloc, dealloc};
+        golem_document_store *untouched = (golem_document_store *)(uintptr_t)1;
+        CHECK(golem_document_store_open(root,false,&allocator,&untouched,NULL)==GOLEM_ERR_OUT_OF_MEMORY);
+        CHECK(untouched==(golem_document_store *)(uintptr_t)1 && failing.live==0);
+    }
     free(wb.data); free(mb.data); free(bb.data);
     return EXIT_SUCCESS;
 }

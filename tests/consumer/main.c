@@ -161,6 +161,12 @@ static int verify_replay_api(const golem_work_capsule *capsule)
             (golem_bytes){payload, payload_size}, frame, sizeof(frame), &size, NULL) != GOLEM_OK) {
         return 1;
     }
+    golem_journal_inspection inspection = {0};
+    if (golem_journal_inspect((golem_bytes){frame, size}, &inspection) != GOLEM_OK ||
+        inspection.stream_status != GOLEM_OK || inspection.records != 1 ||
+        inspection.valid_bytes != size) return 1;
+    if (golem_journal_inspect((golem_bytes){NULL, 1}, &inspection) != GOLEM_ERR_INVALID_ARGUMENT ||
+        inspection.valid_bytes != size || inspection.records != 1) return 1;
     golem_replay_options options = {"consumer-run", true, 1, size, false};
     golem_replay *engine = NULL;
     golem_work_run *recovered = NULL;

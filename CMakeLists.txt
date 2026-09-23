@@ -57,6 +57,8 @@ add_library(golem STATIC
     src/reentry/store.c
     src/reentry/workflow.c
     src/completion/model.c
+    src/completion/evaluator.c
+    src/completion/predicate_v1.c
     src/completion/recovery.c
     src/completion/report.c
     src/completion/store.c
@@ -119,6 +121,7 @@ add_library(golem STATIC
     src/replay/engine.c
     src/replay/apply.c
     src/journal/file.c
+    src/journal/inspect.c
     src/evidence/digest.c
     src/evidence/fs.c
     src/evidence/cas.c
@@ -176,7 +179,7 @@ endif()
 
 if(GOLEM_BUILD_CLI)
     add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c src/cli/research.c src/cli/research_bundle.c
-        src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c
+        src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c src/cli/journal.c
         src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/agent_session.c src/cli/execution.c src/cli/reentry.c src/cli/completion.c)
     set_target_properties(golem_cli PROPERTIES OUTPUT_NAME golem)
     target_link_libraries(golem_cli PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)

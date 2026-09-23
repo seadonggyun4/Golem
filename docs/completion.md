@@ -132,6 +132,8 @@ requires revalidation, even if a particular edit is unrelated.
 
 Replay checks the historical document prefix, policy/assessment equality, report
 digest and CAS, without observing today's source or reexecuting commands.
+The recorded policy predicate selects the historical evaluator; unknown versions
+return `UNSUPPORTED_VERSION`. See [compatibility and integrity](runtime-integrity.md).
 Current verification separately checks today's source and ownership. Completed
 work does not expire merely because an old repair execution deadline expires.
 

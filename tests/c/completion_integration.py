@@ -37,6 +37,9 @@ class Completion(Reentry):
         self.ready(sessions=True)
         self.assertEqual(self.completion()["action"], "VERIFY_COMPLETION")
         r = self.finalize()
+        self.assertEqual(r["record"]["record"]["schema_version"], 1)
+        self.assertEqual(r["record"]["record"]["assessment"]["policy"]["predicate"],
+                         "golem.completion.development.v1")
         self.assertEqual(r, self.finalize())
         self.assertEqual(self.completion()["action"], "RECOVER_REPORT")
         report = self.project()
@@ -189,6 +192,27 @@ class Completion(Reentry):
             src.rename(saved)
             self.completion(ok=False)
             saved.rename(src)
+        self.assertEqual(self.completion()["action"], "DONE")
+
+    def test_historical_evaluator_dispatch(self):
+        self.ready()
+        receipt = self.finalize()
+        event_file = self.events()[-1]
+        original = event_file.read_bytes()
+        event = copy.deepcopy(receipt["record"])
+        event["record"]["assessment"]["policy"]["predicate"] = "golem.completion.development.v999"
+        payload = json.dumps(event).encode()
+        key = hashlib.sha256(payload).hexdigest()
+        obj = self.work / "objects/sha256" / key[:2] / key[2:]
+        obj.parent.mkdir(exist_ok=True)
+        obj.write_bytes(payload)
+        event_file.chmod(0o600)
+        event_file.write_bytes(original[:48] + bytes.fromhex(key))
+        result = self.completion(ok=False)
+        self.assertIn("unsupported", result.stderr.decode().lower())
+        event_file.write_bytes(original)
+        self.assertEqual(self.completion()["action"], "RECOVER_REPORT")
+        self.project()
         self.assertEqual(self.completion()["action"], "DONE")
 
     def test_expired_claim_is_not_restored_by_completion(self):

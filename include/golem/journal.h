@@ -2,6 +2,7 @@
 #define GOLEM_JOURNAL_H
 #include "golem/core.h"
 #include "golem/types.h"
+#include "golem/evidence.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -22,6 +23,26 @@ typedef enum golem_journal_type {
 } golem_journal_type;
 
 typedef struct golem_journal golem_journal;
+/* Read-only diagnostic snapshot. stream_status describes the first invalid
+ * frame; GOLEM_OK from inspect means the report was produced, not stream health.
+ * valid_bytes is a structural prefix, NOT authorization to resume execution.
+ * chain_head is a derived SHA256 commitment, NOT a signature or on-disk v2.
+ * Retain the head outside the journal's trust boundary to detect rewriting or
+ * prefix truncation. Empty stream head is 32 zero bytes. */
+typedef struct golem_journal_inspection {
+    size_t valid_bytes;
+    uint64_t records;
+    golem_status stream_status;
+    golem_diagnostic failure;
+    golem_digest source_digest;
+    golem_digest chain_head;
+} golem_journal_inspection;
+
+/* Inputs borrowed; output caller-owned and unchanged on API/crypto error.
+ * SHA256("golem.journal.chain.v1" || previous_head || SHA256(encoded_frame)).
+ * CRC, version and contiguous sequence are checked before adding each frame.
+ * Does not perform semantic replay, read files, repair bytes or run agents. */
+golem_status golem_journal_inspect(golem_bytes bytes, golem_journal_inspection *out);
 typedef struct golem_journal_record {
     golem_journal_type type;
     uint64_t sequence;

@@ -35,7 +35,10 @@ golem_status golem_document_validate(golem_bytes metadata, golem_bytes markdown,
  * Open verifies the complete committed hash chain, metadata and CAS bodies.
  * Lifetime flock: exclusive for writable, shared for read-only. Serialize handle
  * calls. Outputs owned until close; paths/inputs are copied or consumed at call.
- * allocator controls handle/entry array, not json-c/MD4C/OpenSSL allocations.
+ * allocator controls handle/entries, graph, CAS JSON and workflow scratch.
+ * Standalone file buffers, public replies and libc open_memstream use the C
+ * heap; json-c/MD4C/OpenSSL retain their own allocators. This is not a global
+ * allocation quota. Never free a public reply using the store allocator.
  * Its context must outlive close. No borrowed caller buffers survive calls.
  * IO/uncertain commit failures poison a writer: close/reopen before retry.
  * New files are 0400/0600, directories 0700; caller protects the root.

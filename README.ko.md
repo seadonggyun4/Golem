@@ -102,6 +102,7 @@ build/release/golem document inspect "$WORK" planning 1
 | 단계 선택·문서 참조·최신성 | [워크플로우](docs/workflow.md) |
 | 검증 절차와 보장 범위 | [통합 검증](docs/conformance.md) |
 | 런타임·성능·운영 상세 | [기술 레퍼런스](docs/runtime-reference.md) |
+| 저널 검사·비파괴 복구·호환성 | [무결성과 복구](docs/runtime-integrity.md) |
 
 현재 배포 방식은 **GitHub + Conan 레시피**입니다. ConanCenter 등록이나 공개 Golem 패키지 서버를 전제로 하지 않습니다.
 

@@ -43,16 +43,21 @@ golem_status dw_spec(golem_bytes b, struct json_object **out);
 golem_status dw_meta(golem_bytes b, struct json_object **out);
 golem_status dw_markdown(struct json_object *meta, golem_bytes b);
 golem_status dw_read_at(int dir, const char *name, size_t limit, uint8_t **out, size_t *size);
+/* Store-scoped scratch memory never escapes into public reply buffers. */
+golem_status dw_scratch(golem_document_store *store, size_t size, uint8_t **out);
+void dw_scratch_free(golem_document_store *store, void *memory);
 golem_status dw_dir(int parent, const char *name, bool create, int *out);
 golem_status dw_publish(int dir, const char *name, golem_bytes bytes);
-golem_status dw_event_write(golem_document_store *s, const golem_digest *payload, golem_digest *frame);
+golem_status dw_event_write(golem_document_store *s, const golem_digest *payload,
+                            golem_digest *frame);
 golem_status dw_replay(golem_document_store *s);
-golem_status dw_apply(golem_document_store *s, struct json_object *event, const golem_digest *payload,
-    const golem_digest *frame);
+golem_status dw_apply(golem_document_store *s, struct json_object *event,
+                      const golem_digest *payload, const golem_digest *frame);
 golem_status dw_preconditions(golem_document_store *s, struct json_object *meta);
 dw_entry *dw_find(golem_document_store *s, const char *id, uint32_t revision);
 golem_status dw_project(golem_document_store *s, dw_entry *entry, bool create);
-golem_status dw_cas_json(golem_document_store *s, const golem_digest *key, struct json_object **out);
+golem_status dw_cas_json(golem_document_store *s, const golem_digest *key,
+                         struct json_object **out);
 golem_status dw_put_json(golem_document_store *s, struct json_object *o, golem_digest *out);
 bool dw_add(struct json_object *o, const char *key, struct json_object *value);
 bool dw_add_digest(struct json_object *o, const char *key, const golem_digest *digest);
