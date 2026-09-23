@@ -18,6 +18,8 @@ PRIVATE_COMPONENTS = {
     "build", "dist", "node_modules", "__pycache__",
 }
 SOURCE_FILES = {"CMakeLists.txt", "CMakePresets.json", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"}
+# Reviewed synthetic historical stores, not arbitrary local JSON evidence.
+SOURCE_FILES.add("tests/c/fixtures/completion/v1-store.json")
 
 
 def selected(name):

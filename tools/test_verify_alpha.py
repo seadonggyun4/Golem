@@ -34,6 +34,16 @@ class SourceSnapshotTests(unittest.TestCase):
         for path in corpus:
             self.assertTrue(selected(path.relative_to(root).as_posix()), str(path))
 
+    def test_historical_fixture_is_copied_verbatim(self):
+        root = Path(__file__).resolve().parents[1]
+        name = "tests/c/fixtures/completion/v1-store.json"
+        self.assertTrue(selected(name))
+        self.assertFalse(selected("tests/c/fixtures/completion/local-store.json"))
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp).resolve()
+            snapshot(root, output)
+            self.assertEqual((output / name).read_bytes(), (root / name).read_bytes())
+
     def test_git_selection(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp).resolve()
