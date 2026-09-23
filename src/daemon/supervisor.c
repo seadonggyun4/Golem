@@ -84,7 +84,7 @@ static golem_status run(const char *executable, char *const argv[], const char *
     golem_supervisor_result result = {.exit_code = -1};
     size_t sent = 0; bool stdout_eof = false, stderr_eof = false;
 #ifdef __APPLE__
-    bool exited = false;
+    bool exited = false, group_permission_pending = false;
 #endif
     if (fcntl(in[0], F_SETFL, O_NONBLOCK) < 0 || fcntl(output[0], F_SETFL, O_NONBLOCK) < 0 || fcntl(error[0], F_SETFL, O_NONBLOCK) < 0) s = GOLEM_ERR_IO;
     while (s == GOLEM_OK) {
@@ -122,10 +122,11 @@ static golem_status run(const char *executable, char *const argv[], const char *
     }
     /* Leader remains unreaped, so its process-group ID cannot be reused here. */
     if (kill(-pid, SIGKILL) < 0 && errno != ESRCH && s == GOLEM_OK) {
-        /* Darwin can return EPERM for a group containing only its zombie
-         * leader. Accept only an observed exit with both output pipes closed. */
+        /* Darwin can report EPERM for an exited group leader before pipe EOF
+         * becomes visible. Decide only after reaping and the final drain. */
 #ifdef __APPLE__
-        if (!(errno == EPERM && exited && stdout_eof && stderr_eof)) s = GOLEM_ERR_IO;
+        if (errno == EPERM && exited) group_permission_pending = true;
+        else s = GOLEM_ERR_IO;
 #else
         s = GOLEM_ERR_IO;
 #endif
@@ -139,6 +140,11 @@ static golem_status run(const char *executable, char *const argv[], const char *
     if (s == GOLEM_OK) s = drained;
     drained = drain(error[0], result.error, &result.error_size, &stderr_eof);
     if (s == GOLEM_OK) s = drained;
+#ifdef __APPLE__
+    /* A live descendant retaining a pipe or a failed reap still fails closed. */
+    if (s == GOLEM_OK && group_permission_pending &&
+        (waited != pid || !stdout_eof || !stderr_eof)) s = GOLEM_ERR_IO;
+#endif
     if (s == GOLEM_OK && (result.exit_code != 0 || result.signal_number != 0 || sent != input.size || !stdout_eof || !stderr_eof)) s = GOLEM_ERR_INCOMPLETE_WORK;
     *out = result;
 cleanup:
