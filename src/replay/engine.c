@@ -16,10 +16,27 @@ struct golem_replay {
     size_t capacity;
     size_t filled;
     size_t frame_size;
+    golem_digest chain_head;
+    golem_journal_checkpoint checkpoint;
+    bool has_checkpoint;
 };
 
-static golem_status fail(golem_replay *engine, golem_status status,
-                             size_t offset, const char *message, golem_diagnostic *d)
+golem_status golem_replay_expect_checkpoint(golem_replay *engine,
+                                            const golem_journal_checkpoint *checkpoint)
+{
+    if (engine == NULL || checkpoint == NULL)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    if (engine->state != GOLEM_REPLAY_ACTIVE || engine->received_bytes || engine->has_checkpoint)
+        return GOLEM_ERR_INVALID_STATE;
+    if (checkpoint->records > checkpoint->bytes / GOLEM_JOURNAL_HEADER_SIZE)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    engine->checkpoint = *checkpoint;
+    engine->has_checkpoint = true;
+    return GOLEM_OK;
+}
+
+static golem_status fail(golem_replay *engine, golem_status status, size_t offset,
+                         const char *message, golem_diagnostic *d)
 {
     engine->state = GOLEM_REPLAY_FAILED;
     golem_work_run_free(engine->run);
@@ -28,15 +45,17 @@ static golem_status fail(golem_replay *engine, golem_status status,
 }
 
 golem_status golem_replay_create(const golem_replay_options *options,
-    const golem_allocator *allocator, golem_replay **out, golem_diagnostic *d)
+                                 const golem_allocator *allocator, golem_replay **out,
+                                 golem_diagnostic *d)
 {
     golem_replay_options selected = options == NULL ? (golem_replay_options){0} : *options;
     if (out == NULL || golem_allocator_validate(allocator) != GOLEM_OK ||
         (selected.expected_run_id != NULL && selected.expected_run_id[0] == '\0') ||
-        (selected.has_expected_boundary && (selected.expected_records == 0 ||
-            selected.expected_bytes < GOLEM_JOURNAL_HEADER_SIZE ||
-            selected.expected_records > selected.expected_bytes / GOLEM_JOURNAL_HEADER_SIZE)) ||
-        (!selected.has_expected_boundary && (selected.expected_records != 0 || selected.expected_bytes != 0))) {
+        (selected.has_expected_boundary &&
+         (selected.expected_records == 0 || selected.expected_bytes < GOLEM_JOURNAL_HEADER_SIZE ||
+          selected.expected_records > selected.expected_bytes / GOLEM_JOURNAL_HEADER_SIZE)) ||
+        (!selected.has_expected_boundary &&
+         (selected.expected_records != 0 || selected.expected_bytes != 0))) {
         return golem_journal_report(d, GOLEM_ERR_INVALID_ARGUMENT, 0, "invalid replay options");
     }
     void *memory;
@@ -63,13 +82,13 @@ golem_status golem_replay_create(const golem_replay_options *options,
 
 static golem_status apply_frame(golem_replay *engine, golem_diagnostic *d)
 {
-    const uint8_t *data = engine->frame_size == GOLEM_JOURNAL_HEADER_SIZE
-        ? engine->header : engine->frame;
+    const uint8_t *data =
+        engine->frame_size == GOLEM_JOURNAL_HEADER_SIZE ? engine->header : engine->frame;
     golem_journal_record record;
     size_t consumed;
     golem_diagnostic detail;
-    golem_status status = golem_journal_record_decode(
-        (golem_bytes){data, engine->frame_size}, &record, &consumed, &detail);
+    golem_status status = golem_journal_record_decode((golem_bytes){data, engine->frame_size},
+                                                      &record, &consumed, &detail);
     if (status != GOLEM_OK) {
         return fail(engine, status, engine->verified_bytes + detail.offset, detail.message, d);
     }
@@ -86,9 +105,11 @@ static golem_status apply_frame(golem_replay *engine, golem_diagnostic *d)
             return fail(engine, GOLEM_ERR_INVALID_STATE, engine->verified_bytes,
                         "duplicate created record", d);
         }
-        status = golem_journal_created_decode(record.payload, &engine->allocator, &engine->run, &detail);
+        status =
+            golem_journal_created_decode(record.payload, &engine->allocator, &engine->run, &detail);
         if (status != GOLEM_OK) {
-            return fail(engine, status, engine->verified_bytes + GOLEM_JOURNAL_HEADER_SIZE + detail.offset,
+            return fail(engine, status,
+                        engine->verified_bytes + GOLEM_JOURNAL_HEADER_SIZE + detail.offset,
                         detail.message, d);
         }
         if (engine->expected_id != NULL &&
@@ -104,7 +125,8 @@ static golem_status apply_frame(golem_replay *engine, golem_diagnostic *d)
         golem_journal_event event;
         status = golem_journal_event_decode(&record, &event, &detail);
         if (status != GOLEM_OK) {
-            return fail(engine, status, engine->verified_bytes + GOLEM_JOURNAL_HEADER_SIZE + detail.offset,
+            return fail(engine, status,
+                        engine->verified_bytes + GOLEM_JOURNAL_HEADER_SIZE + detail.offset,
                         detail.message, d);
         }
         status = golem_replay_apply(engine->run, &event);
@@ -112,6 +134,10 @@ static golem_status apply_frame(golem_replay *engine, golem_diagnostic *d)
             return fail(engine, status, engine->verified_bytes, "event violates core lifecycle", d);
         }
     }
+    status = golem_journal_chain_extend(&engine->chain_head, (golem_bytes){data, consumed},
+                                        &engine->chain_head);
+    if (status != GOLEM_OK)
+        return fail(engine, status, engine->verified_bytes, "chain digest failed", d);
     ++engine->records;
     engine->verified_bytes += consumed;
     engine->filled = 0;
@@ -125,10 +151,12 @@ golem_status golem_replay_feed(golem_replay *engine, golem_bytes chunk, golem_di
         return golem_journal_report(d, GOLEM_ERR_INVALID_ARGUMENT, 0, NULL);
     }
     if (engine->state != GOLEM_REPLAY_ACTIVE) {
-        return golem_journal_report(d, GOLEM_ERR_INVALID_STATE, engine->received_bytes, "replay is sealed");
+        return golem_journal_report(d, GOLEM_ERR_INVALID_STATE, engine->received_bytes,
+                                    "replay is sealed");
     }
     if (chunk.data == NULL && chunk.size != 0) {
-        return fail(engine, GOLEM_ERR_INVALID_ARGUMENT, engine->received_bytes, "invalid input span", d);
+        return fail(engine, GOLEM_ERR_INVALID_ARGUMENT, engine->received_bytes,
+                    "invalid input span", d);
     }
     if (chunk.size > SIZE_MAX - engine->received_bytes) {
         return fail(engine, GOLEM_ERR_OVERFLOW, engine->received_bytes, "stream size overflow", d);
@@ -148,16 +176,19 @@ golem_status golem_replay_feed(golem_replay *engine, golem_bytes chunk, golem_di
                 continue;
             }
             golem_diagnostic detail;
-            golem_status status = golem_journal_header_check(engine->header, &engine->frame_size, &detail);
+            golem_status status =
+                golem_journal_header_check(engine->header, &engine->frame_size, &detail);
             if (status != GOLEM_OK) {
-                return fail(engine, status, engine->verified_bytes + detail.offset, detail.message, d);
+                return fail(engine, status, engine->verified_bytes + detail.offset, detail.message,
+                            d);
             }
             if (engine->frame_size > GOLEM_JOURNAL_HEADER_SIZE) {
                 if (engine->frame_size > engine->capacity) {
                     void *memory;
                     status = golem_allocator_alloc(&engine->allocator, engine->frame_size, &memory);
                     if (status != GOLEM_OK) {
-                        return fail(engine, status, engine->verified_bytes, "cannot allocate frame buffer", d);
+                        return fail(engine, status, engine->verified_bytes,
+                                    "cannot allocate frame buffer", d);
                     }
                     (void)golem_allocator_free(&engine->allocator, engine->frame);
                     engine->frame = memory;
@@ -187,37 +218,49 @@ golem_status golem_replay_feed(golem_replay *engine, golem_bytes chunk, golem_di
 }
 
 golem_status golem_replay_finish(golem_replay *engine, golem_work_run **out,
-    golem_replay_report *report, golem_diagnostic *d)
+                                 golem_replay_report *report, golem_diagnostic *d)
 {
     if (engine == NULL) {
         return golem_journal_report(d, GOLEM_ERR_INVALID_ARGUMENT, 0, NULL);
     }
     if (engine->state != GOLEM_REPLAY_ACTIVE) {
-        return golem_journal_report(d, GOLEM_ERR_INVALID_STATE, engine->received_bytes, "replay is sealed");
+        return golem_journal_report(d, GOLEM_ERR_INVALID_STATE, engine->received_bytes,
+                                    "replay is sealed");
     }
     if (out == NULL) {
-        return fail(engine, GOLEM_ERR_INVALID_ARGUMENT, engine->received_bytes, "missing output", d);
+        return fail(engine, GOLEM_ERR_INVALID_ARGUMENT, engine->received_bytes, "missing output",
+                    d);
     }
     if (engine->filled != 0) {
-        return fail(engine, GOLEM_ERR_TRUNCATED_JOURNAL, engine->received_bytes, "incomplete trailing record", d);
+        return fail(engine, GOLEM_ERR_TRUNCATED_JOURNAL, engine->received_bytes,
+                    "incomplete trailing record", d);
     }
     if (engine->run == NULL) {
         return fail(engine, GOLEM_ERR_MISSING_RECORD, 0, "missing created record", d);
     }
     if (engine->options.has_expected_boundary) {
         if (engine->records < engine->options.expected_records) {
-            return fail(engine, GOLEM_ERR_MISSING_RECORD, engine->verified_bytes, "missing expected tail records", d);
+            return fail(engine, GOLEM_ERR_MISSING_RECORD, engine->verified_bytes,
+                        "missing expected tail records", d);
         }
         if (engine->records != engine->options.expected_records ||
             (uint64_t)engine->verified_bytes != engine->options.expected_bytes) {
-            return fail(engine, GOLEM_ERR_REPLAY_MISMATCH, engine->verified_bytes, "unexpected replay endpoint", d);
+            return fail(engine, GOLEM_ERR_REPLAY_MISMATCH, engine->verified_bytes,
+                        "unexpected replay endpoint", d);
         }
     }
     golem_replay_report result;
+    if (engine->has_checkpoint && (engine->checkpoint.records != engine->records ||
+                                   engine->checkpoint.bytes != engine->verified_bytes ||
+                                   memcmp(engine->checkpoint.chain_head.bytes,
+                                          engine->chain_head.bytes, GOLEM_DIGEST_SIZE) != 0))
+        return fail(engine, GOLEM_ERR_DIGEST_MISMATCH, engine->verified_bytes,
+                    "journal checkpoint mismatch", d);
     golem_replay_report_fill(engine->run, engine->records, engine->verified_bytes, &result);
     if (engine->options.require_terminal && result.work.status != GOLEM_WORK_SUCCEEDED &&
         result.work.status != GOLEM_WORK_CANCELLED) {
-        return fail(engine, GOLEM_ERR_INCOMPLETE_WORK, engine->verified_bytes, "terminal work state required", d);
+        return fail(engine, GOLEM_ERR_INCOMPLETE_WORK, engine->verified_bytes,
+                    "terminal work state required", d);
     }
     *out = engine->run;
     engine->run = NULL;
@@ -233,7 +276,8 @@ golem_status golem_replay_progress_get(const golem_replay *engine, golem_replay_
     if (engine == NULL || out == NULL) {
         return GOLEM_ERR_INVALID_ARGUMENT;
     }
-    *out = (golem_replay_progress){engine->state, engine->records, engine->verified_bytes, engine->filled};
+    *out = (golem_replay_progress){engine->state, engine->records, engine->verified_bytes,
+                                   engine->filled};
     return GOLEM_OK;
 }
 

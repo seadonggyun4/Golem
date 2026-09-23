@@ -23,6 +23,18 @@ typedef enum golem_journal_type {
 } golem_journal_type;
 
 typedef struct golem_journal golem_journal;
+/* Value-only checkpoint. Retain separately to detect whole-record loss or
+ * rewriting. It is not authentication. All-zero describes an empty journal. */
+typedef struct golem_journal_checkpoint {
+    uint64_t records;
+    uint64_t bytes;
+    golem_digest chain_head;
+} golem_journal_checkpoint;
+
+/* Returns the last verified/durable boundary; no file I/O. Unchanged on error.
+ * Refuses poisoned handles. Caller owns output, must not alias handle. */
+golem_status golem_journal_checkpoint_get(const golem_journal *journal,
+    golem_journal_checkpoint *out);
 /* Read-only diagnostic snapshot. stream_status describes the first invalid
  * frame; GOLEM_OK from inspect means the report was produced, not stream health.
  * valid_bytes is a structural prefix, NOT authorization to resume execution.

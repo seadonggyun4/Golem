@@ -1,5 +1,6 @@
 """Process-boundary recovery tests; all queues and workers are test-local."""
 import json
+import fcntl
 import os
 from pathlib import Path
 import signal
@@ -133,6 +134,27 @@ while True:
         self.assertEqual(p.returncode, 0, stderr)
         self.assertEqual(len(json.loads(stdout)["jobs"]), 2)
         self.run_queue()
+
+    def test_submission_waits_for_reader_and_does_not_duplicate(self):
+        with (self.queue / ".queue.lock").open("rb") as lock:
+            fcntl.flock(lock, fcntl.LOCK_SH)
+            p = subprocess.Popen([CLI, "daemon", "submit", str(self.queue), str(self.capsule)],
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            self.children.append(p)
+            time.sleep(0.3)
+            self.assertIsNone(p.poll(), "submission did not tolerate a temporary reader")
+            self.assertEqual(list((self.queue / "jobs").iterdir()), [])
+            fcntl.flock(lock, fcntl.LOCK_UN)
+            stdout, stderr = p.communicate(timeout=5)
+            self.assertEqual(p.returncode, 0, stderr)
+            self.assertEqual(int(json.loads(stdout)["ticket"]), 1)
+        self.assertEqual(len(self.status()), 1)
+
+    def test_submission_busy_is_bounded_and_does_not_publish(self):
+        with (self.queue / ".queue.lock").open("rb") as lock:
+            fcntl.flock(lock, fcntl.LOCK_SH)
+            self.call("daemon", "submit", self.queue, self.capsule, code=1)
+            self.assertEqual(list((self.queue / "jobs").iterdir()), [])
 
     def test_uncertain_crash_and_signal(self):
         for sig in [signal.SIGTERM, signal.SIGKILL]:

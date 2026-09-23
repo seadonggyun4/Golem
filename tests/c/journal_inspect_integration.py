@@ -48,6 +48,10 @@ class JournalInspection(unittest.TestCase):
         self.assertEqual(int(report["records"]), records)
         self.assertFalse(report["authenticated"])
         self.call("inspect", self.source, "--expect-chain", "f" * 64, ok=False)
+        for anchor, success in ((head.hex(), True), ("f" * 64, False)):
+            result = subprocess.run([CLI, "replay", str(self.source), "--expect-chain", anchor],
+                                    capture_output=True)
+            self.assertEqual(result.returncode == 0, success, result.stderr)
 
     def test_torn_tail_export_is_exact_prefix(self):
         data = self.good[:-1]
@@ -56,10 +60,41 @@ class JournalInspection(unittest.TestCase):
         self.assertGreater(int(report["discarded_bytes"]), 0)
         self.assertEqual((recovered / "journal.bin").read_bytes(), data[:int(report["valid_bytes"])])
         self.assertEqual(json.loads((recovered / "salvage.json").read_text()), report)
+        receipt_hash = hashlib.sha256((recovered / "salvage.json").read_bytes()).hexdigest()
+        self.assertEqual((recovered / "salvage.commit").read_text(), receipt_hash)
+        self.call("verify-salvage", recovered, "--expect-receipt", receipt_hash)
         self.call("inspect", recovered / "journal.bin")
         result = subprocess.run([CLI, "replay", str(recovered / "journal.bin")], capture_output=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.salvage(data, ok=False)  # existing destination must not be replaced
+
+    def test_partial_publication_and_rewritten_receipt_rejected(self):
+        self.salvage(self.good[:-1])
+        recovered = self.root / "recovered"
+        anchor = (recovered / "salvage.commit").read_text()
+        for name in ("journal.bin", "salvage.json", "salvage.commit"):
+            path = recovered / name
+            original = path.read_bytes()
+            path.unlink()
+            self.call("verify-salvage", recovered, "--expect-receipt", anchor, ok=False)
+            path.write_bytes(original)
+        receipt = recovered / "salvage.json"
+        receipt.write_bytes(receipt.read_bytes() + b" ")
+        (recovered / "salvage.commit").write_text(hashlib.sha256(receipt.read_bytes()).hexdigest())
+        self.call("verify-salvage", recovered, "--expect-receipt", anchor, ok=False)
+
+    def test_receipt_cannot_grant_execution_even_with_matching_hash(self):
+        self.salvage(self.good[:-1])
+        recovered = self.root / "recovered"
+        receipt = recovered / "salvage.json"
+        original = json.loads(receipt.read_text())
+        for field, value in (("execution_authorized", True), ("authenticated", True),
+                             ("schema_version", 2), ("discarded_bytes", "0")):
+            changed = dict(original, **{field: value})
+            receipt.write_text(json.dumps(changed))
+            anchor = hashlib.sha256(receipt.read_bytes()).hexdigest()
+            (recovered / "salvage.commit").write_text(anchor)
+            self.call("verify-salvage", recovered, "--expect-receipt", anchor, ok=False)
 
     def test_every_partial_last_frame_boundary(self):
         # Inspect all byte cuts, not just the last byte. Full prefix boundaries

@@ -143,10 +143,13 @@ golem_status as_load(golem_document_store *s, const char *key, const golem_diges
     closedir(dir);
     if (st == GOLEM_OK && count != max)
         st = GOLEM_ERR_MISSING_RECORD;
-    char (*keys)[GOLEM_DOCUMENT_ID_CAPACITY] =
-        calloc(count ? count : 1, GOLEM_DOCUMENT_ID_CAPACITY);
-    if (!keys)
-        return GOLEM_ERR_OUT_OF_MEMORY;
+    if (st != GOLEM_OK)
+        return st;
+    uint8_t *memory = NULL;
+    st = dw_scratch(s, (count ? count : 1) * GOLEM_DOCUMENT_ID_CAPACITY, &memory);
+    if (st != GOLEM_OK)
+        return st;
+    char (*keys)[GOLEM_DOCUMENT_ID_CAPACITY] = (void *)memory;
     for (unsigned n = 1; st == GOLEM_OK && n <= max; ++n) {
         char name[32];
         (void)snprintf(name, sizeof(name), "%08u.evt", n);
@@ -201,7 +204,7 @@ golem_status as_load(golem_document_store *s, const char *key, const golem_diges
         json_object_put(e);
         free(bytes);
     }
-    free(keys);
+    dw_scratch_free(s, keys);
     return st;
 }
 golem_status as_commit(golem_document_store *s, as_log *l, struct json_object *e,

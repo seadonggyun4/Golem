@@ -61,6 +61,7 @@ add_library(golem STATIC
     src/completion/predicate_v1.c
     src/completion/recovery.c
     src/completion/report.c
+    src/completion/renderer_v1.c
     src/completion/store.c
     src/workflow/graph.c
     src/workflow/model.c

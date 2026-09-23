@@ -9,6 +9,7 @@
 static ssize_t crash_write_byte(int fd, const void *data, size_t size);
 #define gd_intent_write test_intent_write
 #define gd_intents_check test_intents_check
+#define gd_checkpoint test_checkpoint
 #define gd_recover_queue test_recover_queue
 #define golem_daemon_recover test_daemon_recover
 #define write crash_write_byte
@@ -16,6 +17,7 @@ static ssize_t crash_write_byte(int fd, const void *data, size_t size);
 #undef write
 #undef gd_intent_write
 #undef gd_intents_check
+#undef gd_checkpoint
 #undef gd_recover_queue
 #undef golem_daemon_recover
 static ssize_t crash_write_byte(int fd, const void *data, size_t size)

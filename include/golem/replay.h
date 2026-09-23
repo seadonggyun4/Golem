@@ -62,6 +62,12 @@ typedef struct golem_replay_report {
  * offsets. No partial WorkRun is exposed by any failure path. */
 golem_status golem_replay_create(const golem_replay_options *options,
     const golem_allocator *allocator, golem_replay **out, golem_diagnostic *diagnostic);
+/* Copy a separately retained exact checkpoint before the first input byte.
+ * finish rejects any content/endpoint mismatch without exposing a WorkRun.
+ * Not an authentication mechanism; caller establishes checkpoint trust.
+ * May be set once only. No public struct layout changes for existing clients. */
+golem_status golem_replay_expect_checkpoint(golem_replay *replay,
+    const golem_journal_checkpoint *checkpoint);
 /* Chunk boundaries are arbitrary, including within headers/fields. No input
  * pointer retained. Empty chunks allowed. Complete frames are checked/applied;
  * at most one bounded frame buffer is retained. Stream length <= SIZE_MAX.

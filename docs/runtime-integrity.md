@@ -5,6 +5,7 @@
 | Layer | Check | Limit |
 | --- | --- | --- |
 | WorkRun v1 journal | Frame version, CRC32, contiguous sequence, semantic replay | CRC is not authentication |
+| Journal writer/replay | Ordered SHA-256 checkpoint, exact endpoint verification | Reopen requires a separately retained anchor to detect prior rewriting |
 | Journal inspection | SHA-256 source digest and ordered frame chain | Trusted external head required to detect deliberate rewriting |
 | Document event log | Previous-frame digest and content-addressed payload | Whole-store rollback requires an external anchor to detect |
 | Evidence CAS | SHA-256 bytes and no-replace publication | Content identity does not prove truth or authorship |
@@ -13,13 +14,15 @@
 The WorkRun wire format remains v1, including its historical `HWJR` magic.
 Changing this identifier for branding would break existing records. No existing
 bytes are rewritten. The derived chain is explicitly not a new journal format,
-signature, MAC, forward-secure log, or automatic daemon acceptance gate.
+signature, MAC, or forward-secure log. It is now also used by writer recovery
+and daemon admission, without changing the v1 bytes.
 
 ## Inspect and Anchor
 
 ```sh
 golem journal inspect /absolute/path/journal.bin
 golem journal inspect /absolute/path/journal.bin --expect-chain PREVIOUSLY_RETAINED_SHA256
+golem replay /absolute/path/journal.bin --expect-chain PREVIOUSLY_RETAINED_SHA256
 ```
 
 Inspection emits JSON, including `source_digest`, `chain_head`, `records`,
@@ -42,6 +45,23 @@ An exact whole-frame truncation looks like an unfinished run without a retained
 expected head. `--expect-chain` checks exact equality, not append-only extension.
 Inspection checks framing, not valid Core transitions or business acceptance.
 
+The writer computes its checkpoint on open and extends it only after a successful
+append fsync. `golem_journal_checkpoint_get` returns that value without I/O.
+File recovery always compares the streaming replay against this opened/durable
+checkpoint before exposing a WorkRun. A same-length, CRC-correct rewrite during
+the handle lifetime is rejected. This does not prevent hostile writers from
+modifying the file during an append; advisory locking remains the writer contract.
+An unanchored reopen observes the bytes currently present, not their provenance.
+
+Streaming callers may copy a retained checkpoint with
+`golem_replay_expect_checkpoint` before feeding bytes; finish checks head, count
+and byte length. Unanchored legacy replay remains available explicitly for
+compatibility. The daemon computes its expected checkpoint from the already
+published intent transcript and compares the locked writer snapshot before
+runtime recovery/dispatch. Intents and journal in the same compromised directory
+are not independent authentication. No signing keys or trusted remote service
+are implied by this change.
+
 ## Explicit Salvage
 
 First stop all writers and retain the original privately. Obtain its
@@ -59,11 +79,23 @@ through Core replay before creating a new directory. It never edits the source,
 overwrites an existing destination, skips a corrupt interior record, runs an
 agent, grants a lease, or infers that an interrupted external effect is safe to retry.
 
-The new directory contains `journal.bin` (exact verified prefix) and `salvage.json`
+The new directory contains `journal.bin` (exact verified prefix), `salvage.json`
 (source digest, chain head, retained/discarded byte counts). Files are published
 with no-replace links and file/directory fsync through the existing CLI backend.
-An interrupted export may leave an incomplete new directory; keep it for inspection
-and use another destination. The receipt is an inventory, not a signature.
+A final `salvage.commit` contains the SHA-256 of the exact receipt bytes and is
+published only after both components succeed. Retain this digest separately:
+
+```sh
+golem journal verify-salvage /absolute/path/new-recovery --expect-receipt RECEIPT_SHA256
+```
+
+Verification requires all components, the expected receipt digest, a matching
+prefix chain/count/length and valid Core replay. It does not run an agent or
+grant execution authority. Old exports without a marker do not pass this new
+verification command; they remain inspectable. An interrupted export may leave
+an incomplete directory; retain it and use another destination. Never synthesize
+a missing marker to make a partial export pass. The receipt is not a signature.
+Verification checks the exported snapshot, not a concurrently modified original.
 The source digest pins the bytes inspected by this invocation. A concurrent writer
 after the read can still advance the original: quiescence remains an operator duty.
 Do not substitute the recovered file into a live daemon automatically.
@@ -85,6 +117,20 @@ dependency changes can still affect historical behavior: version dispatch is an
 explicit compatibility boundary, not an automatic guarantee that arbitrary future
 refactoring is safe. Existing recovery/idempotency integration tests must continue
 to open schema-1 records and compare report bytes without rerunning QA.
+
+The historical Markdown renderer is now `renderer_v1.c`. Dispatch uses the
+record schema and recorded predicate; changes to future presentation must use a
+new version rather than editing this renderer. Replay's byte-for-byte report
+check remains enabled, so an unrelated CAS object cannot replace a report.
+
+`completion_historical_store` loads a synthetic store produced by commit
+`5184979`, not the code under test, and checks its original report digest without
+restoring or executing its source project. This exercises the shared workflow,
+reentry and session dependencies as well as evaluator/renderer dispatch.
+Those helpers are not blindly duplicated into a second runtime. Their historical
+behavior is a compatibility contract: semantic changes need a versioned path and
+must continue to pass this fixed fixture. The fixture covers a development+QA
+completion with sessions, not every possible historical assessment.
 
 ## Process and Memory Ownership
 
@@ -108,6 +154,9 @@ prefixes identify ownership: `dw` document work, `wf` workflow, `ex` execution,
 `as` agent session, `co` completion, `re` reentry, `ds` discovery. They are not
 public ABI. Completion authorization and record construction are separate helpers;
 predicate dispatch is in `completion/evaluator.c`.
+Agent-session replay's duplicate-key scratch also uses the store allocator.
+The historical-store test injects failure at each store allocation in session
+replay and checks that all temporary allocations are released on each failure.
 
 ## Python Prototype
 
@@ -116,6 +165,42 @@ now **`golem-prototype`**, never `golem`. Existing installations must be upgrade
 in their own virtual environment to replace old entrypoint metadata; editing this
 repository cannot remove an already-installed script from another environment.
 Use Conan/CMake for the C CLI and `bindings/python` for native bindings.
+
+An old installed launcher can be audited and explicitly quarantined:
+
+```sh
+python3 tools/retire_legacy_cli.py /absolute/venv/bin/golem
+python3 tools/retire_legacy_cli.py /absolute/venv/bin/golem --apply-sha256 AUDITED_SHA256
+```
+
+The tool accepts only recognized Python entrypoint ASTs, rejects native binaries,
+symlinks and custom wrappers, and never executes the selected file. Apply verifies
+the digest and inode, publishes a no-overwrite backup before unlinking the old
+name, and retains that backup. Stop concurrent installers first; this is not a
+defense against an attacker controlling the parent directory. Interrupted backup
+publication requires inspection, not an automatic overwrite. It does not uninstall
+the Python distribution or install the C CLI; use the Conan installer afterwards.
+
+## Failure Tests and Limits
+
+- `journal_checkpoint`: byte-chunked anchored replay, endpoint/head mismatch,
+  writer/inspector equality, and CRC-correct same-size modification during recovery.
+- `journal_syscall_faults`: short writes, EINTR, partial EIO and fsync failure;
+  no acknowledged checkpoint or second append after an uncertain commit.
+- `recovery_publication_faults`: write, file/directory fsync and link failures;
+  no completion marker after a failed component.
+- `journal_inspect_cli`: missing export components, rewritten receipt, exact
+  source preservation, chain verification and semantic replay.
+- Existing daemon crash tests still kill the process during dispatch/recovery and
+  require idempotent prefix repair without duplicate execution.
+- CLI submission retries only pre-publication queue-lock contention with the
+  same run identity, for at most 100 attempts separated by 10 ms. I/O and uncertain
+  commit failures are never retried. Reader contention and persistent BUSY have
+  integration tests verifying that no duplicate/partial job is published.
+
+These tests model process/syscall failures. They do not reproduce SSD controller
+failure, storage that lies about flushes, or every filesystem's power-loss ordering.
+Do not label them a physical power-loss certification.
 
 ## Research and Design Rationale
 

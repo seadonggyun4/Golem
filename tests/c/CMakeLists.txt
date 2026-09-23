@@ -137,6 +137,21 @@ foreach(case allocator arena spans diagnostics core_oom)
 endforeach()
 
 add_executable(golem_test_journal test_journal.c)
+add_executable(golem_test_checkpoint test_journal_checkpoint.c)
+target_link_libraries(golem_test_checkpoint PRIVATE Golem::golem)
+target_compile_definitions(golem_test_checkpoint PRIVATE
+    GOLEM_JOURNAL_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures/journal")
+golem_configure_target(golem_test_checkpoint)
+add_test(NAME journal_checkpoint COMMAND golem_test_checkpoint)
+add_executable(golem_test_journal_faults test_journal_faults.c)
+target_link_libraries(golem_test_journal_faults PRIVATE Golem::golem)
+golem_configure_target(golem_test_journal_faults)
+add_test(NAME journal_syscall_faults COMMAND golem_test_journal_faults)
+add_executable(golem_test_recovery_publication test_recovery_publication.c
+    ${PROJECT_SOURCE_DIR}/src/cli/json.c)
+target_link_libraries(golem_test_recovery_publication PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
+golem_configure_target(golem_test_recovery_publication)
+add_test(NAME recovery_publication_faults COMMAND golem_test_recovery_publication)
 target_link_libraries(golem_test_journal PRIVATE Golem::golem)
 target_compile_definitions(golem_test_journal PRIVATE
     GOLEM_JOURNAL_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures/journal")
@@ -219,6 +234,10 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/completion_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} -v)
     set_tests_properties(completion_cli PROPERTIES TIMEOUT 900)
+    add_test(NAME completion_historical_store COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/completion_history.py $<TARGET_FILE:golem_cli>
+        $<TARGET_FILE:golem_test_completion_version>)
+    set_tests_properties(completion_historical_store PROPERTIES TIMEOUT 90)
     add_test(NAME agent_conformance_cli COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/conformance_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})

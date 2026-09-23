@@ -1,6 +1,8 @@
 #ifndef GOLEM_JOURNAL_INTERNAL_H
 #define GOLEM_JOURNAL_INTERNAL_H
 #include "golem/journal.h"
+golem_status golem_journal_chain_extend(const golem_digest *previous,
+    golem_bytes frame, golem_digest *out);
 uint32_t golem_journal_u32(const uint8_t *p);
 uint64_t golem_journal_u64(const uint8_t *p);
 void golem_journal_put32(uint8_t *p, uint32_t value);

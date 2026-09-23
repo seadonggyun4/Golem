@@ -1,5 +1,20 @@
-#include "golem/journal.h"
+#include "internal.h"
 #include <string.h>
+
+golem_status golem_journal_chain_extend(const golem_digest *previous, golem_bytes bytes,
+                                        golem_digest *out)
+{
+    golem_digest frame;
+    golem_status status = golem_digest_bytes(bytes, &frame);
+    if (status != GOLEM_OK)
+        return status;
+    static const char domain[] = "golem.journal.chain.v1";
+    uint8_t binding[sizeof(domain) - 1 + 2 * GOLEM_DIGEST_SIZE];
+    memcpy(binding, domain, sizeof(domain) - 1);
+    memcpy(binding + sizeof(domain) - 1, previous->bytes, GOLEM_DIGEST_SIZE);
+    memcpy(binding + sizeof(domain) - 1 + GOLEM_DIGEST_SIZE, frame.bytes, GOLEM_DIGEST_SIZE);
+    return golem_digest_bytes((golem_bytes){binding, sizeof(binding)}, out);
+}
 
 golem_status golem_journal_inspect(golem_bytes bytes, golem_journal_inspection *out)
 {
@@ -22,17 +37,9 @@ golem_status golem_journal_inspect(golem_bytes bytes, golem_journal_inspection *
             golem_journal_reader_next(&reader, &record, &present, &report.failure);
         if (report.stream_status != GOLEM_OK || !present)
             break;
-        golem_digest frame;
-        status =
-            golem_digest_bytes((golem_bytes){bytes.data + start, reader.offset - start}, &frame);
-        if (status != GOLEM_OK)
-            return status;
-        static const char domain[] = "golem.journal.chain.v1";
-        uint8_t binding[sizeof(domain) - 1 + 2 * GOLEM_DIGEST_SIZE];
-        memcpy(binding, domain, sizeof(domain) - 1);
-        memcpy(binding + sizeof(domain) - 1, report.chain_head.bytes, GOLEM_DIGEST_SIZE);
-        memcpy(binding + sizeof(domain) - 1 + GOLEM_DIGEST_SIZE, frame.bytes, GOLEM_DIGEST_SIZE);
-        status = golem_digest_bytes((golem_bytes){binding, sizeof(binding)}, &report.chain_head);
+        status = golem_journal_chain_extend(
+            &report.chain_head, (golem_bytes){bytes.data + start, reader.offset - start},
+            &report.chain_head);
         if (status != GOLEM_OK)
             return status;
         report.valid_bytes = reader.offset;

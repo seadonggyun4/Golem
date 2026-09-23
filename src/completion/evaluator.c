@@ -1,6 +1,15 @@
 #include "internal.h"
 #include <string.h>
 
+golem_status co_markdown(struct json_object *record, golem_execution_reply *out)
+{
+    struct json_object *policy = dw_get(dw_get(record, "assessment"), "policy");
+    if (dw_uint(record, "schema_version") != 1 || dw_uint(policy, "schema_version") != 1 ||
+        strcmp(dw_text(policy, "predicate"), CO_EVALUATOR_V1) != 0)
+        return GOLEM_ERR_UNSUPPORTED_VERSION;
+    return co_markdown_v1(record, out);
+}
+
 golem_status co_validate(struct json_object *request)
 {
     return co_validate_v1(request);
