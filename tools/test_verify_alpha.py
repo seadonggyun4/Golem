@@ -3,10 +3,35 @@ import tempfile
 from pathlib import Path
 import subprocess
 import unittest
+from unittest.mock import patch
+import verify_alpha
 from verify_alpha import selected, snapshot, audit_install
 
 
 class SourceSnapshotTests(unittest.TestCase):
+    def test_clean_suite_keeps_all_tests_with_bounded_parallelism(self):
+        commands = []
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch("sys.argv", ["verify_alpha.py", "--source", tmp]), \
+                 patch.object(verify_alpha, "snapshot"), \
+                 patch.object(verify_alpha, "audit_install"), \
+                 patch.object(verify_alpha.shutil, "which", return_value="/usr/bin/cc"), \
+                 patch("builtins.print"), \
+                 patch.object(verify_alpha, "run", side_effect=lambda args, cwd, env: commands.append(args)):
+                verify_alpha.main()
+        suite = next(args for args in commands if args[0] == "ctest" and "--parallel" in args)
+        self.assertEqual(suite[suite.index("--parallel") + 1], "2")
+        self.assertIn("--no-tests=error", suite)
+        self.assertIn("--output-on-failure", suite)
+        self.assertNotIn("-R", suite)
+
+    def test_runtime_harness_dependencies_are_explicit(self):
+        for name in ("verify_runtime.py", "test_verify_runtime.py", "verify_agent.py",
+                     "benchmark_runtime.py"):
+            self.assertTrue(selected("tools/" + name))
+        self.assertFalse(selected("tools/local_report.py"))
+        self.assertFalse(selected("tools/project-docs/plan.py"))
+
     def test_scope(self):
         for name in ("src/core/work_run.c", "include/golem/core.h", "CMakeLists.txt"):
             self.assertTrue(selected(name))

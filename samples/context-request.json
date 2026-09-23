@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "renderer_version": 1,
+  "recipe": "extractive-v1",
+  "selection_id": "selection",
+  "target_kind": "development-plan",
+  "source_snapshot": "0000000000000000000000000000000000000000000000000000000000000000",
+  "byte_budget": 2097152,
+  "excerpt_bytes": 1024,
+  "token_budget": 0,
+  "tokenizer_id": "none",
+  "agent_note": ""
+}

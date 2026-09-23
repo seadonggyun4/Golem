@@ -1,6 +1,7 @@
 #include "internal.h"
 #include "../execution/internal.h"
 #include "../reentry/internal.h"
+#include "../runtime/profile_internal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -245,7 +246,10 @@ static golem_status query(golem_document_store *s, as_log *l, struct json_object
     const char *op = dw_text(r, "operation");
     struct json_object *o = json_object_new_object();
     golem_status st = GOLEM_OK;
+    const char *identity = dw_get(dw_get(l->state, "active"), "runtime_binding") ? "BOUND"
+        : s->runtime_profile_count ? "ENROLLED_NO_ACTIVE_BINDING" : "UNKNOWN";
     if (!dw_add(o, "schema_version", json_object_new_int(1)) ||
+        !add_text(o, "runtime_identity", identity) ||
         !add_uint(o, "sequence", l->sequence) ||
         !dw_add(o, "acceptance_verified", json_object_new_boolean(false)) ||
         !dw_add(o, "execution_authorized", json_object_new_boolean(false)))
@@ -509,6 +513,8 @@ static golem_status prepare(golem_document_store *s, as_log *l, struct json_obje
              !add_uint(d, "input_generation", s->count + 1) ||
              !add_text(d, "kind", dw_text(n, "target_kind")) || !add_text(d, "state", "CLAIMED")))
             st = GOLEM_ERR_OUT_OF_MEMORY;
+        if (st == GOLEM_OK)
+            st = rp_claim(s, d);
         json_object_put(n);
         json_object_put(m);
     } else if (st == GOLEM_OK && strcmp(op, "resume") == 0) {
@@ -614,7 +620,7 @@ golem_status golem_agent_session_call(golem_document_store *s, golem_bytes bytes
             st = dw_put_json(s, s->spec, &spec);
             event = json_object_new_object();
             if (st == GOLEM_OK &&
-                (!dw_add(event, "schema_version", json_object_new_int(1)) ||
+                (!dw_add(event, "schema_version", json_object_new_int(dw_get(data, "runtime_binding") ? 2 : 1)) ||
                  !add_uint(event, "sequence", log.sequence + 1) ||
                  !add_text(event, "operation", op) || !add_text(event, "key", key) ||
                  !dw_add_digest(event, "request_digest", &request) ||

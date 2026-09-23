@@ -65,7 +65,8 @@ static golem_status drain(int fd, uint8_t *buffer, size_t *size, bool *eof)
 }
 static golem_status run(const char *executable, char *const argv[], const char *cwd,
                         char *const envp[], golem_bytes input, uint64_t timeout,
-                        golem_status (*pulse)(void *), void *context, golem_supervisor_result *out)
+                        golem_status (*pulse)(void *), void *context, golem_supervisor_result *out,
+                        golem_supervisor_observation *observation)
 {
     if (executable == NULL || executable[0] != '/' || argv == NULL || argv[0] == NULL ||
         out == NULL || timeout == 0 || timeout > UINT64_C(3600000000000) || input.size > 16384 ||
@@ -77,7 +78,13 @@ static golem_status run(const char *executable, char *const argv[], const char *
     posix_spawn_file_actions_t actions;
     posix_spawnattr_t attributes;
     bool actions_init = false, attrs_init = false;
+#ifdef __linux__
+    /* Atomic CLOEXEC matters when independent supervisor threads spawn together. */
+    if (socketpair(AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0, in) < 0 ||
+        pipe2(output, O_CLOEXEC) < 0 || pipe2(error, O_CLOEXEC) < 0)
+#else
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, in) < 0 || pipe(output) < 0 || pipe(error) < 0)
+#endif
         goto cleanup;
     for (size_t i = 0; i < 2; ++i)
         if (!fd_prepare(&in[i]) || !fd_prepare(&output[i]) || !fd_prepare(&error[i]))
@@ -115,9 +122,14 @@ static golem_status run(const char *executable, char *const argv[], const char *
             goto cleanup;
     sigset_t mask;
     sigemptyset(&mask);
+    short spawn_flags = POSIX_SPAWN_SETPGROUP | POSIX_SPAWN_SETSIGMASK;
+#ifdef __APPLE__
+    /* Darwin lacks pipe2; close every descriptor not explicitly mapped by actions. */
+    spawn_flags |= POSIX_SPAWN_CLOEXEC_DEFAULT;
+#endif
     if (posix_spawnattr_setsigmask(&attributes, &mask) != 0 ||
         posix_spawnattr_setpgroup(&attributes, 0) != 0 ||
-        posix_spawnattr_setflags(&attributes, POSIX_SPAWN_SETPGROUP | POSIX_SPAWN_SETSIGMASK) != 0)
+        posix_spawnattr_setflags(&attributes, spawn_flags) != 0)
         goto cleanup;
     uint64_t start;
     s = clock_ns(&start);
@@ -132,6 +144,8 @@ static golem_status run(const char *executable, char *const argv[], const char *
         s = GOLEM_ERR_IO;
         goto cleanup;
     }
+    if (observation)
+        observation->spawned = true;
     (void)close(in[1]);
     in[1] = -1;
     (void)close(output[1]);
@@ -237,6 +251,8 @@ static golem_status run(const char *executable, char *const argv[], const char *
     do {
         waited = waitpid(pid, &status, 0);
     } while (waited < 0 && errno == EINTR);
+    if (observation)
+        observation->reaped = waited == pid;
     if (waited != pid && s == GOLEM_OK)
         s = GOLEM_ERR_IO;
     if (waited == pid && WIFEXITED(status))
@@ -310,7 +326,7 @@ golem_status golem_supervisor_run(const char *executable, char *const argv[], go
                                   uint64_t timeout, golem_status (*pulse)(void *), void *context,
                                   golem_supervisor_result *out)
 {
-    return run(executable, argv, NULL, environ, input, timeout, pulse, context, out);
+    return run(executable, argv, NULL, environ, input, timeout, pulse, context, out, NULL);
 }
 golem_status golem_supervisor_run_at(const char *executable, char *const argv[], const char *cwd,
                                      char *const envp[], golem_bytes input, uint64_t timeout,
@@ -319,5 +335,17 @@ golem_status golem_supervisor_run_at(const char *executable, char *const argv[],
 {
     if (!cwd || cwd[0] != '/' || !envp)
         return GOLEM_ERR_INVALID_ARGUMENT;
-    return run(executable, argv, cwd, envp, input, timeout, pulse, context, out);
+    return run(executable, argv, cwd, envp, input, timeout, pulse, context, out, NULL);
+}
+golem_status golem_supervisor_run_observed(const char *executable, char *const argv[],
+    const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout,
+    golem_status (*pulse)(void *), void *context, golem_supervisor_result *out,
+    golem_supervisor_observation *observation)
+{
+    if (!observation)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    *observation = (golem_supervisor_observation){0};
+    if (!cwd || cwd[0] != '/' || !envp)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    return run(executable, argv, cwd, envp, input, timeout, pulse, context, out, observation);
 }

@@ -33,6 +33,7 @@ if(GOLEM_BUILD_FUZZERS AND NOT BUILD_TESTING)
     message(FATAL_ERROR "Fuzz builds require BUILD_TESTING=ON for seeded smoke tests")
 endif()
 find_package(OpenSSL 3.0 REQUIRED COMPONENTS Crypto)
+find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONC REQUIRED IMPORTED_TARGET json-c>=0.15)
 pkg_check_modules(MD4C REQUIRED IMPORTED_TARGET md4c>=0.4.8)
@@ -43,6 +44,7 @@ add_library(golem STATIC
     src/research/bundle.c
     src/research/bundle_format.c
     src/research/observability.c
+    src/research/runtime_observability.c
     src/research/compare.c
     src/research/outcome.c
     src/research/metrics.c
@@ -66,6 +68,8 @@ add_library(golem STATIC
     src/workflow/graph.c
     src/workflow/model.c
     src/workflow/query.c
+    src/workflow/context_model.c
+    src/workflow/context_projection.c
     src/agent_session/clock.c
     src/agent_session/model.c
     src/agent_session/storage.c
@@ -79,13 +83,30 @@ add_library(golem STATIC
     src/document/storage.c
     src/document/registry.c
     src/daemon/storage.c
+    src/daemon/admission.c
+    src/daemon/admission_model.c
+    src/daemon/admission_storage.c
+    src/daemon/admission_work.c
     src/daemon/recovery.c
     src/daemon/queue.c
     src/daemon/scheduler.c
     src/daemon/supervisor.c
+    src/daemon/worker.c
+    src/daemon/events.c
+    src/daemon/events_admission.c
     src/runtime/loop.c
     src/runtime/lease.c
+    src/runtime/profile_model.c
+    src/runtime/profile_codec.c
+    src/runtime/profile_store.c
+    src/runtime/profile_cache.c
+    src/runtime/profile_binding.c
+    src/runtime/profile_link.c
     src/adapter_protocol/adapter.c
+    src/adapter_protocol/descriptor_model.c
+    src/adapter_protocol/descriptor_codec.c
+    src/adapter_protocol/descriptor_guard.c
+    src/adapter_protocol/descriptor_probe.c
     src/adapter_protocol/model.c
     src/adapter_protocol/schema.c
     src/adapter_protocol/envelope_json.c
@@ -134,7 +155,7 @@ add_library(golem STATIC
     src/lineage/store.c)
 add_library(Golem::golem ALIAS golem)
 target_compile_features(golem PUBLIC c_std_17)
-target_link_libraries(golem PRIVATE OpenSSL::Crypto PkgConfig::JSONC PkgConfig::MD4C)
+target_link_libraries(golem PRIVATE OpenSSL::Crypto PkgConfig::JSONC PkgConfig::MD4C Threads::Threads)
 set_target_properties(golem PROPERTIES C_STANDARD 17 C_STANDARD_REQUIRED YES C_EXTENSIONS NO POSITION_INDEPENDENT_CODE YES)
 target_include_directories(golem PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -179,9 +200,9 @@ if(GOLEM_BUILD_FUZZERS)
 endif()
 
 if(GOLEM_BUILD_CLI)
-    add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c src/cli/research.c src/cli/research_bundle.c
+    add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c src/cli/adapter_descriptor.c src/cli/research.c src/cli/research_bundle.c
         src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c src/cli/journal.c
-        src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/agent_session.c src/cli/execution.c src/cli/reentry.c src/cli/completion.c)
+        src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/context.c src/cli/events.c src/cli/agent_session.c src/cli/runtime_profile.c src/cli/execution.c src/cli/reentry.c src/cli/completion.c)
     set_target_properties(golem_cli PROPERTIES OUTPUT_NAME golem)
     target_link_libraries(golem_cli PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
     golem_configure_target(golem_cli)

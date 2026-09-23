@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "domain": "golem.runtime-profile.v1",
+  "engine_abi": 1,
+  "engine_build_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "adapter_executable_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "adapter_descriptor_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "config_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "policy_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "platform": "fixture-only",
+  "provider_reported": "fixture-provider",
+  "model_reported": "fixture-model",
+  "provider_observed": "",
+  "model_observed": "",
+  "observation_digest": "",
+  "restore_level": "IDENTITY_ONLY",
+  "tools": []
+}

@@ -23,9 +23,12 @@ static int emit(golem_status s, bool packed, const golem_adapter_envelope *e)
     return fflush(stdout) == 0 && !ferror(stdout) ? 0 : 1;
 }
 static bool format(const char *name) { return strcmp(name, "json") == 0 || strcmp(name, "msgpack") == 0; }
+int golem_cli_adapter_descriptor(int argc, char **argv);
 
 int golem_cli_adapter(int argc, char **argv)
 {
+    if (argc > 2 && (!strcmp(argv[2], "describe") || !strcmp(argv[2], "probe")))
+        return golem_cli_adapter_descriptor(argc, argv);
     if (argc == 5 && strcmp(argv[2], "convert") == 0 && format(argv[3]) && format(argv[4])) {
         golem_adapter_envelope e;
         golem_status s = read_envelope(strcmp(argv[3], "msgpack") == 0, &e);

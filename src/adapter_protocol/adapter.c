@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "descriptor_internal.h"
 #include "../core/internal.h"
 #include <string.h>
 
@@ -28,8 +29,9 @@ golem_status golem_adapter_probe(const golem_adapter *a, golem_adapter_capabilit
     if (s == GOLEM_OK) *out = c;
     return golem_adapter_report(d, s);
 }
-golem_status golem_adapter_dispatch(golem_adapter *a, golem_work_run *run,
-    const golem_adapter_request *r, golem_evidence_store *store, golem_adapter_result *out, golem_diagnostic *d)
+static golem_status dispatch(golem_adapter *a, golem_work_run *run,
+    const golem_adapter_request *r, golem_evidence_store *store, const golem_harness_guard *guard,
+    golem_adapter_result *out, golem_diagnostic *d)
 {
     if (a == NULL || run == NULL || store == NULL || out == NULL) return golem_adapter_report(d, GOLEM_ERR_INVALID_ARGUMENT);
     golem_status s = golem_adapter_request_valid(r);
@@ -55,6 +57,10 @@ golem_status golem_adapter_dispatch(golem_adapter *a, golem_work_run *run,
         return golem_adapter_report(d, GOLEM_ERR_POLICY_DENIED);
     s = golem_adapter_inputs_verify(r, store);
     if (s != GOLEM_OK) return golem_adapter_report(d, s);
+    if (guard != NULL) {
+        s = golem_harness_guard_check(guard, r, &c, store);
+        if (s != GOLEM_OK) return golem_adapter_report(d, s);
+    }
     s = golem_core_ownership_check(run);
     if (s != GOLEM_OK) return golem_adapter_report(d, s);
     /* Callback may have effects even when its result is lost/invalid. */
@@ -68,7 +74,20 @@ golem_status golem_adapter_dispatch(golem_adapter *a, golem_work_run *run,
     uint64_t size;
     if (s == GOLEM_OK) s = golem_evidence_verify(store, &result.evidence.digest, &size, d);
     if (s == GOLEM_OK && size != result.evidence.size) s = GOLEM_ERR_SIZE_MISMATCH;
+    if (s == GOLEM_OK && guard != NULL) s = golem_harness_guard_check(guard, r, &c, store);
     if (s == GOLEM_OK) s = golem_core_ownership_check(run);
     if (s == GOLEM_OK) *out = result;
     return golem_adapter_report(d, s);
+}
+golem_status golem_adapter_dispatch(golem_adapter *a, golem_work_run *run,
+    const golem_adapter_request *r, golem_evidence_store *store, golem_adapter_result *out, golem_diagnostic *d)
+{
+    return dispatch(a, run, r, store, NULL, out, d);
+}
+golem_status golem_adapter_dispatch_checked(golem_adapter *a, golem_work_run *run,
+    const golem_adapter_request *r, golem_evidence_store *store, const golem_harness_guard *guard,
+    golem_adapter_result *out, golem_diagnostic *d)
+{
+    if (!guard) return golem_adapter_report(d, GOLEM_ERR_INVALID_ARGUMENT);
+    return dispatch(a, run, r, store, guard, out, d);
 }

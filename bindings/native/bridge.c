@@ -1,4 +1,5 @@
 #include "golem/binding.h"
+#include "golem/adapter_descriptor.h"
 #include "../../src/cli/work.h"
 #include <stdlib.h>
 #include <string.h>
@@ -45,6 +46,20 @@ static golem_status replay(golem_bytes bytes, struct json_object **out)
 }
 int32_t golem_binding_call(uint32_t operation, const uint8_t *data, size_t size, char **out, size_t *out_size)
 {
+    if (operation == GOLEM_BINDING_DESCRIBE_ADAPTER) {
+        if (!out || !out_size) return GOLEM_ERR_INVALID_ARGUMENT;
+        golem_adapter_descriptor descriptor;
+        golem_status status = golem_adapter_descriptor_decode((golem_bytes){data, size}, &descriptor);
+        char encoded[GOLEM_DESCRIPTOR_MAX_BYTES]; size_t n = 0;
+        if (status == GOLEM_OK)
+            status = golem_adapter_descriptor_encode(&descriptor, encoded, sizeof(encoded), &n);
+        if (status == GOLEM_OK) {
+            char *copy = malloc(n + 1);
+            if (!copy) return GOLEM_ERR_OUT_OF_MEMORY;
+            memcpy(copy, encoded, n); copy[n] = 0; *out = copy; *out_size = n;
+        }
+        return (int32_t)status;
+    }
     if (out == NULL || out_size == NULL || data == NULL || size == 0 ||
         (operation != GOLEM_BINDING_VALIDATE && operation != GOLEM_BINDING_REPLAY) ||
         size > (operation == GOLEM_BINDING_VALIDATE ? GOLEM_BINDING_CAPSULE_MAX : GOLEM_BINDING_JOURNAL_MAX))

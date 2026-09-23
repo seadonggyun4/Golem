@@ -9,6 +9,7 @@
 #include "../reentry/internal.h"
 #include "../completion/internal.h"
 #include "../research/internal.h"
+#include "../runtime/profile_internal.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -100,11 +101,14 @@ golem_status dw_apply(golem_document_store *s, struct json_object *event,
         if (st == GOLEM_OK)
             st = dw_spec((golem_bytes){data, n}, &spec);
         free(data);
+        if (st == GOLEM_OK)
+            st = rp_initial(s, spec, false);
         if (st == GOLEM_OK) {
             s->spec = spec;
             s->last = *frame;
             ++s->event_count;
-        }
+        } else
+            json_object_put(spec);
         return st;
     }
     if (strcmp(dw_text(event, "type"), "reentry") == 0)
@@ -113,6 +117,12 @@ golem_status dw_apply(golem_document_store *s, struct json_object *event,
         return co_apply(s, event, payload, frame);
     if (strcmp(dw_text(event, "type"), "research") == 0)
         return rs_apply(s, event, payload, frame);
+    if (strcmp(dw_text(event, "type"), "runtime-profile") == 0)
+        return rp_apply(s, event, frame);
+    if (strcmp(dw_text(event, "type"), "runtime-link") == 0)
+        return rp_link_apply(s, event, payload, frame);
+    if (strcmp(dw_text(event, "type"), "admission-link") == 0)
+        return ga_work_apply(s, event, payload, frame);
     const char *keys[] = {"schema_version", "type", "metadata_digest", "body_digest",
                           "idempotency_key"};
     dw_entry entry = {0};
@@ -228,13 +238,15 @@ golem_status golem_document_store_create(const char *root, golem_bytes spec,
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
     struct json_object *validated = NULL;
     golem_status st = dw_spec(spec, &validated);
-    json_object_put(validated);
     golem_document_store *s = NULL;
     if (st == GOLEM_OK)
         st = allocate_store(root, true, true, a, &s);
     struct json_object *event = NULL;
     golem_receipt receipt;
     golem_digest payload, frame;
+    if (st == GOLEM_OK)
+        st = rp_initial(s, validated, true);
+    json_object_put(validated);
     if (st == GOLEM_OK)
         st = golem_evidence_put(s->cas, spec, &receipt, NULL);
     if (st == GOLEM_OK) {
@@ -284,6 +296,12 @@ golem_status golem_document_store_close(golem_document_store *s)
         json_object_put(s->completions[i]);
     for (size_t i = 0; i < s->research_count; ++i)
         json_object_put(s->research[i]);
+    for (size_t i = 0; i < s->runtime_profile_count; ++i)
+        json_object_put(s->runtime_profiles[i]);
+    for (size_t i = 0; i < s->runtime_link_count; ++i)
+        json_object_put(s->runtime_links[i]);
+    for (size_t i = 0; i < s->admission_link_count; ++i)
+        json_object_put(s->admission_links[i]);
     json_object_put(s->spec);
     golem_status st = golem_evidence_close(s->cas);
     if (s->events >= 0 && close(s->events) < 0)

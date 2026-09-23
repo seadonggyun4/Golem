@@ -2,9 +2,11 @@
 #define _DARWIN_C_SOURCE
 #define _DEFAULT_SOURCE
 #include "golem/adapter_protocol.h"
+#include "golem/adapter_descriptor.h"
 #include "golem/research.h"
 #include "golem/journal.h"
 #include "golem/lineage.h"
+#include "../src/daemon/admission_internal.h"
 #include "check.h"
 #include <errno.h>
 #include <stdlib.h>
@@ -28,6 +30,16 @@ static void save(const char *group, const char *name, const void *data, size_t s
 }
 static void envelopes(const char *source)
 {
+    ga_event init = {.operation = GA_INIT, .ticket = 2,
+        .request = {.cpu_millis = 2000, .memory_bytes = 4096, .runtime_binding = {{1}}}};
+    uint8_t admission[GA_FRAME_SIZE];
+    REQUIRE(ga_encode(&init, (golem_admission_checkpoint){0}, admission) == GOLEM_OK);
+    save("admission", "init", admission, sizeof(admission));
+    golem_adapter_descriptor descriptor;
+    REQUIRE(golem_adapter_descriptor_current("fixture", "", &descriptor) == GOLEM_OK);
+    char descriptor_json[GOLEM_DESCRIPTOR_MAX_BYTES]; size_t descriptor_size;
+    REQUIRE(golem_adapter_descriptor_encode(&descriptor, descriptor_json, sizeof(descriptor_json), &descriptor_size) == GOLEM_OK);
+    save("adapter_json", "descriptor.json", descriptor_json, descriptor_size);
     const char *names[] = {"capability.json", "request.json", "result.json"};
     for (size_t i = 0; i < sizeof(names) / sizeof(names[0]); ++i) {
         char path[4096]; uint8_t input[GOLEM_ADAPTER_JSON_MAX], packed[GOLEM_ADAPTER_MSGPACK_MAX];
@@ -114,6 +126,10 @@ static void parsers(void)
 }
 static void documents(const char *source)
 {
+    const char context[] = "{\"schema_version\":1,\"renderer_version\":1,\"recipe\":\"extractive-v1\",\"selection_id\":\"selection\",\"target_kind\":\"planning\",\"source_snapshot\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"byte_budget\":2097152,\"excerpt_bytes\":128,\"token_budget\":0,\"tokenizer_id\":\"none\",\"agent_note\":\"\"}";
+    save("document", "context-request.json", (const uint8_t *)context, sizeof(context) - 1);
+    const char cursor[] = "1:0000000000000000000000000000000000000000000000000000000000000000:1:0000000000000000000000000000000000000000000000000000000000000000";
+    save("document", "runtime-cursor.txt", (const uint8_t *)cursor, sizeof(cursor) - 1);
     const char *names[] = {"documents/work.json", "documents/planning.json", "documents/planning.md", "discovery/assessment.json", "agent-session/start.json", "agent-session/status.json", "execution/contract.json", "reentry/decision.json", "completion/finalize.json", "completion/resume.json", "research/request.json", "research/attempt-request.json", "research/outcome-enroll-request.json", "research/adjudication-request.json", "research/cohort-request.json", "research/cohort-observe-request.json", "research/redaction-minimal.json", "research/redaction-linkable.json"};
     for (size_t i = 0; i < sizeof(names)/sizeof(*names); ++i) {
         char path[4096]; uint8_t bytes[8192];
@@ -124,6 +140,15 @@ static void documents(const char *source)
         REQUIRE(!ferror(f) && feof(f) && fclose(f) == 0);
         save("document", strrchr(names[i],'/')+1, bytes, size);
     }
+    char profile_path[4096];
+    int n = snprintf(profile_path, sizeof(profile_path), "%s/samples/runtime-profile.json", source);
+    REQUIRE(n > 0 && (size_t)n < sizeof(profile_path));
+    FILE *profile = fopen(profile_path, "rb");
+    REQUIRE(profile != NULL);
+    uint8_t bytes[8192];
+    size_t size = fread(bytes, 1, sizeof(bytes), profile);
+    REQUIRE(!ferror(profile) && feof(profile) && fclose(profile) == 0);
+    save("document", "runtime-profile.json", bytes, size);
 }
 static void bundles(void)
 {

@@ -20,6 +20,9 @@ PRIVATE_COMPONENTS = {
 SOURCE_FILES = {"CMakeLists.txt", "CMakePresets.json", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"}
 # Reviewed synthetic historical stores, not arbitrary local JSON evidence.
 SOURCE_FILES.add("tests/c/fixtures/completion/v1-store.json")
+# Exact test harness dependencies; do not export arbitrary tools or local reports.
+SOURCE_FILES.update({"tools/verify_runtime.py", "tools/test_verify_runtime.py",
+                     "tools/verify_agent.py", "tools/benchmark_runtime.py"})
 
 
 def selected(name):
@@ -114,7 +117,8 @@ def main():
              "-DCMAKE_INSTALL_LIBDIR=lib",
              "-DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF"], work, env)
         run(["cmake", "--build", build, "--parallel", "2"], work, env)
-        run(["ctest", "--test-dir", build, "--output-on-failure", "--no-tests=error"], work, env)
+        run(["ctest", "--test-dir", build, "--parallel", "2",
+             "--output-on-failure", "--no-tests=error"], work, env)
         run(["cmake", "--install", build, "--prefix", prefix], work, env)
         audit_install(prefix)
         consumer = work / "consumer"

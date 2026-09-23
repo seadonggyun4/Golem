@@ -2,6 +2,7 @@
 #define _DARWIN_C_SOURCE
 #define _DEFAULT_SOURCE
 #include "golem/adapter_protocol.h"
+#include "golem/adapter_descriptor.h"
 #include "golem/journal.h"
 #include "golem/optimization.h"
 #include "test.h"
@@ -357,6 +358,92 @@ static int mutations(void)
     }
     return teardown(&f);
 }
+typedef struct host_observer {
+    golem_harness_observation observation;
+    uint64_t now;
+    unsigned calls;
+    bool revoke;
+} host_observer;
+static golem_status observe(void *context, golem_harness_observation *out)
+{
+    host_observer *host = context;
+    ++host->calls;
+    if (host->revoke && host->calls > 1) return GOLEM_ERR_POLICY_DENIED;
+    *out = host->observation;
+    return GOLEM_OK;
+}
+static golem_status host_now(void *context, uint64_t *out)
+{
+    *out = ((host_observer *)context)->now; return GOLEM_OK;
+}
+static int guarded(void)
+{
+    for (unsigned revoke = 0; revoke < 2; ++revoke) {
+        fixture f; CHECK(setup(&f, GOLEM_AUTONOMY_AUTO_LOCAL) == 0);
+        golem_adapter_request request; CHECK(begin(&f, &request) == 0);
+        fake state = {GOLEM_EFFECT_LOCAL, GOLEM_ADAPTER_ALL_STAGES, 0, 0};
+        golem_adapter_ops ops = {fake_probe, fake_run}; golem_adapter *adapter = NULL;
+        CHECK(golem_adapter_create(&ops, &state, NULL, &adapter) == GOLEM_OK);
+        golem_adapter_capability cap;
+        CHECK(golem_adapter_probe(adapter, &cap, NULL) == GOLEM_OK);
+        golem_adapter_descriptor claimed;
+        CHECK(golem_adapter_descriptor_from_v1(&cap, &claimed) == GOLEM_OK);
+        claimed.inputs_known = claimed.inputs_supported = GOLEM_INPUT_JSON;
+        claimed.features_known = claimed.features_supported = GOLEM_HARNESS_CANCEL;
+        golem_harness_requirements req = {0};
+        req.size = sizeof(req); req.version = 1; req.stages = 1;
+        req.inputs = GOLEM_INPUT_JSON; req.features = GOLEM_HARNESS_CANCEL;
+        req.effect = GOLEM_EFFECT_LOCAL; req.simulation = GOLEM_HARNESS_YES;
+        host_observer host = {0}; host.now = 10;
+        host.observation.descriptor = claimed; host.observation.epoch = 1;
+        host.observation.observed_ns = 5; host.observation.expires_ns = 20;
+        host.observation.profile_digest = f.context.digest;
+        host.observation.binding_digest = f.context.digest;
+        host.observation.evidence_digest = f.context.digest;
+        host.observation.clock_domain = f.context.digest;
+        golem_harness_guard guard = {0};
+        guard.size = sizeof(guard); guard.version = 1; guard.claimed = &claimed; guard.required = &req;
+        guard.profile_digest = f.context.digest; guard.binding_digest = f.context.digest;
+        guard.clock_domain = f.context.digest;
+        guard.epoch = 1; guard.observe = observe; guard.now = host_now; guard.context = &host;
+        CHECK(golem_adapter_descriptor_digest(&claimed, &guard.descriptor_digest) == GOLEM_OK);
+        golem_adapter_result result = {0}; result.request.sequence = 999;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, NULL, &result, NULL) == GOLEM_ERR_INVALID_ARGUMENT);
+        host.observation.descriptor.features_supported = 0;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) == GOLEM_ERR_POLICY_DENIED);
+        host.observation.descriptor = claimed;
+        host.now = 20;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) == GOLEM_ERR_STALE_RESULT);
+        host.now = 4;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) == GOLEM_ERR_STALE_RESULT);
+        host.now = 10; host.observation.epoch = 2;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) == GOLEM_ERR_IDENTITY_MISMATCH);
+        host.observation.epoch = 1; host.observation.binding_digest.bytes[0] ^= 1;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) == GOLEM_ERR_IDENTITY_MISMATCH);
+        host.observation.binding_digest = f.context.digest;
+        host.observation.clock_domain.bytes[0] ^= 1;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) == GOLEM_ERR_IDENTITY_MISMATCH);
+        host.observation.clock_domain = f.context.digest;
+        host.observation.evidence_digest.bytes[0] ^= 1;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) == GOLEM_ERR_NOT_FOUND);
+        host.observation.evidence_digest = f.context.digest;
+        guard.descriptor_digest.bytes[0] ^= 1;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) == GOLEM_ERR_IDENTITY_MISMATCH);
+        guard.descriptor_digest.bytes[0] ^= 1;
+        state.effect = GOLEM_EFFECT_EXTERNAL;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) == GOLEM_ERR_POLICY_DENIED);
+        state.effect = GOLEM_EFFECT_LOCAL;
+        CHECK(state.calls == 0 && result.request.sequence == 999);
+        host.calls = 0; host.revoke = revoke != 0;
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) ==
+            (revoke ? GOLEM_ERR_POLICY_DENIED : GOLEM_OK));
+        CHECK(host.calls == 2 && state.calls == 1);
+        CHECK(revoke ? result.request.sequence == 999 : result.simulation);
+        CHECK(golem_adapter_dispatch_checked(adapter, f.run, &request, f.store, &guard, &result, NULL) == GOLEM_ERR_INVALID_STATE);
+        golem_adapter_free(adapter); CHECK(teardown(&f) == 0);
+    }
+    return 0;
+}
 int main(int argc, char **argv)
 {
     CHECK(argc == 2);
@@ -368,5 +455,6 @@ int main(int argc, char **argv)
     if (strcmp(argv[1], "invalid") == 0) return invalid();
     if (strcmp(argv[1], "optimized") == 0) return optimized();
     if (strcmp(argv[1], "mutations") == 0) return mutations();
+    if (strcmp(argv[1], "guarded") == 0) return guarded();
     return EXIT_FAILURE;
 }

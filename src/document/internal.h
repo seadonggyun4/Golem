@@ -29,6 +29,14 @@ struct golem_document_store {
     struct json_object *research[GOLEM_RESEARCH_MAX_EVENTS];
     golem_digest research_digests[GOLEM_RESEARCH_MAX_EVENTS];
     golem_digest research_frames[GOLEM_RESEARCH_MAX_EVENTS];
+    size_t runtime_profile_count;
+    struct json_object *runtime_profiles[64];
+    size_t runtime_link_count;
+    struct json_object *runtime_links[256];
+    golem_digest runtime_link_digests[256];
+    size_t admission_link_count;
+    struct json_object *admission_links[256];
+    golem_digest admission_link_digests[256];
     golem_digest last;
 };
 struct json_object *dw_get(struct json_object *o, const char *key);
@@ -61,4 +69,6 @@ golem_status dw_cas_json(golem_document_store *s, const golem_digest *key,
 golem_status dw_put_json(golem_document_store *s, struct json_object *o, golem_digest *out);
 bool dw_add(struct json_object *o, const char *key, struct json_object *value);
 bool dw_add_digest(struct json_object *o, const char *key, const golem_digest *digest);
+golem_status ga_work_apply(golem_document_store *store, struct json_object *event,
+                           const golem_digest *payload, const golem_digest *frame);
 #endif

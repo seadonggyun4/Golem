@@ -40,7 +40,8 @@ typedef enum golem_status {
     GOLEM_ERR_COST_CAPACITY = 29,
     GOLEM_ERR_OPTIMIZATION_REJECTED = 30,
     GOLEM_ERR_STALE_LEASE = 31,
-    GOLEM_ERR_LEASE_BUSY = 32
+    GOLEM_ERR_LEASE_BUSY = 32,
+    GOLEM_ERR_QUEUE_FULL = 33
 } golem_status;
 
 /* Returns immutable process-lifetime storage; never free the result. */

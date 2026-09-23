@@ -1,6 +1,7 @@
 #include "internal.h"
 #include "../discovery/internal.h"
 #include "../workflow/internal.h"
+#include "../runtime/profile_internal.h"
 #include <string.h>
 
 golem_status dw_report(golem_diagnostic *d, golem_status s, const char *message)
@@ -88,10 +89,11 @@ golem_status dw_spec(golem_bytes b, struct json_object **out)
         return s;
     const char *keys[] = {"schema_version", "work_id",    "request",
                           "scope",          "non_goals",  "permission",
-                          "max_revisions",  "acceptance", "policy_version"};
+                          "max_revisions",  "acceptance", "policy_version", "runtime_profile"};
     struct json_object *a = dw_get(o, "acceptance");
     const char *p = dw_text(o, "permission");
-    bool ok = dw_keys(o, keys, 9) && dw_id(dw_text(o, "work_id")) && prose(dw_text(o, "request")) &&
+    bool v2 = dw_uint(o, "schema_version") == 2;
+    bool ok = dw_keys(o, keys, v2 ? 10 : 9) && dw_id(dw_text(o, "work_id")) && prose(dw_text(o, "request")) &&
               prose(dw_text(o, "scope")) && prose(dw_text(o, "non_goals")) &&
               (strcmp(p, "AUTO_LOCAL") == 0 || strcmp(p, "ASK_ALWAYS") == 0 ||
                strcmp(p, "DENY") == 0 || strcmp(p, "ASK_ON_EXTERNAL_EFFECT") == 0) &&
@@ -111,8 +113,13 @@ golem_status dw_spec(golem_bytes b, struct json_object **out)
         }
     if (!ok)
         s = GOLEM_ERR_PARSE;
-    else if (dw_uint(o, "schema_version") != 1 || dw_uint(o, "policy_version") != 1)
+    else if ((!v2 && dw_uint(o, "schema_version") != 1) || dw_uint(o, "policy_version") != 1)
         s = GOLEM_ERR_UNSUPPORTED_VERSION;
+    if (s == GOLEM_OK && v2) {
+        golem_runtime_profile *profile = NULL;
+        s = rp_object(dw_get(o, "runtime_profile"), NULL, &profile);
+        golem_runtime_profile_free(profile);
+    }
     if (s == GOLEM_OK)
         *out = o;
     else

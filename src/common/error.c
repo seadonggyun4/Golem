@@ -36,6 +36,7 @@ const char *golem_status_string(golem_status status)
     case GOLEM_ERR_OPTIMIZATION_REJECTED: return "optimization rejected";
     case GOLEM_ERR_STALE_LEASE: return "stale lease";
     case GOLEM_ERR_LEASE_BUSY: return "lease busy";
+    case GOLEM_ERR_QUEUE_FULL: return "admission queue full";
     default: return "unknown status";
     }
 }

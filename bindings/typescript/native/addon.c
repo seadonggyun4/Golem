@@ -12,7 +12,8 @@ static napi_value call(napi_env env, napi_callback_info info)
         return fail(env, "call requires an operation and a Uint8Array");
     double op;
     if (napi_get_value_double(env, args[0], &op) != napi_ok ||
-        (op != GOLEM_BINDING_VALIDATE && op != GOLEM_BINDING_REPLAY)) return fail(env, "invalid operation");
+        (op != GOLEM_BINDING_VALIDATE && op != GOLEM_BINDING_REPLAY &&
+         op != GOLEM_BINDING_DESCRIBE_ADAPTER)) return fail(env, "invalid operation");
     bool typed = false;
     if (napi_is_typedarray(env, args[1], &typed) != napi_ok || !typed) return fail(env, "expected Uint8Array");
     napi_typedarray_type type; size_t size, offset; void *data; napi_value backing;

@@ -199,7 +199,7 @@ golem_status dw_replay(golem_document_store *s)
         unsigned seq = 0;
         char trailing, expected[32];
         if (sscanf(item->d_name, "%8u.evt%c", &seq, &trailing) != 1 || seq < 1 ||
-            seq > GOLEM_DOCUMENT_MAX_REVISIONS + 129 + GOLEM_RESEARCH_MAX_EVENTS) {
+            seq > GOLEM_DOCUMENT_MAX_REVISIONS + 129 + GOLEM_RESEARCH_MAX_EVENTS + 64 + 256) {
             st = GOLEM_ERR_CORRUPT_JOURNAL;
             break;
         }

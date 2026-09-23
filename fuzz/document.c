@@ -6,6 +6,9 @@
 #include "golem/reentry.h"
 #include "golem/completion.h"
 #include "golem/research.h"
+#include "golem/runtime_profile.h"
+#include "golem/context.h"
+#include "golem/runtime_event.h"
 #include <stddef.h>
 #include <stdint.h>
 int LLVMFuzzerTestOneInput(const uint8_t *data,size_t size)
@@ -17,6 +20,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data,size_t size)
         "\"policy_version\":1,\"source_snapshot\":\"0000000000000000000000000000000000000000000000000000000000000000\","
         "\"supersedes\":\"\",\"expected_generation\":1}";
     if(size>GOLEM_DOCUMENT_MAX_BODY+1) return 0;
+    golem_runtime_cursor cursor;
+    (void)golem_runtime_cursor_parse((golem_string_view){(const char *)data,size}, &cursor);
+    (void)golem_context_request_validate((golem_bytes){data,size},NULL);
+    golem_runtime_profile *profile = NULL;
+    (void)golem_runtime_profile_parse((golem_bytes){data,size},NULL,&profile,NULL);
+    golem_runtime_profile_free(profile);
     (void)golem_agent_request_validate((golem_bytes){data,size},NULL);
     (void)golem_reentry_validate((golem_bytes){data,size},NULL);
     (void)golem_completion_validate((golem_bytes){data,size},NULL);

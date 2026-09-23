@@ -12,6 +12,7 @@ static int usage(void)
         "  golem init DIRECTORY\n"
         "  golem work start NEW_WORK_DIR SPEC_JSON\n"
         "  golem session call WORK_DIR REQUEST_JSON\n"
+        "  golem profile validate PROFILE_JSON | register WORK_DIR PROFILE_JSON KEY | current WORK_DIR\n"
         "  golem execution validate CONTRACT_JSON\n"
         "  golem execution call WORK_DIR REQUEST_JSON [--approve-contract SHA256]\n"
         "  golem execution render WORK_DIR METADATA_JSON\n"
@@ -35,6 +36,9 @@ static int usage(void)
         "  golem workflow inputs WORK_DIR SELECTION_ID TARGET_KIND SOURCE_SHA256 BYTE_BUDGET\n"
         "  golem workflow trace WORK_DIR DOCUMENT_ID REVISION\n"
         "  golem workflow next WORK_DIR SELECTION_ID\n"
+        "  golem context render|markdown|publish WORK_DIR REQUEST.json\n"
+        "  golem context read WORK_DIR PROJECTION_SHA256 CURRENT_SOURCE_SHA256\n"
+        "  golem events ADMISSION_DIR --jsonl|--otlp|--prov [--after CURSOR]\n"
         "  golem document validate META_JSON BODY_MD\n"
         "  golem document submit WORK_DIR META_JSON BODY_MD IDEMPOTENCY_KEY\n"
         "  golem document inspect WORK_DIR DOCUMENT_ID REVISION\n"
@@ -65,7 +69,10 @@ static int usage(void)
 int golem_cli_document(int argc, char **argv);
 int golem_cli_discovery(int argc, char **argv);
 int golem_cli_workflow(int argc, char **argv);
+int golem_cli_context(int argc, char **argv);
+int golem_cli_events(int argc, char **argv);
 int golem_cli_agent_session(int argc, char **argv);
+int golem_cli_runtime_profile(int argc, char **argv);
 int golem_cli_execution(int argc, char **argv);
 int golem_cli_reentry(int argc, char **argv);
 int golem_cli_research(int argc, char **argv);
@@ -74,7 +81,10 @@ int main(int argc, char **argv)
 {
     if (argc >= 2 && strcmp(argv[1], "journal") == 0) return golem_cli_journal(argc, argv);
     if(argc>=2 && strcmp(argv[1],"workflow")==0) return golem_cli_workflow(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"context")==0) return golem_cli_context(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"events")==0) return golem_cli_events(argc,argv);
     if(argc>=2 && strcmp(argv[1],"session")==0) return golem_cli_agent_session(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"profile")==0) return golem_cli_runtime_profile(argc,argv);
     if(argc>=2 && strcmp(argv[1],"execution")==0) return golem_cli_execution(argc,argv);
     if(argc>=2 && strcmp(argv[1],"reentry")==0) return golem_cli_reentry(argc,argv);
     if(argc>=2 && strcmp(argv[1],"research")==0) return golem_cli_research(argc,argv);

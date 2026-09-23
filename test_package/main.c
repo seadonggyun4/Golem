@@ -7,10 +7,15 @@
 #include "golem/reentry.h"
 #include "golem/completion.h"
 #include "golem/version.h"
+#include "golem/worker.h"
 #include <string.h>
 
 int main(void)
 {
+    golem_worker_options worker_options = golem_worker_options_default();
+    golem_worker_pool *workers = NULL;
+    if (golem_worker_open(&worker_options, &workers) != GOLEM_OK ||
+        golem_worker_close(workers) != GOLEM_OK) return 1;
     static const char reentry_status[]="{\"schema_version\":1,\"operation\":\"status\"}";
     static const char completion_resume[]="{\"schema_version\":1,\"operation\":\"resume\",\"selection_id\":\"selection\"}";
     if(golem_completion_validate((golem_bytes){(const uint8_t *)completion_resume,sizeof(completion_resume)-1},NULL)!=GOLEM_OK) return 1;

@@ -16,7 +16,7 @@ int main(void)
     CHECK(golem_bytes_init(&bytes, NULL, 0) == GOLEM_OK);
     CHECK(bytes.data == NULL && bytes.size == 0);
     CHECK(strcmp(golem_status_string(GOLEM_OK), "ok") == 0);
-    for (int code = GOLEM_ERR_INVALID_ARGUMENT; code <= GOLEM_ERR_LEASE_BUSY; ++code) {
+    for (int code = GOLEM_ERR_INVALID_ARGUMENT; code <= GOLEM_ERR_QUEUE_FULL; ++code) {
         CHECK(strcmp(golem_status_string((golem_status)code), "unknown status") != 0);
     }
     CHECK(strcmp(golem_status_string((golem_status)999), "unknown status") == 0);

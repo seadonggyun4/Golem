@@ -22,7 +22,9 @@ typedef struct golem_document_result {
     golem_status projection_status;
 } golem_document_result;
 
-/* JSON and Markdown inputs are borrowed, immutable for the call. No execution,
+/* Work schema 2 additionally embeds a runtime_profile (runtime_profile.h), whose
+ * CAS identity is published before the Work event. Schema 1 stays unenrolled.
+ * JSON and Markdown inputs are borrowed, immutable for the call. No execution,
  * AI authorship, semantic acceptance, credential authentication or lease grants.
  * Validation is structural only. Unknown schema/template versions fail closed.
  * Optional diagnostic is caller-owned. No output mutation on failure. */

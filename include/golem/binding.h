@@ -15,6 +15,11 @@ extern "C" {
 #define GOLEM_BINDING_JOURNAL_MAX 16777216u
 #define GOLEM_BINDING_VALIDATE 1u
 #define GOLEM_BINDING_REPLAY 2u
+#define GOLEM_BINDING_DESCRIBE_ADAPTER 3u
+
+/* Operation 3 validates/canonicalizes adapter descriptor JSON, <=16 KiB,
+ * using the C descriptor codec. Read-only, no probe/lease/authorization effects.
+ * Additive operation: older ABI-v1 libraries reject it as unknown. */
 
 /* Optional libgolem_binding ABI (not part of the static Golem::golem archive).
  * No native struct layouts, callbacks, global errors, clocks or filesystem I/O.

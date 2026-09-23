@@ -84,5 +84,7 @@ class GolemConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Golem")
         self.cpp_info.set_property("cmake_target_name", "Golem::golem")
         self.cpp_info.libs = ["golem"]
+        if str(self.settings.os) == "Linux":
+            self.cpp_info.system_libs = ["pthread"]
         if self.options.with_cli:
             self.runenv_info.prepend_path("PATH", str(Path(self.package_folder, "bin")))

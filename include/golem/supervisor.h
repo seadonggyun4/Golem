@@ -31,6 +31,16 @@ golem_status golem_supervisor_run(const char *executable, char *const argv[], go
 golem_status golem_supervisor_run_at(const char *executable, char *const argv[],
     const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout_ns,
     golem_status (*pulse)(void *context), void *context, golem_supervisor_result *out);
+/* Additive observation API; preserves the original result layout. Observations
+ * describe the direct child only, never sandbox containment or descendant death.
+ * Initialized even on pre-spawn errors; result retains the legacy contract. */
+typedef struct golem_supervisor_observation {
+    bool spawned, reaped;
+} golem_supervisor_observation;
+golem_status golem_supervisor_run_observed(const char *executable, char *const argv[],
+    const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout_ns,
+    golem_status (*pulse)(void *context), void *context, golem_supervisor_result *out,
+    golem_supervisor_observation *observation);
 #ifdef __cplusplus
 }
 #endif

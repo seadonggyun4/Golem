@@ -30,7 +30,7 @@ golem_status ex_authorize(golem_document_store *s, struct json_object *token,
         if (st == GOLEM_OK && !json_object_equal(pinned, manifest))
             st = GOLEM_ERR_STALE_RESULT;
         json_object_put(pinned);
-    } else if (st == GOLEM_OK && token)
+    } else if (st == GOLEM_OK && (token || s->runtime_profile_count))
         st = GOLEM_ERR_IDENTITY_MISMATCH;
     as_close(&log);
     return st;

@@ -90,6 +90,17 @@ class BindingTests(unittest.TestCase):
         with self.assertRaises(ValueError): binding.Engine("relative.so")
         with self.assertRaises(FileNotFoundError): binding.Engine(LIBRARY.parent / "missing-library.so")
 
+    def test_describe_adapter(self):
+        source = (ROOT / "samples/adapter-descriptor.json").read_bytes()
+        expected = json.loads(source)
+        self.assertEqual(self.engine.describe_adapter(source), expected)
+        self.assertEqual(self.engine.describe_adapter(expected), expected)
+        self.assertEqual(self.engine.describe_adapter(source.decode()), expected)
+        invalid = {**expected, "features_supported": 1}
+        with self.assertRaises(binding.GolemError): self.engine.describe_adapter(invalid)
+        with self.assertRaises(binding.GolemError): self.engine.describe_adapter(b'x' * 16385)
+        with self.assertRaises(TypeError): self.engine.describe_adapter(42)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -7,6 +7,10 @@ CAS and the Work journal remain the source of truth. Neither output is an import
 format, a completion decision, an authenticated execution trace, or permission to publish.
 No Collector, endpoint, credentials, SDK or network transmission is configured.
 
+[Runtime diagnostics](runtime-events.md) add a separate fixed-allowlist event-page
+export in this derived layer. Those pages are not case-study bundles and do not
+change this case-scoped redaction contract or become QA evidence.
+
 ## CLI
 
 ```sh

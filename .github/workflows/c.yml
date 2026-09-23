@@ -44,6 +44,9 @@ jobs:
       - run: cmake --preset ${{ matrix.preset }} -DGOLEM_BUILD_BENCHMARKS=ON -DGOLEM_BUILD_BINDINGS=ON
       - run: cmake --build --preset ${{ matrix.preset }}
       - run: ctest --preset ${{ matrix.preset }}
+      - name: Runtime contract evidence (fixtures, not live agents)
+        if: matrix.preset == 'release'
+        run: python3 tools/verify_runtime.py --build build/release --output build/runtime-validation
       - name: Linux leak checks
         if: runner.os == 'Linux' && matrix.preset == 'asan'
         run: ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 ctest --test-dir build/asan --output-on-failure

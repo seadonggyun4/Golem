@@ -1,5 +1,9 @@
 # Current-Agent Sessions
 
+Optional [runtime profiles](runtime-profile.md) pin a generation and immutable
+execution binding for each enrolled claim. Refresh does not replace a running
+attempt's identity; resume fencing remains separate from historical provenance.
+
 Golem coordinates the agent already working in a CLI or GUI. It does not spawn a
 provider process, require a provider SDK, or keep a GUI agent running after exit.
 The protocol is a local C API plus a thin JSON CLI:

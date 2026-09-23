@@ -66,7 +66,7 @@ class Engine:
         lib.golem_binding_status_message.restype = ctypes.c_char_p
 
     def _call(self, operation: int, data: bytes) -> dict[str, Any]:
-        limit = 131072 if operation == 1 else 16777216
+        limit = {1: 131072, 2: 16777216, 3: 16384}[operation]
         if not data or len(data) > limit:
             raise GolemError(1, "empty or oversized input")
         # A private buffer remains alive while ctypes releases the GIL. No
@@ -103,3 +103,13 @@ class Engine:
         if size > 16777216:
             raise GolemError(1, "oversized journal")
         return cast(ReplayResult, self._call(2, bytes(journal)))
+
+    def describe_adapter(self, descriptor: Mapping[str, Any] | str | bytes) -> dict[str, Any]:
+        """Validate/canonicalize a descriptor. Never probe or authorize execution."""
+        if isinstance(descriptor, Mapping):
+            descriptor = json.dumps(dict(descriptor), ensure_ascii=False, allow_nan=False)
+        if isinstance(descriptor, str):
+            descriptor = descriptor.encode("utf-8")
+        if not isinstance(descriptor, bytes):
+            raise TypeError("descriptor must be a mapping, JSON string or UTF-8 bytes")
+        return self._call(3, descriptor)

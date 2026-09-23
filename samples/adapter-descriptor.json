@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "domain": "golem.adapter-descriptor.v1",
+  "adapter_id": "local.noop",
+  "adapter_version": "",
+  "session_id": "",
+  "current_agent": 0,
+  "protocol_version": 1,
+  "stages": 63,
+  "features_known": 0,
+  "features_supported": 0,
+  "inputs_known": 0,
+  "inputs_supported": 0,
+  "simulation": 2,
+  "hidden_prompt_known": 0,
+  "sandbox": 0,
+  "effect": 1,
+  "tools": []
+}

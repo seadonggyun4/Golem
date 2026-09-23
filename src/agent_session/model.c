@@ -33,7 +33,8 @@ golem_status as_reduce(struct json_object *prior, struct json_object *e, struct 
     uint64_t seq = dw_uint(e, "sequence"), now = dw_uint(e, "observed_ms");
     const char *op = dw_text(e, "operation");
     struct json_object *d = dw_get(e, "data"), *s = NULL;
-    if (!dw_keys(e, ek, 9) || dw_uint(e, "schema_version") != 1 ||
+    bool bound_claim = dw_uint(e, "schema_version") == 2 && !strcmp(op, "claim");
+    if (!dw_keys(e, ek, 9) || (dw_uint(e, "schema_version") != 1 && !bound_claim) ||
         seq != (prior ? dw_uint(prior, "sequence") : 0) + 1 || now == UINT64_MAX ||
         !dw_digest(e, "work_spec_digest", &digest) || !dw_id(dw_text(e, "key")) ||
         !dw_digest(e, "request_digest", &digest) || !dw_digest(e, "boot_id", &digest))
@@ -60,8 +61,9 @@ golem_status as_reduce(struct json_object *prior, struct json_object *e, struct 
     } else if (strcmp(op, "claim") == 0) {
         const char *keys[] = {"attempt_id",      "session_id",       "epoch", "expires_ms",
                               "manifest_digest", "input_generation", "kind",  "policy_digest",
-                              "source_snapshot", "scope_revision",   "state"};
-        if (a || !dw_keys(d, keys, 11) || !dw_id(dw_text(d, "attempt_id")) ||
+                              "source_snapshot", "scope_revision",   "state", "runtime_binding"};
+        if (a || !dw_keys(d, keys, bound_claim ? 12 : 11) ||
+            (bound_claim && !dw_digest(d, "runtime_binding", &digest)) || !dw_id(dw_text(d, "attempt_id")) ||
             !dw_id(dw_text(d, "session_id")) || dw_uint(d, "epoch") != seq ||
             dw_uint(d, "expires_ms") <= now ||
             dw_uint(d, "expires_ms") - now > GOLEM_AGENT_MAX_TTL_MS ||

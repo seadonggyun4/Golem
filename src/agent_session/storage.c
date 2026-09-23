@@ -2,6 +2,7 @@
 #define _DARWIN_C_SOURCE
 #define _DEFAULT_SOURCE
 #include "internal.h"
+#include "../runtime/profile_internal.h"
 #include <dirent.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -63,6 +64,12 @@ static golem_status validate(golem_document_store *s, as_log *l, struct json_obj
              strcmp(dw_text(m, "source_snapshot"), dw_text(d, "source_snapshot")) != 0))
             st = GOLEM_ERR_IDENTITY_MISMATCH;
         json_object_put(m);
+        if (st == GOLEM_OK && dw_uint(e, "schema_version") == 2)
+            st = rp_validate_claim(s, d);
+        if (st == GOLEM_OK && s->runtime_profile_count &&
+            dw_uint(e, "sequence") > dw_uint(s->runtime_profiles[0], "agent_sequence") &&
+            dw_uint(e, "schema_version") != 2)
+            st = GOLEM_ERR_IDENTITY_MISMATCH;
         if (st != GOLEM_OK)
             return st;
     }

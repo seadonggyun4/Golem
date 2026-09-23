@@ -1,5 +1,17 @@
 # Work and Markdown Registry, Version 1
 
+[Context projections](context-projection.md) provide optional digest-bound reading
+aids with mandatory facts and explicit omissions; they do not replace documents
+or authorize execution.
+
+[Runtime profiles](runtime-profile.md) add optional Work specification schema 2
+with an initial profile and immutable generation registration. Schema-1 Work
+stores remain readable and explicitly unenrolled until registered.
+
+[Admission](admission.md) can append an optional `admission-link` event connecting
+a live runtime binding to a durable session/global reservation. This requires a
+reader with admission support; the link does not itself grant execution authority.
+
 The base contract below remains valid. [Phase 22](discovery.md) adds metadata
 schema 2 for discovery/research/scope assessments; it does not change stored
 schema-1 documents or the event frame format.

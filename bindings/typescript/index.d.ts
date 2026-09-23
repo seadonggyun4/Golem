@@ -35,6 +35,26 @@ export class GolemError extends Error {
   readonly status: number;
   constructor(status: number, message: string);
 }
+/** Claimed metadata only. Known/supported masks do not confer permissions. */
+export interface AdapterDescriptor {
+  schema_version: 1;
+  domain: 'golem.adapter-descriptor.v1';
+  adapter_id: string;
+  adapter_version: string;
+  session_id: string;
+  current_agent: 0 | 1;
+  protocol_version: 1;
+  stages: number;
+  features_known: number;
+  features_supported: number;
+  inputs_known: number;
+  inputs_supported: number;
+  simulation: 0 | 1 | 2;
+  hidden_prompt_known: 0 | 1 | 2;
+  sandbox: 0 | 1 | 2 | 3 | 4 | 5;
+  effect: 0 | 1 | 2;
+  tools: { id: string; digest: string }[];
+}
 /** Synchronous Node-only binding. Load trusted native code from an absolute path.
  * No subprocess/provider execution. Use a worker thread for large replay inputs.
  * Replayed states do not verify acceptance, CAS or execution authority. */
@@ -42,4 +62,5 @@ export class Engine {
   constructor(addonPath: string);
   validate(capsule: Capsule | string | Uint8Array): ValidationResult;
   replay(journal: Uint8Array): ReplayResult;
+  describeAdapter(descriptor: AdapterDescriptor | string | Uint8Array): AdapterDescriptor;
 }

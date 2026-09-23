@@ -25,7 +25,7 @@ export class Engine {
   }
 
   #invoke(operation, bytes) {
-    const limit = operation === 1 ? 131072 : 16777216;
+    const limit = operation === 1 ? 131072 : operation === 3 ? 16384 : 16777216;
     if (bytes.byteLength === 0 || bytes.byteLength > limit) {
       throw new GolemError(1, 'empty or oversized input');
     }
@@ -64,5 +64,17 @@ export class Engine {
   replay(journal) {
     if (!(journal instanceof Uint8Array)) throw new TypeError('journal must be a Uint8Array');
     return this.#invoke(2, journal);
+  }
+
+  describeAdapter(descriptor) {
+    if (descriptor instanceof Uint8Array) return this.#invoke(3, descriptor);
+    if (typeof descriptor !== 'string') {
+      if (descriptor === null || typeof descriptor !== 'object' || Array.isArray(descriptor)) {
+        throw new TypeError('descriptor must be an object, JSON string or Uint8Array');
+      }
+      descriptor = JSON.stringify(descriptor);
+    }
+    if (typeof descriptor !== 'string') throw new TypeError('descriptor is not JSON serializable');
+    return this.#invoke(3, Buffer.from(descriptor, 'utf8'));
   }
 }

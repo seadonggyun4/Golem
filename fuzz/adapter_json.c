@@ -1,9 +1,24 @@
 #include "golem/adapter_protocol.h"
+#include "golem/adapter_descriptor.h"
 #include "check.h"
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size);
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+#ifndef GOLEM_FUZZ_MSGPACK
+    golem_adapter_descriptor descriptor, decoded;
+    memset(&descriptor, 0xa5, sizeof(descriptor));
+    unsigned char descriptor_before[sizeof(descriptor)];
+    memcpy(descriptor_before, &descriptor, sizeof(descriptor));
+    golem_status descriptor_status = golem_adapter_descriptor_decode((golem_bytes){data, size}, &descriptor);
+    if (descriptor_status == GOLEM_OK) {
+        char encoded[GOLEM_DESCRIPTOR_MAX_BYTES], again[GOLEM_DESCRIPTOR_MAX_BYTES]; size_t n, m;
+        REQUIRE(golem_adapter_descriptor_encode(&descriptor, encoded, sizeof(encoded), &n) == GOLEM_OK);
+        REQUIRE(golem_adapter_descriptor_decode((golem_bytes){(uint8_t *)encoded, n}, &decoded) == GOLEM_OK);
+        REQUIRE(golem_adapter_descriptor_encode(&decoded, again, sizeof(again), &m) == GOLEM_OK);
+        REQUIRE(n == m && !memcmp(encoded, again, n));
+    } else REQUIRE(!memcmp(descriptor_before, &descriptor, sizeof(descriptor)));
+#endif
     {
         golem_adapter_envelope e, again;
         memset(&e, 0xa5, sizeof(e));
