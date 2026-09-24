@@ -41,7 +41,8 @@ def adjudicate(path, expected):
                 for case in cases))
 
 
-def run(build, output, ctest, timeout):
+def run(build, output, ctest, timeout, *, groups=None, schema="golem.runtime-validation.v1", limitations=None):
+    groups = GROUPS if groups is None else groups
     build = build.resolve()
     cli = build / "golem"
     if not cli.is_file() or not (build / "CMakeCache.txt").is_file():
@@ -50,16 +51,24 @@ def run(build, output, ctest, timeout):
                                capture_output=True, check=True, timeout=30)
     tests = json.loads(inventory.stdout)["tests"]
     available = {test["name"] for test in tests}
-    missing = sorted(set(sum(GROUPS.values(), ())) - available)
+    missing = sorted(set(sum(groups.values(), ())) - available)
     if missing:
         raise ValueError("required tests missing: " + ", ".join(missing))
     inputs = {str(Path(arg).resolve()) for test in tests
-              if test["name"] in set(sum(GROUPS.values(), ()))
+              if test["name"] in set(sum(groups.values(), ()))
               for arg in test.get("command", []) if Path(arg).is_file()}
+    # Python integration cases import sibling fixtures. Pin those dependencies,
+    # not merely the launcher, so a changed oracle cannot retain a fixture PASS.
+    for name in tuple(inputs):
+        if Path(name).suffix == ".py":
+            inputs.update(str(p.resolve()) for p in Path(name).parent.glob("*.py") if p.is_file())
     inputs.add(str(Path(__file__).resolve()))
+    inputs.add(str(Path(__file__).with_name("verify_agent.py").resolve()))
+    inputs.add(str(build / "CMakeCache.txt"))
+    inputs.update(str(p.resolve()) for p in build.rglob("CTestTestfile.cmake"))
     hashes = {path: digest(Path(path)) for path in sorted(inputs)}
     output = private_directory(output)
-    report = {"schema": "golem.runtime-validation.v1", "authority": "DERIVED_ONLY",
+    report = {"schema": schema, "authority": "DERIVED_ONLY",
               "platform": platform.platform(), "cli_sha256": digest(cli),
               "cmake_cache_sha256": digest(build / "CMakeCache.txt"),
               "runner_sha256": digest(Path(__file__)), "groups": {},
@@ -67,8 +76,10 @@ def run(build, output, ctest, timeout):
               "not_verified": ["old-binary downgrade rejection", "cross-host compatibility",
                                "live-agent canary", "stable-runner performance thresholds"]}
     report["input_files"] = hashes
+    if limitations is not None:
+        report["not_verified"] = list(limitations)
     save(output / "inventory.json", inventory.stdout)
-    for name, required in GROUPS.items():
+    for name, required in groups.items():
         directory = private_directory(output / name)
         junit = directory / "results.xml"
         regex = "^(" + "|".join(re.escape(test) for test in required) + ")$"

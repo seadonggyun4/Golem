@@ -49,8 +49,11 @@ static golem_status git(const char *root, const char *command, const char *arg, 
                     (char *)path,
                     NULL};
     golem_supervisor_result r;
+    char *env[] = {"PATH=/usr/bin:/bin", "LANG=C", "LC_ALL=C",
+                   "GIT_CONFIG_NOSYSTEM=1", "GIT_CONFIG_GLOBAL=/dev/null", NULL};
     golem_status st =
-        golem_supervisor_run(argv[0], argv, (golem_bytes){NULL, 0}, deadline - t, NULL, NULL, &r);
+        golem_supervisor_run_at(argv[0], argv, root, env, (golem_bytes){NULL, 0},
+                                deadline - t, NULL, NULL, &r);
     if (st != GOLEM_OK)
         return st;
     if (memchr(r.output, 0, r.output_size))

@@ -39,6 +39,17 @@ pkg_check_modules(JSONC REQUIRED IMPORTED_TARGET json-c>=0.15)
 pkg_check_modules(MD4C REQUIRED IMPORTED_TARGET md4c>=0.4.8)
 
 add_library(golem STATIC
+    src/inventory/model.c
+    src/inventory/matcher.c
+    src/inventory/capture.c
+    src/inventory/git_record.c
+    src/inventory/compare.c
+    src/execution/change.c
+    src/execution/inventory_ref.c
+    src/workspace/model.c
+    src/workspace/git.c
+    src/workspace/store.c
+    src/workspace/lifecycle.c
     src/research/model.c
     src/research/cohort.c
     src/research/bundle.c
@@ -52,8 +63,23 @@ add_library(golem STATIC
     src/research/store.c
     src/research/report.c
     src/execution/model.c
+    src/execution/command.c
     src/execution/store.c
     src/execution/runner.c
+    src/execution/logs.c
+    src/execution/bundle.c
+    src/execution/proof_pack.c
+    src/execution/proof_format.c
+    src/execution/proof_store.c
+    src/candidate/model.c
+    src/candidate/store.c
+    src/candidate/isolation.c
+    src/candidate/evidence.c
+    src/candidate/comparison.c
+    src/candidate/patch.c
+    src/candidate/current.c
+    src/candidate/cohort.c
+    src/candidate/controller.c
     src/execution/report.c
     src/reentry/model.c
     src/reentry/store.c
@@ -87,6 +113,7 @@ add_library(golem STATIC
     src/daemon/admission_model.c
     src/daemon/admission_storage.c
     src/daemon/admission_work.c
+    src/daemon/resource.c
     src/daemon/recovery.c
     src/daemon/queue.c
     src/daemon/scheduler.c
@@ -100,6 +127,7 @@ add_library(golem STATIC
     src/runtime/profile_codec.c
     src/runtime/profile_store.c
     src/runtime/profile_cache.c
+    src/runtime/prepared_cache.c
     src/runtime/profile_binding.c
     src/runtime/profile_link.c
     src/adapter_protocol/adapter.c
@@ -200,10 +228,18 @@ if(GOLEM_BUILD_FUZZERS)
 endif()
 
 if(GOLEM_BUILD_CLI)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        add_executable(golem_cgroup_exec src/daemon/cgroup_exec.c)
+        set_target_properties(golem_cgroup_exec PROPERTIES OUTPUT_NAME golem-cgroup-exec)
+        golem_configure_target(golem_cgroup_exec)
+        install(TARGETS golem_cgroup_exec RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    endif()
     add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c src/cli/adapter_descriptor.c src/cli/research.c src/cli/research_bundle.c
         src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c src/cli/journal.c
-        src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/context.c src/cli/events.c src/cli/agent_session.c src/cli/runtime_profile.c src/cli/execution.c src/cli/reentry.c src/cli/completion.c)
+        src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/context.c src/cli/events.c src/cli/agent_session.c src/cli/runtime_profile.c src/cli/execution.c src/cli/proof.c src/cli/candidate.c src/cli/reentry.c src/cli/completion.c)
     set_target_properties(golem_cli PROPERTIES OUTPUT_NAME golem)
+    target_sources(golem_cli PRIVATE src/cli/candidate_host_config.c src/cli/candidate_host_runtime.c
+        src/cli/candidate_host_transport.c src/cli/candidate_host_cli.c)
     target_link_libraries(golem_cli PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
     golem_configure_target(golem_cli)
     install(TARGETS golem_cli RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

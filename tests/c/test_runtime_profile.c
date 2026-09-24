@@ -1,4 +1,5 @@
 #include "golem/runtime_profile.h"
+#include "golem/prepared_runtime.h"
 #include "test.h"
 #include <json-c/json.h>
 #include <string.h>
@@ -187,6 +188,134 @@ static int ownership(void)
     golem_runtime_profile_free(NULL);
     return 0;
 }
+typedef struct prepared_context {
+    uint64_t now;
+    unsigned observations, discoveries;
+    uint8_t generation;
+    bool denied, change, slow, oversized, fail;
+    golem_prepared_cache *cache;
+} prepared_context;
+static golem_status observe_prepared(void *ctx, const golem_runtime_profile *p, golem_digest *d)
+{
+    prepared_context *c = ctx;
+    (void)p;
+    ++c->observations;
+    if (golem_prepared_cache_close(c->cache) != GOLEM_ERR_INVALID_STATE)
+        return GOLEM_ERR_IO;
+    if (c->denied) return GOLEM_ERR_POLICY_DENIED;
+    *d = (golem_digest){{0}};
+    d->bytes[0] = c->generation;
+    return GOLEM_OK;
+}
+static golem_status discover_prepared(void *ctx, const golem_runtime_profile *p,
+                                      void *buffer, size_t capacity, size_t *used)
+{
+    prepared_context *c = ctx;
+    (void)p;
+    ++c->discoveries;
+    if (golem_prepared_cache_invalidate(c->cache) != GOLEM_ERR_INVALID_STATE)
+        return GOLEM_ERR_IO;
+    if (c->change) ++c->generation;
+    if (c->slow) c->now += 100;
+    if (c->fail) return GOLEM_ERR_IO;
+    if (capacity < 3) return GOLEM_ERR_BUFFER_TOO_SMALL;
+    memcpy(buffer, "SDK", 3);
+    *used = c->oversized ? capacity + 1 : 3;
+    return GOLEM_OK;
+}
+static golem_status prepared_clock(void *ctx, uint64_t *out)
+{
+    *out = ((prepared_context *)ctx)->now;
+    return GOLEM_OK;
+}
+static int prepared(void)
+{
+    allocation_context memory = {0};
+    golem_allocator a = {&memory, allocate, deallocate};
+    prepared_context context = {.now = 1000};
+    golem_prepared_options options = {.size = sizeof(options), .version = 1,
+        .capacity = 2, .max_bytes = 32, .ttl_ns = 100, .context = &context,
+        .observe = observe_prepared, .prepare = discover_prepared, .clock_ns = prepared_clock};
+    memory.fail = true;
+    CHECK(golem_prepared_cache_create(&options, &a, &context.cache) == GOLEM_ERR_OUT_OF_MEMORY);
+    CHECK(context.cache == NULL);
+    memory.fail = false;
+    CHECK(golem_prepared_cache_create(&options, &a, &context.cache) == GOLEM_OK);
+    struct json_object *o = fixture();
+    golem_runtime_profile *p = NULL;
+    CHECK(golem_runtime_profile_parse(encoded(o), NULL, &p, NULL) == GOLEM_OK);
+    const golem_prepared_runtime *first = NULL, *second = NULL, *r = NULL;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &first) == GOLEM_OK);
+    for (unsigned i = 0; i < 100; ++i) {
+        CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_OK);
+        CHECK(r == first);
+        CHECK(golem_prepared_cache_release(context.cache, r) == GOLEM_OK);
+    }
+    CHECK(context.discoveries == 1 && context.observations == 102);
+    golem_bytes bytes;
+    golem_digest profile, dependencies, content, expected;
+    CHECK(golem_prepared_runtime_view(first, &bytes, &profile, &dependencies, &content) == GOLEM_OK);
+    CHECK(bytes.size == 3 && !memcmp(bytes.data, "SDK", 3));
+    CHECK(golem_digest_bytes(bytes, &expected) == GOLEM_OK);
+    CHECK(!memcmp(content.bytes, expected.bytes, sizeof(content.bytes)));
+    context.denied = true;
+    r = first;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_ERR_POLICY_DENIED);
+    CHECK(r == first && context.discoveries == 1);
+    context.denied = false;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &second) == GOLEM_OK);
+    CHECK(second != first && context.discoveries == 2);
+    context.generation++;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_ERR_BUDGET_EXHAUSTED);
+    CHECK(golem_prepared_cache_close(context.cache) == GOLEM_ERR_INVALID_STATE);
+    CHECK(golem_prepared_cache_release(context.cache, first) == GOLEM_OK);
+    CHECK(golem_prepared_cache_release(context.cache, second) == GOLEM_OK);
+    CHECK(golem_prepared_cache_release(context.cache, second) == GOLEM_ERR_INVALID_STATE);
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_OK);
+    CHECK(golem_prepared_cache_release(context.cache, r) == GOLEM_OK);
+    unsigned count = context.discoveries;
+    context.now += 100;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_OK);
+    CHECK(context.discoveries == count + 1);
+    CHECK(golem_prepared_cache_release(context.cache, r) == GOLEM_OK);
+    --context.now;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_ERR_STALE_RESULT);
+    ++context.now;
+    context.change = true;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_ERR_STALE_RESULT);
+    context.change = false;
+    context.slow = true;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_ERR_STALE_RESULT);
+    context.slow = false;
+    context.oversized = true;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_ERR_SIZE_MISMATCH);
+    context.oversized = false;
+    context.fail = true;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_ERR_IO);
+    context.fail = false;
+    memory.fail = true;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_ERR_OUT_OF_MEMORY);
+    memory.fail = false;
+    CHECK(golem_prepared_cache_acquire(context.cache, p, &r) == GOLEM_OK);
+    CHECK(golem_prepared_cache_release(context.cache, r) == GOLEM_OK);
+    count = context.discoveries;
+    json_object_object_add(o, "model_reported", json_object_new_string("different-model"));
+    golem_runtime_profile *other = NULL;
+    CHECK(golem_runtime_profile_parse(encoded(o), NULL, &other, NULL) == GOLEM_OK);
+    CHECK(golem_prepared_cache_acquire(context.cache, other, &r) == GOLEM_OK);
+    CHECK(context.discoveries == count + 1);
+    CHECK(golem_prepared_cache_release(context.cache, r) == GOLEM_OK);
+    golem_runtime_profile_free(other);
+    CHECK(golem_prepared_cache_close(context.cache) == GOLEM_OK);
+    CHECK(memory.live == 0);
+    golem_prepared_cache *unchanged = NULL;
+    options.capacity = 0;
+    CHECK(golem_prepared_cache_create(&options, &a, &unchanged) == GOLEM_ERR_INVALID_ARGUMENT);
+    CHECK(unchanged == NULL && memory.live == 0);
+    golem_runtime_profile_free(p);
+    json_object_put(o);
+    return 0;
+}
 int main(int argc, char **argv)
 {
     CHECK(argc == 2);
@@ -198,5 +327,7 @@ int main(int argc, char **argv)
         return cache();
     if (!strcmp(argv[1], "ownership"))
         return ownership();
+    if (!strcmp(argv[1], "prepared"))
+        return prepared();
     return 1;
 }

@@ -1,5 +1,6 @@
 #include "internal.h"
 #include "../agent_session/internal.h"
+#include "../inventory/internal.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -58,24 +59,48 @@ static bool string_array(struct json_object *a, size_t min, size_t max, bool pat
 }
 golem_status ex_contract(struct json_object *o)
 {
-    const char *keys[] = {"schema_version", "selection_id", "development_plan", "snapshot_plan",
-                          "gates"};
+    const char *keys[] = {"schema_version", "selection_id", "development_plan",
+                          "snapshot_plan",  "gates",        "log_retention"};
+    uint64_t version = dw_uint(o, "schema_version");
     struct json_object *gates = dw_get(o, "gates"), *plan = dw_get(o, "snapshot_plan");
     const char *pk[] = {"schema_version", "timeout_seconds", "repositories"};
-    if (!dw_keys(o, keys, 5) || dw_uint(o, "schema_version") != 1 ||
+    if ((version < 1 || version > 5) || !dw_keys(o, keys, version >= 2 ? 6 : 5) ||
         !dw_id(dw_text(o, "selection_id")) || !wf_reference(dw_get(o, "development_plan")) ||
-        !ds_array(gates, 1, 8) || !dw_keys(plan, pk, 3) || dw_uint(plan, "schema_version") != 1 ||
+        !ds_array(gates, 1, 8) || !dw_keys(plan, pk, 3) ||
+        dw_uint(plan, "schema_version") != (version == 5   ? 3u
+                                            : version == 4 ? 2u
+                                                           : 1u) ||
         dw_uint(plan, "timeout_seconds") < 1 || dw_uint(plan, "timeout_seconds") > 60 ||
         !ds_array(dw_get(plan, "repositories"), 1, 8))
         return GOLEM_ERR_PARSE;
+    if (version >= 2) {
+        golem_status st = ex_retention(dw_get(o, "log_retention"));
+        if (st != GOLEM_OK)
+            return st;
+    }
     struct json_object *repos = dw_get(plan, "repositories");
     for (size_t i = 0; i < json_object_array_length(repos); ++i) {
         struct json_object *r = json_object_array_get_idx(repos, i);
-        const char *rk[] = {"id", "root", "paths", "toolchain", "test_configuration"};
-        if (!dw_keys(r, rk, 5) || !dw_id(dw_text(r, "id")) || dw_text(r, "root")[0] != '/' ||
-            strlen(dw_text(r, "root")) > 3000 || !string_array(dw_get(r, "paths"), 1, 64, true) ||
-            !ds_prose(r, "toolchain") || !ds_prose(r, "test_configuration"))
+        const char *rk[] = {"id",           "root", "paths", "toolchain", "test_configuration",
+                            "change_policy"};
+        if (!dw_keys(r, rk, version >= 4 ? 6 : 5) || !dw_id(dw_text(r, "id")) ||
+            dw_text(r, "root")[0] != '/' || strlen(dw_text(r, "root")) > 3000 ||
+            !string_array(dw_get(r, "paths"), 1, 64, true) || !ds_prose(r, "toolchain") ||
+            !ds_prose(r, "test_configuration"))
             return GOLEM_ERR_PARSE;
+        if (version >= 4) {
+            in_policy policy;
+            golem_status st = in_policy_parse(dw_get(r, "change_policy"), &policy);
+            if (st != GOLEM_OK)
+                return st;
+            struct json_object *paths = dw_get(r, "paths");
+            for (size_t k = 0; k < json_object_array_length(paths); ++k) {
+                const char *path = json_object_get_string(json_object_array_get_idx(paths, k));
+                if (in_any(policy.excluded, policy.excluded_count, path) &&
+                    !in_any(policy.protected, policy.protected_count, path))
+                    return GOLEM_ERR_POLICY_DENIED;
+            }
+        }
         for (size_t j = 0; j < i; ++j)
             if (strcmp(dw_text(r, "id"), dw_text(json_object_array_get_idx(repos, j), "id")) == 0)
                 return GOLEM_ERR_PARSE;
@@ -83,11 +108,11 @@ golem_status ex_contract(struct json_object *o)
     for (size_t i = 0; i < json_object_array_length(gates); ++i) {
         struct json_object *g = json_object_array_get_idx(gates, i), *cases = dw_get(g, "cases"),
                            *paths = dw_get(g, "protected_paths");
-        const char *gk[] = {"id",         "version", "repository",     "argv",
-                            "timeout_ms", "cases",   "protected_paths"};
-        if (!dw_keys(g, gk, 7) || !dw_id(dw_text(g, "id")) || dw_uint(g, "version") < 1 ||
-            dw_uint(g, "version") > UINT32_MAX || !dw_id(dw_text(g, "repository")) ||
-            !string_array(dw_get(g, "argv"), 1, 32, false) ||
+        const char *gk[] = {"id",         "version", "repository",      "argv",
+                            "timeout_ms", "cases",   "protected_paths", "execution"};
+        if (!dw_keys(g, gk, version >= 3 ? 8 : 7) || !dw_id(dw_text(g, "id")) ||
+            dw_uint(g, "version") < 1 || dw_uint(g, "version") > UINT32_MAX ||
+            !dw_id(dw_text(g, "repository")) || !string_array(dw_get(g, "argv"), 1, 32, false) ||
             json_object_get_string(json_object_array_get_idx(dw_get(g, "argv"), 0))[0] != '/' ||
             dw_uint(g, "timeout_ms") < 1 || dw_uint(g, "timeout_ms") > 60000 ||
             !ds_array(cases, 1, 64) || !string_array(paths, 1, 64, true))
@@ -99,6 +124,11 @@ golem_status ex_contract(struct json_object *o)
                 repo = json_object_array_get_idx(repos, j);
         if (!repo)
             return GOLEM_ERR_REQUIREMENTS_UNMET;
+        if (version >= 3) {
+            golem_status st = ex_command_validate(g, repo);
+            if (st != GOLEM_OK)
+                return st;
+        }
         for (size_t j = 0; j < json_object_array_length(paths); ++j) {
             bool found = false;
             struct json_object *all = dw_get(repo, "paths");
@@ -140,20 +170,98 @@ golem_status golem_execution_contract_validate(golem_bytes b, golem_digest *dige
     json_object_put(o);
     return dw_report(d, st, NULL);
 }
-golem_status ex_snapshot(struct json_object *plan, struct json_object **out)
+static golem_status consistent_inventory(struct json_object *declared,
+                                         struct json_object *inventory)
 {
-    const char *p = json_object_to_json_string_ext(plan, JSON_C_TO_STRING_PLAIN);
-    if (!p)
+    if (strcmp(dw_text(declared, "head"), dw_text(inventory, "head")))
+        return GOLEM_ERR_STALE_RESULT;
+    struct json_object *files = dw_get(declared, "files"), *entries = dw_get(inventory, "entries");
+    for (size_t i = 0; i < json_object_array_length(files); ++i) {
+        struct json_object *file = json_object_array_get_idx(files, i);
+        bool found = false;
+        for (size_t j = 0; j < json_object_array_length(entries); ++j) {
+            struct json_object *entry = json_object_array_get_idx(entries, j);
+            char path[GOLEM_INVENTORY_PATH_MAX + 1];
+            if (in_unhex(dw_text(entry, "path_hex"), path, sizeof(path)) != GOLEM_OK)
+                return GOLEM_ERR_PARSE;
+            if (!strcmp(path, dw_text(file, "path"))) {
+                found = true;
+                if (strcmp(dw_text(file, "digest"), dw_text(dw_get(entry, "worktree"), "sha256")))
+                    return GOLEM_ERR_STALE_RESULT;
+            }
+        }
+        if (!found)
+            return GOLEM_ERR_INCOMPLETE_WORK;
+    }
+    return GOLEM_OK;
+}
+
+golem_status ex_snapshot(golem_document_store *store, struct json_object *plan, bool publish,
+                         struct json_object **out)
+{
+    struct json_object *legacy = NULL, *snapshot = NULL;
+    if (json_object_deep_copy(plan, &legacy, NULL))
         return GOLEM_ERR_OUT_OF_MEMORY;
+    bool inventory = dw_uint(plan, "schema_version") >= 2;
+    bool external = dw_uint(plan, "schema_version") == 3;
+    if (inventory) {
+        if (!ex_uint(legacy, "schema_version", 1)) {
+            json_object_put(legacy);
+            return GOLEM_ERR_OUT_OF_MEMORY;
+        }
+        struct json_object *repos = dw_get(legacy, "repositories");
+        for (size_t i = 0; i < json_object_array_length(repos); ++i)
+            json_object_object_del(json_object_array_get_idx(repos, i), "change_policy");
+    }
+    const char *p = json_object_to_json_string_ext(legacy, JSON_C_TO_STRING_PLAIN);
+    if (!p) {
+        json_object_put(legacy);
+        return GOLEM_ERR_OUT_OF_MEMORY;
+    }
     uint8_t *data = NULL;
     size_t n = 0;
     golem_status st = golem_discovery_snapshot((golem_bytes){(const uint8_t *)p, strlen(p)}, NULL,
                                                &data, &n, NULL);
     if (st == GOLEM_OK)
-        st = golem_json_parse((golem_bytes){data, n}, GOLEM_DOCUMENT_MAX_JSON, out);
+        st = golem_json_parse((golem_bytes){data, n}, GOLEM_DOCUMENT_MAX_JSON, &snapshot);
     free(data);
+    json_object_put(legacy);
+    struct json_object *repos = dw_get(plan, "repositories");
+    for (size_t i = 0; inventory && st == GOLEM_OK && i < json_object_array_length(repos); ++i) {
+        struct json_object *repo = json_object_array_get_idx(repos, i), *captured = NULL;
+        in_policy policy;
+        st = in_policy_parse(dw_get(repo, "change_policy"), &policy);
+        if (st == GOLEM_OK)
+            st = in_capture(dw_text(repo, "root"), &policy, &captured);
+        if (st == GOLEM_OK)
+            st = consistent_inventory(
+                json_object_array_get_idx(dw_get(snapshot, "repositories"), i), captured);
+        struct json_object *reference = NULL;
+        if (st == GOLEM_OK && external)
+            st = ex_object_ref(store, captured, "golem.inventory.v1", GOLEM_INVENTORY_MAX_JSON,
+                               publish, &reference);
+        if (st == GOLEM_OK &&
+            !dw_add(json_object_array_get_idx(dw_get(snapshot, "repositories"), i),
+                    external ? "inventory_ref" : "inventory",
+                    json_object_get(external ? reference : captured)))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+        json_object_put(reference);
+        json_object_put(captured);
+    }
+    if (inventory && st == GOLEM_OK) {
+        const char *encoded = json_object_to_json_string_ext(snapshot, JSON_C_TO_STRING_PLAIN);
+        if (!encoded)
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+        else if (strlen(encoded) > GOLEM_DOCUMENT_MAX_JSON / 3)
+            st = GOLEM_ERR_BUDGET_EXHAUSTED;
+    }
+    if (st == GOLEM_OK)
+        *out = snapshot;
+    else
+        json_object_put(snapshot);
     return st;
 }
+
 golem_status ex_current(golem_document_store *s, struct json_object *manifest)
 {
     struct json_object *docs = dw_get(manifest, "documents");

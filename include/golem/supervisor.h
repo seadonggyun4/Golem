@@ -37,6 +37,37 @@ golem_status golem_supervisor_run_at(const char *executable, char *const argv[],
 typedef struct golem_supervisor_observation {
     bool spawned, reaped;
 } golem_supervisor_observation;
+/* Borrowed byte chunks before bounded protocol buffering. stream=0 stdout,
+ * stream=1 stderr. Callback must be bounded, nonblocking, non-reentrant; non-OK
+ * aborts and reaps. Never persist raw chunks without an approved retention policy.
+ * eof is an actual pipe EOF observation, not inferred from child exit. Counts
+ * cover bytes read, not bytes the child may have produced beyond cancellation.
+ * Additive API: existing result/observation layouts and limits are unchanged. */
+typedef struct golem_supervisor_stream {
+    size_t struct_size;
+    uint32_t version;
+    golem_status (*write)(void *context, unsigned stream, golem_bytes chunk);
+    void *context;
+} golem_supervisor_stream;
+typedef struct golem_supervisor_capture {
+    bool spawned, reaped, eof[2];
+    uint64_t observed_bytes[2];
+} golem_supervisor_capture;
+golem_status golem_supervisor_run_streamed(const char *executable, char *const argv[],
+    const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout_ns,
+    golem_status (*pulse)(void *context), void *context, golem_supervisor_result *out,
+    const golem_supervisor_stream *stream, golem_supervisor_capture *capture);
+/* Bounded bulk observation, not an adapter protocol response. Does not buffer
+ * stdout/stderr in result (sizes remain zero). Each stream has an explicit
+ * byte limit, 1..64 MiB. Limit overflow aborts/reaps without delivering the
+ * over-limit chunk. Caller must require OK and both EOFs before publishing any
+ * derived result. Partial callback observations are not a successful artifact.
+ * Same borrowed-input, cancellation, retention and non-sandbox rules as above. */
+golem_status golem_supervisor_run_bulk(const char *executable, char *const argv[],
+    const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout_ns,
+    golem_status (*pulse)(void *context), void *context, golem_supervisor_result *out,
+    const golem_supervisor_stream *stream, const uint64_t limits[2],
+    golem_supervisor_capture *capture);
 golem_status golem_supervisor_run_observed(const char *executable, char *const argv[],
     const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout_ns,
     golem_status (*pulse)(void *context), void *context, golem_supervisor_result *out,

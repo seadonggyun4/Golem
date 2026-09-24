@@ -23,6 +23,10 @@
 #include "golem/lease.h"
 #include "golem/daemon.h"
 #include "golem/supervisor.h"
+#include "golem/candidate.h"
+#include "golem/inventory.h"
+#include "golem/proof.h"
+#include "golem/workspace.h"
 
 static golem_status lease_sink(void *context, const golem_lease_event *event)
 {
@@ -207,6 +211,11 @@ static golem_status optimized_start(golem_work_run *run,
 
 int main(void)
 {
+    golem_digest candidate_digest;
+    if (golem_candidate_validate((golem_bytes){NULL, 0}, &candidate_digest, NULL) != GOLEM_ERR_PARSE ||
+        golem_inventory_policy_validate((golem_bytes){NULL, 0}, NULL) != GOLEM_ERR_PARSE ||
+        golem_proof_integrity((golem_bytes){NULL, 0}, NULL, NULL) != GOLEM_ERR_PARSE)
+        return 1;
     static const char reentry_status[]="{\"schema_version\":1,\"operation\":\"status\"}";
     static const char completion_resume[]="{\"schema_version\":1,\"operation\":\"resume\",\"selection_id\":\"selection\"}";
     if(golem_completion_validate((golem_bytes){(const uint8_t *)completion_resume,sizeof(completion_resume)-1},NULL)!=GOLEM_OK) return 1;

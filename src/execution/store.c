@@ -77,6 +77,8 @@ static golem_status issue(golem_document_store *s, struct json_object *o, golem_
     int dir = -1;
     if (st == GOLEM_OK)
         st = dw_put_json(s, o, out);
+    if (st == GOLEM_OK && dw_uint(o, "schema_version") >= 2 && !strcmp(dw_text(o, "type"), "qa"))
+        st = ex_bundle_check(s, out, o, true);
     if (st == GOLEM_OK)
         st = dw_dir(s->root, "execution-receipts", true, &dir);
     char name[65];
@@ -108,10 +110,13 @@ golem_status ex_load(golem_document_store *s, const golem_digest *key, const cha
     struct json_object *o = NULL;
     if (st == GOLEM_OK)
         st = dw_cas_json(s, key, &o);
-    if (st == GOLEM_OK && (dw_uint(o, "schema_version") != 1 ||
+    if (st == GOLEM_OK && ((dw_uint(o, "schema_version") < 1 || dw_uint(o, "schema_version") > 5) ||
                            strcmp(dw_text(o, "work_id"), dw_text(s->spec, "work_id")) != 0 ||
                            (type && strcmp(dw_text(o, "type"), type) != 0)))
         st = GOLEM_ERR_IDENTITY_MISMATCH;
+    if (st == GOLEM_OK && dw_uint(o, "schema_version") == 5)
+        st = ex_snapshot_verify(
+            s, dw_get(o, !strcmp(dw_text(o, "type"), "checkpoint") ? "baseline" : "snapshot"));
     if (st == GOLEM_OK && strcmp(dw_text(o, "type"), "qa") == 0) {
         struct json_object *gates = dw_get(o, "gates");
         for (size_t i = 0; st == GOLEM_OK && i < json_object_array_length(gates); ++i) {
@@ -132,6 +137,8 @@ golem_status ex_load(golem_document_store *s, const golem_digest *key, const cha
             json_object_put(copy);
             json_object_put(observed);
         }
+        if (st == GOLEM_OK && dw_uint(o, "schema_version") >= 2)
+            st = ex_bundle_check(s, key, o, false);
     }
     if (st == GOLEM_OK)
         *out = o;
@@ -152,8 +159,8 @@ static struct json_object *base(golem_document_store *s, const char *type,
     return o;
 }
 static golem_status prepare(golem_document_store *s, struct json_object *c,
-                            const golem_digest *approval, struct json_object *token,
-                            struct json_object **out)
+                            const golem_digest *approval, const golem_digest *shell,
+                            struct json_object *token, struct json_object **out)
 {
     golem_status st = ex_contract(c);
     golem_digest digest;
@@ -161,6 +168,8 @@ static golem_status prepare(golem_document_store *s, struct json_object *c,
         st = ex_hash(c, &digest);
     if (st == GOLEM_OK && (!approval || !dw_equal(approval, &digest)))
         st = GOLEM_ERR_APPROVAL_REQUIRED;
+    if (st == GOLEM_OK)
+        st = ex_command_approve(c, shell);
     struct json_object *m = NULL, *snap = NULL, *o = NULL, *executables = json_object_new_array();
     if (!executables)
         st = GOLEM_ERR_OUT_OF_MEMORY;
@@ -169,9 +178,12 @@ static golem_status prepare(golem_document_store *s, struct json_object *c,
     if (st == GOLEM_OK)
         st = ex_authorize(s, token, m);
     if (st == GOLEM_OK)
-        st = ex_snapshot(dw_get(c, "snapshot_plan"), &snap);
+        st = ex_snapshot(s, dw_get(c, "snapshot_plan"), true, &snap);
     struct json_object *gates = dw_get(c, "gates");
     for (size_t i = 0; st == GOLEM_OK && i < json_object_array_length(gates); ++i) {
+        st = ex_command_check(json_object_array_get_idx(gates, i), dw_get(c, "snapshot_plan"));
+        if (st != GOLEM_OK)
+            break;
         const char *path = json_object_get_string(
             json_object_array_get_idx(dw_get(json_object_array_get_idx(gates, i), "argv"), 0));
         golem_receipt file;
@@ -188,7 +200,8 @@ static golem_status prepare(golem_document_store *s, struct json_object *c,
     }
     if (st == GOLEM_OK) {
         o = base(s, "checkpoint", m);
-        if (!dw_add(o, "contract", json_object_get(c)) ||
+        if (!ex_uint(o, "schema_version", dw_uint(c, "schema_version")) ||
+            !dw_add(o, "contract", json_object_get(c)) ||
             !dw_add_digest(o, "contract_digest", &digest) ||
             !dw_add(o, "baseline", json_object_get(snap)) ||
             !dw_add(o, "executables", json_object_get(executables)))
@@ -241,7 +254,7 @@ static golem_status prepare(golem_document_store *s, struct json_object *c,
     return st;
 }
 static golem_status finish(golem_document_store *s, struct json_object *cp, const golem_digest *key,
-                           struct json_object **out)
+                           struct json_object *token, struct json_object **out)
 {
     struct json_object *m = NULL, *snap = NULL, *o = NULL;
     golem_status st = ex_inputs(s, dw_get(cp, "contract"), "development-result", &m);
@@ -252,10 +265,15 @@ static golem_status finish(golem_document_store *s, struct json_object *cp, cons
          !json_object_equal(dw_get(m, "documents"), dw_get(dw_get(cp, "manifest"), "documents"))))
         st = GOLEM_ERR_STALE_RESULT;
     if (st == GOLEM_OK)
-        st = ex_snapshot(dw_get(dw_get(cp, "contract"), "snapshot_plan"), &snap);
+        st = ex_snapshot(s, dw_get(dw_get(cp, "contract"), "snapshot_plan"), true, &snap);
+    if (st == GOLEM_OK && dw_uint(cp, "schema_version") >= 4)
+        st = ex_authorize(s, token, m);
+    if (st == GOLEM_OK)
+        st = ex_inventory_check(s, cp, snap, true);
     if (st == GOLEM_OK) {
         o = base(s, "development", m);
-        if (!dw_add_digest(o, "checkpoint", key) || !dw_add(o, "snapshot", json_object_get(snap)))
+        if (!ex_uint(o, "schema_version", dw_uint(cp, "schema_version")) ||
+            !dw_add_digest(o, "checkpoint", key) || !dw_add(o, "snapshot", json_object_get(snap)))
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
     if (st == GOLEM_OK)
@@ -276,7 +294,14 @@ static golem_status live(golem_document_store *s, struct json_object *r)
     if (st == GOLEM_OK)
         st = ex_current(s, dw_get(r, "manifest"));
     if (st == GOLEM_OK)
-        st = ex_snapshot(dw_get(dw_get(cp, "contract"), "snapshot_plan"), &now);
+        st = ex_snapshot(s, dw_get(dw_get(cp, "contract"), "snapshot_plan"), false, &now);
+    /* A changed v5 read-only capture is intentionally not in CAS. Reject it
+     * before resolving references; retain the historical v1-v4 check order. */
+    if (st == GOLEM_OK && dw_uint(r, "schema_version") == 5 &&
+        !json_object_equal(now, dw_get(r, "snapshot")))
+        st = GOLEM_ERR_STALE_RESULT;
+    if (st == GOLEM_OK)
+        st = ex_inventory_check(s, cp, now, false);
     if (st == GOLEM_OK && !json_object_equal(now, dw_get(r, "snapshot")))
         st = GOLEM_ERR_STALE_RESULT;
     json_object_put(cp);
@@ -311,9 +336,8 @@ golem_status ex_pass(golem_document_store *s, struct json_object *meta)
     json_object_put(r);
     return st;
 }
-golem_status golem_execution_call(golem_document_store *s, golem_bytes bytes,
-                                  const golem_digest *approval, golem_execution_reply *out,
-                                  golem_diagnostic *d)
+static golem_status call(golem_document_store *s, golem_bytes bytes, const golem_digest *approval,
+                         const golem_digest *shell, golem_execution_reply *out, golem_diagnostic *d)
 {
     if (!s || !out || s->poisoned)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -340,7 +364,7 @@ golem_status golem_execution_call(golem_document_store *s, golem_bytes bytes,
         st = GOLEM_ERR_APPROVAL_REQUIRED;
     golem_digest key = {0}, result_key = {0};
     if (st == GOLEM_OK && is_prepare)
-        st = prepare(s, dw_get(req, "contract"), approval, dw_get(req, "token"), &result);
+        st = prepare(s, dw_get(req, "contract"), approval, shell, dw_get(req, "token"), &result);
     else if (st == GOLEM_OK) {
         if (!dw_digest(req, is_verify ? "receipt" : "checkpoint", &key))
             st = GOLEM_ERR_PARSE;
@@ -352,7 +376,7 @@ golem_status golem_execution_call(golem_document_store *s, golem_bytes bytes,
                 result = json_object_get(cp);
             result_key = key;
         } else if (st == GOLEM_OK && !is_run) {
-            st = finish(s, cp, &key, &result);
+            st = finish(s, cp, &key, dw_get(req, "token"), &result);
             if (st == GOLEM_OK)
                 st = ex_authorize(s, dw_get(req, "token"), dw_get(result, "manifest"));
         } else if (st == GOLEM_OK) {
@@ -360,6 +384,8 @@ golem_status golem_execution_call(golem_document_store *s, golem_bytes bytes,
             if (!dw_digest(cp, "contract_digest", &approved) || !approval ||
                 !dw_equal(&approved, approval))
                 st = GOLEM_ERR_APPROVAL_REQUIRED;
+            if (st == GOLEM_OK)
+                st = ex_command_approve(dw_get(cp, "contract"), shell);
             if (st == GOLEM_OK)
                 st = ex_inputs(s, dw_get(cp, "contract"), "qa-result", &manifest);
             if (st == GOLEM_OK)
@@ -388,4 +414,21 @@ golem_status golem_execution_call(golem_document_store *s, golem_bytes bytes,
     json_object_put(reply);
     json_object_put(manifest);
     return dw_report(d, st, NULL);
+}
+
+golem_status golem_execution_call(golem_document_store *s, golem_bytes bytes,
+                                  const golem_digest *approval, golem_execution_reply *out,
+                                  golem_diagnostic *d)
+{
+    return call(s, bytes, approval, NULL, out, d);
+}
+
+golem_status golem_execution_call_authorized(golem_document_store *s, golem_bytes bytes,
+                                             const golem_execution_approval *approval,
+                                             golem_execution_reply *out, golem_diagnostic *d)
+{
+    if (approval && (approval->struct_size != sizeof(*approval) || approval->version != 1))
+        return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
+    return call(s, bytes, approval ? approval->contract : NULL,
+                approval ? approval->shell_contract : NULL, out, d);
 }

@@ -4,6 +4,11 @@ Golem keeps the current agent in control of editing. It does not launch another
 agent, execute Markdown code blocks, or interpret reference documents as grants.
 The C API is `include/golem/execution.h`; CLI commands use `golem execution`.
 This is a bounded local execution contract, not a general acceptance oracle.
+Opt-in contract v2 adds [verification bundles and log retention](verification-bundles.md)
+without rewriting historical v1 receipts or Markdown.
+Contract v3 adds [explicit shell approval and the execution boundary](execution-boundary.md).
+Optional isolated candidates use the [workspace C host API](workspaces.md);
+workspace ownership does not replace execution approval or QA acceptance.
 
 ## Workflow
 
@@ -95,8 +100,9 @@ case IDs in order. stderr is not parsed as a test result:
 {"schema_version":1,"cases":[{"id":"reproduction","status":"PASS"}]}
 ```
 
-Only PASS/FAIL are admitted as observed case outcomes. Empty/missing/duplicate,
-extra, skipped or reordered cases are ERROR, even with exit 0. No shell is inserted
+Contract v1 admits PASS/FAIL; v2 also admits ERROR, which makes the gate ERROR.
+Empty/missing/duplicate, extra, skipped or reordered cases are ERROR, even with
+exit 0. No shell is inserted
 and PATH is not used for the executable. A reviewed adapter/wrapper may translate
 CTest/JUnit/TAP to this contract; those parsers are not built into this version.
 Golem cannot prove that a malicious test wrapper actually tested its assertion.
@@ -133,7 +139,8 @@ paths and argv are retained: never put credentials or private data in them.
 
 ## Failure and recovery
 
-Results distinguish PASS, FAIL and ERROR. Nonzero exit is FAIL; signal, timeout,
+Results distinguish PASS, FAIL and ERROR. Nonzero exit is FAIL unless a higher
+priority execution error or v2 case ERROR is observed; signal, timeout,
 lease expiry, output overflow, parser problems and snapshot changes cannot pass.
 Missing cases display UNKNOWN in Markdown; no skipped test is promoted to PASS.
 `verify` means freshness/integrity only and can succeed for a fresh FAIL receipt.
@@ -177,6 +184,21 @@ distributed journal. A cooperative local owner can still edit its own storage.
   Enrollment prevents new result downgrades, not historical data migration.
   Independent reviewer semantics, source patch attribution, automatic causal reentry,
   universal gate parsers and final semantic acceptance are not claimed.
+
+## Policy-scoped inventory (v4/v5)
+
+Opt in to execution contract v4 for HEAD/index/worktree change inventories,
+protected patterns, per-repository changed-path limits and live completion
+freshness checks. [Change inventory](change-inventory.md) documents the schema,
+findings receipts, exclusions and conservative resource limits. The declared-file
+scope limitations above continue to apply to contracts v1-v3.
+
+For larger inventories use execution contract v5 with snapshot plan v3. This
+keeps full inventories in bounded CAS objects and records typed digest/size
+references in checkpoints, development and QA receipts. Actual QA, Markdown
+rendering and live completion checks verify the referenced evidence. See the
+[v5 contract and limits](change-inventory.md#large-inventory-qa-execution-v5).
+Existing v4 records are not rewritten or silently upgraded.
 
 ## Research basis
 

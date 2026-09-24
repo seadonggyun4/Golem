@@ -4,6 +4,9 @@ Phase 30G separates contract regressions, fault injection, bounded exploration,
 measurements and real current-agent evidence. A successful fixture suite is not
 proof of model behavior, a production SLO, or release readiness.
 
+For verification bundles, isolated worktrees, package boundaries and an
+interactive current-agent canary, see [Isolation qualification](isolation-validation.md).
+
 ## Development Baseline Status
 
 The Phase 30A-30G development baseline is closed. Delivered modules cover runtime

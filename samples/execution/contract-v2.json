@@ -1,0 +1,35 @@
+{
+  "schema_version": 2,
+  "selection_id": "selection",
+  "development_plan": {
+    "document_id": "development-plan",
+    "revision": 1,
+    "digest": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "snapshot_plan": {
+    "schema_version": 1,
+    "timeout_seconds": 15,
+    "repositories": [{
+      "id": "project",
+      "root": "/replace/with/private/project",
+      "paths": ["src/logic.c", "tests/gate.py"],
+      "toolchain": "Record the reviewed compiler/tool versions here",
+      "test_configuration": "Regression and reproduction cases for REQ-1"
+    }]
+  },
+  "gates": [{
+    "id": "regression",
+    "version": 1,
+    "repository": "project",
+    "argv": ["/usr/bin/python3", "tests/gate.py"],
+    "timeout_ms": 30000,
+    "cases": [{"id": "reproduction", "requirement_id": "REQ-1"}],
+    "protected_paths": ["tests/gate.py"]
+  }],
+  "log_retention": {
+    "mode": "DISCARD",
+    "max_bytes": 0,
+    "redactor": "none",
+    "require_complete": false
+  }
+}

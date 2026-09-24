@@ -3,12 +3,16 @@
 #include "golem/workflow.h"
 #include "golem/agent_session.h"
 #include "golem/execution.h"
+#include "golem/proof.h"
+#include "golem/candidate.h"
+#include "golem/inventory.h"
 #include "golem/reentry.h"
 #include "golem/completion.h"
 #include "golem/research.h"
 #include "golem/runtime_profile.h"
 #include "golem/context.h"
 #include "golem/runtime_event.h"
+#include "../src/inventory/git_record.h"
 #include <stddef.h>
 #include <stdint.h>
 int LLVMFuzzerTestOneInput(const uint8_t *data,size_t size)
@@ -20,6 +24,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data,size_t size)
         "\"policy_version\":1,\"source_snapshot\":\"0000000000000000000000000000000000000000000000000000000000000000\","
         "\"supersedes\":\"\",\"expected_generation\":1}";
     if(size>GOLEM_DOCUMENT_MAX_BODY+1) return 0;
+    in_git_entry git_entry;
+    (void)in_git_entry_parse((golem_bytes){data,size}, false, &git_entry);
+    (void)in_git_entry_parse((golem_bytes){data,size}, true, &git_entry);
     golem_runtime_cursor cursor;
     (void)golem_runtime_cursor_parse((golem_string_view){(const char *)data,size}, &cursor);
     (void)golem_context_request_validate((golem_bytes){data,size},NULL);
@@ -32,7 +39,15 @@ int LLVMFuzzerTestOneInput(const uint8_t *data,size_t size)
     (void)golem_research_validate((golem_bytes){data,size},NULL);
     (void)golem_research_redaction_validate((golem_bytes){data,size},NULL);
     (void)golem_research_bundle_verify((golem_bytes){data,size},NULL);
+    (void)golem_proof_integrity((golem_bytes){data,size},NULL,NULL);
     golem_digest contract_digest;
+    (void)golem_candidate_validate((golem_bytes){data,size},&contract_digest,NULL);
+    (void)golem_inventory_policy_validate((golem_bytes){data,size},NULL);
+    static const char inventory_policy[] = "{\"schema_version\":1,\"protected\":[],\"excluded\":[],\"limit\":{\"mode\":\"UNLIMITED\"}}";
+    golem_inventory_reply inventory = {0};
+    (void)golem_inventory_compare((golem_bytes){data,size},(golem_bytes){data,size},
+        (golem_bytes){(const uint8_t *)inventory_policy,sizeof(inventory_policy)-1},&inventory,NULL);
+    golem_inventory_reply_free(&inventory);
     (void)golem_execution_contract_validate((golem_bytes){data,size},&contract_digest,NULL);
     /* Mutate bounded typed edges as well as serialized document envelopes. */
     if(size>=4) {

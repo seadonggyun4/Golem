@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "golem/admission.h"
+#include "golem/candidate.h"
 #include "golem/document.h"
 #include <signal.h>
 #include <stdio.h>
@@ -12,6 +13,60 @@ typedef struct host {
     golem_digest receipt;
     unsigned executions;
 } host;
+static golem_status deny_request(void *context, golem_bytes request)
+{
+    (void)context;
+    (void)request;
+    return GOLEM_ERR_APPROVAL_REQUIRED;
+}
+static golem_status deny_cancel(void *context, const char *candidate, const char *session)
+{
+    (void)context;
+    (void)candidate;
+    (void)session;
+    return GOLEM_ERR_APPROVAL_REQUIRED;
+}
+/* Exercises only the trusted start connector, not approval or provider work. */
+static golem_status current_start(host *h, golem_admission *admission,
+                                  const golem_admission_ticket *ticket)
+{
+    golem_document_store *store = NULL;
+    golem_status st = golem_document_store_open(h->work, true, NULL, &store, NULL);
+    golem_workspace_host workspace = {0};
+    golem_candidate_current_binding binding = {.candidate = "candidate-a",
+                                               .session = "agent-a",
+                                               .runtime_binding = ticket->request.runtime_binding,
+                                               .member = {.work = store,
+                                                          .workspace = &workspace,
+                                                          .work_root = h->work,
+                                                          .tree_root = "/",
+                                                          .build_root = "/",
+                                                          .temp_root = "/"}};
+    golem_candidate_current_options options = {.size = sizeof(options),
+                                               .version = 1,
+                                               .bindings = &binding,
+                                               .count = 1,
+                                               .authorize = deny_request,
+                                               .request_cancel = deny_cancel};
+    golem_candidate_host connector;
+    if (st == GOLEM_OK)
+        st = golem_candidate_current_host(&options, &connector);
+    if (st == GOLEM_OK &&
+        connector.check(connector.context, (golem_bytes){NULL, 0}) != GOLEM_ERR_APPROVAL_REQUIRED)
+        st = GOLEM_ERR_INVALID_STATE;
+    if (st == GOLEM_OK)
+        st = connector.start(connector.context, "candidate-a", admission, "bridge-1");
+    if (st == GOLEM_OK && connector.start(connector.context, "candidate-a", admission,
+                                          "bridge-1") != GOLEM_ERR_INVALID_STATE)
+        st = GOLEM_ERR_INVALID_STATE;
+    golem_admission_ticket current;
+    if (st == GOLEM_OK)
+        st = golem_admission_lookup(admission, "bridge-1", &current);
+    if (st == GOLEM_OK)
+        h->receipt = current.binding_receipt;
+    golem_status closed = golem_document_store_close(store);
+    return st == GOLEM_OK ? closed : st;
+}
 static golem_status publish(void *context, const golem_digest *id,
                             const golem_admission_ticket *ticket, golem_digest *receipt)
 {
@@ -86,7 +141,8 @@ int main(int argc, char **argv)
             s = golem_admission_grant(a, &t);
         const golem_admission_dispatch_ops ops = {publish, execute};
         if (s == GOLEM_OK)
-            s = golem_admission_dispatch(a, t.token, &ops, &h);
+            s = !strcmp(h.mode, "current") ? current_start(&h, a, &t)
+                                           : golem_admission_dispatch(a, t.token, &ops, &h);
         if (s == GOLEM_OK)
             s = golem_admission_lookup(a, "bridge-1", &t);
     }

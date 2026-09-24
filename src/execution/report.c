@@ -133,7 +133,38 @@ golem_status ex_markdown(golem_document_store *s, struct json_object *m, golem_e
                     fprintf(f, "| %s | %s | PASS | %s |\n", dw_text(c, "requirement_id"),
                             dw_text(c, "id"), a ? dw_text(a, "status") : "UNKNOWN");
                 }
+                if (dw_uint(r, "schema_version") >= 2) {
+                    struct json_object *logs = dw_get(g, "logs");
+                    fprintf(f, "\nLog retention: %s. Duration: %llu ms.\n\n",
+                        dw_text(g, "log_policy"), (unsigned long long)dw_uint(g, "duration_ms"));
+                    for (size_t j = 0; j < json_object_array_length(logs); ++j) {
+                        struct json_object *log = json_object_array_get_idx(logs, j);
+                        fprintf(f, "- %s: %s; observed %llu bytes; retained %llu bytes; "
+                            "EOF %s; redactor %s; receipt %s.\n",
+                            dw_text(log, "stream"), dw_text(log, "state"),
+                            (unsigned long long)dw_uint(log, "observed_bytes"),
+                            (unsigned long long)dw_uint(log, "retained_bytes"),
+                            json_object_get_boolean(dw_get(log, "eof")) ? "yes" : "no",
+                            dw_text(log, "redactor"), *dw_text(log, "retained_receipt")
+                                ? dw_text(log, "retained_receipt") : "unavailable");
+                    }
+                }
             }
+        }
+        if (qa && dw_uint(r, "schema_version") >= 2) {
+            struct json_object *bundle = NULL;
+            golem_digest digest;
+            st = ex_bundle_build(s, &key, r, &bundle);
+            if (st == GOLEM_OK)
+                st = ex_hash(bundle, &digest);
+            char hex[65];
+            size_t required;
+            if (st == GOLEM_OK)
+                st = golem_digest_format(&digest, hex, sizeof(hex), &required);
+            if (st == GOLEM_OK)
+                fprintf(f, "\nVerification bundle: `%s`. Redacted captures are lossy and "
+                    "private; log completeness does not establish acceptance.\n", hex);
+            json_object_put(bundle);
         }
         fputs("\n## Validation\n\nFacts are generated from immutable receipts. PASS covers only "
               "the declared cases, not semantic completeness.\n\n"

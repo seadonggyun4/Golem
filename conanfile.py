@@ -1,6 +1,7 @@
 """Public source-available Golem package; no private project assets exported."""
 from pathlib import Path
 import re
+import importlib.util
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -26,17 +27,15 @@ class GolemConan(ConanFile):
         self.version = re.search(r'^#define GOLEM_VERSION_STRING "([^"]+)"', header, re.M)[1]
 
     def export(self):
+        copy(self, "source_policy.py", src=self.recipe_folder, dst=self.export_folder)
         copy(self, "version.h", src=str(Path(self.recipe_folder, "include/golem")),
              dst=str(Path(self.export_folder, "include/golem")))
 
     def export_sources(self):
-        for name in ("CMakeLists.txt", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"):
-            copy(self, name, src=self.recipe_folder, dst=self.export_sources_folder)
-        for directory, patterns in (("src", ("*.c", "*.h")),
-                                    ("include", ("*.h",)), ("cmake", ("*.cmake.in",))):
-            for pattern in patterns:
-                copy(self, pattern, src=str(Path(self.recipe_folder, directory)),
-                     dst=str(Path(self.export_sources_folder, directory)))
+        spec = importlib.util.spec_from_file_location("golem_source_policy", Path(self.recipe_folder, "source_policy.py"))
+        policy = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(policy)
+        policy.export_sources(Path(self.recipe_folder), Path(self.export_sources_folder), "conan")
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")

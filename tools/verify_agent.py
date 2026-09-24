@@ -99,8 +99,13 @@ def capture(argv, destination, timeout, cwd=None):
                 os.killpg(process.pid, signal.SIGKILL)
             except ProcessLookupError:
                 pass
-            process.wait()
-    if any(p.stat().st_size > LIMIT for p in paths):
+            except PermissionError:
+                # Reap our launcher, but never claim that its descendants stopped.
+                reason = "CLEANUP_DENIED"
+                if process.poll() is None:
+                    process.kill()
+            process.wait(timeout=5)
+    if reason != "CLEANUP_DENIED" and any(p.stat().st_size > LIMIT for p in paths):
         reason = "OUTPUT_LIMIT"
     return {"returncode": process.returncode, "reason": reason,
             "elapsed_seconds": round(time.monotonic() - started, 3),

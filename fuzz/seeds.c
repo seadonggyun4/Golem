@@ -7,6 +7,7 @@
 #include "golem/journal.h"
 #include "golem/lineage.h"
 #include "../src/daemon/admission_internal.h"
+#include "../src/execution/proof_internal.h"
 #include "check.h"
 #include <errno.h>
 #include <stdlib.h>
@@ -27,6 +28,24 @@ static void save(const char *group, const char *name, const void *data, size_t s
     REQUIRE(n > 0 && (size_t)n < sizeof(path));
     FILE *f = fopen(path, "wb"); REQUIRE(f != NULL);
     REQUIRE(fwrite(data, 1, size, f) == size && fclose(f) == 0);
+}
+static void proof_seed(void)
+{
+    struct json_object *files = json_object_new_object(), *policy = json_object_new_object(), *pack = NULL;
+    REQUIRE(ex_uint(policy, "schema_version", 1));
+    REQUIRE(ex_text(policy, "profile", "MINIMAL"));
+    REQUIRE(dw_add(policy, "acknowledge_linkability", json_object_new_boolean(false)));
+    for (size_t i = 0; i < PROOF_PAYLOADS; ++i)
+        REQUIRE(ex_text(files, proof_names[i], "derived fuzz fixture\n"));
+    REQUIRE(proof_seal(files, policy, &pack) == GOLEM_OK);
+    golem_execution_reply reply = {0};
+    REQUIRE(ex_emit(pack, &reply) == GOLEM_OK);
+    REQUIRE(golem_proof_integrity((golem_bytes){reply.data, reply.size}, NULL, NULL) == GOLEM_OK);
+    save("document", "proof-pack.json", reply.data, reply.size);
+    golem_execution_reply_free(&reply);
+    json_object_put(pack);
+    json_object_put(files);
+    json_object_put(policy);
 }
 static void envelopes(const char *source)
 {
@@ -126,11 +145,17 @@ static void parsers(void)
 }
 static void documents(const char *source)
 {
+    static const char head[] = "100644 blob 0123456789012345678901234567890123456789\tfile\nname";
+    static const char index[] = "100644 0123456789012345678901234567890123456789 0\tfile";
+    save("document", "git-head-record", (const uint8_t *)head, sizeof(head));
+    save("document", "git-index-record", (const uint8_t *)index, sizeof(index));
+    static const char inventory[] = "{\"schema_version\":1,\"protected\":[{\"kind\":\"SEGMENT_GLOB\",\"pattern\":\"**/test?.c\"}],\"excluded\":[],\"limit\":{\"mode\":\"BOUNDED\",\"max_changed_paths\":4}}";
+    save("document", "inventory-policy.json", (const uint8_t *)inventory, sizeof(inventory) - 1);
     const char context[] = "{\"schema_version\":1,\"renderer_version\":1,\"recipe\":\"extractive-v1\",\"selection_id\":\"selection\",\"target_kind\":\"planning\",\"source_snapshot\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"byte_budget\":2097152,\"excerpt_bytes\":128,\"token_budget\":0,\"tokenizer_id\":\"none\",\"agent_note\":\"\"}";
     save("document", "context-request.json", (const uint8_t *)context, sizeof(context) - 1);
     const char cursor[] = "1:0000000000000000000000000000000000000000000000000000000000000000:1:0000000000000000000000000000000000000000000000000000000000000000";
     save("document", "runtime-cursor.txt", (const uint8_t *)cursor, sizeof(cursor) - 1);
-    const char *names[] = {"documents/work.json", "documents/planning.json", "documents/planning.md", "discovery/assessment.json", "agent-session/start.json", "agent-session/status.json", "execution/contract.json", "reentry/decision.json", "completion/finalize.json", "completion/resume.json", "research/request.json", "research/attempt-request.json", "research/outcome-enroll-request.json", "research/adjudication-request.json", "research/cohort-request.json", "research/cohort-observe-request.json", "research/redaction-minimal.json", "research/redaction-linkable.json"};
+    const char *names[] = {"candidates/group.json", "documents/work.json", "documents/planning.json", "documents/planning.md", "discovery/assessment.json", "agent-session/start.json", "agent-session/status.json", "execution/contract.json", "reentry/decision.json", "completion/finalize.json", "completion/resume.json", "research/request.json", "research/attempt-request.json", "research/outcome-enroll-request.json", "research/adjudication-request.json", "research/cohort-request.json", "research/cohort-observe-request.json", "research/redaction-minimal.json", "research/redaction-linkable.json"};
     for (size_t i = 0; i < sizeof(names)/sizeof(*names); ++i) {
         char path[4096]; uint8_t bytes[8192];
         int n = snprintf(path, sizeof(path), "%s/samples/%s", source, names[i]);
@@ -185,6 +210,6 @@ static void bundles(void)
 int main(int argc, char **argv)
 {
     REQUIRE(argc == 3); root = argv[1]; directory(root);
-    envelopes(argv[2]); journals(argv[2]); parsers(); documents(argv[2]); bundles();
+    envelopes(argv[2]); journals(argv[2]); parsers(); documents(argv[2]); bundles(); proof_seed();
     return 0;
 }

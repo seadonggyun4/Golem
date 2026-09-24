@@ -16,6 +16,10 @@ static int usage(void)
         "  golem execution validate CONTRACT_JSON\n"
         "  golem execution call WORK_DIR REQUEST_JSON [--approve-contract SHA256]\n"
         "  golem execution render WORK_DIR METADATA_JSON\n"
+        "  golem proof render WORK REQUEST.json | verify WORK REQUEST.json PACK.json\n"
+        "  golem proof publish PACK.json PRIVATE_ROOT | verify-dir PRIVATE_ROOT MANIFEST_SHA256\n"
+        "  golem proof integrity PACK.json [EXPECTED_MANIFEST_SHA256]\n"
+        "  golem candidate validate MANIFEST.json | gates WORK CHECKPOINT_SHA256 | status WORK GROUP\n"
         "  golem research case create WORK_DIR CASE_JSON KEY\n"
         "  golem research attempt plan|record WORK_DIR ATTEMPT_JSON KEY\n"
         "  golem research validate REQUEST_JSON\n"
@@ -74,6 +78,8 @@ int golem_cli_events(int argc, char **argv);
 int golem_cli_agent_session(int argc, char **argv);
 int golem_cli_runtime_profile(int argc, char **argv);
 int golem_cli_execution(int argc, char **argv);
+int golem_cli_proof(int argc, char **argv);
+int golem_cli_candidate(int argc, char **argv);
 int golem_cli_reentry(int argc, char **argv);
 int golem_cli_research(int argc, char **argv);
 int golem_cli_completion(int argc, char **argv);
@@ -86,6 +92,8 @@ int main(int argc, char **argv)
     if(argc>=2 && strcmp(argv[1],"session")==0) return golem_cli_agent_session(argc,argv);
     if(argc>=2 && strcmp(argv[1],"profile")==0) return golem_cli_runtime_profile(argc,argv);
     if(argc>=2 && strcmp(argv[1],"execution")==0) return golem_cli_execution(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"proof")==0) return golem_cli_proof(argc,argv);
+    if(argc>=2 && strcmp(argv[1],"candidate")==0) return golem_cli_candidate(argc,argv);
     if(argc>=2 && strcmp(argv[1],"reentry")==0) return golem_cli_reentry(argc,argv);
     if(argc>=2 && strcmp(argv[1],"research")==0) return golem_cli_research(argc,argv);
     if(argc>=2 && strcmp(argv[1],"completion")==0) return golem_cli_completion(argc,argv);

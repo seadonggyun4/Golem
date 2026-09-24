@@ -1,6 +1,6 @@
 set(fuzz_names adapter_json adapter_msgpack journal parser policy_artifact document admission)
 add_executable(golem_fuzz_seeds seeds.c)
-target_link_libraries(golem_fuzz_seeds PRIVATE Golem::golem)
+target_link_libraries(golem_fuzz_seeds PRIVATE Golem::golem PkgConfig::JSONC)
 golem_configure_target(golem_fuzz_seeds)
 add_test(NAME fuzz_seeds COMMAND golem_fuzz_seeds
     "${CMAKE_CURRENT_BINARY_DIR}/seeds" "${PROJECT_SOURCE_DIR}")

@@ -1,0 +1,41 @@
+{
+  "schema_version": 3,
+  "selection_id": "selection",
+  "development_plan": {
+    "document_id": "development-plan",
+    "revision": 1,
+    "digest": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "snapshot_plan": {
+    "schema_version": 1,
+    "timeout_seconds": 15,
+    "repositories": [{
+      "id": "project",
+      "root": "/replace/with/private/project",
+      "paths": ["src/logic.c", "qa/verify.sh"],
+      "toolchain": "Record reviewed tools and versions",
+      "test_configuration": "Review the complete script and its external effects"
+    }]
+  },
+  "gates": [{
+    "id": "regression",
+    "version": 1,
+    "repository": "project",
+    "argv": ["/bin/sh", "/replace/with/private/project/qa/verify.sh"],
+    "timeout_ms": 30000,
+    "cases": [{"id": "reproduction", "requirement_id": "REQ-1"}],
+    "protected_paths": ["qa/verify.sh"],
+    "execution": {
+      "kind": "SHELL_SCRIPT",
+      "executable_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "script": "qa/verify.sh",
+      "script_digest": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }],
+  "log_retention": {
+    "mode": "DISCARD",
+    "max_bytes": 0,
+    "redactor": "none",
+    "require_complete": false
+  }
+}

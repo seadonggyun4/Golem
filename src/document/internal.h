@@ -5,6 +5,7 @@
 #include "golem/research.h"
 #define DW_FRAME 80
 #define DW_PATH 4096
+#define DW_RESEARCH_INDEX_SIZE (GOLEM_RESEARCH_MAX_EVENTS * 2u)
 typedef struct dw_entry {
     struct json_object *meta;
     golem_document_result result;
@@ -26,6 +27,9 @@ struct golem_document_store {
     struct json_object *completions[64];
     golem_digest completion_digests[64];
     size_t research_count;
+    /* Derived, allocation-free indexes. Slots store event ordinal + 1. */
+    uint16_t research_keys[DW_RESEARCH_INDEX_SIZE];
+    uint16_t research_cases[DW_RESEARCH_INDEX_SIZE];
     struct json_object *research[GOLEM_RESEARCH_MAX_EVENTS];
     golem_digest research_digests[GOLEM_RESEARCH_MAX_EVENTS];
     golem_digest research_frames[GOLEM_RESEARCH_MAX_EVENTS];

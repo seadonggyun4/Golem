@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 import verify_alpha
 from verify_alpha import selected, snapshot, audit_install
+from source_policy import export_sources, FIXTURES
 
 
 class SourceSnapshotTests(unittest.TestCase):
@@ -33,6 +34,12 @@ class SourceSnapshotTests(unittest.TestCase):
         self.assertFalse(selected("tools/project-docs/plan.py"))
 
     def test_scope(self):
+        for profile in ("validation", "conan"):
+            self.assertTrue(selected("src/workspace/model.c", profile))
+            self.assertTrue(selected("src/inventory/git_record.c", profile))
+            self.assertTrue(selected("src/inventory/git_record.h", profile))
+            self.assertFalse(selected("src/workspace/secrets/key.c", profile))
+            self.assertFalse(selected("src/other/workspace/state.c", profile))
         for name in ("src/core/work_run.c", "include/golem/core.h", "CMakeLists.txt"):
             self.assertTrue(selected(name))
         for name in (".git/config", ".env", "project-docs/plan.md", ".golem/journal.bin", "build/cache", "README.md"):
@@ -40,6 +47,31 @@ class SourceSnapshotTests(unittest.TestCase):
         for name in ("../src/secret", "/src/core.c"):
             with self.assertRaises(ValueError):
                 selected(name)
+
+    def test_only_reviewed_fixture_names_are_public(self):
+        self.assertTrue(all(selected(name) for name in FIXTURES))
+        for name in ("samples/local-report.json", "samples/private-plan.md",
+                     "tests/c/fixtures/local.hex", "fuzz/corpus/local.json",
+                     "src/worktrees/secret.c", "src/objects/leak.c"):
+            self.assertFalse(selected(name), name)
+
+    def test_conan_uses_same_nested_exclusions_and_rejects_links(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve() / "source"
+            root.mkdir()
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            for name in ("src/core/a.c", "src/.golem/private.c", "src/project-docs/plan.h",
+                         "include/secrets/token.h", "src/worktrees/candidate.c",
+                         "src/reports/log.c", "src/ignored.c"):
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("synthetic fixture")
+            (root / ".gitignore").write_text("src/ignored.c\n")
+            output = root.parent / "export"
+            self.assertEqual(export_sources(root, output, "conan"), ["src/core/a.c"])
+            (root / "src/link.c").symlink_to(root / "src/core/a.c")
+            with self.assertRaises(ValueError):
+                export_sources(root, root.parent / "unsafe", "conan")
 
     def test_nested_private_assets_and_supported_fixtures(self):
         for name in ("samples/.golem/objects/sha256/ab/data.json", "src/project-docs/private.md",
@@ -110,15 +142,21 @@ class SourceSnapshotTests(unittest.TestCase):
                 p = root / name
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_text("synthetic public artifact")
-            audit_install(root)
+            audit_install(root, platform="darwin")
+            with self.assertRaises(ValueError):
+                audit_install(root, platform="linux")
+            helper = root / "bin/golem-cgroup-exec"
+            helper.write_text("synthetic trusted trampoline")
+            audit_install(root, platform="linux")
+            helper.unlink()
             extra = root / "private-report.md"
             extra.write_text("synthetic private report")
             with self.assertRaises(ValueError):
-                audit_install(root)
+                audit_install(root, platform="darwin")
             extra.unlink()
             (root / "include/golem/secret.h").symlink_to(root / "share/licenses/Golem/LICENSE")
             with self.assertRaises(ValueError):
-                audit_install(root)
+                audit_install(root, platform="darwin")
 
 
 if __name__ == "__main__":

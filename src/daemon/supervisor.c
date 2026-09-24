@@ -11,6 +11,7 @@
 #define _DEFAULT_SOURCE
 #endif
 #include "golem/supervisor.h"
+#include "cgroup_internal.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -42,10 +43,14 @@ static bool fd_prepare(int *fd)
     }
     return *fd >= 0 && fcntl(*fd, F_SETFD, FD_CLOEXEC) == 0;
 }
-static golem_status drain(int fd, uint8_t *buffer, size_t *size, bool *eof)
+static golem_status drain(int fd, uint8_t *buffer, size_t *size, bool *eof,
+                          const golem_supervisor_stream *sink,
+                          golem_supervisor_capture *capture, unsigned stream,
+                          const uint64_t *limits)
 {
     uint8_t chunk[4096];
-    for (;;) {
+    /* Return to heartbeat/deadline and the other pipe even for a hot writer. */
+    for (unsigned batch = 0; batch < 16; ++batch) {
         ssize_t n = read(fd, chunk, sizeof(chunk));
         if (n < 0 && errno == EINTR)
             continue;
@@ -55,18 +60,38 @@ static golem_status drain(int fd, uint8_t *buffer, size_t *size, bool *eof)
             return GOLEM_ERR_IO;
         if (n == 0) {
             *eof = true;
+            if (capture)
+                capture->eof[stream] = true;
             return GOLEM_OK;
         }
+        if (capture) {
+            if ((uint64_t)n > UINT64_MAX - capture->observed_bytes[stream])
+                return GOLEM_ERR_OVERFLOW;
+            capture->observed_bytes[stream] += (uint64_t)n;
+            if (limits && capture->observed_bytes[stream] > limits[stream])
+                return GOLEM_ERR_BUDGET_EXHAUSTED;
+        }
+        if (sink) {
+            golem_status st = sink->write(sink->context, stream,
+                                          (golem_bytes){chunk, (size_t)n});
+            if (st != GOLEM_OK)
+                return st;
+        }
+        if (limits)
+            continue;
         if ((size_t)n > GOLEM_SUPERVISOR_OUTPUT_MAX - *size)
             return GOLEM_ERR_OVERFLOW;
         memcpy(buffer + *size, chunk, (size_t)n);
         *size += (size_t)n;
     }
+    return GOLEM_OK;
 }
 static golem_status run(const char *executable, char *const argv[], const char *cwd,
                         char *const envp[], golem_bytes input, uint64_t timeout,
                         golem_status (*pulse)(void *), void *context, golem_supervisor_result *out,
-                        golem_supervisor_observation *observation)
+                        golem_supervisor_observation *observation,
+                        const golem_supervisor_stream *sink, golem_supervisor_capture *capture,
+                        const uint64_t *limits, int inherited)
 {
     if (executable == NULL || executable[0] != '/' || argv == NULL || argv[0] == NULL ||
         out == NULL || timeout == 0 || timeout > UINT64_C(3600000000000) || input.size > 16384 ||
@@ -121,6 +146,8 @@ static golem_status run(const char *executable, char *const argv[], const char *
             posix_spawn_file_actions_addclose(&actions, error[i]) != 0)
             goto cleanup;
     sigset_t mask;
+    if (inherited >= 0 && posix_spawn_file_actions_adddup2(&actions, inherited, 3) != 0)
+        goto cleanup;
     sigemptyset(&mask);
     short spawn_flags = POSIX_SPAWN_SETPGROUP | POSIX_SPAWN_SETSIGMASK;
 #ifdef __APPLE__
@@ -146,6 +173,8 @@ static golem_status run(const char *executable, char *const argv[], const char *
     }
     if (observation)
         observation->spawned = true;
+    if (capture)
+        capture->spawned = true;
     (void)close(in[1]);
     in[1] = -1;
     (void)close(output[1]);
@@ -202,10 +231,10 @@ static golem_status run(const char *executable, char *const argv[], const char *
             (void)close(in[0]);
             in[0] = -1;
         }
-        s = drain(output[0], result.output, &result.output_size, &stdout_eof);
+        s = drain(output[0], result.output, &result.output_size, &stdout_eof, sink, capture, 0, limits);
         if (s != GOLEM_OK)
             break;
-        s = drain(error[0], result.error, &result.error_size, &stderr_eof);
+        s = drain(error[0], result.error, &result.error_size, &stderr_eof, sink, capture, 1, limits);
         if (s != GOLEM_OK)
             break;
         siginfo_t info;
@@ -220,9 +249,9 @@ static golem_status run(const char *executable, char *const argv[], const char *
 #ifdef __APPLE__
             exited = true;
 #endif
-            s = drain(output[0], result.output, &result.output_size, &stdout_eof);
+            s = drain(output[0], result.output, &result.output_size, &stdout_eof, sink, capture, 0, limits);
             if (s == GOLEM_OK)
-                s = drain(error[0], result.error, &result.error_size, &stderr_eof);
+                s = drain(error[0], result.error, &result.error_size, &stderr_eof, sink, capture, 1, limits);
             break;
         }
         struct pollfd fds[3] = {{stdout_eof ? -1 : output[0], POLLIN, 0},
@@ -253,16 +282,18 @@ static golem_status run(const char *executable, char *const argv[], const char *
     } while (waited < 0 && errno == EINTR);
     if (observation)
         observation->reaped = waited == pid;
+    if (capture)
+        capture->reaped = waited == pid;
     if (waited != pid && s == GOLEM_OK)
         s = GOLEM_ERR_IO;
     if (waited == pid && WIFEXITED(status))
         result.exit_code = WEXITSTATUS(status);
     if (waited == pid && WIFSIGNALED(status))
         result.signal_number = WTERMSIG(status);
-    golem_status drained = drain(output[0], result.output, &result.output_size, &stdout_eof);
+    golem_status drained = drain(output[0], result.output, &result.output_size, &stdout_eof, sink, capture, 0, limits);
     if (s == GOLEM_OK)
         s = drained;
-    drained = drain(error[0], result.error, &result.error_size, &stderr_eof);
+    drained = drain(error[0], result.error, &result.error_size, &stderr_eof, sink, capture, 1, limits);
     if (s == GOLEM_OK)
         s = drained;
     /* Reaping the leader is not a readiness notification for nonblocking
@@ -293,9 +324,9 @@ static golem_status run(const char *executable, char *const argv[], const char *
             s = GOLEM_ERR_IO;
             break;
         }
-        s = drain(output[0], result.output, &result.output_size, &stdout_eof);
+        s = drain(output[0], result.output, &result.output_size, &stdout_eof, sink, capture, 0, limits);
         if (s == GOLEM_OK)
-            s = drain(error[0], result.error, &result.error_size, &stderr_eof);
+            s = drain(error[0], result.error, &result.error_size, &stderr_eof, sink, capture, 1, limits);
     }
 #ifdef __APPLE__
     /* A live descendant retaining a pipe or a failed reap still fails closed. */
@@ -326,7 +357,7 @@ golem_status golem_supervisor_run(const char *executable, char *const argv[], go
                                   uint64_t timeout, golem_status (*pulse)(void *), void *context,
                                   golem_supervisor_result *out)
 {
-    return run(executable, argv, NULL, environ, input, timeout, pulse, context, out, NULL);
+    return run(executable, argv, NULL, environ, input, timeout, pulse, context, out, NULL, NULL, NULL, NULL, -1);
 }
 golem_status golem_supervisor_run_at(const char *executable, char *const argv[], const char *cwd,
                                      char *const envp[], golem_bytes input, uint64_t timeout,
@@ -335,7 +366,7 @@ golem_status golem_supervisor_run_at(const char *executable, char *const argv[],
 {
     if (!cwd || cwd[0] != '/' || !envp)
         return GOLEM_ERR_INVALID_ARGUMENT;
-    return run(executable, argv, cwd, envp, input, timeout, pulse, context, out, NULL);
+    return run(executable, argv, cwd, envp, input, timeout, pulse, context, out, NULL, NULL, NULL, NULL, -1);
 }
 golem_status golem_supervisor_run_observed(const char *executable, char *const argv[],
     const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout,
@@ -347,5 +378,46 @@ golem_status golem_supervisor_run_observed(const char *executable, char *const a
     *observation = (golem_supervisor_observation){0};
     if (!cwd || cwd[0] != '/' || !envp)
         return GOLEM_ERR_INVALID_ARGUMENT;
-    return run(executable, argv, cwd, envp, input, timeout, pulse, context, out, observation);
+    return run(executable, argv, cwd, envp, input, timeout, pulse, context, out, observation, NULL, NULL, NULL, -1);
+}
+golem_status golem_supervisor_run_streamed(const char *executable, char *const argv[],
+    const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout,
+    golem_status (*pulse)(void *), void *context, golem_supervisor_result *out,
+    const golem_supervisor_stream *stream, golem_supervisor_capture *capture)
+{
+    if (!capture)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    *capture = (golem_supervisor_capture){0};
+    if (!cwd || cwd[0] != '/' || !envp || !stream ||
+        stream->struct_size != sizeof(*stream) || stream->version != 1 || !stream->write)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    return run(executable, argv, cwd, envp, input, timeout, pulse, context, out, NULL, stream, capture, NULL, -1);
+}
+
+golem_status golem_supervisor_run_bulk(const char *executable, char *const argv[],
+    const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout,
+    golem_status (*pulse)(void *), void *context, golem_supervisor_result *out,
+    const golem_supervisor_stream *stream, const uint64_t limits[2],
+    golem_supervisor_capture *capture)
+{
+    if (!capture)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    *capture = (golem_supervisor_capture){0};
+    if (!cwd || cwd[0] != '/' || !envp || !stream ||
+        stream->struct_size != sizeof(*stream) || stream->version != 1 || !stream->write ||
+        !limits || !limits[0] || !limits[1] || limits[0] > UINT64_C(67108864) ||
+        limits[1] > UINT64_C(67108864))
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    return run(executable, argv, cwd, envp, input, timeout, pulse, context, out,
+               NULL, stream, capture, limits, -1);
+}
+
+golem_status golem_supervisor_run_joined(const char *exe, char *const argv[],
+    const char *cwd, char *const envp[], golem_bytes input, uint64_t timeout,
+    golem_status (*pulse)(void *), void *context, golem_supervisor_result *out, int inherited)
+{
+    if (!cwd || cwd[0] != '/' || !envp || inherited < 3)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    return run(exe, argv, cwd, envp, input, timeout, pulse, context, out,
+               NULL, NULL, NULL, NULL, inherited);
 }

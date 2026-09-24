@@ -57,6 +57,27 @@ class Admission(fixture.Session):
         replay = self.invoke("inspect")
         self.assertEqual(json.loads(replay.stdout)["state"], 9)
 
+    def test_current_connector_publishes_without_spawning(self):
+        self.prepared()
+        result = self.invoke("current")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertEqual(data["state"], 4)
+        self.assertEqual(data["executions"], 0)
+        self.request("status")
+        recovered = self.invoke("inspect")
+        self.assertEqual(recovered.returncode, 0, recovered.stderr)
+        self.assertEqual(json.loads(recovered.stdout)["state"], 6)
+
+    def test_current_connector_rejects_wrong_identity(self):
+        self.prepared()
+        self.assertNotEqual(self.invoke("current", session="other-session").returncode, 0)
+
+    def test_current_connector_requires_running_claim(self):
+        self.setup_session(actual=True)
+        self.claim()
+        self.assertNotEqual(self.invoke("current").returncode, 0)
+
     def test_wrong_session_blocks_execution(self):
         self.prepared()
         self.assertNotEqual(self.invoke(session="other-session").returncode, 0)

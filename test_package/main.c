@@ -8,6 +8,10 @@
 #include "golem/completion.h"
 #include "golem/version.h"
 #include "golem/worker.h"
+#include "golem/candidate.h"
+#include "golem/inventory.h"
+#include "golem/proof.h"
+#include "golem/workspace.h"
 #include <string.h>
 
 int main(void)
@@ -21,6 +25,10 @@ int main(void)
     if(golem_completion_validate((golem_bytes){(const uint8_t *)completion_resume,sizeof(completion_resume)-1},NULL)!=GOLEM_OK) return 1;
     if(golem_reentry_validate((golem_bytes){(const uint8_t *)reentry_status,sizeof(reentry_status)-1},NULL)!=GOLEM_OK) return 1;
     golem_digest digest;
+    if (golem_candidate_validate((golem_bytes){NULL, 0}, &digest, NULL) != GOLEM_ERR_PARSE ||
+        golem_inventory_policy_validate((golem_bytes){NULL, 0}, NULL) != GOLEM_ERR_PARSE ||
+        golem_proof_integrity((golem_bytes){NULL, 0}, NULL, NULL) != GOLEM_ERR_PARSE)
+        return 1;
     if(golem_execution_contract_validate((golem_bytes){NULL,0},&digest,NULL)!=GOLEM_ERR_PARSE) return 1;
     const char *request="{\"schema_version\":1,\"operation\":\"status\",\"work_id\":\"work\"}";
     if(golem_agent_request_validate((golem_bytes){(const uint8_t *)request,strlen(request)},NULL)!=GOLEM_OK) return 1;

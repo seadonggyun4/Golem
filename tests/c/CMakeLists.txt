@@ -1,4 +1,14 @@
 add_executable(golem_context_api_helper context_api_helper.c)
+add_executable(golem_inventory_helper inventory_helper.c)
+target_link_libraries(golem_inventory_helper PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_inventory_helper)
+add_executable(golem_test_inventory test_inventory.c)
+target_link_libraries(golem_test_inventory PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_inventory)
+add_test(NAME change_inventory_unit COMMAND golem_test_inventory)
+add_executable(golem_workspace_helper workspace_helper.c)
+target_link_libraries(golem_workspace_helper PRIVATE Golem::golem)
+golem_configure_target(golem_workspace_helper)
 add_executable(golem_test_runtime_events test_runtime_events.c)
 target_link_libraries(golem_test_runtime_events PRIVATE Golem::golem)
 golem_configure_target(golem_test_runtime_events)
@@ -33,6 +43,18 @@ add_executable(golem_test_execution test_execution.c)
 target_link_libraries(golem_test_execution PRIVATE Golem::golem)
 golem_configure_target(golem_test_execution)
 add_test(NAME execution_api COMMAND golem_test_execution)
+add_executable(golem_test_execution_logs test_execution_logs.c)
+target_link_libraries(golem_test_execution_logs PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_execution_logs)
+add_test(NAME execution_logs COMMAND golem_test_execution_logs)
+add_executable(golem_test_proof_publication test_proof_publication.c)
+target_link_libraries(golem_test_proof_publication PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
+golem_configure_target(golem_test_proof_publication)
+add_test(NAME proof_publication_faults COMMAND golem_test_proof_publication)
+add_executable(golem_test_supervisor_stream test_supervisor_stream.c)
+target_link_libraries(golem_test_supervisor_stream PRIVATE Golem::golem)
+golem_configure_target(golem_test_supervisor_stream)
+add_test(NAME supervisor_stream COMMAND golem_test_supervisor_stream)
 set_tests_properties(execution_api PROPERTIES TIMEOUT 30)
 
 add_executable(golem_test_runtime_profile test_runtime_profile.c)
@@ -43,6 +65,10 @@ golem_configure_target(golem_test_admission_faults)
 add_test(NAME admission_faults COMMAND golem_test_admission_faults)
 set_tests_properties(admission_faults PROPERTIES TIMEOUT 30)
 add_executable(golem_admission_work_helper admission_work_helper.c)
+add_executable(golem_test_resource test_resource.c)
+target_link_libraries(golem_test_resource PRIVATE Golem::golem)
+golem_configure_target(golem_test_resource)
+add_test(NAME resource_api COMMAND golem_test_resource)
 target_link_libraries(golem_admission_work_helper PRIVATE Golem::golem)
 golem_configure_target(golem_admission_work_helper)
 target_link_libraries(golem_test_admission PRIVATE Golem::golem)
@@ -63,7 +89,7 @@ target_link_libraries(golem_descriptor_probe_helper PRIVATE Golem::golem)
 golem_configure_target(golem_descriptor_probe_helper)
 target_link_libraries(golem_test_runtime_profile PRIVATE Golem::golem PkgConfig::JSONC)
 golem_configure_target(golem_test_runtime_profile)
-foreach(case codec invalid cache ownership)
+foreach(case codec invalid cache ownership prepared)
     add_test(NAME runtime_profile_${case} COMMAND golem_test_runtime_profile ${case})
     set_tests_properties(runtime_profile_${case} PROPERTIES TIMEOUT 30)
 endforeach()
@@ -237,9 +263,32 @@ foreach(case digest receipt roundtrip file corruption paths ownership concurrent
 endforeach()
 if(GOLEM_BUILD_CLI)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_test(NAME change_inventory_integration COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/inventory_integration.py $<TARGET_FILE:golem_inventory_helper>)
+    set_tests_properties(change_inventory_integration PROPERTIES TIMEOUT 240)
+    add_test(NAME execution_change_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/execution_change_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
+    set_tests_properties(execution_change_cli PROPERTIES TIMEOUT 240)
+    add_test(NAME execution_change_large_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/execution_change_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER}
+        Changes.test_large_v5_qa_markdown_completion_and_staleness)
+    set_tests_properties(execution_change_large_cli PROPERTIES TIMEOUT 240)
+    add_test(NAME candidate_cli_host COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/candidate_cli_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
+    set_tests_properties(candidate_cli_host PROPERTIES TIMEOUT 240)
+    add_test(NAME workspace_lifecycle COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/workspace_integration.py $<TARGET_FILE:golem_cli>
+        $<TARGET_FILE:golem_workspace_helper> ${PROJECT_SOURCE_DIR})
+    set_tests_properties(workspace_lifecycle PROPERTIES TIMEOUT 240)
     add_test(NAME runtime_validation_report COMMAND ${Python3_EXECUTABLE} -m unittest
         discover -s ${PROJECT_SOURCE_DIR}/tools -p test_verify_runtime.py)
     set_tests_properties(runtime_validation_report PROPERTIES TIMEOUT 30 LABELS runtime-contract)
+    add_test(NAME isolation_validation_report COMMAND ${Python3_EXECUTABLE} -m unittest
+        discover -s ${PROJECT_SOURCE_DIR}/tools -p test_verify_isolation.py)
+    set_tests_properties(isolation_validation_report PROPERTIES TIMEOUT 30 LABELS "runtime-contract;isolation")
     add_test(NAME runtime_canary COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/runtime_canary.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
@@ -270,6 +319,20 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/execution_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
     set_tests_properties(execution_cli PROPERTIES TIMEOUT 240)
+    add_test(NAME execution_bundle_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/execution_bundle_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
+    set_tests_properties(execution_bundle_cli PROPERTIES TIMEOUT 240)
+    add_test(NAME proof_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/proof_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
+    set_tests_properties(proof_cli PROPERTIES TIMEOUT 240)
+    add_test(NAME execution_boundary_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/execution_boundary_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
+    set_tests_properties(execution_boundary_cli PROPERTIES TIMEOUT 240)
+    add_test(NAME execution_inventory COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/execution_inventory.py ${PROJECT_SOURCE_DIR})
     add_test(NAME research_cli COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/research_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
@@ -419,6 +482,20 @@ foreach(case roundtrip limits buffers malformed wide gateway mutations)
     add_test(NAME wire_${case} COMMAND golem_test_wire ${case})
     set_tests_properties(wire_${case} PROPERTIES TIMEOUT 60)
 endforeach()
+
+add_executable(golem_test_candidate test_candidate.c)
+target_link_libraries(golem_test_candidate PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_candidate)
+add_test(NAME candidate_model COMMAND golem_test_candidate ${PROJECT_SOURCE_DIR}/samples/candidates/group.json)
+if(GOLEM_BUILD_CLI)
+    add_executable(golem_candidate_host_helper candidate_host_helper.c)
+    target_link_libraries(golem_candidate_host_helper PRIVATE Golem::golem PkgConfig::JSONC)
+    golem_configure_target(golem_candidate_host_helper)
+    add_test(NAME candidate_integration COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/candidate_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_candidate_host_helper>)
+    set_tests_properties(candidate_integration PROPERTIES TIMEOUT 240)
+endif()
 
 # Compile every installed header alone and twice: self-containment and guards.
 file(GLOB public_headers CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/golem/*.h")

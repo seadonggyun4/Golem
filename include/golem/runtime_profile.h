@@ -35,6 +35,7 @@ golem_status golem_runtime_profile_encode(const golem_runtime_profile *profile, 
  * parsing/encoding, not permission. Serialize calls. Acquired profiles are
  * borrowed until release; never profile_free them. Pinned entries aren't evicted.
  * Exact request bytes are the memo key (all identity inputs must be in profile).
+ * Actual preparation/discovery reuse is a separate opt-in prepared_runtime.h API.
  * close refuses outstanding borrows and otherwise consumes cache. */
 typedef golem_status (*golem_runtime_profile_check)(void *context,
                                                     const golem_runtime_profile *profile);

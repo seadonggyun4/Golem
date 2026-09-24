@@ -1,12 +1,39 @@
 #include "internal.h"
 #include <string.h>
+_Static_assert(GOLEM_RESEARCH_MAX_EVENTS < UINT16_MAX, "research index ordinal capacity");
 
 static struct json_object *request_at(golem_document_store *s, size_t i)
 { return dw_get(s->research[i], "request"); }
 static struct json_object *record_at(golem_document_store *s, size_t i)
 { return dw_get(request_at(s, i), "record"); }
+static size_t index_slot(golem_document_store *s, const uint16_t *index,
+                         const char *key, bool cases)
+{
+    uint32_t hash = UINT32_C(2166136261);
+    for (const unsigned char *p = (const unsigned char *)key; *p; ++p)
+        hash = (hash ^ *p) * UINT32_C(16777619);
+    size_t slot = hash % DW_RESEARCH_INDEX_SIZE;
+    /* At most half full; compare actual strings even when hashes collide. */
+    for (size_t n = 0; n < DW_RESEARCH_INDEX_SIZE; ++n) {
+        if (!index[slot]) return slot;
+        size_t i = index[slot] - 1u;
+        const char *old = cases ? dw_text(record_at(s, i), "case_id")
+                                : dw_text(request_at(s, i), "key");
+        if (!strcmp(old, key)) return slot;
+        slot = (slot + 1u) % DW_RESEARCH_INDEX_SIZE;
+    }
+    return SIZE_MAX;
+}
+static size_t indexed(golem_document_store *s, const uint16_t *index,
+                      const char *key, bool cases)
+{
+    size_t slot = index_slot(s, index, key, cases);
+    return slot != SIZE_MAX && index[slot] ? index[slot] - 1u : SIZE_MAX;
+}
 static size_t find(golem_document_store *s, const char *op, const char *case_id, const char *attempt)
 {
+    if (!strcmp(op, "case-create"))
+        return indexed(s, s->research_cases, case_id, true);
     for (size_t i = s->research_count; i > 0; --i) {
         struct json_object *r = request_at(s, i - 1), *v = dw_get(r, "record");
         if (!strcmp(dw_text(r, "operation"), op) && !strcmp(dw_text(v, "case_id"), case_id) &&
@@ -34,8 +61,8 @@ static golem_status preconditions(golem_document_store *s, struct json_object *r
     if (!strcmp(permission, "ASK_ALWAYS")) return GOLEM_ERR_APPROVAL_REQUIRED;
     struct json_object *o = dw_get(r, "record");
     if (strcmp(dw_text(o, "work_id"), dw_text(s->spec, "work_id"))) return GOLEM_ERR_IDENTITY_MISMATCH;
-    for (size_t i = 0; i < s->research_count; ++i)
-        if (!strcmp(dw_text(request_at(s, i), "key"), dw_text(r, "key"))) return GOLEM_ERR_IDENTITY_MISMATCH;
+    if (indexed(s, s->research_keys, dw_text(r, "key"), false) != SIZE_MAX)
+        return GOLEM_ERR_IDENTITY_MISMATCH;
     const char *op = dw_text(r, "operation"), *case_id = dw_text(o, "case_id");
     if (rs_is_cohort(r)) return rs_cohort_check(s, r);
     size_t c = find(s, "case-create", case_id, NULL);
@@ -78,6 +105,13 @@ static void adopt(golem_document_store *s, struct json_object *event,
 {
     size_t i = s->research_count++;
     s->research[i] = json_object_get(event);
+    struct json_object *request = request_at(s, i);
+    size_t slot = index_slot(s, s->research_keys, dw_text(request, "key"), false);
+    s->research_keys[slot] = (uint16_t)(i + 1u);
+    if (!strcmp(dw_text(request, "operation"), "case-create")) {
+        slot = index_slot(s, s->research_cases, dw_text(record_at(s, i), "case_id"), true);
+        s->research_cases[slot] = (uint16_t)(i + 1u);
+    }
     s->research_digests[i] = *payload;
     s->research_frames[i] = *frame;
     s->last = *frame;
@@ -134,9 +168,11 @@ golem_status golem_research_call(golem_document_store *s, golem_bytes b,
         if (!encoded) st = GOLEM_ERR_OUT_OF_MEMORY;
         else if (strlen(encoded) > GOLEM_RESEARCH_MAX_JSON) st = GOLEM_ERR_BUDGET_EXHAUSTED;
     }
-    for (size_t i = 0; st == GOLEM_OK && i < s->research_count; ++i) {
+    size_t previous = st == GOLEM_OK
+        ? indexed(s, s->research_keys, dw_text(r, "key"), false) : SIZE_MAX;
+    if (previous != SIZE_MAX) {
+        size_t i = previous;
         struct json_object *old = request_at(s, i);
-        if (strcmp(dw_text(old, "key"), dw_text(r, "key"))) continue;
         st = json_object_equal(old, r) ? reply(s->research[i], &s->research_digests[i], &s->research_frames[i], out)
             : GOLEM_ERR_IDENTITY_MISMATCH;
         json_object_put(r);

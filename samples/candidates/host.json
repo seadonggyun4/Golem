@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "parent": "/absolute/parent-work",
+  "admission": "/absolute/repository-admission",
+  "repository_id": "project",
+  "repository_root": "/absolute/repository",
+  "worktree_root": "/absolute/worktrees",
+  "limits": {"slots": 1, "cpu_millis": 1000, "memory_bytes": 1073741824},
+  "bindings": [{
+    "candidate": "a",
+    "session": "current-agent",
+    "runtime_binding": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "work": "/absolute/child-work",
+    "tree": "/absolute/worktrees/child-work/a",
+    "build": "/absolute/candidate-build",
+    "temp": "/absolute/candidate-temp",
+    "environment": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  }],
+  "target": null
+}

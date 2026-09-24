@@ -256,6 +256,30 @@ class Research(unittest.TestCase):
         self.assertEqual(first, self.create())
         self.assertEqual(self.count(), 257)
 
+    def test_derived_index_collisions_survive_reopen(self):
+        buckets = {}
+        for i in range(1025):
+            key = f"collision-{i}"
+            digest = 2166136261
+            for byte in key.encode():
+                digest = ((digest ^ byte) * 16777619) & 0xffffffff
+            bucket = digest % 512
+            if bucket in buckets:
+                pair = (buckets[bucket], key)
+                break
+            buckets[bucket] = key
+        else:
+            self.fail("collision fixture did not collide")
+        replies = []
+        for key in pair:
+            replies.append(self.call("case-create", dict(self.case, case_id=key), key))
+        for key, original in zip(pair, replies):
+            self.assertEqual(original,
+                             self.call("case-create", dict(self.case, case_id=key), key))
+        self.call("case-create", dict(self.case, case_id="different"), pair[0], ok=False)
+        self.call("case-create", dict(self.case, case_id=pair[0]), "different", ok=False)
+        self.assertEqual(self.run_cli("research", "status", self.work)["count"], 2)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

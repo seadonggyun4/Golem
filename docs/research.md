@@ -192,3 +192,21 @@ attempts, and actors. This implementation is not PROV serialization or
 conformance. A [study of case-study reporting limitations](https://arxiv.org/abs/2402.08411)
 emphasizes context, classification, and generalization limits; one REAL_SERVICE
 success must not be presented as universal performance improvement.
+
+## Replay Lookup Bounds
+
+Research keys and case identities have separate, store-local open-addressed
+indexes. Each has twice the maximum event capacity, stores only event ordinals,
+and compares full strings on collisions. They allocate no memory during adoption
+and are rebuilt only from validated journal events. They are not persisted cache
+authority: referenced CAS evidence, sequence, duplicate identity and schema checks
+still run on replay. Idempotent retry still compares the complete parsed request.
+Worst-case collisions remain bounded by the table size; constant-time adversarial
+lookup is not promised. Capacity and colliding-key CLI tests close/reopen the Work
+on every operation, including conflicting retry rejection.
+
+[MIT 6.006 hashing notes](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/bd220fb629aefdf30f416b5abf45d38d_MIT6_006S20_r04.pdf)
+inform the collision/load-factor reasoning. CLRS, *Introduction to Algorithms*,
+4th edition, chapter 11 is a textbook reference; only the publisher's description
+and contents were checked, not the full paid chapter. The index is a Golem design,
+not a performance guarantee taken from either reference.

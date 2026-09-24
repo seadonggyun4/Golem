@@ -7,36 +7,8 @@ import subprocess
 import sys
 import tempfile
 
-
-SOURCE_TYPES = {
-    "cmake": {".cmake", ".in"}, "include": {".h"}, "src": {".c", ".h", ".py"},
-    "tests": {".c", ".h", ".py", ".hex", ".cmake"},
-    "fuzz": {".c", ".h", ".json"}, "samples": {".json", ".md"},
-}
-PRIVATE_COMPONENTS = {
-    "project-docs", "credentials", "secrets", "reports", "workspace", "workspaces",
-    "build", "dist", "node_modules", "__pycache__",
-}
-SOURCE_FILES = {"CMakeLists.txt", "CMakePresets.json", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"}
-# Reviewed synthetic historical stores, not arbitrary local JSON evidence.
-SOURCE_FILES.add("tests/c/fixtures/completion/v1-store.json")
-# Exact test harness dependencies; do not export arbitrary tools or local reports.
-SOURCE_FILES.update({"tools/verify_runtime.py", "tools/test_verify_runtime.py",
-                     "tools/verify_agent.py", "tools/benchmark_runtime.py"})
-
-
-def selected(name):
-    path = Path(name)
-    if path.is_absolute() or ".." in path.parts or "\\" in name or any(ord(c) < 32 for c in name):
-        raise ValueError("unsafe source path")
-    if name in SOURCE_FILES:
-        return True
-    if not path.parts or path.parts[0] not in SOURCE_TYPES:
-        return False
-    # Top-level allowlisting alone admits nested Work stores and local reports.
-    if any(p.startswith(".") or p.casefold() in PRIVATE_COMPONENTS for p in path.parts):
-        return False
-    return path.name == "CMakeLists.txt" or path.suffix in SOURCE_TYPES[path.parts[0]]
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from source_policy import selected, export_sources
 
 
 def run(args, cwd, env):
@@ -45,35 +17,17 @@ def run(args, cwd, env):
 
 
 def snapshot(root, destination):
-    # Include pending source changes for local validation, but never ignored files.
-    names = subprocess.check_output(
-        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"], cwd=root
-    ).decode("utf-8").split("\0")
-    ignored = set(subprocess.check_output(
-        ["git", "ls-files", "-z", "--cached", "--ignored", "--exclude-standard"], cwd=root
-    ).decode("utf-8").split("\0"))
-    count = 0
-    for name in sorted(set(names) - ignored - {""}):
-        if not selected(name):
-            continue
-        source = root / name
-        if source.is_symlink() or any(p.is_symlink() for p in source.parents if p != root.parent):
-            raise ValueError("symlink source is not supported: " + name)
-        if not source.exists():
-            continue  # Preserve pending tracked deletions in the clean snapshot.
-        if not source.is_file():
-            raise ValueError("non-file source: " + name)
-        target = destination / name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, target)
-        count += 1
-    print(f"Clean C source snapshot: {count} files (no Git metadata or local state)", flush=True)
+    names = export_sources(root, destination)
+    print(f"Clean C source snapshot: {len(names)} files (no Git metadata or local state)", flush=True)
 
 
-def audit_install(prefix):
+def audit_install(prefix, platform=None):
     """Reject unexpected files in the default static C/CLI installation."""
     required = {"bin/golem", "include/golem/completion.h", "lib/libgolem.a",
                 "share/licenses/Golem/LICENSE", "share/licenses/Golem/NOTICE"}
+    platform = platform or sys.platform
+    if platform == "linux":
+        required.add("bin/golem-cgroup-exec")
     found = set()
     for path in prefix.rglob("*"):
         if path.is_symlink():
@@ -83,6 +37,7 @@ def audit_install(prefix):
         name = path.relative_to(prefix).as_posix()
         parts = path.relative_to(prefix).parts
         allowed = name in ("bin/golem", "lib/libgolem.a")
+        allowed |= platform == "linux" and name == "bin/golem-cgroup-exec"
         allowed |= len(parts) == 3 and parts[:2] == ("include", "golem") and path.suffix == ".h"
         allowed |= (len(parts) == 4 and parts[:3] == ("lib", "cmake", "Golem") and
                     path.name.startswith("Golem") and path.suffix == ".cmake")
@@ -134,6 +89,13 @@ def main():
             raise ValueError("C compiler is required for installed conformance")
         run([sys.executable, source / "tests/c/conformance_integration.py",
              prefix / "bin/golem", source, compiler], work, env)
+        # Phase31 gates run against the installed CLI, never only the build tree.
+        for script in ("execution_bundle_integration.py", "execution_boundary_integration.py",
+                       "execution_change_integration.py", "proof_integration.py"):
+            run([sys.executable, source / "tests/c" / script,
+                 prefix / "bin/golem", source, compiler], work, env)
+        run([prefix / "bin/golem", "candidate", "validate",
+             source / "samples/candidates/group.json"], work, env)
     print("Public Alpha gate passed: clean build, full tests, installed C API, noop and fixture conformance. "
           "Actual-agent qualification is separate.")
 

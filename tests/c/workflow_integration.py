@@ -34,7 +34,7 @@ class Workflow(unittest.TestCase):
         prev = self.docs.get(doc_id)
         stage = {"stage-selection": "planning", "scope": "planning", "development-plan": "development",
                  "development-result": "development", "qa-plan": "qa", "qa-result": "qa", "completion": "audit"}.get(kind, kind)
-        return {"schema_version": version, "work_id": "example-work", "document_id": doc_id,
+        return {"schema_version": version, "work_id": getattr(self, "work_id", "example-work"), "document_id": doc_id,
                 "revision": prev["revision"] + 1 if prev else 1, "kind": kind, "stage": stage,
                 "producer_attempt": "fixture", "parents": parents or [], "requirement_ids": ["REQ-1"],
                 "scope_revision": 1, "template_version": 1, "policy_version": 1,
@@ -52,12 +52,15 @@ class Workflow(unittest.TestCase):
 
     def setup_work(self, ui=False, mode="development"):
         self.confirmed()
+        self.a["work_id"] = getattr(self, "work_id", "example-work")
         self.a["selections"][0].update(needs_ux=ui, needs_publishing=ui)
         self.source = self.validate()["snapshot_digest"]
         self.work = self.root / "work"
         self.docs = {}
         self.generation = 1
-        self.cli("work", "start", self.work, SOURCE / "samples/documents/work.json")
+        spec = json.loads((SOURCE / "samples/documents/work.json").read_text())
+        spec["work_id"] = getattr(self, "work_id", "example-work")
+        self.cli("work", "start", self.work, self.write("work-spec.json", spec))
         self.cli("evidence", "put", self.work, self.write("log.txt", "fixture observation\n"))
         scope = self.metadata("scope", version=2)
         scope["assessment"] = self.a

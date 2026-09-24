@@ -75,6 +75,9 @@ static golem_status protected(golem_document_store *s, struct json_object *cp,
                               const golem_digest *key)
 {
     struct json_object *c = dw_get(cp, "contract"), *gates = dw_get(c, "gates");
+    golem_status inventory_status = ex_inventory_check(s, cp, snapshot, true);
+    if (inventory_status != GOLEM_OK)
+        return inventory_status;
     struct json_object *base = dw_get(dw_get(cp, "baseline"), "repositories"),
                        *repos = dw_get(snapshot, "repositories");
     for (size_t i = 0; i < json_object_array_length(gates); ++i) {
@@ -100,6 +103,9 @@ static golem_status protected(golem_document_store *s, struct json_object *cp,
                        &expected) ||
             !dw_equal(&binary.digest, &expected))
             return GOLEM_ERR_STALE_RESULT;
+        st = ex_command_check(g, dw_get(c, "snapshot_plan"));
+        if (st != GOLEM_OK)
+            return st;
     }
     /* A registered development result must describe these exact bytes and checkpoint. */
     struct json_object *docs = dw_get(manifest, "documents");
@@ -127,7 +133,8 @@ static golem_status protected(golem_document_store *s, struct json_object *cp,
     return found ? GOLEM_OK : GOLEM_ERR_REQUIREMENTS_UNMET;
 }
 static golem_status observations(struct json_object *gate, golem_supervisor_result *r,
-                                 struct json_object **out, bool *passed)
+                                 bool allow_error, struct json_object **out, bool *passed,
+                                 bool *case_error)
 {
     struct json_object *o = NULL, *actual = NULL, *expected = dw_get(gate, "cases");
     golem_status st =
@@ -144,8 +151,11 @@ static golem_status observations(struct json_object *gate, golem_supervisor_resu
                            *e = json_object_array_get_idx(expected, i);
         const char *ck[] = {"id", "status"}, *status = dw_text(c, "status");
         if (!dw_keys(c, ck, 2) || strcmp(dw_text(c, "id"), dw_text(e, "id")) ||
-            (strcmp(status, "PASS") && strcmp(status, "FAIL")))
+            (strcmp(status, "PASS") && strcmp(status, "FAIL") &&
+             (!allow_error || strcmp(status, "ERROR"))))
             st = GOLEM_ERR_PARSE;
+        if (!strcmp(status, "ERROR"))
+            *case_error = true;
         if (strcmp(status, "PASS"))
             all = false;
     }
@@ -176,8 +186,12 @@ static golem_status pulse(void *context)
     return st;
 }
 static golem_status gate_run(golem_document_store *s, struct json_object *gate,
-                             struct json_object *plan, lease_guard *guard, struct json_object **out)
+                             struct json_object *plan, struct json_object *policy,
+                             lease_guard *guard, struct json_object **out)
 {
+    golem_status checked = ex_command_check(gate, plan);
+    if (checked != GOLEM_OK)
+        return checked;
     struct json_object *args = dw_get(gate, "argv"),
                        *repo =
                            find(dw_get(plan, "repositories"), "id", dw_text(gate, "repository"));
@@ -189,14 +203,33 @@ static golem_status gate_run(golem_document_store *s, struct json_object *gate,
     uint64_t start = clock_ms();
     if (!start)
         return GOLEM_ERR_IO;
-    golem_status execution =
-        golem_supervisor_run_at(argv[0], argv, dw_text(repo, "root"), env, (golem_bytes){NULL, 0},
-                                dw_uint(gate, "timeout_ms") * 1000000, pulse, guard, &r);
+    ex_log_capture capture = {0};
+    golem_supervisor_capture observed = {0};
+    golem_status execution;
+    if (policy) {
+        golem_status opened = ex_logs_open(s, policy, &capture);
+        if (opened != GOLEM_OK)
+            return opened;
+        golem_supervisor_stream stream = {sizeof(stream), 1, ex_logs_write, &capture};
+        /* Snapshot/hash preparation can outlive the lease. Check again at the
+         * dispatch boundary, not only before preparation or after spawning. */
+        execution = pulse(guard);
+        if (execution == GOLEM_OK)
+            execution = golem_supervisor_run_streamed(
+                argv[0], argv, dw_text(repo, "root"), env, (golem_bytes){NULL, 0},
+                dw_uint(gate, "timeout_ms") * 1000000, pulse, guard, &r, &stream, &observed);
+    } else {
+        execution = pulse(guard);
+        if (execution == GOLEM_OK)
+            execution = golem_supervisor_run_at(
+                argv[0], argv, dw_text(repo, "root"), env, (golem_bytes){NULL, 0},
+                dw_uint(gate, "timeout_ms") * 1000000, pulse, guard, &r);
+    }
     uint64_t end = clock_ms();
     const char *status = "ERROR", *reason = "EXECUTION_ERROR";
     struct json_object *cases = NULL;
-    bool passed = false;
-    golem_status parsed = observations(gate, &r, &cases, &passed);
+    bool passed = false, case_error = false;
+    golem_status parsed = observations(gate, &r, policy != NULL, &cases, &passed, &case_error);
     if (r.timed_out)
         reason = "TIMEOUT";
     else if (execution == GOLEM_ERR_STALE_RESULT)
@@ -209,19 +242,32 @@ static golem_status gate_run(golem_document_store *s, struct json_object *gate,
         reason = "SIGNAL";
     else if (!end || end < start)
         reason = "CLOCK_ERROR";
+    else if (policy && parsed == GOLEM_OK && case_error)
+        reason = "CASE_ERROR";
     else if (r.exit_code > 0) {
         status = "FAIL";
         reason = "NONZERO_EXIT";
     } else if (execution == GOLEM_OK && parsed == GOLEM_OK) {
-        status = passed ? "PASS" : "FAIL";
-        reason = passed ? "DECLARED_CASES_PASSED" : "CASE_FAILED";
+        status = case_error ? "ERROR" : passed ? "PASS" : "FAIL";
+        reason = case_error ? "CASE_ERROR" : passed ? "DECLARED_CASES_PASSED" : "CASE_FAILED";
     } else if (execution == GOLEM_OK)
         reason = "INVALID_OR_MISSING_CASES";
     if (!cases)
         cases = json_object_new_array();
     struct json_object *o = json_object_new_object();
+    struct json_object *logs = NULL;
+    bool complete = false;
     golem_digest stdout_hash, stderr_hash, evidence;
-    golem_status st = golem_digest_bytes((golem_bytes){r.output, r.output_size}, &stdout_hash);
+    golem_status st = policy ? ex_logs_finish(&capture, &observed, &logs, &complete) : GOLEM_OK;
+    if (policy) {
+        ex_logs_close(&capture);
+        if (json_object_get_boolean(dw_get(policy, "require_complete")) && !complete) {
+            status = "ERROR";
+            reason = "EVIDENCE_INCOMPLETE";
+        }
+    }
+    if (st == GOLEM_OK)
+        st = golem_digest_bytes((golem_bytes){r.output, r.output_size}, &stdout_hash);
     if (st == GOLEM_OK)
         st = golem_digest_bytes((golem_bytes){r.error, r.error_size}, &stderr_hash);
     if (st == GOLEM_OK &&
@@ -238,7 +284,14 @@ static golem_status gate_run(golem_document_store *s, struct json_object *gate,
          !ex_uint(o, "stdout_size", r.output_size) || !ex_uint(o, "stderr_size", r.error_size) ||
          !ex_text(o, "log_policy", "summary-only; raw output discarded, truncated on overflow")))
         st = GOLEM_ERR_OUT_OF_MEMORY;
-    /* Only normalized IDs/statuses enter CAS. Raw logs may contain secrets. */
+    if (st == GOLEM_OK && policy &&
+        (!dw_add(o, "logs", json_object_get(logs)) ||
+         !ex_uint(o, "duration_ms", end >= start ? end - start : 0) ||
+         !dw_add(o, "spawned", json_object_new_boolean(observed.spawned)) ||
+         !dw_add(o, "reaped", json_object_new_boolean(observed.reaped)) ||
+         !ex_text(o, "log_policy", dw_text(policy, "mode"))))
+        st = GOLEM_ERR_OUT_OF_MEMORY;
+    /* Raw logs never enter CAS. v2 capture persists only redacted bytes. */
     if (st == GOLEM_OK)
         st = dw_put_json(s, o, &evidence);
     if (st == GOLEM_OK && !dw_add_digest(o, "observation_digest", &evidence))
@@ -248,6 +301,7 @@ static golem_status gate_run(golem_document_store *s, struct json_object *gate,
     else
         json_object_put(o);
     json_object_put(cases);
+    json_object_put(logs);
     return st;
 }
 golem_status ex_execute(golem_document_store *s, struct json_object *cp, const golem_digest *key,
@@ -305,7 +359,9 @@ golem_status ex_execute(golem_document_store *s, struct json_object *cp, const g
     struct json_object *snap = NULL, *after = NULL, *gates = NULL, *result = NULL;
     struct json_object *c = dw_get(cp, "contract"), *plan = dw_get(c, "snapshot_plan");
     if (st == GOLEM_OK)
-        st = ex_snapshot(plan, &snap);
+        st = ex_snapshot(s, plan, true, &snap);
+    if (st == GOLEM_OK && dw_uint(c, "schema_version") >= 4)
+        st = ex_authorize(s, token, manifest);
     if (st == GOLEM_OK)
         st = protected(s, cp, snap, manifest, key);
     if (st == GOLEM_OK)
@@ -343,11 +399,26 @@ golem_status ex_execute(golem_document_store *s, struct json_object *cp, const g
     bool pass = true, error = false;
     for (size_t i = 0; st == GOLEM_OK && i < json_object_array_length(definitions); ++i) {
         struct json_object *g = NULL;
-        if (pulse(&guard) != GOLEM_OK) {
-            st = GOLEM_ERR_STALE_RESULT;
+        st = pulse(&guard);
+        if (st != GOLEM_OK) {
             break;
         }
-        st = gate_run(s, json_object_array_get_idx(definitions, i), plan, &guard, &g);
+        /* The first gate already has the pre-attempt snapshot above. Subsequent
+         * gates must not trust inputs that an earlier command could change. */
+        if (i != 0) {
+            struct json_object *current = NULL;
+            st = ex_snapshot(s, plan, true, &current);
+            if (st == GOLEM_OK && dw_uint(c, "schema_version") >= 4)
+                st = ex_authorize(s, token, manifest);
+            if (st == GOLEM_OK && !json_object_equal(snap, current))
+                st = GOLEM_ERR_STALE_RESULT;
+            if (st == GOLEM_OK)
+                st = protected(s, cp, current, manifest, key);
+            json_object_put(current);
+        }
+        if (st == GOLEM_OK)
+            st = gate_run(s, json_object_array_get_idx(definitions, i), plan,
+                          dw_get(c, "log_retention"), &guard, &g);
         if (st == GOLEM_OK && strcmp(dw_text(g, "status"), "PASS"))
             pass = false;
         if (st == GOLEM_OK && strcmp(dw_text(g, "status"), "ERROR") == 0)
@@ -358,13 +429,18 @@ golem_status ex_execute(golem_document_store *s, struct json_object *cp, const g
         } else
             json_object_put(g);
     }
-    golem_status snapshot_status = st == GOLEM_OK ? ex_snapshot(plan, &after) : st;
+    golem_status snapshot_status = st == GOLEM_OK ? ex_snapshot(s, plan, true, &after) : st;
+    if (st == GOLEM_OK && dw_uint(c, "schema_version") >= 4)
+        st = ex_authorize(s, token, manifest);
+    if (st == GOLEM_OK && snapshot_status == GOLEM_OK)
+        snapshot_status = ex_inventory_check(s, cp, after, true);
     bool changed = snapshot_status != GOLEM_OK || !json_object_equal(snap, after);
     if (st == GOLEM_OK && !changed && protected(s, cp, after, manifest, key) != GOLEM_OK)
         changed = true;
     if (st == GOLEM_OK) {
         result = json_object_new_object();
-        if (!ex_uint(result, "schema_version", 1) || !ex_text(result, "type", "qa") ||
+        if (!ex_uint(result, "schema_version", dw_uint(c, "schema_version")) ||
+            !ex_text(result, "type", "qa") ||
             !ex_text(result, "work_id", dw_text(s->spec, "work_id")) ||
             !ex_text(result, "attempt_id", attempt) || !dw_add_digest(result, "checkpoint", key) ||
             !dw_add(result, "manifest", json_object_get(manifest)) ||

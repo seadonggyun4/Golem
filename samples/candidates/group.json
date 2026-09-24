@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "group_id": "example",
+  "parallel_opt_in": false,
+  "task_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "base_commit": "1111111111111111111111111111111111111111",
+  "gates_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "protocol_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "currency": "USD",
+  "limits": {"workers": 1, "cpu": 1000, "memory": 1048576, "io": 1, "tokens": 100, "nano_cost": 1000000},
+  "candidates": [{
+    "id": "a",
+    "work_id": "candidate-a",
+    "session_id": "current-agent-a",
+    "runtime_binding": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "environment_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "resources": {"cpu": 1000, "memory": 1048576, "io": 1, "tokens": 100, "nano_cost": 1000000}
+  }],
+  "cohort": null
+}

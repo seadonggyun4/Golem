@@ -61,6 +61,12 @@ class ConformanceToolTests(unittest.TestCase):
             r = gate.capture([self.cli, "-c", "print('x' * 256)"], self.output(), 10)
         self.assertEqual(r["reason"], "OUTPUT_LIMIT")
 
+    def test_cleanup_denied_never_becomes_success(self):
+        with patch.object(gate.os, "killpg", side_effect=PermissionError("denied")):
+            r = gate.capture([self.cli, "-c", "pass"], self.output(), 10)
+        self.assertEqual(r["returncode"], 0)
+        self.assertEqual(r["reason"], "CLEANUP_DENIED")
+
     def test_fixture_rejects_empty_skipped_and_partial(self):
         src = self.root / "src/tests/c"
         src.mkdir(parents=True)
