@@ -13,6 +13,10 @@ int main(void)
         "{\"schema_version\":1,\"operation\":\"status\",\"request_receipt\":"
         "\"0000000000000000000000000000000000000000000000000000000000000000\"}";
     CHECK(golem_approval_request_validate(bytes(valid)) == GOLEM_OK);
+    const char *future =
+        "{\"schema_version\":2,\"operation\":\"status\",\"request_receipt\":"
+        "\"0000000000000000000000000000000000000000000000000000000000000000\"}";
+    CHECK(golem_approval_request_validate(bytes(future)) == GOLEM_ERR_UNSUPPORTED_VERSION);
     const char *invalid[] = {
         "{}", "null", "[]", "{\"schema_version\":2}",
         ("{\"schema_version\":1,\"operation\":\"approve\",\"key\":\"forged\","

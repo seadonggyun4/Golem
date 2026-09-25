@@ -26,9 +26,14 @@ golem_status golem_json_parse(golem_bytes b, size_t limit, struct json_object **
     size_t source = 0, decoded = 0;
     for (size_t i = 0; i < b.size; ++i) {
         unsigned char c = b.data[i];
-        if (c == 0 || (c == '\\' && i + 5 < b.size && memcmp(b.data + i, "\\u0000", 6) == 0))
+        if (c == 0)
             return GOLEM_ERR_PARSE;
         if (escaped) { escaped = false; continue; }
+        /* Reject decoded NUL, including object keys, but preserve an escaped
+         * backslash followed by the ordinary characters u0000. */
+        if (quoted && c == '\\' && i + 5 < b.size &&
+            memcmp(b.data + i, "\\u0000", 6) == 0)
+            return GOLEM_ERR_PARSE;
         if (quoted && c == '\\') { escaped = true; continue; }
         if (c == '"') quoted = !quoted;
         else if (!quoted && c == ':') ++source;

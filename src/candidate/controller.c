@@ -184,7 +184,10 @@ static golem_status dispatch(cf_context *c, const char *op, size_t i, struct jso
             st = c->host->check(c->host->context, c->request_bytes);
         if (st == GOLEM_OK && strcmp(cf_state(c, i), "CANCEL_REQUESTED"))
             st = record_empty(c, "CANCEL_REQUESTED", i);
-        if (st == GOLEM_OK)
+        /* Recovery cannot prove termination. Keep the uncertain reservation,
+         * but still deliver an authorized cancellation with the current fence.
+         * Only finish + termination evidence may settle/release this ticket. */
+        if (st == GOLEM_OK && ticket.state != GOLEM_ADMISSION_RECONCILE_REQUIRED)
             st = golem_admission_cancel(c->admission, ticket.token);
         if (st == GOLEM_OK && attempted)
             st = c->host->cancel(c->host->context, dw_text(cf_spec(c, i), "id"));

@@ -31,7 +31,9 @@ jobs:
           ASAN_OPTIONS: halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
       - name: Collector checks and bounded observation benchmark
-        run: ctest --test-dir build/events --output-on-failure -R '^orchestration_(validation_report|benchmark)$'
+        run: |
+          python3 -m unittest discover -s tools -p 'test_*.py'
+          ctest --test-dir build/events --output-on-failure -R '^orchestration_(validation_report|benchmark)$'
         env:
           ASAN_OPTIONS: halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1

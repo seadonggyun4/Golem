@@ -184,6 +184,30 @@ class CandidateCLI(Changes):
         self.assertEqual(report["decision"], "INCOMPARABLE")
         self.assertEqual(report["dispatch_intent_denominator"], 1)
 
+    def test_cancel_after_restart_keeps_reservation_and_delivers_notice(self):
+        self.setup_host()
+        self.launch()
+        old_token = self.admission_token.copy()
+        self.host.kill()
+        self.host.communicate(timeout=20)
+        self.host = None
+        self.host_start("recovered.sock")
+        self.group("cancel", "a", token=old_token, ok=False)
+        ticket = self.rpc("ticket", operation_id="cf-group-a", approve=False)
+        self.assertEqual(ticket["state"], 6)  # RECONCILE_REQUIRED retains resources.
+        self.admission_token = {k: ticket[k] for k in ("ticket", "epoch", "instance", "boot")}
+        self.group("cancel", "a", token=self.admission_token)
+        self.group("cancel", "a", token=self.admission_token)
+        self.assertTrue((self.work / "candidate-notifications/group").is_file())
+        self.assertEqual(self.rpc("ticket", operation_id="cf-group-a", approve=False)["state"], 6)
+        polled = self.group("poll", "a", session="agent-a", approve=False)
+        self.assertTrue(polled["cancel_requested"])
+        self.assertFalse(polled["may_continue"])
+        self.settle(cancelled=True, ok=False)  # Cancellation is not termination.
+        self.clear_claim()
+        report = self.settle(cancelled=True, known=False)
+        self.assertEqual(report["candidates"][0]["state"], "FINISHED")
+
     def test_approval_and_transport_fail_closed(self):
         self.setup_host()
         self.rpc("create", manifest=self.manifest, approve=False, ok=False)

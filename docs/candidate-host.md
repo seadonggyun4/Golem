@@ -126,6 +126,11 @@ notice publication was interrupted. Successful cancel means **durably queued**,
 not proven delivery to a GUI, forced process termination or released reservation.
 The response marks delivery as `COOPERATIVE_POLL`. An agent must poll and obey it.
 
+After host restart, cancellation with the new admission token also publishes the
+notice while admission remains `RECONCILE_REQUIRED`. This preserves its resource
+reservation until termination is attested. Old tokens remain rejected; retrying
+the cancellation does not redispatch execution or release capacity.
+
 After stopping effects, the agent must submit/reconcile its active Work claim.
 Expiry alone does not count as termination. The operator then reviews the exact
 settlement, including QA receipt and actual or explicitly unknown usage:
