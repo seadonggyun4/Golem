@@ -65,16 +65,23 @@ static void disconnected(struct evhttp_connection *connection, void *context)
 {
     (void)connection;
     subscriber *s = context;
+    /* EOF/timeout detaches an unfinished streaming reply before closecb.
+     * Attached requests remain owned by connection_free; detached ones do not.
+     */
+    if (s->request && !evhttp_request_get_connection(s->request))
+        evhttp_request_free(s->request);
     memset(s, 0, sizeof(*s));
 }
 static void drop(subscriber *s)
 {
     struct evhttp_connection *c = evhttp_request_get_connection(s->request);
-    /* libevent owns the request; closing releases it and calls disconnected. */
+    /* Attached requests are released by libevent after disconnected. */
     if (c)
         evhttp_connection_free(c);
-    else
+    else {
+        evhttp_request_free(s->request);
         memset(s, 0, sizeof(*s));
+    }
 }
 static bool send_bytes(subscriber *s, const char *data, size_t size)
 {
