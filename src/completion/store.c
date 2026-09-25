@@ -356,6 +356,8 @@ golem_status golem_completion_call(golem_document_store *s, golem_bytes b,
         struct json_object *prior = dw_get(dw_get(s->completions[i], "record"), "assessment");
         if (!strcmp(dw_text(old, "selection_id"), dw_text(r, "selection_id")) &&
             dw_uint(old, "expected_generation") == dw_uint(r, "expected_generation") &&
+            json_object_equal(dw_get(prior, "policy"), dw_get(assessment, "policy")) &&
+            json_object_equal(dw_get(prior, "deliverable_receipt"), dw_get(assessment, "deliverable_receipt")) &&
             json_object_equal(dw_get(prior, "outcome_adjudications"),
                               dw_get(assessment, "outcome_adjudications")))
             st = GOLEM_ERR_IDENTITY_MISMATCH;

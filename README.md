@@ -100,6 +100,7 @@ Replace the executable, Work root, protocol docs and target repository placehold
 | Embed the C/C++ library | [Build and install Golem::golem](docs/runtime-reference.md#development) |
 | Use Python or TypeScript | [Language bindings](docs/runtime-reference.md#language-bindings) |
 | Select stages and check document freshness | [Workflow](docs/workflow.md) |
+| Enforce role deliverables before completion | [Role contracts](docs/role-contracts.md) |
 | Understand qualification and verification | [Conformance](docs/conformance.md) |
 | Runtime, performance and operations | [Technical reference](docs/runtime-reference.md) |
 | Journal inspection, salvage and compatibility | [Integrity and recovery](docs/runtime-integrity.md) |

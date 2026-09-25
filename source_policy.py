@@ -10,7 +10,8 @@ PRIVATE = frozenset({"project-docs", "credentials", "secrets", "reports", "works
 BASE = frozenset({"CMakeLists.txt", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"})
 TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.py",
     "benchmark_runtime.py", "verify_isolation.py", "test_verify_isolation.py",
-    "verify_resource.py", "test_verify_resource.py"})
+    "verify_resource.py", "test_verify_resource.py", "event_bridge.c", "event_bridge_limits.h",
+    "verify_orchestration.py", "test_verify_orchestration.py", "benchmark_orchestration.py"})
 # Every data fixture is deliberately reviewed. New local .json/.md files do not
 # become public just because their directory or extension looks like a sample.
 FIXTURES = frozenset("""

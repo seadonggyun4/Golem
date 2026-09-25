@@ -20,6 +20,21 @@ static bool number(struct json_object *o, const char *key)
 static bool shape(const char *action, struct json_object *data, size_t index)
 {
     golem_digest digest;
+    if (!strcmp(action, "DIFF")) {
+        const char *keys[] = {"digest"};
+        return dw_keys(data, keys, 1) && dw_digest(data, "digest", &digest);
+    }
+    if (!strcmp(action, "REVIEW")) {
+        const char *keys[] = {"operation", "group_id", "candidate", "diff",
+                              "qa",        "decision", "reviewer"};
+        return dw_keys(data, keys, 7) && !strcmp(dw_text(data, "operation"), "review") &&
+               dw_digest(data, "diff", &digest) && ws_id(dw_text(data, "reviewer")) &&
+               strlen(dw_text(data, "reviewer")) <= 64 &&
+               json_object_is_type(dw_get(data, "qa"), json_type_string) &&
+               (!*dw_text(data, "qa") || dw_digest(data, "qa", &digest)) &&
+               (!strcmp(dw_text(data, "decision"), "PASS") ||
+                !strcmp(dw_text(data, "decision"), "FAIL"));
+    }
     if (!strcmp(action, "RESERVE")) {
         const char *keys[] = {"namespace"};
         return dw_keys(data, keys, 1) && dw_digest(data, "namespace", &digest);
@@ -105,7 +120,31 @@ golem_status cf_apply(cf_context *c, const char *action, size_t i, struct json_o
         return GOLEM_OK;
     }
     const char *state = cf_state(c, i), *next = NULL, *field = NULL;
-    if (!strcmp(action, "ENROLL") && !strcmp(state, "PLANNED")) {
+    if (!strcmp(action, "DIFF") && !strcmp(state, "FINISHED") && !c->selection) {
+        golem_status st = cf_diff_validate(c, i, data);
+        if (st != GOLEM_OK)
+            return st;
+        next = "FINISHED";
+        field = "diff";
+    } else if (!strcmp(action, "REVIEW") && !strcmp(state, "FINISHED")) {
+        if (strcmp(dw_text(data, "group_id"), dw_text(c->manifest, "group_id")) ||
+            strcmp(dw_text(data, "candidate"), dw_text(cf_spec(c, i), "id")) ||
+            strcmp(dw_text(data, "diff"), dw_text(dw_get(c->members[i], "diff"), "digest")))
+            return GOLEM_ERR_CORRUPT_JOURNAL;
+        golem_digest digest;
+        struct json_object *projection = NULL;
+        if (!dw_digest(data, "diff", &digest))
+            return GOLEM_ERR_CORRUPT_JOURNAL;
+        golem_status st = dw_cas_json(c->parent, &digest, &projection);
+        if (st == GOLEM_OK && !strcmp(dw_text(data, "decision"), "PASS") &&
+            !json_object_get_boolean(dw_get(projection, "complete")))
+            st = GOLEM_ERR_CORRUPT_JOURNAL;
+        json_object_put(projection);
+        if (st != GOLEM_OK)
+            return st;
+        next = "FINISHED";
+        field = "review";
+    } else if (!strcmp(action, "ENROLL") && !strcmp(state, "PLANNED")) {
         next = "READY";
         field = "enrollment";
     } else if (!strcmp(action, "RESERVE") && !strcmp(state, "READY")) {

@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "binding_internal.h"
 #include "../execution/internal.h"
 #include "../reentry/internal.h"
 #include "../runtime/profile_internal.h"
@@ -109,9 +110,11 @@ static bool request_schema(struct json_object *r)
                            "expected_generation",
                            "source_snapshot",
                            "byte_budget",
-                           "ttl_ms"};
-    const char *resume[] = {"schema_version",    "operation",  "work_id", "key",
-                            "expected_sequence", "session_id", "ttl_ms"};
+                           "ttl_ms",
+                           "binding_id"};
+    const char *resume[] = {
+        "schema_version", "operation", "work_id",    "key",  "expected_sequence",
+        "session_id",     "ttl_ms",    "binding_id", "token"};
     const char *begin[] = {"schema_version",    "operation", "work_id",     "key",
                            "expected_sequence", "token",     "input_digest"};
     const char *heartbeat[] = {"schema_version",    "operation", "work_id", "key",
@@ -123,7 +126,9 @@ static bool request_schema(struct json_object *r)
         "schema_version", "operation",       "work_id", "key",      "expected_sequence", "token",
         "input_digest",   "source_snapshot", "output",  "evidence", "resolution"};
     const char *context[] = {"schema_version", "operation", "work_id", "token", "max_bytes"};
-    if (dw_uint(r, "schema_version") != 1 || !dw_id(dw_text(r, "work_id")))
+    bool bound =
+        dw_uint(r, "schema_version") == 2 && (!strcmp(op, "claim") || !strcmp(op, "resume"));
+    if ((dw_uint(r, "schema_version") != 1 && !bound) || !dw_id(dw_text(r, "work_id")))
         return false;
     if (strcmp(op, "status") == 0 || strcmp(op, "next") == 0)
         return dw_keys(r, base, 3);
@@ -132,9 +137,9 @@ static bool request_schema(struct json_object *r)
     if (strcmp(op, "start") == 0)
         return dw_keys(r, start, 6);
     if (strcmp(op, "claim") == 0)
-        return dw_keys(r, claim, 10);
+        return dw_keys(r, claim, bound ? 11 : 10);
     if (strcmp(op, "resume") == 0)
-        return dw_keys(r, resume, 7);
+        return dw_keys(r, resume, bound ? 9 : 7);
     if (strcmp(op, "begin") == 0)
         return dw_keys(r, begin, 7);
     if (strcmp(op, "heartbeat") == 0)
@@ -149,6 +154,8 @@ static bool request_values(struct json_object *r)
 {
     const char *op = dw_text(r, "operation");
     golem_digest digest;
+    if (dw_uint(r, "schema_version") == 2 && !dw_id(dw_text(r, "binding_id")))
+        return false;
     if (strcmp(op, "status") == 0 || strcmp(op, "next") == 0)
         return true;
     bool context = strcmp(op, "context") == 0;
@@ -160,8 +167,15 @@ static bool request_values(struct json_object *r)
     if (strcmp(op, "claim") == 0 || strcmp(op, "resume") == 0 || strcmp(op, "heartbeat") == 0)
         if (!dw_uint(r, "ttl_ms") || dw_uint(r, "ttl_ms") > GOLEM_AGENT_MAX_TTL_MS)
             return false;
-    if (strcmp(op, "resume") == 0)
-        return dw_id(dw_text(r, "session_id"));
+    if (strcmp(op, "resume") == 0) {
+        struct json_object *token = dw_get(r, "token");
+        const char *keys[] = {"epoch", "attempt_id", "session_id"};
+        return dw_id(dw_text(r, "session_id")) &&
+               (dw_uint(r, "schema_version") == 1 || !token ||
+                (dw_keys(token, keys, 3) && dw_uint(token, "epoch") > 0 &&
+                 dw_uint(token, "epoch") <= GOLEM_AGENT_MAX_EVENTS &&
+                 dw_id(dw_text(token, "attempt_id")) && dw_id(dw_text(token, "session_id"))));
+    }
     if (strcmp(op, "claim") == 0)
         return dw_id(dw_text(r, "session_id")) && dw_uint(r, "expected_generation") > 0 &&
                dw_uint(r, "expected_generation") <= GOLEM_DOCUMENT_MAX_REVISIONS + 1 &&
@@ -247,10 +261,10 @@ static golem_status query(golem_document_store *s, as_log *l, struct json_object
     struct json_object *o = json_object_new_object();
     golem_status st = GOLEM_OK;
     const char *identity = dw_get(dw_get(l->state, "active"), "runtime_binding") ? "BOUND"
-        : s->runtime_profile_count ? "ENROLLED_NO_ACTIVE_BINDING" : "UNKNOWN";
+                           : s->runtime_profile_count ? "ENROLLED_NO_ACTIVE_BINDING"
+                                                      : "UNKNOWN";
     if (!dw_add(o, "schema_version", json_object_new_int(1)) ||
-        !add_text(o, "runtime_identity", identity) ||
-        !add_uint(o, "sequence", l->sequence) ||
+        !add_text(o, "runtime_identity", identity) || !add_uint(o, "sequence", l->sequence) ||
         !dw_add(o, "acceptance_verified", json_object_new_boolean(false)) ||
         !dw_add(o, "execution_authorized", json_object_new_boolean(false)))
         st = GOLEM_ERR_OUT_OF_MEMORY;
@@ -463,6 +477,12 @@ static golem_status prepare(golem_document_store *s, as_log *l, struct json_obje
     const char *op = dw_text(r, "operation");
     struct json_object *a = dw_get(l->state, "active"), *d = json_object_new_object();
     golem_status st = d ? GOLEM_OK : GOLEM_ERR_OUT_OF_MEMORY;
+    if (st == GOLEM_OK && (!strcmp(op, "claim") || !strcmp(op, "resume"))) {
+        bool enrolled = dw_get(l->state, "binding") != NULL;
+        if ((enrolled && !ab_matches(l->state, r)) ||
+            (!enrolled && dw_uint(r, "schema_version") != 1))
+            st = GOLEM_ERR_IDENTITY_MISMATCH;
+    }
     uint64_t ttl = dw_uint(r, "ttl_ms");
     if (strcmp(op, "claim") == 0 || strcmp(op, "resume") == 0 || strcmp(op, "heartbeat") == 0)
         if (!ttl || ttl > GOLEM_AGENT_MAX_TTL_MS || now > UINT64_MAX - ttl)
@@ -515,6 +535,9 @@ static golem_status prepare(golem_document_store *s, as_log *l, struct json_obje
             st = GOLEM_ERR_OUT_OF_MEMORY;
         if (st == GOLEM_OK)
             st = rp_claim(s, d);
+        if (st == GOLEM_OK && dw_get(l->state, "binding") &&
+            !add_text(d, "session_binding", dw_text(r, "binding_id")))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
         json_object_put(n);
         json_object_put(m);
     } else if (st == GOLEM_OK && strcmp(op, "resume") == 0) {
@@ -523,6 +546,13 @@ static golem_status prepare(golem_document_store *s, as_log *l, struct json_obje
         else if (!add_text(d, "session_id", dw_text(r, "session_id")) ||
                  !add_uint(d, "expires_ms", now + ttl))
             st = GOLEM_ERR_OUT_OF_MEMORY;
+        if (st == GOLEM_OK && dw_get(l->state, "binding")) {
+            if (a ? !as_token(a, dw_get(r, "token")) : dw_get(r, "token") != NULL)
+                st = GOLEM_ERR_STALE_RESULT;
+            else if (!add_text(d, "session_binding", dw_text(r, "binding_id")) ||
+                     json_object_object_add(d, "token", json_object_get(dw_get(r, "token"))) != 0)
+                st = GOLEM_ERR_OUT_OF_MEMORY;
+        }
     } else if (st == GOLEM_OK && strcmp(op, "start") != 0) {
         if (!as_token(a, dw_get(r, "token")) || !as_live(l, now, boot))
             st = GOLEM_ERR_STALE_RESULT;
@@ -620,7 +650,10 @@ golem_status golem_agent_session_call(golem_document_store *s, golem_bytes bytes
             st = dw_put_json(s, s->spec, &spec);
             event = json_object_new_object();
             if (st == GOLEM_OK &&
-                (!dw_add(event, "schema_version", json_object_new_int(dw_get(data, "runtime_binding") ? 2 : 1)) ||
+                (!dw_add(event, "schema_version",
+                         json_object_new_int(dw_get(data, "session_binding")   ? 3
+                                             : dw_get(data, "runtime_binding") ? 2
+                                                                               : 1)) ||
                  !add_uint(event, "sequence", log.sequence + 1) ||
                  !add_text(event, "operation", op) || !add_text(event, "key", key) ||
                  !dw_add_digest(event, "request_digest", &request) ||

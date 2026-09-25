@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "binding_internal.h"
 #include <string.h>
 
 bool as_active(struct json_object *state)
@@ -33,8 +34,12 @@ golem_status as_reduce(struct json_object *prior, struct json_object *e, struct 
     uint64_t seq = dw_uint(e, "sequence"), now = dw_uint(e, "observed_ms");
     const char *op = dw_text(e, "operation");
     struct json_object *d = dw_get(e, "data"), *s = NULL;
-    bool bound_claim = dw_uint(e, "schema_version") == 2 && !strcmp(op, "claim");
-    if (!dw_keys(e, ek, 9) || (dw_uint(e, "schema_version") != 1 && !bound_claim) ||
+    bool session_event = dw_uint(e, "schema_version") == 3 &&
+                         (!strcmp(op, "bind") || !strcmp(op, "claim") || !strcmp(op, "resume"));
+    bool bound_claim = (dw_uint(e, "schema_version") == 2 || session_event) &&
+                       !strcmp(op, "claim") && dw_get(d, "runtime_binding");
+    if (!dw_keys(e, ek, 9) ||
+        (dw_uint(e, "schema_version") != 1 && !bound_claim && !session_event) ||
         seq != (prior ? dw_uint(prior, "sequence") : 0) + 1 || now == UINT64_MAX ||
         !dw_digest(e, "work_spec_digest", &digest) || !dw_id(dw_text(e, "key")) ||
         !dw_digest(e, "request_digest", &digest) || !dw_digest(e, "boot_id", &digest))
@@ -58,14 +63,24 @@ golem_status as_reduce(struct json_object *prior, struct json_object *e, struct 
     if (strcmp(op, "start") == 0) {
         if (prior)
             st = GOLEM_ERR_INVALID_STATE;
+    } else if (strcmp(op, "bind") == 0) {
+        st = ab_reduce(s, e);
     } else if (strcmp(op, "claim") == 0) {
         const char *keys[] = {"attempt_id",      "session_id",       "epoch", "expires_ms",
                               "manifest_digest", "input_generation", "kind",  "policy_digest",
-                              "source_snapshot", "scope_revision",   "state", "runtime_binding"};
-        if (a || !dw_keys(d, keys, bound_claim ? 12 : 11) ||
-            (bound_claim && !dw_digest(d, "runtime_binding", &digest)) || !dw_id(dw_text(d, "attempt_id")) ||
-            !dw_id(dw_text(d, "session_id")) || dw_uint(d, "epoch") != seq ||
-            dw_uint(d, "expires_ms") <= now ||
+                              "source_snapshot", "scope_revision",   "state", "runtime_binding",
+                              "session_binding"};
+        if (session_event && !bound_claim)
+            keys[11] = "session_binding";
+        struct json_object *binding = dw_get(s, "binding");
+        if (a || !dw_keys(d, keys, 11 + (bound_claim ? 1 : 0) + (session_event ? 1 : 0)) ||
+            ((binding != NULL) != session_event) ||
+            (session_event &&
+             (strcmp(dw_text(binding, "binding_id"), dw_text(d, "session_binding")) ||
+              strcmp(dw_text(binding, "session_id"), dw_text(d, "session_id")))) ||
+            (bound_claim && !dw_digest(d, "runtime_binding", &digest)) ||
+            !dw_id(dw_text(d, "attempt_id")) || !dw_id(dw_text(d, "session_id")) ||
+            dw_uint(d, "epoch") != seq || dw_uint(d, "expires_ms") <= now ||
             dw_uint(d, "expires_ms") - now > GOLEM_AGENT_MAX_TTL_MS ||
             !dw_uint(d, "input_generation") || wf_kind(dw_text(d, "kind")) < 0 ||
             dw_uint(d, "scope_revision") != 1 || !dw_digest(d, "manifest_digest", &digest) ||
@@ -77,8 +92,14 @@ golem_status as_reduce(struct json_object *prior, struct json_object *e, struct 
                  !number(s, "attempts", dw_uint(s, "attempts") + 1))
             st = GOLEM_ERR_OUT_OF_MEMORY;
     } else if (strcmp(op, "resume") == 0) {
-        const char *keys[] = {"session_id", "expires_ms"};
-        if (!dw_keys(d, keys, 2) || !dw_id(dw_text(d, "session_id")) ||
+        const char *keys[] = {"session_id", "expires_ms", "session_binding", "token"};
+        struct json_object *binding = dw_get(s, "binding");
+        if (!dw_keys(d, keys, session_event ? 4 : 2) || !dw_id(dw_text(d, "session_id")) ||
+            ((binding != NULL) != session_event) ||
+            (session_event &&
+             (strcmp(dw_text(binding, "binding_id"), dw_text(d, "session_binding")) ||
+              strcmp(dw_text(binding, "session_id"), dw_text(d, "session_id")) ||
+              (a ? !as_token(a, dw_get(d, "token")) : dw_get(d, "token") != NULL))) ||
             dw_uint(d, "expires_ms") <= now ||
             dw_uint(d, "expires_ms") - now > GOLEM_AGENT_MAX_TTL_MS)
             st = GOLEM_ERR_PARSE;

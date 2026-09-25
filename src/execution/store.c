@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "internal.h"
+#include "../policy/approval_internal.h"
 #include "../agent_session/internal.h"
 #include "../reentry/internal.h"
 #include <stdio.h>
@@ -337,7 +338,8 @@ golem_status ex_pass(golem_document_store *s, struct json_object *meta)
     return st;
 }
 static golem_status call(golem_document_store *s, golem_bytes bytes, const golem_digest *approval,
-                         const golem_digest *shell, golem_execution_reply *out, golem_diagnostic *d)
+                         const golem_digest *shell, ap_dispatch *dispatch,
+                         golem_execution_reply *out, golem_diagnostic *d)
 {
     if (!s || !out || s->poisoned)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -360,8 +362,13 @@ static golem_status call(golem_document_store *s, golem_bytes bytes, const golem
     if (st == GOLEM_OK && !is_verify &&
         (!s->writable || strcmp(dw_text(s->spec, "permission"), "DENY") == 0))
         st = GOLEM_ERR_POLICY_DENIED;
-    if (st == GOLEM_OK && !is_verify && strcmp(dw_text(s->spec, "permission"), "ASK_ALWAYS") == 0)
+    if (st == GOLEM_OK && !is_verify && !dispatch && s->approval_count)
         st = GOLEM_ERR_APPROVAL_REQUIRED;
+    if (st == GOLEM_OK && !is_verify && !dispatch &&
+        strcmp(dw_text(s->spec, "permission"), "ASK_ALWAYS") == 0)
+        st = GOLEM_ERR_APPROVAL_REQUIRED;
+    if (st == GOLEM_OK && dispatch)
+        st = ap_current(dispatch);
     golem_digest key = {0}, result_key = {0};
     if (st == GOLEM_OK && is_prepare)
         st = prepare(s, dw_get(req, "contract"), approval, shell, dw_get(req, "token"), &result);
@@ -392,7 +399,7 @@ static golem_status call(golem_document_store *s, golem_bytes bytes, const golem
                 st = ex_authorize(s, dw_get(req, "token"), manifest);
             if (st == GOLEM_OK)
                 st = ex_execute(s, cp, &key, manifest, dw_text(req, "attempt_id"),
-                                dw_get(req, "token"), &result);
+                                dw_get(req, "token"), dispatch, &result);
         }
     }
     if (st == GOLEM_OK && !is_verify)
@@ -420,7 +427,7 @@ golem_status golem_execution_call(golem_document_store *s, golem_bytes bytes,
                                   const golem_digest *approval, golem_execution_reply *out,
                                   golem_diagnostic *d)
 {
-    return call(s, bytes, approval, NULL, out, d);
+    return call(s, bytes, approval, NULL, NULL, out, d);
 }
 
 golem_status golem_execution_call_authorized(golem_document_store *s, golem_bytes bytes,
@@ -430,5 +437,13 @@ golem_status golem_execution_call_authorized(golem_document_store *s, golem_byte
     if (approval && (approval->struct_size != sizeof(*approval) || approval->version != 1))
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
     return call(s, bytes, approval ? approval->contract : NULL,
-                approval ? approval->shell_contract : NULL, out, d);
+                approval ? approval->shell_contract : NULL, NULL, out, d);
+}
+
+golem_status ex_receipted(golem_document_store *s, golem_bytes bytes,
+                          const golem_execution_approval *approval, ap_dispatch *dispatch,
+                          golem_execution_reply *out, golem_diagnostic *d)
+{
+    return call(s, bytes, approval ? approval->contract : NULL,
+                approval ? approval->shell_contract : NULL, dispatch, out, d);
 }

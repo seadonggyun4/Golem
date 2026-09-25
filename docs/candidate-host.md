@@ -2,7 +2,9 @@
 
 The installed C CLI now supplies the current-agent host implementation. No C
 callbacks, provider subprocesses or SDK credentials are required. Existing
-`candidate validate/gates/status` and the embedding API remain available.
+`candidate validate/gates/status/diff` and the embedding API remain available.
+The host also dispatches [pinned diff/review operations](candidate-diff.md) through
+the existing exact-request approval boundary; source retention is explicit.
 
 This is a **local cooperating-client** protocol, not remote authentication or
 physical containment. A person/process with the same user and filesystem access

@@ -25,6 +25,10 @@ add_test(NAME research_api COMMAND golem_test_research ${CMAKE_CURRENT_BINARY_DI
 set_tests_properties(research_api PROPERTIES TIMEOUT 30)
 
 add_executable(golem_test_completion test_completion.c)
+add_executable(golem_test_role_contract test_role_contract.c)
+target_link_libraries(golem_test_role_contract PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_role_contract)
+add_test(NAME role_contract_api COMMAND golem_test_role_contract)
 add_executable(golem_test_completion_version test_completion_version.c)
 target_link_libraries(golem_test_completion_version PRIVATE Golem::golem PkgConfig::JSONC)
 golem_configure_target(golem_test_completion_version)
@@ -98,6 +102,32 @@ add_executable(golem_test_agent_session test_agent_session.c)
 target_link_libraries(golem_test_agent_session PRIVATE Golem::golem)
 golem_configure_target(golem_test_agent_session)
 add_test(NAME agent_session_api COMMAND golem_test_agent_session)
+add_executable(golem_test_session_binding test_session_binding.c)
+target_link_libraries(golem_test_session_binding PRIVATE Golem::golem)
+golem_configure_target(golem_test_session_binding)
+add_test(NAME session_binding_api COMMAND golem_test_session_binding)
+add_executable(golem_test_approval test_approval.c)
+target_link_libraries(golem_test_approval PRIVATE Golem::golem)
+golem_configure_target(golem_test_approval)
+add_test(NAME approval_api COMMAND golem_test_approval)
+add_executable(golem_test_event_reader test_event_reader.c)
+target_link_libraries(golem_test_event_reader PRIVATE Golem::golem)
+golem_configure_target(golem_test_event_reader)
+add_test(NAME event_reader_api COMMAND golem_test_event_reader)
+set_tests_properties(event_reader_api PROPERTIES TIMEOUT 30 LABELS "observation")
+add_executable(golem_test_event_backpressure test_event_backpressure.c)
+target_link_libraries(golem_test_event_backpressure PRIVATE Golem::golem)
+golem_configure_target(golem_test_event_backpressure)
+add_test(NAME event_bridge_backpressure COMMAND golem_test_event_backpressure)
+set_tests_properties(event_bridge_backpressure PROPERTIES TIMEOUT 30 LABELS "observation")
+if(GOLEM_BUILD_EVENT_BRIDGE)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_test(NAME event_bridge_http COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/event_bridge_integration.py
+        $<TARGET_FILE:golem_event_bridge> $<TARGET_FILE:golem_test_runtime_events>)
+    set_tests_properties(event_bridge_http PROPERTIES TIMEOUT 120 LABELS "observation;http")
+endif()
+set_tests_properties(approval_api PROPERTIES TIMEOUT 30 LABELS "approval")
 set_tests_properties(agent_session_api PROPERTIES TIMEOUT 30)
 
 add_executable(golem_test_workflow test_workflow.c)
@@ -286,6 +316,9 @@ if(GOLEM_BUILD_CLI)
     add_test(NAME runtime_validation_report COMMAND ${Python3_EXECUTABLE} -m unittest
         discover -s ${PROJECT_SOURCE_DIR}/tools -p test_verify_runtime.py)
     set_tests_properties(runtime_validation_report PROPERTIES TIMEOUT 30 LABELS runtime-contract)
+    add_test(NAME orchestration_validation_report COMMAND ${Python3_EXECUTABLE} -m unittest
+        discover -s ${PROJECT_SOURCE_DIR}/tools -p test_verify_orchestration.py)
+    set_tests_properties(orchestration_validation_report PROPERTIES TIMEOUT 30 LABELS orchestration)
     add_test(NAME isolation_validation_report COMMAND ${Python3_EXECUTABLE} -m unittest
         discover -s ${PROJECT_SOURCE_DIR}/tools -p test_verify_isolation.py)
     set_tests_properties(isolation_validation_report PROPERTIES TIMEOUT 30 LABELS "runtime-contract;isolation")
@@ -311,6 +344,20 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/session_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_agent_client>)
     set_tests_properties(agent_session_cli PROPERTIES TIMEOUT 240)
+    add_executable(golem_binding_client binding_client.c)
+    target_link_libraries(golem_binding_client PRIVATE Golem::golem)
+    golem_configure_target(golem_binding_client)
+    add_test(NAME session_binding_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/binding_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_agent_client> $<TARGET_FILE:golem_binding_client>)
+    set_tests_properties(session_binding_cli PROPERTIES TIMEOUT 360 LABELS "binding;session")
+    add_executable(golem_approval_client approval_client.c)
+    target_link_libraries(golem_approval_client PRIVATE Golem::golem)
+    golem_configure_target(golem_approval_client)
+    add_test(NAME approval_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/approval_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_approval_client>)
+    set_tests_properties(approval_cli PROPERTIES TIMEOUT 360 LABELS "approval;execution")
     add_test(NAME runtime_profile_cli COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/profile_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_agent_client>)
@@ -373,6 +420,10 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/completion_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} -v)
     set_tests_properties(completion_cli PROPERTIES TIMEOUT 900)
+    add_test(NAME role_contract_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/role_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} -v)
+    set_tests_properties(role_contract_cli PROPERTIES TIMEOUT 600 LABELS "roles;completion")
     add_test(NAME completion_historical_store COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/completion_history.py $<TARGET_FILE:golem_cli>
         $<TARGET_FILE:golem_test_completion_version>)
@@ -397,6 +448,13 @@ if(GOLEM_BUILD_CLI)
     add_test(NAME workflow_cli COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/workflow_integration.py $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR})
     set_tests_properties(workflow_cli PROPERTIES TIMEOUT 180)
+    add_test(NAME workflow_template_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/workflow_template_integration.py $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
+    set_tests_properties(workflow_template_cli PROPERTIES TIMEOUT 180)
+    add_test(NAME orchestration_integration COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/orchestration_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} -v)
+    set_tests_properties(orchestration_integration PROPERTIES TIMEOUT 240 LABELS "orchestration;fixture")
     add_executable(golem_crash_runner crash_runner.c)
     target_link_libraries(golem_crash_runner PRIVATE Golem::golem OpenSSL::Crypto)
     golem_configure_target(golem_crash_runner)
@@ -495,6 +553,15 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/candidate_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_candidate_host_helper>)
     set_tests_properties(candidate_integration PROPERTIES TIMEOUT 240)
+    add_test(NAME candidate_diff_integration COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/candidate_diff_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_candidate_host_helper>)
+    set_tests_properties(candidate_diff_integration PROPERTIES TIMEOUT 180)
+    add_test(NAME orchestration_benchmark COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/orchestration_benchmark.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_candidate_host_helper>
+        $<TARGET_FILE:golem_test_runtime_events> ${CMAKE_CURRENT_BINARY_DIR})
+    set_tests_properties(orchestration_benchmark PROPERTIES TIMEOUT 240 LABELS "orchestration;benchmark;fixture")
 endif()
 
 # Compile every installed header alone and twice: self-containment and guards.

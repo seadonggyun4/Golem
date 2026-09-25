@@ -4,6 +4,8 @@
 #include "golem/adapter_protocol.h"
 #include "golem/adapter_descriptor.h"
 #include "golem/research.h"
+#include "golem/role_contract.h"
+#include "golem/workflow_template.h"
 #include "golem/journal.h"
 #include "golem/lineage.h"
 #include "../src/daemon/admission_internal.h"
@@ -145,6 +147,28 @@ static void parsers(void)
 }
 static void documents(const char *source)
 {
+    const char approval[] =
+        "{\"schema_version\":1,\"operation\":\"approve\",\"key\":\"decision\","
+        "\"request_receipt\":\"0000000000000000000000000000000000000000000000000000000000000000\","
+        "\"reason\":\"operator-reviewed\"}";
+    save("document", "approval.json", approval, sizeof(approval)-1);
+    const char binding[] = "{\"schema_version\":1,\"operation\":\"attach\",\"work_id\":\"work\",\"key\":\"bind\",\"expected_sequence\":1,\"session_id\":\"agent\",\"descriptor_digest\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"native_thread_id\":\"provider:opaque/id\",\"token\":null,\"ttl_ms\":1000}";
+    save("document", "session-binding.json", binding, sizeof(binding)-1);
+    golem_execution_reply role = {0};
+    REQUIRE(golem_role_template("reviewer", &role) == GOLEM_OK);
+    save("document", "role-contract.json", role.data, role.size);
+    golem_execution_reply_free(&role);
+    const char *templates[] = {"feature", "bugfix", "review", "research"};
+    for (size_t i = 0; i < 4; ++i) {
+        golem_execution_reply preset = {0};
+        char name[64];
+        REQUIRE(golem_workflow_template_builtin(templates[i], &preset) == GOLEM_OK);
+        snprintf(name, sizeof(name), "workflow-template-%s.json", templates[i]);
+        save("document", name, preset.data, preset.size);
+        golem_execution_reply_free(&preset);
+    }
+    const char role_request[] = "{\"schema_version\":1,\"operation\":\"assess\",\"selection_id\":\"selection\",\"key\":\"assessment\",\"expected_generation\":1,\"review\":null}";
+    save("document", "role-request.json", role_request, sizeof(role_request)-1);
     static const char head[] = "100644 blob 0123456789012345678901234567890123456789\tfile\nname";
     static const char index[] = "100644 0123456789012345678901234567890123456789 0\tfile";
     save("document", "git-head-record", (const uint8_t *)head, sizeof(head));

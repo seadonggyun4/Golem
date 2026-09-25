@@ -8,6 +8,8 @@
 #include "../execution/internal.h"
 #include "../reentry/internal.h"
 #include "../completion/internal.h"
+#include "../workflow/role_internal.h"
+#include "../policy/approval_internal.h"
 #include "../research/internal.h"
 #include "../runtime/profile_internal.h"
 #include <dirent.h>
@@ -115,6 +117,10 @@ golem_status dw_apply(golem_document_store *s, struct json_object *event,
         return re_apply(s, event, payload, frame);
     if (strcmp(dw_text(event, "type"), "completion") == 0)
         return co_apply(s, event, payload, frame);
+    if (strcmp(dw_text(event, "type"), "roles") == 0)
+        return rc_apply(s, event, payload, frame);
+    if (strcmp(dw_text(event, "type"), "approval") == 0)
+        return ap_apply(s, event, payload, frame);
     if (strcmp(dw_text(event, "type"), "research") == 0)
         return rs_apply(s, event, payload, frame);
     if (strcmp(dw_text(event, "type"), "runtime-profile") == 0)
@@ -294,6 +300,10 @@ golem_status golem_document_store_close(golem_document_store *s)
         json_object_put(s->reentries[i]);
     for (size_t i = 0; i < s->completion_count; ++i)
         json_object_put(s->completions[i]);
+    for (size_t i = 0; i < s->role_count; ++i)
+        json_object_put(s->roles[i]);
+    for (size_t i = 0; i < s->approval_count; ++i)
+        json_object_put(s->approvals[i]);
     for (size_t i = 0; i < s->research_count; ++i)
         json_object_put(s->research[i]);
     for (size_t i = 0; i < s->runtime_profile_count; ++i)

@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "../workflow/template_internal.h"
 #include "../agent_session/internal.h"
 #include "../inventory/internal.h"
 #include <stdlib.h>
@@ -285,6 +286,9 @@ golem_status ex_current(golem_document_store *s, struct json_object *manifest)
 golem_status ex_inputs(golem_document_store *s, struct json_object *c, const char *kind,
                        struct json_object **out)
 {
+    golem_status template_status = wt_execution(s, c);
+    if (template_status != GOLEM_OK)
+        return template_status;
     dw_entry *dev = wf_resolve(s, dw_get(c, "development_plan"));
     if (!dev || strcmp(dw_text(dev->meta, "kind"), "development-plan") != 0 ||
         dw_uint(dev->meta, "schema_version") != 4)
@@ -293,6 +297,10 @@ golem_status ex_inputs(golem_document_store *s, struct json_object *c, const cha
     if (!dw_digest(dev->meta, "source_snapshot", &source))
         return GOLEM_ERR_PARSE;
     uint64_t budget = GOLEM_WORKFLOW_CONTEXT_MAX;
+    dw_entry *selected = dw_find(s, dw_text(c, "selection_id"), 0);
+    struct json_object *template = selected ? wt_definition(dw_get(selected->meta, "selection")) : NULL;
+    if (template)
+        budget = dw_uint(dw_get(template, "budget"), "context_bytes");
     as_log log = {.directory = -1};
     golem_status loaded = as_load(s, NULL, NULL, &log);
     struct json_object *active = dw_get(log.state, "active"), *pinned = NULL;

@@ -25,6 +25,9 @@ The current Codex/Claude/other client remains the worker.
 Noop/schema-4 claims and document-only selections cannot receive a development
 completion receipt. Document-only acceptance needs a separate predicate; this
 version fails closed rather than labelling it real development completion.
+Explicitly enrolled [role contracts](role-contracts.md) use the separately
+versioned `golem.completion.roles.v1` predicate and version-2 finalize requests,
+including a document-only contract that makes no code-execution claim.
 Passing declared gates is not proof that the user's prose requirement is fully
 implemented or that all defects are absent. Independent review is explicitly
 `false`; an authored audit document does not authenticate an independent reviewer.

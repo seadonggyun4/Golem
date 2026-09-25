@@ -7,6 +7,8 @@ This is a bounded local execution contract, not a general acceptance oracle.
 Opt-in contract v2 adds [verification bundles and log retention](verification-bundles.md)
 without rewriting historical v1 receipts or Markdown.
 Contract v3 adds [explicit shell approval and the execution boundary](execution-boundary.md).
+Optional [scoped HITL receipts](approvals.md) bind host decisions to an exact
+execution request, with expiry, revocation and one-use consumption.
 Optional isolated candidates use the [workspace C host API](workspaces.md);
 workspace ownership does not replace execution approval or QA acceptance.
 

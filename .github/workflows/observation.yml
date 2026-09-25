@@ -1,0 +1,37 @@
+name: Read-only observation
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  sse:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev libevent-dev
+      - if: runner.os == 'macOS'
+        run: brew install ninja openssl@3 pkg-config json-c md4c libevent
+      - run: cmake -S . -B build/events -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGOLEM_ENABLE_SANITIZERS=ON -DGOLEM_BUILD_EVENT_BRIDGE=ON
+      - run: cmake --build build/events --parallel 2
+      - run: ctest --test-dir build/events --output-on-failure -R 'event_reader|event_bridge|runtime_events|mutation_document'
+        env:
+          ASAN_OPTIONS: halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      - name: Orchestration contract matrix
+        run: python3 tools/verify_orchestration.py --build build/events --output build/orchestration-validation
+        env:
+          ASAN_OPTIONS: halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      - name: Collector checks and bounded observation benchmark
+        run: ctest --test-dir build/events --output-on-failure -R '^orchestration_(validation_report|benchmark)$'
+        env:
+          ASAN_OPTIONS: halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1

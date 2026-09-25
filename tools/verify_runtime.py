@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
+from collections import Counter
 
 from verify_agent import capture, digest, private_directory, save
 
@@ -41,8 +42,46 @@ def adjudicate(path, expected):
                 for case in cases))
 
 
-def run(build, output, ctest, timeout, *, groups=None, schema="golem.runtime-validation.v1", limitations=None):
+def required_tests(groups):
+    if not groups or any(not re.fullmatch(r"[A-Za-z0-9_-]+", name) or not cases
+                         for name, cases in groups.items()):
+        raise ValueError("nonempty, safely named validation groups required")
+    names = [name for cases in groups.values() for name in cases]
+    if any(not isinstance(name, str) or not name for name in names) or len(names) != len(set(names)):
+        raise ValueError("required tests must have unique nonempty names")
+    return set(names)
+
+
+def test_inputs(tests, required, build, extra_inputs=()):
+    """Pin local test programs and Python fixtures, including unittest discovery.
+
+    This is not a hermetic import tracer or system-library attestation.
+    """
+    inputs = {str(Path(path).resolve()) for path in extra_inputs}
+    for test in tests:
+        if test["name"] not in required:
+            continue
+        properties = {p["name"]: p["value"] for p in test.get("properties", [])}
+        directory = Path(properties.get("WORKING_DIRECTORY", build))
+        command = test.get("command", [])
+        for index, arg in enumerate(command):
+            path = Path(arg)
+            path = path if path.is_absolute() else directory / path
+            if path.is_file():
+                inputs.add(str(path.resolve()))
+            if index and command[index - 1] in ("-s", "--start-directory") and path.is_dir():
+                inputs.update(str(p.resolve()) for p in path.rglob("*.py") if p.is_file())
+    # Entry points and wrappers may import sibling or package helper modules.
+    for name in tuple(inputs):
+        if Path(name).suffix == ".py":
+            inputs.update(str(p.resolve()) for p in Path(name).parent.rglob("*.py") if p.is_file())
+    return inputs
+
+
+def run(build, output, ctest, timeout, *, groups=None, schema="golem.runtime-validation.v1", limitations=None,
+        extra_inputs=()):
     groups = GROUPS if groups is None else groups
+    required = required_tests(groups)
     build = build.resolve()
     cli = build / "golem"
     if not cli.is_file() or not (build / "CMakeCache.txt").is_file():
@@ -50,21 +89,15 @@ def run(build, output, ctest, timeout, *, groups=None, schema="golem.runtime-val
     inventory = subprocess.run([ctest, "--test-dir", str(build), "--show-only=json-v1"],
                                capture_output=True, check=True, timeout=30)
     tests = json.loads(inventory.stdout)["tests"]
-    available = {test["name"] for test in tests}
-    missing = sorted(set(sum(groups.values(), ())) - available)
+    available = Counter(test["name"] for test in tests)
+    missing = sorted(name for name in required if available[name] != 1)
     if missing:
         raise ValueError("required tests missing: " + ", ".join(missing))
-    inputs = {str(Path(arg).resolve()) for test in tests
-              if test["name"] in set(sum(groups.values(), ()))
-              for arg in test.get("command", []) if Path(arg).is_file()}
-    # Python integration cases import sibling fixtures. Pin those dependencies,
-    # not merely the launcher, so a changed oracle cannot retain a fixture PASS.
-    for name in tuple(inputs):
-        if Path(name).suffix == ".py":
-            inputs.update(str(p.resolve()) for p in Path(name).parent.glob("*.py") if p.is_file())
+    inputs = test_inputs(tests, required, build, extra_inputs)
     inputs.add(str(Path(__file__).resolve()))
     inputs.add(str(Path(__file__).with_name("verify_agent.py").resolve()))
     inputs.add(str(build / "CMakeCache.txt"))
+    inputs.update(str(Path(path).resolve()) for path in extra_inputs)
     inputs.update(str(p.resolve()) for p in build.rglob("CTestTestfile.cmake"))
     hashes = {path: digest(Path(path)) for path in sorted(inputs)}
     output = private_directory(output)

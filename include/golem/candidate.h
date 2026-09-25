@@ -12,7 +12,8 @@ extern "C" {
  * Borrowed handles/strings must remain live for the entire serialized call.
  * Provision independent child Work stores and phase-31C workspaces first.
  * Build/temp roots are dedicated, existing canonical directories outside trees.
- * resolve("$target") is used only for target-check; workspace may be NULL there. */
+ * resolve("$target") is used for target-check and target review; workspace may
+ * be NULL there. */
 typedef struct golem_candidate_member {
     golem_document_store *work;
     const golem_workspace_host *workspace;
@@ -40,6 +41,18 @@ typedef struct golem_candidate_host {
      * Required for cancel after START_INTENT. Never implies observed termination. */
     golem_status (*cancel)(void *, const char *candidate);
 } golem_candidate_host;
+
+/* Additive JSON operations (see docs/candidate-diff.md): diff-seal freezes a
+ * finished candidate's issued QA inventory into a versioned CAS projection;
+ * review binds an exact projection and optional target QA; review-check checks
+ * candidate freshness. These require host authorization. Source retention must
+ * be explicitly permitted by check; reviewer is an audit label, not identity
+ * authentication. Hold exclusive/quiescent workspace authority through capture.
+ * diff reads only the sealed historical projection. With NULL host it uses the
+ * caller's local Work filesystem read authority, like status, never live Git.
+ * With a host, check is mandatory even for diff. Reply ownership is unchanged.
+ * Once sealed, a candidate requires a fresh PASS review before select/target;
+ * legacy unsealed groups keep their prior behavior. No merge/push permission. */
 
 /* Current-agent connector. All bindings/options are trusted caller capabilities,
  * never agent-authored JSON. Borrowed immutable data must outlive the host and

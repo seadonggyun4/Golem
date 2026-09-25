@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "template_internal.h"
 #include "../discovery/internal.h"
 #include <stdlib.h>
 #include <string.h>
@@ -139,8 +140,9 @@ golem_status wf_metadata(struct json_object *m)
 {
     if (dw_uint(m, "schema_version") == 3) {
         struct json_object *p = dw_get(m, "selection"), *dec = dw_get(p, "decisions");
-        const char *keys[] = {"schema_version", "mode", "scope", "decisions"};
-        if (!dw_keys(p, keys, 4) || dw_uint(p, "schema_version") != 1 ||
+        const char *keys[] = {"schema_version", "mode", "scope", "decisions", "template_instance"};
+        bool templated = dw_uint(p, "schema_version") == 2;
+        if (!dw_keys(p, keys, templated ? 5 : 4) || (!templated && dw_uint(p, "schema_version") != 1) ||
             (strcmp(dw_text(p, "mode"), "development") != 0 &&
              strcmp(dw_text(p, "mode"), "documents") != 0) ||
             !wf_reference(dw_get(p, "scope")) ||
@@ -168,7 +170,7 @@ golem_status wf_metadata(struct json_object *m)
             if (i != 1 && i != 2 && strcmp(status, "REQUIRED") != 0)
                 return GOLEM_ERR_REQUIREMENTS_UNMET;
         }
-        return GOLEM_OK;
+        return templated ? wt_selection(p) : GOLEM_OK;
     }
     struct json_object *p = dw_get(m, "input_manifest"), *direct = dw_get(p, "direct"),
                        *docs = dw_get(p, "documents");

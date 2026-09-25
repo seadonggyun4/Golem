@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "internal.h"
+#include "../policy/approval_internal.h"
 #include "golem/supervisor.h"
 #include "../agent_session/internal.h"
 #include "../reentry/internal.h"
@@ -169,6 +170,7 @@ static golem_status observations(struct json_object *gate, golem_supervisor_resu
 typedef struct lease_guard {
     as_log *log;
     golem_document_store *store;
+    ap_dispatch *approval;
 } lease_guard;
 static golem_status pulse(void *context)
 {
@@ -176,6 +178,11 @@ static golem_status pulse(void *context)
     golem_status deadline = re_deadline(guard->store);
     if (deadline != GOLEM_OK)
         return deadline;
+    if (guard->approval) {
+        golem_status approved = ap_guard(guard->approval);
+        if (approved != GOLEM_OK)
+            return approved;
+    }
     if (!guard->log->state)
         return GOLEM_OK;
     uint64_t now;
@@ -306,7 +313,7 @@ static golem_status gate_run(golem_document_store *s, struct json_object *gate,
 }
 golem_status ex_execute(golem_document_store *s, struct json_object *cp, const golem_digest *key,
                         struct json_object *manifest, const char *attempt,
-                        struct json_object *token, struct json_object **out)
+                        struct json_object *token, ap_dispatch *approval, struct json_object **out)
 {
     int dir = -1;
     char started[80], done[80];
@@ -369,7 +376,7 @@ golem_status ex_execute(golem_document_store *s, struct json_object *cp, const g
     if (st == GOLEM_OK)
         st = ex_authorize(s, token, manifest);
     as_log log = {.directory = -1};
-    lease_guard guard = {&log, s};
+    lease_guard guard = {&log, s, approval};
     if (st == GOLEM_OK)
         st = as_load(s, NULL, NULL, &log);
     if (st == GOLEM_OK && dw_get(manifest, "reentry")) {
@@ -399,7 +406,9 @@ golem_status ex_execute(golem_document_store *s, struct json_object *cp, const g
     bool pass = true, error = false;
     for (size_t i = 0; st == GOLEM_OK && i < json_object_array_length(definitions); ++i) {
         struct json_object *g = NULL;
-        st = pulse(&guard);
+        st = approval ? ap_current(approval) : GOLEM_OK;
+        if (st == GOLEM_OK)
+            st = pulse(&guard);
         if (st != GOLEM_OK) {
             break;
         }

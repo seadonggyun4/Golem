@@ -28,7 +28,7 @@ class SourceSnapshotTests(unittest.TestCase):
 
     def test_runtime_harness_dependencies_are_explicit(self):
         for name in ("verify_runtime.py", "test_verify_runtime.py", "verify_agent.py",
-                     "benchmark_runtime.py"):
+                     "benchmark_runtime.py", "event_bridge.c", "event_bridge_limits.h"):
             self.assertTrue(selected("tools/" + name))
         self.assertFalse(selected("tools/local_report.py"))
         self.assertFalse(selected("tools/project-docs/plan.py"))

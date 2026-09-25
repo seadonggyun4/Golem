@@ -79,6 +79,8 @@ golem_status cf_report(cf_context *c, bool compare, struct json_object **out)
             if (strcmp(dw_text(cf_spec(c, 0), "environment_digest"),
                        dw_text(cf_spec(c, i), "environment_digest")))
                 eligibility = "ENVIRONMENT_MISMATCH";
+            if (!strcmp(eligibility, "PASS") && cf_review_check(c, i) != GOLEM_OK)
+                eligibility = "MISSING_OR_STALE_REVIEW";
             if (!strcmp(eligibility, "PASS")) {
                 ++passes;
                 winner = dw_text(cf_spec(c, i), "id");
@@ -184,6 +186,10 @@ golem_status cf_target(cf_context *c, size_t i, struct json_object **out)
         st = GOLEM_ERR_REQUIREMENTS_UNMET;
     if (st == GOLEM_OK)
         st = cf_patch_identity(selected.work, selected_qa, target.work, qa, &patch);
+    if (st == GOLEM_OK && dw_get(c->members[i], "diff") &&
+        strcmp(dw_text(c->request, "operation"), "review") &&
+        strcmp(dw_text(dw_get(c->members[i], "review"), "qa"), dw_text(c->request, "qa")))
+        st = GOLEM_ERR_APPROVAL_REQUIRED;
     struct json_object *result = json_object_new_object();
     if (st == GOLEM_OK &&
         (!dw_add_digest(result, "target_qa", &key) ||

@@ -12,6 +12,8 @@ static int usage(void)
         "  golem init DIRECTORY\n"
         "  golem work start NEW_WORK_DIR SPEC_JSON\n"
         "  golem session call WORK_DIR REQUEST_JSON\n"
+        "  golem approval describe WORK_DIR EXECUTION_JSON\n"
+        "  golem approval call WORK_DIR REQUEST_JSON\n"
         "  golem profile validate PROFILE_JSON | register WORK_DIR PROFILE_JSON KEY | current WORK_DIR\n"
         "  golem execution validate CONTRACT_JSON\n"
         "  golem execution call WORK_DIR REQUEST_JSON [--approve-contract SHA256]\n"
@@ -28,6 +30,9 @@ static int usage(void)
         "  golem research observability WORK --case CASE_ID --format otlp|prov --redact POLICY.json\n"
         "  golem research inspect|report WORK_DIR SEQUENCE\n"
         "  golem completion validate REQUEST_JSON\n"
+        "  golem role template implementer|qa|reviewer|researcher|doc-only|no-change\n"
+        "  golem role validate CONTRACT.json\n"
+        "  golem role call WORK REQUEST.json [--approve-contract SHA256]\n"
         "  golem completion call WORK_DIR REQUEST_JSON\n"
         "  golem completion report WORK_DIR SEQUENCE\n"
         "  golem reentry validate REQUEST_JSON\n"
@@ -83,8 +88,16 @@ int golem_cli_candidate(int argc, char **argv);
 int golem_cli_reentry(int argc, char **argv);
 int golem_cli_research(int argc, char **argv);
 int golem_cli_completion(int argc, char **argv);
+int golem_cli_role(int argc, char **argv);
+int golem_cli_approval(int argc, char **argv);
+int golem_cli_session_binding(int argc, char **argv);
 int main(int argc, char **argv)
 {
+    if (argc >= 2 && !strcmp(argv[1], "approval")) return golem_cli_approval(argc, argv);
+    if (argc >= 2 && !strcmp(argv[1], "agent")) return golem_cli_session_binding(argc, argv);
+    if (argc >= 3 && !strcmp(argv[1], "work") && !strcmp(argv[2], "history"))
+        return golem_cli_session_binding(argc, argv);
+    if (argc >= 2 && !strcmp(argv[1], "role")) return golem_cli_role(argc, argv);
     if (argc >= 2 && strcmp(argv[1], "journal") == 0) return golem_cli_journal(argc, argv);
     if(argc>=2 && strcmp(argv[1],"workflow")==0) return golem_cli_workflow(argc,argv);
     if(argc>=2 && strcmp(argv[1],"context")==0) return golem_cli_context(argc,argv);

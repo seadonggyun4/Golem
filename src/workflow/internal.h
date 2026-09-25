@@ -22,6 +22,8 @@ bool wf_reference(struct json_object *r);
 bool wf_append(struct json_object *a, struct json_object *v);
 int wf_kind(const char *kind);
 int wf_stage(int kind);
+golem_status wf_role_pick(golem_document_store *store, dw_entry *plan, int kind,
+                          wf_graph *graph, dw_entry **out);
 extern const char *const wf_kinds[8];
 extern const char *const wf_stages[6];
 golem_status wf_integrity(golem_document_store *s, size_t index, uint64_t *size);

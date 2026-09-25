@@ -39,4 +39,12 @@ golem_status cf_ticket(cf_context *ctx, size_t index, golem_admission_ticket *ou
 struct json_object *cf_token(const golem_admission_token *token);
 bool cf_token_equal(struct json_object *object, const golem_admission_token *token);
 bool cf_held(const char *state);
+golem_status cf_diff_call(cf_context *ctx, size_t index, struct json_object **out);
+golem_status cf_review_check(cf_context *ctx, size_t index);
+golem_status cf_diff_validate(cf_context *ctx, size_t index, struct json_object *data);
+golem_status cf_diff_inventory(golem_document_store *store, struct json_object *snapshot,
+                               struct json_object **out);
+golem_status cf_diff_content(cf_context *ctx, const golem_candidate_member *member,
+                             const char *path_hex, struct json_object *entry, bool live,
+                             size_t *remaining, struct json_object **out);
 #endif

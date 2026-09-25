@@ -2,6 +2,7 @@
 #include "golem/workflow.h"
 #include <stdlib.h>
 #include <string.h>
+int golem_cli_workflow_template(int argc, char **argv);
 static bool number(const char *s,uint64_t max,uint64_t *out)
 {
     if(!s || !*s) return false;
@@ -12,6 +13,7 @@ static bool number(const char *s,uint64_t max,uint64_t *out)
 }
 int golem_cli_workflow(int argc,char **argv)
 {
+    if(argc>=3 && !strcmp(argv[2],"template")) return golem_cli_workflow_template(argc,argv);
     if(argc<5) return 2;
     bool select=strcmp(argv[2],"select")==0 && argc==7;
     bool inputs=strcmp(argv[2],"inputs")==0 && argc==8;

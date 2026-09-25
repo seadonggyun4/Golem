@@ -159,6 +159,9 @@ static golem_status finish(cf_context *c, size_t i)
 static golem_status dispatch(cf_context *c, const char *op, size_t i, struct json_object **out)
 {
     golem_status st = GOLEM_OK;
+    if (!strcmp(op, "diff-seal") || !strcmp(op, "diff") || !strcmp(op, "review") ||
+        !strcmp(op, "review-check"))
+        return cf_diff_call(c, i, out);
     if (!strcmp(op, "enroll")) {
         struct json_object *data = NULL;
         st = cf_enroll(c, i, &data);
@@ -236,10 +239,15 @@ golem_status golem_candidate_call(golem_document_store *s, const golem_candidate
     golem_status st = golem_json_parse(bytes, GOLEM_DOCUMENT_MAX_JSON, &c.request);
     const char *op = dw_text(c.request, "operation"), *group = dw_text(c.request, "group_id");
     bool create = !strcmp(op, "create"),
-         readonly = !strcmp(op, "status") || !strcmp(op, "compare") || !strcmp(op, "target-check");
+         readonly = !strcmp(op, "status") || !strcmp(op, "compare") ||
+                    !strcmp(op, "target-check") || !strcmp(op, "diff") ||
+                    !strcmp(op, "review-check");
     const char *keys[] = {"operation", "group_id", "candidate", "token"};
     const char *create_keys[] = {"operation", "manifest"};
     const char *target_keys[] = {"operation", "group_id", "candidate", "qa"};
+    const char *diff_keys[] = {"operation", "group_id", "candidate", "redaction"};
+    const char *review_keys[] = {"operation", "group_id", "candidate", "diff",
+                                 "qa",        "decision", "reviewer"};
     if (create) {
         if (!dw_keys(c.request, create_keys, 2))
             st = GOLEM_ERR_PARSE;
@@ -251,12 +259,18 @@ golem_status golem_candidate_call(golem_document_store *s, const golem_candidate
     } else if (!strcmp(op, "target-check")) {
         if (!dw_keys(c.request, target_keys, 4))
             st = GOLEM_ERR_PARSE;
+    } else if (!strcmp(op, "diff-seal")) {
+        if (!dw_keys(c.request, diff_keys, 4))
+            st = GOLEM_ERR_PARSE;
+    } else if (!strcmp(op, "review")) {
+        if (!dw_keys(c.request, review_keys, 7))
+            st = GOLEM_ERR_PARSE;
     } else if (strcmp(op, "finish")) {
         bool general =
             !strcmp(op, "status") || !strcmp(op, "compare") || !strcmp(op, "cohort-record");
         bool token = !strcmp(op, "start") || !strcmp(op, "cancel");
         if ((!general && !token && strcmp(op, "enroll") && strcmp(op, "reserve") &&
-             strcmp(op, "select")) ||
+             strcmp(op, "select") && strcmp(op, "diff") && strcmp(op, "review-check")) ||
             !dw_keys(c.request, keys,
                      general ? 2
                      : token ? 4
@@ -268,11 +282,12 @@ golem_status golem_candidate_call(golem_document_store *s, const golem_candidate
     if (st == GOLEM_OK && !readonly &&
         (!s->writable || !strcmp(dw_text(s->spec, "permission"), "DENY")))
         st = GOLEM_ERR_POLICY_DENIED;
-    if (st == GOLEM_OK && strcmp(op, "status") &&
+    bool local_read = !strcmp(op, "status") || (!strcmp(op, "diff") && !host);
+    if (st == GOLEM_OK && !local_read &&
         (!host || host->size != sizeof(*host) || host->version != 1 || !host->resolve ||
          !host->check))
         st = GOLEM_ERR_APPROVAL_REQUIRED;
-    if (st == GOLEM_OK && strcmp(op, "status"))
+    if (st == GOLEM_OK && !local_read)
         st = host->check(host->context, bytes);
     int groups = -1;
     if (st == GOLEM_OK)

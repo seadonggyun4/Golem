@@ -71,6 +71,12 @@ Requests accepted by `golem_candidate_call`:
 | `start`, `cancel` | `group_id`, `candidate`, `token` |
 | `finish` | `group_id`, `candidate`, `token`, `termination`, `qa`, `cancelled`, `tokens_known`, `cost_known`, `tokens`, `nano_cost` |
 | `target-check` | `group_id`, `candidate`, `qa` |
+| `diff-seal` | `group_id`, `candidate`, `redaction` |
+| `diff`, `review-check` | `group_id`, `candidate` |
+| `review` | `group_id`, `candidate`, `diff`, `qa`, `decision`, `reviewer` |
+
+See [pinned candidate diff and review](candidate-diff.md) for source-retention
+approval, immutable projection, completeness limits, and live review gates.
 
 The token contains `ticket`, `epoch`, `instance` (32 hex characters) and `boot`
 (SHA-256). Obtain it from the current admission owner. `termination` is a parent

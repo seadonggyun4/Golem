@@ -3,6 +3,8 @@
 #include "../execution/internal.h"
 #include "../reentry/internal.h"
 #include "../completion/internal.h"
+#include "role_internal.h"
+#include "template_internal.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -112,6 +114,30 @@ static golem_status pick(golem_document_store *s, dw_entry *plan, int kind, wf_g
     *out = found;
     return GOLEM_OK;
 }
+golem_status wf_role_pick(golem_document_store *s, dw_entry *plan, int kind, wf_graph *g,
+                          dw_entry **out)
+{
+    golem_status st = pick(s, plan, kind, g, out);
+    if (st != GOLEM_ERR_STALE_RESULT)
+        return st;
+    /* Keep a stale root for precise revision feedback without treating it as
+     * usable input. The normal workflow picker still accepts current only. */
+    struct json_object *d = decision(plan, wf_stage(kind));
+    if (!strcmp(dw_text(d, "status"), "REUSED")) {
+        *out = wf_resolve(s, dw_get(dw_get(d, "reuse"), "document"));
+        return st;
+    }
+    for (size_t i = 0; i < s->count; ++i) {
+        dw_entry *e = &s->entries[i];
+        if (!strcmp(dw_text(e->meta, "kind"), wf_kinds[kind]) && same_plan(e->meta, plan) &&
+            g->states[i] == GOLEM_DOCUMENT_STALE) {
+            if (*out)
+                return GOLEM_ERR_INVALID_STATE;
+            *out = e;
+        }
+    }
+    return st;
+}
 static golem_status plan_get(golem_document_store *s, const char *id, wf_graph *g, dw_entry **out)
 {
     if (!dw_id(id))
@@ -152,6 +178,12 @@ golem_status wf_manifest(golem_document_store *s, dw_entry *plan, const char *ki
     golem_status st = wf_selection(s, plan->meta, g);
     if (st != GOLEM_OK)
         return st;
+    st = wt_guard(s, dw_text(plan->meta, "document_id"));
+    if (st != GOLEM_OK)
+        return st;
+    struct json_object *template = wt_definition(dw_get(plan->meta, "selection"));
+    if (template && budget > dw_uint(dw_get(template, "budget"), "context_bytes"))
+        return GOLEM_ERR_BUDGET_EXHAUSTED;
     bool documents = strcmp(dw_text(dw_get(plan->meta, "selection"), "mode"), "documents") == 0;
     if ((documents && k == 4) ||
         strcmp(dw_text(decision(plan, wf_stage(k)), "status"), "REQUIRED") != 0)
@@ -313,6 +345,8 @@ golem_status wf_preconditions(golem_document_store *s, struct json_object *m)
             st = GOLEM_ERR_STALE_RESULT;
         json_object_put(expected);
     }
+    if (st == GOLEM_OK && version == 3)
+        st = wt_revision(s, m);
     /* The selected scope's requirements cannot disappear in a downstream stage. */
     if (st == GOLEM_OK) {
         dw_entry *parent = version == 3
@@ -644,6 +678,15 @@ golem_status golem_workflow_next(golem_document_store *s, const char *id, void *
         uint64_t size;
         st = wf_integrity(s, (size_t)(e - s->entries), &size);
     }
+    if (st == GOLEM_OK && !settled && !strcmp(action, "VERIFY_COMPLETION")) {
+        const char *role_action = NULL, *role_kind = NULL, *role_reason = NULL;
+        st = rc_hint(s, id, &role_action, &role_kind, &role_reason);
+        if (st == GOLEM_OK && role_action) {
+            action = role_action;
+            kind = role_kind;
+            reason = role_reason;
+        }
+    }
     if (st == GOLEM_OK && !settled && !strcmp(action, "VERIFY_COMPLETION") && completed)
         action = completed;
     struct json_object *o = NULL;
@@ -657,6 +700,19 @@ golem_status golem_workflow_next(golem_document_store *s, const char *id, void *
             !dw_add(o, "execution_authorized", json_object_new_boolean(false)) ||
             !dw_add(o, "acceptance_verified", json_object_new_boolean(!strcmp(action, "DONE"))))
             st = GOLEM_ERR_OUT_OF_MEMORY;
+    }
+    if (st == GOLEM_OK) {
+        /* Feedback is historical evidence for targeted revision, not a fresh
+         * acceptance claim or permission to execute. Existing QA reentry wins. */
+        struct json_object *last = rc_latest(s, id);
+        if (last) {
+            golem_digest key;
+            st = ex_hash(last, &key);
+            if (st == GOLEM_OK &&
+                (!dw_add_digest(o, "deliverable_receipt", &key) ||
+                 !dw_add(o, "deliverable_feedback", json_object_get(dw_get(last, "assessment")))))
+                st = GOLEM_ERR_OUT_OF_MEMORY;
+        }
     }
     if (st == GOLEM_OK)
         st = emit(o, buffer, capacity, required);

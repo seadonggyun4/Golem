@@ -2,6 +2,7 @@
 #define _DARWIN_C_SOURCE
 #define _DEFAULT_SOURCE
 #include "internal.h"
+#include "binding_internal.h"
 #include "../runtime/profile_internal.h"
 #include <dirent.h>
 #include <fcntl.h>
@@ -38,7 +39,7 @@ static golem_status validate(golem_document_store *s, as_log *l, struct json_obj
     const char *op = dw_text(e, "operation");
     uint64_t now = dw_uint(e, "observed_ms");
     struct json_object *d = dw_get(e, "data"), *a = dw_get(l->state, "active");
-    if (l->sequence && strcmp(op, "resume") != 0 &&
+    if (l->sequence && strcmp(op, "resume") != 0 && strcmp(op, "bind") != 0 &&
         (!dw_equal(&boot, &l->boot) || now < l->observed_ms))
         return GOLEM_ERR_STALE_RESULT;
     if (strcmp(op, "begin") == 0 || strcmp(op, "heartbeat") == 0 || strcmp(op, "submit") == 0 ||
@@ -64,15 +65,19 @@ static golem_status validate(golem_document_store *s, as_log *l, struct json_obj
              strcmp(dw_text(m, "source_snapshot"), dw_text(d, "source_snapshot")) != 0))
             st = GOLEM_ERR_IDENTITY_MISMATCH;
         json_object_put(m);
-        if (st == GOLEM_OK && dw_uint(e, "schema_version") == 2)
+        if (st == GOLEM_OK && dw_get(d, "runtime_binding"))
             st = rp_validate_claim(s, d);
         if (st == GOLEM_OK && s->runtime_profile_count &&
             dw_uint(e, "sequence") > dw_uint(s->runtime_profiles[0], "agent_sequence") &&
-            dw_uint(e, "schema_version") != 2)
+            !dw_get(d, "runtime_binding"))
             st = GOLEM_ERR_IDENTITY_MISMATCH;
+        if (st == GOLEM_OK)
+            st = ab_claim_validate(s, l->state, d);
         if (st != GOLEM_OK)
             return st;
     }
+    if (!strcmp(op, "bind"))
+        return ab_validate(s, e);
     if (strcmp(op, "submit") == 0 || strcmp(op, "reconcile") == 0) {
         if (dw_get(d, "output") && !wf_resolve(s, dw_get(d, "output")))
             return GOLEM_ERR_IDENTITY_MISMATCH;

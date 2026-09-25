@@ -18,6 +18,7 @@ include(CMakePackageConfigHelpers)
 option(GOLEM_WARNINGS_AS_ERRORS "Treat Golem warnings as errors" ON)
 option(GOLEM_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 option(GOLEM_BUILD_CLI "Build the headless C CLI" ON)
+option(GOLEM_BUILD_EVENT_BRIDGE "Build optional loopback read-only SSE bridge (libevent)" OFF)
 option(GOLEM_BUILD_BENCHMARKS "Build opt-in performance measurement tools" OFF)
 option(GOLEM_BUILD_BINDINGS "Build the optional shared language binding ABI" OFF)
 option(GOLEM_BUILD_NODE_BINDING "Build the optional Node-API addon" OFF)
@@ -77,6 +78,8 @@ add_library(golem STATIC
     src/candidate/evidence.c
     src/candidate/comparison.c
     src/candidate/patch.c
+    src/candidate/diff.c
+    src/candidate/diff_content.c
     src/candidate/current.c
     src/candidate/cohort.c
     src/candidate/controller.c
@@ -86,6 +89,8 @@ add_library(golem STATIC
     src/reentry/workflow.c
     src/completion/model.c
     src/completion/evaluator.c
+    src/completion/deliverable.c
+    src/completion/predicate_roles.c
     src/completion/predicate_v1.c
     src/completion/recovery.c
     src/completion/report.c
@@ -93,13 +98,23 @@ add_library(golem STATIC
     src/completion/store.c
     src/workflow/graph.c
     src/workflow/model.c
+    src/workflow/template.c
+    src/workflow/template_builtin.c
+    src/workflow/template_guard.c
     src/workflow/query.c
+    src/workflow/role_contract.c
+    src/workflow/role_store.c
     src/workflow/context_model.c
     src/workflow/context_projection.c
     src/agent_session/clock.c
     src/agent_session/model.c
     src/agent_session/storage.c
     src/agent_session/coordinator.c
+    src/agent_session/binding.c
+    src/agent_session/history.c
+    src/policy/approval_model.c
+    src/policy/approval_scope.c
+    src/policy/approval_store.c
     src/discovery/model.c
     src/discovery/snapshot.c
     src/discovery/report.c
@@ -120,6 +135,8 @@ add_library(golem STATIC
     src/daemon/supervisor.c
     src/daemon/worker.c
     src/daemon/events.c
+    src/daemon/event_reader.c
+    src/daemon/event_sse.c
     src/daemon/events_admission.c
     src/runtime/loop.c
     src/runtime/lease.c
@@ -236,13 +253,22 @@ if(GOLEM_BUILD_CLI)
     endif()
     add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c src/cli/adapter_descriptor.c src/cli/research.c src/cli/research_bundle.c
         src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c src/cli/journal.c
-        src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/context.c src/cli/events.c src/cli/agent_session.c src/cli/runtime_profile.c src/cli/execution.c src/cli/proof.c src/cli/candidate.c src/cli/reentry.c src/cli/completion.c)
+        src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/workflow_template.c src/cli/context.c src/cli/events.c src/cli/agent_session.c src/cli/runtime_profile.c src/cli/execution.c src/cli/proof.c src/cli/candidate.c src/cli/reentry.c src/cli/completion.c src/cli/role.c src/cli/approval.c)
     set_target_properties(golem_cli PROPERTIES OUTPUT_NAME golem)
     target_sources(golem_cli PRIVATE src/cli/candidate_host_config.c src/cli/candidate_host_runtime.c
         src/cli/candidate_host_transport.c src/cli/candidate_host_cli.c)
     target_link_libraries(golem_cli PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
     golem_configure_target(golem_cli)
     install(TARGETS golem_cli RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
+
+if(GOLEM_BUILD_EVENT_BRIDGE)
+    pkg_check_modules(LIBEVENT REQUIRED IMPORTED_TARGET libevent>=2.1.12)
+    add_executable(golem_event_bridge tools/event_bridge.c)
+    set_target_properties(golem_event_bridge PROPERTIES OUTPUT_NAME golem-events)
+    target_link_libraries(golem_event_bridge PRIVATE Golem::golem PkgConfig::LIBEVENT OpenSSL::Crypto)
+    golem_configure_target(golem_event_bridge)
+    install(TARGETS golem_event_bridge RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 if(BUILD_TESTING)

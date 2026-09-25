@@ -52,9 +52,11 @@ golem_status ex_pass(golem_document_store *s, struct json_object *meta);
 golem_status ex_required(golem_document_store *s, struct json_object *meta);
 golem_status ex_authorize(golem_document_store *s, struct json_object *token,
                           struct json_object *manifest);
+struct ap_dispatch;
 golem_status ex_execute(golem_document_store *s, struct json_object *checkpoint,
                         const golem_digest *checkpoint_digest, struct json_object *manifest,
-                        const char *attempt, struct json_object *token, struct json_object **out);
+                        const char *attempt, struct json_object *token,
+                        struct ap_dispatch *approval, struct json_object **out);
 bool ex_text(struct json_object *o, const char *key, const char *text);
 bool ex_uint(struct json_object *o, const char *key, uint64_t n);
 golem_status ex_emit(struct json_object *o, golem_execution_reply *out);

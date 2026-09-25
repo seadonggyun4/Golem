@@ -5,6 +5,10 @@ grant execution permission, release a lease, complete a Work, or replace evidenc
 It observes the opt-in admission/worker APIs, not every legacy daemon path or
 external agent process.
 
+An optional [read-only SSE bridge](event-stream.md) and shared
+`golem/event_reader.h` view build on these APIs. Subscription state and HTTP
+dependencies stay outside the runtime writer.
+
 ## Two sources
 
 | Source | Producer | Identity/lifetime | Time |

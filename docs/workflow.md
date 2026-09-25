@@ -1,5 +1,8 @@
 # Conditional Markdown Workflow
 
+For feature, bugfix, review and research starting configurations, see
+[workflow selection templates](workflow-templates.md).
+
 Phase 23 adds stage selection, exact upstream references and transitive freshness
 to the immutable [document registry](document-registry.md). It does not launch
 another agent. The current agent authors Markdown, registers it, requests the

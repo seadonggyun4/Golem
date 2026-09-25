@@ -12,10 +12,24 @@
 #include "golem/inventory.h"
 #include "golem/proof.h"
 #include "golem/workspace.h"
+#include "golem/role_contract.h"
+#include "golem/session_binding.h"
+#include "golem/approval.h"
+#include "golem/event_reader.h"
+#include "golem/workflow_template.h"
 #include <string.h>
 
 int main(void)
 {
+    golem_execution_reply template = {0};
+    golem_digest template_digest;
+    if (golem_workflow_template_builtin("feature", &template) != GOLEM_OK)
+        return 1;
+    golem_status template_status = golem_workflow_template_validate(
+        (golem_bytes){template.data, template.size}, &template_digest);
+    golem_execution_reply_free(&template);
+    if (template_status != GOLEM_OK)
+        return 1;
     golem_worker_options worker_options = golem_worker_options_default();
     golem_worker_pool *workers = NULL;
     if (golem_worker_open(&worker_options, &workers) != GOLEM_OK ||

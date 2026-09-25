@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "../workflow/template_internal.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -296,7 +297,9 @@ golem_status re_decide(golem_document_store *s, struct json_object *r, uint64_t 
             reason = "DEADLINE_EXHAUSTED";
         }
     }
-    if (s->reentry_count >= dw_uint(policy, "max_total") ||
+    struct json_object *template = selection ? wt_definition(dw_get(selection->meta, "selection")) : NULL;
+    if ((template && s->reentry_count >= dw_uint(dw_get(template, "budget"), "max_reentries")) ||
+        s->reentry_count >= dw_uint(policy, "max_total") ||
         stages >= dw_uint(policy, "max_stage")) {
         action = "BLOCKED";
         reason = "ATTEMPT_BUDGET_EXHAUSTED";

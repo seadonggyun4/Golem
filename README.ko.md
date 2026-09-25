@@ -100,6 +100,7 @@ build/release/golem document inspect "$WORK" planning 1
 | C/C++ 라이브러리 연동 | [Golem::golem 빌드·설치](docs/runtime-reference.md#development) |
 | Python·TypeScript 연동 | [언어 바인딩](docs/runtime-reference.md#language-bindings) |
 | 단계 선택·문서 참조·최신성 | [워크플로우](docs/workflow.md) |
+| 역할별 산출물·실제 증거·완료 조건 | [역할 계약](docs/role-contracts.md) |
 | 검증 절차와 보장 범위 | [통합 검증](docs/conformance.md) |
 | 런타임·성능·운영 상세 | [기술 레퍼런스](docs/runtime-reference.md) |
 | 저널 검사·비파괴 복구·호환성 | [무결성과 복구](docs/runtime-integrity.md) |

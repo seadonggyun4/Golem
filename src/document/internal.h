@@ -42,6 +42,12 @@ struct golem_document_store {
     struct json_object *admission_links[256];
     golem_digest admission_link_digests[256];
     golem_digest last;
+    size_t role_count;
+    struct json_object *roles[64];
+    golem_digest role_digests[64];
+    size_t approval_count;
+    struct json_object *approvals[256];
+    golem_digest approval_digests[256];
 };
 struct json_object *dw_get(struct json_object *o, const char *key);
 const char *dw_text(struct json_object *o, const char *key);
