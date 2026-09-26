@@ -31,8 +31,22 @@ int gd_lock(int dir, const char *name, bool create, bool exclusive)
     int fd = openat(dir, name, O_RDWR | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK | (create ? O_CREAT : 0), 0600);
     struct stat st;
     if (fd < 0) return -1;
-    if (fstat(fd, &st) < 0 || !S_ISREG(st.st_mode) || flock(fd, (exclusive ? LOCK_EX : LOCK_SH) | LOCK_NB) < 0) {
-        (void)close(fd); return -1;
+    if (fstat(fd, &st) < 0) {
+        int saved = errno;
+        (void)close(fd);
+        errno = saved;
+        return -1;
+    }
+    if (!S_ISREG(st.st_mode)) {
+        (void)close(fd);
+        errno = EINVAL;
+        return -1;
+    }
+    if (flock(fd, (exclusive ? LOCK_EX : LOCK_SH) | LOCK_NB) < 0) {
+        int saved = errno;
+        (void)close(fd);
+        errno = saved;
+        return -1;
     }
     return fd;
 }

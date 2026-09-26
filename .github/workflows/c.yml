@@ -41,9 +41,19 @@ jobs:
       - name: Install JSON dependencies (macOS)
         if: runner.os == 'macOS'
         run: brew install pkg-config json-c md4c
-      - run: cmake --preset ${{ matrix.preset }} -DGOLEM_BUILD_BENCHMARKS=ON -DGOLEM_BUILD_BINDINGS=ON
-      - run: cmake --build --preset ${{ matrix.preset }}
-      - run: ctest --preset ${{ matrix.preset }}
+      - name: Build and full-suite evidence
+        run: >-
+          python3 tools/verify_environment.py --preset ${{ matrix.preset }} --profile full-ci
+          --root "${{ runner.temp }}" --output "${{ runner.temp }}/verification-full"
+          --define GOLEM_BUILD_BENCHMARKS=ON --define GOLEM_BUILD_BINDINGS=ON
+      - name: Preserve full-suite evidence (including failures)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-${{ matrix.os }}-${{ matrix.preset }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/verification-full/
+          if-no-files-found: error
+          retention-days: 14
       - name: Linux kernel resource enforcement (isolated fixture)
         if: runner.os == 'Linux' && matrix.preset == 'release'
         shell: bash
@@ -65,6 +75,33 @@ jobs:
       - run: ctest --test-dir build/consumer --output-on-failure
       - name: Python prototype regression
         run: PYTHONPATH=src python3 -m unittest discover -s tests
+  restricted-diagnostics:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev
+      - if: runner.os == 'macOS'
+        run: brew install cmake ninja openssl@3 pkg-config json-c md4c
+      - name: Diagnostic contract evidence (injection; runner is not a sandbox)
+        run: >-
+          python3 tools/verify_environment.py --preset dev --profile restricted-sandbox
+          --root "${{ runner.temp }}" --output "${{ runner.temp }}/verification-diagnostic"
+      - name: Preserve diagnostic evidence (including failures)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diagnostic-${{ matrix.os }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/verification-diagnostic/
+          if-no-files-found: error
+          retention-days: 14
   language-bindings:
     strategy:
       fail-fast: false

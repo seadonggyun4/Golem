@@ -89,5 +89,8 @@ int golem_cli_candidate_host(int argc, char **argv)
     json_object_put(envelope);
     json_object_put(reply);
     json_object_put(object);
+    if (serve && st != GOLEM_OK)
+        fprintf(stderr, "{\"schema\":\"golem.host-error.v1\",\"phase\":\"serve\","
+                        "\"code\":%d}\n", (int)st);
     return st == GOLEM_OK ? 0 : cli_emit(st, NULL);
 }

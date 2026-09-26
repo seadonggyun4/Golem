@@ -72,6 +72,12 @@ typedef struct golem_admission_options {
  * IO failure poisons mutations: close/reopen and query by operation key. */
 golem_status golem_admission_open(const char *root, const golem_admission_options *options,
                                   golem_admission **out);
+/* Optional caller-owned diagnostic, overwritten on every call. Same ownership
+ * and mutation semantics as open. Diagnostic contains a stable operation name
+ * and captured errno, never root paths, credentials or boot identity values. */
+golem_status golem_admission_open_diagnostic(const char *root,
+    const golem_admission_options *options, golem_admission **out,
+    golem_diagnostic *diagnostic);
 golem_status golem_admission_close(golem_admission *admission);
 golem_status golem_admission_identity(golem_admission *admission, golem_digest *namespace_id,
                                       golem_admission_checkpoint *checkpoint);

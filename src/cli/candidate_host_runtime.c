@@ -168,8 +168,14 @@ golem_status ch_open(ch_host *h, struct json_object *config)
                                        .limits = {.slots = dw_uint(limits, "slots"),
                                                   .cpu_millis = dw_uint(limits, "cpu_millis"),
                                                   .memory_bytes = dw_uint(limits, "memory_bytes")}};
-    if (st == GOLEM_OK)
-        st = golem_admission_open(dw_text(config, "admission"), &options, &h->admission);
+    if (st == GOLEM_OK) {
+        golem_diagnostic diagnostic;
+        st = golem_admission_open_diagnostic(dw_text(config, "admission"), &options,
+                                             &h->admission, &diagnostic);
+        if (st != GOLEM_OK)
+            fprintf(stderr, "{\"schema\":\"golem.host-error.v1\",\"phase\":\"admission_open\","
+                            "\"code\":%d,\"diagnostic\":\"%s\"}\n", (int)st, diagnostic.message);
+    }
     h->workspace = (golem_workspace_host){.struct_size = sizeof(h->workspace),
                                           .version = 1,
                                           .repository_id = dw_text(config, "repository_id"),

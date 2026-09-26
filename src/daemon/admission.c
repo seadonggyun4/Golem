@@ -8,6 +8,20 @@
 #include <openssl/rand.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
+#include <stdio.h>
+
+static golem_status open_error(golem_diagnostic *d, golem_status status,
+                              const char *operation, int saved_errno)
+{
+    if (d) {
+        char message[128];
+        (void)snprintf(message, sizeof(message), "admission.%s errno=%d", operation,
+                       saved_errno);
+        (void)golem_diagnostic_set(d, status, GOLEM_DIAGNOSTIC_NO_OFFSET, message);
+    }
+    return status;
+}
 
 static golem_status ready(golem_admission *a)
 {
@@ -48,62 +62,88 @@ static ga_event limits_event(golem_admission_limits limits, ga_operation op)
 golem_status golem_admission_open(const char *root, const golem_admission_options *o,
                                   golem_admission **out)
 {
+    return golem_admission_open_diagnostic(root, o, out, NULL);
+}
+
+golem_status golem_admission_open_diagnostic(const char *root,
+    const golem_admission_options *o, golem_admission **out, golem_diagnostic *diagnostic)
+{
+    if (diagnostic)
+        (void)golem_diagnostic_clear(diagnostic);
     if (!root || root[0] != '/' || !o || !out || o->size != sizeof(*o))
-        return GOLEM_ERR_INVALID_ARGUMENT;
+        return open_error(diagnostic, GOLEM_ERR_INVALID_ARGUMENT, "arguments", 0);
     if (o->version != GOLEM_ADMISSION_VERSION)
-        return GOLEM_ERR_UNSUPPORTED_VERSION;
+        return open_error(diagnostic, GOLEM_ERR_UNSUPPORTED_VERSION, "version", 0);
     golem_status s = golem_allocator_validate(o->allocator);
     if (s != GOLEM_OK)
-        return s;
+        return open_error(diagnostic, s, "allocator", 0);
     golem_allocator allocator = o->allocator ? *o->allocator : golem_allocator_default();
     golem_admission *a = NULL;
     s = golem_allocator_alloc(&allocator, sizeof(*a), (void **)&a);
     if (s != GOLEM_OK)
-        return s;
+        return open_error(diagnostic, s, "allocate", 0);
     *a =
         (golem_admission){.allocator = allocator, .directory = -1, .leader = -1, .owner = getpid()};
+    const char *operation = "root_open";
+    errno = 0;
     a->directory = golem_evidence_path_open(root, true);
     if (a->directory < 0) {
         s = GOLEM_ERR_IO;
         goto fail;
     }
+    operation = "owner_lock";
+    errno = 0;
     a->leader = gd_lock(a->directory, ".owner", o->create, true);
     if (a->leader < 0) {
         s = GOLEM_ERR_JOURNAL_BUSY;
         goto fail;
     }
+    operation = "replay";
+    errno = 0;
     s = ga_load(a, o->expected);
     if (s != GOLEM_OK)
         goto fail;
+    /* Establish required host identity before publishing any new durable event. */
+    if (!a->checkpoint.records && !o->create) {
+        s = GOLEM_ERR_NOT_FOUND;
+        goto fail;
+    }
+    ga_event boot = {.operation = GA_BOOT, .epoch = a->model.epoch + 1};
+    uint64_t now;
+    operation = "boot_identity_clock";
+    errno = 0;
+    s = as_clock_read(NULL, &now, &boot.boot);
+    if (s != GOLEM_OK)
+        goto fail;
     if (!a->checkpoint.records) {
-        if (!o->create) {
-            s = GOLEM_ERR_NOT_FOUND;
-            goto fail;
-        }
         ga_event init = limits_event(o->limits, GA_INIT);
+        operation = "random_namespace";
+        errno = 0;
         if (RAND_bytes(init.request.runtime_binding.bytes, 32) != 1) {
             s = GOLEM_ERR_CRYPTO;
             goto fail;
         }
+        operation = "initial_commit";
+        errno = 0;
         s = ga_commit(a, &init);
         if (s != GOLEM_OK)
             goto fail;
     }
-    ga_event boot = {.operation = GA_BOOT, .epoch = a->model.epoch + 1};
-    uint64_t now;
-    s = as_clock_read(NULL, &now, &boot.boot);
-    if (s != GOLEM_OK)
-        goto fail;
+    operation = "random_instance";
+    errno = 0;
     if (RAND_bytes(boot.nonce, 16) != 1) {
         s = GOLEM_ERR_CRYPTO;
         goto fail;
     }
+    operation = "epoch_commit";
+    errno = 0;
     s = ga_commit(a, &boot);
     if (s != GOLEM_OK)
         goto fail;
     *out = a;
     return GOLEM_OK;
 fail:
+    (void)open_error(diagnostic, s, operation, errno);
     (void)golem_admission_close(a);
     return s;
 }

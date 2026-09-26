@@ -24,11 +24,18 @@ int golem_cli_agent_session(int argc, char **argv)
                              strcmp(name, "context") == 0);
     golem_document_store *store = NULL;
     golem_agent_reply reply = {0};
-    if (st == GOLEM_OK)
-        st = golem_document_store_open(argv[3], !readonly, NULL, &store, NULL);
-    if (st == GOLEM_OK)
+    golem_diagnostic diagnostic;
+    (void)golem_diagnostic_clear(&diagnostic);
+    const char *phase = "request_read_parse";
+    if (st == GOLEM_OK) {
+        phase = "work_store_open_replay";
+        st = golem_document_store_open(argv[3], !readonly, NULL, &store, &diagnostic);
+    }
+    if (st == GOLEM_OK) {
+        phase = "session_call";
         st = golem_agent_session_call(store, (golem_bytes){input.data, input.size}, NULL, &reply,
-                                      NULL);
+                                      &diagnostic);
+    }
     golem_status closed = golem_document_store_close(store);
     if (st == GOLEM_OK)
         st = closed;
@@ -39,6 +46,17 @@ int golem_cli_agent_session(int argc, char **argv)
     golem_agent_reply_free(&reply);
     json_object_put(request);
     free(input.data);
+    if (st != GOLEM_OK) {
+        struct json_object *error = json_object_new_object();
+        if (error) {
+            json_object_object_add(error, "schema", json_object_new_string("golem.session-error.v1"));
+            json_object_object_add(error, "code", json_object_new_int((int)st));
+            json_object_object_add(error, "phase", json_object_new_string(phase));
+            json_object_object_add(error, "diagnostic", json_object_new_string(diagnostic.message));
+            fprintf(stderr, "%s\n", json_object_to_json_string_ext(error, JSON_C_TO_STRING_PLAIN));
+            json_object_put(error);
+        }
+    }
     return st == GOLEM_OK ? 0 : cli_emit(st, NULL);
 }
 

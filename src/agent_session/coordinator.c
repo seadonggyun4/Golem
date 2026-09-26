@@ -613,6 +613,7 @@ golem_status golem_agent_session_call(golem_document_store *s, golem_bytes bytes
         return dw_report(diagnostic, GOLEM_ERR_INVALID_ARGUMENT, NULL);
     struct json_object *r = NULL, *response = NULL, *data = NULL, *event = NULL;
     as_log log = {.directory = -1};
+    const char *phase = "session.request_validation";
     golem_status st = golem_json_parse(bytes, GOLEM_DOCUMENT_MAX_JSON, &r);
     if (st == GOLEM_OK && (!request_schema(r) || !request_values(r)))
         st = GOLEM_ERR_PARSE;
@@ -628,24 +629,35 @@ golem_status golem_agent_session_call(golem_document_store *s, golem_bytes bytes
         st = GOLEM_ERR_POLICY_DENIED;
     if (st == GOLEM_OK)
         st = golem_digest_bytes(bytes, &request);
-    if (st == GOLEM_OK)
+    if (st == GOLEM_OK) {
+        phase = "session.log_replay";
         st = as_load(s, key, &request, &log);
+    }
     if (st == GOLEM_OK && log.key_conflict)
         st = GOLEM_ERR_IDENTITY_MISMATCH;
     if (st == GOLEM_OK && log.duplicate)
         response = json_object_get(log.duplicate);
-    if (st == GOLEM_OK && !response)
+    if (st == GOLEM_OK && !response) {
+        phase = "session.boot_identity_clock";
         st = as_clock_read(clock, &now, &boot);
-    if (st == GOLEM_OK && !response && readonly)
+    }
+    if (st == GOLEM_OK && !response && readonly) {
+        phase = "session.query";
         st = query(s, &log, r, now, &boot, &response);
-    else if (st == GOLEM_OK && !response) {
+    } else if (st == GOLEM_OK && !response) {
+        phase = "session.expected_sequence";
         if (dw_uint(r, "expected_sequence") != log.sequence)
             st = GOLEM_ERR_STALE_RESULT;
-        if (st == GOLEM_OK)
-            st = policy(s);
-        if (st == GOLEM_OK)
-            st = prepare(s, &log, r, now, &boot, &data);
         if (st == GOLEM_OK) {
+            phase = "session.policy";
+            st = policy(s);
+        }
+        if (st == GOLEM_OK) {
+            phase = "session.prepare";
+            st = prepare(s, &log, r, now, &boot, &data);
+        }
+        if (st == GOLEM_OK) {
+            phase = "session.event_build_cas";
             golem_digest spec;
             st = dw_put_json(s, s->spec, &spec);
             event = json_object_new_object();
@@ -665,16 +677,20 @@ golem_status golem_agent_session_call(golem_document_store *s, golem_bytes bytes
         if (st == GOLEM_OK) {
             uint64_t commit_now;
             golem_digest commit_boot;
+            phase = "session.commit_clock";
             st = as_clock_read(clock, &commit_now, &commit_boot);
             if (st == GOLEM_OK && (!dw_equal(&boot, &commit_boot) || commit_now < now))
                 st = GOLEM_ERR_STALE_RESULT;
             if (st == GOLEM_OK && !add_uint(event, "observed_ms", commit_now))
                 st = GOLEM_ERR_OUT_OF_MEMORY;
         }
-        if (st == GOLEM_OK)
+        if (st == GOLEM_OK) {
+            phase = "session.event_commit";
             st = as_commit(s, &log, event, &response);
+        }
     }
     if (st == GOLEM_OK) {
+        phase = "session.reply";
         const char *text = json_object_to_json_string_ext(response, JSON_C_TO_STRING_PLAIN);
         size_t size = text ? strlen(text) : 0;
         uint8_t *copy = NULL;
@@ -700,5 +716,5 @@ golem_status golem_agent_session_call(golem_document_store *s, golem_bytes bytes
     json_object_put(response);
     return dw_report(
         diagnostic, st,
-        st == GOLEM_OK ? "cooperative local session; external effects are not sandboxed" : NULL);
+        st == GOLEM_OK ? "cooperative local session; external effects are not sandboxed" : phase);
 }

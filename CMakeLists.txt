@@ -254,6 +254,7 @@ if(GOLEM_BUILD_CLI)
     add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c src/cli/adapter_descriptor.c src/cli/research.c src/cli/research_bundle.c
         src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c src/cli/journal.c
         src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/workflow_template.c src/cli/context.c src/cli/events.c src/cli/agent_session.c src/cli/runtime_profile.c src/cli/execution.c src/cli/proof.c src/cli/candidate.c src/cli/reentry.c src/cli/completion.c src/cli/role.c src/cli/approval.c)
+    target_sources(golem_cli PRIVATE src/cli/doctor.c)
     set_target_properties(golem_cli PROPERTIES OUTPUT_NAME golem)
     target_sources(golem_cli PRIVATE src/cli/candidate_host_config.c src/cli/candidate_host_runtime.c
         src/cli/candidate_host_transport.c src/cli/candidate_host_cli.c)

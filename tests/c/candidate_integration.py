@@ -21,17 +21,28 @@ class Candidates(Changes):
     def stop_host(self):
         p = getattr(self, "host", None)
         if p is not None:
-            p.stdin.write('{"operation":"$quit"}\n')
-            p.stdin.flush()
+            try:
+                p.stdin.write('{"operation":"$quit"}\n')
+                p.stdin.flush()
+            except BrokenPipeError:
+                pass
             _, err = p.communicate(timeout=20)
             self.host = None
             self.assertEqual(p.returncode, 0, err)
 
     def rpc(self, operation, ok=True, **fields):
-        self.host.stdin.write(json.dumps({"operation": operation, **fields}) + "\n")
-        self.host.stdin.flush()
+        try:
+            self.host.stdin.write(json.dumps({"operation": operation, **fields}) + "\n")
+            self.host.stdin.flush()
+        except BrokenPipeError:
+            _, error = self.host.communicate(timeout=20)
+            code, self.host = self.host.returncode, None
+            self.fail(f"host failed before {operation}: exit={code}; stderr={error}")
         line = self.host.stdout.readline()
-        self.assertTrue(line, "host terminated without a reply")
+        if not line:
+            _, error = self.host.communicate(timeout=20)
+            code, self.host = self.host.returncode, None
+            self.fail(f"host failed during {operation}: exit={code}; stderr={error}")
         result = json.loads(line)
         self.assertEqual(result["status"] == 0, ok, result)
         self.last_rpc = result

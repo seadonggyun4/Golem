@@ -68,6 +68,11 @@ golem_configure_target(golem_test_json_contract)
 add_test(NAME json_contract COMMAND golem_test_json_contract)
 set_tests_properties(json_contract PROPERTIES TIMEOUT 30 LABELS "hardening")
 add_executable(golem_test_admission test_admission.c)
+add_executable(golem_test_admission_open test_admission_open.c)
+target_link_libraries(golem_test_admission_open PRIVATE Golem::golem OpenSSL::Crypto PkgConfig::JSONC)
+golem_configure_target(golem_test_admission_open)
+add_test(NAME admission_open_diagnostics COMMAND golem_test_admission_open)
+set_tests_properties(admission_open_diagnostics PROPERTIES LABELS "restricted-diagnostic" TIMEOUT 30)
 add_executable(golem_test_admission_contract test_admission_contract.c)
 target_link_libraries(golem_test_admission_contract PRIVATE Golem::golem)
 golem_configure_target(golem_test_admission_contract)
@@ -303,6 +308,23 @@ foreach(case digest receipt roundtrip file corruption paths ownership concurrent
 endforeach()
 if(GOLEM_BUILD_CLI)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_test(NAME doctor_environment COMMAND ${Python3_EXECUTABLE}
+        ${PROJECT_SOURCE_DIR}/tools/doctor_environment.py --binary $<TARGET_FILE:golem_cli>
+        --root ${CMAKE_CURRENT_BINARY_DIR} --profile full-ci)
+    add_test(NAME doctor_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/doctor_integration.py $<TARGET_FILE:golem_cli>)
+    add_test(NAME restricted_diagnostics COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/restricted_diagnostics.py $<TARGET_FILE:golem_cli>)
+    add_test(NAME diagnostic_tools COMMAND ${Python3_EXECUTABLE} -m unittest
+        test_doctor_environment test_classify_failures test_verify_environment)
+    set_tests_properties(diagnostic_tools PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools")
+    set_tests_properties(restricted_diagnostics diagnostic_tools
+        PROPERTIES LABELS "restricted-diagnostic" TIMEOUT 120)
+    add_test(NAME golden_workflow COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/golden_workflow.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
+    # Six real compiler/session workflows; retain per-command deadlines as well.
+    set_tests_properties(golden_workflow PROPERTIES TIMEOUT 900)
     add_test(NAME change_inventory_integration COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/inventory_integration.py $<TARGET_FILE:golem_inventory_helper>)
     set_tests_properties(change_inventory_integration PROPERTIES TIMEOUT 240)

@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 import benchmark as bench
 
@@ -24,6 +25,19 @@ def fixture():
 
 
 class BenchmarkTests(unittest.TestCase):
+    def test_optional_cpu_probe_failure(self):
+        with tempfile.TemporaryDirectory() as root:
+            with mock.patch.object(bench, "cpu_name", side_effect=PermissionError("denied")):
+                report = bench.collect(BINARY, Path(root), "synthetic", 3, 1, smoke=True)
+        self.assertIsNone(report["environment"]["cpu"])
+        self.assertEqual(report["environment"]["cpu_probe_error"], "PermissionError")
+        self.assertEqual(set(report["metrics"]), set(bench.METRICS))
+        with self.assertRaises(ValueError):
+            bench.compare(report, copy.deepcopy(report))
+        del report["environment"]["cpu_probe_error"]
+        with self.assertRaises(ValueError):
+            bench.validate(report)
+
     def test_comparison(self):
         baseline = fixture()
         self.assertEqual(bench.compare(baseline, copy.deepcopy(baseline))["status"], "pass")

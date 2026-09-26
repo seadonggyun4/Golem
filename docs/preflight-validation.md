@@ -15,6 +15,7 @@ normal development dependencies):
 cmake -S . -B build/preflight -G Ninja -DCMAKE_BUILD_TYPE=Debug \
   -DGOLEM_ENABLE_SANITIZERS=ON -DGOLEM_BUILD_EVENT_BRIDGE=ON
 cmake --build build/preflight --parallel 4
+python3 tools/doctor_environment.py --binary build/preflight/golem --root /tmp --profile local-dev
 python3 tools/verify_preflight.py --build build/preflight --output /private/control/new-preflight
 python3 tools/check_guard_mutations.py --output /private/control/new-mutations
 ```
@@ -24,6 +25,11 @@ paths and execution logs; do not publish them without review/redaction. On Linux
 use an appropriate private absolute output path instead of `/private/control`.
 Do not edit or rebuild inputs while the collector is running. It pins its test
 inputs and fails if they change. This does not make the build hermetic.
+
+Run the environment command first and investigate a nonzero result before starting
+the suite. See [environment diagnostics](environment-diagnostics.md) for boot identity,
+socket and storage requirements, structured errors and failure grouping. Permission
+denial is not proof of a product defect, and is never a passing acceptance result.
 
 ## Coverage and independent checks
 

@@ -72,6 +72,9 @@ def validate(report):
         require(key in env, f"missing environment field: {key}")
         if key == "sanitized":
             require(type(env[key]) is bool, "invalid sanitizer flag")
+        elif key == "cpu" and env[key] is None:
+            require(isinstance(env.get("cpu_probe_error"), str) and
+                    0 < len(env["cpu_probe_error"]) <= 128, "missing CPU probe failure")
         else:
             require(isinstance(env[key], str) and 0 < len(env[key]) <= 1024, f"invalid {key}")
     require(isinstance(report.get("metrics"), dict) and set(report["metrics"]) == set(METRICS), "metric set mismatch")
@@ -100,6 +103,9 @@ def compare(baseline, candidate, thresholds=None, max_noise=0.10):
     thresholds = DEFAULT_THRESHOLDS if thresholds is None else thresholds
     require(isinstance(thresholds, dict) and set(thresholds) == set(METRICS), "threshold metric set mismatch")
     require(all(positive(v) and v <= 1 for v in thresholds.values()), "thresholds must be in (0, 1]")
+    require(baseline["environment"].get("cpu") is not None and
+            candidate["environment"].get("cpu") is not None,
+            "CPU metadata unavailable: measurements retained, comparison not qualified")
     require(baseline["environment"] == candidate["environment"], "environment mismatch: do not compare different hosts/toolchains")
     require(baseline["settings"] == candidate["settings"], "measurement settings mismatch")
     for report in (baseline, candidate):
@@ -150,8 +156,15 @@ def collect(binary, scratch, environment_id, samples, target_ms, smoke=False):
     require(positive(target_ms) and target_ms <= 1000, "target-ms must be in (0, 1000]")
     require(environment_id and len(environment_id) <= 128, "provide a stable, nonprivate environment-id")
     before = file_digest(binary); sources = source_digest()
+    try:
+        cpu, cpu_error = cpu_name(), None
+    except (OSError, subprocess.SubprocessError) as exc:
+        cpu, cpu_error = None, type(exc).__name__
     environment = {"system": platform.system(), "release": platform.release(), "architecture": platform.machine(),
-                   "cpu": cpu_name(), "storage_device": str(os.stat(scratch).st_dev), "environment_id": environment_id}
+                   "cpu": cpu,
+                   "storage_device": str(os.stat(scratch).st_dev), "environment_id": environment_id}
+    if cpu_error is not None:
+        environment["cpu_probe_error"] = cpu_error
     report = {"schema": 1, "workload_version": 1, "mode": "smoke" if smoke else "baseline",
               "created_utc": datetime.now(timezone.utc).isoformat(), "environment": environment,
               "binary_sha256": before, "source_sha256": sources,

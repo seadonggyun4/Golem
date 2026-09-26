@@ -2,6 +2,7 @@
 #include "internal.h"
 #include "golem/version.h"
 int golem_cli_work(int argc, char **argv);
+int golem_cli_doctor(int argc, char **argv);
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
@@ -10,6 +11,7 @@ static int usage(void)
 {
     fputs("Usage:\n"
         "  golem init DIRECTORY\n"
+        "  golem doctor clock | work WORK | admission ABSOLUTE_DISPOSABLE_DIRECTORY\n"
         "  golem work start NEW_WORK_DIR SPEC_JSON\n"
         "  golem session call WORK_DIR REQUEST_JSON\n"
         "  golem approval describe WORK_DIR EXECUTION_JSON\n"
@@ -93,6 +95,7 @@ int golem_cli_approval(int argc, char **argv);
 int golem_cli_session_binding(int argc, char **argv);
 int main(int argc, char **argv)
 {
+    if (argc >= 2 && !strcmp(argv[1], "doctor")) return golem_cli_doctor(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "approval")) return golem_cli_approval(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "agent")) return golem_cli_session_binding(argc, argv);
     if (argc >= 3 && !strcmp(argv[1], "work") && !strcmp(argv[2], "history"))

@@ -81,6 +81,13 @@
   ],
   "testPresets": [
     {
+      "name": "restricted-diagnostic",
+      "configurePreset": "dev",
+      "filter": { "include": { "label": "^restricted-diagnostic$" } },
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error" }
+    },
+    {
       "name": "bindings",
       "configurePreset": "bindings",
       "filter": { "include": { "label": "bindings" } },
