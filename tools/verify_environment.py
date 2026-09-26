@@ -178,15 +178,17 @@ def run(source, preset, profile, output, roots, timeout, definitions=()):
             report["processes"][name] = result
             if not successful(result):
                 raise ValueError(name + " failed")
+            if name == "configure":
+                # Keep resolved configuration even when compilation later fails.
+                save(output / "CMakeCache.txt", (build / "CMakeCache.txt").read_bytes())
+                save(output / "CMakePresets.json", (source / "CMakePresets.json").read_bytes())
+                toolchain = sorted(build.glob("CMakeFiles/*/CMake*Compiler.cmake"))
+                if not toolchain:
+                    raise ValueError("missing generated compiler identification")
+                save(output / "toolchain.json", encoded({p.relative_to(build).as_posix(): p.read_text()
+                                                        for p in toolchain}))
         binary = build / "golem"
         report["binary_sha256"] = digest(binary)
-        save(output / "CMakeCache.txt", (build / "CMakeCache.txt").read_bytes())
-        save(output / "CMakePresets.json", (source / "CMakePresets.json").read_bytes())
-        toolchain = sorted(build.glob("CMakeFiles/*/CMake*Compiler.cmake"))
-        if not toolchain:
-            raise ValueError("missing generated compiler identification")
-        save(output / "toolchain.json", encoded({p.relative_to(build).as_posix(): p.read_text()
-                                                for p in toolchain}))
         restricted = profile == "restricted-sandbox"
         ctest = ["ctest", "--preset", preset, "--test-dir", build]
         if restricted:

@@ -308,9 +308,10 @@ foreach(case digest receipt roundtrip file corruption paths ownership concurrent
 endforeach()
 if(GOLEM_BUILD_CLI)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    # Exported macOS build paths can exceed the UNIX socket pathname limit.
     add_test(NAME doctor_environment COMMAND ${Python3_EXECUTABLE}
         ${PROJECT_SOURCE_DIR}/tools/doctor_environment.py --binary $<TARGET_FILE:golem_cli>
-        --root ${CMAKE_CURRENT_BINARY_DIR} --profile full-ci)
+        --root /tmp --profile full-ci)
     add_test(NAME doctor_cli COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/doctor_integration.py $<TARGET_FILE:golem_cli>)
     add_test(NAME restricted_diagnostics COMMAND ${Python3_EXECUTABLE}

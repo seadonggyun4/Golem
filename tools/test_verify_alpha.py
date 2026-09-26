@@ -1,5 +1,7 @@
 """Source selection must exclude private and generated assets."""
 import tempfile
+import os
+import sys
 from pathlib import Path
 import subprocess
 import unittest
@@ -32,6 +34,21 @@ class SourceSnapshotTests(unittest.TestCase):
             self.assertTrue(selected("tools/" + name))
         self.assertFalse(selected("tools/local_report.py"))
         self.assertFalse(selected("tools/project-docs/plan.py"))
+
+    def test_diagnostic_harness_runs_from_export_without_git_metadata(self):
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp).resolve()
+            snapshot(root, output)
+            self.assertFalse((output / ".git").exists())
+            self.assertTrue((output / "tools/doctor_environment.py").is_file())
+            env = {k: v for k, v in os.environ.items()
+                   if not k.startswith("GIT_") and k not in ("PYTHONPATH", "PYTHONHOME")}
+            result = subprocess.run([sys.executable, "-m", "unittest", "test_doctor_environment",
+                                     "test_classify_failures", "test_verify_environment"],
+                                    cwd=output / "tools", env=env, capture_output=True,
+                                    text=True, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_scope(self):
         for profile in ("validation", "conan"):

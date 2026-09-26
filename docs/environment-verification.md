@@ -25,6 +25,10 @@ python3 tools/verify_environment.py --check-bundle /tmp/golem-full-001
 
 Each invocation configures and builds before doctor and CTest. `--timeout`
 bounds each phase (default 3600 seconds). Existing output is never overwritten.
+Resolved cache/compiler configuration is retained after configuration, including
+when a later compilation fails. The standalone CTest doctor case uses `/tmp` to
+avoid UNIX socket pathname overflow in long exported build directories; explicit
+runner roots still probe the locations requested by the caller.
 After building, `ctest --preset restricted-diagnostic` is a fast shortcut without
 the complete bundle. Existing dev/release/asan presets still select full suites.
 

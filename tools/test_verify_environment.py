@@ -171,6 +171,8 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(report["status"], "FAIL")
         self.assertEqual(report["full_suite"], "NOT_RUN")
         self.assertIn("error", report)
+        self.assertEqual((self.output / "CMakeCache.txt").read_text(), "fixture")
+        self.assertTrue((self.output / "toolchain.json").is_file())
         self.assertEqual(verify.check_bundle(self.output)["recorded_status"], "FAIL")
 
     def test_timeout_missing_or_malformed_junit_never_passes(self):
