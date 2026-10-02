@@ -15,12 +15,12 @@ class SourceSnapshotTests(unittest.TestCase):
     def test_clean_suite_keeps_all_tests_with_bounded_parallelism(self):
         commands = []
         with tempfile.TemporaryDirectory() as tmp:
-            with patch("sys.argv", ["verify_alpha.py", "--source", tmp]), \
+            with patch("sys.argv", ["verify_alpha.py", "--source", tmp, "--output", str(Path(tmp).resolve() / "records")]), \
                  patch.object(verify_alpha, "snapshot"), \
                  patch.object(verify_alpha, "audit_install"), \
                  patch.object(verify_alpha.shutil, "which", return_value="/usr/bin/cc"), \
                  patch("builtins.print"), \
-                 patch.object(verify_alpha, "run", side_effect=lambda args, cwd, env: commands.append(args)):
+                 patch.object(verify_alpha, "run", side_effect=lambda args, cwd, env, **kwargs: commands.append(args)):
                 verify_alpha.main()
         suite = next(args for args in commands if args[0] == "ctest" and "--parallel" in args)
         self.assertEqual(suite[suite.index("--parallel") + 1], "2")
@@ -45,7 +45,7 @@ class SourceSnapshotTests(unittest.TestCase):
             env = {k: v for k, v in os.environ.items()
                    if not k.startswith("GIT_") and k not in ("PYTHONPATH", "PYTHONHOME")}
             result = subprocess.run([sys.executable, "-m", "unittest", "test_doctor_environment",
-                                     "test_classify_failures", "test_verify_environment"],
+                                     "test_classify_failures", "test_verify_environment", "test_agent_io", "test_agent_entrypoint", "test_instruction_bundle"],
                                     cwd=output / "tools", env=env, capture_output=True,
                                     text=True, timeout=60)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

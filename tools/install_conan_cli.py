@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+from execution_record import run as recorded_run
 
 
 def install(conan, reference, prefix, bin_dir):
@@ -16,14 +17,17 @@ def install(conan, reference, prefix, bin_dir):
         raise ValueError("Refusing to replace an existing installation or golem command")
     prefix.parent.mkdir(parents=True, exist_ok=True)
     bin_dir.mkdir(parents=True, exist_ok=True)
+    records = Path(tempfile.mkdtemp(prefix=".golem-install-records-", dir=prefix.parent)).resolve()
+    print("Private installation records:", records, flush=True)
     # full_deploy copies all dependency packages, preserving licenses and layout.
     # Temporary output is published only after the deployed executable passes.
     with tempfile.TemporaryDirectory(prefix=".golem-install-", dir=prefix.parent) as tmp:
         staging = Path(tmp) / "payload"
-        subprocess.run([conan, "install", "--requires=" + reference,
+        recorded_run([conan, "install", "--requires=" + reference,
                         "--no-remote", "-o", "golem/*:with_cli=True",
                         "--deployer=full_deploy", "--deployer-folder=" + str(staging),
-                        "--output-folder=" + str(Path(tmp) / "generators")], check=True)
+                        "--output-folder=" + str(Path(tmp) / "generators")],
+                       destination=records / "install", timeout=900)
         candidates = list((staging / "full_deploy/host/golem").glob("**/bin/golem"))
         if len(candidates) != 1:
             raise ValueError("Expected exactly one deployed Golem executable")
@@ -33,7 +37,7 @@ def install(conan, reference, prefix, bin_dir):
                   if p.parent.name in ("lib", "lib64")]
         if shared:
             raise ValueError("Shared dependencies require a run environment; use static dependencies")
-        subprocess.run([str(executable), "--version"], check=True)
+        recorded_run([str(executable), "--version"], destination=records / "version", timeout=30)
         package = executable.parent.parent
         for name in ("LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"):
             if not (package / "licenses" / name).is_file():

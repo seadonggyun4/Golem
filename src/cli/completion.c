@@ -24,7 +24,9 @@ int golem_cli_completion(int argc,char **argv)
         if(!*argv[4] || *end || n<1 || n>64) st=GOLEM_ERR_INVALID_ARGUMENT;
         else st=golem_completion_report(s,(uint32_t)n,true,&out,NULL);
     }
-    if(st==GOLEM_OK && out.size && fwrite(out.data,1,out.size,stdout)!=out.size) st=GOLEM_ERR_IO;
+    if (st == GOLEM_OK && out.size) st = report
+        ? (fwrite(out.data, 1, out.size, stdout) == out.size ? GOLEM_OK : GOLEM_ERR_IO)
+        : cli_output_write((golem_bytes){out.data, out.size});
     if(st==GOLEM_OK && !report) fputc('\n',stdout);
     free(b.data); golem_execution_reply_free(&out);
     golem_status closed=golem_document_store_close(s); if(st==GOLEM_OK) st=closed;

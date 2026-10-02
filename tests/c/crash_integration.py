@@ -32,7 +32,7 @@ class CrashRecovery(unittest.TestCase):
         self.temp.cleanup()
 
     def call(self, *args, code=0):
-        p = subprocess.run([CLI, *map(str, args)], capture_output=True, text=True, timeout=30)
+        p = subprocess.run([CLI, "--output-mode", "full", *map(str, args)], capture_output=True, text=True, timeout=30)
         self.assertEqual(p.returncode, code, (p.stdout, p.stderr))
         return json.loads(p.stdout) if code == 0 else None
 

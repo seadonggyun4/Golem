@@ -101,6 +101,7 @@ int cli_emit(golem_status status, struct json_object *o)
         fprintf(stderr, "golem: %s\n", golem_status_string(status)); json_object_put(o); return 1;
     }
     const char *text = json_object_to_json_string_ext(o, JSON_C_TO_STRING_PLAIN);
-    int result = text == NULL || puts(text) == EOF || fflush(stdout) != 0 || ferror(stdout) ? 1 : 0;
+    int result = text == NULL || cli_output_write((golem_bytes){(const uint8_t *)text, strlen(text)}) != GOLEM_OK ||
+                 fputc('\n', stdout) == EOF || fflush(stdout) != 0 || ferror(stdout) ? 1 : 0;
     json_object_put(o); return result;
 }

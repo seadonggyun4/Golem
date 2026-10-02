@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 
 from verify_agent import capture, digest, private_directory, save
 from verify_runtime import adjudicate, test_inputs
+from execution_record import git, source_identity
 
 SCHEMA = "golem.environment-verification.v1"
 LABEL = "restricted-diagnostic"
@@ -21,44 +22,6 @@ PROFILES = ("full-ci", "local-dev", "restricted-sandbox")
 
 def encoded(value):
     return json.dumps(value, sort_keys=True, ensure_ascii=True, indent=2).encode() + b"\n"
-
-
-def git(source, *args):
-    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
-    return subprocess.run(["git", "-C", str(source), *args], check=True,
-                          capture_output=True, timeout=30, env=env).stdout
-
-
-def source_identity(source):
-    """Hash tracked and nonignored untracked content, modes and deletions.
-
-    No source bytes or arbitrary environment variables are exported. Submodules
-    require a future explicit recursive policy rather than incomplete provenance.
-    """
-    entries = git(source, "ls-files", "--stage", "-z").split(b"\0")
-    if any(row.startswith(b"160000 ") for row in entries):
-        raise ValueError("submodules are not supported by source identity v1")
-    names = git(source, "ls-files", "--cached", "--others", "--exclude-standard", "-z")
-    files = {}
-    for raw in sorted(set(names.split(b"\0")) - {b""}):
-        name = os.fsdecode(raw)
-        path = source / name
-        if path.is_symlink():
-            files[name] = {"kind": "symlink", "sha256": hashlib.sha256(
-                os.fsencode(os.readlink(path))).hexdigest()}
-        elif path.is_file():
-            files[name] = {"kind": "file", "sha256": digest(path),
-                           "executable": bool(path.stat().st_mode & 0o111)}
-        elif not path.exists():
-            files[name] = {"kind": "deleted"}
-        else:
-            raise ValueError("unsupported source file kind: " + name)
-    status = git(source, "status", "--porcelain=v1", "-z", "--untracked-files=all")
-    return {"commit": git(source, "rev-parse", "HEAD").decode().strip(),
-            "dirty": bool(status), "status_sha256": hashlib.sha256(status).hexdigest(),
-            "diff_sha256": hashlib.sha256(git(source, "diff", "HEAD", "--binary", "--no-ext-diff",
-                                               "--no-textconv")).hexdigest(),
-            "tree_sha256": hashlib.sha256(encoded(files)).hexdigest(), "files": files}
 
 
 def select_tests(inventory, restricted):

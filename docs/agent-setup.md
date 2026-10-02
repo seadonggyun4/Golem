@@ -9,11 +9,16 @@ approved Golem-based work.
 
 ## Quick Application
 
+For reviewed, repeatable application to a selected real project, use the
+[entrypoint plan/apply/check workflow](agent-entrypoint.md). It preserves existing
+rules, pins dependencies and refuses stale or ambiguous updates. The manual
+setup below remains available; do not combine it with a managed block.
+
 1. Prepare a current CLI with [the installation guide](runtime-reference.md#conan-package).
    Check both `golem --version` and the source revision used for installation.
    Identical version strings can still hide different functionality; keep `docs/`
    and `samples/` from the same revision.
-2. Append the [common rules block](../samples/agent-session/AGENTS.quickstart.md)
+2. Append the [minimal common rules block](../samples/agent-session/AGENTS.minimal.md)
    to the project's existing `AGENTS.md`. Do not overwrite the existing file with
    the template. If the project uses a separate `AGENT.md`, confirm that the tool
    you use actually reads that entrypoint.
@@ -76,3 +81,7 @@ Detailed contracts: [documents](document-registry.md), [workflow](workflow.md),
 [sessions](agent-session.md), [execution](execution.md), [reentry](reentry.md),
 and [completion](completion.md). Templates are collaboration instructions, not a
 mandatory sandbox.
+
+For on-demand SDK reading and evidence-preserving compact output, see
+[agent I/O](agent-efficiency.md). The [expanded quickstart](../samples/agent-session/AGENTS.quickstart.md)
+remains available; do not append both templates.

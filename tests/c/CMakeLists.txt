@@ -1,4 +1,7 @@
 add_executable(golem_context_api_helper context_api_helper.c)
+add_executable(golem_work_record_helper work_record_helper.c)
+target_link_libraries(golem_work_record_helper PRIVATE Golem::golem)
+golem_configure_target(golem_work_record_helper)
 add_executable(golem_inventory_helper inventory_helper.c)
 target_link_libraries(golem_inventory_helper PRIVATE Golem::golem PkgConfig::JSONC)
 golem_configure_target(golem_inventory_helper)
@@ -276,7 +279,7 @@ target_link_libraries(golem_test_journal_faults PRIVATE Golem::golem)
 golem_configure_target(golem_test_journal_faults)
 add_test(NAME journal_syscall_faults COMMAND golem_test_journal_faults)
 add_executable(golem_test_recovery_publication test_recovery_publication.c
-    ${PROJECT_SOURCE_DIR}/src/cli/json.c)
+    ${PROJECT_SOURCE_DIR}/src/cli/json.c ${PROJECT_SOURCE_DIR}/src/cli/output.c)
 target_link_libraries(golem_test_recovery_publication PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
 golem_configure_target(golem_test_recovery_publication)
 add_test(NAME recovery_publication_faults COMMAND golem_test_recovery_publication)
@@ -308,6 +311,15 @@ foreach(case digest receipt roundtrip file corruption paths ownership concurrent
 endforeach()
 if(GOLEM_BUILD_CLI)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_executable(golem_output_helper output_helper.c
+        ${PROJECT_SOURCE_DIR}/src/cli/output.c ${PROJECT_SOURCE_DIR}/src/cli/io.c
+        ${PROJECT_SOURCE_DIR}/src/cli/json.c)
+    target_link_libraries(golem_output_helper PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
+    golem_configure_target(golem_output_helper)
+    add_test(NAME cli_output_default COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/output_integration.py $<TARGET_FILE:golem_cli>
+        $<TARGET_FILE:golem_output_helper> ${PROJECT_SOURCE_DIR})
+    set_tests_properties(cli_output_default PROPERTIES LABELS "restricted-diagnostic" TIMEOUT 90)
     # Exported macOS build paths can exceed the UNIX socket pathname limit.
     add_test(NAME doctor_environment COMMAND ${Python3_EXECUTABLE}
         ${PROJECT_SOURCE_DIR}/tools/doctor_environment.py --binary $<TARGET_FILE:golem_cli>
@@ -317,10 +329,45 @@ if(GOLEM_BUILD_CLI)
     add_test(NAME restricted_diagnostics COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/restricted_diagnostics.py $<TARGET_FILE:golem_cli>)
     add_test(NAME diagnostic_tools COMMAND ${Python3_EXECUTABLE} -m unittest
-        test_doctor_environment test_classify_failures test_verify_environment)
+        test_doctor_environment test_classify_failures test_verify_environment test_agent_io test_agent_entrypoint test_instruction_bundle)
     set_tests_properties(diagnostic_tools PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools")
     set_tests_properties(restricted_diagnostics diagnostic_tools
         PROPERTIES LABELS "restricted-diagnostic" TIMEOUT 120)
+    add_test(NAME execution_recording COMMAND ${Python3_EXECUTABLE} -m unittest test_execution_record)
+    set_tests_properties(execution_recording PROPERTIES
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools" LABELS "restricted-diagnostic" TIMEOUT 120)
+    add_test(NAME agent_io_integration COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/agent_io_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR})
+    set_tests_properties(agent_io_integration PROPERTIES TIMEOUT 120)
+    add_test(NAME procedure_policy COMMAND ${Python3_EXECUTABLE} -m unittest test_procedure)
+    set_tests_properties(procedure_policy PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic" TIMEOUT 30)
+    add_test(NAME agent_lifecycle COMMAND ${Python3_EXECUTABLE} -m unittest test_agent_lifecycle)
+    set_tests_properties(agent_lifecycle PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic" TIMEOUT 240)
+    add_test(NAME lifecycle_integration COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/lifecycle_integration.py $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR})
+    set_tests_properties(lifecycle_integration PROPERTIES TIMEOUT 180)
+    add_test(NAME procedure_integration COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/procedure_integration.py $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR})
+    set_tests_properties(procedure_integration PROPERTIES TIMEOUT 180)
+    add_test(NAME work_record_integration COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/work_record_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR})
+    set_tests_properties(work_record_integration PROPERTIES TIMEOUT 180)
+    add_test(NAME history_incremental_integration COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/history_incremental_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR})
+    set_tests_properties(history_incremental_integration PROPERTIES TIMEOUT 180)
+    add_test(NAME history_incremental_diagnostics COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/history_incremental_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} --restricted)
+    set_tests_properties(history_incremental_diagnostics PROPERTIES TIMEOUT 120 LABELS "restricted-diagnostic")
+    add_test(NAME work_record_diagnostics COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/work_record_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} Record.test_public_api_failure_preserves_output_and_clock_failure_has_no_events)
+    set_tests_properties(work_record_diagnostics PROPERTIES TIMEOUT 120 LABELS "restricted-diagnostic")
     add_test(NAME golden_workflow COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/golden_workflow.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})

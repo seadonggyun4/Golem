@@ -33,7 +33,7 @@ class Session(unittest.TestCase):
 
     def raw(self, r, ok=True):
         path = self.write("request.json", r)
-        args = ([str(fixture.CLI), "session", "call", str(self.work), str(path)] if self.actual else
+        args = ([str(fixture.CLI), "--output-mode", "full", "session", "call", str(self.work), str(path)] if self.actual else
                 [str(CLIENT), str(self.work), str(path), str(self.now), str(self.boot)])
         p = subprocess.run(args, capture_output=True, env=fixture.ENV, timeout=90)
         if ok:

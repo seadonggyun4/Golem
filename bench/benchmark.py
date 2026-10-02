@@ -11,6 +11,8 @@ import subprocess
 import sys
 import tempfile
 from datetime import datetime, timezone
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+from execution_record import private_directory, run as recorded_run
 
 METRICS = (
     "transition_cycle", "transition_replay", "journal_encode", "journal_decode",
@@ -132,7 +134,7 @@ def file_digest(path):
 
 def source_digest():
     root = Path(__file__).resolve().parent.parent
-    files = [root / "CMakeLists.txt", root / "CMakePresets.json"]
+    files = [root / "CMakeLists.txt", root / "CMakePresets.json", root / "tools/execution_record.py"]
     for directory in ("src", "include", "bench", "cmake"):
         files.extend(p for p in (root / directory).rglob("*") if p.suffix in (".c", ".h", ".py", ".txt", ".in"))
     digest = hashlib.sha256()
@@ -151,10 +153,12 @@ def cpu_name():
     return platform.processor() or platform.machine()
 
 
-def collect(binary, scratch, environment_id, samples, target_ms, smoke=False):
+def collect(binary, scratch, environment_id, samples, target_ms, smoke=False, records=None):
     require(3 <= samples <= 31 and (smoke or samples >= 5), "sample count must be 5..31 (smoke: 3..31)")
     require(positive(target_ms) and target_ms <= 1000, "target-ms must be in (0, 1000]")
     require(environment_id and len(environment_id) <= 128, "provide a stable, nonprivate environment-id")
+    records = private_directory(records) if records is not None else Path(
+        tempfile.mkdtemp(prefix="golem-bench-records-", dir=scratch)).resolve()
     before = file_digest(binary); sources = source_digest()
     try:
         cpu, cpu_error = cpu_name(), None
@@ -171,9 +175,12 @@ def collect(binary, scratch, environment_id, samples, target_ms, smoke=False):
               "settings": {"target_ms": target_ms, "sample_count": samples}, "metrics": {}}
 
     def invoke(metric, iterations, directory):
-        completed = subprocess.run([str(binary), metric, str(iterations), directory], text=True,
-                                   capture_output=True, check=True, timeout=30)
-        row = load(completed.stdout)
+        nonlocal invocation
+        invocation += 1
+        completed = recorded_run([str(binary), metric, str(iterations), directory],
+                                 destination=records / f"step-{invocation:04d}",
+                                 cwd=binary.parent, timeout=30)
+        row = load(completed.stdout.decode())
         require(row["schema"] == 1 and row["workload_version"] == 1 and row["metric"] == metric
                 and row["iterations"] == iterations and positive(row["elapsed_ns"]), "invalid runner output")
         for key in ENV_KEYS:
@@ -185,6 +192,7 @@ def collect(binary, scratch, environment_id, samples, target_ms, smoke=False):
                 "baseline requires an unsanitized Release binary; use --smoke for correctness only")
         return row
 
+    invocation = 0
     with tempfile.TemporaryDirectory(prefix="golem-bench-", dir=scratch) as directory:
         for metric in METRICS:
             loops = 16; limit = 4096 if metric == "journal_append_fsync" else 1000000
@@ -247,7 +255,8 @@ def main():
         if args.command == "run":
             require(not args.output.exists(), "output already exists; baseline overwrite refused")
             report = collect(args.binary.resolve(), args.scratch.resolve(), args.environment_id,
-                             args.samples, args.target_ms, args.smoke)
+                             args.samples, args.target_ms, args.smoke,
+                             records=args.output.with_name(args.output.name + ".records"))
             write_new(args.output, report)
             print(projection(report))
             return 0

@@ -10,22 +10,19 @@ import os
 from pathlib import Path
 import platform
 import re
-import signal
 import subprocess
 import sys
-import time
+import execution_record
+from execution_record import digest, private_directory
 
 LIMIT = 32 * 1024 * 1024
 SCHEMA = "golem.conformance.v1"
 CASES = tuple(f"E28-{i:02d}" for i in range(1, 9))
 
 
-def digest(path):
-    h = hashlib.sha256()
-    with path.open("rb") as stream:
-        for data in iter(lambda: stream.read(1024 * 1024), b""):
-            h.update(data)
-    return h.hexdigest()
+def save(path, data):
+    # Preserve existing report-write semantics; new execution records use fsync.
+    execution_record.save(path, data, durable=False)
 
 
 def suite_digest(source):
@@ -55,61 +52,9 @@ def strict_json(data):
     return json.loads(data, object_pairs_hook=pairs, parse_constant=reject_constant)
 
 
-def private_directory(path):
-    path = path.absolute()
-    for parent in (path, *path.parents):
-        if parent.is_symlink():
-            raise ValueError("symlink output path")
-    path.mkdir(mode=0o700)  # Never reuse, erase, or overwrite an earlier run.
-    return path
-
-
-def save(path, data):
-    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
-    fd = os.open(path, flags, 0o600)
-    with os.fdopen(fd, "wb") as stream:
-        stream.write(data)
-
-
-def capture(argv, destination, timeout, cwd=None):
-    """Bound output and wall time; stop the whole test process group on failure."""
-    env = {k: v for k, v in os.environ.items()
-           if not k.startswith("GIT_") and k not in ("PYTHONPATH", "PYTHONHOME")}
-    paths = [destination / "stdout.log", destination / "stderr.log"]
-    started = time.monotonic()
-    reason = "EXIT"
-    with paths[0].open("xb") as out, paths[1].open("xb") as err:
-        os.chmod(paths[0], 0o600)
-        os.chmod(paths[1], 0o600)
-        process = subprocess.Popen(list(map(str, argv)), cwd=cwd, env=env,
-                                   stdin=subprocess.DEVNULL, stdout=out, stderr=err,
-                                   start_new_session=True)
-        try:
-            while process.poll() is None:
-                if time.monotonic() - started > timeout:
-                    reason = "TIMEOUT"
-                    break
-                if any(p.stat().st_size > LIMIT for p in paths):
-                    reason = "OUTPUT_LIMIT"
-                    break
-                time.sleep(0.05)
-        finally:
-            # A completed launcher must not leave a detached-in-group gate running.
-            try:
-                os.killpg(process.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-            except PermissionError:
-                # Reap our launcher, but never claim that its descendants stopped.
-                reason = "CLEANUP_DENIED"
-                if process.poll() is None:
-                    process.kill()
-            process.wait(timeout=5)
-    if reason != "CLEANUP_DENIED" and any(p.stat().st_size > LIMIT for p in paths):
-        reason = "OUTPUT_LIMIT"
-    return {"returncode": process.returncode, "reason": reason,
-            "elapsed_seconds": round(time.monotonic() - started, 3),
-            "logs": {p.name: digest(p) for p in paths}}
+def capture(argv, destination, timeout, cwd=None, *, source=None):
+    """Compatibility entrypoint; all callers now retain mechanical records."""
+    return execution_record.capture(argv, destination, timeout, cwd, source=source, limit=LIMIT)
 
 
 def base(cli, mode):
@@ -132,7 +77,7 @@ def fixture(cli, source, cc, output, timeout):
     report["suite_sha256"] = digest(script)
     report["suite_source_sha256"] = suite_digest(source)
     report["compiler_sha256"] = digest(cc)
-    result = capture([sys.executable, script, cli, source, cc], output, timeout, output)
+    result = capture([sys.executable, script, cli, source, cc], output, timeout, output, source=source)
     with (output / "stderr.log").open("rb") as stream:
         text = stream.read(LIMIT).decode("utf-8", errors="replace")
     # Fail closed on skipped/empty/truncated suites, not just an exit status of 0.
@@ -161,7 +106,7 @@ def observe(cli, work, selection, output, timeout):
     request = output / "request.json"
     save(request, json.dumps({"schema_version": 1, "operation": "resume",
                              "selection_id": selection}).encode())
-    result = capture([cli, "completion", "call", work, request], output, timeout, output)
+    result = capture([cli, "--output-mode", "full", "completion", "call", work, request], output, timeout, output)
     report.update(status="FAIL", process=result)
     if result["returncode"] != 0 or result["reason"] != "EXIT":
         return report

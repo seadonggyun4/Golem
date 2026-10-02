@@ -4,6 +4,7 @@
 #include "golem/journal.h"
 #include "golem/replay.h"
 #include <json-c/json.h>
+#include "output.h"
 #define CLI_PATH_MAX 4096
 #define CLI_CAPSULE_MAX 131072
 #define CLI_BUNDLE_MAX 2097152

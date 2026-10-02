@@ -111,7 +111,9 @@ int golem_cli_research(int argc, char **argv)
         else st = report ? golem_research_report(store, (uint32_t)seq, &reply, NULL)
                          : golem_research_inspect(store, (uint32_t)seq, &reply, NULL);
     }
-    if (st == GOLEM_OK && reply.size && fwrite(reply.data, 1, reply.size, stdout) != reply.size) st = GOLEM_ERR_IO;
+    if (st == GOLEM_OK && reply.size) st = report || markdown
+        ? (fwrite(reply.data, 1, reply.size, stdout) == reply.size ? GOLEM_OK : GOLEM_ERR_IO)
+        : cli_output_write((golem_bytes){reply.data, reply.size});
     if (st == GOLEM_OK && !report && !markdown && fputc('\n', stdout) == EOF) st = GOLEM_ERR_IO;
     free(input.data); json_object_put(body); json_object_put(request); golem_execution_reply_free(&reply);
     golem_status closed = golem_document_store_close(store);

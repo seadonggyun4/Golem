@@ -43,8 +43,9 @@ int golem_cli_role(int argc, char **argv)
     if (st == GOLEM_OK && call)
         st = golem_role_call(s, (golem_bytes){b.data, b.size}, argc == 7 ? &approval : NULL, &out,
                              NULL);
-    if (st == GOLEM_OK && out.size && fwrite(out.data, 1, out.size, stdout) != out.size)
-        st = GOLEM_ERR_IO;
+    if (st == GOLEM_OK && out.size) st = sample
+        ? (fwrite(out.data, 1, out.size, stdout) == out.size ? GOLEM_OK : GOLEM_ERR_IO)
+        : cli_output_write((golem_bytes){out.data, out.size});
     if (st == GOLEM_OK && (fputc('\n', stdout) == EOF || fflush(stdout)))
         st = GOLEM_ERR_IO;
     free(b.data);

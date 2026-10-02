@@ -32,7 +32,7 @@ static golem_status document_fields(golem_document_store *s, struct json_object 
 }
 /* Both streams have already been replayed under the store lock. Recheck frames
  * while projecting so a missing prefix never becomes an empty successful page. */
-static golem_status project_stream(golem_document_store *s, int dir, const char *stream,
+golem_status ab_project_stream(golem_document_store *s, int dir, const char *stream,
                                    const char *magic, size_t count, const golem_digest *head,
                                    uint64_t after, uint64_t limit, uint64_t *ordinal,
                                    struct json_object *rows)
@@ -144,6 +144,11 @@ golem_status golem_work_history(golem_document_store *s, golem_bytes bytes, gole
     const char *keys[] = {"schema_version", "work_id",       "after",
                           "limit",          "document_head", "agent_head"};
     golem_status st = golem_json_parse(bytes, GOLEM_SESSION_BINDING_MAX_BYTES, &r);
+    if (st == GOLEM_OK && dw_uint(r, "schema_version") == 2) {
+        st = ab_history_incremental(s, r, out, diagnostic);
+        json_object_put(r);
+        return st;
+    }
     if (st == GOLEM_OK &&
         (!dw_keys(r, keys, 6) || dw_uint(r, "schema_version") != 1 ||
          !dw_id(dw_text(r, "work_id")) || !dw_uint(r, "limit") ||
@@ -173,10 +178,10 @@ golem_status golem_work_history(golem_document_store *s, golem_bytes bytes, gole
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
     if (st == GOLEM_OK)
-        st = project_stream(s, s->events, "document", "GWDOC001", s->event_count, &s->last, after,
+        st = ab_project_stream(s, s->events, "document", "GWDOC001", s->event_count, &s->last, after,
                             dw_uint(r, "limit"), &ordinal, rows);
     if (st == GOLEM_OK)
-        st = project_stream(s, l.directory, "agent", "GWAGN001", (size_t)l.sequence, &l.last, after,
+        st = ab_project_stream(s, l.directory, "agent", "GWAGN001", (size_t)l.sequence, &l.last, after,
                             dw_uint(r, "limit"), &ordinal, rows);
     if (st == GOLEM_OK &&
         (!dw_add(response, "schema_version", json_object_new_int(1)) ||

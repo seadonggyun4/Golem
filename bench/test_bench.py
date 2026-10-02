@@ -9,6 +9,7 @@ import unittest
 from unittest import mock
 
 import benchmark as bench
+from execution_record import check as check_record
 
 BINARY = Path(sys.argv.pop(1)).resolve()
 
@@ -99,7 +100,13 @@ class BenchmarkTests(unittest.TestCase):
             root = Path(directory)
             report = bench.collect(BINARY, root, "test-only", 3, 1, smoke=True)
             self.assertEqual(set(report["metrics"]), set(bench.METRICS))
-            self.assertEqual(list(root.iterdir()), [])
+            retained = list(root.iterdir())
+            self.assertEqual(len(retained), 1)
+            self.assertTrue(retained[0].name.startswith("golem-bench-records-"))
+            commands = list(retained[0].iterdir())
+            self.assertGreaterEqual(len(commands), len(bench.METRICS) * 4)
+            for command in commands:
+                self.assertEqual(check_record(command.resolve())["process"]["returncode"], 0)
             target = root / "report.json"
             bench.write_new(target, report)
             self.assertEqual(bench.read(target), report)

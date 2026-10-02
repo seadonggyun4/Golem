@@ -369,6 +369,11 @@ The pre-1.0 public API is experimental; binary compatibility is not promised.
 
 ## Evidence CLI
 
+For operational JSON consumers, use the global `--output-mode full` flag before
+the command. Native CLI defaults now support compact observations and private
+hash-verified original retrieval; see [CLI output compatibility](cli-output.md).
+Evidence hash/verify output itself is unchanged.
+
 The C executable is `build/dev/golem`, installed as `bin/golem`.
 Set `GOLEM_BUILD_CLI=OFF` for a library-only build. Commands emit JSON on
 success, diagnostics on stderr on failure, and return 0 (success), 1 (operation

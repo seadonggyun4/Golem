@@ -22,7 +22,7 @@ class JournalInspection(unittest.TestCase):
         self.source.write_bytes(self.good)
 
     def call(self, *args, ok=True):
-        result = subprocess.run([CLI, "journal", *map(str, args)], capture_output=True, text=True)
+        result = subprocess.run([CLI, "--output-mode", "full", "journal", *map(str, args)], capture_output=True, text=True)
         self.assertEqual(result.returncode == 0, ok, result.stderr)
         return json.loads(result.stdout) if result.stdout else None
 

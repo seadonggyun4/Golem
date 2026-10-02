@@ -11,9 +11,9 @@ class BenchmarkInput(unittest.TestCase):
         good = {"schema": 1, "observers": 0, "iterations": 100000,
                 "elapsed_ns": 100, "rss_bytes": 1024, "checksum": 0}
         def run(value):
-            with patch("benchmark_runtime.subprocess.run", return_value=SimpleNamespace(
+            with patch("benchmark_runtime.recorded_run", return_value=SimpleNamespace(
                     stdout=json.dumps(value).encode())):
-                return sample(Path("unused"), 0)
+                return sample(Path("unused"), 0, Path("unused-record"))
         self.assertEqual(run(good), good)
         for value in ([], {}, {**good, "extra": 1}, {**good, "observers": False},
                       {**good, "schema": 2}, {**good, "elapsed_ns": 0},

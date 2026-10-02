@@ -13,6 +13,7 @@ import xml.etree.ElementTree as ET
 
 from verify_agent import digest, private_directory, save
 from verify_runtime import adjudicate
+from execution_record import run as recorded_run
 
 MUTATIONS = (
     ("30-epoch-fence", "src/daemon/admission_model.c",
@@ -54,9 +55,7 @@ def main():
               "exhaustive": False, "mutations": []}
 
     def command(argv, name, timeout=180):
-        result = subprocess.run([str(a) for a in argv], capture_output=True, timeout=timeout)
-        save(output / (name + ".stdout"), result.stdout)
-        save(output / (name + ".stderr"), result.stderr)
+        result = recorded_run(argv, destination=output / name, timeout=timeout, source=checkout, check=False)
         return result.returncode
 
     try:

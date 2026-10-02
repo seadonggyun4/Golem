@@ -22,7 +22,7 @@ class OrchestrationReport(unittest.TestCase):
             binary = root / "binary"
             binary.write_bytes(b"fixture")
             commands = {k: [binary] for k in ("history", "events", "diff", "template")}
-            def fixed(_argv, _kind):
+            def fixed(_argv, _kind, _destination=None):
                 return dict(elapsed_ns=10, bytes=2, sha256="a" * 64)
             with patch("benchmark_orchestration.sample", side_effect=fixed):
                 report = collect(commands, root / "success", repeats=5)
@@ -45,7 +45,7 @@ class OrchestrationReport(unittest.TestCase):
             binary.write_bytes(b"fixture")
             request.write_bytes(b"before")
             commands = {k: [binary, request] for k in ("history", "events", "diff", "template")}
-            def changed(_argv, _kind):
+            def changed(_argv, _kind, _destination=None):
                 request.write_bytes(b"after")
                 return dict(elapsed_ns=10, bytes=2, sha256="a" * 64)
             with patch("benchmark_orchestration.sample", side_effect=changed):

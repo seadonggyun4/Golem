@@ -8,11 +8,15 @@ Golem은 현재 Codex·Claude가 사용하는 문서 기반 작업 프로토콜�
 
 ## 빠른 적용
 
+실제 프로젝트에 반복 적용할 때는 [진입점 plan/apply/check](agent-entrypoint.md)를
+사용한다. 기존 규칙을 보존하고 의존 문서·실행 파일을 고정하며, 오래되거나
+모호한 갱신은 거절한다. 아래 수동 설정과 관리 구역을 중복 적용하지 않는다.
+
 1. [설치 안내](runtime-reference.md#conan-package)로 최신 CLI를 준비한다.
    `golem --version`과 설치 소스 revision을 확인한다. 버전 문자열만 같아도
    실제 기능은 다를 수 있다. 같은 revision의 `docs/`와 `samples/`를 사용한다.
 2. 프로젝트 루트의 기존 `AGENTS.md`에
-   [공통 규칙 블록](../samples/agent-session/AGENTS.quickstart.ko.md)을 덧붙인다.
+   [경량 공통 규칙 블록](../samples/agent-session/AGENTS.minimal.ko.md)을 덧붙인다.
    기존 파일을 템플릿으로 덮어쓰지 않는다. `AGENT.md`를 별도로 운영한다면
    사용하는 도구가 실제 읽는 진입점과 연결되어 있는지 확인한다.
 3. 기존 `CLAUDE.md`에는 [Claude 진입 블록](../samples/agent-session/CLAUDE.quickstart.ko.md)을
@@ -69,6 +73,10 @@ AGENTS.md의 Golem 설정과 작업 규칙을 먼저 읽어줘.
 상세 계약: [문서](document-registry.md) · [단계](workflow.md) ·
 [세션](agent-session.md) · [실행](execution.md) · [재진입](reentry.md) ·
 [완료](completion.md). 템플릿은 협력 지침이지 강제 sandbox가 아니다.
+
+필요 시 SDK 조회, 간결 출력과 증거 보존은 [agent I/O](agent-efficiency.md)를 따른다.
+[상세 quickstart](../samples/agent-session/AGENTS.quickstart.ko.md)도 유지하지만
+두 템플릿을 중복으로 추가하지 않는다.
 
 ## English Summary
 

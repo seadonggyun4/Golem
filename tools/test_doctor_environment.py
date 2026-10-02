@@ -56,7 +56,9 @@ class DoctorTests(unittest.TestCase):
             binary.write_bytes(b"fixture")
             with mock.patch.object(doctor, "engine", return_value={"status": "FAIL"}):
                 for profile in ("full-ci", "local-dev", "restricted-sandbox", "read-only-observation"):
-                    row = doctor.collect(binary, [], profile)
+                    records = Path(root).resolve() / profile
+                    records.mkdir(mode=0o700)
+                    row = doctor.collect(binary, [], profile, records)
                     self.assertEqual(row["status"], "UNSUPPORTED_ENVIRONMENT")
                     self.assertFalse(row["product_tests_passed"])
 

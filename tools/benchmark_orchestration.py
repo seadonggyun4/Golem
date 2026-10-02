@@ -8,27 +8,25 @@ import platform
 import random
 import subprocess
 import sys
-import time
 
 from benchmark_runtime import summarize
 from verify_agent import digest, private_directory, save, strict_json
+from execution_record import run as recorded_run
 
 
 def commands(cli, work, history, admission, candidates, group, candidate):
     return {
-        "history": [cli, "work", "history", work, history],
+        "history": [cli, "--output-mode", "full", "work", "history", work, history],
         "events": [cli, "events", admission, "--jsonl"],
-        "diff": [cli, "candidate", "diff", candidates, group, candidate],
+        "diff": [cli, "--output-mode", "full", "candidate", "diff", candidates, group, candidate],
         "template": [cli, "workflow", "template", "show", "feature"],
     }
 
 
-def sample(argv, kind):
+def sample(argv, kind, destination):
     env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
-    started = time.perf_counter_ns()
-    process = subprocess.run(list(map(str, argv)), stdin=subprocess.DEVNULL,
-                             capture_output=True, env=env, timeout=30, check=True)
-    elapsed = time.perf_counter_ns() - started
+    process = recorded_run(argv, destination=destination, env=env, timeout=30)
+    elapsed = process.observation["elapsed_seconds"] * 1_000_000_000
     if kind == "events":
         rows = [strict_json(line) for line in process.stdout.splitlines()]
         if not rows or rows[0].get("count") != len(rows) - 1:
@@ -47,22 +45,23 @@ def collect(command_map, output, repeats=30, seed=32):
     inputs = {Path(arg).resolve() for argv in command_map.values() for arg in argv
               if Path(arg).is_file()}
     inputs.update(Path(__file__).with_name(name).resolve()
-                  for name in ("benchmark_orchestration.py", "benchmark_runtime.py", "verify_agent.py"))
+                  for name in ("benchmark_orchestration.py", "benchmark_runtime.py", "verify_agent.py", "execution_record.py"))
     cache = Path(command_map["template"][0]).resolve().parent / "CMakeCache.txt"
     if cache.is_file():
         inputs.add(cache)
     hashes = {str(path): digest(path) for path in sorted(inputs)}
     identity = {"host": platform.platform(), "machine": platform.machine(),
                 "cli_sha256": digest(Path(command_map["template"][0])),
-                "collector_sha256": digest(Path(__file__)), "scope": "CLI wall-clock ns"}
+                "collector_sha256": digest(Path(__file__)), "scope": "recorded CLI process wall-clock ns",
+                "timing_contract": "capture-v1; includes supervision, excludes source hashing and final record"}
     output = private_directory(output)
-    warm = {name: sample(argv, name) for name, argv in command_map.items()}
+    warm = {name: sample(argv, name, output / ("warmup-" + name)) for name, argv in command_map.items()}
     save(output / "warmup.json", json.dumps(warm, indent=2).encode())
     rng, raw = random.Random(seed), []
     for index in range(repeats):
         order = list(command_map)
         rng.shuffle(order)
-        row = {name: sample(command_map[name], name) for name in order}
+        row = {name: sample(command_map[name], name, output / f"process-{index:03d}-{name}") for name in order}
         save(output / f"sample-{index:03d}.json", json.dumps(row, indent=2).encode())
         if any(row[name]["sha256"] != warm[name]["sha256"] for name in row):
             raise ValueError("projection changed during measurement; samples retained")

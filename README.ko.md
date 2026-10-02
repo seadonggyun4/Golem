@@ -57,6 +57,17 @@
 
 ## 빠른 시작
 
+assessment·status·journal은 [통합 Work 기록](docs/work-records.md)에서
+원본의 권한과 이력을 유지하며 함께 조회할 수 있습니다.
+
+Python 검증·벤치마크 실행 도구에는 [기계적 실행 기록](docs/execution-recording.md)이
+자동 적용됩니다. 적용 경로와 예외를 구분하며, 기록 자체가 제품 승인이나 QA 통과를 뜻하지는 않습니다.
+
+네이티브 CLI는 큰 운영 JSON 응답을 기본적으로 간결하게 표시합니다.
+프로토콜 필드를 읽는 스크립트는 `golem --output-mode full COMMAND ...`을 사용하세요.
+간결 응답의 근거 ID로 명령 재실행 없이 원문을 검증·조회할 수 있습니다.
+[출력 모드와 호환성 안내](docs/cli-output.md)를 참고하세요.
+
 macOS 또는 Linux에서 C17 컴파일러, CMake 3.21+, Ninja, Python 3.11+, OpenSSL 3, pkg-config, json-c 0.15+, MD4C 0.4.8+가 필요합니다. [OS별 의존성](docs/runtime-reference.md#build-and-run) 또는 [Conan 설치](docs/runtime-reference.md#conan-package)를 참고하세요.
 
 ```sh

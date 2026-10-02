@@ -26,7 +26,7 @@ class Documents(unittest.TestCase):
         self.temp.cleanup()
 
     def call(self, *args, ok=True):
-        p = subprocess.run([CLI, *map(str, args)], capture_output=True, timeout=30)
+        p = subprocess.run([CLI, "--output-mode", "full", *map(str, args)], capture_output=True, timeout=30)
         if ok:
             self.assertEqual(p.returncode, 0, p.stderr.decode())
             return json.loads(p.stdout)

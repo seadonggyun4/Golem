@@ -1,5 +1,8 @@
 # Conditional Markdown Workflow
 
+For structured docs/code/deploy procedure routing and captured selection proposals,
+see [task-specific procedures](task-procedures.md).
+
 For feature, bugfix, review and research starting configurations, see
 [workflow selection templates](workflow-templates.md).
 

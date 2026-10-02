@@ -57,6 +57,17 @@ Select **only the necessary stages** from planning → UX → publishing → dev
 
 ## Quick Start
 
+Owned Python verification and benchmark launchers automatically retain private
+[mechanical execution records](docs/execution-recording.md).
+[Consolidated Work records](docs/work-records.md) connect assessment, status and
+journal views without rewriting their authoritative sources. Coverage and
+exceptions are explicit; recorded execution is not product acceptance.
+
+The native CLI defaults to compact presentation for large operational JSON replies.
+For scripts parsing protocol fields, use `golem --output-mode full COMMAND ...`.
+Compact replies link to hash-verified original payloads without reexecuting the
+command. See [output modes and migration](docs/cli-output.md).
+
 Requires macOS or Linux, a C17 compiler, CMake 3.21+, Ninja, Python 3.11+, OpenSSL 3, pkg-config, json-c 0.15+ and MD4C 0.4.8+. See [platform dependencies](docs/runtime-reference.md#build-and-run) or [Conan installation](docs/runtime-reference.md#conan-package).
 
 ```sh

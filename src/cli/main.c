@@ -1,5 +1,6 @@
 #include "golem/evidence.h"
 #include "internal.h"
+#include "output.h"
 #include "golem/version.h"
 int golem_cli_work(int argc, char **argv);
 int golem_cli_doctor(int argc, char **argv);
@@ -10,6 +11,10 @@ int golem_cli_doctor(int argc, char **argv);
 static int usage(void)
 {
     fputs("Usage:\n"
+        "  golem [--output-mode compact|full] [--output-store ABSOLUTE_DIR] COMMAND ...\n"
+        "  golem output read SHA256\n"
+        "Default: compact large JSON responses; full preserves protocol output.\n"
+        "Output controls precede COMMAND. See docs/cli-output.md.\n"
         "  golem init DIRECTORY\n"
         "  golem doctor clock | work WORK | admission ABSOLUTE_DISPOSABLE_DIRECTORY\n"
         "  golem work start NEW_WORK_DIR SPEC_JSON\n"
@@ -47,6 +52,7 @@ static int usage(void)
         "  golem workflow inputs WORK_DIR SELECTION_ID TARGET_KIND SOURCE_SHA256 BYTE_BUDGET\n"
         "  golem workflow trace WORK_DIR DOCUMENT_ID REVISION\n"
         "  golem workflow next WORK_DIR SELECTION_ID\n"
+        "  golem work record WORK_DIR REQUEST.json\n"
         "  golem context render|markdown|publish WORK_DIR REQUEST.json\n"
         "  golem context read WORK_DIR PROJECTION_SHA256 CURRENT_SOURCE_SHA256\n"
         "  golem events ADMISSION_DIR --jsonl|--otlp|--prov [--after CURSOR]\n"
@@ -95,10 +101,16 @@ int golem_cli_approval(int argc, char **argv);
 int golem_cli_session_binding(int argc, char **argv);
 int main(int argc, char **argv)
 {
+    if (cli_output_options(&argc, argv) != 0) {
+        fputs("golem: invalid output options; use --output-mode compact|full and an absolute --output-store before COMMAND\n", stderr);
+        return 2;
+    }
+    if (argc >= 2 && !strcmp(argv[1], "output")) return golem_cli_output(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "doctor")) return golem_cli_doctor(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "approval")) return golem_cli_approval(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "agent")) return golem_cli_session_binding(argc, argv);
-    if (argc >= 3 && !strcmp(argv[1], "work") && !strcmp(argv[2], "history"))
+    if (argc >= 3 && !strcmp(argv[1], "work") &&
+        (!strcmp(argv[2], "history") || !strcmp(argv[2], "record")))
         return golem_cli_session_binding(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "role")) return golem_cli_role(argc, argv);
     if (argc >= 2 && strcmp(argv[1], "journal") == 0) return golem_cli_journal(argc, argv);

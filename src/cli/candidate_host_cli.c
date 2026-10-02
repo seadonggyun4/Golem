@@ -83,7 +83,8 @@ int golem_cli_candidate_host(int argc, char **argv)
     } else if (st == GOLEM_OK && call) {
         const char *text =
             json_object_to_json_string_ext(dw_get(reply, "result"), JSON_C_TO_STRING_PLAIN);
-        if (!text || puts(text) < 0)
+        if (!text || cli_output_write((golem_bytes){(const uint8_t *)text, strlen(text)}) != GOLEM_OK ||
+            fputc('\n', stdout) == EOF)
             st = GOLEM_ERR_IO;
     }
     json_object_put(envelope);

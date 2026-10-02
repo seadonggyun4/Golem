@@ -34,7 +34,7 @@ int golem_cli_approval(int argc, char **argv)
     golem_status closed = golem_document_store_close(s);
     if (st == GOLEM_OK)
         st = closed;
-    if (st == GOLEM_OK && (fwrite(out.data, 1, out.size, stdout) != out.size ||
+    if (st == GOLEM_OK && (cli_output_write((golem_bytes){out.data, out.size}) != GOLEM_OK ||
                            fputc('\n', stdout) == EOF || fflush(stdout)))
         st = GOLEM_ERR_IO;
     golem_execution_reply_free(&out);

@@ -29,7 +29,8 @@ class Discovery(unittest.TestCase):
         return p
 
     def cli(self, *args, ok=True, env=None):
-        p = subprocess.run([str(CLI), *map(str, args)], capture_output=True, env=env or ENV, timeout=90)
+        # Protocol consumers require full fields; default presentation has its own suite.
+        p = subprocess.run([str(CLI), "--output-mode", "full", *map(str, args)], capture_output=True, env=env or ENV, timeout=90)
         if ok:
             self.assertEqual(p.returncode, 0, p.stderr.decode())
             return json.loads(p.stdout)

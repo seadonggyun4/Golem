@@ -15,6 +15,7 @@ import socket
 import subprocess
 import sys
 import tempfile
+from execution_record import run as recorded_run
 
 
 def attempt(name, operation):
@@ -27,15 +28,17 @@ def attempt(name, operation):
                 "errno": getattr(exc, "errno", None)}
 
 
-def engine(binary, *args):
-    result = subprocess.run([str(binary), "doctor", *args], capture_output=True,
-                            text=True, timeout=15)
+def engine(binary, *args, records=None):
+    if records is None:
+        records = Path(tempfile.mkdtemp(prefix="golem-doctor-records-")).resolve() / "process"
+    result = recorded_run([str(binary), "doctor", *args], destination=records,
+                          check=False, timeout=15)
     row = json.loads(result.stdout)
     if (row.get("schema") != "golem.doctor.v1" or
             row.get("status") not in ("PASS", "FAIL") or
             (result.returncode == 0) != (row["status"] == "PASS")):
         raise ValueError("invalid doctor response")
-    return row
+    return {**row, "process_records": str(records)}
 
 
 def filesystem(root):
@@ -89,7 +92,7 @@ def unix_socket(root):
         sock.listen(1)
 
 
-def root_probe(binary, path):
+def root_probe(binary, path, records=None):
     rows = []
     try:
         # Keep the spelling in the report; engine requires symlink-free canonical paths.
@@ -100,7 +103,7 @@ def root_probe(binary, path):
                 rows.append(attempt(name, lambda operation=operation: operation(root)))
             admission = root / "admission"
             admission.mkdir(mode=0o700)
-            row = attempt("admission", lambda: engine(binary, "admission", str(admission)))
+            row = attempt("admission", lambda: engine(binary, "admission", str(admission), records=records))
             if row["status"] == "PASS":
                 row["status"] = row["details"]["status"]
             rows.append(row)
@@ -110,12 +113,13 @@ def root_probe(binary, path):
             "status": "PASS" if rows and all(r["status"] == "PASS" for r in rows) else "FAIL"}
 
 
-def collect(binary, roots, profile):
+def collect(binary, roots, profile, records=None):
     before = hashlib.sha256(binary.read_bytes()).hexdigest()
-    clock = attempt("boot_identity_clock", lambda: engine(binary, "clock"))
+    records = records or Path(tempfile.mkdtemp(prefix="golem-doctor-records-")).resolve()
+    clock = attempt("boot_identity_clock", lambda: engine(binary, "clock", records=records / "clock"))
     if clock["status"] == "PASS":
         clock["status"] = clock["details"]["status"]
-    observations = [root_probe(binary, root) for root in roots]
+    observations = [root_probe(binary, root, records / f"root-{i}") for i, root in enumerate(roots)]
     unchanged = before == hashlib.sha256(binary.read_bytes()).hexdigest()
     supported = unchanged and clock["status"] == "PASS" and all(
         r["status"] == "PASS" for r in observations)
@@ -124,7 +128,7 @@ def collect(binary, roots, profile):
             "system": platform.system(), "release": platform.release(),
             "architecture": platform.machine(), "binary_sha256": before,
             "binary_unchanged": unchanged, "clock": clock, "roots": observations,
-            "product_tests_passed": False,
+            "product_tests_passed": False, "process_records": str(records),
             "limitations": ["No Work replay or product acceptance performed.",
                             "Process spawn observed through doctor; no sandbox isolation proof.",
                             "Profile is declared, not an authority grant or automatic detection."]}

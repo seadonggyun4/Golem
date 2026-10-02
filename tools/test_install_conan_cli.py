@@ -11,7 +11,7 @@ class InstallerTests(unittest.TestCase):
             root = Path(tmp)
             prefix = root / "installed"
             prefix.mkdir()
-            with patch("install_conan_cli.subprocess.run") as run:
+            with patch("install_conan_cli.recorded_run") as run:
                 with self.assertRaises(ValueError):
                     install("conan", "golem/0.1.0", prefix, root / "bin")
                 run.assert_not_called()
@@ -28,12 +28,14 @@ class InstallerTests(unittest.TestCase):
     def test_failed_deployment_does_not_publish(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            with patch("install_conan_cli.subprocess.run", side_effect=RuntimeError("synthetic failure")):
+            with patch("install_conan_cli.recorded_run", side_effect=RuntimeError("synthetic failure")):
                 with self.assertRaises(RuntimeError):
                     install("conan", "golem/0.1.0", root / "new", root / "bin")
             self.assertFalse((root / "new").exists())
             self.assertFalse((root / "bin/golem").exists())
-            self.assertFalse(list(root.glob(".golem-install-*")))
+            leftovers = list(root.glob(".golem-install-*"))
+            self.assertTrue(leftovers)
+            self.assertTrue(all(p.name.startswith(".golem-install-records-") for p in leftovers))
 
 
 if __name__ == "__main__":

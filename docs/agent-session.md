@@ -9,13 +9,18 @@ provider process, require a provider SDK, or keep a GUI agent running after exit
 The protocol is a local C API plus a thin JSON CLI:
 
 ```sh
-golem session call WORK REQUEST.json
+golem --output-mode full session call WORK REQUEST.json
 ```
 
 `WORK` is an existing [document registry](document-registry.md), with a Phase 22
 scope and a registered [stage selection](workflow.md). Authoring those bootstrap
 artifacts remains a separate step. Responses are JSON on stdout; no commands
 found in Markdown are executed by Golem.
+
+This protocol reference uses full replies. Without `--output-mode full`, the
+native CLI may return a [compact observation](cli-output.md) with a verified
+original-payload reference. Read the original before using omitted context;
+never repeat a claim/begin/submit merely to recover its output.
 
 ## Lifecycle
 
@@ -61,6 +66,9 @@ Use the most recent session sequence, not the document generation.
 | resume | session_id, ttl_ms |
 | submit | token, input_digest, source_snapshot, output, evidence |
 | reconcile | token, input_digest, source_snapshot, output, evidence, resolution |
+
+For one locked assessment/status/journal capture, use
+[Work records](work-records.md); existing `status` remains compatible.
 
 `status` is read-only and returns the current state, current lease validity and
 the last 32 events. Durable history is not truncated; all events remain in the

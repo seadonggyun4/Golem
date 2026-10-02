@@ -70,7 +70,7 @@ int golem_cli_candidate(int argc, char **argv)
     if (st == GOLEM_OK)
         st = closed;
     if (st == GOLEM_OK && (status || diff)) {
-        if (fwrite(reply.data, 1, reply.size, stdout) != reply.size || fputc('\n', stdout) == EOF)
+        if (cli_output_write((golem_bytes){reply.data, reply.size}) != GOLEM_OK || fputc('\n', stdout) == EOF)
             st = GOLEM_ERR_IO;
     } else if (st == GOLEM_OK) {
         char hex[65];

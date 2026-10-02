@@ -9,8 +9,13 @@ PRIVATE = frozenset({"project-docs", "credentials", "secrets", "reports", "works
     "build", "dist", "node_modules", "__pycache__"})
 BASE = frozenset({"CMakeLists.txt", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"})
 TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.py",
+    "execution_record.py", "test_execution_record.py",
     "doctor_environment.py", "test_doctor_environment.py", "classify_failures.py",
     "test_classify_failures.py", "verify_environment.py", "test_verify_environment.py",
+    "agent_io.py", "test_agent_io.py", "test_procedure.py",
+    "agent_lifecycle.py", "test_agent_lifecycle.py",
+    "agent_entrypoint.py", "test_agent_entrypoint.py",
+    "instruction_bundle.py", "test_instruction_bundle.py",
     "benchmark_runtime.py", "verify_isolation.py", "test_verify_isolation.py",
     "verify_resource.py", "test_verify_resource.py", "event_bridge.c", "event_bridge_limits.h",
     "verify_orchestration.py", "test_verify_orchestration.py", "benchmark_orchestration.py"})
@@ -22,6 +27,8 @@ fuzz/corpus/adapter_json/request.json
 fuzz/corpus/adapter_json/result.json
 samples/adapter-descriptor.json
 samples/agent-session/AGENTS.fragment.md
+samples/agent-session/AGENTS.minimal.md
+samples/agent-session/AGENTS.minimal.ko.md
 samples/agent-session/AGENTS.quickstart.ko.md
 samples/agent-session/AGENTS.quickstart.md
 samples/agent-session/CLAUDE.quickstart.ko.md

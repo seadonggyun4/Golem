@@ -58,7 +58,9 @@ int golem_cli_workflow_template(int argc, char **argv)
         st = golem_digest_format(&digest, hex, sizeof(hex), &needed);
         if (st == GOLEM_OK && puts(hex) < 0)
             st = GOLEM_ERR_IO;
-    } else if (st == GOLEM_OK && (fwrite(reply.data, 1, reply.size, stdout) != reply.size ||
+    } else if (st == GOLEM_OK && ((show
+                                  ? fwrite(reply.data, 1, reply.size, stdout) != reply.size
+                                  : cli_output_write((golem_bytes){reply.data, reply.size}) != GOLEM_OK) ||
                                   fputc('\n', stdout) == EOF))
         st = GOLEM_ERR_IO;
     free(input.data);

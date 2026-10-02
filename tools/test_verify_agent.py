@@ -89,7 +89,7 @@ class ConformanceToolTests(unittest.TestCase):
         (out / "stdout.log").write_text(json.dumps(state))
         with patch.object(gate, "capture", return_value={"returncode": 0, "reason": "EXIT"}) as run:
             result = gate.observe(self.cli, work, "selection", out, 10)
-        self.assertEqual(run.call_args.args[0][1:3], ["completion", "call"])
+        self.assertEqual(run.call_args.args[0][1:5], ["--output-mode", "full", "completion", "call"])
         request = json.loads((out / "request.json").read_text())
         self.assertEqual(request["operation"], "resume")
         return result

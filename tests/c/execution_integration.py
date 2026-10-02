@@ -28,7 +28,7 @@ class Execution(unittest.TestCase):
     next = fixture.Workflow.next
 
     def raw(self, *args, ok=True):
-        p = subprocess.run([str(CLI), *map(str, args)], capture_output=True, env=ENV, timeout=90)
+        p = subprocess.run([str(CLI), "--output-mode", "full", *map(str, args)], capture_output=True, env=ENV, timeout=90)
         self.assertEqual(p.returncode == 0, ok, p.stderr.decode())
         return p.stdout.decode()
 

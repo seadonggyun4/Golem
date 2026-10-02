@@ -10,6 +10,7 @@ import statistics
 import subprocess
 import sys
 from verify_agent import digest, private_directory, save, strict_json
+from execution_record import run as recorded_run
 
 
 def summarize(values):
@@ -20,9 +21,9 @@ def summarize(values):
             "relative_mad": statistics.median(abs(v - median) for v in ordered) / median}
 
 
-def sample(binary, observers):
-    result = subprocess.run([str(binary), str(observers)], capture_output=True,
-                            check=True, timeout=30)
+def sample(binary, observers, destination):
+    result = recorded_run([str(binary), str(observers)], destination=destination,
+                          cwd=binary.parent, timeout=30)
     value = strict_json(result.stdout)
     fields = {"schema", "observers", "iterations", "elapsed_ns", "rss_bytes", "checksum"}
     if (not isinstance(value, dict) or set(value) != fields or
@@ -43,16 +44,17 @@ def collect(binary, profile, output, pairs, seed):
     output = private_directory(output)
     identity = {"system": platform.platform(), "machine": platform.machine(),
                 "binary_sha256": digest(binary), "profile_file_sha256": digest(profile),
-                "collector_sha256": digest(Path(__file__)), "cmake_cache_sha256": digest(cache)}
+                "collector_sha256": digest(Path(__file__)), "cmake_cache_sha256": digest(cache),
+                "recorder_sha256": digest(Path(__file__).with_name("execution_record.py"))}
     environment_digest = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
     # Warmup is separate and never included in the statistics.
     for mode in (0, 1, 32):
-        sample(binary, mode)
+        sample(binary, mode, output / f"warmup-{mode}")
     rng, raw = random.Random(seed), []
     for pair in range(pairs):
         order = [0, 1, 32]
         rng.shuffle(order)
-        samples = [sample(binary, mode) for mode in order]
+        samples = [sample(binary, mode, output / f"process-{pair:03d}-{mode}") for mode in order]
         row = {"pair": pair, "order": order, "samples": samples}
         raw.append(row)
         save(output / f"pair-{pair:03d}.json", json.dumps(row, indent=2).encode())
@@ -70,7 +72,8 @@ def collect(binary, profile, output, pairs, seed):
         ratios[str(mode)] = summarize(values)
     if (digest(binary) != identity["binary_sha256"] or
             digest(profile) != identity["profile_file_sha256"] or
-            digest(cache) != identity["cmake_cache_sha256"]):
+            digest(cache) != identity["cmake_cache_sha256"] or
+            digest(Path(__file__).with_name("execution_record.py")) != identity["recorder_sha256"]):
         raise ValueError("benchmark inputs changed during collection; raw samples retained")
     report = {"schema": "golem.runtime-benchmark.v1", "authority": "DERIVED_ONLY",
               "scope": "event-ring append plus synchronous pulls every 16 events",

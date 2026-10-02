@@ -22,7 +22,7 @@ def verify(current, legacy, source, output):
     def invoke(binary, *args, succeeds=True):
         index = len(calls)
         directory = private_directory(output / f"call-{index}")
-        result = capture([binary, *args], directory, 30)
+        result = capture([binary, *args], directory, 30, source=source)
         calls.append({"binary_sha256": digest(binary), "process": result})
         if result["reason"] != "EXIT" or (result["returncode"] == 0) != succeeds:
             raise ValueError(f"unexpected cross-version result at call {index}")

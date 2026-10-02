@@ -39,7 +39,7 @@ class DaemonIntegration(unittest.TestCase):
         self.tmp.cleanup()
 
     def call(self, *args, code=0):
-        p = subprocess.run([CLI, *map(str, args)], capture_output=True, text=True, timeout=15)
+        p = subprocess.run([CLI, "--output-mode", "full", *map(str, args)], capture_output=True, text=True, timeout=15)
         self.assertEqual(p.returncode, code, (args, p.stdout, p.stderr))
         if code:
             self.assertEqual(p.stdout, "")

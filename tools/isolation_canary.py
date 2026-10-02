@@ -12,6 +12,7 @@ import subprocess
 import sys
 
 from verify_agent import private_directory, save
+from execution_record import git, run as recorded_run
 
 
 def main():
@@ -53,11 +54,12 @@ def main():
     main_repo = f.repo
     original = (main_repo / "user.txt").read_bytes()
     env = {k: v for k, v in os.environ.items() if not k.startswith(("GIT_", "WS_"))}
-    base = subprocess.check_output(["git", "-C", str(main_repo), "rev-parse", "HEAD"], env=env).decode().strip()
+    base = git(main_repo, "rev-parse", "HEAD").decode().strip()
     workspace_root = root / "worktrees"
     workspace_root.mkdir()
-    output = subprocess.check_output([str(args.workspace_helper.resolve()), str(f.work),
-        str(main_repo), str(workspace_root), "candidate", "1", base, "-"], env=env, timeout=90).decode().splitlines()
+    output = recorded_run([str(args.workspace_helper.resolve()), str(f.work),
+        str(main_repo), str(workspace_root), "candidate", "1", base, "-"], env=env, timeout=90,
+        destination=root / "workspace-process", source=main_repo).stdout.decode().splitlines()
     f.repo = Path(output[1])
     initial_code = (f.repo / "logic.c").read_bytes()
     workspace_receipt = output[2]

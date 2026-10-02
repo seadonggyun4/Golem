@@ -20,12 +20,12 @@ class KernelQualification(unittest.TestCase):
                            "pids.events": "max"}[name]
                     return {key: int(enforced and seen[name] > 1)}
                 with patch.object(gate, "counters", side_effect=observe), \
-                        patch.object(gate.subprocess, "run") as run:
+                        patch.object(gate, "recorded_run") as run:
                     if not enforced:
                         with self.assertRaises(ValueError):
-                            gate.verify(Path(tmp), Path(tmp))
+                            gate.verify(Path(tmp), Path(tmp), Path(tmp).resolve() / "records")
                     else:
-                        report = gate.verify(Path(tmp), Path(tmp))
+                        report = gate.verify(Path(tmp), Path(tmp), Path(tmp).resolve() / "records")
                         self.assertEqual(report["status"], "PASS")
                         self.assertFalse(report["sandbox_verified"])
                         self.assertFalse(report["candidate_integration_verified"])
@@ -35,7 +35,7 @@ class KernelQualification(unittest.TestCase):
     def test_populated_scope_never_launches(self):
         with tempfile.TemporaryDirectory() as tmp, \
                 patch.object(gate, "counters", return_value={"populated": 1}), \
-                patch.object(gate.subprocess, "run") as run:
+                patch.object(gate, "recorded_run") as run:
             with self.assertRaises(ValueError):
                 gate.verify(Path(tmp), Path(tmp))
             run.assert_not_called()

@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 
 from verify_agent import capture, digest, private_directory, save
+from execution_record import run as recorded_run
 
 # Exact required names, not a regex that can silently select no tests.
 GROUPS = {
@@ -86,8 +87,9 @@ def run(build, output, ctest, timeout, *, groups=None, schema="golem.runtime-val
     cli = build / "golem"
     if not cli.is_file() or not (build / "CMakeCache.txt").is_file():
         raise ValueError("configured and built Golem directory required")
-    inventory = subprocess.run([ctest, "--test-dir", str(build), "--show-only=json-v1"],
-                               capture_output=True, check=True, timeout=30)
+    output = private_directory(output)
+    inventory = recorded_run([ctest, "--test-dir", str(build), "--show-only=json-v1"],
+                             destination=output / "inventory-process", cwd=build, timeout=30)
     tests = json.loads(inventory.stdout)["tests"]
     available = Counter(test["name"] for test in tests)
     missing = sorted(name for name in required if available[name] != 1)
@@ -96,11 +98,11 @@ def run(build, output, ctest, timeout, *, groups=None, schema="golem.runtime-val
     inputs = test_inputs(tests, required, build, extra_inputs)
     inputs.add(str(Path(__file__).resolve()))
     inputs.add(str(Path(__file__).with_name("verify_agent.py").resolve()))
+    inputs.add(str(Path(__file__).with_name("execution_record.py").resolve()))
     inputs.add(str(build / "CMakeCache.txt"))
     inputs.update(str(Path(path).resolve()) for path in extra_inputs)
     inputs.update(str(p.resolve()) for p in build.rglob("CTestTestfile.cmake"))
     hashes = {path: digest(Path(path)) for path in sorted(inputs)}
-    output = private_directory(output)
     report = {"schema": schema, "authority": "DERIVED_ONLY",
               "platform": platform.platform(), "cli_sha256": digest(cli),
               "cmake_cache_sha256": digest(build / "CMakeCache.txt"),
@@ -117,7 +119,7 @@ def run(build, output, ctest, timeout, *, groups=None, schema="golem.runtime-val
         junit = directory / "results.xml"
         regex = "^(" + "|".join(re.escape(test) for test in required) + ")$"
         process = capture([ctest, "--test-dir", build, "-R", regex, "--output-on-failure",
-                           "--output-junit", junit], directory, timeout)
+                           "--output-junit", junit], directory, timeout, build)
         passed = (process["returncode"] == 0 and process["reason"] == "EXIT" and
                   adjudicate(junit, required))
         if junit.exists():

@@ -26,7 +26,7 @@ static int bundle(int argc, char **argv)
         st = inspect ? golem_execution_bundle_inspect(store, &key, &reply, NULL)
                      : golem_execution_bundle_verify(store, (golem_bytes){bytes.data, bytes.size}, NULL);
     if (st == GOLEM_OK && inspect &&
-        (fwrite(reply.data, 1, reply.size, stdout) != reply.size || fputc('\n', stdout) == EOF))
+        (cli_output_write((golem_bytes){reply.data, reply.size}) != GOLEM_OK || fputc('\n', stdout) == EOF))
         st = GOLEM_ERR_IO;
     if (st == GOLEM_OK && verify &&
         puts("{\"integrity_verified\":true,\"acceptance_verified\":false}") < 0)
@@ -77,7 +77,11 @@ int golem_cli_execution(int argc,char **argv)
         st=golem_document_store_open(argv[3],!render,NULL,&store,NULL);
         if(st==GOLEM_OK) st=render?golem_execution_render(store,(golem_bytes){input.data,input.size},&reply,NULL):
             golem_execution_call_authorized(store,(golem_bytes){input.data,input.size},&approved,&reply,NULL);
-        if(st==GOLEM_OK && (fwrite(reply.data,1,reply.size,stdout)!=reply.size || (!render && fputc('\n',stdout)==EOF))) st=GOLEM_ERR_IO;
+        if (st == GOLEM_OK) {
+            st = render ? (fwrite(reply.data, 1, reply.size, stdout) == reply.size ? GOLEM_OK : GOLEM_ERR_IO)
+                        : cli_output_write((golem_bytes){reply.data, reply.size});
+            if (st == GOLEM_OK && !render && fputc('\n', stdout) == EOF) st = GOLEM_ERR_IO;
+        }
     }
     golem_status closed=golem_document_store_close(store); if(st==GOLEM_OK) st=closed;
     free(input.data); golem_execution_reply_free(&reply); return st==GOLEM_OK?0:cli_emit(st,NULL);

@@ -26,7 +26,7 @@ class Research(unittest.TestCase):
         self.temp.cleanup()
 
     def run_cli(self, *args, ok=True, raw=False):
-        p = subprocess.run([CLI, *map(str, args)], capture_output=True, timeout=30)
+        p = subprocess.run([CLI, "--output-mode", "full", *map(str, args)], capture_output=True, timeout=30)
         if not ok:
             self.assertNotEqual(p.returncode, 0, p.stdout)
             return p
