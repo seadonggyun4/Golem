@@ -149,6 +149,9 @@ int main(int argc, char **argv)
     if (!strcmp(argv[2], "none")) CHECK(scope.count == 0);
     else {
         CHECK(scope.count > 0);
+        if (strcmp(scope.entries[0].operation, argv[2]))
+            fprintf(stderr, "mode=%s expected=%s observed=%s errno=%d\n", mode, argv[2],
+                    scope.entries[0].operation, scope.entries[0].error_number);
         CHECK(!strcmp(scope.entries[0].operation, argv[2]));
         int wanted = !strcmp(argv[3], "EINVAL") ? EINVAL :
                      !strcmp(argv[3], "ECHILD") ? ECHILD :

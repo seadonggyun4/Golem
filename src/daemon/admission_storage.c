@@ -217,7 +217,7 @@ static golem_status read_event(int root, uint64_t sequence, uint8_t frame[GA_FRA
 
 golem_status ga_load(golem_admission *a, const golem_admission_checkpoint *expected)
 {
-    uint64_t count;
+    uint64_t count = 0;
     golem_status s = event_count(a->directory, &count);
     if (s != GOLEM_OK)
         return s;

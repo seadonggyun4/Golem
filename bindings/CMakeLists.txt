@@ -8,7 +8,7 @@ endif()
 # the CLI or introducing a second parser/schema in either host language.
 add_library(golem_binding SHARED native/bridge.c
     ${PROJECT_SOURCE_DIR}/src/cli/json.c ${PROJECT_SOURCE_DIR}/src/cli/capsule.c
-    ${PROJECT_SOURCE_DIR}/src/cli/projection.c)
+    ${PROJECT_SOURCE_DIR}/src/cli/projection.c ${PROJECT_SOURCE_DIR}/src/cli/error.c)
 add_library(Golem::binding ALIAS golem_binding)
 set_target_properties(golem_binding PROPERTIES EXPORT_NAME binding VERSION 1.0.0 SOVERSION 1
     C_VISIBILITY_PRESET hidden)
@@ -22,6 +22,7 @@ if(APPLE)
 else()
     set_property(TARGET golem_binding APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/native/exports.map")
     target_link_options(golem_binding PRIVATE "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/native/exports.map")
+    target_link_options(golem_binding PRIVATE "LINKER:--no-undefined")
 endif()
 install(TARGETS golem_binding EXPORT GolemTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
