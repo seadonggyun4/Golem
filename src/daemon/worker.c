@@ -67,7 +67,7 @@ static void observe(golem_worker_pool *p, uint64_t id, golem_runtime_event_kind 
     if (!p->events_enabled) return;
     golem_runtime_event e = {.kind = kind, .origin = GOLEM_EVENT_WORKER_OBSERVATION,
         .subject = id, .status_known = status_known, .status = status};
-    uint64_t now;
+    uint64_t now = 0;
     if (p->clock_known && now_ns(&now) == GOLEM_OK && now >= p->opened_ns) {
         e.elapsed_known = true;
         e.elapsed_ns = now - p->opened_ns;
@@ -223,7 +223,7 @@ static golem_status pulse(void *context)
     worker_job *j = context;
     if (atomic_load(&j->cancelled))
         return GOLEM_ERR_INCOMPLETE_WORK;
-    uint64_t now;
+    uint64_t now = 0;
     golem_status s = now_ns(&now);
     if (s != GOLEM_OK)
         return s;
@@ -307,7 +307,7 @@ worker_start(golem_worker_pool *p, uint64_t id, golem_admission *a, const char *
     s = golem_admission_identity(a, &j->authority, &checkpoint);
     if (s != GOLEM_OK)
         return s;
-    uint64_t now;
+    uint64_t now = 0;
     s = now_ns(&now);
     if (s != GOLEM_OK)
         return s;
@@ -441,7 +441,7 @@ GOLEM_RECORDED_REQUIRED_API(golem_worker_heartbeat,
         return GOLEM_ERR_INVALID_ARGUMENT;
     if (state(j) != GOLEM_WORKER_RUNNING || atomic_load(&j->expired))
         return GOLEM_ERR_STALE_LEASE;
-    uint64_t now;
+    uint64_t now = 0;
     s = now_ns(&now);
     if (s != GOLEM_OK)
         return s;
