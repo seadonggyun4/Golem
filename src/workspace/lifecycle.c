@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "internal.h"
+#include "../common/record_internal.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <openssl/rand.h>
@@ -212,10 +213,11 @@ static golem_status remove_tree(ws_context *ctx)
     return st;
 }
 
-golem_status golem_workspace_call(golem_document_store *store,
-    const golem_workspace_host *host, golem_workspace_operation operation,
-    const char *candidate, const char *base, const golem_digest *evidence,
-    golem_workspace_result *out, golem_diagnostic *diagnostic)
+GOLEM_RECORDED_API(golem_workspace_call,
+    (golem_document_store *store, const golem_workspace_host *host, golem_workspace_operation operation,
+     const char *candidate, const char *base, const golem_digest *evidence,
+     golem_workspace_result *out, golem_diagnostic *diagnostic),
+    (store, host, operation, candidate, base, evidence, out, diagnostic), diagnostic)
 {
     if (!store || !host || host->struct_size != sizeof(*host) || host->version != 1 ||
         !host->check || !host->pulse || !ws_id(host->repository_id) || !ws_id(candidate) || !out ||

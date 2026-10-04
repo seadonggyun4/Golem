@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "../common/record_internal.h"
 #include <string.h>
 
 golem_status in_emit(struct json_object *o, golem_inventory_reply *out)
@@ -125,8 +126,8 @@ golem_status golem_inventory_policy_validate(golem_bytes policy, golem_diagnosti
     return dw_report(d, st, NULL);
 }
 
-golem_status golem_inventory_capture(const char *root, golem_bytes policy,
-                                     golem_inventory_reply *out, golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_inventory_capture, (const char *root, golem_bytes policy,
+    golem_inventory_reply *out, golem_diagnostic *d), (root, policy, out, d), d)
 {
     if (!root || !out)
         return GOLEM_ERR_INVALID_ARGUMENT;

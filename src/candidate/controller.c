@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "internal.h"
+#include "../common/record_internal.h"
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -231,9 +232,10 @@ static golem_status dispatch(cf_context *c, const char *op, size_t i, struct jso
     return st;
 }
 
-golem_status golem_candidate_call(golem_document_store *s, const golem_candidate_host *host,
-                                  golem_admission *admission, golem_bytes bytes,
-                                  golem_execution_reply *out, golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_candidate_call,
+    (golem_document_store *s, const golem_candidate_host *host, golem_admission *admission,
+     golem_bytes bytes, golem_execution_reply *out, golem_diagnostic *d),
+    (s, host, admission, bytes, out, d), d)
 {
     if (!s || s->poisoned || !out)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);

@@ -94,11 +94,14 @@ golem_status re_context(golem_document_store *s, struct json_object *m, uint64_t
     struct json_object *event = s->reentries[s->reentry_count - 1], *d = dw_get(event, "decision"),
                        *ref = json_object_new_object();
     golem_digest report;
+    bool deferred = dw_uint(event, "schema_version") == 2;
     uint64_t bytes = 0;
     golem_status st = GOLEM_OK;
     if (!json_object_equal(dw_get(m, "selection"), dw_get(d, "selection")))
         st = GOLEM_ERR_STALE_RESULT;
-    if (st == GOLEM_OK && !dw_digest(event, "report_digest", &report))
+    if (deferred)
+        report = s->reentry_digests[s->reentry_count - 1];
+    if (st == GOLEM_OK && !deferred && !dw_digest(event, "report_digest", &report))
         st = GOLEM_ERR_PARSE;
     if (st == GOLEM_OK)
         st = golem_evidence_verify(s->cas, &report, &bytes, NULL);
@@ -106,9 +109,9 @@ golem_status re_context(golem_document_store *s, struct json_object *m, uint64_t
         st = GOLEM_ERR_BUDGET_EXHAUSTED;
     if (st == GOLEM_OK &&
         (!dw_add_digest(ref, "decision_digest", &s->reentry_digests[s->reentry_count - 1]) ||
-         !dw_add_digest(ref, "report_digest", &report) ||
+         (!deferred && !dw_add_digest(ref, "report_digest", &report)) ||
          !dw_add(ref, "failure_receipt", json_object_get(dw_get(d, "failure_receipt"))) ||
-         !ex_uint(m, "schema_version", 2) || !dw_add(m, "reentry", json_object_get(ref))))
+         !ex_uint(m, "schema_version", deferred ? 3 : 2) || !dw_add(m, "reentry", json_object_get(ref))))
         st = GOLEM_ERR_OUT_OF_MEMORY;
     if (st == GOLEM_OK) {
         *total += bytes;
@@ -123,6 +126,29 @@ golem_status re_export(golem_document_store *s, struct json_object *m, struct js
     struct json_object *r = dw_get(m, "reentry");
     if (!r)
         return GOLEM_OK;
+    if (dw_uint(m, "schema_version") == 3) {
+        golem_digest key;
+        if (!dw_digest(r, "decision_digest", &key))
+            return GOLEM_ERR_PARSE;
+        size_t index = 0;
+        while (index < s->reentry_count && !dw_equal(&key, &s->reentry_digests[index]))
+            ++index;
+        if (index == s->reentry_count)
+            return GOLEM_ERR_NOT_FOUND;
+        struct json_object *event = NULL;
+        golem_status st = dw_cas_json(s, &key, &event);
+        if (st == GOLEM_OK && (!json_object_equal(event, s->reentries[index]) ||
+                               dw_uint(event, "schema_version") != 2 ||
+                               strcmp(dw_text(event, "type"), "reentry") ||
+                               dw_uint(event, "renderer_version") != 1 ||
+                               !json_object_equal(dw_get(r, "failure_receipt"),
+                                   dw_get(dw_get(event, "decision"), "failure_receipt"))))
+            st = GOLEM_ERR_IDENTITY_MISMATCH;
+        if (st == GOLEM_OK && !dw_add(reply, "failure_record", json_object_get(event)))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+        json_object_put(event);
+        return st;
+    }
     golem_digest key;
     uint8_t *body = NULL;
     size_t n = 0;

@@ -215,6 +215,7 @@ int golem_cli_output(int argc, char **argv)
     if (st == GOLEM_OK) st = write_bytes((golem_bytes){data, size});
     if (st == GOLEM_OK && (fputc('\n', stdout) == EOF || fflush(stdout))) st = GOLEM_ERR_IO;
     golem_allocator_free(NULL, data);
+    cli_error_note(st, "output_read", NULL);
     if (st != GOLEM_OK) fprintf(stderr, "golem output read: %s; do not rerun effects to recover output\n", golem_status_string(st));
     return st == GOLEM_OK ? 0 : 1;
 }

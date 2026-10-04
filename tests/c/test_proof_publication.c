@@ -62,6 +62,7 @@ static int fault_link(int from, const char *old, int to, const char *name, int f
 #define dw_event_write fault_dw_event_write
 #define dw_cas_json fault_dw_cas_json
 #define dw_put_json fault_dw_put_json
+#define dw_put_json_bounded fault_dw_put_json_bounded
 #define dw_replay fault_dw_replay
 #define dw_project fault_dw_project
 #define write fault_write

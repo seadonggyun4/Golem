@@ -2,6 +2,7 @@
 #define GOLEM_WORKER_H
 #include "golem/admission.h"
 #include "golem/supervisor.h"
+#include "golem/system_error.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -80,6 +81,17 @@ golem_status golem_worker_start(golem_worker_pool *pool, uint64_t job, golem_adm
                                 void *context);
 golem_status golem_worker_inspect(golem_worker_pool *pool, uint64_t job,
                                   golem_worker_snapshot *out);
+/* Completed-job observations, including thread creation and supervisor errors.
+ * Copy only after completion; otherwise output is unchanged. The returned scope
+ * is inactive (parent=NULL); do not pass storage for a currently active scope.
+ * No path/payload data. Retrieval never depends on recorder availability. */
+golem_status golem_worker_diagnostics(golem_worker_pool *pool, uint64_t job,
+                                     golem_system_error_scope *out);
+/* Completed worker-thread recording outcome, independent of operation status.
+ * GOLEM_OK also covers disabled recording or no attempted worker dispatch; use
+ * the job snapshot to distinguish these. Getter itself performs no recording. */
+golem_status golem_worker_recording_status(golem_worker_pool *pool, uint64_t job,
+                                          golem_status *out);
 golem_status golem_worker_cancel(golem_worker_pool *pool, uint64_t job);
 /* Extend before expiry only. Host first renews actual lease; this local watchdog
  * is not a replacement for a durable lease. Duration positive <= one hour. */

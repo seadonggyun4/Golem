@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "test.h"
+#include "golem/system_error.h"
 static unsigned mode, calls;
 static ssize_t injected_write(int fd, const void *data, size_t size)
 {
@@ -50,15 +51,21 @@ int main(void)
         CHECK(fault_open(path, NULL, &writer, NULL) == GOLEM_OK);
         uint64_t sequence = 99;
         calls = 0;
+        golem_system_error_scope errors;
+        CHECK(golem_system_error_begin(&errors) == GOLEM_OK);
         golem_status status =
             fault_append(writer, GOLEM_JOURNAL_CANCELLED, (golem_bytes){NULL, 0}, &sequence, NULL);
+        CHECK(golem_system_error_end(&errors) == GOLEM_OK);
         golem_journal_checkpoint checkpoint;
         if (mode == 2 || mode == 3) {
+            CHECK(errors.count == 1 && errors.entries[0].error_number == EIO);
+            CHECK(!strcmp(errors.entries[0].operation, mode == 2 ? "write" : "fsync"));
             CHECK(status == GOLEM_ERR_IO && sequence == 99);
             CHECK(fault_checkpoint(writer, &checkpoint) == GOLEM_ERR_INVALID_STATE);
             CHECK(fault_append(writer, GOLEM_JOURNAL_CANCELLED, (golem_bytes){NULL, 0}, &sequence,
                                NULL) == GOLEM_ERR_INVALID_STATE);
         } else {
+            CHECK(errors.count == 0);
             CHECK(status == GOLEM_OK && sequence == 1);
             CHECK(fault_checkpoint(writer, &checkpoint) == GOLEM_OK);
             CHECK(checkpoint.records == 1 && checkpoint.bytes == 32);

@@ -35,6 +35,22 @@ class Records(unittest.TestCase):
     def read(self, directory, name):
         return json.loads((directory / "execution" / name).read_bytes())
 
+    def test_extra_logs_are_bounded_and_bound_to_manifest(self):
+        path = self.root / "result"
+        code = f"from pathlib import Path; Path({str(path / 'syscalls.log')!r}).write_bytes(b'x' * 4096)"
+        directory, result = self.invoke(code, extra_logs=("syscalls.log",), limit=1024)
+        self.assertEqual(result["reason"], "OUTPUT_LIMIT")
+        self.assertEqual(record.check(directory)["integrity"], "PASS")
+        (directory / "syscalls.log").write_bytes(b"changed")
+        with self.assertRaisesRegex(ValueError, "digest mismatch"):
+            record.check(directory)
+
+    def test_extra_logs_reject_unsafe_or_duplicate_names_before_launch(self):
+        for names in (("../escape.log",), ("stdout.log",), ("x.log", "x.log"), ("execution",),
+                      None, "x.log", ({},)):
+            with self.subTest(names=names), self.assertRaises(ValueError):
+                record._extra_logs(names)
+
     def test_automatic_success_records_observation_not_acceptance(self):
         path, result = self.invoke()
         start = self.read(path, "started.json")
@@ -56,7 +72,8 @@ class Records(unittest.TestCase):
         cases = [("raise SystemExit(7)", "EXIT", 7, {}),
                  ("import os,signal; os.kill(os.getpid(),signal.SIGTERM)", "EXIT", -15, {}),
                  ("import time; time.sleep(10)", "TIMEOUT", None, {"timeout": .1}),
-                 ("print('x'*2048)", "OUTPUT_LIMIT", None, {"limit": 16})]
+                 ("import time; print('x'*2048, flush=True); time.sleep(10)",
+                  "OUTPUT_LIMIT", None, {"limit": 16})]
         for i, (code, reason, rc, options) in enumerate(cases):
             path, result = self.invoke(code, str(i), **options)
             self.assertEqual(result["reason"], reason)
@@ -144,6 +161,20 @@ class Records(unittest.TestCase):
             path, _ = self.invoke()
         self.assertNotIn(b"never-include-this-value", b"".join(
             p.read_bytes() for p in (path / "execution").iterdir()))
+
+    def test_native_empty_scope_is_incomplete_not_unobserved(self):
+        native = record.private_directory(self.root / "native")
+        scope = record.private_directory(native / ("a" * 32))
+        files, complete = record.native_inventory(native)
+        self.assertFalse(complete)
+        self.assertIn(scope.name + "/", files)
+
+    def test_uninstrumented_child_and_bound_native_inventory(self):
+        path, result = self.invoke()
+        self.assertEqual(result["native_recording"], "NOT_OBSERVED")
+        record.private_directory(path / "native" / ("b" * 32))
+        with self.assertRaises(ValueError):
+            record.check(path)
 
     def test_concurrent_independent_records_have_unique_ids(self):
         with ThreadPoolExecutor(max_workers=3) as pool:

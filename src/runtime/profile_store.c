@@ -1,4 +1,5 @@
 #include "profile_internal.h"
+#include "../common/record_internal.h"
 #include "../agent_session/internal.h"
 #include <string.h>
 
@@ -148,9 +149,10 @@ golem_status rp_apply(golem_document_store *store, struct json_object *event,
     return status;
 }
 
-golem_status golem_runtime_profile_register(golem_document_store *store,
-                                            const golem_runtime_profile *profile, const char *key,
-                                            golem_digest *out, golem_diagnostic *diagnostic)
+GOLEM_RECORDED_API(golem_runtime_profile_register,
+    (golem_document_store *store, const golem_runtime_profile *profile, const char *key,
+     golem_digest *out, golem_diagnostic *diagnostic),
+    (store, profile, key, out, diagnostic), diagnostic)
 {
     if (!store || !profile || !out || !dw_id(key) || !strcmp(key, "initial"))
         return dw_report(diagnostic, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -194,7 +196,7 @@ golem_status golem_runtime_profile_register(golem_document_store *store,
     if (status == GOLEM_OK && !event)
         status = GOLEM_ERR_OUT_OF_MEMORY;
     if (status == GOLEM_OK)
-        status = dw_put_json(store, event, &payload);
+        status = dw_record_prepare(store, event, GOLEM_DOCUMENT_MAX_JSON, &payload);
     if (status == GOLEM_OK)
         status = dw_event_write(store, &payload, &frame);
     if (status == GOLEM_OK) {

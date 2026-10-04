@@ -38,6 +38,7 @@ static ssize_t injected_write(int fd, const void *data, size_t size)
 #define gd_write fault_gd_write
 #define gd_root fault_gd_root
 #define gd_list fault_gd_list
+#define gd_close fault_gd_close
 #define fsync injected_sync
 #define write injected_write
 #include "../../src/daemon/storage.c"

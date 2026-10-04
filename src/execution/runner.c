@@ -473,7 +473,7 @@ golem_status ex_execute(golem_document_store *s, struct json_object *cp, const g
     if (st == GOLEM_OK)
         st = dw_put_json(s, result, &result_digest);
     if (st == GOLEM_OK)
-        st = dw_publish(dir, done, (golem_bytes){result_digest.bytes, 32});
+        st = dw_record_reference(s, dir, done, &result_digest, false);
     if (st == GOLEM_OK)
         *out = result;
     else

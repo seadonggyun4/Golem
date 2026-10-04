@@ -40,6 +40,7 @@ pkg_check_modules(JSONC REQUIRED IMPORTED_TARGET json-c>=0.15)
 pkg_check_modules(MD4C REQUIRED IMPORTED_TARGET md4c>=0.4.8)
 
 add_library(golem STATIC
+    src/common/record.c
     src/inventory/model.c
     src/inventory/matcher.c
     src/inventory/capture.c
@@ -124,6 +125,8 @@ add_library(golem STATIC
     src/document/schema.c
     src/document/markdown.c
     src/document/storage.c
+    src/document/record.c
+    src/document/record_read.c
     src/document/registry.c
     src/daemon/storage.c
     src/daemon/admission.c
@@ -131,6 +134,7 @@ add_library(golem STATIC
     src/daemon/admission_storage.c
     src/daemon/admission_work.c
     src/daemon/resource.c
+    src/daemon/resource_io.c
     src/daemon/recovery.c
     src/daemon/queue.c
     src/daemon/scheduler.c
@@ -162,6 +166,7 @@ add_library(golem STATIC
     src/adapter_protocol/noop.c
     src/common/error.c
     src/common/diagnostic.c
+    src/common/system_error.c
     src/common/allocator.c
     src/common/arena.c
     src/common/span.c
@@ -256,7 +261,7 @@ if(GOLEM_BUILD_CLI)
     add_executable(golem_cli src/cli/main.c src/cli/lineage.c src/cli/adapter.c src/cli/adapter_descriptor.c src/cli/research.c src/cli/research_bundle.c
         src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c src/cli/journal.c
         src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/workflow_template.c src/cli/context.c src/cli/events.c src/cli/agent_session.c src/cli/runtime_profile.c src/cli/execution.c src/cli/proof.c src/cli/candidate.c src/cli/reentry.c src/cli/completion.c src/cli/role.c src/cli/approval.c)
-    target_sources(golem_cli PRIVATE src/cli/doctor.c src/cli/output.c)
+    target_sources(golem_cli PRIVATE src/cli/doctor.c src/cli/output.c src/cli/error.c)
     set_target_properties(golem_cli PROPERTIES OUTPUT_NAME golem)
     target_sources(golem_cli PRIVATE src/cli/candidate_host_config.c src/cli/candidate_host_runtime.c
         src/cli/candidate_host_transport.c src/cli/candidate_host_cli.c)

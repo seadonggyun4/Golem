@@ -47,6 +47,7 @@ int golem_cli_agent_session(int argc, char **argv)
     json_object_put(request);
     free(input.data);
     if (st != GOLEM_OK) {
+        cli_error_note(st, phase, &diagnostic);
         struct json_object *error = json_object_new_object();
         if (error) {
             json_object_object_add(error, "schema", json_object_new_string("golem.session-error.v1"));
@@ -103,6 +104,7 @@ int golem_cli_session_binding(int argc, char **argv)
     golem_agent_reply_free(&reply);
     free(input.data);
     json_object_put(r);
+    cli_error_note(st, "work_or_binding", &diagnostic);
     if (record && st != GOLEM_OK) {
         struct json_object *error = json_object_new_object();
         if (error) {

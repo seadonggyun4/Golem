@@ -3,6 +3,7 @@
 #define _DEFAULT_SOURCE
 #define _FILE_OFFSET_BITS 64
 #include "internal.h"
+#include "golem/system_error.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -16,7 +17,10 @@ int golem_evidence_path_open(const char *path, bool directory)
 {
     if (path == NULL || path[0] == '\0') { errno = EINVAL; return -1; }
     int parent = open(path[0] == '/' ? "/" : ".", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
-    if (parent < 0) return -1;
+    if (parent < 0) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "evidence.path", "open", errno);
+        return -1;
+    }
     const char *cursor = path;
     while (*cursor != '\0') {
         if (*cursor == '/') { ++cursor; continue; }
@@ -35,6 +39,9 @@ int golem_evidence_path_open(const char *path, bool directory)
         if (!last || directory) flags |= O_DIRECTORY;
         int child = openat(parent, name, flags);
         int error = errno;
+        if (child < 0)
+            (void)golem_system_error_note(error == ENOENT ? GOLEM_ERR_NOT_FOUND : GOLEM_ERR_IO,
+                                         "evidence.path", "openat", error);
         (void)close(parent);
         if (child < 0) { errno = error; return -1; }
         parent = child;
@@ -59,7 +66,10 @@ static bool same_file(const struct stat *before, const struct stat *after)
 golem_status golem_evidence_scan_fd(int fd, int copy_fd, golem_receipt *out)
 {
     struct stat before, after;
-    if (fstat(fd, &before) < 0 || !S_ISREG(before.st_mode) || before.st_size < 0) return GOLEM_ERR_IO;
+    if (fstat(fd, &before) < 0)
+        return golem_system_error_note(GOLEM_ERR_IO, "evidence.scan", "fstat", errno);
+    if (!S_ISREG(before.st_mode) || before.st_size < 0)
+        return golem_system_error_note(GOLEM_ERR_IO, "evidence.scan", "file_shape", 0);
     if ((uintmax_t)before.st_size > GOLEM_SHA256_MAX_BYTES) return GOLEM_ERR_OVERFLOW;
     EVP_MD_CTX *ctx = NULL;
     golem_status status = golem_evidence_hash_begin(&ctx);
@@ -68,7 +78,7 @@ golem_status golem_evidence_scan_fd(int fd, int copy_fd, golem_receipt *out)
     while (status == GOLEM_OK) {
         ssize_t amount = read(fd, buffer, sizeof(buffer));
         if (amount < 0 && errno == EINTR) continue;
-        if (amount < 0) { status = GOLEM_ERR_IO; break; }
+        if (amount < 0) { status = golem_system_error_note(GOLEM_ERR_IO, "evidence.scan", "read", errno); break; }
         if (amount == 0) break;
         if ((uint64_t)amount > GOLEM_SHA256_MAX_BYTES - receipt.size) {
             status = GOLEM_ERR_OVERFLOW; break;
@@ -80,14 +90,20 @@ golem_status golem_evidence_scan_fd(int fd, int copy_fd, golem_receipt *out)
         while (copy_fd >= 0 && offset < (size_t)amount) {
             ssize_t written = write(copy_fd, buffer + offset, (size_t)amount - offset);
             if (written < 0 && errno == EINTR) continue;
-            if (written <= 0) { status = GOLEM_ERR_IO; break; }
+            if (written <= 0) {
+                status = golem_system_error_note(GOLEM_ERR_IO, "evidence.scan",
+                    written < 0 ? "write" : "write_no_progress", written < 0 ? errno : 0);
+                break;
+            }
             offset += (size_t)written;
         }
     }
     /* Link publication/temporary unlink changes ctime without changing content.
      * Compare size and mtime, then rely on the expected digest for CAS reads. */
-    if (status == GOLEM_OK && (fstat(fd, &after) < 0 || !same_file(&before, &after) ||
-        receipt.size != (uint64_t)before.st_size)) status = GOLEM_ERR_IO;
+    if (status == GOLEM_OK && fstat(fd, &after) < 0)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.scan", "fstat_after", errno);
+    if (status == GOLEM_OK && (!same_file(&before, &after) || receipt.size != (uint64_t)before.st_size))
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.scan", "file_changed", 0);
     if (status == GOLEM_OK) status = golem_evidence_hash_end(ctx, &receipt.digest);
     EVP_MD_CTX_free(ctx);
     if (status == GOLEM_OK) *out = receipt;
@@ -103,7 +119,8 @@ golem_status golem_digest_file(const char *path, golem_receipt *out, golem_diagn
         "cannot open regular artifact without symlinks");
     golem_receipt receipt;
     golem_status status = golem_evidence_scan_fd(fd, -1, &receipt);
-    if (close(fd) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
+    if (close(fd) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.digest", "close", errno);
     if (status == GOLEM_OK) *out = receipt;
     return golem_evidence_report(d, status, NULL);
 }

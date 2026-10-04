@@ -1,4 +1,5 @@
 #include "approval_internal.h"
+#include "../common/record_internal.h"
 #include "../agent_session/internal.h"
 #include <string.h>
 
@@ -144,7 +145,7 @@ static golem_status append(golem_document_store *s, struct json_object *e, golem
     golem_status st = transition(s, e);
     golem_digest frame;
     if (st == GOLEM_OK)
-        st = dw_put_json(s, e, key);
+        st = dw_record_prepare(s, e, GOLEM_DOCUMENT_MAX_JSON, key);
     if (st == GOLEM_OK)
         st = dw_event_write(s, key, &frame);
     if (st == GOLEM_OK)
@@ -183,9 +184,10 @@ static golem_status emit_event(struct json_object *e, const golem_digest *key,
     json_object_put(r);
     return st;
 }
-golem_status golem_approval_call(golem_document_store *s, golem_bytes bytes,
-                                 const golem_approval_host *host, const golem_agent_clock *clock,
-                                 golem_execution_reply *out, golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_approval_call,
+    (golem_document_store *s, golem_bytes bytes, const golem_approval_host *host,
+     const golem_agent_clock *clock, golem_execution_reply *out, golem_diagnostic *d),
+    (s, bytes, host, clock, out, d), d)
 {
     if (!s || !out || s->poisoned)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -325,11 +327,11 @@ static struct json_object *internal_request(const char *op, const golem_digest *
     }
     return r;
 }
-golem_status golem_execution_call_receipted(golem_document_store *s, golem_bytes bytes,
-                                            const golem_digest *key,
-                                            const golem_approval_host *host,
-                                            const golem_execution_approval *approval,
-                                            golem_execution_reply *out, golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_execution_call_receipted,
+    (golem_document_store *s, golem_bytes bytes, const golem_digest *key,
+     const golem_approval_host *host, const golem_execution_approval *approval,
+     golem_execution_reply *out, golem_diagnostic *d),
+    (s, bytes, key, host, approval, out, d), d)
 {
     if (!s || !key || !out || s->poisoned ||
         (approval && (approval->version != 1 || approval->struct_size != sizeof(*approval))))

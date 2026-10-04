@@ -16,7 +16,14 @@ Each command has separate `stdout.log`, `stderr.log` and an `execution/` directo
 | `source-before.json` | Git commit, dirty state, status/diff hashes and tracked/nonignored untracked content inventory, or explicit UNAVAILABLE |
 | `source-after.json` | Same observation after the process; never inferred from HEAD alone |
 | `result.json` | Child return code, termination reason, elapsed time, log references, input-change observations, finish time and non-acceptance marker |
-| `manifest.json` | Fixed inventory with byte counts and SHA-256 for metadata and the two original logs |
+| `manifest.json` | Fixed inventory with byte counts and SHA-256 for metadata, stdout/stderr and any explicitly declared additional logs |
+
+Additional flat `.log` names are validated before launch, stored in the intent,
+monitored against the same per-file soft output limit, synced and included in
+manifest verification. Undeclared or missing additional logs fail verification.
+The [explicit Linux syscall runner](syscall-recording.md) uses this extension for
+`syscalls.log`; ordinary callers still capture only stdout/stderr. Version-1
+records without the optional `extra_logs` field retain their original inventory.
 
 The source observer is shared with `verify_environment`, avoiding competing
 definitions of dirty-worktree identity. Symlinks are identified by their target
@@ -71,11 +78,22 @@ replay an incomplete record.
 | `install_conan_cli` | Conan and version-check records retained beside the install destination even if staging is removed |
 | `isolation_canary` | Direct workspace-helper launch; imported synthetic fixtures retain their existing Work evidence, not a new per-subprocess trace |
 
+The [native recorder](native-recording.md) now covers configured direct CLI
+dispatch, 68 reviewed C API boundaries, and all supervisor variants, including
+pre-launch adapter rejection and owned worker-context handoff. Required
+cancel/lease/release controls and selected recovery queries preserve their
+operation even if recording fails; that failure remains separately observable. Python capture
+automatically binds native observations to its source-identity bundle. Hosts can
+wrap other C API operations with `golem_record_call`. Enabled direct C callers
+inspect the versioned `golem_record_last_api_outcome` immediately after automatic
+boundaries: operation success and recording success are separate results.
+
 The C execution engine already persists attempt/checkpoint/QA receipts and
 contract-selected logs. Its authorization, retention/redaction policy and public
-ABI are unchanged. Direct native CLI invocations, C API callers, arbitrary shell
-commands, CMake/Conan hooks, and processes inside CTest/fixture commands do **not**
-gain separate Python records. A recorded parent is not proof of complete descendant
+ABI are unchanged. Arbitrary shell commands, CMake/Conan hooks, and uninstrumented
+processes inside CTest/fixture commands do **not** gain separate native records.
+Direct CLI stream interception and automatic interposition of every C function
+are not provided. A recorded parent is not proof of complete descendant
 coverage. Native CLI output CAS entries are payloads, not execution transcripts.
 
 An AST regression check inventories direct subprocess launches in owned
@@ -133,7 +151,7 @@ was copied; no published performance result is claimed for Golem.
 | --- | --- |
 | [W3C PROV-DM](https://www.w3.org/TR/prov-dm/), overview/core structures and entity/activity distinction | Separate command activities, input/output identities and derived judgments. This local JSON schema is not a claim of PROV conformance or trusted attribution. |
 | [SLSA 1.2 Build Provenance](https://slsa.dev/spec/v1.2/build-provenance), model, build definition, run details and dependencies | Record actual parameters, resolved executable, invocation and byproducts; explicitly mark incomplete input knowledge. No SLSA level, signature or hermetic-build claim. |
-| Chirigati, Shasha, Freire, [ReproZip, TaPP 2013](https://www.usenix.org/system/files/conference/tapp13/tapp13-final16.pdf), introduction and sections 2-3 | Automatic capture reduces reliance on manually reconstructed experiment descriptions. Unlike ReproZip, this implementation does not trace syscalls or package all runtime dependencies. |
+| Chirigati, Shasha, Freire, [ReproZip, TaPP 2013](https://www.usenix.org/system/files/conference/tapp13/tapp13-final16.pdf), introduction and sections 2-3 | Automatic capture reduces reliance on manually reconstructed experiment descriptions. Ordinary capture does not trace syscalls or package dependencies; the separate explicit syscall runner adds Linux diagnostic observations, not a reproducible environment package. |
 | Moreau and Groth, *Provenance: An Introduction to PROV*, Morgan & Claypool 2013, [authors' public introduction and chapter outline](https://www.provbook.org/) | Treat generation, validation and management as distinct concerns. Book text was not available here; only the public overview was consulted, with detailed data-model decisions checked against PROV-DM. |
 | Beyer et al. (eds.), *Site Reliability Engineering*, O'Reilly 2016, [Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/), definitions and monitoring philosophy | Keep observations interpretable and separate symptoms from causes; a recorded return code is not a semantic acceptance verdict. |
 

@@ -4,6 +4,8 @@
 #define _DEFAULT_SOURCE 1
 #endif
 #include "internal.h"
+#include "../common/record_internal.h"
+#include "golem/system_error.h"
 #include "../evidence/internal.h"
 #include <inttypes.h>
 #include <stdio.h>
@@ -31,9 +33,11 @@ typedef struct active_job {
 static golem_status now(uint64_t *out)
 {
     struct timespec t;
-    if (clock_gettime(CLOCK_MONOTONIC, &t) != 0 || t.tv_sec < 0 ||
-        (uint64_t)t.tv_sec > UINT64_MAX / 1000000000u)
-        return GOLEM_ERR_IO;
+    if (clock_gettime(CLOCK_MONOTONIC, &t) != 0)
+        return golem_system_error_note(GOLEM_ERR_IO, "daemon", "clock_gettime", errno);
+    if (t.tv_sec < 0 || t.tv_nsec < 0 || t.tv_nsec >= 1000000000 ||
+        (uint64_t)t.tv_sec > (UINT64_MAX - (uint64_t)t.tv_nsec) / 1000000000u)
+        return golem_system_error_note(GOLEM_ERR_IO, "daemon", "clock_value", 0);
     *out = (uint64_t)t.tv_sec * 1000000000u + (uint64_t)t.tv_nsec;
     return GOLEM_OK;
 }
@@ -102,8 +106,8 @@ static golem_status execute(void *context, golem_work_run *run, const golem_stag
     return job->daemon->ops.execute(job->daemon->context, job->runtime, run, job->path, stage,
                                     deadline, out);
 }
-golem_status golem_daemon_open(const char *root, const golem_daemon_ops *ops, void *context,
-                               golem_daemon **out)
+GOLEM_RECORDED_API(golem_daemon_open, (const char *root, const golem_daemon_ops *ops,
+    void *context, golem_daemon **out), (root, ops, context, out), NULL)
 {
     if (ops == NULL || ops->execute == NULL || out == NULL)
         return GOLEM_ERR_INVALID_ARGUMENT;
@@ -111,7 +115,7 @@ golem_status golem_daemon_open(const char *root, const golem_daemon_ops *ops, vo
     if (fd < 0)
         return GOLEM_ERR_IO;
     int leader = gd_lock(fd, ".daemon.lock", false, true);
-    (void)close(fd);
+    (void)gd_close(fd);
     if (leader < 0)
         return GOLEM_ERR_JOURNAL_BUSY;
     golem_daemon_recovery_report recovery;
@@ -122,16 +126,17 @@ golem_status golem_daemon_open(const char *root, const golem_daemon_ops *ops, vo
         recovered = gd_recover_queue(root, &recovery);
         if (recovered == GOLEM_ERR_JOURNAL_BUSY) {
             struct timespec delay = {0, 10000000};
-            (void)nanosleep(&delay, NULL);
+            if (nanosleep(&delay, NULL) < 0 && errno != EINTR)
+                (void)golem_system_error_note(GOLEM_ERR_IO, "daemon", "nanosleep", errno);
         }
     }
     if (recovered != GOLEM_OK) {
-        (void)close(leader);
+        (void)gd_close(leader);
         return recovered;
     }
     golem_daemon *d = calloc(1, sizeof(*d));
     if (d == NULL) {
-        (void)close(leader);
+        (void)gd_close(leader);
         return GOLEM_ERR_OUT_OF_MEMORY;
     }
     strcpy(d->root, root);
@@ -141,7 +146,7 @@ golem_status golem_daemon_open(const char *root, const golem_daemon_ops *ops, vo
     *out = d;
     return GOLEM_OK;
 }
-golem_status golem_daemon_tick(golem_daemon *d, bool *worked)
+GOLEM_RECORDED_API(golem_daemon_tick, (golem_daemon *d, bool *worked), (d, worked), NULL)
 {
     if (d == NULL || worked == NULL)
         return GOLEM_ERR_INVALID_ARGUMENT;
@@ -197,7 +202,7 @@ golem_status golem_daemon_tick(golem_daemon *d, bool *worked)
         s = golem_journal_open(path, NULL, &job.journal, NULL);
     if (s == GOLEM_ERR_JOURNAL_BUSY) {
         if (job.fd >= 0)
-            (void)close(job.fd);
+            (void)gd_close(job.fd);
         d->busy = false;
         *worked = false;
         return GOLEM_OK;
@@ -256,7 +261,7 @@ golem_status golem_daemon_tick(golem_daemon *d, bool *worked)
                                           (golem_bytes){(const uint8_t *)message, strlen(message)});
     }
     if (job.fd >= 0 && close(job.fd) < 0)
-        persisted = GOLEM_ERR_IO;
+        persisted = golem_system_error_note(GOLEM_ERR_IO, "daemon", "close_job", errno);
     d->cursor = rows[selected].ticket;
     d->busy = false;
     if (persisted != GOLEM_OK) {
@@ -266,13 +271,14 @@ golem_status golem_daemon_tick(golem_daemon *d, bool *worked)
     *worked = true;
     return GOLEM_OK;
 }
-golem_status golem_daemon_close(golem_daemon *d)
+GOLEM_RECORDED_REQUIRED_API(golem_daemon_close, (golem_daemon *d), (d))
 {
     if (d == NULL)
         return GOLEM_OK;
     if (d->busy)
         return GOLEM_ERR_INVALID_STATE;
-    golem_status s = close(d->leader) == 0 ? GOLEM_OK : GOLEM_ERR_IO;
+    golem_status s = close(d->leader) == 0 ? GOLEM_OK :
+        golem_system_error_note(GOLEM_ERR_IO, "daemon", "close_leader", errno);
     free(d);
     return s;
 }

@@ -23,6 +23,7 @@ bool as_active(struct json_object *state);
 golem_status as_unreceipted(golem_document_store *s, as_log *log);
 bool as_token(struct json_object *active, struct json_object *token);
 bool as_live(const as_log *log, uint64_t now, const golem_digest *boot);
+golem_status as_publication_guard(void *log);
 golem_status as_fresh(golem_document_store *s, struct json_object *active, bool output_allowed,
                       struct json_object **manifest);
 #endif

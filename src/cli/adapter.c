@@ -17,7 +17,7 @@ static int emit(golem_status s, bool packed, const golem_adapter_envelope *e)
     uint8_t output[GOLEM_ADAPTER_JSON_MAX + 1]; size_t n;
     if (s == GOLEM_OK) s = packed ? golem_adapter_msgpack_encode(e, output, sizeof(output), &n, NULL) :
         golem_adapter_envelope_encode(e, (char *)output, sizeof(output), &n, NULL);
-    if (s != GOLEM_OK) { fprintf(stderr, "golem: %s\n", golem_status_string(s)); return 1; }
+    if (s != GOLEM_OK) { cli_error_note(s, "adapter", NULL); fprintf(stderr, "golem: %s\n", golem_status_string(s)); return 1; }
     if (!packed) output[n - 1] = '\n';
     if (fwrite(output, 1, n, stdout) != n) return 1;
     return fflush(stdout) == 0 && !ferror(stdout) ? 0 : 1;

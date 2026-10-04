@@ -10,7 +10,7 @@ from workflow_integration import Workflow
 
 class Conformance(Completion):
     def test_e01_session_failure_revision_completion(self):
-        Reentry.test_session_context_contains_failure_report(self)
+        Reentry.test_session_context_contains_failure_record(self)
         self.managed("completion")
         self.finalize()
         self.project()

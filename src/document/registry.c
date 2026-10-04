@@ -2,6 +2,8 @@
 #define _DARWIN_C_SOURCE
 #define _DEFAULT_SOURCE
 #include "internal.h"
+#include "golem/system_error.h"
+#include "../common/record_internal.h"
 #include "../discovery/internal.h"
 #include "../workflow/internal.h"
 #include "../evidence/internal.h"
@@ -86,7 +88,8 @@ golem_status dw_apply(golem_document_store *s, struct json_object *event,
                       const golem_digest *payload, const golem_digest *frame)
 {
     if (dw_uint(event, "schema_version") != 1 &&
-        !(dw_uint(event, "schema_version") == 2 && !strcmp(dw_text(event, "type"), "research") &&
+        !(dw_uint(event, "schema_version") == 2 &&
+          (!strcmp(dw_text(event, "type"), "research") || !strcmp(dw_text(event, "type"), "reentry")) &&
           s->spec))
         return GOLEM_ERR_UNSUPPORTED_VERSION;
     golem_status st = GOLEM_OK;
@@ -176,11 +179,13 @@ static golem_status empty_root(int root)
 {
     int scan = openat(root, ".", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (scan < 0)
-        return GOLEM_ERR_IO;
+        return golem_system_error_note(GOLEM_ERR_IO, "document.scan", "openat", errno);
     DIR *d = fdopendir(scan);
     if (!d) {
-        close(scan);
-        return GOLEM_ERR_IO;
+        golem_status st = golem_system_error_note(GOLEM_ERR_IO, "document.scan", "fdopendir", errno);
+        if (close(scan) < 0)
+            (void)golem_system_error_note(GOLEM_ERR_IO, "document.scan", "close", errno);
+        return st;
     }
     golem_status st = GOLEM_OK;
     struct dirent *e;
@@ -191,8 +196,11 @@ static golem_status empty_root(int root)
             break;
         }
     if (errno && st == GOLEM_OK)
-        st = GOLEM_ERR_IO;
-    closedir(d);
+        st = golem_system_error_note(GOLEM_ERR_IO, "document.scan", "readdir", errno);
+    if (closedir(d) < 0) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "document.scan", "closedir", errno);
+        if (st == GOLEM_OK) st = GOLEM_ERR_IO;
+    }
     return st;
 }
 static golem_status allocate_store(const char *root, bool writable, bool create,
@@ -223,7 +231,7 @@ static golem_status allocate_store(const char *root, bool writable, bool create,
             st = GOLEM_ERR_IO;
     }
     if (st == GOLEM_OK && flock(s->root, (writable ? LOCK_EX : LOCK_SH) | LOCK_NB) < 0)
-        st = GOLEM_ERR_JOURNAL_BUSY;
+        st = golem_system_error_note(GOLEM_ERR_JOURNAL_BUSY, "document.open", "flock", errno);
     if (st == GOLEM_OK && create)
         st = empty_root(s->root);
     if (st == GOLEM_OK)
@@ -236,9 +244,9 @@ static golem_status allocate_store(const char *root, bool writable, bool create,
         *out = s;
     return st;
 }
-golem_status golem_document_store_create(const char *root, golem_bytes spec,
-                                         const golem_allocator *a, golem_document_store **out,
-                                         golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_document_store_create,
+    (const char *root, golem_bytes spec, const golem_allocator *a, golem_document_store **out,
+     golem_diagnostic *d), (root, spec, a, out, d), d)
 {
     if (!out)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -263,7 +271,7 @@ golem_status golem_document_store_create(const char *root, golem_bytes spec,
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
     if (st == GOLEM_OK)
-        st = dw_put_json(s, event, &payload);
+        st = dw_record_prepare(s, event, GOLEM_DOCUMENT_MAX_JSON, &payload);
     if (st == GOLEM_OK)
         st = dw_event_write(s, &payload, &frame);
     if (st == GOLEM_OK)
@@ -275,8 +283,9 @@ golem_status golem_document_store_create(const char *root, golem_bytes spec,
         (void)golem_document_store_close(s);
     return dw_report(d, st, NULL);
 }
-golem_status golem_document_store_open(const char *root, bool writable, const golem_allocator *a,
-                                       golem_document_store **out, golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_document_store_open,
+    (const char *root, bool writable, const golem_allocator *a,
+     golem_document_store **out, golem_diagnostic *d), (root, writable, a, out, d), d)
 {
     if (!out)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -290,7 +299,7 @@ golem_status golem_document_store_open(const char *root, bool writable, const go
         (void)golem_document_store_close(s);
     return dw_report(d, st, NULL);
 }
-golem_status golem_document_store_close(golem_document_store *s)
+GOLEM_RECORDED_REQUIRED_API(golem_document_store_close, (golem_document_store *s), (s))
 {
     if (!s)
         return GOLEM_OK;
@@ -315,9 +324,9 @@ golem_status golem_document_store_close(golem_document_store *s)
     json_object_put(s->spec);
     golem_status st = golem_evidence_close(s->cas);
     if (s->events >= 0 && close(s->events) < 0)
-        st = GOLEM_ERR_IO;
+        st = golem_system_error_note(GOLEM_ERR_IO, "document.close", "close_events", errno);
     if (s->root >= 0 && close(s->root) < 0)
-        st = GOLEM_ERR_IO;
+        st = golem_system_error_note(GOLEM_ERR_IO, "document.close", "close_root", errno);
     golem_allocator a = s->allocator;
     (void)golem_allocator_free(&a, s->entries);
     (void)golem_allocator_free(&a, s);
@@ -332,8 +341,10 @@ golem_status golem_document_generation(const golem_document_store *s, uint64_t *
     *out = s->count + 1;
     return GOLEM_OK;
 }
-golem_status golem_document_submit(golem_document_store *s, golem_bytes metadata, golem_bytes body,
-                                   const char *key, golem_document_result *out, golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_document_submit,
+    (golem_document_store *s, golem_bytes metadata, golem_bytes body,
+     const char *key, golem_document_result *out, golem_diagnostic *d),
+    (s, metadata, body, key, out, d), d)
 {
     if (!s || !out || !dw_id(key))
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -389,7 +400,7 @@ golem_status golem_document_submit(golem_document_store *s, golem_bytes metadata
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
     if (st == GOLEM_OK)
-        st = dw_put_json(s, event, &payload);
+        st = dw_record_prepare(s, event, GOLEM_DOCUMENT_MAX_JSON, &payload);
     if (st == GOLEM_OK)
         st = dw_event_write(s, &payload, &frame);
     if (st == GOLEM_OK) {

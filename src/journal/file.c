@@ -5,6 +5,8 @@
 #endif
 #define _FILE_OFFSET_BITS 64
 #include "internal.h"
+#include "golem/system_error.h"
+#include "../common/record_internal.h"
 #include "golem/replay.h"
 #include <errno.h>
 #include <fcntl.h>
@@ -24,7 +26,8 @@ struct golem_journal {
     golem_digest chain_head;
 };
 
-golem_status golem_journal_checkpoint_get(const golem_journal *j, golem_journal_checkpoint *out)
+GOLEM_RECORDED_REQUIRED_API(golem_journal_checkpoint_get,
+    (const golem_journal *j, golem_journal_checkpoint *out), (j, out))
 {
     if (j == NULL || out == NULL)
         return GOLEM_ERR_INVALID_ARGUMENT;
@@ -42,7 +45,7 @@ static golem_status read_at(int fd, uint8_t *buffer, size_t size, size_t offset)
         if (amount < 0 && errno == EINTR)
             continue;
         if (amount < 0)
-            return GOLEM_ERR_IO;
+            return golem_system_error_note(GOLEM_ERR_IO, "journal.read", "pread", errno);
         if (amount == 0)
             return GOLEM_ERR_TRUNCATED_JOURNAL;
         buffer += (size_t)amount;
@@ -57,7 +60,7 @@ static golem_status sync_file(int fd)
     do {
         result = fsync(fd);
     } while (result < 0 && errno == EINTR);
-    return result == 0 ? GOLEM_OK : GOLEM_ERR_IO;
+    return result == 0 ? GOLEM_OK : golem_system_error_note(GOLEM_ERR_IO, "journal", "fsync", errno);
 }
 static golem_status scan(golem_journal *j, golem_diagnostic *d)
 {
@@ -106,8 +109,8 @@ static golem_status scan(golem_journal *j, golem_diagnostic *d)
     }
     return GOLEM_OK;
 }
-golem_status golem_journal_open(const char *path, const golem_allocator *allocator,
-                                golem_journal **out, golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_journal_open, (const char *path, const golem_allocator *allocator,
+                                golem_journal **out, golem_diagnostic *d), (path, allocator, out, d), d)
 {
     if (path == NULL || path[0] == '\0' || out == NULL ||
         golem_allocator_validate(allocator) != GOLEM_OK)
@@ -122,18 +125,23 @@ golem_status golem_journal_open(const char *path, const golem_allocator *allocat
                          .next_sequence = 1};
     j->fd = open(path, O_RDWR | O_CREAT | O_APPEND | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK, 0600);
     if (j->fd < 0)
-        status = GOLEM_ERR_IO;
+        status = golem_system_error_note(GOLEM_ERR_IO, "journal.open", "open", errno);
     struct stat info;
-    if (status == GOLEM_OK && (fstat(j->fd, &info) < 0 || !S_ISREG(info.st_mode) ||
-                               info.st_size < 0 || (uintmax_t)info.st_size > SIZE_MAX))
-        status = GOLEM_ERR_IO;
+    if (status == GOLEM_OK && fstat(j->fd, &info) < 0)
+        status = golem_system_error_note(GOLEM_ERR_IO, "journal.open", "fstat", errno);
+    if (status == GOLEM_OK && (!S_ISREG(info.st_mode) || info.st_size < 0 || (uintmax_t)info.st_size > SIZE_MAX))
+        status = golem_system_error_note(GOLEM_ERR_IO, "journal.open", "file_shape", 0);
     if (status == GOLEM_OK && flock(j->fd, LOCK_EX | LOCK_NB) < 0)
-        status = errno == EWOULDBLOCK || errno == EAGAIN ? GOLEM_ERR_JOURNAL_BUSY : GOLEM_ERR_IO;
+        status = golem_system_error_note(errno == EWOULDBLOCK || errno == EAGAIN ? GOLEM_ERR_JOURNAL_BUSY : GOLEM_ERR_IO,
+                                         "journal.open", "flock", errno);
     if (status != GOLEM_OK) {
         (void)golem_journal_report(d, status, 0, "cannot open and lock regular journal");
     } else {
         /* Sample length only after acquiring the writer lock. */
-        if (fstat(j->fd, &info) < 0 || info.st_size < 0 || (uintmax_t)info.st_size > SIZE_MAX) {
+        int stat_result = fstat(j->fd, &info);
+        if (stat_result < 0 || info.st_size < 0 || (uintmax_t)info.st_size > SIZE_MAX) {
+            (void)golem_system_error_note(GOLEM_ERR_IO, "journal.open",
+                stat_result < 0 ? "fstat_locked" : "file_size", stat_result < 0 ? errno : 0);
             status = golem_journal_report(d, GOLEM_ERR_IO, 0, "cannot stat journal");
         } else {
             j->length = (size_t)info.st_size;
@@ -147,8 +155,9 @@ golem_status golem_journal_open(const char *path, const golem_allocator *allocat
     *out = j;
     return golem_journal_report(d, GOLEM_OK, 0, NULL);
 }
-golem_status golem_journal_append(golem_journal *j, golem_journal_type type, golem_bytes payload,
-                                  uint64_t *sequence, golem_diagnostic *d)
+GOLEM_RECORDED_REQUIRED_API(golem_journal_append,
+    (golem_journal *j, golem_journal_type type, golem_bytes payload,
+                                  uint64_t *sequence, golem_diagnostic *d), (j, type, payload, sequence, d))
 {
     if (j == NULL || sequence == NULL)
         return golem_journal_report(d, GOLEM_ERR_INVALID_ARGUMENT, 0, NULL);
@@ -174,16 +183,18 @@ golem_status golem_journal_append(golem_journal *j, golem_journal_type type, gol
         status =
             golem_journal_chain_extend(&j->chain_head, (golem_bytes){memory, size}, &next_head);
     struct stat info;
-    if (status == GOLEM_OK &&
-        (fstat(j->fd, &info) < 0 || info.st_size < 0 || (uintmax_t)info.st_size != j->length))
-        status = GOLEM_ERR_IO;
+    if (status == GOLEM_OK && fstat(j->fd, &info) < 0)
+        status = golem_system_error_note(GOLEM_ERR_IO, "journal.append", "fstat", errno);
+    if (status == GOLEM_OK && (info.st_size < 0 || (uintmax_t)info.st_size != j->length))
+        status = golem_system_error_note(GOLEM_ERR_IO, "journal.append", "file_size_changed", 0);
     size_t written = 0;
     while (status == GOLEM_OK && written < size) {
         ssize_t amount = write(j->fd, (uint8_t *)memory + written, size - written);
         if (amount < 0 && errno == EINTR)
             continue;
         if (amount <= 0) {
-            status = GOLEM_ERR_IO;
+            status = golem_system_error_note(GOLEM_ERR_IO, "journal.append",
+                amount < 0 ? "write" : "write_no_progress", amount < 0 ? errno : 0);
             break;
         }
         written += (size_t)amount;
@@ -202,21 +213,22 @@ golem_status golem_journal_append(golem_journal *j, golem_journal_type type, gol
     j->chain_head = next_head;
     return golem_journal_report(d, GOLEM_OK, 0, NULL);
 }
-golem_status golem_journal_close(golem_journal *j, golem_diagnostic *d)
+GOLEM_RECORDED_REQUIRED_API(golem_journal_close,
+    (golem_journal *j, golem_diagnostic *d), (j, d))
 {
     golem_status status = GOLEM_OK;
     if (j != NULL) {
         /* Never retry close after EINTR: the descriptor may have been reused. */
         if (j->fd >= 0 && close(j->fd) < 0)
-            status = GOLEM_ERR_IO;
+            status = golem_system_error_note(GOLEM_ERR_IO, "journal", "close", errno);
         (void)golem_allocator_free(&j->allocator, j);
     }
     return golem_journal_report(d, status, 0, NULL);
 }
 
-golem_status golem_journal_recover(golem_journal *j, const golem_replay_options *options,
+GOLEM_RECORDED_API(golem_journal_recover, (golem_journal *j, const golem_replay_options *options,
                                    golem_work_run **out, golem_replay_report *report,
-                                   golem_diagnostic *d)
+                                   golem_diagnostic *d), (j, options, out, report, d), d)
 {
     if (j == NULL || out == NULL) {
         return golem_journal_report(d, GOLEM_ERR_INVALID_ARGUMENT, 0, NULL);
@@ -234,7 +246,10 @@ golem_status golem_journal_recover(golem_journal *j, const golem_replay_options 
     if (status == GOLEM_OK)
         status = golem_replay_expect_checkpoint(engine, &checkpoint);
     struct stat info;
-    if (fstat(j->fd, &info) < 0 || info.st_size < 0 || (uintmax_t)info.st_size != j->length) {
+    int stat_result = fstat(j->fd, &info);
+    if (stat_result < 0 || info.st_size < 0 || (uintmax_t)info.st_size != j->length) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "journal.recover",
+            stat_result < 0 ? "fstat_before" : "file_size_changed", stat_result < 0 ? errno : 0);
         status = golem_journal_report(d, GOLEM_ERR_IO, 0, "journal length changed before recovery");
     }
     uint8_t buffer[16384];
@@ -252,8 +267,11 @@ golem_status golem_journal_recover(golem_journal *j, const golem_replay_options 
         status = golem_replay_feed(engine, (golem_bytes){buffer, amount}, d);
         offset += amount;
     }
+    if (status == GOLEM_OK) stat_result = fstat(j->fd, &info);
     if (status == GOLEM_OK &&
-        (fstat(j->fd, &info) < 0 || info.st_size < 0 || (uintmax_t)info.st_size != j->length)) {
+        (stat_result < 0 || info.st_size < 0 || (uintmax_t)info.st_size != j->length)) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "journal.recover",
+            stat_result < 0 ? "fstat_after" : "file_size_changed", stat_result < 0 ? errno : 0);
         status =
             golem_journal_report(d, GOLEM_ERR_IO, offset, "journal length changed during recovery");
     }

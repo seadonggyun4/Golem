@@ -80,5 +80,6 @@ int golem_cli_document(int argc,char **argv)
     golem_status closed=golem_document_store_close(store);
     if(st==GOLEM_OK) st=closed;
     free(meta.data); free(body.data);
+    cli_error_note(st, "document", &d);
     return cli_emit(st,o);
 }

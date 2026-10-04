@@ -59,7 +59,7 @@ class Reentry(Execution):
         self.assertEqual((self.work / "failures/r0001.md").read_text(), report)
         self.assertEqual(self.next()["target_kind"], "development-plan")
         inputs = self.inputs("development-plan")
-        self.assertEqual(inputs["schema_version"], 2)
+        self.assertEqual(inputs["schema_version"], 3)
         self.assertEqual(inputs["reentry"]["decision_digest"], decision["decision_digest"])
         self.inputs("qa-result", ok=False)
         self.managed("development-plan")
@@ -127,14 +127,16 @@ class Reentry(Execution):
         self.assertEqual(d["reason"], "ATTEMPT_BUDGET_EXHAUSTED")
         self.assertEqual(self.next()["action"], "BLOCKED")
 
-    def test_session_context_contains_failure_report(self):
+    def test_session_context_contains_failure_record(self):
         self.setup_failure(sessions=True)
         self.decide()
         self.begin_claim()
         request = {"schema_version": 1, "operation": "context", "work_id": "example-work",
                    "token": self.token, "max_bytes": 1048576}
         r = self.cli("session", "call", self.work, self.write("context.json", request))
-        self.assertIn(self.failure["receipt_digest"], r["failure_markdown"])
+        self.assertNotIn("failure_markdown", r)
+        self.assertEqual(self.failure["receipt_digest"], r["failure_record"]["decision"]["failure_receipt"])
+        self.assertEqual(r["manifest"]["schema_version"], 3)
         self.assertEqual(r["manifest"]["target_kind"], "development-plan")
         self.decide(self.request(key="during-claim"), ok=False)
         m = self.metadata("development-plan", parents=r["manifest"]["direct"], version=4)

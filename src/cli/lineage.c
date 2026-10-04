@@ -53,6 +53,7 @@ int golem_cli_lineage(int argc, char **argv)
         }
     }
     if (status != GOLEM_OK) {
+        cli_error_note(status, "lineage", NULL);
         fprintf(stderr, "golem: %s\n", golem_status_string(status));
         golem_lineage_free(g); (void)golem_allocator_free(NULL, ids); return 1;
     }

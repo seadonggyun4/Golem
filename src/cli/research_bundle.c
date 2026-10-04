@@ -131,6 +131,7 @@ int golem_cli_research_bundle(int argc, char **argv)
     golem_status closed = golem_document_store_close(s);
     if (st == GOLEM_OK) st = closed;
     free(policy.data); golem_execution_reply_free(&reply); json_object_put(bundle);
+    cli_error_note(st, "research_bundle", NULL);
     if (st != GOLEM_OK) fprintf(stderr, "research bundle: %s\n", golem_status_string(st));
     return st == GOLEM_OK ? 0 : 1;
 }

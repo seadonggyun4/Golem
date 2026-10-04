@@ -2,6 +2,7 @@
 #define _DARWIN_C_SOURCE
 #define _DEFAULT_SOURCE
 #include "internal.h"
+#include "golem/system_error.h"
 #include <errno.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -31,9 +32,22 @@ typedef struct in_scan {
 static uint64_t now_ns(void)
 {
     struct timespec t;
-    return clock_gettime(CLOCK_MONOTONIC, &t)
-               ? 0
-               : (uint64_t)t.tv_sec * UINT64_C(1000000000) + (uint64_t)t.tv_nsec;
+    if (clock_gettime(CLOCK_MONOTONIC, &t)) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "inventory", "clock_gettime", errno);
+        return 0;
+    }
+    if (t.tv_sec < 0 || t.tv_nsec < 0 || t.tv_nsec >= 1000000000 ||
+        (uint64_t)t.tv_sec > (UINT64_MAX - (uint64_t)t.tv_nsec) / UINT64_C(1000000000)) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "inventory", "clock_value", 0);
+        return 0;
+    }
+    return (uint64_t)t.tv_sec * UINT64_C(1000000000) + (uint64_t)t.tv_nsec;
+}
+
+static void close_observed(int fd)
+{
+    if (close(fd))
+        (void)golem_system_error_note(GOLEM_ERR_IO, "inventory", "close", errno);
 }
 
 static golem_status pulse(void *context)
@@ -192,11 +206,12 @@ static golem_status walk(in_scan *s, int parent_fd, const char *prefix, unsigned
         return GOLEM_ERR_BUDGET_EXHAUSTED;
     int fd = openat(parent_fd, ".", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (fd < 0)
-        return GOLEM_ERR_IO;
+        return golem_system_error_note(GOLEM_ERR_IO, "inventory", "open_walk", errno);
     DIR *dir = fdopendir(fd);
     if (!dir) {
-        close(fd);
-        return GOLEM_ERR_IO;
+        golem_status st = golem_system_error_note(GOLEM_ERR_IO, "inventory", "fdopendir", errno);
+        close_observed(fd);
+        return st;
     }
     golem_status st = GOLEM_OK;
     struct dirent *item;
@@ -205,7 +220,7 @@ static golem_status walk(in_scan *s, int parent_fd, const char *prefix, unsigned
         item = readdir(dir);
         if (!item) {
             if (errno)
-                st = GOLEM_ERR_IO;
+                st = golem_system_error_note(GOLEM_ERR_IO, "inventory", "readdir", errno);
             break;
         }
         if (!strcmp(item->d_name, ".") || !strcmp(item->d_name, "..") ||
@@ -223,7 +238,7 @@ static golem_status walk(in_scan *s, int parent_fd, const char *prefix, unsigned
         }
         struct stat info;
         if (fstatat(fd, item->d_name, &info, AT_SYMLINK_NOFOLLOW)) {
-            st = GOLEM_ERR_STALE_RESULT;
+            st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "inventory", "fstatat_walk", errno);
             break;
         }
         if (S_ISDIR(info.st_mode)) {
@@ -231,17 +246,18 @@ static golem_status walk(in_scan *s, int parent_fd, const char *prefix, unsigned
                 continue;
             int child = openat(fd, item->d_name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
             if (child < 0)
-                st = GOLEM_ERR_INCOMPLETE_WORK;
+                st = golem_system_error_note(GOLEM_ERR_INCOMPLETE_WORK, "inventory", "open_child", errno);
             else {
                 st = walk(s, child, path, depth + 1, visited);
-                close(child);
+                close_observed(child);
             }
         } else {
             in_entry *entry_out = NULL;
             st = entry(s, (const uint8_t *)path, (size_t)n, &entry_out);
         }
     }
-    closedir(dir);
+    if (closedir(dir))
+        (void)golem_system_error_note(GOLEM_ERR_IO, "inventory", "closedir", errno);
     return st;
 }
 
@@ -265,17 +281,19 @@ static golem_status parent(in_scan *s, const char *path, int *out, char leaf[102
     memcpy(leaf, path, strlen(path) + 1);
     int fd = openat(s->root, ".", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (fd < 0)
-        return GOLEM_ERR_IO;
+        return golem_system_error_note(GOLEM_ERR_IO, "inventory", "open_parent", errno);
     char *p = leaf, *slash;
     while ((slash = strchr(p, '/'))) {
         *slash = 0;
         int next = openat(fd, p, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
         if (next < 0) {
             golem_status st = errno == ENOENT ? GOLEM_ERR_NOT_FOUND : GOLEM_ERR_INCOMPLETE_WORK;
-            close(fd);
+            if (st != GOLEM_ERR_NOT_FOUND)
+                (void)golem_system_error_note(st, "inventory", "open_component", errno);
+            close_observed(fd);
             return st;
         }
-        close(fd);
+        close_observed(fd);
         fd = next;
         p = slash + 1;
     }
@@ -294,10 +312,13 @@ static golem_status content(in_scan *s, const char *path, struct json_object **o
         return GOLEM_OK;
     }
     struct stat before, after;
-    if (st == GOLEM_OK && fstatat(dir, leaf, &before, AT_SYMLINK_NOFOLLOW) < 0)
+    if (st == GOLEM_OK && fstatat(dir, leaf, &before, AT_SYMLINK_NOFOLLOW) < 0) {
         st = errno == ENOENT ? GOLEM_ERR_NOT_FOUND : GOLEM_ERR_IO;
+        if (st != GOLEM_ERR_NOT_FOUND)
+            (void)golem_system_error_note(st, "inventory", "fstatat_before", errno);
+    }
     if (st == GOLEM_ERR_NOT_FOUND) {
-        close(dir);
+        close_observed(dir);
         *out = NULL;
         return GOLEM_OK;
     }
@@ -327,8 +348,12 @@ static golem_status content(in_scan *s, const char *path, struct json_object **o
     }
     if (st == GOLEM_OK && !link) {
         fd = openat(dir, leaf, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
-        if (fd < 0 || fstat(fd, &after) < 0 || !same_file(&before, &after))
-            st = GOLEM_ERR_STALE_RESULT;
+        if (fd < 0)
+            st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "inventory", "open_content", errno);
+        else if (fstat(fd, &after) < 0)
+            st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "inventory", "fstat_content", errno);
+        else if (!same_file(&before, &after))
+            st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "inventory", "content_changed", 0);
     }
     uint64_t total = 0;
     uint8_t buffer[8192];
@@ -341,7 +366,7 @@ static golem_status content(in_scan *s, const char *path, struct json_object **o
         if (n < 0 && errno == EINTR)
             continue;
         if (n < 0) {
-            st = GOLEM_ERR_IO;
+            st = golem_system_error_note(GOLEM_ERR_IO, "inventory", link ? "readlinkat" : "read", errno);
             break;
         }
         if (!n && !link)
@@ -358,10 +383,14 @@ static golem_status content(in_scan *s, const char *path, struct json_object **o
         if (link)
             break;
     }
-    if (st == GOLEM_OK &&
-        (total != (uint64_t)before.st_size || fstatat(dir, leaf, &after, AT_SYMLINK_NOFOLLOW) < 0 ||
-         !same_file(&before, &after)))
-        st = GOLEM_ERR_STALE_RESULT;
+    if (st == GOLEM_OK) {
+        if (total != (uint64_t)before.st_size)
+            st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "inventory", "size_changed", 0);
+        else if (fstatat(dir, leaf, &after, AT_SYMLINK_NOFOLLOW) < 0)
+            st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "inventory", "fstatat_after", errno);
+        else if (!same_file(&before, &after))
+            st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "inventory", "content_changed", 0);
+    }
     uint8_t digest[32], oid[32];
     unsigned n = 0, m = 0;
     if (st == GOLEM_OK && (EVP_DigestFinal_ex(sha, digest, &n) != 1 || n != 32 ||
@@ -380,9 +409,9 @@ static golem_status content(in_scan *s, const char *path, struct json_object **o
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
     if (fd >= 0)
-        close(fd);
+        close_observed(fd);
     if (dir >= 0)
-        close(dir);
+        close_observed(dir);
     EVP_MD_CTX_free(sha);
     EVP_MD_CTX_free(git);
     if (st == GOLEM_OK) {
@@ -403,10 +432,13 @@ static golem_status scan(in_scan *s, struct json_object **out)
     golem_status st =
         items && o ? ws_identity(s->host.repository_root, &identity) : GOLEM_ERR_OUT_OF_MEMORY;
     struct stat root_stat;
-    if (st == GOLEM_OK &&
-        (fstat(s->root, &root_stat) || (uint64_t)root_stat.st_dev != dw_uint(identity, "device") ||
-         (uint64_t)root_stat.st_ino != dw_uint(identity, "inode")))
-        st = GOLEM_ERR_IDENTITY_MISMATCH;
+    if (st == GOLEM_OK) {
+        if (fstat(s->root, &root_stat))
+            st = golem_system_error_note(GOLEM_ERR_IDENTITY_MISMATCH, "inventory", "fstat_root", errno);
+        else if ((uint64_t)root_stat.st_dev != dw_uint(identity, "device") ||
+                 (uint64_t)root_stat.st_ino != dw_uint(identity, "inode"))
+            st = golem_system_error_note(GOLEM_ERR_IDENTITY_MISMATCH, "inventory", "root_changed", 0);
+    }
     if (st == GOLEM_OK)
         st = ws_git_policy(&s->git);
     if (st == GOLEM_OK) {
@@ -472,7 +504,10 @@ static golem_status scan(in_scan *s, struct json_object **out)
 
 golem_status in_capture(const char *root, const in_policy *policy, struct json_object **out)
 {
-    in_scan s = {.policy = policy, .deadline = now_ns() + UINT64_C(60000000000), .root = -1};
+    uint64_t now = now_ns();
+    if (!now) return GOLEM_ERR_IO;
+    if (now > UINT64_MAX - UINT64_C(60000000000)) return GOLEM_ERR_OVERFLOW;
+    in_scan s = {.policy = policy, .deadline = now + UINT64_C(60000000000), .root = -1};
     s.host = (golem_workspace_host){
         .repository_root = root, .check = readable, .pulse = pulse, .context = &s};
     s.git.host = &s.host;
@@ -494,6 +529,6 @@ golem_status in_capture(const char *root, const in_policy *policy, struct json_o
     json_object_put(second);
     (void)golem_allocator_free(NULL, memory);
     if (s.root >= 0)
-        close(s.root);
+        close_observed(s.root);
     return st;
 }

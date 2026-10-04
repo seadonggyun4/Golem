@@ -3,6 +3,26 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  syscall-diagnostics:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: sudo apt-get update && sudo apt-get install -y strace
+      - name: Real descendant syscall and tracer-exit tests
+        env:
+          GOLEM_TRACE_TEST_OUTPUT: ${{ runner.temp }}/syscall-tests
+        run: python3 tools/test_syscall_record.py --linux-integration
+      - name: Preserve trace evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: syscall-diagnostics-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/syscall-tests/
+          if-no-files-found: error
+          retention-days: 14
   public-alpha:
     strategy:
       fail-fast: false

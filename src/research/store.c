@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "../common/record_internal.h"
 #include <string.h>
 _Static_assert(GOLEM_RESEARCH_MAX_EVENTS < UINT16_MAX, "research index ordinal capacity");
 
@@ -154,8 +155,9 @@ static golem_status reply(struct json_object *event, const golem_digest *payload
     json_object_put(o);
     return st;
 }
-golem_status golem_research_call(golem_document_store *s, golem_bytes b,
-    golem_execution_reply *out, golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_research_call,
+    (golem_document_store *s, golem_bytes b, golem_execution_reply *out, golem_diagnostic *d),
+    (s, b, out, d), d)
 {
     if (!s || !out) return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
     if (s->poisoned) return dw_report(d, GOLEM_ERR_INVALID_STATE, NULL);
@@ -192,7 +194,7 @@ golem_status golem_research_call(golem_document_store *s, golem_bytes b,
     }
     golem_digest payload, frame;
     golem_execution_reply result = {0};
-    if (st == GOLEM_OK) st = dw_put_json(s, event, &payload);
+    if (st == GOLEM_OK) st = dw_record_prepare(s, event, GOLEM_DOCUMENT_MAX_JSON, &payload);
     /* Adoption cannot allocate. If reply allocation fails after commit, poison
      * the handle and recover the original receipt by replay and same-key retry. */
     if (st == GOLEM_OK) st = dw_event_write(s, &payload, &frame);

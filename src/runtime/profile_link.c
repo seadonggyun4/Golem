@@ -1,4 +1,5 @@
 #include "profile_internal.h"
+#include "../common/record_internal.h"
 #include "../agent_session/internal.h"
 #include <string.h>
 
@@ -133,10 +134,11 @@ golem_status rp_link_apply(golem_document_store *store, struct json_object *even
     return status;
 }
 
-golem_status golem_runtime_link_run(golem_document_store *store, const golem_digest *binding,
-                                    golem_bytes journal, const char *run_id,
-                                    const golem_journal_checkpoint *checkpoint,
-                                    golem_digest *receipt, golem_diagnostic *diagnostic)
+GOLEM_RECORDED_API(golem_runtime_link_run,
+    (golem_document_store *store, const golem_digest *binding, golem_bytes journal,
+     const char *run_id, const golem_journal_checkpoint *checkpoint,
+     golem_digest *receipt, golem_diagnostic *diagnostic),
+    (store, binding, journal, run_id, checkpoint, receipt, diagnostic), diagnostic)
 {
     if (!store || !binding || !receipt || !checkpoint)
         return dw_report(diagnostic, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -195,15 +197,15 @@ golem_status golem_runtime_link_run(golem_document_store *store, const golem_dig
     if (status == GOLEM_OK && !duplicate)
         status = golem_evidence_put(store->cas, journal, &stored, NULL);
     if (status == GOLEM_OK && !duplicate)
-        status = dw_put_json(store, event, &payload);
+        status = dw_record_prepare(store, event, GOLEM_DOCUMENT_MAX_JSON, &payload);
     /* Validate authority again after bounded replay/CAS work, before publication. */
-    if (status == GOLEM_OK) {
+    if (status == GOLEM_OK && duplicate) {
         status = as_clock_read(NULL, &now, &boot);
         if (status == GOLEM_OK && !as_live(&log, now, &boot))
             status = GOLEM_ERR_STALE_LEASE;
     }
     if (status == GOLEM_OK && !duplicate)
-        status = dw_event_write(store, &payload, &frame);
+        status = dw_event_write_guarded(store, &payload, &frame, as_publication_guard, &log);
     if (status == GOLEM_OK && !duplicate) {
         size_t index = store->runtime_link_count++;
         store->runtime_links[index] = json_object_get(event);

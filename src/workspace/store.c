@@ -19,14 +19,11 @@ golem_status ws_append(ws_context *ctx, struct json_object *data)
         return GOLEM_ERR_OUT_OF_MEMORY;
     }
     golem_digest digest;
-    golem_status st = dw_put_json(ctx->store, event, &digest);
-    char name[16], hex[65];
-    size_t size;
+    golem_status st = dw_record_prepare(ctx->store, event, GOLEM_DOCUMENT_MAX_JSON, &digest);
+    char name[16];
     (void)snprintf(name, sizeof(name), "%04u", ctx->sequence + 1);
     if (st == GOLEM_OK)
-        st = golem_digest_format(&digest, hex, sizeof(hex), &size);
-    if (st == GOLEM_OK)
-        st = dw_publish(ctx->records, name, (golem_bytes){(uint8_t *)hex, 64});
+        st = dw_record_reference(ctx->store, ctx->records, name, &digest, true);
     if (st == GOLEM_OK) {
         ctx->last = digest;
         ++ctx->sequence;

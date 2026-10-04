@@ -24,6 +24,7 @@ static int observability(int argc, char **argv)
     if (st == GOLEM_OK && (fwrite(reply.data, 1, reply.size, stdout) != reply.size ||
         fputc('\n', stdout) == EOF || fflush(stdout) == EOF)) st = GOLEM_ERR_IO;
     free(policy.data); golem_execution_reply_free(&reply);
+    cli_error_note(st, "research_observability", NULL);
     if (st != GOLEM_OK) fprintf(stderr, "research observability: %s\n", golem_status_string(st));
     return st == GOLEM_OK ? 0 : 1;
 }
@@ -118,6 +119,7 @@ int golem_cli_research(int argc, char **argv)
     free(input.data); json_object_put(body); json_object_put(request); golem_execution_reply_free(&reply);
     golem_status closed = golem_document_store_close(store);
     if (st == GOLEM_OK) st = closed;
+    cli_error_note(st, "research", NULL);
     if (st != GOLEM_OK) fprintf(stderr, "research: %s\n", golem_status_string(st));
     return st == GOLEM_OK ? 0 : 1;
 }

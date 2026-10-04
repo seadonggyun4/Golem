@@ -14,10 +14,12 @@ golem reentry report "$WORK" 1
 golem workflow next "$WORK" selection
 ```
 
-`report` prints and projects the exact recorded Markdown to
-`WORK/failures/r0001.md`. The report's authoritative bytes are already in CAS
-when `call` commits. Projection can be repeated after interruption; conflicting
-bytes are never overwritten. The chosen Work directory controls the path.
+`report` prints and projects Markdown to `WORK/failures/r0001.md` only when
+explicitly requested. New event v2 records commit the complete structured decision
+and `renderer_version: 1`, without rendering or storing Markdown. Report failure
+does not undo the decision. Historical event v1 records retain their original
+CAS Markdown and digest verification. Projection can be repeated after interruption;
+conflicting bytes are never overwritten. The chosen Work directory controls the path.
 Do not commit runtime data. See [the request template](../samples/reentry/decision.json).
 Its all-`a` digest is deliberately a placeholder, not usable evidence.
 
@@ -83,11 +85,14 @@ budget and clock holds cannot be cleared this way.
    [completion contract](completion.md) to finalize and materialize the report.
    Its guarantee is declared-gate acceptance, not proof of semantic completeness.
 
-Input manifest v2 adds `reentry` with `decision_digest`, `report_digest` and
-`failure_receipt`. Historical failure is evidence, not a dependency parent that
-would create a stale-reference cycle. The report bytes count toward the context
-budget. Session `context` returns them as `failure_markdown` alongside current
-input documents. All content remains reference data, never executable instructions.
+Input manifest v3 references new decisions using `decision_digest` and
+`failure_receipt`; the complete event's CAS byte length counts toward the context
+budget. Session `context` returns that structured event as `failure_record`, not
+`failure_markdown`. This preserves observations, hypotheses, policy and impact
+without repeatedly formatting prose. Historical manifest v2 still includes
+`report_digest` and exports the verified bytes as `failure_markdown`.
+Historical failure is evidence, not a dependency parent that would create a
+stale-reference cycle. All content remains reference data, never instructions.
 
 ## Bounds and persistence
 
@@ -114,9 +119,13 @@ The same deadline is checked before work and during supervised QA.
 Decisions use the existing hash-linked Work journal and CAS. Journal frame sequence
 now counts both document and reentry events; document generation remains a document
 counter for compatibility. Replay recomputes each decision against its historical
-document prefix and checks its Markdown digest, without consulting the live source
-or current clock. New reentry records require a Phase-26-capable reader. Old
-document-only journals retain their original encoding and behavior.
+document prefix without consulting the live source or current clock. For v1 it
+also checks the historical Markdown digest; v2 checks the pinned renderer version
+without invoking the renderer. Unknown versions fail closed. Mixed histories are
+supported, but readers predating event v2/manifest v3 cannot read newly written
+decisions. Upgrade readers together; no historical records are rewritten.
+Old document-only journals retain their original encoding and behavior.
+See [report timing](report-timing.md) for the boundary policy and research basis.
 
 ## Trust and limits
 

@@ -4,6 +4,8 @@
 #define _DEFAULT_SOURCE 1
 #endif
 #include "internal.h"
+#include "golem/system_error.h"
+#include "../common/record_internal.h"
 #include "../evidence/internal.h"
 #include <dirent.h>
 #include <errno.h>
@@ -37,8 +39,9 @@ static golem_status intent_list(const char *path, uint64_t *sequences, size_t *c
         return GOLEM_ERR_IO;
     DIR *dir = fdopendir(fd);
     if (dir == NULL) {
-        (void)close(fd);
-        return GOLEM_ERR_IO;
+        golem_status s = golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", "fdopendir", errno);
+        (void)gd_close(fd);
+        return s;
     }
     golem_status s = GOLEM_OK;
     size_t n = 0;
@@ -65,9 +68,11 @@ static golem_status intent_list(const char *path, uint64_t *sequences, size_t *c
         sequences[n++] = sequence;
     }
     if (errno != 0 && s == GOLEM_OK)
-        s = GOLEM_ERR_IO;
-    if (closedir(dir) < 0 && s == GOLEM_OK)
-        s = GOLEM_ERR_IO;
+        s = golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", "readdir", errno);
+    if (closedir(dir) < 0) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", "closedir", errno);
+        if (s == GOLEM_OK) s = GOLEM_ERR_IO;
+    }
     if (s == GOLEM_OK) {
         qsort(sequences, n, sizeof(*sequences), compare);
         for (size_t i = 0; i < n; ++i)
@@ -201,19 +206,26 @@ static golem_status repair(const char *path, bool *changed, bool *fatal)
     if (dir < 0)
         return GOLEM_ERR_IO;
     int fd = openat(dir, "journal.bin", O_RDWR | O_APPEND | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK);
-    (void)close(dir);
+    if (fd < 0) (void)golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", "open_journal", errno);
+    (void)gd_close(dir);
     if (fd < 0)
         return GOLEM_ERR_IO;
     golem_status s = GOLEM_OK;
     struct stat st;
     gd_blob expected = {0};
-    if (fstat(fd, &st) < 0 || !S_ISREG(st.st_mode) || st.st_size < 0 ||
+    if (fstat(fd, &st) < 0)
+        s = golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", "fstat", errno);
+    else if (!S_ISREG(st.st_mode) || st.st_size < 0 ||
         (uintmax_t)st.st_size > GD_LIMIT)
-        s = GOLEM_ERR_IO;
+        s = golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", "journal_shape", 0);
     if (s == GOLEM_OK && flock(fd, LOCK_EX | LOCK_NB) < 0)
-        s = GOLEM_ERR_JOURNAL_BUSY;
-    if (s == GOLEM_OK && (fstat(fd, &st) < 0 || st.st_size < 0 || (uintmax_t)st.st_size > GD_LIMIT))
-        s = GOLEM_ERR_IO;
+        s = golem_system_error_note(GOLEM_ERR_JOURNAL_BUSY, "daemon.recovery", "flock", errno);
+    if (s == GOLEM_OK) {
+        if (fstat(fd, &st) < 0)
+            s = golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", "fstat_locked", errno);
+        else if (st.st_size < 0 || (uintmax_t)st.st_size > GD_LIMIT)
+            s = golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", "journal_shape", 0);
+    }
     if (s == GOLEM_OK)
         s = transcript(path, &expected);
     size_t size = s == GOLEM_OK ? (size_t)st.st_size : 0;
@@ -227,7 +239,7 @@ static golem_status repair(const char *path, bool *changed, bool *fatal)
         if (got < 0 && errno == EINTR)
             continue;
         if (got <= 0) {
-            s = GOLEM_ERR_IO;
+            s = golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", got < 0 ? "pread" : "unexpected_eof", got < 0 ? errno : 0);
             break;
         }
         if (memcmp(bytes, expected.data + offset, (size_t)got) != 0) {
@@ -243,7 +255,7 @@ static golem_status repair(const char *path, bool *changed, bool *fatal)
         if (n < 0 && errno == EINTR)
             continue;
         if (n <= 0) {
-            s = GOLEM_ERR_IO;
+            s = golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", n < 0 ? "write" : "write_zero", n < 0 ? errno : 0);
             *fatal = true;
             break;
         }
@@ -251,10 +263,10 @@ static golem_status repair(const char *path, bool *changed, bool *fatal)
     }
     bool repaired = s == GOLEM_OK && size != expected.size;
     if (s == GOLEM_OK && fsync(fd) < 0) {
-        s = GOLEM_ERR_IO;
+        s = golem_system_error_note(GOLEM_ERR_IO, "daemon.recovery", "fsync", errno);
         *fatal = true;
     }
-    if (close(fd) < 0 && s == GOLEM_OK) {
+    if (gd_close(fd) < 0 && s == GOLEM_OK) {
         s = GOLEM_ERR_IO;
         *fatal = true;
     }
@@ -308,13 +320,14 @@ golem_status gd_recover_queue(const char *root, golem_daemon_recovery_report *ou
             ++report.attention;
     }
     if (lock >= 0)
-        (void)close(lock);
-    (void)close(fd);
+        (void)gd_close(lock);
+    (void)gd_close(fd);
     if (s == GOLEM_OK)
         *out = report;
     return s;
 }
-golem_status golem_daemon_recover(const char *root, golem_daemon_recovery_report *out)
+GOLEM_RECORDED_API(golem_daemon_recover,
+    (const char *root, golem_daemon_recovery_report *out), (root, out), NULL)
 {
     if (out == NULL)
         return GOLEM_ERR_INVALID_ARGUMENT;
@@ -322,12 +335,12 @@ golem_status golem_daemon_recover(const char *root, golem_daemon_recovery_report
     if (fd < 0)
         return GOLEM_ERR_IO;
     int owner = gd_lock(fd, ".daemon.lock", false, true);
-    (void)close(fd);
+    (void)gd_close(fd);
     if (owner < 0)
         return GOLEM_ERR_JOURNAL_BUSY;
     golem_daemon_recovery_report report;
     golem_status s = gd_recover_queue(root, &report);
-    if (close(owner) < 0 && s == GOLEM_OK)
+    if (gd_close(owner) < 0 && s == GOLEM_OK)
         s = GOLEM_ERR_IO;
     if (s == GOLEM_OK)
         *out = report;

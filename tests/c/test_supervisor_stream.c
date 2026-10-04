@@ -1,6 +1,8 @@
 #define _POSIX_C_SOURCE 200809L
 #include "golem/supervisor.h"
+#include "golem/system_error.h"
 #include "test.h"
+#include <errno.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -23,7 +25,7 @@ static golem_status cancel_after_reads(void *context)
 }
 int main(int argc, char **argv)
 {
-    if (argc > 1) {
+    if (argc > 1 && strcmp(argv[1], "--missing-spawn")) {
         if (!strcmp(argv[1], "bulk") || !strcmp(argv[1], "hot")) {
             unsigned char block[4096] = {0};
             for (unsigned i = 0; i < 128 || !strcmp(argv[1], "hot"); ++i)
@@ -41,6 +43,19 @@ int main(int argc, char **argv)
     golem_supervisor_stream options = {sizeof(options), 1, receive, &collected};
     golem_supervisor_capture captured;
     golem_supervisor_result result = {.exit_code = 42};
+    if (argc > 1) {
+        golem_system_error_scope errors;
+        CHECK(golem_system_error_begin(&errors) == GOLEM_OK);
+        errno = EBUSY;
+        CHECK(golem_supervisor_run_streamed("/dev/null/golem-not-executable", args, "/", env,
+            (golem_bytes){NULL, 0}, UINT64_C(3000000000), NULL, NULL, &result, &options,
+            &captured) == GOLEM_ERR_IO);
+        CHECK(golem_system_error_end(&errors) == GOLEM_OK);
+        CHECK(!captured.spawned && result.exit_code == 42 && errors.count > 0);
+        CHECK(!strcmp(errors.entries[0].operation, "posix_spawn"));
+        CHECK(errors.entries[0].error_number == ENOTDIR || errors.entries[0].error_number == ENOENT);
+        return 0;
+    }
     CHECK(golem_supervisor_run_streamed(argv[0], args, "/", env, (golem_bytes){NULL, 0},
                                         UINT64_C(3000000000), NULL, NULL, &result, &options,
                                         &captured) == GOLEM_OK);

@@ -2,9 +2,11 @@
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import signal
 import stat
@@ -135,16 +137,39 @@ def _private_existing(path):
         raise ValueError("output directory must be private and owned by this user")
 
 
-def capture(argv, destination, timeout, cwd=None, *, source=None, env=None, limit=LIMIT):
+def _extra_logs(names):
+    if not isinstance(names, (tuple, list)):
+        raise ValueError("additional logs must be a list")
+    names = tuple(names)
+    if (any(not isinstance(n, str) or
+            not re.fullmatch(r"[a-z][a-z0-9_-]{0,63}\.log", n) or
+            n in ("stdout.log", "stderr.log") for n in names) or len(set(names)) != len(names)):
+        raise ValueError("invalid additional log names")
+    return names
+
+
+def _over_limit(paths, limit):
+    for path in paths:
+        info = path.lstat()
+        if not stat.S_ISREG(info.st_mode):
+            raise ValueError("capture log is not a regular file")
+        if info.st_size > limit:
+            return True
+    return False
+
+
+def capture(argv, destination, timeout, cwd=None, *, source=None, env=None, limit=LIMIT,
+            extra_logs=()):
     """Record once before launch and once after reaping; never retry effects."""
     command = list(map(str, argv))
-    if not command or any("\0" in s for s in command) or timeout <= 0 or limit < 1:
+    if not command or any("\0" in s for s in command) or not math.isfinite(timeout) or timeout <= 0 or limit < 1:
         raise ValueError("invalid capture parameters")
     cwd = Path(cwd or Path.cwd()).resolve()
     destination = Path(destination).absolute()
     _private_existing(destination)
+    extra_logs = _extra_logs(extra_logs)
     if any((destination / name).exists() or (destination / name).is_symlink()
-           for name in ("stdout.log", "stderr.log")):
+           for name in ("stdout.log", "stderr.log", *extra_logs)):
         raise FileExistsError("capture logs already exist")
     record_dir = private_directory(destination / "execution")
     environment = dict(env) if env is not None else {
@@ -157,16 +182,22 @@ def capture(argv, destination, timeout, cwd=None, *, source=None, env=None, limi
     start = {"schema": SCHEMA, "invocation_id": uuid.uuid4().hex,
              "started_at": datetime.now(timezone.utc).isoformat(), "argv": command,
              "cwd": str(cwd), "timeout_seconds": timeout, "output_limit_bytes": limit,
+             "extra_logs": list(extra_logs),
              "executable": binary, "source_status": before["status"],
              "producer_sha256": digest(Path(__file__)),
              "python": platform.python_version(), "system": platform.system(),
              "environment_recorded": False, "state": "STARTED", "product_acceptance": False}
     save(record_dir / "started.json", encoded(start))
-    paths = [destination / "stdout.log", destination / "stderr.log"]
+    native = private_directory(destination / "native")
+    environment["GOLEM_RECORD_ROOT"] = str(native)
+    environment["GOLEM_RECORD_SOURCE_MANIFEST"] = str(record_dir / "source-before.json")
+    paths = [destination / name for name in ("stdout.log", "stderr.log", *extra_logs)]
     process, error, returncode = None, None, None
     reason = "EXIT"
     started = time.monotonic()
     try:
+        for path in paths[2:]:
+            save(path, b"")
         with paths[0].open("xb") as out, paths[1].open("xb") as err:
             os.chmod(paths[0], 0o600)
             os.chmod(paths[1], 0o600)
@@ -178,7 +209,7 @@ def capture(argv, destination, timeout, cwd=None, *, source=None, env=None, limi
                     if time.monotonic() - started > timeout:
                         reason = "TIMEOUT"
                         break
-                    if any(p.stat().st_size > limit for p in paths):
+                    if _over_limit(paths, limit):
                         reason = "OUTPUT_LIMIT"
                         break
                     time.sleep(0.01)
@@ -194,7 +225,15 @@ def capture(argv, destination, timeout, cwd=None, *, source=None, env=None, limi
                 returncode = process.wait(timeout=5)
             out.flush(); err.flush()
             os.fsync(out.fileno()); os.fsync(err.fileno())
-        if reason != "CLEANUP_DENIED" and any(p.stat().st_size > limit for p in paths):
+        for path in paths[2:]:
+            fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            try:
+                if not stat.S_ISREG(os.fstat(fd).st_mode):
+                    raise ValueError("capture log is not a regular file")
+                os.fsync(fd)
+            finally:
+                os.close(fd)
+        if reason != "CLEANUP_DENIED" and _over_limit(paths, limit):
             reason = "OUTPUT_LIMIT"
     except BaseException as exc:
         error = exc
@@ -207,6 +246,9 @@ def capture(argv, destination, timeout, cwd=None, *, source=None, env=None, limi
         after = source_observation(source, destination)
         save(record_dir / "source-after.json", encoded(after))
         binary_after = executable_identity(command, cwd, environment)
+        native_files, native_complete = native_inventory(native)
+        result["native_recording"] = ("NOT_OBSERVED" if not native_files else
+                                      "RECORDED" if native_complete else "INCOMPLETE")
         result["recording"] = "RECORDED"
         finish = {"schema": SCHEMA, "invocation_id": start["invocation_id"],
                   "finished_at": datetime.now(timezone.utc).isoformat(), "state": "FINISHED",
@@ -220,13 +262,42 @@ def capture(argv, destination, timeout, cwd=None, *, source=None, env=None, limi
         files = {p.name: metadata(p) for p in record_dir.iterdir() if p.is_file()}
         logs = {p.name: metadata(p) for p in paths if p.is_file()}
         save(record_dir / "manifest.json", encoded({"schema": "golem.execution-manifest.v1",
-             "files": files, "logs": logs}))
+             "files": files, "logs": logs, "native_files": native_files}))
     except (OSError, ValueError) as exc:
         result.update(recording="INCOMPLETE", reason="RECORDING_ERROR", process_reason=reason,
                       recording_error=type(exc).__name__)
     if error is not None:
         raise error
     return result
+
+
+def native_inventory(root):
+    """Bind observed native files, including incomplete scopes, without claiming coverage."""
+    _private_existing(root)
+    inventory, complete = {}, True
+    for scope in root.iterdir():
+        if len(scope.name) != 32 or any(c not in "0123456789abcdef" for c in scope.name):
+            raise ValueError("invalid native record id")
+        _private_existing(scope)
+        inventory[scope.name + "/"] = {"kind": "directory"}
+        names = {p.name for p in scope.iterdir()}
+        complete = complete and {"started.json", "result.json", "manifest.json"} <= names
+        for p in scope.iterdir():
+            if p.name not in {"started.json", "result.json", "manifest.json", ".pending", "stdout.log", "stderr.log"}:
+                raise ValueError("unexpected native artifact")
+            inventory[p.relative_to(root).as_posix()] = metadata(p)
+        if {"started.json", "result.json", "manifest.json"} <= names:
+            try:
+                manifest = json.loads((scope / "manifest.json").read_bytes())
+                result = json.loads((scope / "result.json").read_bytes())
+                valid = (isinstance(manifest, dict) and set(manifest) == names - {"manifest.json"}
+                         and result.get("state") == "FINISHED" and result.get("recording_status") == 0
+                         and all(inventory[scope.name + "/" + name]["sha256"] == value
+                                 for name, value in manifest.items()))
+                complete = complete and valid
+            except (ValueError, KeyError, TypeError, AttributeError):
+                complete = False
+    return inventory, complete
 
 
 def check(destination):
@@ -243,9 +314,12 @@ def check(destination):
             raise ValueError("record too large")
         return json.loads(path.read_bytes())
     manifest = load("manifest.json")
+    start = load("started.json")
+    extra_logs = _extra_logs(start.get("extra_logs", []))
     if (manifest.get("schema") != "golem.execution-manifest.v1" or
             set(manifest.get("files", {})) != expected or
-            set(manifest.get("logs", {})) - {"stdout.log", "stderr.log"} or
+            set(manifest.get("logs", {})) - {"stdout.log", "stderr.log", *extra_logs} or
+            set(extra_logs) - manifest.get("logs", {}).keys() or
             {p.name for p in record.iterdir()} != expected | {"manifest.json"}):
         raise ValueError("invalid record inventory")
     for name, meta in manifest["files"].items():
@@ -254,6 +328,12 @@ def check(destination):
     for name, meta in manifest["logs"].items():
         if metadata(destination / name) != meta:
             raise ValueError("log digest mismatch")
+    if "native_files" in manifest:
+        native_files, _ = native_inventory(destination / "native")
+        if native_files != manifest["native_files"]:
+            raise ValueError("native record digest mismatch")
+    elif (destination / "native").exists():
+        raise ValueError("unbound native records")
     start, finish = load("started.json"), load("result.json")
     if (start.get("schema") != SCHEMA or finish.get("schema") != SCHEMA or
             start.get("state") != "STARTED" or finish.get("state") != "FINISHED" or

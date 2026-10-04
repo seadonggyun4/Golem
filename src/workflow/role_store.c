@@ -1,4 +1,5 @@
 #include "role_internal.h"
+#include "../common/record_internal.h"
 #include "template_internal.h"
 #include "../reentry/internal.h"
 #include <string.h>
@@ -121,9 +122,10 @@ static golem_status reply(struct json_object *event, const golem_digest *digest,
     json_object_put(v);
     return st;
 }
-golem_status golem_role_call(golem_document_store *s, golem_bytes bytes,
-                             const golem_digest *approval, golem_execution_reply *out,
-                             golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_role_call,
+    (golem_document_store *s, golem_bytes bytes, const golem_digest *approval,
+     golem_execution_reply *out, golem_diagnostic *d),
+    (s, bytes, approval, out, d), d)
 {
     if (!s || !out || s->poisoned)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -185,7 +187,7 @@ golem_status golem_role_call(golem_document_store *s, golem_bytes bytes,
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
     if (st == GOLEM_OK)
-        st = dw_put_json(s, event, &payload);
+        st = dw_record_prepare(s, event, GOLEM_DOCUMENT_MAX_JSON, &payload);
     if (st == GOLEM_OK)
         st = reply(event, &payload, &response);
     if (st == GOLEM_OK)

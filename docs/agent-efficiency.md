@@ -1,5 +1,8 @@
 # Evidence-preserving agent I/O
 
+Native command failures now share an additive [CLI diagnostic envelope](cli-errors.md)
+while preserving original stderr, stdout protocols, and recovery authority.
+
 This is an opt-in Python tooling layer, not a new Work protocol. The native CLI now
 has a [compact default presentation](cli-output.md); this observer explicitly asks
 for full protocol JSON. QA, permissions, leases and completion gates remain unchanged. No provider is
@@ -81,6 +84,10 @@ of record.json, not a Golem completion receipt.
 
 ## Views, differences and reports
 
+The [report timing policy](report-timing.md) also covers native reentry and the
+older conformance tool. Gate evidence is always retained; optional prose is
+generated at an explicit request, handoff, or completion boundary.
+
 ```sh
 python3 tools/agent_io.py view /private/tmp/observation-002
 python3 tools/agent_io.py view /private/tmp/observation-002 \
@@ -124,12 +131,12 @@ required native completion document/report.
 | --- | --- | --- |
 | Lightweight entry | Minimal bilingual templates, on-demand contracts | Mandatory safety/completion retained |
 | Concise output | Native compact default plus opt-in observation views | Native protocol consumers explicitly select full output; see cli-output.md |
-| Mechanical capture | Shared recorder automatically covers owned Python launch boundaries; see [coverage matrix](execution-recording.md) | No arbitrary shell/C API/descendant trace; observations, not semantic judgment |
-| Deduplicate records | Native assessment/status/journal capture; section views and reports use the same recorded bytes | Original authority and storage remain; no physical legacy compaction or automatic judgment |
+| Mechanical capture | Shared Python recorder, 68 reviewed native API boundaries including runtime/journal/document-store lifecycle, CLI/supervisor and worker handoff; explicit Linux syscall runner | Other model/cache/projection boundaries remain; pure/recorder primitives deliberately excluded; descendant tracing is opt-in and platform dependent |
+| Deduplicate records | Native assessment/status/journal capture; shared preparation/publication and replay/projection validation; section views and reports use the same captured bytes | Original authority and storage remain; see [common protocol](work-record-writing.md); no physical legacy compaction or automatic judgment |
 | Changed-state reads | Hash-pinned baseline and conservative full fallback | No live-state cache or skipped engine checks |
 | Task routing | Reading guides plus captured docs/code/deploy procedure proposals | No reduced QA, effect dispatch or permission grants |
 | Fewer round trips | Built-in three-query observation, explicit sequential plan | Underlying process count is not reduced |
-| Failure diagnosis | Exit/reason, bounded stderr, raw IDs, fail-stop | No inferred root cause or automatic recovery |
+| Failure diagnosis | Common CLI envelope and scoped native observations; runtime clock, document cleanup, cgroup child diagnostics and explicit Linux syscall evidence; see [coverage](system-errors.md) | No inferred root cause or automatic recovery; no universal platform coverage or implicit tracing |
 | Deferred narrative | Explicit report command | Raw evidence always captured |
 
 ## Evaluation and limits

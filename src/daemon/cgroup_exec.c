@@ -4,21 +4,20 @@
 #include <unistd.h>
 #include <sys/vfs.h>
 #include <linux/magic.h>
+#include <stdbool.h>
+#include "cgroup_exec_internal.h"
 extern char **environ;
+
+static int verify_cgroup(int fd)
+{
+    struct statfs fs;
+    if (fstatfs(fd, &fs) != 0) { gc_exec_error("fstatfs", errno); return -1; }
+    if (fs.f_type != CGROUP2_SUPER_MAGIC) { gc_exec_error("filesystem_type", 0); return -1; }
+    return 0;
+}
 
 /* Trusted trampoline: no user executable runs before kernel membership. */
 int main(int argc, char **argv)
 {
-    struct statfs fs;
-    if (argc < 3 || argv[1][0] != '/' || fstatfs(3, &fs) || fs.f_type != CGROUP2_SUPER_MAGIC)
-        return 126;
-    int fd = openat(3, "cgroup.procs", O_WRONLY | O_CLOEXEC | O_NOFOLLOW);
-    if (fd < 0)
-        return 126;
-    ssize_t n = write(fd, "0", 1);
-    int closed = close(fd);
-    if (n != 1 || closed || close(3))
-        return 126;
-    execve(argv[1], argv + 2, environ);
-    return 127;
+    return gc_exec_run(argc, argv, environ, verify_cgroup);
 }

@@ -40,6 +40,7 @@ int golem_cli_approval(int argc, char **argv)
     golem_execution_reply_free(&out);
     json_object_put(r);
     free(input.data);
+    cli_error_note(st, "approval", NULL);
     if (st != GOLEM_OK)
         fprintf(stderr, "approval: %s\n", golem_status_string(st));
     return st == GOLEM_OK ? 0 : 1;

@@ -3,6 +3,7 @@
 #define _DEFAULT_SOURCE
 #define _FILE_OFFSET_BITS 64
 #include "internal.h"
+#include "golem/system_error.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <openssl/rand.h>
@@ -14,14 +15,16 @@ static golem_status sync_fd(int fd)
 {
     int result;
     do { result = fsync(fd); } while (result < 0 && errno == EINTR);
-    return result == 0 ? GOLEM_OK : GOLEM_ERR_IO;
+    return result == 0 ? GOLEM_OK : golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "fsync", errno);
 }
 
 static golem_status directory_open(int parent, const char *name, bool create, int *out)
 {
-    if (create && mkdirat(parent, name, 0700) < 0 && errno != EEXIST) return GOLEM_ERR_IO;
+    if (create && mkdirat(parent, name, 0700) < 0 && errno != EEXIST)
+        return golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "mkdirat", errno);
     int fd = openat(parent, name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK);
-    if (fd < 0) return errno == ENOENT ? GOLEM_ERR_NOT_FOUND : GOLEM_ERR_IO;
+    if (fd < 0) return golem_system_error_note(errno == ENOENT ? GOLEM_ERR_NOT_FOUND : GOLEM_ERR_IO,
+                                              "evidence.cas", "openat_directory", errno);
     /* Sync even existing directories: another concurrent writer may have created them. */
     if (create && (sync_fd(fd) != GOLEM_OK || sync_fd(parent) != GOLEM_OK)) {
         (void)close(fd); return GOLEM_ERR_IO;
@@ -42,8 +45,10 @@ golem_status golem_evidence_open(const char *root, bool create, const golem_allo
     if (root_fd < 0) status = errno == ENOENT ? GOLEM_ERR_NOT_FOUND : GOLEM_ERR_IO;
     if (status == GOLEM_OK) status = directory_open(root_fd, "objects", create, &objects);
     if (status == GOLEM_OK) status = directory_open(objects, "sha256", create, &sha256);
-    if (objects >= 0 && close(objects) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
-    if (root_fd >= 0 && close(root_fd) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
+    if (objects >= 0 && close(objects) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "close_objects", errno);
+    if (root_fd >= 0 && close(root_fd) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "close_root", errno);
     if (status != GOLEM_OK) {
         if (sha256 >= 0) (void)close(sha256);
         (void)golem_allocator_free(allocator, memory);
@@ -58,7 +63,8 @@ golem_status golem_evidence_open(const char *root, bool create, const golem_allo
 golem_status golem_evidence_close(golem_evidence_store *store)
 {
     if (store == NULL) return GOLEM_OK;
-    golem_status status = close(store->fd) == 0 ? GOLEM_OK : GOLEM_ERR_IO;
+    golem_status status = close(store->fd) == 0 ? GOLEM_OK :
+        golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "close", errno);
     (void)golem_allocator_free(&store->allocator, store);
     return status;
 }
@@ -78,10 +84,15 @@ golem_status golem_evidence_object_open(golem_evidence_store *store, const golem
     golem_status status = directory_open(store->fd, shard, false, &directory);
     if (status != GOLEM_OK) return status;
     int fd = openat(directory, hex + 2, O_RDONLY | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK);
-    if (fd < 0) status = errno == ENOENT ? GOLEM_ERR_NOT_FOUND : GOLEM_ERR_IO;
-    if (close(directory) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
+    if (fd < 0) status = golem_system_error_note(errno == ENOENT ? GOLEM_ERR_NOT_FOUND : GOLEM_ERR_IO,
+                                               "evidence.cas", "openat_object", errno);
+    if (close(directory) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "close_directory", errno);
     struct stat info;
-    if (status == GOLEM_OK && (fstat(fd, &info) < 0 || !S_ISREG(info.st_mode))) status = GOLEM_ERR_IO;
+    if (status == GOLEM_OK && fstat(fd, &info) < 0)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "fstat", errno);
+    if (status == GOLEM_OK && !S_ISREG(info.st_mode))
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "file_shape", 0);
     if (status != GOLEM_OK) { if (fd >= 0) (void)close(fd); }
     else *out = fd;
     return status;
@@ -96,7 +107,8 @@ golem_status golem_evidence_verify(golem_evidence_store *store, const golem_dige
     golem_status status = golem_evidence_object_open(store, digest, &fd);
     golem_receipt actual;
     if (status == GOLEM_OK) status = golem_evidence_scan_fd(fd, -1, &actual);
-    if (fd >= 0 && close(fd) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
+    if (fd >= 0 && close(fd) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.verify", "close", errno);
     if (status == GOLEM_OK && memcmp(actual.digest.bytes, digest->bytes, GOLEM_DIGEST_SIZE) != 0)
         status = GOLEM_ERR_DIGEST_MISMATCH;
     if (status == GOLEM_OK) *size = actual.size;
@@ -117,9 +129,9 @@ static golem_status temporary_open(int directory, char name[38], int *out)
         name[37] = '\0';
         int fd = openat(directory, name, O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0600);
         if (fd >= 0) { *out = fd; return GOLEM_OK; }
-        if (errno != EEXIST) return GOLEM_ERR_IO;
+        if (errno != EEXIST) return golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "openat_temporary", errno);
     }
-    return GOLEM_ERR_IO;
+    return golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "temporary_collision_limit", 0);
 }
 
 static golem_status copy_bytes(int fd, golem_bytes bytes, golem_receipt *out)
@@ -132,7 +144,11 @@ static golem_status copy_bytes(int fd, golem_bytes bytes, golem_receipt *out)
         if (amount > GOLEM_EVIDENCE_CHUNK) amount = GOLEM_EVIDENCE_CHUNK;
         ssize_t written = write(fd, bytes.data + offset, amount);
         if (written < 0 && errno == EINTR) continue;
-        if (written <= 0) { status = GOLEM_ERR_IO; break; }
+        if (written <= 0) {
+            status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas",
+                written < 0 ? "write" : "write_no_progress", written < 0 ? errno : 0);
+            break;
+        }
         if (EVP_DigestUpdate(ctx, bytes.data + offset, (size_t)written) != 1) status = GOLEM_ERR_CRYPTO;
         offset += (size_t)written;
     }
@@ -152,16 +168,18 @@ static golem_status publish(golem_evidence_store *store, int source_fd, golem_by
     if (status != GOLEM_OK) return status;
     golem_receipt receipt;
     status = source_fd >= 0 ? golem_evidence_scan_fd(source_fd, fd, &receipt) : copy_bytes(fd, bytes, &receipt);
-    if (status == GOLEM_OK && fchmod(fd, 0400) < 0) status = GOLEM_ERR_IO;
+    if (status == GOLEM_OK && fchmod(fd, 0400) < 0)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "fchmod", errno);
     if (status == GOLEM_OK) status = sync_fd(fd);
-    if (close(fd) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
+    if (close(fd) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "close_temporary", errno);
     int shard_fd = -1;
     if (status == GOLEM_OK) {
         char hex[GOLEM_DIGEST_HEX_CAPACITY], shard[3];
         key_names(&receipt.digest, hex, shard);
         status = directory_open(store->fd, shard, true, &shard_fd);
         if (status == GOLEM_OK && linkat(store->fd, temporary, shard_fd, hex + 2, 0) < 0) {
-            if (errno != EEXIST) status = GOLEM_ERR_IO;
+            if (errno != EEXIST) status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "linkat", errno);
             else {
                 uint64_t size;
                 status = golem_evidence_verify(store, &receipt.digest, &size, NULL);
@@ -170,9 +188,11 @@ static golem_status publish(golem_evidence_store *store, int source_fd, golem_by
         }
         if (status == GOLEM_OK) status = sync_fd(shard_fd);
     }
-    if (shard_fd >= 0 && close(shard_fd) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
+    if (shard_fd >= 0 && close(shard_fd) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "close_shard", errno);
     /* Only our unpublished temporary name is removed; never delete a CAS key. */
-    if (unlinkat(store->fd, temporary, 0) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
+    if (unlinkat(store->fd, temporary, 0) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.cas", "unlinkat", errno);
     if (status == GOLEM_OK) status = sync_fd(store->fd);
     if (status == GOLEM_OK) *out = receipt;
     return status;
@@ -198,7 +218,8 @@ golem_status golem_evidence_import(golem_evidence_store *store, const char *path
     if (fd < 0) return golem_evidence_report(d, errno == ENOENT ? GOLEM_ERR_NOT_FOUND : GOLEM_ERR_IO, NULL);
     golem_receipt receipt;
     golem_status status = publish(store, fd, (golem_bytes){NULL, 0}, &receipt);
-    if (close(fd) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
+    if (close(fd) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.import", "close", errno);
     if (status == GOLEM_OK) *out = receipt;
     return golem_evidence_report(d, status, NULL);
 }
@@ -216,11 +237,12 @@ golem_status golem_evidence_receipt_verify(golem_evidence_store *store,
     while (status == GOLEM_OK && length < sizeof(bytes)) {
         ssize_t amount = read(fd, bytes + length, sizeof(bytes) - length);
         if (amount < 0 && errno == EINTR) continue;
-        if (amount < 0) { status = GOLEM_ERR_IO; break; }
+        if (amount < 0) { status = golem_system_error_note(GOLEM_ERR_IO, "evidence.receipt", "read", errno); break; }
         if (amount == 0) break;
         length += (size_t)amount;
     }
-    if (fd >= 0 && close(fd) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
+    if (fd >= 0 && close(fd) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.receipt", "close", errno);
     if (status == GOLEM_OK && length != GOLEM_RECEIPT_SIZE) status = GOLEM_ERR_PARSE;
     golem_digest actual;
     if (status == GOLEM_OK) status = golem_digest_bytes((golem_bytes){bytes, length}, &actual);

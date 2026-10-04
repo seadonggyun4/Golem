@@ -179,12 +179,13 @@ golem_status wf_metadata(struct json_object *m)
                           "template_version", "byte_budget",     "total_bytes",    "direct",
                           "documents",        "reentry"};
     golem_digest a, b;
-    bool reentry = dw_uint(p, "schema_version") == 2;
+    bool deferred = dw_uint(p, "schema_version") == 3;
+    bool reentry = dw_uint(p, "schema_version") == 2 || deferred;
     if (reentry) {
-        const char *rk[] = {"decision_digest", "report_digest", "failure_receipt"};
+        const char *rk[] = {"decision_digest", "failure_receipt", "report_digest"};
         struct json_object *r = dw_get(p, "reentry");
-        if (!dw_keys(r, rk, 3) || !dw_digest(r, "decision_digest", &a) ||
-            !dw_digest(r, "report_digest", &a) || !dw_digest(r, "failure_receipt", &a))
+        if (!dw_keys(r, rk, deferred ? 2 : 3) || !dw_digest(r, "decision_digest", &a) ||
+            (!deferred && !dw_digest(r, "report_digest", &a)) || !dw_digest(r, "failure_receipt", &a))
             return GOLEM_ERR_PARSE;
     }
     if (!dw_keys(p, keys, reentry ? 14 : 13) || (!reentry && dw_uint(p, "schema_version") != 1) ||

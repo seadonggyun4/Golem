@@ -67,16 +67,18 @@ int golem_cli_execution(int argc,char **argv)
             return 2;
     }
     cli_blob input={0}; golem_execution_reply reply={0}; golem_document_store *store=NULL;
+    golem_diagnostic diagnostic;
+    (void)golem_diagnostic_clear(&diagnostic);
     golem_status st=cli_read(argv[validate?3:4],GOLEM_DOCUMENT_MAX_JSON,&input);
     if(st==GOLEM_OK && validate) {
         golem_digest digest; char hex[65]; size_t n;
-        st=golem_execution_contract_validate((golem_bytes){input.data,input.size},&digest,NULL);
+        st=golem_execution_contract_validate((golem_bytes){input.data,input.size},&digest,&diagnostic);
         if(st==GOLEM_OK) st=golem_digest_format(&digest,hex,sizeof(hex),&n);
         if(st==GOLEM_OK && printf("%s\n",hex)<0) st=GOLEM_ERR_IO;
     } else if(st==GOLEM_OK) {
-        st=golem_document_store_open(argv[3],!render,NULL,&store,NULL);
-        if(st==GOLEM_OK) st=render?golem_execution_render(store,(golem_bytes){input.data,input.size},&reply,NULL):
-            golem_execution_call_authorized(store,(golem_bytes){input.data,input.size},&approved,&reply,NULL);
+        st=golem_document_store_open(argv[3],!render,NULL,&store,&diagnostic);
+        if(st==GOLEM_OK) st=render?golem_execution_render(store,(golem_bytes){input.data,input.size},&reply,&diagnostic):
+            golem_execution_call_authorized(store,(golem_bytes){input.data,input.size},&approved,&reply,&diagnostic);
         if (st == GOLEM_OK) {
             st = render ? (fwrite(reply.data, 1, reply.size, stdout) == reply.size ? GOLEM_OK : GOLEM_ERR_IO)
                         : cli_output_write((golem_bytes){reply.data, reply.size});
@@ -84,5 +86,6 @@ int golem_cli_execution(int argc,char **argv)
         }
     }
     golem_status closed=golem_document_store_close(store); if(st==GOLEM_OK) st=closed;
+    cli_error_note(st, "execution", &diagnostic);
     free(input.data); golem_execution_reply_free(&reply); return st==GOLEM_OK?0:cli_emit(st,NULL);
 }

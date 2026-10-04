@@ -4,6 +4,7 @@
 #define _DEFAULT_SOURCE 1
 #endif
 #include "internal.h"
+#include "golem/system_error.h"
 #include "../evidence/internal.h"
 #include <dirent.h>
 #include <errno.h>
@@ -30,20 +31,26 @@ int gd_lock(int dir, const char *name, bool create, bool exclusive)
 {
     int fd = openat(dir, name, O_RDWR | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK | (create ? O_CREAT : 0), 0600);
     struct stat st;
-    if (fd < 0) return -1;
+    if (fd < 0) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "daemon.lock", "openat", errno);
+        return -1;
+    }
     if (fstat(fd, &st) < 0) {
         int saved = errno;
+        (void)golem_system_error_note(GOLEM_ERR_IO, "daemon.lock", "fstat", saved);
         (void)close(fd);
         errno = saved;
         return -1;
     }
     if (!S_ISREG(st.st_mode)) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "daemon.lock", "file_shape", 0);
         (void)close(fd);
         errno = EINVAL;
         return -1;
     }
     if (flock(fd, (exclusive ? LOCK_EX : LOCK_SH) | LOCK_NB) < 0) {
         int saved = errno;
+        (void)golem_system_error_note(GOLEM_ERR_JOURNAL_BUSY, "daemon.lock", "flock", saved);
         (void)close(fd);
         errno = saved;
         return -1;
@@ -55,18 +62,21 @@ golem_status gd_read(const char *path, size_t limit, gd_blob *out)
     int fd = golem_evidence_path_open(path, false);
     if (fd < 0) return errno == ENOENT ? GOLEM_ERR_NOT_FOUND : GOLEM_ERR_IO;
     struct stat st; golem_status s = GOLEM_OK; gd_blob b = {0};
-    if (fstat(fd, &st) < 0 || !S_ISREG(st.st_mode) || st.st_size < 0 || (uintmax_t)st.st_size > limit) s = GOLEM_ERR_IO;
-    if (s == GOLEM_OK && flock(fd, LOCK_SH | LOCK_NB) < 0) s = GOLEM_ERR_JOURNAL_BUSY;
+    if (fstat(fd, &st) < 0) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.read", "fstat", errno);
+    if (s == GOLEM_OK && (!S_ISREG(st.st_mode) || st.st_size < 0 || (uintmax_t)st.st_size > limit))
+        s = golem_system_error_note(GOLEM_ERR_IO, "daemon.read", "file_shape", 0);
+    if (s == GOLEM_OK && flock(fd, LOCK_SH | LOCK_NB) < 0)
+        s = golem_system_error_note(GOLEM_ERR_JOURNAL_BUSY, "daemon.read", "flock", errno);
     if (s == GOLEM_OK) { b.data = malloc((size_t)st.st_size + 1); if (b.data == NULL) s = GOLEM_ERR_OUT_OF_MEMORY; }
     while (s == GOLEM_OK && b.size <= (size_t)st.st_size) {
         ssize_t n = read(fd, b.data + b.size, (size_t)st.st_size + 1 - b.size);
         if (n < 0 && errno == EINTR) continue;
-        if (n < 0) { s = GOLEM_ERR_IO; break; }
+        if (n < 0) { s = golem_system_error_note(GOLEM_ERR_IO, "daemon.read", "read", errno); break; }
         if (n == 0) break;
         b.size += (size_t)n;
     }
-    if (s == GOLEM_OK && b.size != (size_t)st.st_size) s = GOLEM_ERR_IO;
-    if (close(fd) < 0 && s == GOLEM_OK) s = GOLEM_ERR_IO;
+    if (s == GOLEM_OK && b.size != (size_t)st.st_size) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.read", "file_size_changed", 0);
+    if (close(fd) < 0 && s == GOLEM_OK) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.read", "close", errno);
     if (s == GOLEM_OK) { b.data[b.size] = 0; *out = b; } else free(b.data);
     return s;
 }
@@ -78,19 +88,22 @@ golem_status gd_write(int dir, const char *name, golem_bytes bytes)
     for (size_t i = 0; i < sizeof(random); ++i) (void)snprintf(nonce + 2 * i, 3, "%02x", random[i]);
     if (snprintf(temp, sizeof(temp), ".%s.pending-%s", name, nonce) >= (int)sizeof(temp)) return GOLEM_ERR_INVALID_ARGUMENT;
     int fd = openat(dir, temp, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
-    if (fd < 0) return GOLEM_ERR_IO;
+    if (fd < 0) return golem_system_error_note(GOLEM_ERR_IO, "daemon.publish", "openat", errno);
     size_t offset = 0; golem_status s = GOLEM_OK;
     while (offset < bytes.size) {
         ssize_t n = write(fd, bytes.data + offset, bytes.size - offset);
         if (n < 0 && errno == EINTR) continue;
-        if (n <= 0) { s = GOLEM_ERR_IO; break; }
+        if (n <= 0) {
+            s = golem_system_error_note(GOLEM_ERR_IO, "daemon.publish", n < 0 ? "write" : "write_no_progress", n < 0 ? errno : 0);
+            break;
+        }
         offset += (size_t)n;
     }
-    if (s == GOLEM_OK && fsync(fd) < 0) s = GOLEM_ERR_IO;
-    if (close(fd) < 0 && s == GOLEM_OK) s = GOLEM_ERR_IO;
-    if (s == GOLEM_OK && linkat(dir, temp, dir, name, 0) < 0) s = GOLEM_ERR_IO;
-    if (unlinkat(dir, temp, 0) < 0 && s == GOLEM_OK) s = GOLEM_ERR_IO;
-    if (s == GOLEM_OK && fsync(dir) < 0) s = GOLEM_ERR_IO;
+    if (s == GOLEM_OK && fsync(fd) < 0) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.publish", "fsync_file", errno);
+    if (close(fd) < 0 && s == GOLEM_OK) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.publish", "close", errno);
+    if (s == GOLEM_OK && linkat(dir, temp, dir, name, 0) < 0) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.publish", "linkat", errno);
+    if (unlinkat(dir, temp, 0) < 0 && s == GOLEM_OK) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.publish", "unlinkat", errno);
+    if (s == GOLEM_OK && fsync(dir) < 0) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.publish", "fsync_directory", errno);
     return s;
 }
 int gd_root(const char *root)
@@ -108,8 +121,12 @@ static int compare(const void *a, const void *b)
 golem_status gd_list(int root, uint64_t tickets[GOLEM_DAEMON_MAX_JOBS], size_t *count)
 {
     int fd = openat(root, "jobs", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
-    if (fd < 0) return GOLEM_ERR_IO;
-    DIR *dir = fdopendir(fd); if (dir == NULL) { (void)close(fd); return GOLEM_ERR_IO; }
+    if (fd < 0) return golem_system_error_note(GOLEM_ERR_IO, "daemon.list", "openat", errno);
+    DIR *dir = fdopendir(fd);
+    if (dir == NULL) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "daemon.list", "fdopendir", errno);
+        (void)close(fd); return GOLEM_ERR_IO;
+    }
     size_t n = 0; golem_status s = GOLEM_OK; struct dirent *entry; errno = 0;
     while ((entry = readdir(dir)) != NULL) {
         if (entry->d_name[0] == '.') continue;
@@ -123,8 +140,14 @@ golem_status gd_list(int root, uint64_t tickets[GOLEM_DAEMON_MAX_JOBS], size_t *
         if (s != GOLEM_OK || value == 0) { s = GOLEM_ERR_PARSE; break; }
         tickets[n++] = value; errno = 0;
     }
-    if (errno != 0 && s == GOLEM_OK) s = GOLEM_ERR_IO;
-    if (closedir(dir) < 0 && s == GOLEM_OK) s = GOLEM_ERR_IO;
+    if (errno != 0 && s == GOLEM_OK) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.list", "readdir", errno);
+    if (closedir(dir) < 0 && s == GOLEM_OK) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.list", "closedir", errno);
     if (s == GOLEM_OK) { qsort(tickets, n, sizeof(*tickets), compare); *count = n; }
     return s;
+}
+int gd_close(int fd)
+{
+    int rc = close(fd);
+    if (rc < 0) (void)golem_system_error_note(GOLEM_ERR_IO, "daemon.cleanup", "close", errno);
+    return rc;
 }

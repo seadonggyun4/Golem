@@ -12,15 +12,14 @@
 #include <string.h>
 #include <unistd.h>
 
-static void frame(uint8_t b[80], uint64_t seq, const golem_digest *prev,
-                  const golem_digest *payload)
+golem_status as_publication_guard(void *context)
 {
-    memcpy(b, "GWAGN001", 8);
-    for (unsigned i = 0; i < 8; ++i)
-        b[8 + i] = (uint8_t)(seq >> (8 * i));
-    memcpy(b + 16, prev->bytes, 32);
-    memcpy(b + 48, payload->bytes, 32);
+    uint64_t now;
+    golem_digest boot;
+    golem_status st = as_clock_read(NULL, &now, &boot);
+    return st == GOLEM_OK && !as_live(context, now, &boot) ? GOLEM_ERR_STALE_LEASE : st;
 }
+
 static golem_status validate(golem_document_store *s, as_log *l, struct json_object *e)
 {
     golem_digest boot;
@@ -58,7 +57,8 @@ static golem_status validate(golem_document_store *s, as_log *l, struct json_obj
             return GOLEM_ERR_IDENTITY_MISMATCH;
         golem_status st = dw_cas_json(s, &key, &m);
         if (st == GOLEM_OK &&
-            ((dw_uint(m, "schema_version") != 1 && dw_uint(m, "schema_version") != 2) ||
+            ((dw_uint(m, "schema_version") != 1 && dw_uint(m, "schema_version") != 2 &&
+              dw_uint(m, "schema_version") != 3) ||
              dw_uint(m, "generation") != dw_uint(d, "input_generation") ||
              strcmp(dw_text(m, "work_id"), dw_text(s->spec, "work_id")) != 0 ||
              strcmp(dw_text(m, "target_kind"), dw_text(d, "kind")) != 0 ||
@@ -120,68 +120,19 @@ golem_status as_load(golem_document_store *s, const char *key, const golem_diges
         return GOLEM_OK;
     if (st != GOLEM_OK)
         return st;
-    int scan = openat(l->directory, ".", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
-    if (scan < 0)
-        return GOLEM_ERR_IO;
-    DIR *dir = fdopendir(scan);
-    if (!dir) {
-        close(scan);
-        return GOLEM_ERR_IO;
-    }
-    struct dirent *v;
-    unsigned max = 0, count = 0;
-    errno = 0;
-    while ((v = readdir(dir)) != NULL) {
-        if (strcmp(v->d_name, ".") == 0 || strcmp(v->d_name, "..") == 0 ||
-            strncmp(v->d_name, ".pending-", 9) == 0)
-            continue;
-        unsigned n = 0;
-        char tail, name[32];
-        if (sscanf(v->d_name, "%8u.evt%c", &n, &tail) != 1 || n < 1 || n > GOLEM_AGENT_MAX_EVENTS) {
-            st = GOLEM_ERR_CORRUPT_JOURNAL;
-            break;
-        }
-        (void)snprintf(name, sizeof(name), "%08u.evt", n);
-        if (strcmp(name, v->d_name) != 0) {
-            st = GOLEM_ERR_CORRUPT_JOURNAL;
-            break;
-        }
-        ++count;
-        if (n > max)
-            max = n;
-    }
-    if (errno && st == GOLEM_OK)
-        st = GOLEM_ERR_IO;
-    closedir(dir);
-    if (st == GOLEM_OK && count != max)
-        st = GOLEM_ERR_MISSING_RECORD;
+    unsigned max = 0;
+    st = dw_record_scan(l->directory, GOLEM_AGENT_MAX_EVENTS, false, &max);
     if (st != GOLEM_OK)
         return st;
     uint8_t *memory = NULL;
-    st = dw_scratch(s, (count ? count : 1) * GOLEM_DOCUMENT_ID_CAPACITY, &memory);
+    st = dw_scratch(s, (max ? max : 1) * GOLEM_DOCUMENT_ID_CAPACITY, &memory);
     if (st != GOLEM_OK)
         return st;
     char (*keys)[GOLEM_DOCUMENT_ID_CAPACITY] = (void *)memory;
     for (unsigned n = 1; st == GOLEM_OK && n <= max; ++n) {
-        char name[32];
-        (void)snprintf(name, sizeof(name), "%08u.evt", n);
-        uint8_t *bytes = NULL, expected[80];
-        size_t size = 0;
         golem_digest payload, digest, req;
-        st = dw_read_at(l->directory, name, 80, &bytes, &size);
-        if (st == GOLEM_OK && size != 80)
-            st = GOLEM_ERR_CORRUPT_JOURNAL;
-        if (st == GOLEM_OK) {
-            memcpy(payload.bytes, bytes + 48, 32);
-            frame(expected, n, &l->last, &payload);
-            if (memcmp(bytes, expected, 80) != 0)
-                st = GOLEM_ERR_CORRUPT_JOURNAL;
-        }
-        if (st == GOLEM_OK)
-            st = golem_digest_bytes((golem_bytes){bytes, size}, &digest);
         struct json_object *e = NULL, *state = NULL;
-        if (st == GOLEM_OK)
-            st = dw_cas_json(s, &payload, &e);
+        st = dw_record_read(s, l->directory, true, n, &l->last, &payload, &digest, &e);
         if (st == GOLEM_OK)
             st = as_reduce(l->state, e, &state);
         if (st == GOLEM_OK)
@@ -214,7 +165,6 @@ golem_status as_load(golem_document_store *s, const char *key, const golem_diges
         }
         json_object_put(state);
         json_object_put(e);
-        free(bytes);
     }
     dw_scratch_free(s, keys);
     return st;
@@ -233,26 +183,13 @@ golem_status as_commit(golem_document_store *s, as_log *l, struct json_object *e
         if (!receipt)
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
-    const char *serialized =
-        st == GOLEM_OK ? json_object_to_json_string_ext(e, JSON_C_TO_STRING_PLAIN) : NULL;
-    if (st == GOLEM_OK && (!serialized || strlen(serialized) > AS_EVENT_MAX))
-        st = GOLEM_ERR_BUDGET_EXHAUSTED;
     golem_digest payload, digest;
-    uint8_t bytes[80];
-    char name[32];
     if (st == GOLEM_OK)
-        st = dw_put_json(s, e, &payload);
+        st = dw_record_prepare(s, e, AS_EVENT_MAX, &payload);
     if (st == GOLEM_OK && l->directory < 0)
         st = dw_dir(s->root, "agent-events", true, &l->directory);
-    if (st == GOLEM_OK) {
-        frame(bytes, l->sequence + 1, &l->last, &payload);
-        st = golem_digest_bytes((golem_bytes){bytes, 80}, &digest);
-        (void)snprintf(name, sizeof(name), "%08u.evt", (unsigned)l->sequence + 1);
-        if (st == GOLEM_OK)
-            st = dw_publish(l->directory, name, (golem_bytes){bytes, 80});
-        if (st != GOLEM_OK)
-            s->poisoned = true;
-    }
+    if (st == GOLEM_OK)
+        st = dw_record_event(s, l->directory, true, l->sequence + 1, &l->last, &payload, &digest);
     if (st == GOLEM_OK) {
         *out = receipt;
         receipt = NULL;

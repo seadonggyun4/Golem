@@ -68,6 +68,32 @@ golem_status dw_dir(int parent, const char *name, bool create, int *out);
 golem_status dw_publish(int dir, const char *name, golem_bytes bytes);
 golem_status dw_event_write(golem_document_store *s, const golem_digest *payload,
                             golem_digest *frame);
+/* Guard runs after CAS verification, immediately before publication. It must be
+ * read-only and cannot append another event. Failure publishes nothing. */
+golem_status dw_event_write_guarded(golem_document_store *s, const golem_digest *payload,
+                                   golem_digest *frame, golem_status (*guard)(void *), void *context);
+/* Shared Work-record writer. Preparation persists one exact JSON-C byte identity;
+ * callers finish validation/response allocation before publishing a reference.
+ * Domain validation, idempotency, ownership locks and allocation-free adoption
+ * remain with callers. Outputs change only on success. No external-effect retry,
+ * second status store, or legacy byte/schema rewrite. */
+golem_status dw_record_prepare(golem_document_store *s, struct json_object *event,
+                              size_t limit, golem_digest *payload);
+void dw_record_frame(uint8_t bytes[DW_FRAME], bool agent, uint64_t sequence,
+                     const golem_digest *previous, const golem_digest *payload);
+/* Read-only mechanism shared by replay and projections. Callers hold their
+ * store lock and retain domain validation. All outputs change only on success. */
+golem_status dw_record_scan(int directory, unsigned limit, bool require_nonempty,
+                            unsigned *count);
+golem_status dw_record_read(golem_document_store *s, int directory, bool agent,
+                            uint64_t sequence, const golem_digest *previous,
+                            golem_digest *payload, golem_digest *frame,
+                            struct json_object **event);
+golem_status dw_record_event(golem_document_store *s, int directory, bool agent,
+                            uint64_t sequence, const golem_digest *previous,
+                            const golem_digest *payload, golem_digest *frame);
+golem_status dw_record_reference(golem_document_store *s, int directory, const char *name,
+                                const golem_digest *payload, bool hexadecimal);
 golem_status dw_replay(golem_document_store *s);
 golem_status dw_apply(golem_document_store *s, struct json_object *event,
                       const golem_digest *payload, const golem_digest *frame);
@@ -77,6 +103,8 @@ golem_status dw_project(golem_document_store *s, dw_entry *entry, bool create);
 golem_status dw_cas_json(golem_document_store *s, const golem_digest *key,
                          struct json_object **out);
 golem_status dw_put_json(golem_document_store *s, struct json_object *o, golem_digest *out);
+golem_status dw_put_json_bounded(golem_document_store *s, struct json_object *o,
+                                size_t limit, golem_digest *out);
 bool dw_add(struct json_object *o, const char *key, struct json_object *value);
 bool dw_add_digest(struct json_object *o, const char *key, const golem_digest *digest);
 golem_status ga_work_apply(golem_document_store *store, struct json_object *event,

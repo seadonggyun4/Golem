@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "golem/resource.h"
+#include "golem/system_error.h"
 #include "test.h"
 #include <fcntl.h>
 #include <stdio.h>
@@ -49,9 +50,18 @@ int main(int argc, char **argv)
     int ordinary = open("/", O_RDONLY | O_DIRECTORY);
     CHECK(ordinary >= 0);
     char *probe_args[] = {"/must-not-execute", NULL}, *probe_env[] = {NULL};
+    golem_system_error_scope errors;
+    CHECK(golem_system_error_begin(&errors) == GOLEM_OK);
     CHECK(golem_resource_run(ordinary, &limits, "/must-not-execute", "/must-not-execute",
                              probe_args, "/", probe_env, (golem_bytes){NULL, 0}, 1, NULL, NULL,
                              &result, &empty) == GOLEM_ERR_REQUIREMENTS_UNMET);
+    CHECK(golem_system_error_end(&errors) == GOLEM_OK);
+    CHECK(errors.count == 1 && errors.entries[0].error_number == 0);
+#ifdef __linux__
+    CHECK(!strcmp(errors.entries[0].operation, "filesystem_type"));
+#else
+    CHECK(!strcmp(errors.entries[0].operation, "platform_unsupported"));
+#endif
     CHECK(close(ordinary) == 0 && !empty && result.exit_code == 42);
     if (argc == 1)
         return 0;

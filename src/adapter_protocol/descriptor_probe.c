@@ -1,5 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "descriptor_internal.h"
+#include "../common/record_internal.h"
+#include "golem/system_error.h"
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -7,14 +9,16 @@
 static golem_status now_ns(uint64_t *out)
 {
     struct timespec t;
-    if (clock_gettime(CLOCK_MONOTONIC, &t) || t.tv_sec < 0 ||
-        (uint64_t)t.tv_sec > UINT64_MAX / UINT64_C(1000000000))
-        return GOLEM_ERR_IO;
+    if (clock_gettime(CLOCK_MONOTONIC, &t))
+        return golem_system_error_note(GOLEM_ERR_IO, "harness.probe", "clock_gettime", errno);
+    if (t.tv_sec < 0 || t.tv_nsec < 0 || t.tv_nsec >= 1000000000 ||
+        (uint64_t)t.tv_sec > (UINT64_MAX - (uint64_t)t.tv_nsec) / UINT64_C(1000000000))
+        return golem_system_error_note(GOLEM_ERR_IO, "harness.probe", "clock_value", 0);
     *out = (uint64_t)t.tv_sec * UINT64_C(1000000000) + (uint64_t)t.tv_nsec;
     return GOLEM_OK;
 }
-golem_status golem_harness_probe(const golem_harness_probe_options *o,
-                                 golem_harness_probe_result *out)
+GOLEM_RECORDED_API(golem_harness_probe,
+    (const golem_harness_probe_options *o, golem_harness_probe_result *out), (o, out), NULL)
 {
     if (!o || !out || o->size != sizeof(*o) || o->version != 1 || !o->executable ||
         o->executable[0] != '/' || !o->cwd || o->cwd[0] != '/' || !o->timeout_ns ||

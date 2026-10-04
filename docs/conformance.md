@@ -37,8 +37,13 @@ python3 tools/verify_agent.py fixture \
 
 The output directory must not exist. Keep its parent private; the tool rejects
 symlink output paths, creates the directory with mode 0700 and files with 0600,
-and never overwrites a prior report. It writes `report.json`, `report.md`, and
-private stdout/stderr logs. Timeout defaults to 900 seconds (allowed range
+and never overwrites prior evidence. It always writes `report.json` (machine-readable
+gate evidence) and private stdout/stderr logs. Markdown is deferred by default.
+Use `--report-at requested|handoff|completion` to generate it once after capture,
+or `python3 tools/verify_agent.py report --output EXISTING_OBSERVATION` to print
+it later without rerunning any command or changing evidence. These boundary names
+are explicit presentation requests, not proof of completion or authorization.
+See [report timing](report-timing.md). Timeout defaults to 900 seconds (allowed range
 1..3600). Output monitoring stops oversized runs around a 32 MiB per-stream
 limit; polling can overshoot. The tool terminates its process group on timeout,
 failure during capture, or launcher exit. A child which deliberately escapes

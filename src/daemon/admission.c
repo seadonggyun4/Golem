@@ -4,6 +4,8 @@
 #define _DEFAULT_SOURCE 1
 #endif
 #include "admission_internal.h"
+#include "../common/record_internal.h"
+#include "golem/system_error.h"
 #include "internal.h"
 #include "../evidence/internal.h"
 #include "../agent_session/internal.h"
@@ -61,14 +63,16 @@ static ga_event limits_event(golem_admission_limits limits, ga_operation op)
     return e;
 }
 
-golem_status golem_admission_open(const char *root, const golem_admission_options *o,
-                                  golem_admission **out)
+GOLEM_RECORDED_API(golem_admission_open,
+    (const char *root, const golem_admission_options *o, golem_admission **out),
+    (root, o, out), NULL)
 {
     return golem_admission_open_diagnostic(root, o, out, NULL);
 }
 
-golem_status golem_admission_open_diagnostic(const char *root,
-    const golem_admission_options *o, golem_admission **out, golem_diagnostic *diagnostic)
+GOLEM_RECORDED_API(golem_admission_open_diagnostic, (const char *root,
+    const golem_admission_options *o, golem_admission **out, golem_diagnostic *diagnostic),
+    (root, o, out, diagnostic), diagnostic)
 {
     if (diagnostic)
         (void)golem_diagnostic_clear(diagnostic);
@@ -150,7 +154,7 @@ fail:
     return s;
 }
 
-golem_status golem_admission_close(golem_admission *a)
+GOLEM_RECORDED_REQUIRED_API(golem_admission_close, (golem_admission *a), (a))
 {
     if (!a)
         return GOLEM_OK;
@@ -158,16 +162,16 @@ golem_status golem_admission_close(golem_admission *a)
         return GOLEM_ERR_INVALID_STATE;
     golem_status s = GOLEM_OK;
     if (a->leader >= 0 && close(a->leader) != 0)
-        s = GOLEM_ERR_IO;
+        s = golem_system_error_note(GOLEM_ERR_IO, "admission", "close_leader", errno);
     if (a->directory >= 0 && close(a->directory) != 0)
-        s = GOLEM_ERR_IO;
+        s = golem_system_error_note(GOLEM_ERR_IO, "admission", "close_directory", errno);
     golem_allocator allocator = a->allocator;
     (void)golem_allocator_free(&allocator, a);
     return s;
 }
 
-golem_status golem_admission_identity(golem_admission *a, golem_digest *id,
-                                      golem_admission_checkpoint *checkpoint)
+GOLEM_RECORDED_REQUIRED_API(golem_admission_identity, (golem_admission *a, golem_digest *id,
+    golem_admission_checkpoint *checkpoint), (a, id, checkpoint))
 {
     golem_status s = ready(a);
     if (s != GOLEM_OK)
@@ -179,8 +183,8 @@ golem_status golem_admission_identity(golem_admission *a, golem_digest *id,
     return GOLEM_OK;
 }
 
-golem_status golem_admission_enqueue(golem_admission *a, const golem_admission_request *r,
-                                     uint64_t *out)
+GOLEM_RECORDED_API(golem_admission_enqueue, (golem_admission *a,
+    const golem_admission_request *r, uint64_t *out), (a, r, out), NULL)
 {
     golem_status s = ready(a);
     if (s != GOLEM_OK)
@@ -212,8 +216,8 @@ golem_status golem_admission_enqueue(golem_admission *a, const golem_admission_r
     return s;
 }
 
-golem_status golem_admission_lookup(golem_admission *a, const char *operation,
-                                    golem_admission_ticket *out)
+GOLEM_RECORDED_REQUIRED_API(golem_admission_lookup, (golem_admission *a, const char *operation,
+    golem_admission_ticket *out), (a, operation, out))
 {
     golem_status s = ready(a);
     if (s != GOLEM_OK)
@@ -228,7 +232,8 @@ golem_status golem_admission_lookup(golem_admission *a, const char *operation,
     return GOLEM_ERR_NOT_FOUND;
 }
 
-golem_status golem_admission_grant(golem_admission *a, golem_admission_ticket *out)
+GOLEM_RECORDED_API(golem_admission_grant, (golem_admission *a, golem_admission_ticket *out),
+    (a, out), NULL)
 {
     golem_status s = ready(a);
     if (s != GOLEM_OK)
@@ -245,7 +250,8 @@ golem_status golem_admission_grant(golem_admission *a, golem_admission_ticket *o
     return s;
 }
 
-golem_status golem_admission_resize(golem_admission *a, golem_admission_limits limits)
+GOLEM_RECORDED_API(golem_admission_resize, (golem_admission *a, golem_admission_limits limits),
+    (a, limits), NULL)
 {
     golem_status s = ready(a);
     if (s != GOLEM_OK)
@@ -278,22 +284,24 @@ static golem_status change(golem_admission *a, golem_admission_token token, ga_o
     return ga_commit(a, &e);
 }
 
-golem_status golem_admission_cancel(golem_admission *a, golem_admission_token t)
+GOLEM_RECORDED_REQUIRED_API(golem_admission_cancel, (golem_admission *a, golem_admission_token t), (a, t))
 {
     return change(a, t, GA_CANCEL, (golem_digest){0});
 }
-golem_status golem_admission_settle(golem_admission *a, golem_admission_token t, golem_digest proof)
+GOLEM_RECORDED_REQUIRED_API(golem_admission_settle,
+    (golem_admission *a, golem_admission_token t, golem_digest proof), (a, t, proof))
 {
     return change(a, t, GA_SETTLE, proof);
 }
-golem_status golem_admission_release(golem_admission *a, golem_admission_token t)
+GOLEM_RECORDED_REQUIRED_API(golem_admission_release, (golem_admission *a, golem_admission_token t), (a, t))
 {
     return change(a, t, GA_RELEASE, (golem_digest){0});
 }
 
-golem_status golem_admission_begin(golem_admission *a, golem_admission_token token,
+GOLEM_RECORDED_API(golem_admission_begin, (golem_admission *a, golem_admission_token token,
     golem_status (*publish)(void *, const golem_digest *, const golem_admission_ticket *,
-                           golem_digest *), void *context, golem_admission_ticket *out)
+                           golem_digest *), void *context, golem_admission_ticket *out),
+    (a, token, publish, context, out), NULL)
 {
     golem_status s = ready(a);
     if (s == GOLEM_OK)
@@ -322,8 +330,8 @@ golem_status golem_admission_begin(golem_admission *a, golem_admission_token tok
     return GOLEM_OK;
 }
 
-golem_status golem_admission_dispatch(golem_admission *a, golem_admission_token token,
-                                      const golem_admission_dispatch_ops *ops, void *context)
+GOLEM_RECORDED_API(golem_admission_dispatch, (golem_admission *a, golem_admission_token token,
+    const golem_admission_dispatch_ops *ops, void *context), (a, token, ops, context), NULL)
 {
     if (!ops || !ops->publish || !ops->execute)
         return GOLEM_ERR_INVALID_ARGUMENT;

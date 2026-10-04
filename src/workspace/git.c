@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _DARWIN_C_SOURCE
 #include "internal.h"
+#include "golem/system_error.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -17,11 +18,13 @@ static golem_status cleanup_scan(ws_context *ctx, int parent, unsigned depth, si
         return GOLEM_ERR_BUDGET_EXHAUSTED;
     int fd = openat(parent, ".", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     if (fd < 0)
-        return GOLEM_ERR_IO;
+        return golem_system_error_note(GOLEM_ERR_IO, "workspace.scan", "openat", errno);
     DIR *dir = fdopendir(fd);
     if (!dir) {
-        close(fd);
-        return GOLEM_ERR_IO;
+        golem_status st = golem_system_error_note(GOLEM_ERR_IO, "workspace.scan", "fdopendir", errno);
+        if (close(fd))
+            (void)golem_system_error_note(GOLEM_ERR_IO, "workspace.scan", "close", errno);
+        return st;
     }
     golem_status st = GOLEM_OK;
     bool populated = false;
@@ -30,7 +33,7 @@ static golem_status cleanup_scan(ws_context *ctx, int parent, unsigned depth, si
         struct dirent *entry = readdir(dir);
         if (!entry) {
             if (errno)
-                st = GOLEM_ERR_IO;
+                st = golem_system_error_note(GOLEM_ERR_IO, "workspace.scan", "readdir", errno);
             break;
         }
         const char *name = entry->d_name;
@@ -44,31 +47,40 @@ static golem_status cleanup_scan(ws_context *ctx, int parent, unsigned depth, si
         st = ctx->host->pulse(ctx->host->context);
         struct stat before, opened, after;
         if (st == GOLEM_OK && fstatat(fd, name, &before, AT_SYMLINK_NOFOLLOW))
-            st = GOLEM_ERR_STALE_RESULT;
+            st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "workspace.scan", "fstatat_before", errno);
         if (st != GOLEM_OK)
             break;
         if (S_ISDIR(before.st_mode)) {
             int child = openat(fd, name, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
             if (child < 0)
-                st = GOLEM_ERR_STALE_RESULT;
+                st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "workspace.scan", "open_child", errno);
             else {
-                if (fstat(child, &opened) || opened.st_dev != before.st_dev ||
+                if (fstat(child, &opened))
+                    st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "workspace.scan", "fstat", errno);
+                else if (opened.st_dev != before.st_dev ||
                     opened.st_ino != before.st_ino)
-                    st = GOLEM_ERR_STALE_RESULT;
+                    st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "workspace.scan", "identity_changed", 0);
                 else
                     st = cleanup_scan(ctx, child, depth + 1, visited);
-                if (close(child) && st == GOLEM_OK)
-                    st = GOLEM_ERR_IO;
+                if (close(child)) {
+                    (void)golem_system_error_note(GOLEM_ERR_IO, "workspace.scan", "close_child", errno);
+                    if (st == GOLEM_OK) st = GOLEM_ERR_IO;
+                }
             }
         } else if (!S_ISREG(before.st_mode) && !S_ISLNK(before.st_mode))
             st = GOLEM_ERR_REQUIREMENTS_UNMET;
-        if (st == GOLEM_OK && (fstatat(fd, name, &after, AT_SYMLINK_NOFOLLOW) ||
-            after.st_dev != before.st_dev || after.st_ino != before.st_ino ||
-            after.st_mode != before.st_mode))
-            st = GOLEM_ERR_STALE_RESULT;
+        if (st == GOLEM_OK) {
+            if (fstatat(fd, name, &after, AT_SYMLINK_NOFOLLOW))
+                st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "workspace.scan", "fstatat_after", errno);
+            else if (after.st_dev != before.st_dev || after.st_ino != before.st_ino ||
+                     after.st_mode != before.st_mode)
+                st = golem_system_error_note(GOLEM_ERR_STALE_RESULT, "workspace.scan", "identity_changed", 0);
+        }
     }
-    if (closedir(dir) && st == GOLEM_OK)
-        st = GOLEM_ERR_IO;
+    if (closedir(dir)) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "workspace.scan", "closedir", errno);
+        if (st == GOLEM_OK) st = GOLEM_ERR_IO;
+    }
     if (st == GOLEM_OK && depth && !populated)
         st = GOLEM_ERR_REQUIREMENTS_UNMET;
     return st;
@@ -81,8 +93,10 @@ golem_status ws_cleanup_inventory(ws_context *ctx)
     golem_status st = ws_directory(ctx->path, &fd);
     if (st == GOLEM_OK)
         st = cleanup_scan(ctx, fd, 0, &visited);
-    if (fd >= 0 && close(fd) && st == GOLEM_OK)
-        st = GOLEM_ERR_IO;
+    if (fd >= 0 && close(fd)) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "workspace.scan", "close_root", errno);
+        if (st == GOLEM_OK) st = GOLEM_ERR_IO;
+    }
     return st;
 }
 

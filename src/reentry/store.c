@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "internal.h"
+#include "../common/record_internal.h"
 #include "../agent_session/internal.h"
 #include <ctype.h>
 #include <stdio.h>
@@ -20,6 +21,7 @@ static void prose(FILE *f, const char *text)
         }
     }
 }
+/* Renderer v1 is frozen: historical event digests depend on these exact bytes. */
 golem_status re_markdown(struct json_object *d, golem_execution_reply *out)
 {
     char *data = NULL;
@@ -93,13 +95,17 @@ golem_status re_markdown(struct json_object *d, golem_execution_reply *out)
 golem_status re_apply(golem_document_store *s, struct json_object *event,
                       const golem_digest *payload, const golem_digest *frame)
 {
-    const char *keys[] = {"schema_version", "type", "request", "decision", "report_digest"};
-    if (!dw_keys(event, keys, 5) || dw_uint(event, "schema_version") != 1 ||
+    bool deferred = dw_uint(event, "schema_version") == 2;
+    const char *keys[] = {"schema_version", "type", "request", "decision",
+                          deferred ? "renderer_version" : "report_digest"};
+    if (!dw_keys(event, keys, 5) || (!deferred && dw_uint(event, "schema_version") != 1) ||
         strcmp(dw_text(event, "type"), "reentry") || s->reentry_count >= RE_MAX_EVENTS)
         return GOLEM_ERR_CORRUPT_JOURNAL;
+    if (deferred && dw_uint(event, "renderer_version") != 1)
+        return GOLEM_ERR_UNSUPPORTED_VERSION;
     struct json_object *d = dw_get(event, "decision"), *expected = NULL;
     golem_digest boot, report;
-    if (!dw_digest(d, "boot", &boot) || !dw_digest(event, "report_digest", &report))
+    if (!dw_digest(d, "boot", &boot) || (!deferred && !dw_digest(event, "report_digest", &report)))
         return GOLEM_ERR_PARSE;
     golem_status st =
         re_decide(s, dw_get(event, "request"), dw_uint(d, "observed_ms"), &boot, &expected);
@@ -108,13 +114,13 @@ golem_status re_apply(golem_document_store *s, struct json_object *event,
     golem_execution_reply md = {0};
     golem_digest digest;
     uint64_t size;
-    if (st == GOLEM_OK)
+    if (st == GOLEM_OK && !deferred)
         st = re_markdown(d, &md);
-    if (st == GOLEM_OK)
+    if (st == GOLEM_OK && !deferred)
         st = golem_digest_bytes((golem_bytes){md.data, md.size}, &digest);
-    if (st == GOLEM_OK && !dw_equal(&digest, &report))
+    if (st == GOLEM_OK && !deferred && !dw_equal(&digest, &report))
         st = GOLEM_ERR_DIGEST_MISMATCH;
-    if (st == GOLEM_OK)
+    if (st == GOLEM_OK && !deferred)
         st = golem_evidence_verify(s->cas, &report, &size, NULL);
     if (st == GOLEM_OK) {
         s->reentries[s->reentry_count] = json_object_get(event);
@@ -139,8 +145,9 @@ static golem_status reply(golem_document_store *s, size_t index, golem_execution
     json_object_put(o);
     return st;
 }
-golem_status golem_reentry_call(golem_document_store *s, golem_bytes b, golem_execution_reply *out,
-                                golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_reentry_call,
+    (golem_document_store *s, golem_bytes b, golem_execution_reply *out, golem_diagnostic *d),
+    (s, b, out, d), d)
 {
     if (!s || !out || s->poisoned)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -187,19 +194,13 @@ golem_status golem_reentry_call(golem_document_store *s, golem_bytes b, golem_ex
         st = as_clock_read(NULL, &now, &boot);
     if (st == GOLEM_OK)
         st = re_decide(s, r, now, &boot, &decision);
-    golem_execution_reply md = {0};
-    golem_receipt receipt;
     golem_digest payload, frame;
-    if (st == GOLEM_OK)
-        st = re_markdown(decision, &md);
-    if (st == GOLEM_OK)
-        st = golem_evidence_put(s->cas, (golem_bytes){md.data, md.size}, &receipt, NULL);
     if (st == GOLEM_OK) {
         event = json_object_new_object();
-        if (!ex_uint(event, "schema_version", 1) || !ex_text(event, "type", "reentry") ||
+        if (!ex_uint(event, "schema_version", 2) || !ex_text(event, "type", "reentry") ||
             !dw_add(event, "request", json_object_get(r)) ||
             !dw_add(event, "decision", json_object_get(decision)) ||
-            !dw_add_digest(event, "report_digest", &receipt.digest))
+            !ex_uint(event, "renderer_version", 1))
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
     golem_execution_reply encoded = {0};
@@ -207,7 +208,7 @@ golem_status golem_reentry_call(golem_document_store *s, golem_bytes b, golem_ex
         st = ex_emit(event, &encoded);
     golem_execution_reply_free(&encoded);
     if (st == GOLEM_OK)
-        st = dw_put_json(s, event, &payload);
+        st = dw_record_prepare(s, event, GOLEM_DOCUMENT_MAX_JSON, &payload);
     if (st == GOLEM_OK)
         st = dw_event_write(s, &payload, &frame);
     if (st == GOLEM_OK) {
@@ -220,7 +221,6 @@ golem_status golem_reentry_call(golem_document_store *s, golem_bytes b, golem_ex
     }
     if (st == GOLEM_ERR_IO)
         s->poisoned = true;
-    golem_execution_reply_free(&md);
     json_object_put(r);
     json_object_put(decision);
     json_object_put(event);
@@ -234,14 +234,24 @@ golem_status golem_reentry_report(golem_document_store *s, uint32_t sequence, bo
     if (project && !s->writable)
         return dw_report(d, GOLEM_ERR_POLICY_DENIED, NULL);
     struct json_object *event = s->reentries[sequence - 1];
-    golem_digest digest;
-    if (!dw_digest(event, "report_digest", &digest))
-        return dw_report(d, GOLEM_ERR_PARSE, NULL);
     uint8_t *bytes = NULL;
     size_t n = 0;
     int dir = -1;
-    golem_status st =
-        golem_evidence_read(s->cas, &digest, GOLEM_DOCUMENT_MAX_BODY, NULL, &bytes, &n, NULL);
+    golem_status st;
+    if (dw_uint(event, "schema_version") == 2) {
+        /* Render only at this explicit boundary; the committed decision is the
+         * source of truth. A rendering failure never invalidates that decision. */
+        golem_execution_reply rendered = {0};
+        st = dw_uint(event, "renderer_version") == 1
+            ? re_markdown(dw_get(event, "decision"), &rendered) : GOLEM_ERR_UNSUPPORTED_VERSION;
+        bytes = rendered.data;
+        n = rendered.size;
+    } else {
+        golem_digest digest;
+        st = dw_digest(event, "report_digest", &digest) ? GOLEM_OK : GOLEM_ERR_PARSE;
+        if (st == GOLEM_OK)
+            st = golem_evidence_read(s->cas, &digest, GOLEM_DOCUMENT_MAX_BODY, NULL, &bytes, &n, NULL);
+    }
     if (st == GOLEM_OK && project)
         st = dw_dir(s->root, "failures", true, &dir);
     if (st == GOLEM_OK && project) {

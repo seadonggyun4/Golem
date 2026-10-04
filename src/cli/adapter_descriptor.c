@@ -8,6 +8,7 @@ static int emit(golem_status status, const void *data, size_t n)
 {
     if (n && (fwrite(data, 1, n, stdout) != n || fputc('\n', stdout) == EOF || fflush(stdout)))
         return 1;
+    cli_error_note(status, "adapter_descriptor", NULL);
     if (status != GOLEM_OK)
         fprintf(stderr, "golem: %s\n", golem_status_string(status));
     return status == GOLEM_OK ? 0 : 1;

@@ -32,39 +32,20 @@ static golem_status document_fields(golem_document_store *s, struct json_object 
 }
 /* Both streams have already been replayed under the store lock. Recheck frames
  * while projecting so a missing prefix never becomes an empty successful page. */
-golem_status ab_project_stream(golem_document_store *s, int dir, const char *stream,
-                                   const char *magic, size_t count, const golem_digest *head,
+golem_status ab_project_stream(golem_document_store *s, int dir, bool agent,
+                                   size_t count, const golem_digest *head,
                                    uint64_t after, uint64_t limit, uint64_t *ordinal,
                                    struct json_object *rows)
 {
+    const char *stream = agent ? "agent" : "document";
     golem_digest previous = {{0}};
     struct json_object *state = NULL;
     golem_status result = GOLEM_OK;
     for (size_t i = 1; i <= count; ++i) {
-        char name[32];
-        (void)snprintf(name, sizeof(name), "%08u.evt", (unsigned)i);
-        uint8_t *bytes = NULL;
-        size_t n = 0;
-        golem_status st = dw_read_at(dir, name, 80, &bytes, &n);
         golem_digest payload, frame;
-        if (st == GOLEM_OK &&
-            (n != 80 || memcmp(bytes, magic, 8) || memcmp(bytes + 16, previous.bytes, 32)))
-            st = GOLEM_ERR_CORRUPT_JOURNAL;
-        uint64_t sequence = 0;
-        if (st == GOLEM_OK) {
-            for (unsigned j = 0; j < 8; ++j)
-                sequence |= (uint64_t)bytes[8 + j] << (8 * j);
-            if (sequence != i)
-                st = GOLEM_ERR_MISSING_RECORD;
-        }
-        if (st == GOLEM_OK) {
-            memcpy(payload.bytes, bytes + 48, 32);
-            st = golem_digest_bytes((golem_bytes){bytes, n}, &frame);
-        }
-        free(bytes);
         struct json_object *e = NULL, *row = NULL;
-        if (st == GOLEM_OK)
-            st = dw_cas_json(s, &payload, &e);
+        golem_status st = dw_record_read(s, dir, agent, i,
+                                        &previous, &payload, &frame, &e);
         if (st == GOLEM_OK && *ordinal >= after && json_object_array_length(rows) < limit) {
             row = json_object_new_object();
             const char *operation =
@@ -178,10 +159,10 @@ golem_status golem_work_history(golem_document_store *s, golem_bytes bytes, gole
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
     if (st == GOLEM_OK)
-        st = ab_project_stream(s, s->events, "document", "GWDOC001", s->event_count, &s->last, after,
+        st = ab_project_stream(s, s->events, false, s->event_count, &s->last, after,
                             dw_uint(r, "limit"), &ordinal, rows);
     if (st == GOLEM_OK)
-        st = ab_project_stream(s, l.directory, "agent", "GWAGN001", (size_t)l.sequence, &l.last, after,
+        st = ab_project_stream(s, l.directory, true, (size_t)l.sequence, &l.last, after,
                             dw_uint(r, "limit"), &ordinal, rows);
     if (st == GOLEM_OK &&
         (!dw_add(response, "schema_version", json_object_new_int(1)) ||

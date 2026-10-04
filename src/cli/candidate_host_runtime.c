@@ -1,4 +1,5 @@
 #include "candidate_host.h"
+#include "error.h"
 #include "../runtime/profile_internal.h"
 #include <stdio.h>
 #include <string.h>
@@ -138,7 +139,7 @@ static golem_status request_cancel(void *context, const char *id, const char *se
     if (st == GOLEM_OK)
         st = dw_dir(b->member.work->root, "candidate-notifications", true, &dir);
     if (st == GOLEM_OK)
-        st = dw_publish(dir, group, (golem_bytes){digest.bytes, sizeof(digest.bytes)});
+        st = dw_record_reference(b->member.work, dir, group, &digest, false);
     if (dir >= 0 && close(dir) && st == GOLEM_OK)
         st = GOLEM_ERR_IO;
     json_object_put(notice);
@@ -172,6 +173,7 @@ golem_status ch_open(ch_host *h, struct json_object *config)
         golem_diagnostic diagnostic;
         st = golem_admission_open_diagnostic(dw_text(config, "admission"), &options,
                                              &h->admission, &diagnostic);
+        cli_error_note(st, "admission_open", &diagnostic);
         if (st != GOLEM_OK)
             fprintf(stderr, "{\"schema\":\"golem.host-error.v1\",\"phase\":\"admission_open\","
                             "\"code\":%d,\"diagnostic\":\"%s\"}\n", (int)st, diagnostic.message);

@@ -129,9 +129,45 @@ class ConformanceToolTests(unittest.TestCase):
         out = self.output()
         r = gate.base(self.cli, "FIXTURE_CONFORMANCE")
         r["status"] = "FAIL"
-        gate.write_report(out, r)
+        gate.write_report(out, r, report_at="requested")
         self.assertIn("Actual agent verified: false", (out / "report.md").read_text())
         self.assertFalse(json.loads((out / "report.json").read_text())["release_ready"])
+
+    def test_default_defers_narrative_and_explicit_report_never_captures(self):
+        out = self.output()
+        r = gate.base(self.cli, "FIXTURE_CONFORMANCE")
+        r["status"] = "FAIL"
+        gate.write_report(out, r)
+        before = {p.name: p.read_bytes() for p in out.iterdir()}
+        self.assertNotIn("report.md", before)
+        with patch.object(gate, "capture", side_effect=AssertionError("must not execute")):
+            with patch("builtins.print") as printed:
+                self.assertEqual(gate.main(["report", "--output", str(out)]), 0)
+                self.assertIn("Status: FAIL", printed.call_args.args[0])
+        self.assertEqual(before, {p.name: p.read_bytes() for p in out.iterdir()})
+        self.assertEqual(gate.render_report(before["report.json"]), gate.render_report(before["report.json"]))
+
+    def test_boundary_and_render_failure_preserve_observation(self):
+        r = gate.base(self.cli, "WORK_OBSERVATION")
+        r["status"] = "BLOCKED"
+        for boundary in ("handoff", "completion"):
+            out = self.output(boundary)
+            gate.write_report(out, r, report_at=boundary)
+            self.assertIn("Status: BLOCKED", (out / "report.md").read_text())
+        out = self.output("failed-render")
+        with patch.object(gate, "render_report", side_effect=ValueError("render failed")):
+            with self.assertRaises(ValueError):
+                gate.write_report(out, r, report_at="requested")
+        self.assertEqual(json.loads((out / "report.json").read_bytes())["status"], "BLOCKED")
+
+    def test_projection_rejects_fabricated_authority_and_escapes_prose(self):
+        r = gate.base(self.cli, "WORK_OBSERVATION")
+        r.update(status="PASS", limitations=["\n# injected\n<script>"])
+        rendered = gate.render_report(json.dumps(r).encode())
+        self.assertNotIn("\n# injected", rendered)
+        r["release_ready"] = True
+        with self.assertRaises(ValueError):
+            gate.render_report(json.dumps(r).encode())
 
 
 if __name__ == "__main__":

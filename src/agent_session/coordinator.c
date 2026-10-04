@@ -1,4 +1,5 @@
 #include "internal.h"
+#include "../common/record_internal.h"
 #include "binding_internal.h"
 #include "../execution/internal.h"
 #include "../reentry/internal.h"
@@ -605,9 +606,10 @@ void golem_agent_reply_free(golem_agent_reply *reply)
         *reply = (golem_agent_reply){0};
     }
 }
-golem_status golem_agent_session_call(golem_document_store *s, golem_bytes bytes,
-                                      const golem_agent_clock *clock, golem_agent_reply *out,
-                                      golem_diagnostic *diagnostic)
+GOLEM_RECORDED_API(golem_agent_session_call,
+    (golem_document_store *s, golem_bytes bytes, const golem_agent_clock *clock,
+     golem_agent_reply *out, golem_diagnostic *diagnostic),
+    (s, bytes, clock, out, diagnostic), diagnostic)
 {
     if (!s || !out || s->poisoned)
         return dw_report(diagnostic, GOLEM_ERR_INVALID_ARGUMENT, NULL);

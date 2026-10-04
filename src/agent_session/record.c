@@ -132,11 +132,11 @@ golem_status golem_work_record(golem_document_store *s, golem_bytes bytes,
     uint64_t ordinal = 0;
     if (st == GOLEM_OK) {
         phase = "record.journal";
-        st = ab_project_stream(s, s->events, "document", "GWDOC001", s->event_count, &s->last,
+        st = ab_project_stream(s, s->events, false, s->event_count, &s->last,
                                 0, UINT64_MAX, &ordinal, rows);
     }
     if (st == GOLEM_OK)
-        st = ab_project_stream(s, log.directory, "agent", "GWAGN001", (size_t)log.sequence,
+        st = ab_project_stream(s, log.directory, true, (size_t)log.sequence,
                                 &log.last, 0, UINT64_MAX, &ordinal, rows);
     if (st == GOLEM_OK &&
         (!text(o, "schema", "golem.work-record.v1") ||

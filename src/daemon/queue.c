@@ -2,6 +2,8 @@
 #define _DARWIN_C_SOURCE
 #define _DEFAULT_SOURCE
 #include "internal.h"
+#include "golem/system_error.h"
+#include "../common/record_internal.h"
 #include "../evidence/internal.h"
 #include "../adapter_protocol/internal.h"
 #include <errno.h>
@@ -22,23 +24,28 @@ static bool options_valid(const golem_runtime_options *o)
     return o != NULL && o->version == 1 && o->max_attempts > 0 && o->max_attempts <= 1024 &&
         o->max_stage_runs > 0 && o->max_stage_runs <= 1024 && o->timeout_ns > 0 && o->timeout_ns <= UINT64_C(3600000000000);
 }
-golem_status golem_daemon_init(const char *root)
+GOLEM_RECORDED_API(golem_daemon_init, (const char *root), (root), NULL)
 {
-    int valid = gd_root(root); if (valid >= 0) { (void)close(valid); return GOLEM_OK; }
+    int valid = gd_root(root); if (valid >= 0) { (void)gd_close(valid); return GOLEM_OK; }
     if (root == NULL || root[0] != '/' || strlen(root) > GD_PATH - 180) return GOLEM_ERR_INVALID_ARGUMENT;
     int fd = golem_evidence_path_open(root, true); if (fd < 0) return GOLEM_ERR_IO;
     int lock = gd_lock(fd, ".queue.lock", true, true); golem_status s = lock < 0 ? GOLEM_ERR_JOURNAL_BUSY : GOLEM_OK;
     struct stat st;
-    if (s == GOLEM_OK && fstatat(fd, "format", &st, AT_SYMLINK_NOFOLLOW) == 0) s = GOLEM_ERR_INVALID_STATE;
-    if (s == GOLEM_OK && mkdirat(fd, "jobs", 0700) < 0 && errno != EEXIST) s = GOLEM_ERR_IO;
+    if (s == GOLEM_OK) {
+        if (fstatat(fd, "format", &st, AT_SYMLINK_NOFOLLOW) == 0) s = GOLEM_ERR_INVALID_STATE;
+        else if (errno != ENOENT) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.queue", "fstatat_format", errno);
+    }
+    if (s == GOLEM_OK && mkdirat(fd, "jobs", 0700) < 0 && errno != EEXIST)
+        s = golem_system_error_note(GOLEM_ERR_IO, "daemon.queue", "mkdir_jobs", errno);
     int jobs = -1, leader = -1;
-    if (s == GOLEM_OK) { jobs = openat(fd, "jobs", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC); if (jobs < 0) s = GOLEM_ERR_IO; }
+    if (s == GOLEM_OK) { jobs = openat(fd, "jobs", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+        if (jobs < 0) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.queue", "open_jobs", errno); }
     if (s == GOLEM_OK) { leader = gd_lock(fd, ".daemon.lock", true, true); if (leader < 0) s = GOLEM_ERR_JOURNAL_BUSY; }
     if (s == GOLEM_OK) s = gd_write(fd, "format", (golem_bytes){(const uint8_t *)"GolemQueue1\n", 12});
-    if (jobs >= 0) (void)close(jobs);
-    if (leader >= 0) (void)close(leader);
-    if (lock >= 0) (void)close(lock);
-    (void)close(fd); return s;
+    if (jobs >= 0) (void)gd_close(jobs);
+    if (leader >= 0) (void)gd_close(leader);
+    if (lock >= 0) (void)gd_close(lock);
+    (void)gd_close(fd); return s;
 }
 golem_status gd_load(const char *path, golem_daemon_job *job, golem_runtime_options *options)
 {
@@ -57,7 +64,8 @@ golem_status gd_load(const char *path, golem_daemon_job *job, golem_runtime_opti
     if (s == GOLEM_OK) {
         journal_lock = golem_evidence_path_open(file, false);
         if (journal_lock < 0) s = GOLEM_ERR_IO;
-        else if (flock(journal_lock, LOCK_SH | LOCK_NB) < 0) s = GOLEM_ERR_JOURNAL_BUSY;
+        else if (flock(journal_lock, LOCK_SH | LOCK_NB) < 0)
+            s = golem_system_error_note(GOLEM_ERR_JOURNAL_BUSY, "daemon.queue", "flock", errno);
     }
     if (s == GOLEM_OK) s = gd_read(file, GD_LIMIT, &journal);
     if (s == GOLEM_OK) s = gd_intents_check(path, (golem_bytes){journal.data, journal.size});
@@ -93,10 +101,12 @@ golem_status gd_load(const char *path, golem_daemon_job *job, golem_runtime_opti
         }
     }
     if (s != GOLEM_OK) { job->state = s == GOLEM_ERR_JOURNAL_BUSY ? GOLEM_DAEMON_BUSY : GOLEM_DAEMON_ATTENTION; job->reason = s; }
-    if (journal_lock >= 0) (void)close(journal_lock);
+    if (journal_lock >= 0) (void)gd_close(journal_lock);
     golem_work_run_free(run); free(meta.data); free(journal.data); free(context.data); free(attention.data); return s;
 }
-golem_status golem_daemon_inspect(const char *root, golem_daemon_job *jobs, size_t capacity, size_t *count)
+GOLEM_RECORDED_API(golem_daemon_inspect,
+    (const char *root, golem_daemon_job *jobs, size_t capacity, size_t *count),
+    (root, jobs, capacity, count), NULL)
 {
     if (jobs == NULL || count == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
     int fd = gd_root(root); if (fd < 0) return GOLEM_ERR_IO;
@@ -112,10 +122,11 @@ golem_status golem_daemon_inspect(const char *root, golem_daemon_job *jobs, size
         if (s == GOLEM_OK) (void)gd_load(path, &rows[i], &options);
     }
     if (s == GOLEM_OK) { if (n > 0) memcpy(jobs, rows, n * sizeof(*rows)); *count = n; }
-    free(rows); if (lock >= 0) (void)close(lock); (void)close(fd); return s;
+    free(rows); if (lock >= 0) (void)gd_close(lock); (void)gd_close(fd); return s;
 }
-golem_status golem_daemon_submit(const char *root, const char *id, const golem_work_capsule *capsule,
-    const golem_runtime_options *options, uint64_t *ticket)
+GOLEM_RECORDED_API(golem_daemon_submit, (const char *root, const char *id,
+    const golem_work_capsule *capsule, const golem_runtime_options *options, uint64_t *ticket),
+    (root, id, capsule, options, ticket), NULL)
 {
     if (!golem_adapter_id_valid(id) || capsule == NULL || !options_valid(options) || ticket == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
     int fd = gd_root(root); if (fd < 0) return GOLEM_ERR_IO;
@@ -136,9 +147,12 @@ golem_status golem_daemon_submit(const char *root, const char *id, const golem_w
     if (s == GOLEM_OK && RAND_bytes(random, sizeof(random)) != 1) s = GOLEM_ERR_CRYPTO;
     if (s == GOLEM_OK) for (size_t i = 0; i < sizeof(random); ++i) (void)snprintf(temp + 9 + i * 2, 3, "%02x", random[i]);
     (void)snprintf(final, sizeof(final), "%020" PRIu64, next);
-    if (s == GOLEM_OK) { jobs = openat(fd, "jobs", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC); if (jobs < 0) s = GOLEM_ERR_IO; }
-    if (s == GOLEM_OK && mkdirat(jobs, temp, 0700) < 0) s = GOLEM_ERR_IO;
-    if (s == GOLEM_OK) { pending = openat(jobs, temp, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC); if (pending < 0) s = GOLEM_ERR_IO; }
+    if (s == GOLEM_OK) { jobs = openat(fd, "jobs", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+        if (jobs < 0) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.queue", "open_jobs", errno); }
+    if (s == GOLEM_OK && mkdirat(jobs, temp, 0700) < 0)
+        s = golem_system_error_note(GOLEM_ERR_IO, "daemon.queue", "mkdir_pending", errno);
+    if (s == GOLEM_OK) { pending = openat(jobs, temp, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+        if (pending < 0) s = golem_system_error_note(GOLEM_ERR_IO, "daemon.queue", "open_pending", errno); }
     size_t size = 0, frame_size = 0; void *payload = NULL, *frame = NULL;
     if (s == GOLEM_OK) {
         s = golem_journal_created_encode(id, capsule, options->max_attempts, NULL, 0, &size, NULL);
@@ -161,11 +175,14 @@ golem_status golem_daemon_submit(const char *root, const char *id, const golem_w
     uint8_t recovery[40] = "GRCV0001"; golem_digest meta_digest;
     if (s == GOLEM_OK) s = golem_digest_bytes((golem_bytes){meta, sizeof(meta)}, &meta_digest);
     if (s == GOLEM_OK) { memcpy(recovery + 8, &meta_digest, 32); s = gd_write(pending, "recovery.meta", (golem_bytes){recovery, sizeof(recovery)}); }
-    if (s == GOLEM_OK && (renameat(jobs, temp, jobs, final) < 0 || fsync(jobs) < 0)) s = GOLEM_ERR_IO;
+    if (s == GOLEM_OK && renameat(jobs, temp, jobs, final) < 0)
+        s = golem_system_error_note(GOLEM_ERR_IO, "daemon.queue", "rename_publish", errno);
+    if (s == GOLEM_OK && fsync(jobs) < 0)
+        s = golem_system_error_note(GOLEM_ERR_IO, "daemon.queue", "fsync_jobs", errno);
     if (s == GOLEM_OK) *ticket = next;
     free(frame); free(payload);
-    if (pending >= 0) (void)close(pending);
-    if (jobs >= 0) (void)close(jobs);
-    if (lock >= 0) (void)close(lock);
-    (void)close(fd); return s;
+    if (pending >= 0) (void)gd_close(pending);
+    if (jobs >= 0) (void)gd_close(jobs);
+    if (lock >= 0) (void)gd_close(lock);
+    (void)gd_close(fd); return s;
 }

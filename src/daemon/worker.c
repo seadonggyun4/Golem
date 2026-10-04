@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "golem/worker.h"
 #include "events_internal.h"
+#include "../common/record_internal.h"
 #include <pthread.h>
 #include <stdatomic.h>
 #include <string.h>
@@ -23,6 +24,9 @@ typedef struct worker_job {
     golem_status status;
     golem_supervisor_observation observation;
     golem_supervisor_result result;
+    golem_system_error_scope diagnostics;
+    gr_context recording_context;
+    golem_status recording_status;
 } worker_job;
 struct golem_worker_pool {
     golem_allocator allocator;
@@ -40,8 +44,10 @@ struct golem_worker_pool {
 static golem_status now_ns(uint64_t *out)
 {
     struct timespec t;
-    if (clock_gettime(CLOCK_MONOTONIC, &t) || t.tv_sec < 0)
-        return GOLEM_ERR_IO;
+    if (clock_gettime(CLOCK_MONOTONIC, &t))
+        return golem_system_error_note(GOLEM_ERR_IO, "worker", "clock_gettime", errno);
+    if (t.tv_sec < 0 || t.tv_nsec < 0 || t.tv_nsec >= 1000000000)
+        return golem_system_error_note(GOLEM_ERR_IO, "worker", "clock_value", 0);
     if ((uint64_t)t.tv_sec > (UINT64_MAX - (uint64_t)t.tv_nsec) / UINT64_C(1000000000))
         return GOLEM_ERR_OVERFLOW;
     *out = (uint64_t)t.tv_sec * UINT64_C(1000000000) + (uint64_t)t.tv_nsec;
@@ -89,7 +95,8 @@ golem_worker_options golem_worker_options_default(void)
                                              .memory_bytes = UINT64_C(1073741824),
                                              .queue_bytes = 1048576}};
 }
-golem_status golem_worker_open(const golem_worker_options *o, golem_worker_pool **out)
+GOLEM_RECORDED_API(golem_worker_open, (const golem_worker_options *o, golem_worker_pool **out),
+    (o, out), NULL)
 {
     if (!o || !out || o->size != sizeof(*o))
         return GOLEM_ERR_INVALID_ARGUMENT;
@@ -154,7 +161,8 @@ static golem_status copy_vector(worker_job *j, char *const *src, char **dest)
     }
     return GOLEM_ERR_BUFFER_TOO_SMALL;
 }
-golem_status golem_worker_submit(golem_worker_pool *p, const golem_worker_request *r, uint64_t *id)
+GOLEM_RECORDED_API(golem_worker_submit,
+    (golem_worker_pool *p, const golem_worker_request *r, uint64_t *id), (p, r, id), NULL)
 {
     golem_status s = ready(p);
     if (s != GOLEM_OK)
@@ -196,6 +204,9 @@ golem_status golem_worker_submit(golem_worker_pool *p, const golem_worker_reques
     j->status = GOLEM_OK;
     j->result = (golem_supervisor_result){.exit_code = -1};
     j->observation = (golem_supervisor_observation){0};
+    j->diagnostics = (golem_system_error_scope){0};
+    j->recording_context = (gr_context){0};
+    j->recording_status = GOLEM_OK;
     j->threaded = j->reserved = j->terminal_observed = false;
     j->token = (golem_admission_token){0};
     atomic_init(&j->done, false);
@@ -225,12 +236,26 @@ static golem_status pulse(void *context)
 static void *execute(void *context)
 {
     worker_job *j = context;
+    (void)golem_system_error_begin(&j->diagnostics);
+    golem_record *record = NULL;
+    j->status = gr_context_attach(&j->recording_context);
+    bool attached = j->status == GOLEM_OK;
+    if (attached) j->status = gr_api_begin("golem.worker.execute", &record, NULL);
+    j->recording_status = j->status;
     /* Cancel/lease may have changed while the supervisor thread was scheduled. */
-    j->status = pulse(j);
+    if (j->status == GOLEM_OK) j->status = pulse(j);
     if (j->status == GOLEM_OK)
         j->status = golem_supervisor_run_observed(j->request.executable, j->argv, j->request.cwd,
                                                   j->envp, j->request.input, j->request.timeout_ns,
                                                   pulse, j, &j->result, &j->observation);
+    if (j->recording_status == GOLEM_OK) {
+        (void)gr_api_finish("golem.worker.execute", record, j->status, NULL);
+        golem_record_api_outcome outcome = {.struct_size = sizeof(outcome), .version = 1};
+        if (golem_record_last_api_outcome(&outcome)) j->recording_status = outcome.recording_status;
+    }
+    if (attached) (void)gr_context_detach(&j->recording_context);
+    gr_context_dispose(&j->recording_context);
+    (void)golem_system_error_end(&j->diagnostics);
     atomic_store_explicit(&j->done, true, memory_order_release);
     return NULL;
 }
@@ -288,27 +313,37 @@ worker_start(golem_worker_pool *p, uint64_t id, golem_admission *a, const char *
         return s;
     if (now > UINT64_MAX - j->request.lease_ns)
         return GOLEM_ERR_OVERFLOW;
+    s = gr_context_capture(&j->recording_context);
+    if (s != GOLEM_OK) return s;
     p->busy = true;
     s = golem_admission_begin(a, t.token, publish, context, &t);
     p->busy = false;
-    if (s != GOLEM_OK)
+    if (s != GOLEM_OK) {
+        gr_context_dispose(&j->recording_context);
         return s;
+    }
     /* Lease duration includes publication; slow publication cannot extend it. */
     atomic_store(&j->deadline, now + j->request.lease_ns);
     j->token = t.token;
     j->reserved = true;
     j->state = GOLEM_WORKER_RUNNING;
-    if (pthread_create(&j->thread, NULL, execute, j)) {
-        j->status = GOLEM_ERR_IO;
+    int created = pthread_create(&j->thread, NULL, execute, j);
+    if (created) {
+        gr_context_dispose(&j->recording_context);
+        j->status = golem_system_error_note(GOLEM_ERR_IO, "worker", "pthread_create", created);
+        (void)golem_system_error_begin(&j->diagnostics);
+        (void)golem_system_error_note(j->status, "worker", "pthread_create", created);
+        (void)golem_system_error_end(&j->diagnostics);
         atomic_store(&j->done, true);
     } else {
         j->threaded = true;
     }
     return GOLEM_OK;
 }
-golem_status golem_worker_start(golem_worker_pool *p, uint64_t id, golem_admission *a,
+GOLEM_RECORDED_API(golem_worker_start, (golem_worker_pool *p, uint64_t id, golem_admission *a,
     const char *operation, golem_status (*publish)(void *, const golem_digest *,
-    const golem_admission_ticket *, golem_digest *), void *context)
+    const golem_admission_ticket *, golem_digest *), void *context),
+    (p, id, a, operation, publish, context), NULL)
 {
     worker_job *j;
     golem_status s = find(p, id, &j);
@@ -344,8 +379,9 @@ static void collect(golem_worker_pool *p)
         }
     }
 }
-golem_status golem_worker_events(golem_worker_pool *p, const golem_runtime_cursor *after,
-    golem_runtime_event *records, size_t capacity, golem_runtime_event_page *page)
+GOLEM_RECORDED_REQUIRED_API(golem_worker_events, (golem_worker_pool *p, const golem_runtime_cursor *after,
+    golem_runtime_event *records, size_t capacity, golem_runtime_event_page *page),
+    (p, after, records, capacity, page))
 {
     golem_status s = ready(p);
     if (s != GOLEM_OK) return s;
@@ -353,7 +389,8 @@ golem_status golem_worker_events(golem_worker_pool *p, const golem_runtime_curso
     collect(p);
     return ge_read(&p->events, after, records, capacity, page);
 }
-golem_status golem_worker_inspect(golem_worker_pool *p, uint64_t id, golem_worker_snapshot *out)
+GOLEM_RECORDED_REQUIRED_API(golem_worker_inspect,
+    (golem_worker_pool *p, uint64_t id, golem_worker_snapshot *out), (p, id, out))
 {
     worker_job *j;
     golem_status s = find(p, id, &j);
@@ -375,7 +412,7 @@ golem_status golem_worker_inspect(golem_worker_pool *p, uint64_t id, golem_worke
     *out = snapshot;
     return GOLEM_OK;
 }
-golem_status golem_worker_cancel(golem_worker_pool *p, uint64_t id)
+GOLEM_RECORDED_REQUIRED_API(golem_worker_cancel, (golem_worker_pool *p, uint64_t id), (p, id))
 {
     worker_job *j;
     golem_status s = find(p, id, &j);
@@ -393,7 +430,8 @@ golem_status golem_worker_cancel(golem_worker_pool *p, uint64_t id)
     }
     return GOLEM_OK;
 }
-golem_status golem_worker_heartbeat(golem_worker_pool *p, uint64_t id, uint64_t duration)
+GOLEM_RECORDED_REQUIRED_API(golem_worker_heartbeat,
+    (golem_worker_pool *p, uint64_t id, uint64_t duration), (p, id, duration))
 {
     worker_job *j;
     golem_status s = find(p, id, &j);
@@ -414,8 +452,8 @@ golem_status golem_worker_heartbeat(golem_worker_pool *p, uint64_t id, uint64_t 
     atomic_store(&j->deadline, now + duration);
     return GOLEM_OK;
 }
-golem_status golem_worker_acknowledge(golem_worker_pool *p, uint64_t id, golem_admission *a,
-                                      const char *operation)
+GOLEM_RECORDED_REQUIRED_API(golem_worker_acknowledge, (golem_worker_pool *p, uint64_t id,
+    golem_admission *a, const char *operation), (p, id, a, operation))
 {
     worker_job *j;
     golem_status s = find(p, id, &j);
@@ -452,7 +490,7 @@ golem_status golem_worker_acknowledge(golem_worker_pool *p, uint64_t id, golem_a
     observe(p, id, GOLEM_EVENT_ACKNOWLEDGED, false, GOLEM_OK);
     return GOLEM_OK;
 }
-golem_status golem_worker_close(golem_worker_pool *p)
+GOLEM_RECORDED_REQUIRED_API(golem_worker_close, (golem_worker_pool *p), (p))
 {
     if (!p)
         return GOLEM_OK;
@@ -467,11 +505,36 @@ golem_status golem_worker_close(golem_worker_pool *p)
     }
     for (uint64_t i = 0; i < p->count; ++i) {
         if (p->jobs[i].threaded) {
-            if (pthread_join(p->jobs[i].thread, NULL))
-                return GOLEM_ERR_IO;
+            int joined = pthread_join(p->jobs[i].thread, NULL);
+            if (joined)
+                return golem_system_error_note(GOLEM_ERR_IO, "worker", "pthread_join", joined);
             p->jobs[i].threaded = false;
         }
     }
     golem_allocator a = p->allocator;
     return golem_allocator_free(&a, p);
+}
+
+/* Observation retrieval must remain available when recorder storage has failed.
+ * The release/acquire pair on done publishes the entire immutable snapshot. */
+golem_status golem_worker_diagnostics(golem_worker_pool *p, uint64_t id,
+                                     golem_system_error_scope *out)
+{
+    worker_job *j;
+    golem_status s = find(p, id, &j);
+    if (s != GOLEM_OK) return s;
+    if (!out) return GOLEM_ERR_INVALID_ARGUMENT;
+    if (!atomic_load_explicit(&j->done, memory_order_acquire)) return GOLEM_ERR_INVALID_STATE;
+    *out = j->diagnostics;
+    return GOLEM_OK;
+}
+golem_status golem_worker_recording_status(golem_worker_pool *p, uint64_t id, golem_status *out)
+{
+    worker_job *j;
+    golem_status s = find(p, id, &j);
+    if (s != GOLEM_OK) return s;
+    if (!out) return GOLEM_ERR_INVALID_ARGUMENT;
+    if (!atomic_load_explicit(&j->done, memory_order_acquire)) return GOLEM_ERR_INVALID_STATE;
+    *out = j->recording_status;
+    return GOLEM_OK;
 }

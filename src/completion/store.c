@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "internal.h"
+#include "../common/record_internal.h"
 #include "../reentry/internal.h"
 #include "golem/agent_session.h"
 #include <stdio.h>
@@ -247,9 +248,11 @@ static golem_status resume(golem_document_store *s, const char *id, golem_execut
         }
     for (size_t i = 0; st == GOLEM_OK && i < s->reentry_count; ++i) {
         struct json_object *v = json_object_new_object();
+        bool deferred = dw_uint(s->reentries[i], "schema_version") == 2;
         if (!dw_add_digest(v, "decision_digest", &s->reentry_digests[i]) ||
-            !dw_add(v, "report_digest",
-                    json_object_get(dw_get(s->reentries[i], "report_digest")))) {
+            (deferred ? (!ex_text(v, "report_policy", "ON_REQUEST") || !ex_uint(v, "renderer_version", 1))
+                      : !dw_add(v, "report_digest",
+                                json_object_get(dw_get(s->reentries[i], "report_digest"))))) {
             json_object_put(v);
             st = GOLEM_ERR_OUT_OF_MEMORY;
         } else if (!wf_append(history, v))
@@ -318,8 +321,9 @@ static golem_status completion_record(golem_document_store *store, struct json_o
     return GOLEM_OK;
 }
 
-golem_status golem_completion_call(golem_document_store *s, golem_bytes b,
-                                   golem_execution_reply *out, golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_completion_call,
+    (golem_document_store *s, golem_bytes b, golem_execution_reply *out, golem_diagnostic *d),
+    (s, b, out, d), d)
 {
     if (!s || !out || s->poisoned)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -384,7 +388,7 @@ golem_status golem_completion_call(golem_document_store *s, golem_bytes b,
     if (st == GOLEM_OK)
         st = ex_emit(event, &encoded);
     if (st == GOLEM_OK)
-        st = dw_put_json(s, event, &payload);
+        st = dw_record_prepare(s, event, GOLEM_DOCUMENT_MAX_JSON, &payload);
     if (st == GOLEM_OK)
         st = receipt_value(event, &payload, &response);
     if (st == GOLEM_OK)

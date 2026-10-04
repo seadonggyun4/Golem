@@ -1,4 +1,5 @@
 #include "binding_internal.h"
+#include "../common/record_internal.h"
 #include "golem/adapter_descriptor.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -284,10 +285,10 @@ static golem_status prepare_binding(golem_document_store *s, as_log *l, struct j
         json_object_put(d);
     return st;
 }
-golem_status golem_session_binding_call(golem_document_store *s, golem_bytes bytes,
-                                        const golem_agent_clock *clock,
-                                        const golem_session_binding_host *host,
-                                        golem_agent_reply *out, golem_diagnostic *diagnostic)
+GOLEM_RECORDED_API(golem_session_binding_call,
+    (golem_document_store *s, golem_bytes bytes, const golem_agent_clock *clock,
+     const golem_session_binding_host *host, golem_agent_reply *out, golem_diagnostic *diagnostic),
+    (s, bytes, clock, host, out, diagnostic), diagnostic)
 {
     if (!s || !out || s->poisoned)
         return dw_report(diagnostic, GOLEM_ERR_INVALID_ARGUMENT, NULL);

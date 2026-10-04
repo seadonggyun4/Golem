@@ -13,6 +13,7 @@ static bool fail_thread, lost_child;
 static int create_thread(pthread_t *thread, const pthread_attr_t *attr, void *(*entry)(void *),
                          void *context)
 {
+    if (fail_thread) errno = ENOSPC;
     return fail_thread ? EAGAIN : pthread_create(thread, attr, entry, context);
 }
 static golem_status observed(const char *exe, char *const argv[], const char *cwd,
@@ -138,6 +139,13 @@ int main(int argc, char **argv)
         (void)nanosleep(&delay, NULL);
     }
     CHECK(snapshot.status == GOLEM_ERR_IO);
+    golem_system_error_scope diagnostics;
+    CHECK(golem_worker_diagnostics(p, id, &diagnostics) == GOLEM_OK);
+    if (fail_thread) {
+        CHECK(diagnostics.count == 1 && diagnostics.parent == NULL);
+        CHECK(diagnostics.entries[0].error_number == EAGAIN);
+        CHECK(!strcmp(diagnostics.entries[0].operation, "pthread_create"));
+    }
     golem_runtime_event events[64]; golem_runtime_event_page page;
     CHECK(golem_worker_events(p, NULL, events, 64, &page) == GOLEM_OK);
     bool reconcile = false, dispatched = false, preparation_failed = false;

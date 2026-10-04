@@ -76,6 +76,10 @@ to v3. The extra flag cannot implicitly upgrade an old contract.
 
 ## Process-entry inventory
 
+The sole supervisor launch boundary supports [native mechanical recording](native-recording.md)
+for all callers when a host recording root is configured. Recording observes
+effects; it does not grant any of the approvals described above.
+
 | Source | Purpose |
 | --- | --- |
 | `execution/runner.c` | Reviewed argv/cwd/fixed env through supervisor |

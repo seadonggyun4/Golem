@@ -77,12 +77,12 @@ golem_status ab_history_incremental(golem_document_store *s, struct json_object 
         st = GOLEM_ERR_OUT_OF_MEMORY;
     uint64_t ordinal = 0, limit = dw_uint(r, "limit");
     if (st == GOLEM_OK)
-        st = ab_project_stream(s, s->events, "document", "GWDOC001", s->event_count, &s->last,
+        st = ab_project_stream(s, s->events, false, s->event_count, &s->last,
                                 after[0], limit, &ordinal, rows);
     size_t doc_rows = rows ? json_object_array_length(rows) : 0;
     ordinal = 0;
     if (st == GOLEM_OK)
-        st = ab_project_stream(s, log.directory, "agent", "GWAGN001", (size_t)log.sequence,
+        st = ab_project_stream(s, log.directory, true, (size_t)log.sequence,
                                 &log.last, after[1], doc_rows + limit, &ordinal, rows);
     uint64_t positions[2] = {after[0] + doc_rows,
                             after[1] + (rows ? json_object_array_length(rows) : 0) - doc_rows};

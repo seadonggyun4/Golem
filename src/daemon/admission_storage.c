@@ -5,6 +5,7 @@
 #endif
 #include "admission_internal.h"
 #include "internal.h"
+#include "golem/system_error.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -137,11 +138,12 @@ static golem_status event_count(int root, uint64_t *out)
 {
     int scan = openat(root, ".", O_RDONLY | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW);
     if (scan < 0)
-        return GOLEM_ERR_IO;
+        return golem_system_error_note(GOLEM_ERR_IO, "admission.storage", "open_scan", errno);
     DIR *dir = fdopendir(scan);
     if (!dir) {
-        (void)close(scan);
-        return GOLEM_ERR_IO;
+        golem_status s = golem_system_error_note(GOLEM_ERR_IO, "admission.storage", "fdopendir", errno);
+        (void)gd_close(scan);
+        return s;
     }
     uint64_t count = 0, maximum = 0;
     golem_status s = GOLEM_OK;
@@ -173,9 +175,11 @@ static golem_status event_count(int root, uint64_t *out)
             maximum = n;
     }
     if (s == GOLEM_OK && errno)
-        s = GOLEM_ERR_IO;
-    if (closedir(dir) != 0 && s == GOLEM_OK)
-        s = GOLEM_ERR_IO;
+        s = golem_system_error_note(GOLEM_ERR_IO, "admission.storage", "readdir", errno);
+    if (closedir(dir) != 0) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "admission.storage", "closedir", errno);
+        if (s == GOLEM_OK) s = GOLEM_ERR_IO;
+    }
     if (s == GOLEM_OK && count != maximum)
         s = GOLEM_ERR_MISSING_RECORD;
     if (s == GOLEM_OK)
@@ -189,11 +193,13 @@ static golem_status read_event(int root, uint64_t sequence, uint8_t frame[GA_FRA
     (void)snprintf(name, sizeof(name), "%020" PRIu64, sequence);
     int fd = openat(root, name, O_RDONLY | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK);
     if (fd < 0)
-        return GOLEM_ERR_IO;
+        return golem_system_error_note(GOLEM_ERR_IO, "admission.storage", "open_event", errno);
     struct stat st;
     golem_status s = GOLEM_OK;
-    if (fstat(fd, &st) != 0 || !S_ISREG(st.st_mode) || st.st_size != GA_FRAME_SIZE)
-        s = GOLEM_ERR_CORRUPT_JOURNAL;
+    if (fstat(fd, &st) != 0)
+        s = golem_system_error_note(GOLEM_ERR_CORRUPT_JOURNAL, "admission.storage", "fstat", errno);
+    else if (!S_ISREG(st.st_mode) || st.st_size != GA_FRAME_SIZE)
+        s = golem_system_error_note(GOLEM_ERR_CORRUPT_JOURNAL, "admission.storage", "event_shape", 0);
     size_t offset = 0;
     while (s == GOLEM_OK && offset < GA_FRAME_SIZE) {
         ssize_t n = read(fd, frame + offset, GA_FRAME_SIZE - offset);
@@ -202,9 +208,9 @@ static golem_status read_event(int root, uint64_t sequence, uint8_t frame[GA_FRA
         else if (n < 0 && errno == EINTR)
             continue;
         else
-            s = GOLEM_ERR_IO;
+            s = golem_system_error_note(GOLEM_ERR_IO, "admission.storage", n < 0 ? "read" : "unexpected_eof", n < 0 ? errno : 0);
     }
-    if (close(fd) != 0 && s == GOLEM_OK)
+    if (gd_close(fd) != 0 && s == GOLEM_OK)
         s = GOLEM_ERR_IO;
     return s;
 }

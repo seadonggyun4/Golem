@@ -12,7 +12,9 @@ const char *cli_json_text(struct json_object *o)
 }
 golem_status cli_json_parse(golem_bytes data, struct json_object **out)
 {
-    return golem_json_parse(data, CLI_BUNDLE_MAX, out);
+    golem_status status = golem_json_parse(data, CLI_BUNDLE_MAX, out);
+    cli_error_note(status, "request_parse", NULL);
+    return status;
 }
 bool cli_json_keys(struct json_object *o, const char *const *keys, size_t count)
 {

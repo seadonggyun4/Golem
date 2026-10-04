@@ -206,14 +206,11 @@ golem_status cf_append(cf_context *c, const char *action, size_t index, struct j
         st = GOLEM_ERR_OUT_OF_MEMORY;
     golem_digest digest;
     if (st == GOLEM_OK)
-        st = dw_put_json(c->parent, event, &digest);
-    char name[16], hex[65];
-    size_t size;
+        st = dw_record_prepare(c->parent, event, GOLEM_DOCUMENT_MAX_JSON, &digest);
+    char name[16];
     (void)snprintf(name, sizeof(name), "%04u", c->sequence + 1);
     if (st == GOLEM_OK)
-        st = golem_digest_format(&digest, hex, sizeof(hex), &size);
-    if (st == GOLEM_OK)
-        st = dw_publish(c->dir, name, (golem_bytes){(const uint8_t *)hex, 64});
+        st = dw_record_reference(c->parent, c->dir, name, &digest, true);
     if (st == GOLEM_OK) {
         ++c->sequence;
         c->last = digest;

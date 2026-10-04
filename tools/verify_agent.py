@@ -135,35 +135,69 @@ def observe(cli, work, selection, output, timeout):
     return report
 
 
-def write_report(output, report):
-    save(output / "report.json", (json.dumps(report, indent=2, sort_keys=True) + "\n").encode())
+def render_report(data):
+    """Pure, explicit projection of one saved observation; never execute its commands."""
+    report = strict_json(data)
+    if (not isinstance(report, dict) or report.get("schema") != SCHEMA
+            or report.get("mode") not in ("FIXTURE_CONFORMANCE", "WORK_OBSERVATION")
+            or report.get("status") not in ("PASS", "FAIL", "BLOCKED")
+            or any(report.get(k) is not False for k in
+                   ("actual_agent_verified", "release_ready", "provider_invoked"))):
+        raise ValueError("unsupported observation")
     lines = ["# Golem Conformance Observation", "", f"- Mode: {report['mode']}",
              f"- Status: {report['status']}", "- Actual agent verified: false",
              "- Release ready: false", "- Usage/cost: unknown", "",
+             f"- Observation SHA256: `{hashlib.sha256(data).hexdigest()}`",
+             "- Renderer: `golem.conformance-markdown.v1`", "",
              "This result is scoped evidence, not a deployment authorization.", ""]
     for item in report.get("cases", []):
+        if not isinstance(item, dict) or item.get("id") not in CASES or item.get("status") not in ("PASS", "NOT_PASSED"):
+            raise ValueError("unsupported case")
         lines.append(f"- {item['id']}: {item['status']}")
-    lines += ["", "## Limits", ""] + ["- " + value for value in report.get("limitations", [])]
-    save(output / "report.md", ("\n".join(lines) + "\n").encode())
+    limits = report.get("limitations", [])
+    if not isinstance(limits, list) or not all(isinstance(v, str) for v in limits):
+        raise ValueError("unsupported limitations")
+    lines += ["", "## Limits", ""] + ["    " + json.dumps(value, ensure_ascii=True) for value in limits]
+    return "\n".join(lines) + "\n"
+
+
+def write_report(output, report, *, report_at=None):
+    if report_at not in (None, "requested", "handoff", "completion"):
+        raise ValueError("unsupported report boundary")
+    # This JSON is gate evidence, not optional narrative. Preserve it before any
+    # presentation operation so a rendering failure cannot erase the result.
+    data = (json.dumps(report, indent=2, sort_keys=True) + "\n").encode()
+    execution_record.save(output / "report.json", data)
+    if report_at is not None:
+        execution_record.save(output / "report.md", render_report(data).encode())
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("fixture", "observe"))
-    parser.add_argument("--cli", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True, help="new private directory, never upload")
+    parser.add_argument("mode", choices=("fixture", "observe", "report"))
+    parser.add_argument("--cli", type=Path)
+    parser.add_argument("--output", type=Path, required=True, help="new private directory; existing observation for report mode")
+    parser.add_argument("--report-at", choices=("requested", "handoff", "completion"),
+                        help="opt in to one Markdown projection after capture; never changes acceptance")
     parser.add_argument("--source", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--cc", type=Path)
     parser.add_argument("--work", type=Path)
     parser.add_argument("--selection", default="selection")
     parser.add_argument("--timeout", type=int, default=900)
     args = parser.parse_args(argv)
+    if args.mode != "report" and args.cli is None:
+        parser.error("fixture/observe requires --cli")
     if not 1 <= args.timeout <= 3600:
         parser.error("timeout must be 1..3600 seconds")
     if (args.mode == "fixture" and not args.cc) or (args.mode == "observe" and not args.work):
         parser.error("fixture requires --cc; observe requires --work")
     output = None
     try:
+        if args.mode == "report":
+            with (args.output / "report.json").open("rb") as stream:
+                data = stream.read(LIMIT + 1)
+            print(render_report(data), end="")
+            return 0
         cli = args.cli.resolve(strict=True)
         output = private_directory(args.output)
         report = (fixture(cli, args.source.resolve(strict=True), args.cc.resolve(strict=True), output, args.timeout)
@@ -172,7 +206,7 @@ def main(argv=None):
         if digest(cli) != report["cli_sha256"]:
             report["status"] = "FAIL"
             report["binary_changed"] = True
-        write_report(output, report)
+        write_report(output, report, report_at=args.report_at)
         print(f"{report['mode']}: {report['status']}; actual-agent verification and release readiness not asserted")
         return 0 if report["status"] == "PASS" else 1
     except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError):

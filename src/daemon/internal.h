@@ -10,6 +10,8 @@ golem_status gd_read(const char *path, size_t limit, gd_blob *out);
 golem_status gd_write(int dir, const char *name, golem_bytes bytes);
 int gd_lock(int dir, const char *name, bool create, bool exclusive);
 int gd_root(const char *root);
+/* Single close with a scoped observation; caller retains status precedence. */
+int gd_close(int fd);
 golem_status gd_list(int root, uint64_t tickets[GOLEM_DAEMON_MAX_JOBS], size_t *count);
 golem_status gd_job_path(const char *root, uint64_t ticket, char out[GD_PATH]);
 golem_status gd_load(const char *path, golem_daemon_job *job, golem_runtime_options *options);

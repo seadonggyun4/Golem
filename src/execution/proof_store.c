@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "proof_internal.h"
+#include "../common/record_internal.h"
 #include "../workspace/internal.h"
 #include <dirent.h>
 #include <errno.h>
@@ -85,8 +86,9 @@ static golem_status exact_inventory(int fd)
     return st;
 }
 
-golem_status golem_proof_publish(golem_bytes bytes, const char *parent, golem_digest *out,
-                                 golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_proof_publish,
+    (golem_bytes bytes, const char *parent, golem_digest *out, golem_diagnostic *d),
+    (bytes, parent, out, d), d)
 {
     if (!parent || !out)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);

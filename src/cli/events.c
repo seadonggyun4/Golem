@@ -30,6 +30,7 @@ int golem_cli_events(int argc, char **argv)
     golem_status st = golem_runtime_events_snapshot(argv[2], NULL, after, records,
                                                     GOLEM_RUNTIME_EVENT_PAGE_MAX, &page);
     if (st == GOLEM_ERR_STALE_RESULT) {
+        cli_error_note(st, "event_cursor", NULL);
         fprintf(stderr,
                 "golem: stale event cursor; missed=%llu oldest=%llu newest=%llu; explicitly "
                 "restart without --after\n",
@@ -50,6 +51,7 @@ int golem_cli_events(int argc, char **argv)
     if (st == GOLEM_OK && (fwrite(bytes, 1, n, stdout) != n || fflush(stdout)))
         st = GOLEM_ERR_IO;
     free(bytes);
+    cli_error_note(st, "events", NULL);
     if (st != GOLEM_OK)
         fprintf(stderr, "golem: %s\n", golem_status_string(st));
     return st == GOLEM_OK ? 0 : 1;

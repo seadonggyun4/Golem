@@ -1,4 +1,5 @@
 #include "admission_internal.h"
+#include "../common/record_internal.h"
 #include "../runtime/profile_internal.h"
 #include "../agent_session/internal.h"
 #include <string.h>
@@ -57,10 +58,10 @@ golem_status ga_work_apply(golem_document_store *s, struct json_object *event,
     return status;
 }
 
-golem_status golem_admission_publish_work(golem_document_store *store,
-                                          const golem_digest *namespace_id,
-                                          const golem_admission_ticket *ticket,
-                                          golem_digest *receipt)
+GOLEM_RECORDED_API(golem_admission_publish_work,
+    (golem_document_store *store, const golem_digest *namespace_id,
+     const golem_admission_ticket *ticket, golem_digest *receipt),
+    (store, namespace_id, ticket, receipt), NULL)
 {
     if (!store || !namespace_id || !ticket || !receipt ||
         ticket->state != GOLEM_ADMISSION_GRANTED ||
@@ -126,14 +127,14 @@ golem_status golem_admission_publish_work(golem_document_store *store,
     if (s == GOLEM_OK && !duplicate && store->admission_link_count >= 256)
         s = GOLEM_ERR_OVERFLOW;
     if (s == GOLEM_OK && !duplicate)
-        s = dw_put_json(store, event, &payload);
-    if (s == GOLEM_OK) {
+        s = dw_record_prepare(store, event, GOLEM_DOCUMENT_MAX_JSON, &payload);
+    if (s == GOLEM_OK && duplicate) {
         s = as_clock_read(NULL, &now, &boot);
         if (s == GOLEM_OK && !as_live(&log, now, &boot))
             s = GOLEM_ERR_STALE_LEASE;
     }
     if (s == GOLEM_OK && !duplicate)
-        s = dw_event_write(store, &payload, &frame);
+        s = dw_event_write_guarded(store, &payload, &frame, as_publication_guard, &log);
     if (s == GOLEM_OK && !duplicate)
         remember(store, event, &payload, &frame);
     if (s == GOLEM_OK)

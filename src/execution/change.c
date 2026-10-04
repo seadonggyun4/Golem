@@ -80,7 +80,7 @@ golem_status ex_inventory_check(golem_document_store *store, struct json_object 
         if (st == GOLEM_OK)
             st = golem_digest_format(&digest, name, sizeof(name), &length);
         if (st == GOLEM_OK)
-            st = dw_publish(dir, name, (golem_bytes){digest.bytes, sizeof(digest.bytes)});
+            st = dw_record_reference(store, dir, name, &digest, false);
         if (dir >= 0)
             close(dir);
     }

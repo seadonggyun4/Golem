@@ -3,6 +3,8 @@
 #include "golem/policy.h"
 #include "golem/replay.h"
 #include "../core/internal.h"
+#include "../common/record_internal.h"
+#include "golem/system_error.h"
 #include <string.h>
 #include <time.h>
 
@@ -31,8 +33,12 @@ static golem_status clock_read(golem_runtime *r, uint64_t *out)
         if (s != GOLEM_OK) return s;
     } else {
         struct timespec t;
-        if (clock_gettime(CLOCK_MONOTONIC, &t) != 0 || t.tv_sec < 0 || t.tv_nsec < 0 || t.tv_nsec >= 1000000000L) return GOLEM_ERR_IO;
-        if ((uint64_t)t.tv_sec > (UINT64_MAX - (uint64_t)t.tv_nsec) / 1000000000u) return GOLEM_ERR_OVERFLOW;
+        if (clock_gettime(CLOCK_MONOTONIC, &t) != 0)
+            return golem_system_error_note(GOLEM_ERR_IO, "runtime.clock", "clock_gettime", errno);
+        if (t.tv_sec < 0 || t.tv_nsec < 0 || t.tv_nsec >= 1000000000L)
+            return golem_system_error_note(GOLEM_ERR_IO, "runtime.clock", "clock_value", 0);
+        if ((uint64_t)t.tv_sec > (UINT64_MAX - (uint64_t)t.tv_nsec) / 1000000000u)
+            return golem_system_error_note(GOLEM_ERR_OVERFLOW, "runtime.clock", "clock_overflow", 0);
         value = (uint64_t)t.tv_sec * 1000000000u + (uint64_t)t.tv_nsec;
     }
     if (r->clock_seen && value < r->last_clock) return GOLEM_ERR_INVALID_STATE;
@@ -63,9 +69,10 @@ static golem_status leave(golem_runtime *r, golem_status s)
     }
     r->busy = false; return s;
 }
-golem_status golem_runtime_create(const char *id, const golem_work_capsule *capsule,
+GOLEM_RECORDED_API(golem_runtime_create, (const char *id, const golem_work_capsule *capsule,
     const golem_runtime_options *options, const golem_runtime_ops *ops, void *context,
-    const golem_allocator *allocator, golem_runtime **out)
+    const golem_allocator *allocator, golem_runtime **out),
+    (id, capsule, options, ops, context, allocator, out), NULL)
 {
     if (options == NULL || ops == NULL || out == NULL || capsule == NULL || id == NULL ||
         options->max_attempts == 0 || options->max_stage_runs == 0 || ops->execute == NULL || ops->record == NULL)
@@ -89,15 +96,16 @@ golem_status golem_runtime_create(const char *id, const golem_work_capsule *caps
     if (s != GOLEM_OK) { golem_runtime_free(r); return s; }
     *out = r; return GOLEM_OK;
 }
-void golem_runtime_free(golem_runtime *r)
+GOLEM_RECORDED_RELEASE_API(golem_runtime_free, (golem_runtime *r), (r))
 {
     if (r == NULL) return;
     golem_work_run_free(r->run);
     (void)golem_allocator_free(&r->allocator, r->created);
     golem_allocator a = r->allocator; (void)golem_allocator_free(&a, r);
 }
-golem_status golem_runtime_recover(golem_journal *journal, const golem_runtime_options *options,
-    const golem_runtime_ops *ops, void *context, const golem_allocator *allocator, golem_runtime **out)
+GOLEM_RECORDED_API(golem_runtime_recover, (golem_journal *journal, const golem_runtime_options *options,
+    const golem_runtime_ops *ops, void *context, const golem_allocator *allocator, golem_runtime **out),
+    (journal, options, ops, context, allocator, out), NULL)
 {
     if (journal == NULL || options == NULL || ops == NULL || out == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
     golem_work_run *run = NULL; golem_replay_report report;
@@ -120,7 +128,7 @@ golem_status golem_runtime_recover(golem_journal *journal, const golem_runtime_o
     }
     golem_work_run_free(run); return s;
 }
-golem_status golem_runtime_step(golem_runtime *r)
+GOLEM_RECORDED_API(golem_runtime_step, (golem_runtime *r), (r), NULL)
 {
     if (r == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
     if (r->busy || r->checking) return GOLEM_ERR_INVALID_STATE;
@@ -177,7 +185,7 @@ golem_status golem_runtime_step(golem_runtime *r)
     event.type = GOLEM_JOURNAL_FINISHED; event.outcome = result.outcome; event.failure = result.failure; event.requirements_met = result.requirements_met;
     s = emit(r, &event); return leave(r, s);
 }
-golem_status golem_runtime_drive(golem_runtime *r)
+GOLEM_RECORDED_API(golem_runtime_drive, (golem_runtime *r), (r), NULL)
 {
     if (r == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
     if (r->busy || r->checking) return GOLEM_ERR_INVALID_STATE;
@@ -186,7 +194,7 @@ golem_status golem_runtime_drive(golem_runtime *r)
     }
     return r->reason;
 }
-golem_status golem_runtime_cancel(golem_runtime *r)
+GOLEM_RECORDED_REQUIRED_API(golem_runtime_cancel, (golem_runtime *r), (r))
 {
     if (r == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
     if (r->busy || r->checking) return GOLEM_ERR_INVALID_STATE;
@@ -200,7 +208,8 @@ golem_status golem_runtime_cancel(golem_runtime *r)
     if (s == GOLEM_OK) s = emit(r, &event);
     return leave(r, s);
 }
-golem_status golem_runtime_report_get(const golem_runtime *r, golem_runtime_report *out)
+GOLEM_RECORDED_REQUIRED_API(golem_runtime_report_get,
+    (const golem_runtime *r, golem_runtime_report *out), (r, out))
 {
     if (r == NULL || out == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
     golem_runtime_report report = {.dispatched = r->dispatched, .reentries = r->reentries, .stopped = r->stopped, .stop_reason = r->reason};
@@ -209,7 +218,8 @@ golem_status golem_runtime_report_get(const golem_runtime *r, golem_runtime_repo
 const golem_work_run *golem_runtime_run_borrow(const golem_runtime *r) { return r == NULL ? NULL : r->run; }
 
 static golem_status ownership_guard(void *context) { return golem_runtime_checkpoint(context); }
-golem_status golem_runtime_lease_bind(golem_runtime *r, golem_lease *lease, const golem_lease_token *token)
+GOLEM_RECORDED_API(golem_runtime_lease_bind,
+    (golem_runtime *r, golem_lease *lease, const golem_lease_token *token), (r, lease, token), NULL)
 {
     if (r == NULL || lease == NULL || token == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
     if (r->busy || r->checking || r->stepped || r->stopped || r->lease != NULL) return GOLEM_ERR_INVALID_STATE;
@@ -223,7 +233,7 @@ golem_status golem_runtime_lease_bind(golem_runtime *r, golem_lease *lease, cons
     r->run->ownership_check = ownership_guard; r->run->ownership_context = r;
     return GOLEM_OK;
 }
-golem_status golem_runtime_checkpoint(golem_runtime *r)
+GOLEM_RECORDED_REQUIRED_API(golem_runtime_checkpoint, (golem_runtime *r), (r))
 {
     if (r == NULL) return GOLEM_ERR_INVALID_ARGUMENT;
     if (r->checking) return GOLEM_ERR_INVALID_STATE;
@@ -236,7 +246,8 @@ golem_status golem_runtime_checkpoint(golem_runtime *r)
     if (s != GOLEM_OK) { r->stopped = true; r->reason = s; }
     return s;
 }
-golem_status golem_runtime_heartbeat(golem_runtime *r, uint64_t ttl, golem_lease_snapshot *out)
+GOLEM_RECORDED_REQUIRED_API(golem_runtime_heartbeat,
+    (golem_runtime *r, uint64_t ttl, golem_lease_snapshot *out), (r, ttl, out))
 {
     if (r == NULL || out == NULL || ttl == 0) return GOLEM_ERR_INVALID_ARGUMENT;
     if (r->checking || r->lease == NULL || r->stopped) return GOLEM_ERR_INVALID_STATE;

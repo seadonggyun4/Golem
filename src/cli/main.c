@@ -2,6 +2,7 @@
 #include "internal.h"
 #include "output.h"
 #include "golem/version.h"
+#include "golem/record.h"
 int golem_cli_work(int argc, char **argv);
 int golem_cli_doctor(int argc, char **argv);
 #include <inttypes.h>
@@ -15,6 +16,7 @@ static int usage(void)
         "  golem output read SHA256\n"
         "Default: compact large JSON responses; full preserves protocol output.\n"
         "Output controls precede COMMAND. See docs/cli-output.md.\n"
+        "Recording: set GOLEM_RECORD_ROOT to an existing private absolute directory.\n"
         "  golem init DIRECTORY\n"
         "  golem doctor clock | work WORK | admission ABSOLUTE_DISPOSABLE_DIRECTORY\n"
         "  golem work start NEW_WORK_DIR SPEC_JSON\n"
@@ -99,12 +101,13 @@ int golem_cli_completion(int argc, char **argv);
 int golem_cli_role(int argc, char **argv);
 int golem_cli_approval(int argc, char **argv);
 int golem_cli_session_binding(int argc, char **argv);
-int main(int argc, char **argv)
+static int dispatch(int argc, char **argv)
 {
     if (cli_output_options(&argc, argv) != 0) {
         fputs("golem: invalid output options; use --output-mode compact|full and an absolute --output-store before COMMAND\n", stderr);
         return 2;
     }
+    cli_error_command(argc >= 2 ? argv[1] : NULL);
     if (argc >= 2 && !strcmp(argv[1], "output")) return golem_cli_output(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "doctor")) return golem_cli_doctor(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "approval")) return golem_cli_approval(argc, argv);
@@ -164,6 +167,7 @@ int main(int argc, char **argv)
     golem_status closed = golem_evidence_close(store);
     if (status == GOLEM_OK) status = closed;
     if (status != GOLEM_OK) {
+        cli_error_note(status, "evidence", NULL);
         fprintf(stderr, "golem: %s\n", golem_status_string(status));
         return 1;
     }
@@ -179,4 +183,31 @@ int main(int argc, char **argv)
     if (verify || receipt) fputs(",\"verified\":true", stdout);
     puts("}");
     return fflush(stdout) == 0 && !ferror(stdout) ? 0 : 1;
+}
+
+int main(int argc, char **argv)
+{
+    cli_error_begin();
+    golem_record_options options = {.struct_size = sizeof(options), .version = 1,
+        .kind = "cli", .operation = "dispatch", .argv = argv,
+        .executable = argc && argv[0][0] == '/' ? argv[0] : NULL};
+    golem_record *record = NULL;
+    golem_status st = golem_record_begin(&options, &record);
+    if (st != GOLEM_OK) {
+        cli_error_note(st, "record.begin", NULL);
+        return cli_error_finish(1);
+    }
+    int code = cli_error_finish(dispatch(argc, argv));
+    golem_record_result result = {.struct_size = sizeof(result), .version = 1,
+        .operation_status = code ? GOLEM_ERR_INCOMPLETE_WORK : GOLEM_OK, .exit_code = code};
+    if (!code) {
+        cli_error_begin();
+        cli_error_command(argc >= 2 ? argv[1] : NULL);
+    }
+    st = golem_record_finish(record, &result);
+    if (st != GOLEM_OK) {
+        fputs("golem: recording incomplete after dispatch; inspect effects before retry\n", stderr);
+        if (!code) { cli_error_note(st, "record.finish", NULL); return cli_error_finish(1); }
+    }
+    return code ? code : cli_error_finish(0);
 }

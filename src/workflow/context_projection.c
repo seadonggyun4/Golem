@@ -1,4 +1,5 @@
 #include "context_internal.h"
+#include "../common/record_internal.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -348,9 +349,10 @@ golem_status golem_context_render(golem_document_store *s, golem_bytes request,
     json_object_put(o);
     return dw_report(d, st, NULL);
 }
-golem_status golem_context_publish(golem_document_store *s, golem_bytes request,
-                                   const golem_context_tokenizer *tokenizer, golem_receipt *receipt,
-                                   golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_context_publish,
+    (golem_document_store *s, golem_bytes request, const golem_context_tokenizer *tokenizer,
+     golem_receipt *receipt, golem_diagnostic *d),
+    (s, request, tokenizer, receipt, d), d)
 {
     if (!s || !receipt)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);

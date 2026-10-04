@@ -1,5 +1,30 @@
 add_executable(golem_context_api_helper context_api_helper.c)
+add_executable(golem_test_system_error test_system_error.c)
+target_link_libraries(golem_test_system_error PRIVATE Golem::golem Threads::Threads)
+golem_configure_target(golem_test_system_error)
+add_test(NAME system_error_scope COMMAND golem_test_system_error)
+set_tests_properties(system_error_scope PROPERTIES TIMEOUT 30 LABELS "restricted-diagnostic;diagnostics")
+add_executable(golem_system_error_faults system_error_faults.c)
+target_link_libraries(golem_system_error_faults PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
+golem_configure_target(golem_system_error_faults)
+add_executable(golem_system_error_clock system_error_clock.c)
+add_executable(golem_supervisor_diagnostics supervisor_diagnostics.c)
+target_link_libraries(golem_supervisor_diagnostics PRIVATE Golem::golem)
+golem_configure_target(golem_supervisor_diagnostics)
+add_executable(golem_resource_diagnostics resource_diagnostics.c)
+target_link_libraries(golem_resource_diagnostics PRIVATE Golem::golem)
+golem_configure_target(golem_resource_diagnostics)
+target_link_libraries(golem_system_error_clock PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_system_error_clock)
+add_test(NAME system_error_clock COMMAND golem_system_error_clock)
+set_tests_properties(system_error_clock PROPERTIES TIMEOUT 30 LABELS "restricted-diagnostic;diagnostics")
 add_executable(golem_work_record_helper work_record_helper.c)
+add_executable(golem_work_record_writer work_record_writer.c)
+target_link_libraries(golem_work_record_writer PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_work_record_writer)
+add_executable(golem_work_record_reader work_record_reader.c)
+target_link_libraries(golem_work_record_reader PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_work_record_reader)
 target_link_libraries(golem_work_record_helper PRIVATE Golem::golem)
 golem_configure_target(golem_work_record_helper)
 add_executable(golem_inventory_helper inventory_helper.c)
@@ -62,6 +87,8 @@ add_executable(golem_test_supervisor_stream test_supervisor_stream.c)
 target_link_libraries(golem_test_supervisor_stream PRIVATE Golem::golem)
 golem_configure_target(golem_test_supervisor_stream)
 add_test(NAME supervisor_stream COMMAND golem_test_supervisor_stream)
+add_test(NAME supervisor_spawn_diagnostics COMMAND golem_test_supervisor_stream --missing-spawn)
+set_tests_properties(supervisor_spawn_diagnostics PROPERTIES TIMEOUT 30 LABELS "host-required;diagnostics")
 set_tests_properties(execution_api PROPERTIES TIMEOUT 30)
 
 add_executable(golem_test_runtime_profile test_runtime_profile.c)
@@ -184,7 +211,45 @@ foreach(case lifecycle retry limits uncertain policy corruption recovery invalid
     set_tests_properties(daemon_${case} PROPERTIES TIMEOUT 60)
 endforeach()
 add_executable(golem_test_supervisor test_supervisor.c)
+add_executable(golem_native_record_helper native_record_helper.c)
+add_executable(golem_native_api_helper native_api_helper.c)
+target_link_libraries(golem_native_api_helper PRIVATE Golem::golem Threads::Threads PkgConfig::JSONC)
+golem_configure_target(golem_native_api_helper)
+target_link_libraries(golem_native_record_helper PRIVATE Golem::golem Threads::Threads)
+golem_configure_target(golem_native_record_helper)
 add_executable(golem_test_worker test_worker.c)
+add_executable(golem_worker_diagnostics worker_diagnostics.c)
+add_executable(golem_lifecycle_recording lifecycle_recording.c)
+add_executable(golem_runtime_clock_diagnostics runtime_clock_diagnostics.c)
+add_executable(golem_cgroup_exec_diagnostics cgroup_exec_diagnostics.c)
+add_executable(golem_document_cleanup_diagnostics document_cleanup_diagnostics.c)
+target_link_libraries(golem_document_cleanup_diagnostics PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
+golem_configure_target(golem_document_cleanup_diagnostics)
+add_test(NAME document_cleanup_diagnostics COMMAND golem_document_cleanup_diagnostics)
+set_tests_properties(document_cleanup_diagnostics PROPERTIES TIMEOUT 30 LABELS "restricted-diagnostic;diagnostics")
+foreach(target golem_lifecycle_recording golem_runtime_clock_diagnostics golem_cgroup_exec_diagnostics)
+    target_link_libraries(${target} PRIVATE Golem::golem)
+    golem_configure_target(${target})
+endforeach()
+add_test(NAME runtime_clock_diagnostics COMMAND golem_runtime_clock_diagnostics)
+add_test(NAME cgroup_exec_diagnostics COMMAND golem_cgroup_exec_diagnostics)
+set_tests_properties(runtime_clock_diagnostics cgroup_exec_diagnostics PROPERTIES
+    TIMEOUT 30 LABELS "restricted-diagnostic;diagnostics")
+add_executable(golem_queue_diagnostics queue_diagnostics.c)
+target_link_libraries(golem_queue_diagnostics PRIVATE Golem::golem OpenSSL::Crypto)
+golem_configure_target(golem_queue_diagnostics)
+foreach(kind inventory workspace)
+    add_executable(golem_${kind}_diagnostics traversal_diagnostics.c)
+    target_link_libraries(golem_${kind}_diagnostics PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
+    golem_configure_target(golem_${kind}_diagnostics)
+endforeach()
+target_compile_definitions(golem_workspace_diagnostics PRIVATE TEST_WORKSPACE=1)
+target_link_libraries(golem_worker_diagnostics PRIVATE Golem::golem Threads::Threads)
+golem_configure_target(golem_worker_diagnostics)
+foreach(case clock clock-value cancelled execute join)
+    add_test(NAME worker_diagnostics_${case} COMMAND golem_worker_diagnostics ${case})
+    set_tests_properties(worker_diagnostics_${case} PROPERTIES TIMEOUT 30 LABELS "restricted-diagnostic;diagnostics")
+endforeach()
 add_executable(golem_test_worker_faults test_worker_faults.c)
 target_link_libraries(golem_test_worker_faults PRIVATE Golem::golem Threads::Threads)
 golem_configure_target(golem_test_worker_faults)
@@ -279,7 +344,7 @@ target_link_libraries(golem_test_journal_faults PRIVATE Golem::golem)
 golem_configure_target(golem_test_journal_faults)
 add_test(NAME journal_syscall_faults COMMAND golem_test_journal_faults)
 add_executable(golem_test_recovery_publication test_recovery_publication.c
-    ${PROJECT_SOURCE_DIR}/src/cli/json.c ${PROJECT_SOURCE_DIR}/src/cli/output.c)
+    ${PROJECT_SOURCE_DIR}/src/cli/json.c ${PROJECT_SOURCE_DIR}/src/cli/output.c ${PROJECT_SOURCE_DIR}/src/cli/error.c)
 target_link_libraries(golem_test_recovery_publication PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
 golem_configure_target(golem_test_recovery_publication)
 add_test(NAME recovery_publication_faults COMMAND golem_test_recovery_publication)
@@ -313,7 +378,7 @@ if(GOLEM_BUILD_CLI)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
     add_executable(golem_output_helper output_helper.c
         ${PROJECT_SOURCE_DIR}/src/cli/output.c ${PROJECT_SOURCE_DIR}/src/cli/io.c
-        ${PROJECT_SOURCE_DIR}/src/cli/json.c)
+        ${PROJECT_SOURCE_DIR}/src/cli/json.c ${PROJECT_SOURCE_DIR}/src/cli/error.c)
     target_link_libraries(golem_output_helper PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
     golem_configure_target(golem_output_helper)
     add_test(NAME cli_output_default COMMAND ${Python3_EXECUTABLE}
@@ -334,6 +399,42 @@ if(GOLEM_BUILD_CLI)
     set_tests_properties(restricted_diagnostics diagnostic_tools
         PROPERTIES LABELS "restricted-diagnostic" TIMEOUT 120)
     add_test(NAME execution_recording COMMAND ${Python3_EXECUTABLE} -m unittest test_execution_record)
+    add_test(NAME syscall_recording COMMAND ${Python3_EXECUTABLE} -m unittest test_syscall_record)
+    set_tests_properties(syscall_recording PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;diagnostics" TIMEOUT 120)
+    add_test(NAME native_recording COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/native_record_integration.py $<TARGET_FILE:golem_cli>
+        $<TARGET_FILE:golem_native_record_helper> $<TARGET_FILE:golem_test_supervisor>
+        ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_test_supervisor_stream>)
+    set_tests_properties(native_recording PROPERTIES TIMEOUT 120 LABELS "recording;host-required")
+    add_test(NAME native_api_recording COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/native_api_integration.py $<TARGET_FILE:golem_native_api_helper> ${PROJECT_SOURCE_DIR}
+        $<TARGET_FILE:golem_lifecycle_recording>)
+    add_test(NAME native_api_inventory COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/native_api_inventory.py ${PROJECT_SOURCE_DIR})
+    add_test(NAME traversal_diagnostics COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/traversal_diagnostics.py
+        $<TARGET_FILE:golem_inventory_diagnostics> $<TARGET_FILE:golem_workspace_diagnostics>
+        $<TARGET_FILE:golem_queue_diagnostics>)
+    set_tests_properties(traversal_diagnostics PROPERTIES TIMEOUT 60 LABELS "restricted-diagnostic;diagnostics")
+    set_tests_properties(native_api_recording native_api_inventory PROPERTIES TIMEOUT 120 LABELS "recording;restricted-diagnostic")
+    add_test(NAME native_api_scenarios COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/native_api_scenarios.py ${PROJECT_SOURCE_DIR}
+        --case golem_completion_call ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/completion_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} Completion.test_failure_repair_reaches_completion
+        --case golem_session_binding_call ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/binding_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_agent_client> $<TARGET_FILE:golem_binding_client>
+        Binding.test_bound_lifecycle_rejects_legacy_claim_and_resume
+        --case golem_approval_call ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/approval_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_approval_client>
+        Approval.test_one_use_and_readonly_result_recovery
+        --case golem_worker_start $<TARGET_FILE:golem_test_worker> echo
+        --case golem_daemon_tick $<TARGET_FILE:golem_test_daemon> lifecycle @CASE_DIR@
+        --case golem_runtime_drive $<TARGET_FILE:golem_test_runtime> matrix)
+    set_tests_properties(native_api_scenarios PROPERTIES TIMEOUT 660 LABELS "recording;host-required")
     set_tests_properties(execution_recording PROPERTIES
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools" LABELS "restricted-diagnostic" TIMEOUT 120)
     add_test(NAME agent_io_integration COMMAND ${Python3_EXECUTABLE}
@@ -356,6 +457,23 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/work_record_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR})
     set_tests_properties(work_record_integration PROPERTIES TIMEOUT 180)
+    add_test(NAME work_record_writer COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/work_record_writer.py $<TARGET_FILE:golem_work_record_writer>)
+    add_test(NAME work_record_reader COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/work_record_reader.py $<TARGET_FILE:golem_work_record_reader>)
+    add_test(NAME system_error_faults COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/system_error_faults.py $<TARGET_FILE:golem_system_error_faults>)
+    add_test(NAME supervisor_diagnostics COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/supervisor_diagnostics.py $<TARGET_FILE:golem_supervisor_diagnostics>)
+    set_tests_properties(supervisor_diagnostics PROPERTIES TIMEOUT 60 LABELS "restricted-diagnostic;diagnostics")
+    add_test(NAME resource_diagnostics COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/resource_diagnostics.py $<TARGET_FILE:golem_resource_diagnostics>)
+    set_tests_properties(resource_diagnostics PROPERTIES TIMEOUT 60 LABELS "restricted-diagnostic;diagnostics")
+    set_tests_properties(system_error_faults PROPERTIES TIMEOUT 60 LABELS "restricted-diagnostic;diagnostics")
+    add_test(NAME work_record_inventory COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/work_record_inventory.py ${PROJECT_SOURCE_DIR})
+    set_tests_properties(work_record_writer work_record_reader work_record_inventory PROPERTIES
+        TIMEOUT 60 LABELS "restricted-diagnostic;recording")
     add_test(NAME history_incremental_integration COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/history_incremental_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR})
@@ -496,6 +614,16 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/reentry_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER})
     set_tests_properties(reentry_cli PROPERTIES TIMEOUT 360)
+    add_executable(golem_report_timing_helper report_timing_helper.c)
+    target_link_libraries(golem_report_timing_helper PRIVATE Golem::golem PkgConfig::JSONC)
+    golem_configure_target(golem_report_timing_helper)
+    add_test(NAME report_timing_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/report_timing_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_report_timing_helper>)
+    set_tests_properties(report_timing_cli PROPERTIES TIMEOUT 180 LABELS "reporting;reentry")
+    add_test(NAME reporting_inventory COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/reporting_inventory.py ${PROJECT_SOURCE_DIR})
+    set_tests_properties(reporting_inventory PROPERTIES TIMEOUT 30 LABELS "reporting;restricted-diagnostic")
     add_test(NAME completion_cli COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/completion_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} -v)
@@ -552,6 +680,13 @@ if(GOLEM_BUILD_CLI)
     add_test(NAME daemon_cli COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/daemon_integration.py $<TARGET_FILE:golem_cli> ${CMAKE_CURRENT_BINARY_DIR})
     set_tests_properties(daemon_cli PROPERTIES TIMEOUT 120)
+    add_executable(golem_cli_error_helper cli_error_helper.c)
+    target_link_libraries(golem_cli_error_helper PRIVATE Golem::golem PkgConfig::JSONC)
+    golem_configure_target(golem_cli_error_helper)
+    add_test(NAME cli_error_contract COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/cli_error_integration.py $<TARGET_FILE:golem_cli>
+        $<TARGET_FILE:golem_cli_error_helper> ${PROJECT_SOURCE_DIR})
+    set_tests_properties(cli_error_contract PROPERTIES TIMEOUT 60 LABELS "restricted-diagnostic")
     add_test(NAME cli_integration COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/cli_integration.py $<TARGET_FILE:golem_cli> ${CMAKE_CURRENT_BINARY_DIR})
     set_tests_properties(cli_integration PROPERTIES TIMEOUT 120)

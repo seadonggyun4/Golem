@@ -79,7 +79,10 @@ Existing view/delta/raw/measure commands remain available.
 
 - Existing assessment inputs, metadata schemas, CAS and journals are NOT rewritten
   or deleted. Physical duplicate bytes in legacy metadata remain; consolidation
-  is at the reading/reporting boundary, not storage compaction.
+  covers the reading/reporting boundary and the native
+  [common write protocol](work-record-writing.md), not storage compaction.
+  Replay and history projection also share its frame/CAS validation mechanism;
+  domain-specific reduction and authorization remain separate.
 - Discovery report, document inspect, session status and work history retain
   their contracts. Required native completion reports and QA gates remain required.
 - Old observation bundles still support old views/report. `record-view` rejects a

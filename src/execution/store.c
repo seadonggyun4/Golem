@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "internal.h"
+#include "../common/record_internal.h"
 #include "../policy/approval_internal.h"
 #include "../agent_session/internal.h"
 #include "../reentry/internal.h"
@@ -85,7 +86,7 @@ static golem_status issue(golem_document_store *s, struct json_object *o, golem_
     char name[65];
     if (st == GOLEM_OK) {
         hex(out, name);
-        st = dw_publish(dir, name, (golem_bytes){out->bytes, 32});
+        st = dw_record_reference(s, dir, name, out, false);
     }
     if (dir >= 0)
         close(dir);
@@ -423,16 +424,18 @@ static golem_status call(golem_document_store *s, golem_bytes bytes, const golem
     return dw_report(d, st, NULL);
 }
 
-golem_status golem_execution_call(golem_document_store *s, golem_bytes bytes,
-                                  const golem_digest *approval, golem_execution_reply *out,
-                                  golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_execution_call,
+    (golem_document_store *s, golem_bytes bytes, const golem_digest *approval,
+     golem_execution_reply *out, golem_diagnostic *d),
+    (s, bytes, approval, out, d), d)
 {
     return call(s, bytes, approval, NULL, NULL, out, d);
 }
 
-golem_status golem_execution_call_authorized(golem_document_store *s, golem_bytes bytes,
-                                             const golem_execution_approval *approval,
-                                             golem_execution_reply *out, golem_diagnostic *d)
+GOLEM_RECORDED_API(golem_execution_call_authorized,
+    (golem_document_store *s, golem_bytes bytes, const golem_execution_approval *approval,
+     golem_execution_reply *out, golem_diagnostic *d),
+    (s, bytes, approval, out, d), d)
 {
     if (approval && (approval->struct_size != sizeof(*approval) || approval->version != 1))
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);

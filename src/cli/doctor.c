@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include "golem/admission.h"
+#include "error.h"
 #include "golem/document.h"
 #include "../agent_session/internal.h"
 #include <errno.h>
@@ -52,5 +53,6 @@ int golem_cli_doctor(int argc, char **argv)
     printf("{\"schema\":\"golem.doctor.v1\",\"status\":\"%s\","
            "\"code\":%d,\"diagnostic\":\"%s\"}\n",
            status == GOLEM_OK ? "PASS" : "FAIL", (int)status, diagnostic.message);
+    cli_error_note(status, "doctor_probe", &diagnostic);
     return status == GOLEM_OK ? 0 : 1;
 }

@@ -2,6 +2,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _DARWIN_C_SOURCE
 #include "candidate_host.h"
+#include "golem/system_error.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <poll.h>
@@ -23,9 +24,11 @@ static void stop_signal(int signal_number)
 static uint64_t milliseconds(void)
 {
     struct timespec now;
-    return clock_gettime(CLOCK_MONOTONIC, &now)
-               ? 0
-               : (uint64_t)now.tv_sec * 1000 + (uint64_t)now.tv_nsec / 1000000;
+    if (clock_gettime(CLOCK_MONOTONIC, &now)) {
+        (void)golem_system_error_note(GOLEM_ERR_IO, "host.transport", "clock_gettime", errno);
+        return 0;
+    }
+    return (uint64_t)now.tv_sec * 1000 + (uint64_t)now.tv_nsec / 1000000;
 }
 
 static golem_status transfer(int fd, void *data, size_t size, bool writing, uint64_t deadline)
@@ -34,19 +37,20 @@ static golem_status transfer(int fd, void *data, size_t size, bool writing, uint
     while (offset < size) {
         uint64_t now = milliseconds();
         if (!now || now >= deadline || stopping)
-            return GOLEM_ERR_IO;
+            return golem_system_error_note(GOLEM_ERR_IO, "host.transport", "deadline_or_stop", 0);
         struct pollfd p = {.fd = fd, .events = writing ? POLLOUT : POLLIN};
         int ready = poll(&p, 1, (int)(deadline - now));
         if (ready < 0 && errno == EINTR)
             continue;
         if (ready <= 0)
-            return GOLEM_ERR_IO;
+            return golem_system_error_note(GOLEM_ERR_IO, "host.transport", ready < 0 ? "poll" : "poll_timeout", ready < 0 ? errno : 0);
         ssize_t n = writing ? send(fd, (uint8_t *)data + offset, size - offset, 0)
                             : recv(fd, (uint8_t *)data + offset, size - offset, 0);
         if (n < 0 && (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK))
             continue;
         if (n <= 0)
-            return GOLEM_ERR_IO;
+            return golem_system_error_note(GOLEM_ERR_IO, "host.transport",
+                n < 0 ? (writing ? "send" : "recv") : "peer_no_progress", n < 0 ? errno : 0);
         offset += (size_t)n;
     }
     return GOLEM_OK;
@@ -106,7 +110,7 @@ static golem_status address(const char *path, struct sockaddr_un *out)
     golem_status st = ws_directory(parent, &directory);
     struct stat s;
     if (st == GOLEM_OK && fstat(directory, &s))
-        st = GOLEM_ERR_IO;
+        st = golem_system_error_note(GOLEM_ERR_IO, "host.transport", "fstat_directory", errno);
     if (st == GOLEM_OK && (s.st_uid != geteuid() || (s.st_mode & 0077)))
         st = GOLEM_ERR_POLICY_DENIED;
     if (directory >= 0)
@@ -123,12 +127,15 @@ static golem_status peer(int fd)
 #if defined(__APPLE__)
     uid_t uid;
     gid_t gid;
-    return getpeereid(fd, &uid, &gid) == 0 && uid == geteuid() ? GOLEM_OK : GOLEM_ERR_POLICY_DENIED;
+    if (getpeereid(fd, &uid, &gid))
+        return golem_system_error_note(GOLEM_ERR_POLICY_DENIED, "host.transport", "getpeereid", errno);
+    return uid == geteuid() ? GOLEM_OK : GOLEM_ERR_POLICY_DENIED;
 #elif defined(__linux__)
     struct ucred credentials;
     socklen_t size = sizeof(credentials);
-    return getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &credentials, &size) == 0 &&
-                   size == sizeof(credentials) && credentials.uid == geteuid()
+    if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &credentials, &size))
+        return golem_system_error_note(GOLEM_ERR_POLICY_DENIED, "host.transport", "getsockopt", errno);
+    return size == sizeof(credentials) && credentials.uid == geteuid()
                ? GOLEM_OK
                : GOLEM_ERR_POLICY_DENIED;
 #else
@@ -143,7 +150,7 @@ static golem_status nonblocking(int fd)
     return flags >= 0 && fcntl(fd, F_SETFL, flags | O_NONBLOCK) == 0 &&
                    fcntl(fd, F_SETFD, FD_CLOEXEC) == 0
                ? GOLEM_OK
-               : GOLEM_ERR_IO;
+               : golem_system_error_note(GOLEM_ERR_IO, "host.transport", "fcntl", errno);
 }
 
 golem_status ch_client(const char *path, struct json_object *envelope, struct json_object **out)
@@ -151,17 +158,19 @@ golem_status ch_client(const char *path, struct json_object *envelope, struct js
     struct sockaddr_un addr;
     golem_status st = address(path, &addr);
     struct stat endpoint;
-    if (st == GOLEM_OK && (lstat(path, &endpoint) || !S_ISSOCK(endpoint.st_mode) ||
+    if (st == GOLEM_OK && lstat(path, &endpoint))
+        st = golem_system_error_note(GOLEM_ERR_POLICY_DENIED, "host.transport", "lstat_endpoint", errno);
+    if (st == GOLEM_OK && (!S_ISSOCK(endpoint.st_mode) ||
                            endpoint.st_uid != geteuid() || (endpoint.st_mode & 0077)))
         st = GOLEM_ERR_POLICY_DENIED;
     int fd = st == GOLEM_OK ? socket(AF_UNIX, SOCK_STREAM, 0) : -1;
     if (st == GOLEM_OK && fd < 0)
-        st = GOLEM_ERR_IO;
+        st = golem_system_error_note(GOLEM_ERR_IO, "host.transport", "socket", errno);
     (void)signal(SIGPIPE, SIG_IGN);
     if (st == GOLEM_OK)
         st = nonblocking(fd);
     if (st == GOLEM_OK && connect(fd, (struct sockaddr *)&addr, sizeof(addr)) != 0)
-        st = GOLEM_ERR_IO;
+        st = golem_system_error_note(GOLEM_ERR_IO, "host.transport", "connect", errno);
     if (st == GOLEM_OK)
         st = peer(fd);
     if (st == GOLEM_OK)
@@ -185,18 +194,20 @@ golem_status ch_serve(struct json_object *config, const char *path)
         st = ch_open(&host, config);
     int fd = st == GOLEM_OK ? socket(AF_UNIX, SOCK_STREAM, 0) : -1;
     if (st == GOLEM_OK && fd < 0)
-        st = GOLEM_ERR_IO;
+        st = golem_system_error_note(GOLEM_ERR_IO, "host.transport", "socket", errno);
     bool bound = false;
     if (st == GOLEM_OK) {
         if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)))
-            st = GOLEM_ERR_IO;
+            st = golem_system_error_note(GOLEM_ERR_IO, "host.transport", "bind", errno);
         else if (lstat(path, &owned))
-            st = GOLEM_ERR_IO;
+            st = golem_system_error_note(GOLEM_ERR_IO, "host.transport", "lstat_bound", errno);
         else
             bound = true;
     }
-    if (st == GOLEM_OK && (chmod(path, 0600) || listen(fd, 8)))
-        st = GOLEM_ERR_IO;
+    if (st == GOLEM_OK && chmod(path, 0600))
+        st = golem_system_error_note(GOLEM_ERR_IO, "host.transport", "chmod", errno);
+    if (st == GOLEM_OK && listen(fd, 8))
+        st = golem_system_error_note(GOLEM_ERR_IO, "host.transport", "listen", errno);
     if (st == GOLEM_OK)
         st = nonblocking(fd);
     stopping = 0;
@@ -209,7 +220,7 @@ golem_status ch_serve(struct json_object *config, const char *path)
         if (ready < 0 && errno == EINTR)
             continue;
         if (ready < 0) {
-            st = GOLEM_ERR_IO;
+            st = golem_system_error_note(GOLEM_ERR_IO, "host.transport", "poll_accept", errno);
             break;
         }
         if (!ready)
@@ -218,7 +229,7 @@ golem_status ch_serve(struct json_object *config, const char *path)
         if (client < 0 && (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK))
             continue;
         if (client < 0) {
-            st = GOLEM_ERR_IO;
+            st = golem_system_error_note(GOLEM_ERR_IO, "host.transport", "accept", errno);
             break;
         }
         struct json_object *request = NULL, *result = NULL, *response = json_object_new_object();

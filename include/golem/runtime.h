@@ -51,7 +51,8 @@ typedef struct golem_runtime_report {
 
 /* Single-threaded local runtime, no background threads or global state. Create
  * deep-copies capsule/id/options/ops/allocator, BORROWS callback context until
- * free. Owns its WorkRun. Allocator context must outlive free. No I/O at create.
+ * free. Owns its WorkRun. Allocator context must outlive free. No domain I/O at
+ * create; opt-in automatic execution recording may perform audit storage I/O.
  * Inputs borrowed only for call, outputs unchanged on error. No aliasing.
  * record is mandatory so no execution silently escapes the journal contract.
  * Serialize calls; callbacks cannot reenter step/drive/cancel/free. Reentry is

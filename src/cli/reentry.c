@@ -31,6 +31,7 @@ int golem_cli_reentry(int argc,char **argv)
     if(st==GOLEM_OK && !report) fputc('\n',stdout);
     free(input.data); golem_execution_reply_free(&reply);
     golem_status closed=golem_document_store_close(store); if(st==GOLEM_OK) st=closed;
+    cli_error_note(st, "reentry", NULL);
     if(st!=GOLEM_OK) fprintf(stderr,"reentry: %s\n",golem_status_string(st));
     return st==GOLEM_OK?0:1;
 }

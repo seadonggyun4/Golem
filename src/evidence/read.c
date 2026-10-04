@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _FILE_OFFSET_BITS 64
 #include "internal.h"
+#include "golem/system_error.h"
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -15,7 +16,10 @@ golem_status golem_evidence_read(golem_evidence_store *store, const golem_digest
     golem_status status = golem_evidence_object_open(store, digest, &fd);
     struct stat info;
     size_t length = 0;
-    if (status == GOLEM_OK && (fstat(fd, &info) < 0 || info.st_size < 0)) status = GOLEM_ERR_IO;
+    if (status == GOLEM_OK && fstat(fd, &info) < 0)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.read", "fstat", errno);
+    if (status == GOLEM_OK && info.st_size < 0)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.read", "file_size", 0);
     if (status == GOLEM_OK && ((uintmax_t)info.st_size > max_size || (uintmax_t)info.st_size > GOLEM_SHA256_MAX_BYTES))
         status = GOLEM_ERR_OVERFLOW;
     void *memory = NULL;
@@ -29,16 +33,20 @@ golem_status golem_evidence_read(golem_evidence_store *store, const golem_digest
         if (amount > GOLEM_EVIDENCE_CHUNK) amount = GOLEM_EVIDENCE_CHUNK;
         ssize_t n = read(fd, (uint8_t *)memory + offset, amount);
         if (n < 0 && errno == EINTR) continue;
-        if (n <= 0) { status = GOLEM_ERR_IO; break; }
+        if (n <= 0) {
+            status = golem_system_error_note(GOLEM_ERR_IO, "evidence.read", n < 0 ? "read" : "unexpected_eof", n < 0 ? errno : 0);
+            break;
+        }
         offset += (size_t)n;
     }
     if (status == GOLEM_OK) {
         uint8_t extra;
         ssize_t n;
         do { n = read(fd, &extra, 1); } while (n < 0 && errno == EINTR);
-        if (n != 0) status = GOLEM_ERR_IO;
+        if (n != 0) status = golem_system_error_note(GOLEM_ERR_IO, "evidence.read", n < 0 ? "read_tail" : "unexpected_tail", n < 0 ? errno : 0);
     }
-    if (fd >= 0 && close(fd) < 0 && status == GOLEM_OK) status = GOLEM_ERR_IO;
+    if (fd >= 0 && close(fd) < 0 && status == GOLEM_OK)
+        status = golem_system_error_note(GOLEM_ERR_IO, "evidence.read", "close", errno);
     golem_digest actual;
     if (status == GOLEM_OK) status = golem_digest_bytes((golem_bytes){memory, length}, &actual);
     if (status == GOLEM_OK && memcmp(actual.bytes, digest->bytes, GOLEM_DIGEST_SIZE) != 0)
