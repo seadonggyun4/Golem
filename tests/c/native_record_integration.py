@@ -58,6 +58,14 @@ class NativeRecord(unittest.TestCase):
         self.assertTrue(any(r["result"]["exit_code"] == 17 for r in records))
         self.assertTrue(any(r["result"]["signal_number"] for r in records))
 
+    def test_spawn_failure_preserves_diagnostic_with_recording(self):
+        subprocess.run([STREAM, "--missing-spawn"], env=self.env, check=True, capture_output=True)
+        records = self.records()
+        self.assertEqual(len(records), 1)
+        self.assertFalse(records[0]["result"]["spawned"])
+        self.assertFalse(records[0]["result"]["reaped"])
+        self.assertEqual(records[0]["result"]["operation_status"], 5)
+
     def test_bulk_and_streamed_preserve_callbacks(self):
         subprocess.run([STREAM], env=self.env, check=True, capture_output=True)
         records = self.records()

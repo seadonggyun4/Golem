@@ -10,6 +10,7 @@ PRIVATE = frozenset({"project-docs", "credentials", "secrets", "reports", "works
 BASE = frozenset({"CMakeLists.txt", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"})
 TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.py",
     "execution_record.py", "test_execution_record.py",
+    "native_record.py", "syscall_record.py", "test_syscall_record.py",
     "doctor_environment.py", "test_doctor_environment.py", "classify_failures.py",
     "test_classify_failures.py", "verify_environment.py", "test_verify_environment.py",
     "agent_io.py", "test_agent_io.py", "test_procedure.py",

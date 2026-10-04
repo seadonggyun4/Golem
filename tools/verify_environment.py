@@ -185,7 +185,7 @@ def run(source, preset, profile, output, roots, timeout, definitions=()):
             report["doctor_error"] = str(exc)
         # A failing preflight never suppresses a requested full suite.
         junit = output / "results.xml"
-        result = execute(output, "ctest", [*ctest, "--output-on-failure", "--no-tests=error",
+        result = execute(output, "ctest", [*ctest, "--parallel", "2", "--output-on-failure", "--no-tests=error",
                                          "--output-junit", junit], timeout, source)
         report["processes"]["ctest"] = result
         passed = successful(result) and adjudicate(junit, names)

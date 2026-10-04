@@ -54,6 +54,9 @@ class EvidenceTests(unittest.TestCase):
                 "status": "UNSUPPORTED_ENVIRONMENT", "roots": [{"status": "FAIL"}],
                 "binary_sha256": verify.digest(self.build / "golem"), "binary_unchanged": True}))
         elif name == "ctest":
+            self.assertEqual(argv[argv.index("--parallel") + 1], "2")
+            self.assertIn("--no-tests=error", argv)
+            self.assertNotIn("-R", argv)
             names = verify.select_tests(inventory(), "-L" in argv)
             (output / "results.xml").write_text('<testsuite>' + ''.join(
                 f'<testcase name="{n}" status="run"/>' for n in names) + '</testsuite>')

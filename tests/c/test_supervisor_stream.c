@@ -47,7 +47,9 @@ int main(int argc, char **argv)
         golem_system_error_scope errors;
         CHECK(golem_system_error_begin(&errors) == GOLEM_OK);
         errno = EBUSY;
-        CHECK(golem_supervisor_run_streamed("/dev/null/golem-not-executable", args, "/", env,
+        /* Hashing a missing executable fails before spawn when recording is on.
+         * A valid executable with an impossible cwd reaches real posix_spawn. */
+        CHECK(golem_supervisor_run_streamed(argv[0], args, "/dev/null/golem-not-directory", env,
             (golem_bytes){NULL, 0}, UINT64_C(3000000000), NULL, NULL, &result, &options,
             &captured) == GOLEM_ERR_IO);
         CHECK(golem_system_error_end(&errors) == GOLEM_OK);

@@ -46,6 +46,7 @@ class SourceSnapshotTests(unittest.TestCase):
 
     def test_runtime_harness_dependencies_are_explicit(self):
         for name in ("verify_runtime.py", "test_verify_runtime.py", "verify_agent.py",
+                     "native_record.py", "syscall_record.py", "test_syscall_record.py",
                      "benchmark_runtime.py", "event_bridge.c", "event_bridge_limits.h"):
             self.assertTrue(selected("tools/" + name))
         self.assertFalse(selected("tools/local_report.py"))
@@ -58,13 +59,17 @@ class SourceSnapshotTests(unittest.TestCase):
             snapshot(root, output)
             self.assertFalse((output / ".git").exists())
             self.assertTrue((output / "tools/doctor_environment.py").is_file())
+            for name in ("native_record.py", "syscall_record.py", "test_syscall_record.py"):
+                self.assertTrue((output / "tools" / name).is_file(), name)
             env = {k: v for k, v in os.environ.items()
                    if not k.startswith("GIT_") and k not in ("PYTHONPATH", "PYTHONHOME")}
             result = subprocess.run([sys.executable, "-m", "unittest", "test_doctor_environment",
-                                     "test_classify_failures", "test_verify_environment", "test_agent_io", "test_agent_entrypoint", "test_instruction_bundle"],
+                                     "test_classify_failures", "test_verify_environment", "test_agent_io", "test_agent_entrypoint", "test_instruction_bundle", "test_syscall_record"],
                                     cwd=output / "tools", env=env, capture_output=True,
                                     text=True, timeout=60)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            subprocess.run([sys.executable, "-c", "import native_record"],
+                           cwd=output / "tools", env=env, check=True, timeout=30)
 
     def test_scope(self):
         for profile in ("validation", "conan"):
