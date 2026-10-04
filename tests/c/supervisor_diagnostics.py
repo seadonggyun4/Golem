@@ -1,6 +1,9 @@
 """Deterministic supervisor failures, without spawning or signalling children."""
 import subprocess
 import sys
+import os
+import tempfile
+from pathlib import Path
 
 cases = [(name, name, "EINVAL") for name in (
     "actions_init", "attributes_init", "addchdir", "dup_stdin", "close_stdin",
@@ -21,4 +24,11 @@ if sys.platform == "darwin":
     cases.append(("setsockopt", "setsockopt", "EACCES"))
 for case in cases:
     subprocess.run([sys.argv[1], *case], check=True)
-print(f"{len(cases)} supervisor diagnostic scenarios passed")
+with tempfile.TemporaryDirectory(prefix="golem-supervisor-diagnostics-") as directory:
+    root = Path(directory).resolve()
+    env = dict(os.environ, GOLEM_RECORD_ROOT=str(root))
+    env.pop("GOLEM_RECORD_SOURCE_MANIFEST", None)
+    for case in cases:
+        subprocess.run([str(Path(sys.argv[1]).resolve()), *case], env=env, check=True)
+    assert len(list(root.glob("*/manifest.json"))) == len(cases)
+print(f"{len(cases)} supervisor diagnostic scenarios passed with inherited and explicit recording")

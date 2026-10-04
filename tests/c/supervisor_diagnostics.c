@@ -135,7 +135,9 @@ int main(int argc, char **argv)
     mode = argv[1];
     golem_system_error_scope scope;
     CHECK(golem_system_error_begin(&scope) == GOLEM_OK);
-    char *args[] = {"/private/unreported-executable", NULL}, *env[] = {NULL};
+    /* Recording hashes the executable before reaching the mocked spawn. Use
+     * this real fixture binary so recording-enabled suites reach each fault. */
+    char *args[] = {argv[0], NULL}, *env[] = {NULL};
     golem_supervisor_result result = {.exit_code = 73};
     golem_supervisor_observation observed = {0};
     golem_status st = golem_supervisor_run_observed(args[0], args, "/", env,
