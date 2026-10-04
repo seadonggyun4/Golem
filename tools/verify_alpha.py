@@ -14,9 +14,13 @@ from execution_record import run as recorded_run, private_directory
 
 def run(args, cwd, env, *, records, source):
     print("+ " + " ".join(map(str, args)), flush=True)
-    result = recorded_run(args, destination=records, cwd=cwd, source=source, env=env, timeout=900)
+    result = recorded_run(args, destination=records, cwd=cwd, source=source, env=env, timeout=900,
+                          check=False)
     sys.stdout.buffer.write(result.stdout)
     sys.stderr.buffer.write(result.stderr)
+    sys.stdout.buffer.flush()
+    sys.stderr.buffer.flush()
+    result.check_returncode()
 
 
 def snapshot(root, destination):

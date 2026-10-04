@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 import subprocess
 import unittest
+import io
+from types import SimpleNamespace
 from unittest.mock import patch
 import verify_alpha
 from verify_alpha import selected, snapshot, audit_install
@@ -12,6 +14,20 @@ from source_policy import export_sources, FIXTURES
 
 
 class SourceSnapshotTests(unittest.TestCase):
+    def test_failed_command_emits_logs_and_preserves_failure(self):
+        stdout, stderr = io.BytesIO(), io.BytesIO()
+        result = subprocess.CompletedProcess(["test-command"], 7, b"test output\n", b"test error\n")
+        with patch.object(verify_alpha, "recorded_run", return_value=result) as execute, \
+             patch.object(verify_alpha.sys, "stdout", SimpleNamespace(buffer=stdout)), \
+             patch.object(verify_alpha.sys, "stderr", SimpleNamespace(buffer=stderr)), \
+             patch("builtins.print"):
+            with self.assertRaises(subprocess.CalledProcessError) as raised:
+                verify_alpha.run(["test-command"], Path("."), {}, records=Path("records"), source=Path("."))
+        self.assertEqual(raised.exception.returncode, 7)
+        self.assertEqual(stdout.getvalue(), result.stdout)
+        self.assertEqual(stderr.getvalue(), result.stderr)
+        self.assertFalse(execute.call_args.kwargs["check"])
+
     def test_clean_suite_keeps_all_tests_with_bounded_parallelism(self):
         commands = []
         with tempfile.TemporaryDirectory() as tmp:
