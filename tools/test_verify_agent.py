@@ -57,9 +57,19 @@ class ConformanceToolTests(unittest.TestCase):
         self.assertFalse(marker.exists())
 
     def test_capture_output_limit_is_failure_even_with_exit_zero(self):
-        with patch.object(gate, "LIMIT", 32):
+        # Isolate output accounting from platform-specific process-group cleanup.
+        # This child creates no descendants and capture still waits for its exit.
+        with patch.object(gate, "LIMIT", 32), patch.object(
+                gate.os, "killpg", side_effect=ProcessLookupError):
             r = gate.capture([self.cli, "-c", "print('x' * 256)"], self.output(), 10)
+        self.assertEqual(r["returncode"], 0)
         self.assertEqual(r["reason"], "OUTPUT_LIMIT")
+
+    def test_cleanup_denied_preserved_when_output_exceeds_limit(self):
+        with patch.object(gate, "LIMIT", 32), patch.object(
+                gate.os, "killpg", side_effect=PermissionError("denied")):
+            r = gate.capture([self.cli, "-c", "print('x' * 256)"], self.output(), 10)
+        self.assertEqual(r["reason"], "CLEANUP_DENIED")
 
     def test_cleanup_denied_never_becomes_success(self):
         with patch.object(gate.os, "killpg", side_effect=PermissionError("denied")):
