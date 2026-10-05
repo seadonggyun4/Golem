@@ -16,7 +16,7 @@ class GolemConan(ConanFile):
     license = "PolyForm-Noncommercial-1.0.0"
     author = "Donggyun Seo <seadonggyun@gmail.com>"
     url = "https://github.com/seadonggyun4/Golem"
-    description = "Headless Agentic Work Engine with durable evidence and policy boundaries"
+    description = "Headless Agentic Workflow Engine with durable evidence and policy boundaries"
     settings = "os", "arch", "compiler", "build_type"
     options = {"fPIC": [True], "with_cli": [True, False]}
     default_options = {"fPIC": True, "with_cli": True}

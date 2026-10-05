@@ -2,7 +2,7 @@
   <img width="650" alt="Golem Banner" src="assets/Golem.png" />
 </div>
 
-<h1 align="center">Golem — Agentic Work Engine</h1>
+<h1 align="center">Golem — Agentic Workflow Engine</h1>
 
 <p align="center">
   <strong>A headless work runtime that carries Markdown and verified results through to completion</strong>
@@ -22,7 +22,7 @@
 
 **Supported agents: Codex and Claude.** Golem helps the agent already working with you carry Markdown documents and verification results through to completion. Launching another agent is not the central idea.
 
-The agent researches, writes documents and edits code. Golem manages document dependencies, freshness, execution evidence, permissions and completion conditions. **AWE (Agentic Work Engine) is the category; Golem is the product.** It provides a C17 engine, CLI, JSON and Markdown, without a UI client.
+The agent researches, writes documents and edits code. Golem manages document dependencies, freshness, execution evidence, permissions and completion conditions. **AWE (Agentic Workflow Engine) is the category; Golem is the product.** It provides a C17 engine, CLI, JSON and Markdown, without a UI client.
 
 ## Work Cycle
 

@@ -1,6 +1,11 @@
 # AWE Concepts in Golem
 
-`AWE — Agentic Work Engine` is the category name. `Golem` is the product and implementation.
+`AWE — Agentic Workflow Engine` is the category name. `Golem` is the product and implementation.
+
+`Workflow` denotes the governed stages, transitions, verification, recovery, and
+completion of agentic activity. `Work` denotes an individual managed unit of
+work; existing Work types, API names, schemas, and stored evidence retain their
+names. This terminology clarification does not change runtime behavior.
 
 Golem implements a headless runtime model for evidence-bound agent work. The central planning object is a `Work Capsule`; each execution is a `WorkRun` made of provider-specific `StageRun` attempts.
 

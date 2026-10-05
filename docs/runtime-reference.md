@@ -8,7 +8,7 @@ Subsystem descriptions apply to their individual APIs, not the entire product.
 
 <img src="../assets/Golem.png" alt="Golem — Awaken the worker." width="500">
 
-Golem is the product implementation of `AWE — Agentic Work Engine`.
+Golem is the product implementation of `AWE — Agentic Workflow Engine`.
 
 AWE is the academic/category name. Golem is the product name.
 

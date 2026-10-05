@@ -1,4 +1,4 @@
-"""Golem product package for the Agentic Work Engine runtime."""
+"""Golem product package for the Agentic Workflow Engine runtime."""
 
 from golem.core.models import (
     AcceptanceCriterion,

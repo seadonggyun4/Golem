@@ -4,9 +4,13 @@
 
 Decision date: 2026-09-21.
 
+Terminology clarified on 2026-10-05: **AWE = Agentic Workflow Engine**.
+Workflow describes the governed process; Work remains the individual managed
+unit. Historical evidence and API identifiers are not renamed.
+
 | Category | Final name | Role | Meaning |
 | --- | --- | --- | --- |
-| AWE | Golem | Work engine that assembles agents, tools, policies, and stages, then manages execution, verification, and recovery | The image of assembling parts into a working golem |
+| AWE | Golem | Workflow engine that assembles agents, tools, policies, and stages, then manages execution, verification, and recovery | The image of assembling parts into a working golem |
 | AWO | Hatchling | Optimizer that reduces service execution cost while preserving quality and safety constraints | Inspired by a young dragon guarding a pile of gold in *The Hobbit* |
 
 These names are metaphors. They do not imply official affiliation with, or rights

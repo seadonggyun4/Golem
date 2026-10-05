@@ -2,7 +2,7 @@
   <img width="650" alt="Golem Banner" src="assets/Golem.png" />
 </div>
 
-<h1 align="center">Golem — Agentic Work Engine</h1>
+<h1 align="center">Golem — Agentic Workflow Engine</h1>
 
 <p align="center">
   <strong>문서와 검증 결과를 이어받아 일을 끝까지 수행하는 headless work runtime</strong>
@@ -22,7 +22,7 @@
 
 **지원 에이전트: Codex · Claude.** 핵심은 별도 agent를 새로 띄우는 것보다, 지금 작업 중인 agent가 Markdown 문서와 검증 결과를 이어받아 완료까지 진행하도록 만드는 데 있습니다.
 
-에이전트가 조사·문서 작성·코드 수정을 수행하고, Golem은 문서의 관계와 최신성, 실행 증거, 권한 및 완료 조건을 관리합니다. **AWE는 Agentic Work Engine이라는 분류명이며, 제품명은 Golem입니다.** C17 엔진과 CLI·JSON·Markdown을 제공하며 UI는 만들지 않습니다.
+에이전트가 조사·문서 작성·코드 수정을 수행하고, Golem은 문서의 관계와 최신성, 실행 증거, 권한 및 완료 조건을 관리합니다. **AWE는 Agentic Workflow Engine이라는 분류명이며, 제품명은 Golem입니다.** C17 엔진과 CLI·JSON·Markdown을 제공하며 UI는 만들지 않습니다.
 
 ## 작업 흐름
 
