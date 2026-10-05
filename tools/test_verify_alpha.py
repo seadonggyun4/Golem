@@ -27,6 +27,7 @@ class SourceSnapshotTests(unittest.TestCase):
         self.assertEqual(stdout.getvalue(), result.stdout)
         self.assertEqual(stderr.getvalue(), result.stderr)
         self.assertFalse(execute.call_args.kwargs["check"])
+        self.assertEqual(execute.call_args.kwargs["timeout"], 900)
 
     def test_clean_suite_keeps_all_tests_with_bounded_parallelism(self):
         commands = []
@@ -36,9 +37,13 @@ class SourceSnapshotTests(unittest.TestCase):
                  patch.object(verify_alpha, "audit_install"), \
                  patch.object(verify_alpha.shutil, "which", return_value="/usr/bin/cc"), \
                  patch("builtins.print"), \
-                 patch.object(verify_alpha, "run", side_effect=lambda args, cwd, env, **kwargs: commands.append(args)):
+                 patch.object(verify_alpha, "run", side_effect=lambda args, cwd, env, **kwargs: commands.append((args, kwargs))):
                 verify_alpha.main()
-        suite = next(args for args in commands if args[0] == "ctest" and "--parallel" in args)
+        suite, options = next((args, options) for args, options in commands
+                              if args[0] == "ctest" and "--parallel" in args)
+        self.assertEqual(options["timeout"], 3600)
+        self.assertTrue(all(options["timeout"] == 900 for args, options in commands
+                            if args is not suite))
         self.assertEqual(suite[suite.index("--parallel") + 1], "2")
         self.assertIn("--no-tests=error", suite)
         self.assertIn("--output-on-failure", suite)

@@ -12,9 +12,9 @@ from source_policy import selected, export_sources
 from execution_record import run as recorded_run, private_directory
 
 
-def run(args, cwd, env, *, records, source):
+def run(args, cwd, env, *, records, source, timeout=900):
     print("+ " + " ".join(map(str, args)), flush=True)
-    result = recorded_run(args, destination=records, cwd=cwd, source=source, env=env, timeout=900,
+    result = recorded_run(args, destination=records, cwd=cwd, source=source, env=env, timeout=timeout,
                           check=False)
     sys.stdout.buffer.write(result.stdout)
     sys.stderr.buffer.write(result.stderr)
@@ -67,10 +67,11 @@ def main():
     records = private_directory(args.output) if args.output else Path(tempfile.mkdtemp(prefix="golem-alpha-records-")).resolve()
     print("Private command records: " + str(records), flush=True)
     index = 0
-    def execute(command, cwd, env):
+    def execute(command, cwd, env, *, timeout=900):
         nonlocal index
         index += 1
-        return run(command, cwd, env, records=records / f"step-{index:03d}", source=root)
+        return run(command, cwd, env, records=records / f"step-{index:03d}", source=root,
+                   timeout=timeout)
     env = dict(os.environ)
     env.pop("PYTHONPATH", None)
     env.pop("CMAKE_PREFIX_PATH", None)
@@ -87,8 +88,9 @@ def main():
              "-DCMAKE_INSTALL_LIBDIR=lib",
              "-DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF"], work, env)
         execute(["cmake", "--build", build, "--parallel", "2"], work, env)
+        # Match verify_environment's full-suite budget, including native recording.
         execute(["ctest", "--test-dir", build, "--parallel", "2",
-             "--output-on-failure", "--no-tests=error"], work, env)
+             "--output-on-failure", "--no-tests=error"], work, env, timeout=3600)
         execute(["cmake", "--install", build, "--prefix", prefix], work, env)
         audit_install(prefix)
         consumer = work / "consumer"
