@@ -16,6 +16,29 @@ import execution_record as record
 
 
 class Records(unittest.TestCase):
+    def test_private_output_is_bounded_memory_only_and_never_persisted(self):
+        destination = self.root / "private-output"
+        secret = "credential-fixture-not-for-disk"
+        result = record.run_private([sys.executable, "-c", f"print({secret!r})"],
+            destination=destination, timeout=5, source=self.source, capture_output=True)
+        self.assertEqual(result.stdout.strip(), secret.encode())
+        self.assertEqual(result.stderr, b"")
+        self.assertTrue(all(secret.encode() not in p.read_bytes() for p in destination.rglob("*") if p.is_file()))
+        self.assertFalse((destination / "stdout.log").exists())
+        finish = json.loads((destination / "result.json").read_bytes())
+        self.assertEqual(finish["reason"], "EXIT")
+
+    def test_private_output_limit_and_timeout_reap_child(self):
+        for name, code, error, reason in (
+            ("limit", "print('x'*65536)", ValueError, "OUTPUT_LIMIT"),
+            ("timeout", "import time; time.sleep(10)", subprocess.TimeoutExpired, "TIMEOUT")):
+            destination = self.root / name
+            with self.assertRaises(error):
+                record.run_private([sys.executable, "-c", code], destination=destination,
+                    timeout=.3, source=self.source, capture_output=True, output_limit=1024)
+            finish = json.loads((destination / "result.json").read_bytes())
+            self.assertEqual(finish["reason"], reason)
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -38,7 +61,9 @@ class Records(unittest.TestCase):
     def test_extra_logs_are_bounded_and_bound_to_manifest(self):
         path = self.root / "result"
         code = f"from pathlib import Path; Path({str(path / 'syscalls.log')!r}).write_bytes(b'x' * 4096)"
-        directory, result = self.invoke(code, extra_logs=("syscalls.log",), limit=1024)
+        # This fixture has no descendants; isolate size accounting from cleanup policy.
+        with patch.object(record.os, "killpg", side_effect=ProcessLookupError):
+            directory, result = self.invoke(code, extra_logs=("syscalls.log",), limit=1024)
         self.assertEqual(result["reason"], "OUTPUT_LIMIT")
         self.assertEqual(record.check(directory)["integrity"], "PASS")
         (directory / "syscalls.log").write_bytes(b"changed")
@@ -220,6 +245,7 @@ class Coverage(unittest.TestCase):
     def test_owned_python_launches_use_recording_boundary(self):
         root = Path(record.__file__).resolve().parents[1]
         allowed = {("tools/execution_record.py", "git"), ("tools/execution_record.py", "capture"),
+                   ("tools/execution_record.py", "run_private"),
                    ("tools/agent_entrypoint.py", "git"), ("tools/instruction_bundle.py", "boundary"),
                    ("bench/benchmark.py", "cpu_name")}
         found = set()

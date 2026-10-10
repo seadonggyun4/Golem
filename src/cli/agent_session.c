@@ -1,19 +1,28 @@
 #include "work.h"
 #include "golem/agent_session.h"
 #include "golem/session_binding.h"
+#include "context_tokenizer.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
 int golem_cli_agent_session(int argc, char **argv)
 {
-    if (argc != 5 || strcmp(argv[2], "call") != 0) {
-        fputs("usage: golem session call WORK REQUEST.json\n", stderr);
+    bool resume = (argc == 6 || argc == 7) && !strcmp(argv[2], "resume");
+    if (!resume && (argc != 5 || strcmp(argv[2], "call") != 0)) {
+        fputs("usage: golem session call WORK REQUEST.json\n"
+              "       golem session resume WORK RESUME.json CONTEXT.json [TOKEN_COUNT.json]\n", stderr);
         return 2;
     }
     cli_blob input = {0};
+    cli_blob context = {0};
+    cli_context_count count = {0};
     struct json_object *request = NULL;
     golem_status st = cli_read(argv[4], GOLEM_DOCUMENT_MAX_JSON, &input);
+    if (st == GOLEM_OK && resume)
+        st = cli_read(argv[5], GOLEM_CONTEXT_REQUEST_MAX, &context);
+    if (st == GOLEM_OK && resume && argc == 7)
+        st = cli_context_count_load(argv[6], &count);
     if (st == GOLEM_OK)
         st = cli_json_parse((golem_bytes){input.data, input.size}, &request);
     struct json_object *op = NULL;
@@ -33,8 +42,11 @@ int golem_cli_agent_session(int argc, char **argv)
     }
     if (st == GOLEM_OK) {
         phase = "session_call";
-        st = golem_agent_session_call(store, (golem_bytes){input.data, input.size}, NULL, &reply,
-                                      &diagnostic);
+        st = resume ? golem_agent_session_resume_context(store, (golem_bytes){input.data, input.size},
+                (golem_bytes){context.data, context.size}, argc == 7 ? &count.tokenizer : NULL,
+                NULL, &reply, &diagnostic)
+                    : golem_agent_session_call(store, (golem_bytes){input.data, input.size}, NULL, &reply,
+                                               &diagnostic);
     }
     golem_status closed = golem_document_store_close(store);
     if (st == GOLEM_OK)
@@ -46,6 +58,8 @@ int golem_cli_agent_session(int argc, char **argv)
     golem_agent_reply_free(&reply);
     json_object_put(request);
     free(input.data);
+    free(context.data);
+    cli_context_count_clear(&count);
     if (st != GOLEM_OK) {
         cli_error_note(st, phase, &diagnostic);
         struct json_object *error = json_object_new_object();

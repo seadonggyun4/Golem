@@ -1,5 +1,10 @@
 # Case Study Bundles (29E)
 
+For opt-in raw evidence with bounded transitive references and standalone byte/
+graph verification, see [Scoped Standalone Evidence Export](evidence-export.md).
+It is a separate private format; this native redacted v1 bundle's no-raw-copy and
+no-transitive-expansion contract remains unchanged.
+
 [한국어](bundle.ko.md)
 
 Export a single ResearchCase as a **private, derived, structurally redacted**

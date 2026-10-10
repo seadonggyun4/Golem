@@ -79,6 +79,7 @@ static int rejected(void)
     REJECT(golem_document_store_create(NULL, bytes, NULL, NULL, &d));
     REJECT(golem_document_submit(NULL, bytes, bytes, "private-key", NULL, &d));
     REJECT(golem_agent_session_call(NULL, bytes, NULL, &agent, &d));
+    REJECT(golem_agent_session_resume_context(NULL, bytes, bytes, NULL, NULL, &agent, &d));
     REJECT(golem_session_binding_call(NULL, bytes, NULL, NULL, &agent, &d));
     REJECT(golem_approval_call(NULL, bytes, NULL, NULL, &reply, &d));
     REJECT(golem_execution_call_receipted(NULL, bytes, &key, NULL, NULL, &reply, &d));

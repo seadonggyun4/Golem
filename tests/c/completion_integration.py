@@ -5,9 +5,38 @@ import json
 import time
 import unittest
 from reentry_integration import Reentry
+from discovery_integration import CLI, SOURCE
+import sys
+sys.path.insert(0, str(SOURCE / "tools"))
+import revision_status
 
 
 class Completion(Reentry):
+    def test_revision_status_preserves_live_authority_and_rejects_old_done(self):
+        self.ready()
+        self.finalize()
+        self.project()
+        self.git("remote", "add", "origin", "https://github.com/fixture/project.git")
+        index = {"schema": revision_status.SCHEMA, "repository": "fixture/project",
+                 "binding": {"project_id": "fixture", "work_id": "example-work"}, "entries": []}
+        output = self.root / "revision-observation"
+        result = revision_status.observe(index, self.repo, CLI, self.work, "selection", output)
+        self.assertTrue(result["native_acceptance_verified"], result)
+        self.assertEqual(result["channels"]["completion"]["status"], "PASS")
+        self.assertEqual(result["channels"]["remote_ci"]["status"], "NOT_OBSERVED")
+        index["entries"] = [{"id": "old-completion", "channel": "completion",
+            "adapter": "native-completion.v1", "bundle": str(output),
+            "revision": revision_status.io.digest(output / "record.json"),
+            "step": "completion", "scope": "selection"}]
+        historical = revision_status.projection(index, self.repo)
+        self.assertFalse(historical["native_acceptance_verified"])
+        self.assertEqual(historical["channels"]["completion"]["status"], "REVALIDATE_REQUIRED")
+        (self.repo / "logic.c").write_text("int add(int a,int b) { return a-b; }\n")
+        changed = revision_status.observe(index, self.repo, CLI, self.work, "selection",
+                                          self.root / "changed-observation")
+        self.assertFalse(changed["native_acceptance_verified"], changed)
+        self.assertNotEqual(changed["channels"]["completion"]["status"], "PASS")
+
     def completion(self, operation="resume", ok=True, **kw):
         req = dict(schema_version=1, operation=operation, selection_id="selection", **kw)
         return self.cli("completion", "call", self.work, self.write("completion.json", req), ok=ok)

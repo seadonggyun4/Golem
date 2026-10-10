@@ -1,5 +1,9 @@
 # Current-Agent Sessions
 
+For a verified projection plus provider-budgeted input handoff, use the explicit
+[context-aware resume](context-resume.md) entry point. Legacy session calls retain
+their protocol; no provider/model is inferred and no model generation is launched.
+
 Optional [runtime profiles](runtime-profile.md) pin a generation and immutable
 execution binding for each enrolled claim. Refresh does not replace a running
 attempt's identity; resume fencing remains separate from historical provenance.

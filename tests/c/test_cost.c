@@ -334,12 +334,113 @@ static int invalid(void)
     CHECK(golem_cost_ledger_stage_totals_get(golem_work_run_cost_borrow(run), GOLEM_STAGE_NONE, &totals) == GOLEM_ERR_INVALID_ARGUMENT);
     golem_work_run_free(run); return 0;
 }
+static int import_report(void)
+{
+    const char *json = "{\"schema\":\"golem.native-cost-report.v1\",\"run_id\":\"cost-run\","
+        "\"sequence\":\"1\",\"request_id\":\"observed-call\",\"provider\":\"codex.exec.v1\","
+        "\"model\":\"unreported\",\"price_revision\":\"provider-unpriced-v1\",\"currency\":\"USD\","
+        "\"usage_known\":true,\"cost_known\":false,\"nano_cost\":\"0\",\"usage\":{"
+        "\"input_tokens\":\"12\",\"cached_input_tokens\":\"2\",\"output_tokens\":\"3\","
+        "\"reasoning_tokens\":\"0\",\"tool_calls\":\"0\"}}";
+    golem_bytes bytes = {(const uint8_t *)json, strlen(json)};
+    uint64_t seq = 999; golem_provider_usage report = provider(42);
+    CHECK(golem_cost_report_decode(bytes, "other-run", &seq, &report) == GOLEM_ERR_IDENTITY_MISMATCH);
+    CHECK(seq == 999 && report.actual.nano_cost == 42);
+    CHECK(golem_cost_report_decode(bytes, "cost-run", &seq, &report) == GOLEM_OK);
+    CHECK(seq == 1 && report.actual.usage.input_tokens == 12 && !report.actual.cost_known);
+    golem_work_run *run = NULL; CHECK(make_run(GOLEM_AUTONOMY_AUTO_LOCAL, NULL, &run) == 0);
+    golem_cost_options o = options(); CHECK(golem_work_run_cost_enable(run, &o) == GOLEM_OK);
+    CHECK(golem_work_run_cost_report_json(run, bytes) == GOLEM_ERR_NOT_FOUND);
+    golem_stage_snapshot stage; CHECK(golem_work_run_begin(run, false, false, &stage) == GOLEM_OK);
+    CHECK(golem_work_run_cost_report_json(run, bytes) == GOLEM_OK);
+    CHECK(golem_work_run_cost_report_json(run, bytes) == GOLEM_OK);
+    CHECK(golem_work_run_cost_settle(run, 1) == GOLEM_ERR_INVALID_STATE);
+    CHECK(golem_work_run_finish(run, 1, GOLEM_STAGE_PASSED, GOLEM_FAILURE_NONE, true) == GOLEM_OK);
+    CHECK(golem_work_run_cost_settle(run, 1) == GOLEM_OK);
+    golem_cost_totals totals;
+    CHECK(golem_cost_ledger_totals_get(golem_work_run_cost_borrow(run), &totals) == GOLEM_OK);
+    CHECK(totals.reports == 1 && totals.actual.usage_known && !totals.actual.cost_known);
+    CHECK(totals.actual.usage.input_tokens == 12 && totals.unsettled == 0);
+    char corrupt[2048];
+    const char *bad[] = {"01", "-1", "18446744073709551616", "1e2"};
+    for (size_t i = 0; i < sizeof(bad) / sizeof(bad[0]); ++i) {
+        const char *position = strstr(json, "\"sequence\":\"1\"");
+        size_t prefix = (size_t)(position - json);
+        memcpy(corrupt, json, prefix);
+        (void)snprintf(corrupt + prefix, sizeof(corrupt) - prefix, "\"sequence\":\"%s\"%s", bad[i], position + strlen("\"sequence\":\"1\""));
+        CHECK(golem_work_run_cost_report_json(run, (golem_bytes){(const uint8_t *)corrupt, strlen(corrupt)}) == GOLEM_ERR_PARSE);
+    }
+    CHECK(golem_cost_ledger_totals_get(golem_work_run_cost_borrow(run), &totals) == GOLEM_OK && totals.reports == 1);
+    golem_work_run_free(run); return 0;
+}
+static int import_file(const char *path)
+{
+    uint8_t data[16385]; FILE *file = fopen(path, "rb"); CHECK(file != NULL);
+    size_t length = fread(data, 1, sizeof(data), file);
+    bool valid = !ferror(file) && length > 0 && length < sizeof(data);
+    CHECK(fclose(file) == 0 && valid);
+    golem_bytes bytes = {data, length}; uint64_t sequence = 0; golem_provider_usage report = {0};
+    CHECK(golem_cost_report_decode(bytes, "cost-run", &sequence, &report) == GOLEM_OK && sequence == 1);
+    golem_work_run *run = NULL; CHECK(make_run(GOLEM_AUTONOMY_AUTO_LOCAL, NULL, &run) == 0);
+    golem_cost_options o = options(); CHECK(golem_work_run_cost_enable(run, &o) == GOLEM_OK);
+    golem_stage_snapshot stage; CHECK(golem_work_run_begin(run, false, false, &stage) == GOLEM_OK);
+    CHECK(golem_work_run_cost_report_json(run, bytes) == GOLEM_OK);
+    CHECK(golem_work_run_cost_report_json(run, bytes) == GOLEM_OK);
+    CHECK(golem_work_run_finish(run, 1, GOLEM_STAGE_PASSED, GOLEM_FAILURE_NONE, true) == GOLEM_OK);
+    CHECK(golem_work_run_cost_settle(run, 1) == GOLEM_OK);
+    golem_cost_totals totals;
+    CHECK(golem_cost_ledger_totals_get(golem_work_run_cost_borrow(run), &totals) == GOLEM_OK);
+    CHECK(totals.reports == 1 && totals.unsettled == 0);
+    CHECK(totals.actual.usage_known == report.actual.usage_known && totals.actual.cost_known == report.actual.cost_known);
+    CHECK(totals.actual.nano_cost == report.actual.nano_cost);
+    CHECK(totals.actual.usage.input_tokens == report.actual.usage.input_tokens);
+    CHECK(totals.actual.usage.cached_input_tokens == report.actual.usage.cached_input_tokens);
+    CHECK(totals.actual.usage.output_tokens == report.actual.usage.output_tokens);
+    CHECK(totals.actual.usage.reasoning_tokens == report.actual.usage.reasoning_tokens);
+    CHECK(totals.actual.usage.tool_calls == report.actual.usage.tool_calls);
+    golem_work_run_free(run);
+    puts("Native ledger import, duplicate handling and settlement: PASS"); return 0;
+}
+static int inbox_file(const char *path, bool blocked, bool cancel, bool billed)
+{
+    golem_work_run *run = NULL; CHECK(make_run(GOLEM_AUTONOMY_AUTO_LOCAL, NULL, &run) == 0);
+    golem_cost_options o = options(); CHECK(golem_work_run_cost_enable(run, &o) == GOLEM_OK);
+    CHECK(golem_work_run_cost_inbox_enable(run, path, billed) == GOLEM_OK);
+    golem_stage_snapshot stage; CHECK(golem_work_run_begin(run, false, false, &stage) == GOLEM_OK);
+    golem_status status = cancel ? golem_work_run_cancel(run) :
+        golem_work_run_finish(run, 1, GOLEM_STAGE_PASSED, GOLEM_FAILURE_NONE, true);
+    if (blocked) {
+        CHECK(status != GOLEM_OK);
+        golem_work_snapshot snapshot; CHECK(golem_work_run_snapshot_get(run, &snapshot) == GOLEM_OK);
+        CHECK(snapshot.status == GOLEM_WORK_RUNNING);
+        CHECK(golem_work_run_cancel(run) == GOLEM_OK);
+        golem_status accounting; CHECK(golem_work_run_cost_inbox_status(run, &accounting) == GOLEM_OK);
+        CHECK(accounting != GOLEM_OK);
+    } else {
+        CHECK(status == GOLEM_OK);
+        CHECK(golem_work_run_cost_inbox_sync(run, 1, true) == GOLEM_OK);
+        golem_cost_totals totals;
+        CHECK(golem_cost_ledger_totals_get(golem_work_run_cost_borrow(run), &totals) == GOLEM_OK);
+        CHECK(totals.reports == 1 && totals.unsettled == 0 && totals.actual.usage_known);
+        CHECK(totals.actual.usage.input_tokens == 25 && totals.actual.usage.cached_input_tokens == 5);
+        CHECK(totals.actual.usage.output_tokens == 7 && totals.actual.usage.reasoning_tokens == 3);
+        CHECK(totals.actual.cost_known == billed);
+        CHECK(totals.actual.nano_cost == (billed ? 13 : 0));
+    }
+    golem_work_run_free(run); return 0;
+}
 int main(int argc, char **argv)
 {
+    if (argc == 3 && strcmp(argv[1], "import-file") == 0) return import_file(argv[2]);
+    if (argc == 3 && strcmp(argv[1], "inbox-file") == 0) return inbox_file(argv[2], false, false, false);
+    if (argc == 3 && strcmp(argv[1], "inbox-cancel") == 0) return inbox_file(argv[2], false, true, false);
+    if (argc == 3 && strcmp(argv[1], "inbox-billed") == 0) return inbox_file(argv[2], false, false, true);
+    if (argc == 3 && strcmp(argv[1], "inbox-unbilled") == 0) return inbox_file(argv[2], true, false, true);
+    if (argc == 3 && strcmp(argv[1], "inbox-blocked") == 0) return inbox_file(argv[2], true, false, false);
     CHECK(argc == 2);
     const struct { const char *name; int (*run)(void); } cases[] = {
         {"arithmetic", arithmetic}, {"lifecycle", lifecycle}, {"retry", retry}, {"budget", budget},
-        {"reports", reports}, {"capacity", capacity}, {"aggregate", aggregate}, {"ownership", ownership}, {"invalid", invalid}
+        {"reports", reports}, {"capacity", capacity}, {"aggregate", aggregate}, {"ownership", ownership}, {"invalid", invalid}, {"import", import_report}
     };
     for (size_t i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i)
         if (strcmp(argv[1], cases[i].name) == 0) return cases[i].run();

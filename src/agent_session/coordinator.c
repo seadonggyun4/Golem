@@ -4,6 +4,7 @@
 #include "../execution/internal.h"
 #include "../reentry/internal.h"
 #include "../runtime/profile_internal.h"
+#include "../workflow/context_internal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -719,4 +720,87 @@ GOLEM_RECORDED_API(golem_agent_session_call,
     return dw_report(
         diagnostic, st,
         st == GOLEM_OK ? "cooperative local session; external effects are not sandboxed" : phase);
+}
+
+GOLEM_RECORDED_API(golem_agent_session_resume_context,
+    (golem_document_store *s, golem_bytes bytes, golem_bytes context_request,
+     const golem_context_tokenizer *tokenizer, const golem_agent_clock *clock,
+     golem_agent_reply *out, golem_diagnostic *diagnostic),
+    (s, bytes, context_request, tokenizer, clock, out, diagnostic), diagnostic)
+{
+    if (!s || !out || s->poisoned || !s->writable)
+        return dw_report(diagnostic, GOLEM_ERR_INVALID_ARGUMENT, "session.resume_context.store");
+    struct json_object *r = NULL, *c = NULL, *projection = NULL, *wrapper = NULL, *receipt = NULL;
+    as_log log = {.directory = -1};
+    golem_agent_reply reply = {0};
+    bool coordinator_failed = false;
+    const char *phase = "session.resume_context.validation";
+    golem_status st = golem_json_parse(bytes, GOLEM_DOCUMENT_MAX_JSON, &r);
+    if (st == GOLEM_OK && (!request_schema(r) || !request_values(r) ||
+                          strcmp(dw_text(r, "operation"), "resume") ||
+                          strcmp(dw_text(r, "work_id"), dw_text(s->spec, "work_id"))))
+        st = GOLEM_ERR_INVALID_ARGUMENT;
+    if (st == GOLEM_OK)
+        st = cx_request(context_request, &c);
+    if (st == GOLEM_OK)
+        st = as_load(s, NULL, NULL, &log);
+    struct json_object *a = dw_get(log.state, "active");
+    if (st == GOLEM_OK && (!log.state ||
+        strcmp(dw_text(c, "selection_id"), dw_text(log.state, "selection_id")) ||
+        (a && (strcmp(dw_text(c, "target_kind"), dw_text(a, "kind")) ||
+               strcmp(dw_text(c, "source_snapshot"), dw_text(a, "source_snapshot"))))))
+        st = GOLEM_ERR_IDENTITY_MISMATCH;
+    if (st == GOLEM_OK && !a) {
+        struct json_object *next = NULL;
+        st = next_document(s, dw_text(log.state, "selection_id"), &next);
+        if (st == GOLEM_OK && strcmp(dw_text(c, "target_kind"), dw_text(next, "target_kind")))
+            st = GOLEM_ERR_IDENTITY_MISMATCH;
+        json_object_put(next);
+    }
+    if (st == GOLEM_OK) {
+        phase = "session.resume_context.projection_budget";
+        st = cx_build(s, c, tokenizer, &projection);
+    }
+    if (st == GOLEM_OK) {
+        wrapper = json_object_new_object();
+        const char *text = json_object_to_json_string_ext(projection, JSON_C_TO_STRING_PLAIN);
+        golem_digest digest;
+        st = text ? golem_digest_bytes((golem_bytes){(const uint8_t *)text, strlen(text)}, &digest)
+                  : GOLEM_ERR_OUT_OF_MEMORY;
+        if (st == GOLEM_OK && (!wrapper ||
+            !add_uint(wrapper, "schema_version", 1) ||
+            !dw_add(wrapper, "derived_only", json_object_new_boolean(true)) ||
+            !dw_add(wrapper, "budget_verified", json_object_new_boolean(true)) ||
+            !dw_add(wrapper, "execution_authorized", json_object_new_boolean(false)) ||
+            !dw_add_digest(wrapper, "context_digest", &digest) ||
+            !dw_add(wrapper, "context_projection", json_object_get(projection))))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+    }
+    as_close(&log);
+    if (st == GOLEM_OK) {
+        phase = "session.resume_context.commit";
+        st = golem_agent_session_call(s, bytes, clock, &reply, diagnostic);
+        coordinator_failed = st != GOLEM_OK;
+    }
+    if (st == GOLEM_OK)
+        st = golem_json_parse((golem_bytes){reply.data, reply.size}, GOLEM_AGENT_CONTEXT_MAX, &receipt);
+    if (st == GOLEM_OK && !dw_add(wrapper, "receipt", json_object_get(receipt)))
+        st = GOLEM_ERR_OUT_OF_MEMORY;
+    if (st == GOLEM_OK) {
+        phase = "session.resume_context.reply";
+        const char *text = json_object_to_json_string_ext(wrapper, JSON_C_TO_STRING_PLAIN);
+        size_t n = text ? strlen(text) : 0;
+        uint8_t *copy = n <= GOLEM_AGENT_CONTEXT_MAX && text ? malloc(n) : NULL;
+        if (!copy)
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+        else {
+            memcpy(copy, text, n);
+            *out = (golem_agent_reply){copy, n};
+        }
+    }
+    golem_agent_reply_free(&reply);
+    json_object_put(r); json_object_put(c); json_object_put(projection);
+    json_object_put(wrapper); json_object_put(receipt);
+    return coordinator_failed ? st : dw_report(diagnostic, st,
+        st == GOLEM_OK ? "fresh derived resume input; not permission" : phase);
 }

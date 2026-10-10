@@ -52,6 +52,7 @@ golem_status golem_work_run_create(const char *id, const golem_work_capsule *cap
 void golem_work_run_free(golem_work_run *run)
 {
     if (run != NULL) {
+        golem_cost_inbox_free(run);
         golem_cost_ledger_free(run->cost);
         (void)golem_allocator_free(&run->allocator, run->optimization);
         golem_work_capsule_free(run->capsule);
@@ -129,9 +130,17 @@ golem_status golem_work_run_finish(golem_work_run *run, uint64_t sequence, golem
     if (status != GOLEM_OK) {
         return status;
     }
+    if (run->cost_inbox != NULL) {
+        status = golem_work_run_cost_inbox_sync(run, sequence, true);
+        if (status != GOLEM_OK) return status;
+    }
     run->latest.snapshot.status = next;
     run->latest.snapshot.failure = failure;
     golem_cost_finish(run->cost, &run->latest.snapshot);
+    if (run->cost_inbox != NULL) {
+        /* sync verified at least one report; terminal settlement cannot fail. */
+        (void)golem_work_run_cost_settle(run, sequence);
+    }
     if (next == GOLEM_STAGE_PASSED) {
         run->passed[run->position] = true;
         ++run->position;
@@ -152,8 +161,11 @@ golem_status golem_work_run_cancel(golem_work_run *run)
         return GOLEM_ERR_INVALID_STATE;
     }
     if (run->status == GOLEM_WORK_RUNNING) {
+        bool accounted = run->cost_inbox != NULL &&
+            golem_work_run_cost_inbox_sync(run, run->sequence, true) == GOLEM_OK;
         run->latest.snapshot.status = GOLEM_STAGE_CANCELLED;
         golem_cost_finish(run->cost, &run->latest.snapshot);
+        if (accounted) (void)golem_work_run_cost_settle(run, run->sequence);
     }
     run->status = GOLEM_WORK_CANCELLED;
     return GOLEM_OK;

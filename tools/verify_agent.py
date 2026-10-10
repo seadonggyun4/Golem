@@ -36,7 +36,7 @@ def suite_digest(source):
     return h.hexdigest()
 
 
-def strict_json(data):
+def strict_json(data, *, parse_float=float):
     def reject_constant(value):
         raise ValueError("non-finite JSON")
 
@@ -49,7 +49,8 @@ def strict_json(data):
         return result
     if len(data) > LIMIT:
         raise ValueError("JSON size limit")
-    return json.loads(data, object_pairs_hook=pairs, parse_constant=reject_constant)
+    return json.loads(data, object_pairs_hook=pairs, parse_constant=reject_constant,
+                      parse_float=parse_float)
 
 
 def capture(argv, destination, timeout, cwd=None, *, source=None):

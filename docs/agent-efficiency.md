@@ -131,7 +131,7 @@ required native completion document/report.
 | --- | --- | --- |
 | Lightweight entry | Minimal bilingual templates, on-demand contracts | Mandatory safety/completion retained |
 | Concise output | Native compact default plus opt-in observation views | Native protocol consumers explicitly select full output; see cli-output.md |
-| Mechanical capture | Shared Python recorder, 68 reviewed native API boundaries including runtime/journal/document-store lifecycle, CLI/supervisor and worker handoff; explicit Linux syscall runner | Other model/cache/projection boundaries remain; pure/recorder primitives deliberately excluded; descendant tracing is opt-in and platform dependent |
+| Mechanical capture | Shared Python recorder, 69 reviewed native API boundaries including context-aware resume, runtime/journal/document-store lifecycle, CLI/supervisor and worker handoff; explicit Linux syscall runner | Other model/cache/projection boundaries remain; pure/recorder primitives deliberately excluded; descendant tracing is opt-in and platform dependent |
 | Deduplicate records | Native assessment/status/journal capture; shared preparation/publication and replay/projection validation; section views and reports use the same captured bytes | Original authority and storage remain; see [common protocol](work-record-writing.md); no physical legacy compaction or automatic judgment |
 | Changed-state reads | Hash-pinned baseline and conservative full fallback | No live-state cache or skipped engine checks |
 | Task routing | Reading guides plus captured docs/code/deploy procedure proposals | No reduced QA, effect dispatch or permission grants |
@@ -140,6 +140,11 @@ required native completion document/report.
 | Deferred narrative | Explicit report command | Raw evidence always captured |
 
 ## Evaluation and limits
+
+Context delivery now has an explicit [context-aware resume](context-resume.md)
+path: verified current projection, provider/model counting outside the store lock,
+digest-bound budget check before mutation and private input/receipt handoff. It
+does not automatically alter hosted conversation history or prove cost savings.
 
 For append-tolerant live document/agent history, use
 [`observe-history` and history schema 2](incremental-history.md). This extends the
@@ -183,7 +188,10 @@ tasks with the same model, pinned source, permissions and QA oracle; separate
 tuning tasks from held-out evaluation tasks, repeat trials, and retain actual
 provider usage including cached input/output, all raw retrievals, failures,
 wall time and completion correctness. Report uncertainty and negative results.
-This tool supplies the observation layer, not a provider usage collector.
+For instrumented commands, [provider usage collection](provider-usage.md) binds
+reported usage and billing to explicit Work/attempt/session/request identities.
+The runner supplies a private usage stream and exposes coverage in view/measure.
+Uninstrumented commands and inaccessible hosted-session usage remain unmeasured.
 
 Snapshots are non-atomic, source identity excludes ignored dependencies and
 rejects submodules, and argv records do not trace all runtime imports. Captured
@@ -208,3 +216,10 @@ motivate design/evaluation; none measures this Golem change. No source code copi
 | W3C PROV-DM, sections 2.1.1-2.1.3 ([standard](https://www.w3.org/TR/prov-dm/)) | Separate source entities, observed activities and derived views. A hash is not authority or authenticity. No PROV serialization compliance claimed. |
 | Anthropic, *Writing effective tools for AI agents*, evaluation and tool-response sections ([engineering reference](https://www.anthropic.com/engineering/writing-tools-for-agents)) | Compound tools, concise/detail paths and actionable failures; measure calls/errors/runtime alongside quality. Vendor guidance, not independent experimental proof for Golem. |
 | Anthropic, *Effective context engineering*, retrieval/compaction sections ([engineering reference](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)) | On-demand contracts and retained originals; aggressive compaction risks losing critical context. No LLM summarizer or opaque compression added. |
+
+## Fact-linked judgment changes
+
+Ordinary tasks can attach only changed judgments to verified automatic command
+observations through the [fact/judgment contract](fact-judgment.md). No research
+hypothesis schema is required. Historical judgments are not fresh QA evidence;
+native Work authority and raw evidence remain separate.

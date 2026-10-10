@@ -1,5 +1,9 @@
 # OutcomeAdjudication (29B)
 
+The [evidence verification adapter](evidence-verification.md) exposes per-case
+legacy statements without upgrading PASS or a CAS digest into execution, truth
+or independent review. Native outcome storage and completion policy are unchanged.
+
 [한국어](outcome.ko.md) · **English**
 
 Golem does not complete work merely because a tool prints `PASS` or reports zero

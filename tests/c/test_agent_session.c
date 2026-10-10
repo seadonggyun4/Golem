@@ -15,6 +15,9 @@ int main(void)
     golem_agent_reply reply={(uint8_t *)(uintptr_t)1,17};
     CHECK(golem_agent_session_call(NULL,(golem_bytes){NULL,0},NULL,&reply,NULL)==GOLEM_ERR_INVALID_ARGUMENT);
     CHECK(reply.data==(uint8_t *)(uintptr_t)1 && reply.size==17);
+    CHECK(golem_agent_session_resume_context(NULL,(golem_bytes){NULL,0},(golem_bytes){NULL,0},
+          NULL,NULL,&reply,NULL)==GOLEM_ERR_INVALID_ARGUMENT);
+    CHECK(reply.data==(uint8_t *)(uintptr_t)1 && reply.size==17);
     reply=(golem_agent_reply){malloc(1),1}; CHECK(reply.data);
     golem_agent_reply_free(&reply); CHECK(!reply.data && !reply.size);
     golem_agent_reply_free(&reply); golem_agent_reply_free(NULL);

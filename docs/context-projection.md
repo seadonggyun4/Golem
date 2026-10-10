@@ -2,8 +2,10 @@
 
 Golem produces a derived reading aid, not a replacement for original Markdown,
 approval receipts, QA evidence or completion gates. No additional agent is launched.
-Public C API: `golem/context.h`. CLI commands are opt-in; agent resume does not
-automatically consume these projections.
+Public C API: `golem/context.h`. Context-aware resume now validates and transfers
+the projection through `golem_agent_session_resume_context` / `golem session resume`.
+The explicit provider input adapter is described in [context-resume.md](context-resume.md).
+Legacy `session call` remains protocol-compatible and does not infer a provider/model.
 
 ## Request
 
@@ -68,7 +70,11 @@ is not a strict allocator quota. Large historical Works may exceed it.
 
 The C API accepts a trusted deterministic tokenizer callback pinned by an ID. It
 counts the complete JSON, not an approximate bytes-to-token conversion. The CLI
-has no model tokenizer and rejects nonzero token budgets. Request ownership,
+accepts a trusted digest-bound token count with `--token-count COUNT.json`;
+without it, nonzero token budgets still fail. `context candidate` produces only an
+explicitly unverified token-budget candidate for external counting, never a CAS
+publication or resume mutation. Provider/model counts are collected outside the
+store lock; the native boundary checks exact input bytes again. Request ownership,
 short-buffer and callback contracts are documented in the public header.
 
 `read` verifies CAS and rebuilds against current originals, facts and Work head,

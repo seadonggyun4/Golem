@@ -29,6 +29,7 @@ struct golem_work_run {
     void *ownership_context;
     golem_allocator allocator;
     golem_cost_ledger *cost;
+    struct golem_cost_inbox *cost_inbox;
     struct golem_optimizer_state *optimization;
     char *id;
     golem_work_capsule *capsule;

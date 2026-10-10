@@ -1,6 +1,7 @@
 #ifndef GOLEM_AGENT_SESSION_H
 #define GOLEM_AGENT_SESSION_H
 #include "golem/document.h"
+#include "golem/context.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,6 +34,18 @@ typedef struct golem_agent_clock {
  * does not reset the durable coordinator. Bounds: 4096 events, 256 attempts.
  */
 golem_status golem_agent_session_call(golem_document_store *store, golem_bytes request,
+    const golem_agent_clock *clock, golem_agent_reply *out, golem_diagnostic *diagnostic);
+/* Explicit resume input handoff. Verify current projection and exact callback
+ * budget BEFORE the resume mutation, under the same store lock. Selection must
+ * match the durable session; active kind/source must match the attempt. Returns
+ * a wrapper with the ordinary durable receipt and fresh derived projection.
+ * Projection is not part of the receipt or permission and is rebuilt on retries;
+ * a historical duplicate receipt cannot certify current context freshness.
+ * No provider network calls or implicit original/summary fallback. Callback is
+ * trusted as in context.h. Reply allocation/IO errors may follow a commit: reopen
+ * and inspect the identical resume key. Output unchanged on failure. */
+golem_status golem_agent_session_resume_context(golem_document_store *store,
+    golem_bytes request, golem_bytes context_request, const golem_context_tokenizer *tokenizer,
     const golem_agent_clock *clock, golem_agent_reply *out, golem_diagnostic *diagnostic);
 void golem_agent_reply_free(golem_agent_reply *reply);
 #ifdef __cplusplus

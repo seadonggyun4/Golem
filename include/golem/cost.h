@@ -2,6 +2,7 @@
 #define GOLEM_COST_H
 
 #include "golem/core.h"
+#include "golem/types.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -100,6 +101,33 @@ golem_status golem_work_run_cost_plan(golem_work_run *run, uint64_t sequence,
  * Never use estimated cost as actual. Strings copied into preallocated storage. */
 golem_status golem_work_run_cost_report(golem_work_run *run, uint64_t sequence,
     const golem_provider_usage *report);
+/* Bounded normalized interchange, golem.native-cost-report.v1. Decimal uint64
+ * strings avoid JSON rounding/saturation. Decoder allocates temporary json-c
+ * storage, never owner storage; failures preserve outputs. Expected run ID is
+ * mandatory. This is trusted accounting input, not provider authentication.
+ * JSON ingestion checks owner identity and delegates exactly one FINAL report;
+ * it never creates/begins/finishes/settles a stage or grants execution authority. */
+golem_status golem_cost_report_decode(golem_bytes json, const char *expected_run_id,
+    uint64_t *sequence, golem_provider_usage *out);
+golem_status golem_work_run_cost_report_json(golem_work_run *run, golem_bytes json);
+/* Opt-in private, owner-controlled accounting inbox. Configure once before begin,
+ * after cost_enable. directory is borrowed only for this call; an O_NOFOLLOW
+ * directory descriptor is retained. No discovery or inferred Work/Run mapping.
+ * Each sequence uses a zero-padded 20-digit sequence + .json snapshot containing
+ * golem.native-cost-inbox.v1.
+ * Finish automatically imports a sealed snapshot before changing stage state and
+ * settles after transition. Missing/unsealed/required-but-unbilled reports block
+ * finish, never cancel. Cancellation attempts sealed import without blocking;
+ * inspect inbox_status for failures. sync supports late accounting after cancel.
+ * Reports are individually idempotent; an error may retain an imported prefix.
+ * Retain inboxes for reconstruction: ledger and dedup state are still in-memory.
+ * Temporary bounded JSON/report allocations occur during synchronization. */
+golem_status golem_work_run_cost_inbox_enable(golem_work_run *run,
+    const char *directory, bool require_billed);
+golem_status golem_work_run_cost_inbox_sync(golem_work_run *run,
+    uint64_t sequence, bool require_sealed);
+/* Last synchronization result (initially COST_INCOMPLETE), not execution status. */
+golem_status golem_work_run_cost_inbox_status(const golem_work_run *run, golem_status *out);
 /* Terminal attempts with >=1 report only; explicit known-zero report represents
  * free/no-op work. Idempotent. Prevents new reports, not duplicate delivery.
  * Unknown amounts may settle but remain incomplete for budget enforcement. */

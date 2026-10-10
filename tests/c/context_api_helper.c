@@ -1,4 +1,5 @@
 #include "golem/context.h"
+#include "golem/agent_session.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,6 +59,27 @@ int main(int argc, char **argv)
     golem_receipt receipt;
     CHECK(golem_context_publish(store, input, &tokenizer, &receipt, NULL) ==
           GOLEM_ERR_POLICY_DENIED);
+    CHECK(golem_document_store_close(store) == GOLEM_OK);
+    CHECK(golem_document_store_open(argv[1], true, NULL, &store, NULL) == GOLEM_OK);
+    const char *start = "{\"schema_version\":1,\"operation\":\"start\",\"work_id\":\"example-work\","
+                        "\"key\":\"c-start\",\"expected_sequence\":0,\"selection_id\":\"selection\"}";
+    const char *resume = "{\"schema_version\":1,\"operation\":\"resume\",\"work_id\":\"example-work\","
+                         "\"key\":\"c-resume\",\"expected_sequence\":1,\"session_id\":\"c-agent\",\"ttl_ms\":60000}";
+    golem_agent_reply reply = {0};
+    CHECK(golem_agent_session_call(store, (golem_bytes){(const uint8_t *)start, strlen(start)},
+                                   NULL, &reply, NULL) == GOLEM_OK);
+    golem_agent_reply_free(&reply);
+    reply = (golem_agent_reply){(uint8_t *)(uintptr_t)1, 17};
+    CHECK(golem_agent_session_resume_context(store,
+        (golem_bytes){(const uint8_t *)resume, strlen(resume)}, input, &tokenizer, NULL, &reply, NULL) ==
+        GOLEM_ERR_BUDGET_EXHAUSTED);
+    CHECK(reply.data == (uint8_t *)(uintptr_t)1 && reply.size == 17);
+    tokenizer.count = count;
+    reply = (golem_agent_reply){0};
+    CHECK(golem_agent_session_resume_context(store,
+        (golem_bytes){(const uint8_t *)resume, strlen(resume)}, input, &tokenizer, NULL, &reply, NULL) == GOLEM_OK);
+    CHECK(reply.data != NULL && reply.size > 0);
+    golem_agent_reply_free(&reply);
     CHECK(golem_document_store_close(store) == GOLEM_OK);
     return 0;
 }

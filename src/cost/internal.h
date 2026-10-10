@@ -36,4 +36,5 @@ void golem_cost_ledger_free(golem_cost_ledger *ledger);
 golem_status golem_cost_begin(golem_cost_ledger *ledger, const golem_stage_snapshot *stage,
     const golem_cost_amount *estimate);
 void golem_cost_finish(golem_cost_ledger *ledger, const golem_stage_snapshot *stage);
+void golem_cost_inbox_free(golem_work_run *run);
 #endif

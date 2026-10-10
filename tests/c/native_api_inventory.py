@@ -5,6 +5,7 @@ import sys
 
 CORE_APIS = {
     "golem_document_store_create", "golem_document_submit", "golem_agent_session_call",
+    "golem_agent_session_resume_context",
     "golem_session_binding_call", "golem_approval_call", "golem_execution_call_receipted",
     "golem_execution_call", "golem_execution_call_authorized", "golem_role_call",
     "golem_research_call", "golem_completion_call", "golem_reentry_call",

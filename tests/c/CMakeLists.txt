@@ -394,10 +394,49 @@ if(GOLEM_BUILD_CLI)
     add_test(NAME restricted_diagnostics COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/restricted_diagnostics.py $<TARGET_FILE:golem_cli>)
     add_test(NAME diagnostic_tools COMMAND ${Python3_EXECUTABLE} -m unittest
-        test_doctor_environment test_classify_failures test_verify_environment test_agent_io test_agent_entrypoint test_instruction_bundle)
+        test_doctor_environment test_classify_failures test_verify_environment test_agent_io test_provider_usage test_agent_entrypoint test_instruction_bundle)
     set_tests_properties(diagnostic_tools PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools")
     set_tests_properties(restricted_diagnostics diagnostic_tools
         PROPERTIES LABELS "restricted-diagnostic" TIMEOUT 120)
+    add_test(NAME provider_usage_integrations COMMAND ${Python3_EXECUTABLE} -m unittest test_usage_integrations)
+    set_tests_properties(provider_usage_integrations PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "host-required;usage;billing" TIMEOUT 60)
+    add_test(NAME usage_pipeline COMMAND ${Python3_EXECUTABLE} -m unittest test_usage_pipeline)
+    set_tests_properties(usage_pipeline PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;usage;billing" TIMEOUT 60)
+    add_test(NAME usage_pipeline_host COMMAND ${Python3_EXECUTABLE} -m unittest test_usage_pipeline_host)
+    set_tests_properties(usage_pipeline_host PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "host-required;usage" TIMEOUT 60)
+    add_test(NAME usage_pipeline_native COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/usage_pipeline_integration.py $<TARGET_FILE:golem_test_cost>)
+    set_tests_properties(usage_pipeline_native PROPERTIES LABELS "restricted-diagnostic;usage" TIMEOUT 60)
+    add_test(NAME provider_cost_adapters COMMAND ${Python3_EXECUTABLE} -m unittest test_provider_costs)
+    set_tests_properties(provider_cost_adapters PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;usage;billing" TIMEOUT 60)
+    add_test(NAME context_provider_adapters COMMAND ${Python3_EXECUTABLE} -m unittest test_context_resume)
+    set_tests_properties(context_provider_adapters PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;context" TIMEOUT 60)
+    add_test(NAME judgment_recording COMMAND ${Python3_EXECUTABLE} -m unittest test_judgment_record)
+    set_tests_properties(judgment_recording PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;records" TIMEOUT 120)
+    add_test(NAME revision_status COMMAND ${Python3_EXECUTABLE} -m unittest test_revision_status)
+    set_tests_properties(revision_status PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;records" TIMEOUT 120)
+    add_test(NAME remote_status COMMAND ${Python3_EXECUTABLE} -m unittest test_remote_status)
+    set_tests_properties(remote_status PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;records" TIMEOUT 120)
+    add_test(NAME status_collector COMMAND ${Python3_EXECUTABLE} -m unittest test_status_collector)
+    add_test(NAME github_policy COMMAND ${Python3_EXECUTABLE} -m unittest test_github_policy)
+    set_tests_properties(github_policy PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;records" TIMEOUT 120)
+    set_tests_properties(status_collector PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;records" TIMEOUT 120)
+    add_test(NAME evidence_contract COMMAND ${Python3_EXECUTABLE} -m unittest test_evidence_contract)
+    set_tests_properties(evidence_contract PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;records" TIMEOUT 120)
+    add_test(NAME evidence_export COMMAND ${Python3_EXECUTABLE} -m unittest test_evidence_export)
+    set_tests_properties(evidence_export PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;records;export" TIMEOUT 120)
     add_test(NAME execution_recording COMMAND ${Python3_EXECUTABLE} -m unittest test_execution_record)
     add_test(NAME syscall_recording COMMAND ${Python3_EXECUTABLE} -m unittest test_syscall_record)
     set_tests_properties(syscall_recording PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
@@ -423,6 +462,8 @@ if(GOLEM_BUILD_CLI)
         --case golem_completion_call ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/completion_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} Completion.test_failure_repair_reaches_completion
+        --case golem_agent_session_resume_context ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/context_integration.py $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR}
         --case golem_session_binding_call ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/binding_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_agent_client> $<TARGET_FILE:golem_binding_client>
@@ -721,7 +762,7 @@ endforeach()
 add_executable(golem_test_cost test_cost.c)
 target_link_libraries(golem_test_cost PRIVATE Golem::golem)
 golem_configure_target(golem_test_cost)
-foreach(case arithmetic lifecycle retry budget reports capacity aggregate ownership invalid)
+foreach(case arithmetic lifecycle retry budget reports capacity aggregate ownership invalid import)
     add_test(NAME cost_${case} COMMAND golem_test_cost ${case})
     set_tests_properties(cost_${case} PROPERTIES TIMEOUT 60)
 endforeach()

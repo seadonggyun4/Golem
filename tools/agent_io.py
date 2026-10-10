@@ -12,6 +12,7 @@ import sys
 
 from verify_agent import LIMIT, capture, digest, private_directory, save, strict_json
 from verify_environment import git, source_identity
+import provider_usage
 
 SCHEMA = "golem.agent-observation.v1"
 PLAN_SCHEMA = "golem.agent-command-plan.v1"
@@ -38,6 +39,10 @@ PROCEDURE_STEPS = {
                     "register_results_and_review", "verify_completion"),
 }
 RECOVERY = {
+    "INVALID_USAGE_EVIDENCE": "Inspect the preserved usage error and raw provider output; do not aggregate invalid usage records.",
+    "USAGE_DUPLICATE_CALL_ID": "Assign a unique call ID to each invocation, including retries; do not reuse an ID within a plan.",
+    "USAGE_CLI_FRESH_INVOCATION_REQUIRED": "Use a fresh dedicated CLI invocation with one unique invocation ID; resumed totals cannot be attributed safely.",
+    "USAGE_WORK_MISMATCH": "Match the usage Work ID to the observation scope before execution.",
     "PROCEDURE_INTENT": "Use procedure-intent.v1 with unique docs/code/deploy activities and an exact scope reference.",
     "PROCEDURE_EVIDENCE": "Inspect the preserved selection logs and scope reference; refresh scope explicitly, never replay effects.",
     "PLAN_SCHEMA": "Use schema golem.agent-command-plan.v1, task docs/code/deploy and 1..32 commands.",
@@ -132,7 +137,7 @@ def producer():
     return {"python": platform.python_version(), "system": platform.system(),
             "modules": {name: digest(root / name) for name in
                         ("agent_io.py", "verify_agent.py", "verify_environment.py", "verify_runtime.py",
-                         "execution_record.py")}}
+                         "execution_record.py", "provider_usage.py", "hosted_usage.py", "usage_pipeline.py", "billing_evidence.py", "provider_costs.py", "context_resume.py", "judgment_record.py", "revision_status.py", "remote_status.py", "github_checks.py", "github_policy.py", "status_collector.py", "evidence_contract.py", "evidence_adapters.py", "evidence_export.py")}}
 
 
 def read_json(path):
@@ -145,9 +150,10 @@ def validate_plan(plan):
             or plan["schema"] != PLAN_SCHEMA or plan["task"] not in ROUTES
             or not isinstance(plan["commands"], list) or not 1 <= len(plan["commands"]) <= 32):
         raise ObservationError("PLAN_SCHEMA")
-    seen = set()
+    seen, usage_ids = set(), set()
     for row in plan["commands"]:
-        if (not isinstance(row, dict) or set(row) != {"id", "argv", "timeout"}
+        if (not isinstance(row, dict) or set(row) - {"id", "argv", "timeout", "usage"}
+                or not {"id", "argv", "timeout"} <= set(row)
                 or not isinstance(row["id"], str) or not ID.fullmatch(row["id"])
                 or row["id"] in seen or not isinstance(row["argv"], list)
                 or not 1 <= len(row["argv"]) <= 256
@@ -156,6 +162,19 @@ def validate_plan(plan):
                 or type(row["timeout"]) is not int or not 1 <= row["timeout"] <= 3600):
             raise ObservationError("PLAN_COMMAND")
         seen.add(row["id"])
+        if "usage" in row:
+            provider_usage.binding(row["usage"])
+            for request in row["usage"]["request_ids"]:
+                key = (row["usage"]["provider"], row["usage"]["account_id"], request)
+                if key in usage_ids:
+                    raise ObservationError("USAGE_DUPLICATE_CALL_ID")
+                usage_ids.add(key)
+            if row["usage"]["provider"] in ("codex.exec.v1", "claude.code.v1"):
+                if len(row["usage"]["request_ids"]) != 1 or any(
+                        arg in ("resume", "--resume", "-r", "--continue", "--fork-session")
+                        or (arg == "-c" and row["usage"]["provider"] == "claude.code.v1")
+                        or arg.startswith(("--resume=", "--continue=")) for arg in row["argv"][1:]):
+                    raise ObservationError("USAGE_CLI_FRESH_INVOCATION_REQUIRED")
     return plan
 
 
@@ -232,7 +251,7 @@ def load_bundle(output):
         if (not isinstance(step, dict) or not isinstance(step.get("id"), str)
                 or not ID.fullmatch(step["id"]) or step["id"] in seen
                 or not isinstance(step.get("logs"), dict)
-                or set(step["logs"]) - {"stdout.log", "stderr.log"}):
+                or set(step["logs"]) - {"stdout.log", "stderr.log", "usage.log"}):
             raise ObservationError("SCHEMA")
         seen.add(step["id"])
         for name, meta in step["logs"].items():
@@ -244,6 +263,10 @@ def load_bundle(output):
 
 def run(plan, cwd, output, scope=None):
     validate_plan(plan)
+    if scope and scope.get("work_id"):
+        for command in plan["commands"]:
+            if "usage" in command and command["usage"]["work_id"] != scope["work_id"]:
+                raise ObservationError("USAGE_WORK_MISMATCH")
     save(output / "plan.json", encoded(plan))
     record = {"schema": SCHEMA, "started_at": datetime.now(timezone.utc).isoformat(),
               "cwd": str(cwd), "task": plan["task"], "scope": scope,
@@ -261,6 +284,8 @@ def run(plan, cwd, output, scope=None):
         stopped = False
         for command in plan["commands"]:
             step = {"id": command["id"], "status": "NOT_RUN", "logs": {}}
+            if "usage" in command:
+                step["usage"] = provider_usage.collect(output / "missing-usage", command["usage"])
             record["steps"].append(step)
             if stopped:
                 continue
@@ -268,7 +293,17 @@ def run(plan, cwd, output, scope=None):
             executable = Path(command["argv"][0])
             try:
                 step["executable_sha256"] = digest(executable)
-                result = capture(command["argv"], directory, command["timeout"], cwd)
+                if "usage" in command:
+                    import execution_record
+                    environment = {k: v for k, v in os.environ.items()
+                                   if not k.startswith("GIT_") and k not in ("PYTHONPATH", "PYTHONHOME")}
+                    environment["GOLEM_USAGE_STREAM"] = str(directory / "usage.log")
+                    result = execution_record.capture(
+                        command["argv"], directory, command["timeout"], cwd,
+                        env=environment, extra_logs=(() if command["usage"]["provider"] in
+                            ("codex.exec.v1", "claude.code.v1") else ("usage.log",)))
+                else:
+                    result = capture(command["argv"], directory, command["timeout"], cwd)
                 step.update(result)
                 step["executable_unchanged"] = digest(executable) == step["executable_sha256"]
                 step["status"] = ("EXIT_OK" if result["returncode"] == 0 and result["reason"] == "EXIT"
@@ -276,6 +311,15 @@ def run(plan, cwd, output, scope=None):
             except (OSError, subprocess.SubprocessError) as error:
                 step.update(status="FAILED", reason="LAUNCH_OR_CAPTURE_ERROR", returncode=None,
                             error_type=type(error).__name__, errno=getattr(error, "errno", None))
+            if "usage" in command:
+                try:
+                    if command["usage"]["provider"] in ("codex.exec.v1", "claude.code.v1"):
+                        step["cli_usage"] = provider_usage.collect_cli(
+                            directory / "stdout.log", directory / "usage.log", command["usage"])
+                    step["usage"] = provider_usage.collect(directory / "usage.log", command["usage"])
+                except (ValueError, KeyError, TypeError, OSError) as error:
+                    step.update(status="FAILED", usage_error=str(error)[:128])
+                    step["usage"] = provider_usage.collect(directory / "missing-usage", command["usage"])
             step["logs"] = {p.name: {"sha256": digest(p), "bytes": p.stat().st_size}
                             for p in directory.iterdir() if p.is_file()}
             stopped = step["status"] != "EXIT_OK"
@@ -290,6 +334,16 @@ def run(plan, cwd, output, scope=None):
         record.update(status="INCOMPLETE", error_type=type(error).__name__,
                       diagnostic=getattr(error, "code", "SOURCE_OR_CAPTURE_FAILURE"))
     record["finished_at"] = datetime.now(timezone.utc).isoformat()
+    try:
+        record["usage_accounting"] = provider_usage.totals(
+            [step["usage"] for step in record["steps"] if "usage" in step])
+    except ValueError as error:
+        record.update(status="FAILED", diagnostic=str(error))
+        record["usage_accounting"] = {"token_usage": None, "cost": None,
+                                      "usage_complete": False, "cost_complete": False,
+                                      "diagnostic": str(error)}
+    record["token_usage"] = record["usage_accounting"]["token_usage"]
+    record["cost"] = record["usage_accounting"]["cost"]
     save(output / "record.json", encoded(record))
     save(output / "manifest.json", encoded({"schema": "golem.agent-observation-manifest.v1",
                                            "files": file_inventory(output)}))
@@ -364,6 +418,10 @@ def view(output, since=None, revision=None):
                             for name, meta in step["logs"].items()]}
         if "error_type" in step:
             row.update(error_type=step["error_type"], errno=step.get("errno"))
+        if "cli_usage" in step:
+            row["cli_usage"] = step["cli_usage"]
+        if "usage_error" in step:
+            row["usage_error"] = step["usage_error"]
         if record["scope"] and "stdout.log" in step["logs"]:
             row["observed"] = observed_fields(output / step["id"] / "stdout.log")
         # Keep bounded diagnostic data even on exit zero; warnings must remain visible.
@@ -384,7 +442,8 @@ def view(output, since=None, revision=None):
               "raw_required_before_effects": True, "execution_authorized": False,
               "product_acceptance": False, "source_changed": record.get("source_changed"),
               "raw_bytes": sum(log["bytes"] for step in record["steps"] for log in step["logs"].values()),
-              "token_usage": None, "cost": None}
+              "token_usage": record.get("token_usage"), "cost": record.get("cost"),
+              "usage_accounting": record.get("usage_accounting")}
     return result
 
 
@@ -424,7 +483,8 @@ def report(output):
             lines.extend(["", f"## {section.title()}", "",
                           "    " + encoded(value[section]).decode().rstrip(), ""])
     lines.extend(["", "Inspect original stdout/stderr and current engine state before effects.",
-                  "Provider tokens, cost and semantic correctness were not measured.", ""])
+                  "Usage accounting: " + json.dumps(record.get("usage_accounting"), sort_keys=True),
+                  "Provider reports use explicit caller attribution; semantic correctness is not inferred.", ""])
     return "\n".join(lines)
 
 
@@ -497,13 +557,30 @@ def measure(output, since=None, revision=None):
             "commands_planned": len(record["steps"]),
             "commands_run": sum(s["status"] != "NOT_RUN" for s in record["steps"]),
             "process_seconds": sum(s.get("elapsed_seconds", 0) for s in record["steps"]),
-            "token_usage": None, "cost": None, "agent_success": None,
+            "token_usage": record.get("token_usage"), "cost": record.get("cost"),
+            "usage_accounting": record.get("usage_accounting"), "agent_success": None,
             "basis": "Recorded streams versus serialized view only; excludes subsequent raw reads and prompts."}
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    p = commands.add_parser("judgment-write")
+    p.add_argument("bundle", type=Path)
+    p.add_argument("--project-id", required=True)
+    p.add_argument("--work-id", required=True)
+    p.add_argument("--delta", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--since", type=Path)
+    p.add_argument("--revision")
+    p = commands.add_parser("judgment-view")
+    p.add_argument("bundle", type=Path)
+    p = commands.add_parser("judgment-facts")
+    p.add_argument("bundle", type=Path)
+    p.add_argument("--project-id", required=True)
+    p.add_argument("--work-id", required=True)
+    p = commands.add_parser("usage-total")
+    p.add_argument("bundles", nargs="+", type=Path)
     for name in ("run", "observe", "observe-history", "procedure"):
         p = commands.add_parser(name)
         p.add_argument("--cwd", type=Path, required=True, help="Git repository root")
@@ -542,7 +619,47 @@ def main(argv=None):
     p.add_argument("task", choices=ROUTES)
     args = parser.parse_args(argv)
     try:
-        if args.command == "guide":
+        if args.command.startswith("judgment-"):
+            import judgment_record as judgments
+            if args.command == "judgment-view":
+                result = judgments.view(args.bundle)
+            else:
+                work = {"project_id": args.project_id, "work_id": args.work_id}
+                judgments.binding(work)
+                if args.command == "judgment-facts":
+                    observation = judgments.facts(args.bundle, work)
+                    result = {"schema": "golem.judgment-facts.v1", "binding": work,
+                              "observation_revision": observation["observation_revision"],
+                              "facts": judgments.fact_ids(observation),
+                              "attribution_basis": observation["attribution_basis"],
+                              "authenticity_verified": False, "product_acceptance": False}
+                else:
+                    result = judgments.write(args.bundle, work, read_json(args.delta),
+                                             args.output, args.since, args.revision)
+        elif args.command == "usage-total":
+            usage = []
+            for path in args.bundles:
+                if (path / "usage.json").is_file():
+                    from billing_evidence import load_records
+                    records, _ = load_records([path])
+                    usage.extend(records)
+                    continue
+                record, _ = load_bundle(path)
+                if any(step.get("usage_error") for step in record["steps"]) or record.get("diagnostic") == "USAGE_CONFLICT":
+                    raise ObservationError("INVALID_USAGE_EVIDENCE")
+                usage.extend(step["usage"] for step in record["steps"] if "usage" in step)
+            # Union first so a request cannot be assigned to different Works.
+            aggregate = provider_usage.totals(usage)
+            def work_key(call):
+                a = call["attribution"]
+                return (a["project_id"], a["work_id"])
+            works = sorted({work_key(call) for item in usage for call in item["calls"]})
+            result = {"schema": "golem.work-usage-totals.v1", "aggregate": aggregate,
+                      "works": [{"project_id": work[0], "work_id": work[1],
+                                 "totals": provider_usage.totals([
+                          {"calls": [call for call in item["calls"] if work_key(call) == work]}
+                          for item in usage])} for work in works]}
+        elif args.command == "guide":
             result = {"task": args.task, "read_on_demand": ROUTES[args.task] + COMMON,
                       "procedure_entrypoint": "agent_io.py procedure --intent INTENT --cli CLI --work WORK --cwd REPOSITORY --output NEW_BUNDLE",
                       "stage_selection": "Use workflow policy; task labels never waive required gates.",
@@ -599,6 +716,7 @@ def main(argv=None):
         code = getattr(error, "code", "INVALID_OR_UNAVAILABLE_EVIDENCE")
         sys.stderr.buffer.write(encoded({"schema": "golem.agent-io-error.v1", "code": code,
             "error_type": type(error).__name__, "errno": getattr(error, "errno", None),
+            "detail": str(error) if code == "JUDGMENT_CONTRACT" else None,
             "next_action": RECOVERY.get(code, "Inspect arguments and private evidence; do not retry effects automatically."),
             "execution_authorized": False}))
         return 2

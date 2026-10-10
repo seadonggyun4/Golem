@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import selectors
 import shutil
 import signal
 import stat
@@ -126,6 +127,86 @@ def metadata(path):
     if path.is_symlink() or not stat.S_ISREG(path.stat().st_mode):
         raise ValueError("record must be a regular file")
     return {"sha256": digest(path), "bytes": path.stat().st_size}
+
+
+def run_private(argv, *, destination, timeout, env=None, cwd=None, source=None,
+                capture_output=False, output_limit=8192):
+    """Metadata-only interactive child: never persist prompt-bearing argv or streams."""
+    command = list(map(str, argv))
+    if not command or any("\0" in s for s in command) or not math.isfinite(timeout) or timeout <= 0:
+        raise ValueError("invalid private process parameters")
+    if type(capture_output) is not bool or type(output_limit) is not int or not 0 < output_limit <= LIMIT:
+        raise ValueError("invalid private output parameters")
+    directory = private_directory(destination)
+    cwd = Path(cwd or Path.cwd()).resolve()
+    environment = dict(os.environ if env is None else env)
+    before = source_observation(Path(source or cwd), directory)
+    save(directory / "source-before.json", encoded(before))
+    identity = executable_identity(command, cwd, environment)
+    save(directory / "started.json", encoded({"schema": "golem.private-process-observation.v1",
+        "executable": identity, "timeout_seconds": timeout, "argv_redacted": True,
+        "streams_recorded": False, "environment_recorded": False,
+        "producer_sha256": digest(Path(__file__)), "started_at": datetime.now(timezone.utc).isoformat()}))
+    child, reason = None, "LAUNCH_ERROR"
+    started = time.monotonic()
+    try:
+        child = subprocess.Popen(command, cwd=cwd, env=environment, start_new_session=True,
+            stdin=subprocess.DEVNULL if capture_output else None,
+            stdout=subprocess.PIPE if capture_output else None, stderr=subprocess.PIPE if capture_output else None)
+        reason = "EXIT"
+        try:
+            if capture_output:
+                # Secret streams never touch disk or inherited terminal output.
+                buffers, size = {"stdout": bytearray(), "stderr": bytearray()}, 0
+                with selectors.DefaultSelector() as selector:
+                    for name in buffers:
+                        stream = getattr(child, name)
+                        os.set_blocking(stream.fileno(), False)
+                        selector.register(stream, selectors.EVENT_READ, name)
+                    while selector.get_map():
+                        if time.monotonic() - started >= timeout:
+                            raise subprocess.TimeoutExpired("<redacted>", timeout)
+                        for key, _ in selector.select(min(.1, timeout)):
+                            data = os.read(key.fileobj.fileno(), 4096)
+                            if not data:
+                                selector.unregister(key.fileobj)
+                                continue
+                            size += len(data)
+                            if size > output_limit:
+                                reason = "OUTPUT_LIMIT"
+                                raise ValueError("private output limit exceeded")
+                            buffers[key.data].extend(data)
+                returncode = child.wait(timeout=max(.001, timeout - (time.monotonic() - started)))
+                return subprocess.CompletedProcess([], returncode, bytes(buffers["stdout"]), bytes(buffers["stderr"]))
+            return subprocess.CompletedProcess([], child.wait(timeout=timeout))
+        except subprocess.TimeoutExpired:
+            reason = "TIMEOUT"
+            raise subprocess.TimeoutExpired("<redacted>", timeout) from None
+    except BaseException:
+        if reason == "EXIT":
+            reason = "INTERRUPTED"
+        raise
+    finally:
+        if child is not None:
+            try:
+                os.killpg(child.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            except PermissionError:
+                reason = "CLEANUP_DENIED"
+                if child.poll() is None:
+                    child.kill()
+            child.wait()
+            if capture_output:
+                child.stdout.close()
+                child.stderr.close()
+        after = source_observation(Path(source or cwd), directory)
+        save(directory / "source-after.json", encoded(after))
+        save(directory / "result.json", encoded({"schema": "golem.private-process-result.v1",
+            "returncode": child.returncode if child else None, "reason": reason,
+            "elapsed_seconds": time.monotonic() - started,
+            "source_unchanged": before == after if before["status"] == after["status"] == "OBSERVED" else None,
+            "executable_unchanged": executable_identity(command, cwd, environment) == identity}))
 
 
 def _private_existing(path):
