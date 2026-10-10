@@ -25,6 +25,11 @@ struct golem_cost_ledger {
     golem_cost_amount plan;
 };
 bool golem_cost_amount_valid(const golem_cost_amount *amount);
+bool golem_cost_report_amount_valid(const golem_cost_amount *amount, bool partial);
+golem_status golem_cost_report_decode_extended(golem_bytes json, const char *run_id,
+    uint64_t *sequence, golem_provider_usage *out, bool *partial);
+golem_status golem_cost_report_apply(golem_work_run *run, uint64_t sequence,
+    const golem_provider_usage *report, bool partial);
 bool golem_cost_budget_valid(const golem_budget *budget);
 golem_status golem_cost_budget_admit(const golem_budget *budget,
     const golem_cost_amount *prior, const golem_cost_amount *planned);

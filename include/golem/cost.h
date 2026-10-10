@@ -109,6 +109,10 @@ golem_status golem_work_run_cost_report(golem_work_run *run, uint64_t sequence,
  * it never creates/begins/finishes/settles a stage or grants execution authority. */
 golem_status golem_cost_report_decode(golem_bytes json, const char *expected_run_id,
     uint64_t *sequence, golem_provider_usage *out);
+/* JSON ingestion additionally accepts golem.native-cost-report.v2: nonzero
+ * observed partial usage may accompany usage_known=false. It never satisfies
+ * enabled usage budgets. The v1 decoder and typed report API remain strict.
+ * Unknown money must still be zero; cost_known=false is not a free charge. */
 golem_status golem_work_run_cost_report_json(golem_work_run *run, golem_bytes json);
 /* Opt-in private, owner-controlled accounting inbox. Configure once before begin,
  * after cost_enable. directory is borrowed only for this call; an O_NOFOLLOW

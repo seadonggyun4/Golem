@@ -31,6 +31,12 @@ Request IDs in native reports are namespaced by the complete attribution identit
 `tool_calls` optionally maps provider request/turn IDs to observed integer counts.
 Without a count, token partial sums still reach native storage, but the native v1
 aggregate's `usage_known` remains false; placeholder zero is **not known zero**.
+These partial reports use `golem.native-cost-report.v2`. Only the explicit v2
+JSON/inbox import accepts observed nonzero usage with completeness false; native
+v1 decoding and typed report inputs still require zero unknown usage. Aggregated
+partial values never satisfy enabled usage budgets. Unknown money must still be
+zero with `cost_known: false`. Older native binaries cannot import this v2 path;
+upgrade the owner, preserve the failed inbox and do not rewrite sealed evidence.
 `tool_usage_complete` exposes this limitation separately from token completeness.
 Use `require_billed: true` if native settlement must wait for verified charges.
 Otherwise cost remains unknown, even after usage settlement. An append-only
@@ -52,6 +58,43 @@ app-server client, not a manually assembled report. Its EOF declares the selecte
 scope closed. Forward only the bound, serialized turns with the correct cumulative
 baseline; failed/interrupted or unobserved turns remain incomplete. The current
 Codex desktop conversation is not intercepted; its owner must provide this stream.
+
+### Owned Codex connection
+
+`tools/codex_hosted.py` removes manual notification forwarding for a fresh,
+explicitly owned Codex app-server stdio thread. Supply a private attribution JSON
+containing `account_id`, `project_id`, `work_id`, `attempt_id`, the route above,
+and a JSON array of 1-32 prompt strings on stdin:
+
+```sh
+python3 tools/codex_hosted.py --directory NEW_PRIVATE_DIRECTORY \
+  --attribution PRIVATE_ATTRIBUTION --route PRIVATE_ROUTE --cwd PROJECT_ROOT \
+  --timeout 300 < PRIVATE_PROMPTS_JSON
+```
+
+It automatically binds returned thread/turn IDs, captures usage notifications,
+preserves the cumulative baseline between serialized turns, and publishes a
+separate immutable inbox sequence per turn. Reserve those native stage sequences
+before launching; this adapter does not create/advance native stages. Tool counts
+remain unknown unless independently supplied. Thread ownership and fresh zero
+baseline are required; it never guesses usage for resumed or unrelated threads.
+The optional `--model` is an explicit override, not an automatic fallback.
+
+The connection is bounded by framing, total bytes, message count and wall time.
+The shared private-process recording boundary owns source/executable identity,
+redacted metadata and child-group cleanup. Only normalized usage events are
+durably stored; prompts, responses, auth messages and stderr are not persisted.
+Requests for approval/authentication refresh are refused, not auto-approved.
+The owning client uses read-only sandbox/never-approve settings. An interactive
+client requiring richer capabilities must retain its existing owner-forwarded
+adapter rather than grant this accounting client execution authority.
+
+This covers owned fresh stdio sessions, existing owner-forwarded Codex streams,
+and authenticated Claude exports/owned launches. It does **not** connect arbitrary
+ChatGPT/Codex desktop, browser, Cowork or inaccessible cloud conversations. Those
+surfaces need provider-supported exports and an authorized owner binding; account
+aggregates cannot establish Work attribution. "All Hosted paths" is not a
+supported coverage claim.
 
 `listen` uses authenticated, bounded loopback OTLP/JSON ingestion. Duration expiry
 does **not** close the session: its owner must close after exporter flush. For an
@@ -162,3 +205,22 @@ Regression coverage includes replay, failed durable writes, deferred delivery,
 scope conflicts, private path checks, signed billing and tampering, child lifecycle,
 authenticated HTTP, and real C finish/cancel import. Synthetic provider/billing
 fixtures are explicitly not genuine charges or proof of universal hosted coverage.
+
+## Live Connection Results, 2026-10-10
+
+A real owned Claude Code invocation exported two provider requests through the
+authenticated loopback receiver. The aggregate was 3556 input and 17 output tokens;
+the native owner automatically imported both reports on stage finish and settled
+them idempotently. Cost remained unknown and native usage completeness stayed false
+because tool counts were not observed. This is real usage delivery, not authenticated
+billing, independent token measurement or a product completion verdict. The first
+attempt exposed the v1 partial-usage incompatibility; its failure evidence was
+retained, and the corrected v2 path was tested with a separate invocation/inbox.
+
+The installed Codex app-server completed its handshake and emitted failed-turn
+notifications, but the provider rejected the configured model. An explicit,
+user-approved `gpt-5.4` override was also rejected as unsupported, despite its
+presence in `model/list`. No fallback model was silently chosen, and no usage or
+ledger success was claimed for those calls. Synthetic stdio regressions cover the
+successful owned Codex protocol, correlation, multiple turns and native import;
+real Codex successful usage collection remains **NOT VERIFIED** in this account.

@@ -35,6 +35,13 @@ bool golem_cost_amount_valid(const golem_cost_amount *a)
     for (size_t i = 0; i < 5; ++i) if (!a->usage_known && u[i] != 0) return false;
     return true;
 }
+bool golem_cost_report_amount_valid(const golem_cost_amount *a, bool partial)
+{
+    if (!partial) return golem_cost_amount_valid(a);
+    /* v2 explicitly permits observed partial usage. Completeness stays false;
+     * all usage budgets still reject this amount as COST_INCOMPLETE. */
+    return a != NULL && !a->usage_known && (a->cost_known || a->nano_cost == 0);
+}
 golem_status golem_cost_amount_add(const golem_cost_amount *a,
     const golem_cost_amount *b, golem_cost_amount *out)
 {

@@ -427,6 +427,10 @@ if(GOLEM_BUILD_CLI)
         LABELS "restricted-diagnostic;records" TIMEOUT 120)
     add_test(NAME status_collector COMMAND ${Python3_EXECUTABLE} -m unittest test_status_collector)
     add_test(NAME github_policy COMMAND ${Python3_EXECUTABLE} -m unittest test_github_policy)
+    add_test(NAME github_context COMMAND ${Python3_EXECUTABLE} -m unittest test_github_context)
+    add_test(NAME codex_hosted COMMAND ${Python3_EXECUTABLE} -m unittest test_codex_hosted)
+    set_tests_properties(github_context codex_hosted PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
+        LABELS "restricted-diagnostic;records" TIMEOUT 120)
     set_tests_properties(github_policy PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"
         LABELS "restricted-diagnostic;records" TIMEOUT 120)
     set_tests_properties(status_collector PROPERTIES WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/tools"

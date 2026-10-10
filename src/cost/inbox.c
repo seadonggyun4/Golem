@@ -117,18 +117,20 @@ static golem_status sync_snapshot(golem_work_run *run, uint64_t sequence, bool r
     void *memory = NULL;
     status = golem_allocator_alloc(&run->allocator, count * sizeof(golem_provider_usage), &memory);
     golem_provider_usage *decoded = memory;
+    bool partial[INBOX_REPORTS] = {false};
     /* Validate the complete envelope before any report affects the ledger. */
     for (size_t i = 0; status == GOLEM_OK && i < count; ++i) {
         const char *json = json_object_to_json_string_ext(json_object_array_get_idx(reports, i), JSON_C_TO_STRING_PLAIN);
         uint64_t reported_sequence = 0;
-        status = golem_cost_report_decode((golem_bytes){(const uint8_t *)json, strlen(json)},
-            run->id, &reported_sequence, &decoded[i]);
+        status = golem_cost_report_decode_extended((golem_bytes){(const uint8_t *)json, strlen(json)},
+            run->id, &reported_sequence, &decoded[i], &partial[i]);
         if (status == GOLEM_OK && reported_sequence != sequence) status = GOLEM_ERR_IDENTITY_MISMATCH;
         if (status == GOLEM_OK && run->cost_inbox->require_billed && !decoded[i].actual.cost_known)
             status = GOLEM_ERR_COST_INCOMPLETE;
     }
     for (size_t i = 0; status == GOLEM_OK && i < count; ++i)
-        status = golem_work_run_cost_report(run, sequence, &decoded[i]);
+        status = partial[i] ? golem_cost_report_apply(run, sequence, &decoded[i], true) :
+            golem_work_run_cost_report(run, sequence, &decoded[i]);
     (void)golem_allocator_free(&run->allocator, memory);
     json_object_put(root);
     return status;

@@ -90,6 +90,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(result["native_delivery"], "PUBLISHED")
         self.assertFalse(result["tool_usage_complete"])
         report = json.loads(next(self.inbox.iterdir()).read_bytes())["reports"][0]
+        self.assertEqual(report["schema"], "golem.native-cost-report.v2")
         self.assertFalse(report["usage_known"])
         self.assertEqual(report["usage"]["input_tokens"], "25")
 

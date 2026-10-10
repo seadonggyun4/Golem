@@ -67,13 +67,16 @@ def credential(source, root, cwd):
     return result.stdout.decode().strip()
 
 
-def config(index, cwd, branch, interval, ttl):
+def config(index, cwd, branch, interval, ttl, candidate_context=None):
     rs.validate(index)
     github.text(branch)
     remote.check(type(interval) in (int, float) and 60 <= interval <= 86400,
                  "INTERVAL_MUST_BE_60_TO_86400_SECONDS")
     remote.check(type(ttl) in (int, float) and interval <= ttl <= 86400, "INVALID_FRESHNESS_TTL")
-    return {"index": index, "cwd": str(cwd.resolve()), "branch": branch, "interval": float(interval), "ttl": float(ttl)}
+    result = {"index": index, "cwd": str(cwd.resolve()), "branch": branch, "interval": float(interval), "ttl": float(ttl)}
+    if candidate_context is not None:
+        result["candidate_context"] = github.github_policy.github_context.validate(candidate_context)
+    return result
 
 
 def private_json(path):
@@ -98,7 +101,8 @@ def collect(configured, root, token=None, timeout=120, credential_failure=False)
             pass  # Cache is optional, never an acceptance source.
     client = github.Client(index["repository"], token, cache, timeout=timeout)
     started = time.time()
-    snapshot = github.snapshot(index, cwd, configured["branch"], client, credential_failure)
+    snapshot = github.snapshot(index, cwd, configured["branch"], client, credential_failure,
+                               candidate_context=configured.get("candidate_context"))
     deployment = (github.deployments(client, index, snapshot["target"]) if not credential_failure else
                   {"status": "QUERY_FAILED", "discovery_complete": False, "evidence": [],
                    "environments": [], "diagnostic": "CREDENTIAL_UNAVAILABLE"})
@@ -235,6 +239,7 @@ def main(argv=None):
     parser.add_argument("index", type=Path)
     parser.add_argument("--cwd", type=Path, required=True)
     parser.add_argument("--branch", required=True)
+    parser.add_argument("--candidate-context", type=Path)
     parser.add_argument("--state", type=Path, required=True)
     parser.add_argument("--interval", type=float, default=60)
     parser.add_argument("--ttl", type=float, default=180)
@@ -243,7 +248,8 @@ def main(argv=None):
     parser.add_argument("--max-cycles", type=int, default=0)
     args = parser.parse_args(argv)
     try:
-        configured = config(io.read_json(args.index), args.cwd, args.branch, args.interval, args.ttl)
+        configured = config(io.read_json(args.index), args.cwd, args.branch, args.interval, args.ttl,
+                            io.read_json(args.candidate_context) if args.candidate_context else None)
         if args.mode == "status":
             result = read(configured, directory(args.state))
             sys.stdout.buffer.write(io.encoded(result))

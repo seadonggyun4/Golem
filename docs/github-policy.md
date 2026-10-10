@@ -143,3 +143,71 @@ disabled protection metadata and timezone-equivalent instants. Private command,
 HTTP and collector-cycle captures retain failure attempts as well as successful
 observations. The test repository is retained for audit and archived after testing;
 archival does not prove historical policy success or real application health.
+
+## Candidate Scanning Adapters
+
+The collector's optional `--candidate-context PRIVATE_JSON` binds scanning to a
+candidate, while `--branch` still names the protected base branch. The local
+checkout must be at the exact scanned candidate SHA, not merely its base/head.
+
+```json
+{"kind":"pull_request","number":3,"ref_mode":"merge"}
+```
+
+`head` and `merge` are distinct explicit modes. The adapter verifies the open PR,
+base repository/branch/SHA, canonical pull ref and (for merge mode) exact base/head
+parents. Null `merge_commit_sha` metadata is not guessed: the canonical merge ref
+and its parents must independently verify. Closed/moved/conflicting candidates
+fail. Each alert's scoped instances are queried, rather than trusting the
+repository-wide most-recent instance. These observations are conservatively
+about open instances on the selected ref; they do not reproduce GitHub's entire
+changed-line merge eligibility algorithm or grant merge permission.
+
+```json
+{
+  "kind":"merge_group",
+  "run_id":123,
+  "head_ref":"refs/heads/gh-readonly-queue/main/pr-3-example",
+  "head_sha":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "base_sha":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}
+```
+
+Merge-group resolution requires a real GitHub Actions run whose event is
+`merge_group`, with exact repository/head SHA/head branch, plus the live queue ref,
+current base ref and base ancestry. A caller-created queue-looking ref or a push
+run cannot stand in for provider provenance. Third-party-only queue execution
+without an Actions run requires another authenticated event adapter; it is not
+silently accepted. All identities and analysis/alert/instance sets are re-read
+after observation; movement, missing data, permissions or shared request-budget
+exhaustion remain non-PASS. No queue or GitHub App is installed automatically.
+
+Actual REST integration on synthetic [PR 3](https://github.com/seadonggyun4/golem-policy-validation-20261010-27a0a589/pull/3)
+observed **BLOCKED -> PASS** after replacing a finding analysis with a clean one
+on the same pull merge ref; closing the PR then invalidated its context. Synthetic
+SARIF is not a real vulnerability assessment. The test repository was archived
+again. A prior failed attempt (null merge metadata) was preserved and produced a
+regression. Actual merge queue execution remains **NOT VERIFIED**: the approved
+test repository belongs to a personal account, and no organization test repository
+is available. Provider-shaped positive/negative regressions are not that live test.
+
+## Additional Design Sources
+
+Consulted 2026-10-10; design rationale, not proof of achieved coverage/performance:
+
+- [Codex app-server protocol and events](https://learn.chatgpt.com/docs/app-server):
+  owning stdio client, initialize handshake and turn/usage identity boundaries.
+- [GitHub scanning REST](https://docs.github.com/en/rest/code-scanning/code-scanning):
+  explicit PR refs, category-specific analyses and scoped alert instances.
+- [GitHub merge queues](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue)
+  and [merge-group event](https://docs.github.com/en/webhooks/webhook-events-and-payloads#merge_group):
+  queue SHA is not PR SHA; feature eligibility and provider event provenance.
+- Saltzer, Reed and Clark, *End-to-End Arguments in System Design*, ACM TOCS
+  2(4), 1984, pp. 277-288, [author-hosted paper](https://web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf):
+  receiver-side confirmation cannot be replaced by transport success. Accordingly
+  collection, inbox publication and actual native owner application stay distinct.
+- Winters, Manshreck and Wright (eds.), *Software Engineering at Google*,
+  O'Reilly, 2020, [chapter 12](https://abseil.io/resources/swe-book/html/ch12.html):
+  regress behavior/contract boundaries, not private implementation structure.
+  Tests cover candidate movement, incomplete usage, late response mismatch,
+  timeout/cleanup and secret-free persistence alongside live integration evidence.

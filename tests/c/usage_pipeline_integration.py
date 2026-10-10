@@ -7,9 +7,28 @@ import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
 from test_usage_pipeline import PipelineTests
+from test_codex_hosted import OwnedTests
 
 
 def main():
+    owned = OwnedTests(); owned.setUp()
+    try:
+        owned.mapping["run_id"] = "cost-run"
+        assert owned.run_owned()["native_delivery"] == "PUBLISHED"
+        subprocess.run([sys.argv[1], "inbox-observed", str(owned.inbox)], check=True)
+        path = next(owned.inbox.glob("*.json"))
+        value = json.loads(path.read_bytes())
+        report = value["reports"][0]
+        for invalid in ({**report, "schema": "golem.native-cost-report.v1"},
+                        {**report, "nano_cost": "1"},
+                        {**report, "usage_known": "false"},
+                        {**report, "run_id": "cost-run\0hidden"},
+                        {**report, "request_id": "call\0hidden"},
+                        {**report, "extra": True}):
+            path.write_text(json.dumps({**value, "reports": [invalid]}))
+            subprocess.run([sys.argv[1], "inbox-blocked", str(owned.inbox)], check=True)
+    finally:
+        owned.doCleanups()
     case = PipelineTests()
     case.setUp()
     try:

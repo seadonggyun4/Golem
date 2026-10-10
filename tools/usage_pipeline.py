@@ -233,6 +233,10 @@ class Pipeline:
                 # The native v1 aggregate has one completeness bit for tokens AND tools.
                 # Preserve token partial sums but never assert an unknown tool count is zero.
                 report["usage_known"] = request in mapping["tool_calls"]
+                if not report["usage_known"]:
+                    # v1 forbids nonzero fields when usage is incomplete. Only
+                    # the explicit v2 import path can retain observed partials.
+                    report["schema"] = "golem.native-cost-report.v2"
                 # Native IDs include account + Work + attempt + session, not just provider IDs.
                 report["request_id"] = hashlib.sha256(encoded([call["attribution"], request])).hexdigest()
                 if mapping["require_billed"] and not report["cost_known"]:

@@ -371,6 +371,32 @@ static int import_report(void)
         CHECK(golem_work_run_cost_report_json(run, (golem_bytes){(const uint8_t *)corrupt, strlen(corrupt)}) == GOLEM_ERR_PARSE);
     }
     CHECK(golem_cost_ledger_totals_get(golem_work_run_cost_borrow(run), &totals) == GOLEM_OK && totals.reports == 1);
+    golem_work_run_free(run);
+    const char *partial = "{\"schema\":\"golem.native-cost-report.v2\",\"run_id\":\"cost-run\","
+        "\"sequence\":\"1\",\"request_id\":\"partial-call\",\"provider\":\"codex.app-server.v1\","
+        "\"model\":\"unreported\",\"price_revision\":\"provider-unpriced-v1\",\"currency\":\"USD\","
+        "\"usage_known\":false,\"cost_known\":false,\"nano_cost\":\"0\",\"usage\":{"
+        "\"input_tokens\":\"12\",\"cached_input_tokens\":\"2\",\"output_tokens\":\"3\","
+        "\"reasoning_tokens\":\"0\",\"tool_calls\":\"0\"}}";
+    bytes = (golem_bytes){(const uint8_t *)partial, strlen(partial)};
+    seq = 999; report = provider(42);
+    CHECK(golem_cost_report_decode(bytes, "cost-run", &seq, &report) == GOLEM_ERR_PARSE);
+    CHECK(seq == 999 && report.actual.nano_cost == 42);
+    CHECK(make_run(GOLEM_AUTONOMY_AUTO_LOCAL, NULL, &run) == 0);
+    CHECK(golem_work_run_cost_enable(run, &o) == GOLEM_OK);
+    CHECK(golem_work_run_begin(run, false, false, &stage) == GOLEM_OK);
+    report.actual.usage_known = false;
+    CHECK(golem_work_run_cost_report(run, 1, &report) == GOLEM_ERR_INVALID_ARGUMENT);
+    CHECK(golem_work_run_cost_report_json(run, bytes) == GOLEM_OK);
+    CHECK(golem_work_run_cost_report_json(run, bytes) == GOLEM_OK);
+    CHECK(golem_work_run_finish(run, 1, GOLEM_STAGE_PASSED, GOLEM_FAILURE_NONE, true) == GOLEM_OK);
+    CHECK(golem_work_run_cost_settle(run, 1) == GOLEM_OK);
+    CHECK(golem_cost_ledger_totals_get(golem_work_run_cost_borrow(run), &totals) == GOLEM_OK);
+    CHECK(totals.reports == 1 && totals.unsettled == 0 && !totals.actual.usage_known);
+    CHECK(totals.actual.usage.input_tokens == 12 && !totals.actual.cost_known);
+    golem_budget budget = {0}; budget.enabled = GOLEM_BUDGET_INPUT;
+    budget.limits.input_tokens = 999;
+    CHECK(golem_budget_check(&budget, &totals.actual) == GOLEM_ERR_COST_INCOMPLETE);
     golem_work_run_free(run); return 0;
 }
 static int import_file(const char *path)
@@ -429,8 +455,30 @@ static int inbox_file(const char *path, bool blocked, bool cancel, bool billed)
     }
     golem_work_run_free(run); return 0;
 }
+static int inbox_observed(const char *path, size_t expected_reports)
+{
+    golem_work_run *run = NULL; CHECK(make_run(GOLEM_AUTONOMY_AUTO_LOCAL, NULL, &run) == 0);
+    golem_cost_options o = options(); CHECK(golem_work_run_cost_enable(run, &o) == GOLEM_OK);
+    CHECK(golem_work_run_cost_inbox_enable(run, path, false) == GOLEM_OK);
+    golem_stage_snapshot stage; CHECK(golem_work_run_begin(run, false, false, &stage) == GOLEM_OK);
+    CHECK(golem_work_run_finish(run, 1, GOLEM_STAGE_PASSED, GOLEM_FAILURE_NONE, true) == GOLEM_OK);
+    CHECK(golem_work_run_cost_inbox_sync(run, 1, true) == GOLEM_OK);
+    golem_cost_totals totals;
+    CHECK(golem_cost_ledger_totals_get(golem_work_run_cost_borrow(run), &totals) == GOLEM_OK);
+    CHECK(totals.reports == expected_reports && totals.unsettled == 0);
+    CHECK(!totals.actual.cost_known && !totals.actual.usage_known);
+    CHECK(totals.actual.usage.input_tokens > 0 || totals.actual.usage.cached_input_tokens > 0);
+    CHECK(totals.actual.usage.output_tokens > 0 || totals.actual.usage.reasoning_tokens > 0);
+    printf("Native partial usage import and settlement: %zu reports, cost/usage completeness unknown\n", totals.reports);
+    golem_work_run_free(run); return 0;
+}
 int main(int argc, char **argv)
 {
+    if ((argc == 3 || argc == 4) && strcmp(argv[1], "inbox-observed") == 0) {
+        size_t expected = 1; char extra;
+        if (argc == 4) CHECK(sscanf(argv[3], "%zu%c", &expected, &extra) == 1 && expected > 0 && expected <= 64);
+        return inbox_observed(argv[2], expected);
+    }
     if (argc == 3 && strcmp(argv[1], "import-file") == 0) return import_file(argv[2]);
     if (argc == 3 && strcmp(argv[1], "inbox-file") == 0) return inbox_file(argv[2], false, false, false);
     if (argc == 3 && strcmp(argv[1], "inbox-cancel") == 0) return inbox_file(argv[2], false, true, false);

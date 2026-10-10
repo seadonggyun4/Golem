@@ -7,6 +7,7 @@ import re
 from datetime import datetime
 
 import remote_status as remote
+import github_context
 
 
 SUPPORTED = frozenset({"workflows", "code_scanning", "required_deployments"})
@@ -136,13 +137,13 @@ def workflow_rule(client, rule, sha, branch, policy):
                    provider_historical_result=state, current_merge_authorized=False)
 
 
-def scanning_tool(client, requirement, sha, branch):
+def scanning_tool(client, requirement, sha, branch, context=None):
     remote.check(set(requirement) == {"tool", "alerts_threshold", "security_alerts_threshold"},
                  "UNKNOWN_SCANNING_TOOL_PARAMETERS")
     tool = name(requirement["tool"])
     ordinary, security = requirement["alerts_threshold"], requirement["security_alerts_threshold"]
     remote.check(ordinary in ALERTS and security in SECURITY, "UNKNOWN_SCANNING_THRESHOLD")
-    ref = "refs/heads/" + branch
+    ref = context["ref"] if context else "refs/heads/" + branch
     analyses = unique(client.pages("/code-scanning/analyses", ref=ref, tool_name=tool))
     groups = {}
     for row in analyses:
@@ -169,8 +170,22 @@ def scanning_tool(client, requirement, sha, branch):
         return outcome("ANALYSIS_WARNING", evidence, tool=tool)
     alerts = unique(client.pages("/code-scanning/alerts", ref=ref, tool_name=tool), "number")
     blocking = []
+    instance_reads = []
     for alert in alerts:
         instance, rule = alert["most_recent_instance"], alert["rule"]
+        if context:
+            # A repository-wide most_recent_instance can belong to another ref.
+            # The scoped instance endpoint supplies the actual candidate state.
+            path = f"/code-scanning/alerts/{alert['number']}/instances"
+            instances = client.pages(path, ref=ref)
+            remote.check(bool(instances) and all(i["ref"] == ref for i in instances),
+                         "SCANNING_CANDIDATE_INSTANCES_UNAVAILABLE")
+            instance_reads.append((path, instances))
+            current = [i for i in instances if i["commit_sha"] == sha]
+            remote.check(bool(current), "SCANNING_ALERT_REVISION_MISMATCH")
+            remote.check(all(i["state"] in ("open", "dismissed", "fixed") for i in current),
+                         "UNKNOWN_ALERT_STATE")
+            instance = next((i for i in current if i["state"] == "open"), current[0])
         remote.check(alert["tool"]["name"] == tool and instance["ref"] == ref,
                      "SCANNING_ALERT_IDENTITY_MISMATCH")
         remote.check(alert["state"] in ("open", "dismissed", "fixed")
@@ -193,11 +208,13 @@ def scanning_tool(client, requirement, sha, branch):
             blocking.append(alert["number"])
     # Analysis/alert queries are not a transaction. Detect uploads during the read.
     remote.check(analyses == client.pages("/code-scanning/analyses", ref=ref, tool_name=tool)
-                 and alerts == client.pages("/code-scanning/alerts", ref=ref, tool_name=tool),
+                 and alerts == client.pages("/code-scanning/alerts", ref=ref, tool_name=tool)
+                 and all(rows == client.pages(path, ref=ref) for path, rows in instance_reads),
                  "SCANNING_ANALYSIS_CHANGED_DURING_QUERY")
     return outcome("FAIL" if blocking else "PASS", evidence, tool=tool,
                    blocking_alerts=blocking, observed_alerts=len(alerts),
-                   scope="OBSERVED_REFERENCE_ANALYSIS_CATEGORIES", vulnerability_free_verified=False)
+                   scope="OBSERVED_REFERENCE_ANALYSIS_CATEGORIES", reference=ref,
+                   vulnerability_free_verified=False, provider_merge_decision_equivalent=False)
 
 
 def scanning_rule(client, rule, sha, branch, policy):
@@ -206,11 +223,18 @@ def scanning_rule(client, rule, sha, branch, policy):
     remote.check(isinstance(tools, list) and 0 < len(tools) <= 32, "INVALID_SCANNING_TOOLS")
     # This collector observes a branch, not a PR diff. Never apply branch-head
     # alerts to a candidate/merge-group SHA that needs another reference context.
-    if sha != policy["branch_sha"]:
+    context = None
+    if policy.get("candidate_context") is not None:
+        context = github_context.resolve(client, policy["candidate_context"], branch, policy["branch_sha"])
+        remote.check(context["sha"] == sha, "CANDIDATE_SOURCE_REVISION_MISMATCH")
+    elif sha != policy["branch_sha"]:
         return outcome("REFERENCE_CONTEXT_REQUIRED")
-    rows = [scanning_tool(client, item, sha, branch) for item in tools]
+    rows = [scanning_tool(client, item, sha, branch, context) for item in tools]
+    if context:
+        remote.check(context == github_context.resolve(client, policy["candidate_context"], branch,
+                                                       policy["branch_sha"]), "CANDIDATE_CHANGED_DURING_QUERY")
     return outcome("PASS" if all(r["status"] == "PASS" for r in rows) else "BLOCKED",
-                   [e for r in rows for e in r["evidence"]], tools=rows)
+                   [e for r in rows for e in r["evidence"]], tools=rows, candidate=context)
 
 
 def deployment_rule(client, rule, sha, branch, policy):

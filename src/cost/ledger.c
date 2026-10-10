@@ -124,12 +124,12 @@ void golem_cost_finish(golem_cost_ledger *l, const golem_stage_snapshot *stage)
 {
     if (l != NULL) l->entries[(size_t)stage->sequence - 1].value.stage = *stage;
 }
-golem_status golem_work_run_cost_report(golem_work_run *run, uint64_t sequence,
-    const golem_provider_usage *r)
+golem_status golem_cost_report_apply(golem_work_run *run, uint64_t sequence,
+    const golem_provider_usage *r, bool partial)
 {
     if (run == NULL || r == NULL || !text_valid(r->request_id) || !text_valid(r->provider) ||
         !text_valid(r->model) || !text_valid(r->price_revision) || !currency_valid(r->currency) ||
-        !golem_cost_amount_valid(&r->actual)) return GOLEM_ERR_INVALID_ARGUMENT;
+        !golem_cost_report_amount_valid(&r->actual, partial)) return GOLEM_ERR_INVALID_ARGUMENT;
     golem_cost_ledger *l = run->cost;
     if (l == NULL) return GOLEM_ERR_INVALID_STATE;
     if (strcmp(r->currency, l->options.currency) != 0) return GOLEM_ERR_IDENTITY_MISMATCH;
@@ -163,6 +163,11 @@ golem_status golem_work_run_cost_report(golem_work_run *run, uint64_t sequence,
     ++l->totals.reports; ++l->stage_totals[e->stage.stage].reports;
     e->actual = sum; ++e->report_count;
     return GOLEM_OK;
+}
+golem_status golem_work_run_cost_report(golem_work_run *run, uint64_t sequence,
+    const golem_provider_usage *r)
+{
+    return golem_cost_report_apply(run, sequence, r, false);
 }
 golem_status golem_work_run_cost_settle(golem_work_run *run, uint64_t sequence)
 {

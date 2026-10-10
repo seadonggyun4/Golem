@@ -324,7 +324,7 @@ def evaluate(policy, checks, statuses, sha, domain_results=None):
             "observed_commit_statuses": len(statuses)}
 
 
-def snapshot(index, cwd, branch, client, credential_failure=False):
+def snapshot(index, cwd, branch, client, credential_failure=False, candidate_context=None):
     rs.validate(index)
     before = rs.target_source(cwd, index["repository"])
     result = {"schema": "golem.github-required-checks.v1", "binding": index["binding"],
@@ -337,8 +337,15 @@ def snapshot(index, cwd, branch, client, credential_failure=False):
         if credential_failure:
             raise APIError("CREDENTIAL_UNAVAILABLE")
         policy = discover(client, branch)
+        if candidate_context is not None:
+            github_policy.github_context.validate(candidate_context)
+            policy["candidate_context"] = candidate_context
         sha = before["commit"]
         remote.check(re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", sha), "INVALID_SOURCE_SHA")
+        if candidate_context is not None:
+            candidate = github_policy.github_context.resolve(client, candidate_context, branch, policy["branch_sha"])
+            remote.check(candidate["sha"] == sha, "CANDIDATE_SOURCE_REVISION_MISMATCH")
+            result["candidate"] = candidate
         checks = client.pages(f"/commits/{sha}/check-runs", "check_runs", filter="latest")
         # A terminal latest-by-completion filter must not conceal an unfinished rerun.
         unfinished = []
@@ -358,6 +365,10 @@ def snapshot(index, cwd, branch, client, credential_failure=False):
         domain_results = github_policy.collect(client, policy, sha, branch, checks=checks)
         # Policy and branch movement during observation cannot turn into a current PASS.
         after_policy = discover(client, branch)
+        if candidate_context is not None:
+            after_policy["candidate_context"] = candidate_context
+            remote.check(candidate == github_policy.github_context.resolve(client, candidate_context,
+                         branch, after_policy["branch_sha"]), "CANDIDATE_CHANGED_DURING_QUERY")
         remote.check(policy == after_policy, "POLICY_OR_BRANCH_CHANGED_DURING_QUERY")
         result.update(evaluate(policy, checks, statuses, sha, domain_results))
         result["policy_evidence_failed"] = any(r["status"] == "QUERY_OR_VALIDATION_FAILED" for r in domain_results)

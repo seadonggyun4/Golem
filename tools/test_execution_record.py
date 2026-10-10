@@ -16,6 +16,33 @@ import execution_record as record
 
 
 class Records(unittest.TestCase):
+    def test_private_protocol_is_bidirectional_but_never_persisted(self):
+        destination = self.root / "protocol"
+        secret = b"protocol-secret-fixture\n"
+        def exchange(child, deadline):
+            self.assertGreater(deadline, time.monotonic())
+            child.stdin.write(secret); child.stdin.flush()
+            self.assertEqual(child.stdout.readline(), secret)
+            return {"observed": True}
+        result = record.run_private([sys.executable, "-c",
+            "import sys; s=sys.stdin.buffer.readline(); sys.stdout.buffer.write(s); sys.stdout.buffer.flush()"],
+            destination=destination, timeout=5, source=self.source, protocol=exchange)
+        self.assertEqual(result, {"observed": True})
+        self.assertTrue(all(secret.strip() not in p.read_bytes() for p in destination.iterdir() if p.is_file()))
+        self.assertIsNotNone(json.loads((destination / "result.json").read_bytes())["returncode"])
+
+    def test_private_protocol_failure_is_recorded_and_reaped(self):
+        destination = self.root / "protocol-failure"
+        def reject(child, deadline):
+            raise ValueError("reject")
+        with self.assertRaises(ValueError):
+            record.run_private([sys.executable, "-c", "import time; time.sleep(60)"],
+                destination=destination, timeout=5, source=self.source, protocol=reject)
+        self.assertIsNotNone(json.loads((destination / "result.json").read_bytes())["returncode"])
+        with self.assertRaises(ValueError):
+            record.run_private([sys.executable], destination=self.root / "invalid-protocol",
+                timeout=5, capture_output=True, protocol=reject)
+
     def test_private_output_is_bounded_memory_only_and_never_persisted(self):
         destination = self.root / "private-output"
         secret = "credential-fixture-not-for-disk"
