@@ -345,6 +345,7 @@ static golem_status call(golem_document_store *s, golem_bytes bytes, const golem
     if (!s || !out || s->poisoned)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
     struct json_object *req = NULL, *result = NULL, *cp = NULL, *reply = NULL, *manifest = NULL;
+    const char *failure = NULL;
     golem_status st = golem_json_parse(bytes, GOLEM_DOCUMENT_MAX_JSON, &req);
     const char *op = dw_text(req, "operation");
     bool is_prepare = strcmp(op, "prepare") == 0, is_run = strcmp(op, "run") == 0,
@@ -400,7 +401,7 @@ static golem_status call(golem_document_store *s, golem_bytes bytes, const golem
                 st = ex_authorize(s, dw_get(req, "token"), manifest);
             if (st == GOLEM_OK)
                 st = ex_execute(s, cp, &key, manifest, dw_text(req, "attempt_id"),
-                                dw_get(req, "token"), dispatch, &result);
+                                dw_get(req, "token"), dispatch, &result, &failure);
         }
     }
     if (st == GOLEM_OK && !is_verify)
@@ -421,7 +422,7 @@ static golem_status call(golem_document_store *s, golem_bytes bytes, const golem
     json_object_put(cp);
     json_object_put(reply);
     json_object_put(manifest);
-    return dw_report(d, st, NULL);
+    return dw_report(d, st, failure);
 }
 
 GOLEM_RECORDED_API(golem_execution_call,

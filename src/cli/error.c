@@ -163,7 +163,19 @@ int cli_error_finish(int exit_code)
             ADD("offset", json_object_new_uint64(context.diagnostic.offset));
         }
     }
-    ADD("next_action", json_object_new_string(rule ? rule->action : exit_code == 2 ? INPUT : EVIDENCE));
+    const char *action = rule ? rule->action : exit_code == 2 ? INPUT : EVIDENCE;
+    if (context.has_diagnostic && !context.diagnostic.truncated) {
+        const char *diagnostic = context.diagnostic.message;
+        if (!strcmp(diagnostic, "session.resume_preflight.DONE.READ_NEXT"))
+            action = "Read session next and completion status; do not mutate a completed Work.";
+        else if (!strcmp(diagnostic, "session.resume_preflight.LIVE_OWNER.WAIT"))
+            action = "Wait for the live owner or a lawful handoff/expiry; do not force takeover or repeat effects.";
+        else if (!strncmp(diagnostic, "execution.protected.", 20))
+            action = "Preserve the checkpoint; review changed bytes and Git metadata, then explicitly revise the selection and approve a new baseline.";
+        else if (!strncmp(diagnostic, "discovery.git_environment:", 26))
+            action = "Review inherited GIT_ overrides and unset them in this invocation only; do not bypass the environment guard.";
+    }
+    ADD("next_action", json_object_new_string(action));
     ADD("retry_effect", json_object_new_boolean(false));
     ADD("effects", json_object_new_string("NOT_INFERRED_FROM_EXIT_STATUS"));
     struct json_object *observations = json_object_new_array();

@@ -121,6 +121,37 @@ necessary. All observations can become stale immediately: normal sequence,
 lease, binding, source and manifest checks are unchanged. An old-key replay is
 still historical, not a new lease. `execution_authorized` remains false.
 
+### Resume entry enforcement
+
+New explicit `resume` requests now run the same read-only preflight builder used
+by status/next, under the existing store lifetime lock, before preparing CAS or
+an event. This covers `session call`, the C API and the eventual mutation inside
+`session resume`/the context adapter; it is not a subprocess invocation of
+status/next and does not make a GUI conversation run those queries automatically.
+Clients should still read full status and next before constructing a request.
+The Python context adapter additionally calls both queries before contacting the
+token-count provider, retains the observations, and stops on DONE, a foreign live
+owner, review blockers or an inconsistent sequence. Those separate read-only
+calls do not reserve state: the final native mutation still checks everything.
+
+An already verified DONE rejects a new resume with `GOLEM_ERR_INVALID_STATE` and
+`session.resume_preflight.DONE.READ_NEXT`. Another live owner rejects with
+`GOLEM_ERR_JOURNAL_BUSY` and `session.resume_preflight.LIVE_OWNER.WAIT`, before
+any resume preparation writes. The common CLI error includes the diagnostic and
+a matching next action. A same-owner resume remains explicit; a RUNNING attempt
+still becomes RECOVERY_REQUIRED, never an automatically executable fresh claim.
+
+Sequence and policy checks precede this preflight. Binding/token checks and the
+final boot/clock/lease publication guard remain authoritative afterward; a query
+is not a reservation. Exact old-key retries still return the historical receipt
+before preflight, without changing state or renewing ownership. Replay of old
+events is unchanged: existing v1 sessions need no migration, and historical
+resume events after completion remain readable. This is prospective validation,
+not a rewriting of old completion/session evidence.
+
+See [resume safety review and installation handoff](resume-safety.md) for tested
+boundaries, protected-baseline recovery and invocation-local Git environment setup.
+
 ### Start and Claim
 
 For a Work named `example-work` with document ID `selection`:

@@ -33,11 +33,20 @@ handoff. Existing ownership, binding, fencing and recovery rules are unchanged.
 
 ## Provider Adapter
 
-`tools/context_resume.py` performs candidate -> count -> fenced resume -> input
-handoff. `context candidate` defers only token checking and explicitly labels
+`tools/context_resume.py` performs read-only status/next preflight -> candidate ->
+count -> fenced resume -> input handoff. The two full observations are retained;
+DONE, another live owner, review blockers and inconsistent sequences stop before
+provider contact. The queries reserve nothing: the native mutation still fences
+intervening changes. The adapter needs the matching resume-preflight SDK/engine;
+missing hints fail closed. For an ambiguous prior mutation, inspect the retained
+request and original receipt using the ordinary identical-key protocol rather
+than treating this adapter's fresh-input preflight as an idempotency oracle.
+See [resume safety](resume-safety.md).
+
+`context candidate` defers only token checking and explicitly labels
 `budget_verified=false`; byte/integrity checks still apply. It retains the exact
 budget/identity in the request so subsequent native rebuilding has identical bytes.
-It never publishes CAS or resumes a session.
+The candidate command never publishes CAS or resumes a session.
 
 The adapter sends the complete projection JSON, not just Markdown, plus explicit
 instructions to the configured token-count endpoint. After counting, it checks

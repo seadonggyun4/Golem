@@ -10,6 +10,8 @@ int golem_cli_discovery(int argc,char **argv)
     bool snapshot=strcmp(argv[2],"snapshot")==0,validate=strcmp(argv[2],"validate")==0;
     if((report && argc!=5) || (!report && (argc!=4 || (!snapshot && !validate)))) return 2;
     cli_blob b={0}; struct json_object *o=NULL;
+    golem_diagnostic diagnostic;
+    (void)golem_diagnostic_clear(&diagnostic);
     golem_status st=cli_read(argv[3],GOLEM_DOCUMENT_MAX_JSON,&b);
     if(report) {
         size_t size=0; void *output=NULL;
@@ -24,7 +26,7 @@ int golem_cli_discovery(int argc,char **argv)
     }
     if(st==GOLEM_OK && snapshot) {
         uint8_t *output=NULL; size_t size=0;
-        st=golem_discovery_snapshot((golem_bytes){b.data,b.size},NULL,&output,&size,NULL);
+        st=golem_discovery_snapshot((golem_bytes){b.data,b.size},NULL,&output,&size,&diagnostic);
         if(st==GOLEM_OK) st=cli_json_parse((golem_bytes){output,size},&o);
         (void)golem_allocator_free(NULL,output);
     } else if(st==GOLEM_OK) {
@@ -46,5 +48,6 @@ int golem_cli_discovery(int argc,char **argv)
                 !cli_json_add(o,"snapshot_digest",json_object_new_string(hex)))) st=GOLEM_ERR_OUT_OF_MEMORY;
         }
     }
+    cli_error_note(st, snapshot ? "discovery_snapshot" : "discovery_validate", &diagnostic);
     free(b.data); return cli_emit(st,o);
 }

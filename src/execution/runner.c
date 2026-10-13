@@ -73,7 +73,7 @@ static golem_status result_budget(struct json_object *manifest, struct json_obje
 }
 static golem_status protected(golem_document_store *s, struct json_object *cp,
                               struct json_object *snapshot, struct json_object *manifest,
-                              const golem_digest *key)
+                              const golem_digest *key, const char **failure)
 {
     struct json_object *c = dw_get(cp, "contract"), *gates = dw_get(c, "gates");
     golem_status inventory_status = ex_inventory_check(s, cp, snapshot, true);
@@ -90,9 +90,18 @@ static golem_status protected(golem_document_store *s, struct json_object *cp,
             return GOLEM_ERR_STALE_RESULT;
         for (size_t j = 0; j < json_object_array_length(paths); ++j) {
             const char *path = json_object_get_string(json_object_array_get_idx(paths, j));
-            if (!json_object_equal(find(dw_get(old, "files"), "path", path),
-                                   find(dw_get(now, "files"), "path", path)))
+            struct json_object *prior = find(dw_get(old, "files"), "path", path),
+                               *current = find(dw_get(now, "files"), "path", path);
+            if (!json_object_equal(prior, current)) {
+                if (failure)
+                    *failure = !prior || !current
+                        ? "execution.protected.missing.REVIEW_NEW_SELECTION"
+                        : strcmp(dw_text(prior, "digest"), dw_text(current, "digest")) ||
+                          dw_uint(prior, "size") != dw_uint(current, "size")
+                        ? "execution.protected.bytes_changed.REVIEW_NEW_SELECTION"
+                        : "execution.protected.metadata_changed.REVIEW_NEW_SELECTION";
                 return GOLEM_ERR_POLICY_DENIED;
+            }
         }
         golem_receipt binary;
         golem_digest expected;
@@ -313,7 +322,8 @@ static golem_status gate_run(golem_document_store *s, struct json_object *gate,
 }
 golem_status ex_execute(golem_document_store *s, struct json_object *cp, const golem_digest *key,
                         struct json_object *manifest, const char *attempt,
-                        struct json_object *token, ap_dispatch *approval, struct json_object **out)
+                        struct json_object *token, ap_dispatch *approval, struct json_object **out,
+                        const char **failure)
 {
     int dir = -1;
     char started[80], done[80];
@@ -370,7 +380,7 @@ golem_status ex_execute(golem_document_store *s, struct json_object *cp, const g
     if (st == GOLEM_OK && dw_uint(c, "schema_version") >= 4)
         st = ex_authorize(s, token, manifest);
     if (st == GOLEM_OK)
-        st = protected(s, cp, snap, manifest, key);
+        st = protected(s, cp, snap, manifest, key, failure);
     if (st == GOLEM_OK)
         st = result_budget(manifest, snap, dw_get(c, "gates"));
     if (st == GOLEM_OK)
@@ -422,7 +432,7 @@ golem_status ex_execute(golem_document_store *s, struct json_object *cp, const g
             if (st == GOLEM_OK && !json_object_equal(snap, current))
                 st = GOLEM_ERR_STALE_RESULT;
             if (st == GOLEM_OK)
-                st = protected(s, cp, current, manifest, key);
+                st = protected(s, cp, current, manifest, key, failure);
             json_object_put(current);
         }
         if (st == GOLEM_OK)
@@ -444,7 +454,7 @@ golem_status ex_execute(golem_document_store *s, struct json_object *cp, const g
     if (st == GOLEM_OK && snapshot_status == GOLEM_OK)
         snapshot_status = ex_inventory_check(s, cp, after, true);
     bool changed = snapshot_status != GOLEM_OK || !json_object_equal(snap, after);
-    if (st == GOLEM_OK && !changed && protected(s, cp, after, manifest, key) != GOLEM_OK)
+    if (st == GOLEM_OK && !changed && protected(s, cp, after, manifest, key, NULL) != GOLEM_OK)
         changed = true;
     if (st == GOLEM_OK) {
         result = json_object_new_object();

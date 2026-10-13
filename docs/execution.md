@@ -91,7 +91,21 @@ Contract v1 fixes one or more gates. Each has `id`, positive `version`, a snapsh
 and `protected_paths`. Cases bind `id` to `requirement_id`; all selected requirements
 must have a case. Protect all test scripts, fixtures, wrappers and configuration
 which could weaken the oracle. Golem cannot infer every transitive dependency.
-Changed protected bytes or executable digests stop dispatch. Paths are an explicit
+Changed protected file objects or executable digests stop dispatch. A protected
+file object includes digest, size, tracked and dirty fields: a commit can change
+the approved object without changing file bytes. Pre-dispatch diagnostics now
+distinguish `execution.protected.bytes_changed.REVIEW_NEW_SELECTION`,
+`execution.protected.metadata_changed.REVIEW_NEW_SELECTION` and missing objects.
+Both byte and metadata changes remain POLICY_DENIED; identical bytes are not
+automatic approval to rebaseline. Preserve the original checkpoint and failure,
+review the exact delta, explicitly register a new selection revision and review
+its contract digest, then prepare a new checkpoint and produce fresh development
+and QA receipts. Existing enrollment pins the first checkpoint per selection;
+repeating prepare is not a rebaseline API. Never patch old CAS, sidecars, receipts
+or registered Markdown, and never remove protected paths to clear the error.
+See [resume safety](resume-safety.md) for the upgrade handoff.
+
+Paths are an explicit
 allowlist, not shell patterns. Approval hashes json-c compact serialization with
 original member order, not raw input whitespace or RFC 8785 canonical JSON.
 

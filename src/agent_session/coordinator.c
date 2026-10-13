@@ -731,6 +731,21 @@ GOLEM_RECORDED_API(golem_agent_session_call,
             phase = "session.policy";
             st = policy(s);
         }
+        if (st == GOLEM_OK && !strcmp(op, "resume")) {
+            struct json_object *hint = NULL;
+            phase = "session.resume_preflight";
+            st = resume_preflight(s, &log, now, &boot, &hint);
+            if (st == GOLEM_OK && !strcmp(dw_text(hint, "reason"), "DONE")) {
+                phase = "session.resume_preflight.DONE.READ_NEXT";
+                st = GOLEM_ERR_INVALID_STATE;
+            } else if (st == GOLEM_OK && as_live(&log, now, &boot) &&
+                       strcmp(dw_text(dw_get(log.state, "active"), "session_id"),
+                              dw_text(r, "session_id"))) {
+                phase = "session.resume_preflight.LIVE_OWNER.WAIT";
+                st = GOLEM_ERR_JOURNAL_BUSY;
+            }
+            json_object_put(hint);
+        }
         if (st == GOLEM_OK) {
             phase = "session.prepare";
             st = prepare(s, &log, r, now, &boot, &data);

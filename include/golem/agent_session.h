@@ -32,6 +32,10 @@ typedef struct golem_agent_clock {
  * or declare semantic completion. Local cooperating clients, not distributed HA.
  * Clock rollback/boot change require explicit resume; CLI process exit alone
  * does not reset the durable coordinator. Bounds: 4096 events, 256 attempts.
+ * New resume requests run the read-only status/next preflight under the store
+ * lock before preparation. DONE and another live owner reject without writes.
+ * Historical duplicate receipts retain their original semantics and are not
+ * refreshed by preflight. Session IDs remain cooperative, not authenticated.
  */
 golem_status golem_agent_session_call(golem_document_store *store, golem_bytes request,
     const golem_agent_clock *clock, golem_agent_reply *out, golem_diagnostic *diagnostic);

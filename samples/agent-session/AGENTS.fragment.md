@@ -18,7 +18,10 @@ Use the current CLI/GUI agent; do not launch a second agent implicitly.
 6. Author the required Markdown, register exact parents and producer_attempt,
    then submit the output receipt and actual evidence digests. Label external
    commands self_reported. Never fabricate test execution, QA PASS or completion.
-7. After interruption, query status and explicitly resume. Reconcile RUNNING
+7. After interruption, query full status/next and honor resume_preflight. DONE
+   requires read-only completion inspection, not session resume. A live foreign
+   owner requires waiting or lawful handoff. Explicit resume never authorizes
+   replaying uncertain effects. Reconcile RUNNING
    effects before claiming again. Adopt existing registered output when valid;
    do not automatically repeat effects whose outcome is unknown.
 8. Query next after each accepted submission. BLOCKED means resolve the stated

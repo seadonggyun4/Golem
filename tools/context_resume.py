@@ -1,4 +1,4 @@
-"""Explicit projection -> provider count -> fenced resume -> provider input handoff.
+"""Read-only preflight -> projection -> count -> fenced resume -> input handoff.
 
 Only configured provider token-count endpoints are called, never generation.
 No hidden conversation/history or credential-store access. Required facts are
@@ -139,6 +139,36 @@ def resume(cli, work, request, context, settings, output, *, source=None):
     records.save(directory / "resume-request.json", records.encoded(request))
     records.save(directory / "provider-config.json", records.encoded(settings))
     try:
+        queries = {}
+        for operation in ("status", "next"):
+            query = {"schema_version": 1, "operation": operation,
+                     "work_id": request.get("work_id")}
+            path = directory / (operation + "-request.json")
+            records.save(path, records.encoded(query))
+            result = records.run([str(cli), "--output-mode", "full", "session", "call",
+                                  str(work), str(path)], destination=directory / (operation + "-process"),
+                                 timeout=90, source=source)
+            if len(result.stdout) > MAX_INPUT:
+                raise ValueError("CONTEXT_PREFLIGHT_LIMIT")
+            queries[operation] = strict_json(result.stdout)
+            records.save(directory / (operation + "-observation.json"), records.encoded(queries[operation]))
+        status, following = queries["status"], queries["next"]
+        hint = status.get("resume_preflight", {})
+        sequence = status.get("sequence")
+        if (hint.get("schema_version") != 1 or type(sequence) is not int or
+                type(request.get("expected_sequence")) is not int or
+                hint.get("expected_sequence") != sequence or
+                following.get("sequence") != sequence or request.get("expected_sequence") != sequence):
+            raise ValueError("CONTEXT_PREFLIGHT_STALE_OR_UNSUPPORTED")
+        if hint.get("reason") == "DONE" or following.get("action") == "DONE":
+            raise ValueError("CONTEXT_PREFLIGHT_DONE_READ_NEXT")
+        if hint.get("next_operation") in ("REVIEW_POLICY", "SESSION_START", "INSPECT_WORKFLOW"):
+            raise ValueError("CONTEXT_PREFLIGHT_REVIEW_REQUIRED")
+        if following.get("action") == "BLOCKED" and following.get("reason") not in (
+                "RESUME_REQUIRED", "RECONCILIATION_REQUIRED"):
+            raise ValueError("CONTEXT_PREFLIGHT_REVIEW_REQUIRED")
+        if hint.get("lease_live") is True and hint.get("owner_session_id") != request.get("session_id"):
+            raise ValueError("CONTEXT_PREFLIGHT_LIVE_OWNER_WAIT")
         result = records.run([str(cli), "--output-mode", "full", "context", "candidate", str(work),
                               str(directory / "context-request.json")], destination=directory / "candidate-process",
                              timeout=90, source=source)
@@ -176,10 +206,17 @@ def resume(cli, work, request, context, settings, output, *, source=None):
         return summary
     except Exception as error:
         # A failed resume subprocess may have committed; never retry mutations.
+        code = str(error) if isinstance(error, ValueError) and re.fullmatch(r"CONTEXT_[A-Z_]+", str(error)) else "CONTEXT_EXECUTION_OR_EVIDENCE_ERROR"
+        recovery = {
+            "CONTEXT_PREFLIGHT_DONE_READ_NEXT": ("READ_NEXT", "Read native next and completion; do not session-resume DONE."),
+            "CONTEXT_PREFLIGHT_LIVE_OWNER_WAIT": ("WAIT_OWNER", "Respect the live owner; wait for lawful handoff/expiry, never force takeover."),
+            "CONTEXT_PREFLIGHT_STALE_OR_UNSUPPORTED": ("READ_STATUS_NEXT", "Inspect current full status/next and engine compatibility; review a fresh request explicitly."),
+            "CONTEXT_PREFLIGHT_REVIEW_REQUIRED": ("REVIEW_PREFLIGHT", "Inspect the preserved full status/next blocker; do not infer permission or retry effects."),
+        }.get(code, ("INSPECT_ORIGINAL", "Inspect preserved logs and identical resume key; do not auto-retry or drop required facts."))
         records.save(directory / "failure.json", records.encoded({"state": "INCOMPLETE", "error_type": type(error).__name__,
-                    "code": str(error) if isinstance(error, ValueError) and re.fullmatch(r"CONTEXT_[A-Z_]+", str(error)) else "CONTEXT_EXECUTION_OR_EVIDENCE_ERROR",
+                    "code": code, "next_operation": recovery[0],
                     "resume_may_have_committed": (directory / "resume-process").exists(),
-                    "next_action": "Inspect preserved logs and identical resume key; do not auto-retry or drop required facts."}))
+                    "next_action": recovery[1]}))
         raise
 
 

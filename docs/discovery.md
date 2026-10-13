@@ -49,6 +49,20 @@ tests, reset, checkout, network or cleanup runs. GIT_* environment overrides are
 rejected to avoid silently selecting another index/worktree. `/usr/bin/git` must
 be available, the repository must have a HEAD commit, and files must exist.
 
+Inherited `GIT_PAGER` is also a rejected `GIT_*` override, even though the Git
+child uses `--no-pager` and a fixed environment. The diagnostic names a bounded
+safe variable name, never its value; the CLI preserves that diagnostic and gives
+invocation-local recovery guidance. Review every inherited override rather than
+allowlisting pager settings implicitly. For the pager-only case:
+
+```sh
+env -u GIT_PAGER golem --output-mode full discovery snapshot PLAN.json
+```
+
+Other overrides remain rejected. Do not silently remove repository/index/config
+identity overrides in an adapter: first confirm the intended repository and plan.
+No global shell settings or Git configuration are changed by this recovery.
+
 Each snapshot contains:
 
 - Root identity digest (supplied absolute path plus device/inode), HEAD identity.

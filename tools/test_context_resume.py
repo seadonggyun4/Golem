@@ -9,6 +9,7 @@ import ssl
 import tempfile
 import time
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.request import Request
@@ -27,6 +28,12 @@ def candidate():
     text = records.encoded(value).decode()
     return {"candidate": value, "candidate_json": text, "projection_digest": hashlib.sha256(text.encode()).hexdigest(),
             "budget_verified": False}
+
+
+def preflight():
+    return {"sequence": 2, "resume_preflight": dict(schema_version=1, expected_sequence=2,
+            reason="CURRENT", next_operation="READ_NEXT", lease_live=False,
+            owner_session_id="")}
 
 
 class Response(io.BytesIO):
@@ -131,14 +138,35 @@ class ProviderCount(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp).resolve(); cli = root / "cli"; records.save(cli, b"fixture")
             with patch.object(records, "run") as run, patch.object(resume, "count_input") as count:
-                run.return_value.stdout = records.encoded(candidate())
+                run.side_effect = [SimpleNamespace(stdout=records.encoded(value)) for value in
+                                   (preflight(), {"sequence": 2}, candidate())]
                 count.return_value = {"input_tokens": 1801}
                 with self.assertRaisesRegex(ValueError, "BUDGET_EXHAUSTED"):
-                    resume.resume(cli, root, {"operation": "resume"}, {}, settings(), root / "result")
-                self.assertEqual(run.call_count, 1)
+                    resume.resume(cli, root, {"operation": "resume", "work_id": "work",
+                                  "session_id": "owner", "expected_sequence": 2}, {}, settings(), root / "result")
+                self.assertEqual(run.call_count, 3)
                 failure = json.loads((root / "result/failure.json").read_bytes())
                 self.assertFalse(failure["resume_may_have_committed"])
                 self.assertFalse((root / "result/manifest.json").exists())
+
+    def test_preflight_blocks_before_provider_or_mutation(self):
+        cases = [({"reason": "DONE"}, 2, "DONE_READ_NEXT"),
+                 ({"lease_live": True, "owner_session_id": "other"}, 2, "LIVE_OWNER_WAIT"),
+                 ({"next_operation": "REVIEW_POLICY"}, 2, "REVIEW_REQUIRED"),
+                 ({}, 3, "STALE_OR_UNSUPPORTED")]
+        for changes, next_sequence, code in cases:
+            with self.subTest(code=code), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp).resolve(); cli = root / "cli"; records.save(cli, b"fixture")
+                value = preflight(); value["resume_preflight"].update(changes)
+                with patch.object(records, "run") as run, patch.object(resume, "count_input") as count:
+                    run.side_effect = [SimpleNamespace(stdout=records.encoded(value)),
+                                       SimpleNamespace(stdout=records.encoded({"sequence": next_sequence}))]
+                    with self.assertRaisesRegex(ValueError, code):
+                        resume.resume(cli, root, {"operation": "resume", "work_id": "work",
+                                      "session_id": "owner", "expected_sequence": 2}, {}, settings(), root / "result")
+                    count.assert_not_called()
+                    self.assertEqual(run.call_count, 2)
+                    self.assertFalse((root / "result/resume-process").exists())
 
 
 if __name__ == "__main__":

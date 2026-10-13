@@ -152,6 +152,24 @@ class Session(unittest.TestCase):
         self.request("start", selection_id="selection")
         self.assertEqual(self.request("status")["resume_preflight"]["next_operation"], "READ_NEXT")
 
+    def test_resume_live_foreign_owner_is_rejected_before_any_write(self):
+        self.setup_session()
+        self.claim()
+        before = self.work_bytes()
+        rejected = self.request("resume", session_id="intruder", ttl_ms=10000, ok=False)
+        self.assertIn(b"session.resume_preflight.LIVE_OWNER.WAIT", rejected.stderr)
+        self.assertEqual(before, self.work_bytes())
+
+    def test_preflight_observation_does_not_authorize_stale_resume(self):
+        self.setup_session()
+        observed = self.request("status")["resume_preflight"]["expected_sequence"]
+        self.claim()
+        before = self.work_bytes()
+        rejected = self.request("resume", expected_sequence=observed,
+                                session_id="agent-a", ttl_ms=10000, ok=False)
+        self.assertIn(b"session.expected_sequence", rejected.stderr)
+        self.assertEqual(before, self.work_bytes())
+
     def test_completed_session_reboot_does_not_request_mutation(self):
         self.setup_work(mode="documents")
         self.register_selection()
@@ -185,6 +203,9 @@ class Session(unittest.TestCase):
         self.assertEqual(hint["reason"], "DONE")
         self.assertTrue(hint["boot_changed"])
         self.assertFalse(hint["resume_required"])
+        self.assertEqual(before, self.work_bytes())
+        rejected = self.request("resume", session_id="unnecessary", ttl_ms=10000, ok=False)
+        self.assertIn(b"session.resume_preflight.DONE.READ_NEXT", rejected.stderr)
         self.assertEqual(before, self.work_bytes())
 
     def test_actual_cli_document_handoff(self):
@@ -231,6 +252,50 @@ class Session(unittest.TestCase):
         self.assertEqual(self.raw(original), receipt)
         original["source_snapshot"] = "f" * 64
         self.raw(original, ok=False)
+
+    def test_expired_resume_race_has_one_owner(self):
+        self.setup_session()
+        self.claim()
+        self.begin()
+        self.now += 10000
+        processes = []
+        for i in range(2):
+            request = dict(schema_version=1, operation="resume", work_id="example-work",
+                           key=f"resume-race-{i}", expected_sequence=self.seq,
+                           session_id=f"recovery-{i}", ttl_ms=10000)
+            path = self.write(f"resume-race-{i}.json", request)
+            processes.append(subprocess.Popen(
+                [str(CLIENT), str(self.work), str(path), str(self.now), str(self.boot)],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=fixture.ENV))
+        outputs = [p.communicate(timeout=90) for p in processes]
+        self.assertEqual(sum(p.returncode == 0 for p in processes), 1, outputs)
+        status = self.request("status")
+        self.assertEqual(status["sequence"], self.seq + 1)
+        self.assertEqual(status["state"]["active"]["state"], "RECOVERY_REQUIRED")
+        self.assertEqual(status["resume_preflight"]["next_operation"], "CONTEXT_THEN_RECONCILE")
+
+    def test_duplicate_resume_is_historical_not_new_permission(self):
+        self.setup_session()
+        self.claim()
+        receipt = self.request("resume", session_id="agent-a", ttl_ms=10000)
+        original = copy.deepcopy(self.last_request)
+        self.claim()
+        self.now += 10000
+        before = self.work_bytes()
+        self.assertEqual(self.raw(original), receipt)
+        self.assertEqual(before, self.work_bytes())
+        self.assertFalse(self.request("status")["lease_live"])
+
+    def test_actual_cli_resume_reports_live_owner_before_write(self):
+        self.setup_session(actual=True)
+        self.claim()
+        before = self.work_bytes()
+        rejected = self.request("resume", session_id="intruder", ttl_ms=10000, ok=False)
+        errors = [json.loads(line) for line in rejected.stderr.decode().splitlines()
+                  if line.startswith("{")]
+        self.assertTrue(any(e.get("diagnostic") == "session.resume_preflight.LIVE_OWNER.WAIT"
+                            for e in errors))
+        self.assertEqual(before, self.work_bytes())
 
     def test_resume_claimed_revokes_old_token(self):
         self.setup_session()

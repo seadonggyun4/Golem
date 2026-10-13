@@ -15,7 +15,7 @@ run = subprocess.run(
 sys.stderr.buffer.write(run.stdout)
 sys.stderr.buffer.write(run.stderr)
 summary = re.search(rb'Ran (\d+) tests? in ', run.stderr)
-passed = run.returncode == 0 and summary is not None and int(summary[1]) == 19
+passed = run.returncode == 0 and summary is not None and int(summary[1]) == 24
 print(json.dumps({'schema_version': 1, 'cases': [
     {'id': 'native-session-regression', 'status': 'PASS' if passed else 'FAIL'}]}))
 sys.exit(0 if passed else 1)

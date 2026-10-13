@@ -236,6 +236,19 @@ class Discovery(unittest.TestCase):
         (r / "large.c").write_bytes(b"x" * (1048576 + 1))
         self.cli("discovery", "snapshot", self.write("plan.json", self.plan([r], ["large.c"])), ok=False)
 
+    def test_pager_override_has_safe_actionable_diagnostic(self):
+        r, _ = self.repo("pager")
+        plan = self.write("plan.json", self.plan([r], ["code.c"]))
+        before = {p: p.read_bytes() for p in r.rglob("*") if p.is_file()}
+        rejected = self.cli("discovery", "snapshot", plan,
+                            env={**ENV, "GIT_PAGER": "private-command-do-not-print"}, ok=False)
+        self.assertIn(b"GIT_PAGER", rejected.stderr)
+        self.assertNotIn(b"private-command-do-not-print", rejected.stderr)
+        error = json.loads(rejected.stderr.decode().splitlines()[-1])
+        self.assertIn("unset", error["next_action"])
+        self.cli("discovery", "snapshot", plan, env=ENV)
+        self.assertEqual(before, {p: p.read_bytes() for p in r.rglob("*") if p.is_file()})
+
     def register(self, kind="discovery", ok=True, evidence=True):
         work = self.root / "work"
         if not work.exists():

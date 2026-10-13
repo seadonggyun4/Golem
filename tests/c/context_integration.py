@@ -197,6 +197,28 @@ class Context(unittest.TestCase):
         handoff = json.loads((self.root / "handoff/resume-handoff.json").read_bytes())
         self.assertEqual(json.loads(input_data["messages"][0]["content"]), handoff["context_projection"])
         self.assertEqual(handoff["receipt"]["sequence"], 2)
+        self.assertTrue((self.root / "handoff/status-observation.json").is_file())
+        self.assertTrue((self.root / "handoff/next-observation.json").is_file())
+
+    def test_adapter_live_owner_blocks_before_provider_count(self):
+        self.prepare(); request = self.start_session()
+        claim = self.cli("session", "call", self.work, self.write("claim.json", {
+            "schema_version": 1, "operation": "claim", "work_id": "example-work", "key": "owner",
+            "expected_sequence": 1, "session_id": "other-owner", "ttl_ms": 60000,
+            "expected_generation": self.generation, "source_snapshot": self.source,
+            "byte_budget": 1048576}))
+        request["expected_sequence"] = claim["sequence"]
+        settings = {"schema": "golem.context-provider.v1", "provider": "anthropic.messages.v1", "model": "fixture-model",
+                    "credential_env": "GOLEM_CONTEXT_TEST_KEY", "token_budget": 1000,
+                    "reserve_tokens": 200, "instructions": ""}
+        before = {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()}
+        with patch.object(context_resume, "count_input") as count:
+            with self.assertRaisesRegex(ValueError, "LIVE_OWNER_WAIT"):
+                context_resume.resume(fixture.CLI, self.work, request, self.request, settings,
+                                      self.root / "blocked-handoff", source=fixture.SOURCE)
+            count.assert_not_called()
+        self.assertEqual(before, {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()})
+        self.assertFalse((self.root / "blocked-handoff/resume-process").exists())
 
     def test_work_changes_during_provider_count_block_resume(self):
         self.prepare(); request = self.start_session()

@@ -223,7 +223,8 @@ int main(void) {
         (self.repo / "test.c").write_text("int main(void) { return 0; }\n")
         self.call("prepare", contract=self.contract, ok=False)
         self.finish()
-        self.call("run", checkpoint=self.cp["receipt_digest"], attempt_id="weakened", ok=False)
+        rejected = self.call("run", checkpoint=self.cp["receipt_digest"], attempt_id="weakened", ok=False)
+        self.assertIn(b"execution.protected.bytes_changed.REVIEW_NEW_SELECTION", rejected.stderr)
         self.assertFalse((self.repo / "invoked").exists())
 
     def test_idempotent_and_uncertain_attempt(self):
@@ -237,6 +238,45 @@ int main(void) {
         (self.work / "execution-attempts/same.done").unlink()
         self.call("run", checkpoint=self.cp["receipt_digest"], attempt_id="same", ok=False)
         self.assertEqual((self.repo / "invoked").read_text(), "x")
+
+    def test_commit_metadata_change_requires_reviewed_new_baseline(self):
+        self.setup_execution(mode="pass")
+        # Identical protected bytes become clean/tracked at the commit boundary.
+        path = self.repo / "runner.py"
+        original = path.read_bytes()
+        path.write_bytes(original + b"\n")
+        self.prepare()
+        self.git("add", "runner.py")
+        self.git("commit", "-m", "commit unchanged checkpoint bytes")
+        self.finish()
+        self.assertEqual(path.read_bytes(), original + b"\n")
+        request = dict(schema_version=1, operation="run", checkpoint=self.cp["receipt_digest"],
+                       attempt_id="metadata-only")
+        rejected = subprocess.run([str(CLI), "--output-mode", "full", "execution", "call",
+                                   str(self.work), str(self.write("metadata-run.json", request)),
+                                   "--approve-contract", self.approval],
+                                  capture_output=True, env=ENV, timeout=90)
+        self.assertNotEqual(rejected.returncode, 0)
+        self.assertIn(b"execution.protected.metadata_changed.REVIEW_NEW_SELECTION", rejected.stderr)
+        self.assertFalse((self.repo / "invoked").exists())
+        self.assertFalse((self.work / "execution-attempts/metadata-only.started").exists())
+        retained = {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()}
+        old_checkpoint = self.cp["receipt_digest"]
+        gates = copy.deepcopy(self.contract["gates"])
+        self.register_selection()
+        self.managed("planning")
+        self.managed("development-plan")
+        plan = self.docs["development-plan"]
+        self.contract["development_plan"] = dict(document_id="development-plan",
+            revision=plan["revision"], digest=plan["manifest_digest"])
+        self.approval = self.raw("execution", "validate", self.write("reviewed.json", self.contract)).strip()
+        self.prepare()
+        self.assertNotEqual(self.cp["receipt_digest"], old_checkpoint)
+        self.assertEqual(self.contract["gates"], gates)
+        self.finish()
+        receipt = self.call("run", checkpoint=self.cp["receipt_digest"], attempt_id="reviewed-baseline")
+        self.assertEqual(receipt["record"]["status"], "PASS")
+        self.assertTrue(all(p.read_bytes() == content for p, content in retained.items()))
 
     def test_raw_environment_not_inherited(self):
         self.setup_execution(mode="env")

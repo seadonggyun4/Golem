@@ -305,9 +305,19 @@ golem_status golem_discovery_snapshot(golem_bytes b, const golem_allocator *a, u
     if (!out || !size || golem_allocator_validate(a) != GOLEM_OK)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
     for (char **p = environ; *p; ++p)
-        if (strncmp(*p, "GIT_", 4) == 0)
-            return dw_report(d, GOLEM_ERR_POLICY_DENIED,
-                             "unset Git environment overrides before discovery");
+        if (strncmp(*p, "GIT_", 4) == 0) {
+            char message[160];
+            size_t n = strcspn(*p, "=");
+            bool safe = n <= 64 && (*p)[n] == '=';
+            for (size_t i = 0; safe && i < n; ++i)
+                safe = ((*p)[i] >= 'A' && (*p)[i] <= 'Z') ||
+                       ((*p)[i] >= 'a' && (*p)[i] <= 'z') ||
+                       ((*p)[i] >= '0' && (*p)[i] <= '9') || (*p)[i] == '_';
+            (void)snprintf(message, sizeof(message),
+                           "discovery.git_environment: unset %.*s in the invocation environment; "
+                           "review all GIT_ overrides before retry", (int)(safe ? n : 4), *p);
+            return dw_report(d, GOLEM_ERR_POLICY_DENIED, message);
+        }
     struct json_object *plan = NULL, *snapshot = NULL, *repos = NULL;
     golem_status st = golem_json_parse(b, GOLEM_DOCUMENT_MAX_JSON, &plan);
     const char *keys[] = {"schema_version", "timeout_seconds", "repositories"};

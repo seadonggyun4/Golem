@@ -18,10 +18,12 @@ int main(int argc,char **argv)
     if(bad || n>GOLEM_DOCUMENT_MAX_JSON) { free(data); return 2; }
     test_clock c={strtoull(argv[3],NULL,10),(unsigned)strtoul(argv[4],NULL,10)};
     golem_agent_clock clock={clock_read,&c}; golem_document_store *s=NULL; golem_agent_reply reply={0};
-    golem_status st=golem_document_store_open(argv[1],true,NULL,&s,NULL);
-    if(st==GOLEM_OK) st=golem_agent_session_call(s,(golem_bytes){data,n},&clock,&reply,NULL);
+    golem_diagnostic diagnostic;
+    (void)golem_diagnostic_clear(&diagnostic);
+    golem_status st=golem_document_store_open(argv[1],true,NULL,&s,&diagnostic);
+    if(st==GOLEM_OK) st=golem_agent_session_call(s,(golem_bytes){data,n},&clock,&reply,&diagnostic);
     golem_status closed=golem_document_store_close(s); if(st==GOLEM_OK) st=closed;
     if(st==GOLEM_OK) { (void)fwrite(reply.data,1,reply.size,stdout); (void)fputc('\n',stdout); }
-    else fprintf(stderr,"%s\n",golem_status_string(st));
+    else fprintf(stderr,"%s: %s\n",golem_status_string(st),diagnostic.message);
     free(data); golem_agent_reply_free(&reply); return st==GOLEM_OK?0:1;
 }
