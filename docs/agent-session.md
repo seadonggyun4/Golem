@@ -84,6 +84,43 @@ Identifiers follow the document registry ASCII identifier rules. `ttl_ms` is
 the full exported JSON and is 1..33554432. A response that cannot fit is rejected,
 not partially exported. Required documents are never silently dropped.
 
+### Automatic read-only resume preflight
+
+`status` and `next` include `resume_preflight` (schema version 1). The native
+coordinator compares the replayed session boot identity and monotonic observation
+with the current host, even when `active` is null. A query writes no session
+event, renews no lease, and does not run or reconcile a command.
+
+For an unfinished idle session across a reboot/clock rollback, `next` returns
+`BLOCKED` / `RESUME_REQUIRED` instead of a misleading `CLAIM_REQUIRED`.
+The hint distinguishes `BOOT_CHANGED`, `CLOCK_REGRESSED`, `LEASE_EXPIRED`,
+`ACTIVE_CLAIM`, `RECONCILIATION_REQUIRED`, `START_REQUIRED`, and current state.
+A verified `DONE` yields `NONE` even across a reboot; do not resume it merely to
+clear a historical boot difference. Policy and missing-evidence blockers remain
+in force. `WORKFLOW_UNAVAILABLE` requires inspection, never guessed completion.
+
+Use `next_operation` as guidance:
+
+- `SESSION_RESUME`: submit the ordinary explicit resume request with the observed
+  `expected_sequence`, a reviewed session identity, TTL and idempotency key.
+  Enrolled bindings still require the existing v2 identity/token contract.
+- `CONTEXT_THEN_RECONCILE`: inspect original effects with the current recovery
+  token; explicitly adopt a verified output or justify no effects. Never rerun
+  uncertain effects from a hint.
+- `OWNER_CONTINUE_OR_RESUME`: only the live owner can continue or explicitly
+  resume; another owner must wait for lawful handoff/expiry.
+- `SESSION_START`, `READ_NEXT`, `REVIEW_POLICY`, `INSPECT_WORKFLOW`, `NONE`: follow
+  the named lifecycle step without inventing authority or completion.
+
+The hint also exposes `boot_changed`, `clock_regressed`, `lease_live`,
+`resume_required`, `reconciliation_required`, `owner_session_id`, `active_state`
+and `binding_required`. Reconciliation may be required *after* resume for a
+RUNNING attempt; an unused CLAIMED attempt can be released by resume. A live
+interruption cannot be inferred from time alone, so explicit owner intent remains
+necessary. All observations can become stale immediately: normal sequence,
+lease, binding, source and manifest checks are unchanged. An old-key replay is
+still historical, not a new lease. `execution_authorized` remains false.
+
 ### Start and Claim
 
 For a Work named `example-work` with document ID `selection`:

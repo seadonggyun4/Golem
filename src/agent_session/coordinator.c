@@ -256,6 +256,67 @@ golem_status as_unreceipted(golem_document_store *s, as_log *l)
     }
     return GOLEM_OK;
 }
+/* Read-only advice. It neither renews ownership nor reconciles uncertain effects. */
+static golem_status resume_preflight(golem_document_store *s, as_log *l, uint64_t now,
+                                     const golem_digest *boot, struct json_object **out)
+{
+    struct json_object *a = dw_get(l->state, "active"), *next = NULL;
+    bool active = as_active(l->state), live = as_live(l, now, boot);
+    bool changed = l->sequence && !dw_equal(&l->boot, boot);
+    bool regressed = l->sequence && now < l->observed_ms;
+    bool reconcile = active && (!strcmp(dw_text(a, "state"), "RUNNING") ||
+                                !strcmp(dw_text(a, "state"), "RECOVERY_REQUIRED"));
+    bool done = false;
+    golem_status workflow = GOLEM_OK;
+    if (l->state && !active && as_unreceipted(s, l) == GOLEM_OK) {
+        workflow = next_document(s, dw_text(l->state, "selection_id"), &next);
+        done = workflow == GOLEM_OK && !strcmp(dw_text(next, "action"), "DONE");
+    }
+    json_object_put(next);
+    bool required = !done && (changed || regressed || (active && !live));
+    const char *reason = "CURRENT", *operation = "READ_NEXT";
+    if (done) {
+        reason = "DONE";
+        operation = "NONE";
+    } else if (policy(s) != GOLEM_OK) {
+        reason = "POLICY_REQUIRES_PERMISSION";
+        operation = "REVIEW_POLICY";
+    } else if (!l->state) {
+        reason = "START_REQUIRED";
+        operation = "SESSION_START";
+    } else if (workflow != GOLEM_OK) {
+        reason = "WORKFLOW_UNAVAILABLE";
+        operation = "INSPECT_WORKFLOW";
+    } else if (required) {
+        reason = changed ? "BOOT_CHANGED" : regressed ? "CLOCK_REGRESSED" : "LEASE_EXPIRED";
+        operation = "SESSION_RESUME";
+    } else if (active && !strcmp(dw_text(a, "state"), "RECOVERY_REQUIRED")) {
+        reason = "RECONCILIATION_REQUIRED";
+        operation = "CONTEXT_THEN_RECONCILE";
+    } else if (active) {
+        reason = "ACTIVE_CLAIM";
+        operation = "OWNER_CONTINUE_OR_RESUME";
+    }
+    struct json_object *o = json_object_new_object();
+    if (!dw_add(o, "schema_version", json_object_new_int(1)) ||
+        !add_text(o, "reason", reason) || !add_text(o, "next_operation", operation) ||
+        !add_uint(o, "expected_sequence", l->sequence) ||
+        !dw_add(o, "boot_changed", json_object_new_boolean(changed)) ||
+        !dw_add(o, "clock_regressed", json_object_new_boolean(regressed)) ||
+        !dw_add(o, "lease_live", json_object_new_boolean(live)) ||
+        !dw_add(o, "resume_required", json_object_new_boolean(required)) ||
+        !dw_add(o, "reconciliation_required", json_object_new_boolean(reconcile)) ||
+        !dw_add(o, "binding_required", json_object_new_boolean(dw_get(l->state, "binding") != NULL)) ||
+        !add_text(o, "owner_session_id", dw_text(a, "session_id")) ||
+        !add_text(o, "active_state", dw_text(a, "state")) ||
+        !dw_add(o, "execution_authorized", json_object_new_boolean(false))) {
+        json_object_put(o);
+        return GOLEM_ERR_OUT_OF_MEMORY;
+    }
+    *out = o;
+    return GOLEM_OK;
+}
+
 static golem_status query(golem_document_store *s, as_log *l, struct json_object *r, uint64_t now,
                           const golem_digest *boot, struct json_object **out)
 {
@@ -270,6 +331,12 @@ static golem_status query(golem_document_store *s, as_log *l, struct json_object
         !dw_add(o, "acceptance_verified", json_object_new_boolean(false)) ||
         !dw_add(o, "execution_authorized", json_object_new_boolean(false)))
         st = GOLEM_ERR_OUT_OF_MEMORY;
+    if (st == GOLEM_OK && (!strcmp(op, "status") || !strcmp(op, "next"))) {
+        struct json_object *hint = NULL;
+        st = resume_preflight(s, l, now, boot, &hint);
+        if (st == GOLEM_OK && !dw_add(o, "resume_preflight", hint))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+    }
     if (st == GOLEM_OK && strcmp(op, "status") == 0) {
         if (json_object_object_add(o, "state", json_object_get(l->state)) != 0 ||
             !dw_add(o, "lease_live", json_object_new_boolean(as_live(l, now, boot))) ||
@@ -327,6 +394,15 @@ static golem_status query(golem_document_store *s, as_log *l, struct json_object
                     json_object_put(inputs);
                 }
             }
+        }
+        /* A fresh completion remains read-only across reboots. All mutation guards
+         * remain authoritative; never hide a policy or missing-evidence blocker. */
+        struct json_object *hint = dw_get(o, "resume_preflight");
+        if ((!strcmp(action, "NEXT_ACTION") || !strcmp(action, "VERIFY_COMPLETION") ||
+             !strcmp(reason, "RECONCILIATION_REQUIRED")) &&
+            !strcmp(dw_text(hint, "next_operation"), "SESSION_RESUME")) {
+            action = "BLOCKED";
+            reason = "RESUME_REQUIRED";
         }
         if (!add_text(o, "action", action) || !add_text(o, "reason", reason) ||
             !dw_add(o, "acceptance_verified", json_object_new_boolean(!strcmp(action, "DONE"))) ||

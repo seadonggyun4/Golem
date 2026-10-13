@@ -78,6 +78,115 @@ class Session(unittest.TestCase):
         return self.request("submit", ok=ok, token=self.token, input_digest=self.active["manifest_digest"],
                             source_snapshot=self.source, output=self.ref, evidence=[self.evidence])
 
+    def work_bytes(self):
+        return {str(p.relative_to(self.work)): p.read_bytes()
+                for p in self.work.rglob("*") if p.is_file()}
+
+    def test_idle_reboot_preflight_is_read_only_and_requires_resume(self):
+        self.setup_session()
+        self.boot += 1
+        before = self.work_bytes()
+        status = self.request("status")
+        hint = status["resume_preflight"]
+        self.assertEqual(hint["reason"], "BOOT_CHANGED")
+        self.assertEqual(hint["next_operation"], "SESSION_RESUME")
+        self.assertTrue(hint["resume_required"])
+        self.assertFalse(hint["reconciliation_required"])
+        self.assertEqual(hint["expected_sequence"], self.seq)
+        self.assertFalse(hint["execution_authorized"])
+        self.assertEqual(self.request("next")["reason"], "RESUME_REQUIRED")
+        self.assertEqual(before, self.work_bytes())
+        self.claim(ok=False)  # Query does not bypass the original storage fence.
+        self.assertEqual(self.request("status")["sequence"], self.seq)
+        self.request("resume", session_id="after-reboot", ttl_ms=10000)
+        self.assertFalse(self.request("status")["resume_preflight"]["resume_required"])
+        self.assertEqual(self.request("next")["reason"], "CLAIM_REQUIRED")
+        self.claim("after-reboot")
+        self.begin()
+
+    def test_idle_clock_rollback_requires_explicit_resume(self):
+        self.setup_session()
+        self.now -= 1
+        before = self.work_bytes()
+        hint = self.request("next")["resume_preflight"]
+        self.assertEqual(hint["reason"], "CLOCK_REGRESSED")
+        self.assertFalse(hint["boot_changed"])
+        self.assertTrue(hint["clock_regressed"])
+        self.assertEqual(before, self.work_bytes())
+        self.claim(ok=False)
+        self.request("resume", session_id="after-clock", ttl_ms=10000)
+        self.claim("after-clock")
+
+    def test_preflight_running_expiry_and_recovery_are_distinct(self):
+        self.setup_session()
+        self.claim()
+        self.begin()
+        live = self.request("status")["resume_preflight"]
+        self.assertEqual(live["next_operation"], "OWNER_CONTINUE_OR_RESUME")
+        self.assertEqual(live["owner_session_id"], "agent-a")
+        self.request("resume", session_id="intruder", ttl_ms=10000, ok=False)
+        self.now += 10000  # equality is expired
+        expired = self.request("next")["resume_preflight"]
+        self.assertEqual(expired["reason"], "LEASE_EXPIRED")
+        self.assertTrue(expired["reconciliation_required"])
+        self.assertEqual(expired["next_operation"], "SESSION_RESUME")
+        self.request("resume", session_id="recovery", ttl_ms=10000)
+        before = self.work_bytes()
+        recovering = self.request("next")["resume_preflight"]
+        self.assertEqual(recovering["next_operation"], "CONTEXT_THEN_RECONCILE")
+        self.assertFalse(recovering["resume_required"])
+        self.assertEqual(before, self.work_bytes())
+        self.claim("recovery", ok=False)
+        self.now += 10000
+        self.assertEqual(self.request("next")["resume_preflight"]["next_operation"], "SESSION_RESUME")
+
+    def test_preflight_fresh_and_unstarted_sessions(self):
+        self.setup_work()
+        self.now, self.boot, self.seq, self.key, self.actual = 1000, 1, 0, 0, False
+        before = self.work_bytes()
+        hint = self.request("status")["resume_preflight"]
+        self.assertEqual(hint["next_operation"], "SESSION_START")
+        self.assertFalse(hint["resume_required"])
+        self.assertEqual(before, self.work_bytes())
+        self.register_selection()
+        self.request("start", selection_id="selection")
+        self.assertEqual(self.request("status")["resume_preflight"]["next_operation"], "READ_NEXT")
+
+    def test_completed_session_reboot_does_not_request_mutation(self):
+        self.setup_work(mode="documents")
+        self.register_selection()
+        self.now, self.boot, self.seq, self.key, self.actual = 1000, 1, 0, 0, False
+        self.request("start", selection_id="selection")
+        for kind in ("planning", "development-plan", "qa-plan", "qa-result", "completion"):
+            self.claim()
+            self.begin()
+            self.output()
+            self.submit()
+        contract = self.cli("role", "template", "doc-only")
+        digest = self.cli("role", "validate", self.write("role-contract.json", contract))["contract_digest"]
+        enroll = dict(schema_version=1, operation="enroll", selection_id="selection", key="enroll",
+                      expected_generation=self.generation, contract=contract)
+        self.cli("role", "call", self.work, self.write("enroll.json", enroll), "--approve-contract", digest)
+        self.cli("role", "call", self.work, self.write("assess.json", dict(
+            schema_version=1, operation="assess", selection_id="selection", key="assess",
+            expected_generation=self.generation, review=None)))
+        self.cli("completion", "call", self.work, self.write("finalize.json", dict(
+            schema_version=2, operation="finalize", selection_id="selection", key="done",
+            expected_generation=self.generation, issues=[])))
+        report = subprocess.run([str(fixture.CLI), "--output-mode", "full", "completion",
+                                 "report", str(self.work), "1"], capture_output=True,
+                                env=fixture.ENV, timeout=90)
+        self.assertEqual(report.returncode, 0, report.stderr.decode())
+        self.boot += 1
+        before = self.work_bytes()
+        self.assertEqual(self.request("next")["action"], "DONE")
+        hint = self.request("status")["resume_preflight"]
+        self.assertEqual(hint["next_operation"], "NONE")
+        self.assertEqual(hint["reason"], "DONE")
+        self.assertTrue(hint["boot_changed"])
+        self.assertFalse(hint["resume_required"])
+        self.assertEqual(before, self.work_bytes())
+
     def test_actual_cli_document_handoff(self):
         self.setup_session(actual=True)
         for kind in ("planning", "development-plan", "development-result", "qa-plan", "qa-result", "completion"):
@@ -245,7 +354,9 @@ class Session(unittest.TestCase):
         self.cli("work", "start", self.work, self.write("deny.json", spec))
         self.seq = 0
         self.request("start", selection_id="selection", ok=False)
-        self.assertIsNone(self.request("status")["state"])
+        denied = self.request("status")
+        self.assertIsNone(denied["state"])
+        self.assertEqual(denied["resume_preflight"]["next_operation"], "REVIEW_POLICY")
 
     def test_unreceipted_documents_do_not_advance(self):
         self.setup_session()
