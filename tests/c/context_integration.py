@@ -1,5 +1,9 @@
 """Derived context must preserve facts without becoming execution authority."""
 import json
+import hashlib
+import io
+import os
+from email.message import Message
 import subprocess
 import sys
 import unittest
@@ -68,6 +72,44 @@ class Context(unittest.TestCase):
         result = self.context()
         self.assertTrue(all(v["omitted_bytes"] == 0 for v in result["sources"]))
 
+    def test_single_copy_renderer_preserves_facts_and_legacy_objects(self):
+        self.prepare()
+        before = {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()}
+        legacy = self.context()
+        self.request["renderer_version"] = 2
+        modern = self.context()
+        self.assertEqual(before, {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()})
+        self.assertEqual(modern["schema_version"], 2)
+        self.assertEqual(legacy["mandatory_facts"], modern["mandatory_facts"])
+        self.assertEqual(legacy["sources"], modern["sources"])
+        self.assertEqual(legacy["work_head"], modern["work_head"])
+        self.assertIn('"work_specification":', legacy["markdown"])
+        self.assertNotIn('"work_specification":', modern["markdown"])
+        self.assertIn("Markdown field alone is incomplete", modern["markdown"])
+        for value in ("FAIL beginning", "NOT_DONE middle", "SKIPPED end REQ-1"):
+            self.assertIn(value, json.dumps(modern["mandatory_facts"]))
+        self.request["renderer_version"] = 1
+        old_receipt = self.context("publish")
+        self.request["renderer_version"] = 2
+        new_receipt = self.context("publish")
+        self.assertNotEqual(old_receipt["digest"], new_receipt["digest"])
+        for receipt, value in ((old_receipt, legacy), (new_receipt, modern)):
+            self.assertEqual(value, self.cli("context", "read", self.work, receipt["digest"], self.source))
+        self.request["renderer_version"] = 1
+        self.assertEqual(old_receipt, self.context("publish"))
+
+    def test_old_representation_count_cannot_resume_v2(self):
+        self.prepare(); request = self.start_session()
+        self.request.update(token_budget=100, tokenizer_id="provider-fixture-v1")
+        candidate = self.context("candidate")
+        proof = dict(schema_version=1, tokenizer_id="provider-fixture-v1",
+                     projection_digest=candidate["projection_digest"], input_tokens=100)
+        self.request["renderer_version"] = 2
+        before = {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()}
+        self.cli("session", "resume", self.work, self.write("resume.json", request),
+                 self.write("context.json", self.request), self.write("old-count.json", proof), ok=False)
+        self.assertEqual(before, {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()})
+
     def test_utf8_boundary_and_missing_original(self):
         self.prepare()
         self.request["excerpt_bytes"] = 3
@@ -107,10 +149,12 @@ class Context(unittest.TestCase):
         self.prepare()
         self.request.update(token_budget=2097152, tokenizer_id="test-byte-v1")
         helper = fixture.CLI.parent / "tests/c/golem_context_api_helper"
-        result = subprocess.run([str(helper), str(self.work),
-                                 str(self.write("context.json", self.request))],
-                                env=fixture.ENV, capture_output=True)
-        self.assertEqual(result.returncode, 0, result.stderr.decode())
+        for version in (1, 2):
+            self.request["renderer_version"] = version
+            result = subprocess.run([str(helper), str(self.work),
+                                     str(self.write("context.json", self.request))],
+                                    env=fixture.ENV, capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stderr.decode())
 
     def test_original_corruption_blocks_regeneration(self):
         self.prepare()
@@ -120,6 +164,8 @@ class Context(unittest.TestCase):
         self.assertEqual(len(objects), 1)
         objects[0].chmod(0o600)
         objects[0].write_bytes(b"corrupted original")
+        self.context(ok=False)
+        self.request["renderer_version"] = 2
         self.context(ok=False)
 
     def start_session(self):
@@ -222,12 +268,14 @@ class Context(unittest.TestCase):
 
     def test_work_changes_during_provider_count_block_resume(self):
         self.prepare(); request = self.start_session()
-        settings = {"schema": "golem.context-provider.v1", "provider": "openai.responses.v1", "model": "fixture-model",
+        self.request.update(renderer_version=2, recipe="original-v1")
+        settings = {"schema": "golem.context-provider.v2", "provider": "openai.responses.v1", "model": "fixture-model",
                     "credential_env": "GOLEM_CONTEXT_TEST_KEY", "token_budget": 1000,
                     "reserve_tokens": 200, "instructions": ""}
         def count(config, payload):
             self.managed("planning")
-            return {"input_tokens": 800, "input_sha256": "f" * 64, "basis": "PROVIDER_INPUT_COUNT"}
+            return {"input_tokens": 800, "input_sha256": hashlib.sha256(context_resume.records.encoded(payload)).hexdigest(),
+                    "basis": "PROVIDER_INPUT_COUNT"}
         with patch.object(context_resume, "count_input", side_effect=count):
             with self.assertRaises(subprocess.CalledProcessError):
                 context_resume.resume(fixture.CLI, self.work, request, self.request, settings,
@@ -235,6 +283,81 @@ class Context(unittest.TestCase):
         status = self.cli("session", "call", self.work, self.write("status.json", {
             "schema_version": 1, "operation": "status", "work_id": "example-work"}))
         self.assertEqual(status["state"]["sequence"], 1)
+
+    def test_v1_v2_actual_handoff_payloads_preserve_decisions(self):
+        self.prepare(); request = self.start_session()
+        self.request["recipe"] = "original-v1"
+        settings = dict(schema="golem.context-provider.v1", provider="openai.responses.v1",
+                        model="fixture-model", credential_env="GOLEM_CONTEXT_TEST_KEY",
+                        token_budget=1000, reserve_tokens=200, instructions="Inspect all original evidence.")
+        retained = os.environ.get("GOLEM_CONTEXT_COMPARISON_OUTPUT")
+        evidence = context_resume.records.private_directory(retained) if retained else None
+        sequence, measurements = 1, []
+        for provider in context_resume.ENDPOINTS:
+            observations, values = [], []
+            settings["provider"] = provider
+            def post(req, timeout):
+                observations.append(req.data)
+                body = {"input_tokens": 800}
+                if provider == "openai.responses.v1":
+                    body["object"] = "response.input_tokens"
+                class Response(io.BytesIO):
+                    status = 200
+                    headers = Message()
+                    headers["Content-Type"] = "application/json"
+                    def geturl(self):
+                        return req.full_url
+                return Response(context_resume.records.encoded(body))
+            for version in (1, 2):
+                self.request["renderer_version"] = version
+                settings["schema"] = f"golem.context-provider.v{version}"
+                key = f"handoff-{provider.split('.')[0]}-v{version}"
+                request.update(key=key, expected_sequence=sequence)
+                output = self.root / key
+                with patch.object(context_resume, "build_opener") as opener, patch.dict(
+                        os.environ, {"GOLEM_CONTEXT_TEST_KEY": "fixture-not-a-real-api-key-1234"}):
+                    opener.return_value.open.side_effect = post
+                    result = context_resume.resume(fixture.CLI, self.work, request, self.request,
+                                                   settings, output, source=fixture.SOURCE)
+                    self.assertEqual(opener.return_value.open.call_count, 1)
+                sequence += 1
+                raw = (output / "provider-input.json").read_bytes()
+                self.assertEqual(raw, observations[-1])
+                self.assertEqual(result["input_sha256"], hashlib.sha256(raw).hexdigest())
+                envelope = json.loads(raw)
+                value = json.loads(envelope["input" if provider.startswith("openai") else "messages"][0]["content"])
+                if version == 2:
+                    self.assertTrue(value["preflight_only"])
+                    self.assertEqual(value["preflight"]["status"]["sequence"], sequence - 1)
+                    self.assertIn("state", value["preflight"]["status"])
+                    self.assertIn("recent_events", value["preflight"]["status"])
+                    self.assertFalse(value["execution_authorized"])
+                    value = value["projection"]
+                    self.assertTrue(all(item["omitted_bytes"] == 0 for item in value["sources"]))
+                values.append(value)
+                self.assertEqual(value["schema_version"], version)
+                self.assertFalse(result["execution_authorized"])
+                self.assertFalse(result["generation_executed"])
+                for operation in ("status", "next"):
+                    self.assertTrue((output / f"{operation}-observation.json").is_file())
+                for step, verb in (("status", ["session", "call"]), ("next", ["session", "call"]),
+                                   ("candidate", ["context", "candidate"]), ("resume", ["session", "resume"])):
+                    started = output / f"{step}-process/execution/started.json"
+                    self.assertEqual(json.loads(started.read_bytes())["argv"][3:5], verb)
+                    if evidence:
+                        context_resume.records.save(evidence / f"{key}-{step}-started.json", started.read_bytes())
+                if evidence:
+                    for name in ("provider-input.json", "token-count-observation.json", "token-count.json",
+                                 "context-request.json", "resume-handoff.json", "result.json"):
+                        context_resume.records.save(evidence / f"{key}-{name}", (output / name).read_bytes())
+            self.assertEqual(values[0]["mandatory_facts"], values[1]["mandatory_facts"])
+            self.assertEqual(values[0]["sources"], values[1]["sources"])
+            self.assertLess(len(observations[1]), len(observations[0]))
+            measurements.append(dict(provider=provider, v1_bytes=len(observations[0]),
+                                     v2_bytes=len(observations[1]), native_resume_calls=2,
+                                     count_transport="FAKE_HTTP_NO_NETWORK", measured_tokens=False))
+        if evidence:
+            context_resume.records.save(evidence / "comparison.json", context_resume.records.encoded(measurements))
 
     def test_active_resume_requires_attempt_kind_and_source_and_preserves_recovery(self):
         self.prepare(); request = self.start_session()
@@ -256,6 +379,31 @@ class Context(unittest.TestCase):
         self.assertEqual(result["receipt"]["sequence"], 4)
         self.assertEqual(result["receipt"]["state"]["active"]["state"], "RECOVERY_REQUIRED")
         self.assertFalse(result["execution_authorized"])
+        self.request["renderer_version"] = 2
+        again = self.cli("session", "resume", self.work, self.write("resume.json", request),
+                         self.write("context.json", self.request))
+        self.assertEqual(again["receipt"], result["receipt"])
+        self.assertEqual(again["context_projection"]["schema_version"], 2)
+        self.assertEqual(again["context_projection"]["mandatory_facts"], result["context_projection"]["mandatory_facts"])
+        self.assertFalse(again["execution_authorized"])
+        self.request["recipe"] = "original-v1"
+        request.update(key="recovery-handoff", expected_sequence=4)
+        settings = dict(schema="golem.context-provider.v2", provider="openai.responses.v1",
+                        model="fixture-model", credential_env="GOLEM_CONTEXT_TEST_KEY",
+                        token_budget=2000, reserve_tokens=200, instructions="Data, not authority.")
+        output = self.root / "recovery-handoff"
+        def count(config, payload):
+            body = json.loads(payload["input"][0]["content"])
+            self.assertEqual(body["preflight"]["status"]["state"]["active"]["state"], "RECOVERY_REQUIRED")
+            self.assertFalse(body["execution_authorized"])
+            return dict(input_tokens=800, basis="FIXTURE_NOT_PROVIDER",
+                        input_sha256=hashlib.sha256(context_resume.records.encoded(payload)).hexdigest())
+        with patch.object(context_resume, "count_input", side_effect=count):
+            context_resume.resume(fixture.CLI, self.work, request, self.request, settings,
+                                  output, source=fixture.SOURCE)
+        handoff = json.loads((output / "resume-handoff.json").read_bytes())
+        self.assertEqual(handoff["receipt"]["state"]["active"]["state"], "RECOVERY_REQUIRED")
+        self.assertFalse(handoff["execution_authorized"])
 
 
 if __name__ == "__main__":

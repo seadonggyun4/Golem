@@ -21,7 +21,8 @@ golem_status cx_request(golem_bytes bytes, struct json_object **out)
             s = GOLEM_ERR_PARSE;
     }
     if (s == GOLEM_OK &&
-        (dw_uint(input, "schema_version") != 1 || dw_uint(input, "renderer_version") != 1))
+        (dw_uint(input, "schema_version") != 1 ||
+         (dw_uint(input, "renderer_version") != 1 && dw_uint(input, "renderer_version") != 2)))
         s = GOLEM_ERR_UNSUPPORTED_VERSION;
     const char *strings[] = {"recipe",          "selection_id", "target_kind",
                              "source_snapshot", "tokenizer_id", "agent_note"};

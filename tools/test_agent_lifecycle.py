@@ -54,6 +54,39 @@ class Lifecycle(unittest.TestCase):
             self.assertTrue((self.root / phase).exists())
             self.assertEqual(life.records.check(self.store / plan["run_id"] / phase)["integrity"], "PASS")
 
+    def test_compact_view_is_derived_without_replay_or_evidence_changes(self):
+        result = self.execute()
+        output = self.store / "attempt-1"
+        before = life.io.file_inventory(output)
+        with patch.object(life.records, "capture") as dispatch:
+            view = life.compact(life.inspect(output))
+            dispatch.assert_not_called()
+        self.assertEqual(view["status"], result["status"])
+        self.assertEqual(view["plan_sha256"], result["plan_sha256"])
+        self.assertEqual(view["step_counts"], {"CHECKS_PASSED": 3})
+        self.assertNotIn("steps", view)
+        self.assertEqual(view["original"], str(output / "result.json"))
+        self.assertEqual(before, life.io.file_inventory(output))
+        cli = [sys.executable, life.__file__, "inspect", str(output)]
+        small = subprocess.run(cli, capture_output=True, check=True, timeout=30)
+        full = subprocess.run(cli + ["--output-mode", "full"], capture_output=True, check=True, timeout=30)
+        self.assertEqual(json.loads(small.stdout), view)
+        self.assertEqual(json.loads(full.stdout), result)
+
+    def test_compact_stopped_retains_failure_and_uncertain_recovery(self):
+        plan = self.plan()
+        plan["phases"]["execute"][0]["argv"][-1] = "raise SystemExit(7)"
+        result = self.execute(plan)
+        view = life.compact(result)
+        self.assertEqual(view["failed_step"], result["steps"][1])
+        self.assertEqual(view["diagnostic"], result["diagnostic"])
+        self.assertIn("DO_NOT_REPLAY", view["next_action"])
+        uncertain = life.compact({"schema": "golem.agent-lifecycle-result.v1",
+            "status": "RECONCILE_REQUIRED", "evidence": str(self.store),
+            "next_action": "INSPECT_EFFECTS_AND_CHILD_PROCESSES; DO_NOT_REPLAY"})
+        self.assertEqual(uncertain["status"], "RECONCILE_REQUIRED")
+        self.assertIsNone(uncertain["original"])
+
     def test_exit_zero_blocked_prevents_later_phases(self):
         plan = self.plan()
         plan["phases"]["prepare"][0]["argv"][-1] = 'print(\'{"state":"PENDING_APPROVAL"}\')'

@@ -57,6 +57,25 @@
 
 ## 빠른 시작
 
+### 기본 실행과 선택 기능
+
+기본 경로는 현재 client가 구동하는 native CLI·JSON 세션과 문서 workflow입니다.
+[실행 계약](docs/execution.md)은 명시한 로컬 개발·QA 명령을 실제로 실행하며,
+[worker executor](docs/worker-executor.md)는 신뢰된 host용 C API입니다.
+client가 바뀌어도 Work·source·sequence·owner/binding·입력 참조·receipt를 유지해야
+하며, 인수·재실행 권한이 자동으로 생기지 않습니다.
+[context 재개](docs/context-resume.md)의 진단·복구 계약을 따릅니다.
+
+[lifecycle wrapper](docs/agent-lifecycle.md)는 검토한 준비·실행·종료를 한 호출로
+묶는 선택 기능입니다. 원자적 실행이나 native DONE 판정은 아닙니다.
+연구 schema·cohort·상세 지표·observability·provider 사용량 adapter는 일반 작업마다
+작성할 필수 문서가 아닙니다. 설정된 native QA·증거·완료 조건은 유지됩니다.
+
+`run --noop`와 CLI daemon의 `local.noop` worker는 시뮬레이션이며 실제 에이전트
+작업 완료가 아닙니다. 과거 Python `golem-prototype`도 native `golem`과 구별합니다.
+인증된 원격 runner·임의 provider 실행·Windows runtime 지원을 이 예제가 보장하지
+않습니다. 개별 지원 범위는 [기술 문서](docs/runtime-reference.md)를 참고하세요.
+
 assessment·status·journal은 [통합 Work 기록](docs/work-records.md)에서
 원본의 권한과 이력을 유지하며 함께 조회할 수 있습니다.
 

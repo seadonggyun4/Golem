@@ -108,6 +108,27 @@ def inspect(output):
     return result
 
 
+def compact(result):
+    """Presentation only; the manifest-verified original retains every step."""
+    counts = {}
+    failed = None
+    for row in result.get("steps", []):
+        status = row["status"]
+        counts[status] = counts.get(status, 0) + 1
+        if failed is None and status in ("FAILED", "BLOCKED", "DISPATCH_UNCERTAIN"):
+            failed = dict(row)
+    view = {"schema": "golem.agent-lifecycle-view.v1", "status": result["status"],
+            "evidence": result["evidence"], "step_counts": counts, "failed_step": failed,
+            "original": (str(Path(result["evidence"]) / "result.json")
+                         if "plan_sha256" in result else None),
+            "execution_authorized": False, "product_acceptance": False,
+            "next_action": result["next_action"]}
+    for key in ("run_id", "plan_sha256", "diagnostic", "error_type"):
+        if key in result:
+            view[key] = result[key]
+    return view
+
+
 def run(plan, store, reviewed_digest):
     # Freeze caller-owned objects before any command can run.
     plan = validate(io.strict_json(io.encoded(plan)))
@@ -201,8 +222,10 @@ def main(argv=None):
     p.add_argument("plan", type=Path)
     p.add_argument("--store", type=Path, required=True)
     p.add_argument("--reviewed-plan", required=True, help="exact plan digest; not native execution approval")
+    p.add_argument("--output-mode", choices=("compact", "full"), default="compact")
     p = sub.add_parser("inspect")
     p.add_argument("output", type=Path)
+    p.add_argument("--output-mode", choices=("compact", "full"), default="compact")
     args = parser.parse_args(argv)
     try:
         if args.command == "validate":
@@ -212,7 +235,9 @@ def main(argv=None):
             value = run(io.read_json(args.plan), args.store, args.reviewed_plan)
         else:
             value = inspect(args.output)
-        sys.stdout.buffer.write(io.encoded(value))
+        presentation = (compact(value) if args.command != "validate" and args.output_mode == "compact"
+                        else value)
+        sys.stdout.buffer.write(io.encoded(presentation))
         return 0 if value.get("status", "FINISHED") == "FINISHED" else 1
     except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
         sys.stderr.buffer.write(io.encoded({"schema": "golem.agent-lifecycle-error.v1",

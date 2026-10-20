@@ -25,9 +25,26 @@ ENDPOINTS = {"openai.responses.v1": "https://api.openai.com/v1/responses/input_t
 MAX_INPUT = 8 * 1024 * 1024
 
 
+def error_detail(error):
+    code = (str(error) if isinstance(error, ValueError) and
+            re.fullmatch(r"CONTEXT_[A-Z_]+", str(error)) else "CONTEXT_EXECUTION_OR_EVIDENCE_ERROR")
+    operation, action = {
+        "CONTEXT_PREFLIGHT_DONE_READ_NEXT": ("READ_NEXT", "Read native next and completion; do not session-resume DONE."),
+        "CONTEXT_PREFLIGHT_LIVE_OWNER_WAIT": ("WAIT_OWNER", "Respect the live owner; wait for lawful handoff/expiry, never force takeover."),
+        "CONTEXT_PREFLIGHT_STALE_OR_UNSUPPORTED": ("READ_STATUS_NEXT", "Inspect current full status/next and engine compatibility; review a fresh request explicitly."),
+        "CONTEXT_PREFLIGHT_REVIEW_REQUIRED": ("REVIEW_PREFLIGHT", "Inspect preserved full status/next; do not infer permission or retry effects."),
+        "CONTEXT_INCOMPLETE_SOURCE": ("REVIEW_ORIGINAL_CONTEXT", "Use explicit original-v1 with sufficient byte/token budgets; do not drop required source bodies."),
+        "CONTEXT_PREFLIGHT_BINDING": ("READ_STATUS_NEXT", "Review fresh full status/next and count identical complete input; do not reuse old counts."),
+        "CONTEXT_TOKEN_BUDGET_EXHAUSTED": ("REVIEW_BUDGET", "Review an adequate budget explicitly; do not truncate mandatory context or reuse counts."),
+    }.get(code, ("INSPECT_ORIGINAL", "Inspect preserved logs and identical resume key; do not auto-retry or drop required facts."))
+    return {"code": code, "error_type": type(error).__name__,
+            "next_operation": operation, "next_action": action}
+
+
 def config(value):
     fields = {"schema", "provider", "model", "credential_env", "token_budget", "reserve_tokens", "instructions"}
-    if not isinstance(value, dict) or set(value) != fields or value["schema"] != "golem.context-provider.v1":
+    if not isinstance(value, dict) or set(value) != fields or value["schema"] not in (
+            "golem.context-provider.v1", "golem.context-provider.v2"):
         raise ValueError("CONTEXT_PROVIDER_SCHEMA")
     if not isinstance(value["provider"], str) or value["provider"] not in ENDPOINTS:
         raise ValueError("CONTEXT_PROVIDER_UNSUPPORTED")
@@ -43,18 +60,45 @@ def config(value):
     return dict(value)
 
 
-def tokenizer_id(settings):
-    identity = {"adapter": "provider-input-count-v1", "provider": settings["provider"],
+def tokenizer_id(settings, preflight=None):
+    version = 2 if settings["schema"] == "golem.context-provider.v2" else 1
+    identity = {"adapter": f"provider-input-count-v{version}", "provider": settings["provider"],
                 "model": settings["model"], "instructions": settings["instructions"]}
-    return "count-v1-" + hashlib.sha256(records.encoded(identity)).hexdigest()[:32]
+    if version == 2:
+        identity.update(adapter="provider-input-count-v2-preflight",
+                        preflight_sha256=hashlib.sha256(records.encoded(preflight)).hexdigest())
+    return f"count-v{version}-" + hashlib.sha256(records.encoded(identity)).hexdigest()[:32]
 
 
-def provider_input(settings, candidate):
+def provider_input(settings, candidate, preflight=None):
     text = candidate["candidate_json"]
     if (not isinstance(text, str) or len(text.encode()) > 2097152
         or hashlib.sha256(text.encode()).hexdigest() != candidate["projection_digest"]
         or strict_json(text.encode()) != candidate["candidate"] or candidate["budget_verified"] is not False):
         raise ValueError("CONTEXT_CANDIDATE_BINDING")
+    version = 2 if settings["schema"] == "golem.context-provider.v2" else 1
+    if (candidate["candidate"].get("schema_version") != version or
+            candidate["candidate"].get("request", {}).get("renderer_version") != version):
+        raise ValueError("CONTEXT_REPRESENTATION_VERSION")
+    if version == 2:
+        if (not isinstance(preflight, dict) or set(preflight) != {"status", "next"}
+                or any(not isinstance(preflight[key], dict) for key in preflight)
+                or type(preflight["status"].get("sequence")) is not int
+                or type(preflight["next"].get("sequence")) is not int
+                or preflight["status"]["sequence"] != preflight["next"]["sequence"]):
+            raise ValueError("CONTEXT_PREFLIGHT_BINDING")
+        projection = candidate["candidate"]
+        if (projection["request"].get("recipe") != "original-v1"
+                or not isinstance(projection.get("sources"), list)
+                or not projection["sources"]
+                or any(not isinstance(item, dict) or type(item.get("omitted_bytes")) is not int
+                       or item["omitted_bytes"] != 0 for item in projection["sources"])):
+            raise ValueError("CONTEXT_INCOMPLETE_SOURCE")
+        if projection["request"].get("tokenizer_id") != tokenizer_id(settings, preflight):
+            raise ValueError("CONTEXT_PREFLIGHT_BINDING")
+        text = records.encoded({"schema": "golem.context-input.v2", "projection": projection,
+            "preflight": preflight, "preflight_only": True, "execution_authorized": False,
+            "next_action": "Inspect the post-resume native receipt and reconcile uncertain effects before execution."}).decode()
     common = {"model": settings["model"]}
     if settings["provider"] == "openai.responses.v1":
         common.update(input=[{"role": "user", "content": text}], instructions=settings["instructions"])
@@ -130,12 +174,14 @@ def resume(cli, work, request, context, settings, output, *, source=None):
         raise ValueError("CONTEXT_RESUME_OPERATION")
     if not isinstance(context, dict):
         raise ValueError("CONTEXT_REQUEST")
+    version = 2 if settings["schema"] == "golem.context-provider.v2" else 1
+    if context.get("renderer_version") != version:
+        raise ValueError("CONTEXT_REPRESENTATION_VERSION")
     context = dict(context)
     context.update(token_budget=settings["token_budget"] - settings["reserve_tokens"],
                    tokenizer_id=tokenizer_id(settings))
     cli, work = Path(cli).resolve(strict=True), Path(work).resolve(strict=True)
     directory = records.private_directory(output)
-    records.save(directory / "context-request.json", records.encoded(context))
     records.save(directory / "resume-request.json", records.encoded(request))
     records.save(directory / "provider-config.json", records.encoded(settings))
     try:
@@ -169,15 +215,30 @@ def resume(cli, work, request, context, settings, output, *, source=None):
             raise ValueError("CONTEXT_PREFLIGHT_REVIEW_REQUIRED")
         if hint.get("lease_live") is True and hint.get("owner_session_id") != request.get("session_id"):
             raise ValueError("CONTEXT_PREFLIGHT_LIVE_OWNER_WAIT")
+        if version == 2:
+            if context.get("recipe") != "original-v1":
+                raise ValueError("CONTEXT_INCOMPLETE_SOURCE")
+            context["tokenizer_id"] = tokenizer_id(settings, queries)
+        records.save(directory / "context-request.json", records.encoded(context))
         result = records.run([str(cli), "--output-mode", "full", "context", "candidate", str(work),
                               str(directory / "context-request.json")], destination=directory / "candidate-process",
                              timeout=90, source=source)
         if len(result.stdout) > MAX_INPUT:
             raise ValueError("CONTEXT_CANDIDATE_LIMIT")
         candidate = strict_json(result.stdout)
-        payload = provider_input(settings, candidate)
+        bound_preflight = queries if version == 2 else None
+        payload = provider_input(settings, candidate, bound_preflight)
+        payload_bytes = records.encoded(payload)
+        payload_digest = hashlib.sha256(payload_bytes).hexdigest()
         observation = count_input(settings, payload)
-        records.save(directory / "provider-input.json", records.encoded(payload))
+        if (observation.get("input_sha256") != payload_digest or
+                records.encoded(payload) != payload_bytes or
+                records.encoded(provider_input(settings, candidate, bound_preflight)) != payload_bytes or
+                tokenizer_id(settings, bound_preflight) != context["tokenizer_id"]):
+            raise ValueError("CONTEXT_COUNT_PAYLOAD_BINDING")
+        if not 0 < usage.count(observation["input_tokens"]) <= 1000000000:
+            raise ValueError("CONTEXT_COUNT_RANGE")
+        records.save(directory / "provider-input.json", payload_bytes)
         records.save(directory / "token-count-observation.json", records.encoded(observation))
         if observation["input_tokens"] > context["token_budget"]:
             raise ValueError("CONTEXT_TOKEN_BUDGET_EXHAUSTED")
@@ -193,6 +254,8 @@ def resume(cli, work, request, context, settings, output, *, source=None):
         handoff = strict_json(result.stdout)
         if handoff["context_digest"] != candidate["projection_digest"] or handoff["context_projection"] != candidate["candidate"] or handoff["budget_verified"] is not True:
             raise ValueError("CONTEXT_HANDOFF_BINDING")
+        if records.encoded(provider_input(settings, candidate, bound_preflight)) != payload_bytes:
+            raise ValueError("CONTEXT_COUNT_PAYLOAD_BINDING")
         records.save(directory / "resume-handoff.json", records.encoded(handoff))
         summary = {"schema": "golem.context-resume-handoff.v1", "state": "RESUMED_INPUT_READY",
                    "context_digest": handoff["context_digest"], "input_sha256": observation["input_sha256"],
@@ -200,23 +263,17 @@ def resume(cli, work, request, context, settings, output, *, source=None):
                    "token_budget": settings["token_budget"], "reserve_tokens": settings["reserve_tokens"],
                    "provider_input": "provider-input.json", "receipt": "resume-handoff.json",
                    "generation_executed": False, "execution_authorized": False}
+        if version == 2:
+            summary.update(schema="golem.context-resume-handoff.v2", renderer_version=2,
+                           preflight_sha256=hashlib.sha256(records.encoded(queries)).hexdigest())
         records.save(directory / "result.json", records.encoded(summary))
         from agent_io import file_inventory, producer
         records.save(directory / "manifest.json", records.encoded({"producer": producer(), "files": file_inventory(directory)}))
         return summary
     except Exception as error:
         # A failed resume subprocess may have committed; never retry mutations.
-        code = str(error) if isinstance(error, ValueError) and re.fullmatch(r"CONTEXT_[A-Z_]+", str(error)) else "CONTEXT_EXECUTION_OR_EVIDENCE_ERROR"
-        recovery = {
-            "CONTEXT_PREFLIGHT_DONE_READ_NEXT": ("READ_NEXT", "Read native next and completion; do not session-resume DONE."),
-            "CONTEXT_PREFLIGHT_LIVE_OWNER_WAIT": ("WAIT_OWNER", "Respect the live owner; wait for lawful handoff/expiry, never force takeover."),
-            "CONTEXT_PREFLIGHT_STALE_OR_UNSUPPORTED": ("READ_STATUS_NEXT", "Inspect current full status/next and engine compatibility; review a fresh request explicitly."),
-            "CONTEXT_PREFLIGHT_REVIEW_REQUIRED": ("REVIEW_PREFLIGHT", "Inspect the preserved full status/next blocker; do not infer permission or retry effects."),
-        }.get(code, ("INSPECT_ORIGINAL", "Inspect preserved logs and identical resume key; do not auto-retry or drop required facts."))
-        records.save(directory / "failure.json", records.encoded({"state": "INCOMPLETE", "error_type": type(error).__name__,
-                    "code": code, "next_operation": recovery[0],
-                    "resume_may_have_committed": (directory / "resume-process").exists(),
-                    "next_action": recovery[1]}))
+        records.save(directory / "failure.json", records.encoded({"state": "INCOMPLETE", **error_detail(error),
+                    "resume_may_have_committed": (directory / "resume-process").exists()}))
         raise
 
 
@@ -232,9 +289,7 @@ def main():
                         args.output, source=args.source)
         print(json.dumps(result, sort_keys=True)); return 0
     except Exception as error:
-        print(json.dumps({"state": "FAILED", "error_type": type(error).__name__,
-                          "code": str(error) if isinstance(error, ValueError) and re.fullmatch(r"CONTEXT_[A-Z_]+", str(error)) else "CONTEXT_EXECUTION_OR_EVIDENCE_ERROR",
-                          "next_action": "Inspect private evidence; no automatic retry, summary fallback or generation."}))
+        print(json.dumps({"state": "FAILED", **error_detail(error), "execution_authorized": False}))
         return 2
 
 

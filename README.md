@@ -57,6 +57,30 @@ Select **only the necessary stages** from planning → UX → publishing → dev
 
 ## Quick Start
 
+### Execution and Optional Features
+
+The normal path is the native CLI/JSON session and document workflow, driven by
+the current client. [Observed execution](docs/execution.md) runs explicitly
+configured local development/QA commands under existing approval and source gates;
+the [worker executor](docs/worker-executor.md) is a trusted-host C API, not an
+automatic agent launcher. A new client must retain exact Work/source/sequence,
+owner/binding, input references and native receipts; changing clients grants no
+takeover or replay authority. Use [context-aware resume](docs/context-resume.md)
+and its recovery instructions for handoff.
+
+The [bounded lifecycle wrapper](docs/agent-lifecycle.md) is optional: one reviewed
+prepare/execute/finalize invocation, not an atomic transaction or automatic DONE.
+Research records, cohorts, detailed metrics, observability exports and provider
+usage adapters are optional surfaces, not documents every ordinary task must write.
+Native QA/evidence/completion requirements remain mandatory where configured.
+
+`run --noop` and the CLI daemon's `local.noop` worker simulate runtime stages;
+their success does not mean a real agent executed the user's task. The historical
+Python `golem-prototype` is not the native `golem` engine. Existing local command
+execution is real, but authenticated remote runners, arbitrary provider dispatch
+and Windows runtime support are not promised by these examples. See the
+[runtime reference](docs/runtime-reference.md) for individual supported contracts.
+
 Owned Python verification and benchmark launchers automatically retain private
 [mechanical execution records](docs/execution-recording.md).
 [Consolidated Work records](docs/work-records.md) connect assessment, status and

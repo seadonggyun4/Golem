@@ -17,12 +17,22 @@ python3 tools/agent_lifecycle.py validate lifecycle.json
 python3 tools/agent_lifecycle.py run lifecycle.json --store "$PRIVATE_RUN_STORE" \
   --reviewed-plan "$REVIEWED_PLAN_SHA256"
 python3 tools/agent_lifecycle.py inspect "$PRIVATE_RUN_STORE/$RUN_ID"
+python3 tools/agent_lifecycle.py inspect "$PRIVATE_RUN_STORE/$RUN_ID" --output-mode full
 ```
 
 Validation prints a digest without executing commands. Review the exact plan
 before supplying the digest. This pin is not authenticated human approval and
 does not replace native execution-contract approval. The store must be private
 and outside the source repository. Keep it outside the Work registry as well.
+
+`run` and `inspect` default to `golem.agent-lifecycle-view.v1`: status, plan
+identity, step counts, the first failed/blocked/uncertain step, next action and
+original evidence location. Diagnostics are not hidden. Scripts needing the old
+`golem.agent-lifecycle-result.v1` with every step must pass `--output-mode full`.
+The full result is always retained in `result.json` under the existing manifest;
+inspection checks that manifest before presenting either view. `run()`/`inspect()`
+Python return values and `validate` output remain unchanged. This removes repeated
+presentation, not durable dispatch/completion facts or underlying subprocesses.
 
 Plan shape (placeholders are intentionally non-runnable):
 

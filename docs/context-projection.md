@@ -15,8 +15,8 @@ current source digest and use an existing registered stage selection.
 ```json
 {
   "schema_version": 1,
-  "renderer_version": 1,
-  "recipe": "extractive-v1",
+  "renderer_version": 2,
+  "recipe": "original-v1",
   "selection_id": "selection",
   "target_kind": "development-plan",
   "source_snapshot": "<64 lowercase hexadecimal characters>",
@@ -42,6 +42,16 @@ journal. Retain the receipt and request independently. The same canonical reques
 Work state and live workflow observations produce the same bytes. A changed note,
 source, Work head or live next action can produce a different digest.
 
+Renderer 2 returns output schema 2: `mandatory_facts` is the single generated
+facts representation; `markdown` retains source excerpts, links, an incomplete-view
+warning and the untrusted note, but no second facts JSON block. Always deliver
+the complete JSON to a model. `context markdown` with renderer 2 is intentionally
+not a complete context. Renderer 1/output schema 1 retain their exact legacy bytes
+and embedded facts block. Request schema remains 1; choose the renderer explicitly.
+Existing CAS objects are never rewritten. New v2 publications have distinct
+identities and are rebuilt/read by the same integrity/freshness code. An old engine
+rejects v2 rather than silently downgrading. See the [decision and source review](context-input-decision.md).
+
 ## Preservation and authority
 
 - Full Work specification, acceptance criteria, document metadata/history, parent
@@ -59,12 +69,14 @@ source, Work head or live next action can produce a different digest.
 
 The omission inventory describes the range absent from each prefix, which may
 overlap separately preserved passages. JSON is the complete inventory surface.
-The Markdown view includes the mandatory facts and exact source links.
+The renderer-1 Markdown view includes mandatory facts and exact source links;
+renderer 2 keeps facts only in the enclosing JSON. Neither version removes
+repetition within original sources, metadata history or protected passages.
 
 ## Budgets, freshness and fallback
 
-The byte budget covers the complete serialized JSON, including duplicated Markdown
-facts and metadata, not just excerpt bytes. Maximum bundle size is 2 MiB. Insufficient
+The byte budget covers the complete serialized JSON, including metadata and, for
+renderer 1, duplicated Markdown facts, not just excerpt bytes. Maximum bundle size is 2 MiB. Insufficient
 space for mandatory facts fails without emitting a partial result. The output cap
 is not a strict allocator quota. Large historical Works may exceed it.
 
