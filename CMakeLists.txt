@@ -107,6 +107,7 @@ add_library(golem STATIC
     src/workflow/role_store.c
     src/workflow/context_model.c
     src/workflow/context_projection.c
+    src/workflow/context_selection.c
     src/agent_session/clock.c
     src/agent_session/model.c
     src/agent_session/storage.c

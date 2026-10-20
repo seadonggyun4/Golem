@@ -67,6 +67,9 @@ automatic agent launcher. A new client must retain exact Work/source/sequence,
 owner/binding, input references and native receipts; changing clients grants no
 takeover or replay authority. Use [context-aware resume](docs/context-resume.md)
 and its recovery instructions for handoff.
+The default [current context recipe](docs/current-context-selection.md) retains
+active dependencies and explicit archive references, with full fallback when
+history/effect interpretation is uncertain; originals and native replay stay full.
 
 The [bounded lifecycle wrapper](docs/agent-lifecycle.md) is optional: one reviewed
 prepare/execute/finalize invocation, not an atomic transaction or automatic DONE.

@@ -72,6 +72,8 @@ class ProviderCount(unittest.TestCase):
         self.assertEqual(body["preflight"], queries)
         self.assertEqual(body["projection"], value)
         self.assertFalse(body["execution_authorized"])
+        value["request"]["recipe"] = "current-v1"
+        self.assertIn("current-v1", resume.provider_input(config, wrap(), queries)["input"][0]["content"])
         original = resume.tokenizer_id(config, queries)
         queries["status"]["state"] = {"active": {"state": "RUNNING"}}
         self.assertNotEqual(original, resume.tokenizer_id(config, queries))

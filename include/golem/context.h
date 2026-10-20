@@ -18,12 +18,14 @@ typedef struct golem_context_tokenizer {
 } golem_context_tokenizer;
 golem_status golem_context_request_validate(golem_bytes request, golem_diagnostic *diagnostic);
 /* Derived, read-only projection of verified current workflow inputs. Request
- * request schema 1, renderer version 1 or 2, extractive-v1 or original-v1 recipe.
+ * schema 1, renderer 1 or 2; extractive-v1/original-v1, or current-v1 with renderer 2.
  * Renderer 1 preserves its exact legacy format. Renderer/output schema 2 keeps
  * facts once in mandatory_facts, not duplicated inside Markdown. The complete
  * JSON is required; v2 Markdown alone is incomplete. Old CAS is not rewritten.
- * Machine facts
- * are never authored by an agent: full Work spec, metadata, reentry/research/
+ * Current-v1 retains current/stale/reference metadata plus explicit archive
+ * identities; unknown/active/effect/history states fall back to full metadata.
+ * Its bytes also bind the validated session checkpoint. No journal compaction.
+ * Machine facts are never authored by an agent: full Work spec, metadata refs, reentry/research/
  * completion history, workflow next action and protected status/requirement lines.
  * Arbitrary natural-language meaning is NOT guaranteed; read originals for it.
  * JSON includes Markdown, exact source refs, omission inventory and untrusted

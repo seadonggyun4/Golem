@@ -65,6 +65,9 @@
 client가 바뀌어도 Work·source·sequence·owner/binding·입력 참조·receipt를 유지해야
 하며, 인수·재실행 권한이 자동으로 생기지 않습니다.
 [context 재개](docs/context-resume.md)의 진단·복구 계약을 따릅니다.
+[기본 current context](docs/current-context-selection.md)는 활성 의존성과 명시적
+archive 참조를 유지하며, 이력·효과 판단이 불확실하면 full metadata로 돌아갑니다.
+저장 원본과 native 전체 replay 검증은 줄이지 않습니다.
 
 [lifecycle wrapper](docs/agent-lifecycle.md)는 검토한 준비·실행·종료를 한 호출로
 묶는 선택 기능입니다. 원자적 실행이나 native DONE 판정은 아닙니다.

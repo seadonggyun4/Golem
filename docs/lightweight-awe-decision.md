@@ -70,6 +70,10 @@ These labels distinguish implemented changes from previously satisfied behavior
 and uncompleted work. This patch is not completion of every lightweight-context
 optimization.
 
+This table is the historical disposition at ef8078c. The later bounded
+[current-v1 selection](current-context-selection.md) implements the safe plan
+metadata subset; it does not retroactively change this snapshot's evidence.
+
 | Requirement | Disposition | Code/evidence and remaining boundary |
 | --- | --- | --- |
 | Remove generated JSON/Markdown facts duplication | implemented | Renderer 2 omits only the generated Markdown facts block; renderer 1 unchanged. |

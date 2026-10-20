@@ -127,7 +127,17 @@ static golem_status facts(golem_document_store *s, struct json_object *r,
     wf_graph g = {0};
     if (st == GOLEM_OK)
         st = wf_graph_make(s, &g);
+    bool selected[GOLEM_DOCUMENT_MAX_REVISIONS];
+    bool current = !strcmp(dw_text(r, "recipe"), "current-v1");
+    if (st == GOLEM_OK && current) {
+        struct json_object *selection = NULL;
+        st = cx_history_select(s, f, &g, selected, &selection);
+        if (st == GOLEM_OK && !dw_add(f, "history_selection", selection))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+    }
     for (size_t i = 0; st == GOLEM_OK && i < s->count; ++i) {
+        if (current && !selected[i])
+            continue;
         size_t n = json_size(s->entries[i].meta);
         if (n > remaining) {
             st = GOLEM_ERR_BUDGET_EXHAUSTED;
@@ -184,7 +194,7 @@ static golem_status source(golem_document_store *s, struct json_object *r, struc
     if (st != GOLEM_OK)
         return st;
     size_t keep =
-        !strcmp(dw_text(r, "recipe"), "original-v1") ? n : (size_t)dw_uint(r, "excerpt_bytes");
+        strcmp(dw_text(r, "recipe"), "extractive-v1") ? n : (size_t)dw_uint(r, "excerpt_bytes");
     if (keep > n)
         keep = n;
     while (keep && keep < n && (body[keep] & 0xc0) == 0x80)

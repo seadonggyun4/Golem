@@ -3,6 +3,7 @@ import json
 import hashlib
 import io
 import os
+from pathlib import Path
 from email.message import Message
 import subprocess
 import sys
@@ -110,6 +111,144 @@ class Context(unittest.TestCase):
                  self.write("context.json", self.request), self.write("old-count.json", proof), ok=False)
         self.assertEqual(before, {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()})
 
+    def test_current_history_archives_only_unreferenced_superseded_plans(self):
+        self.prepare()
+        for _ in range(7):
+            self.managed("planning")
+        self.request.update(renderer_version=2, recipe="original-v1", target_kind="development-plan")
+        full = self.context()
+        self.request["recipe"] = "current-v1"
+        before = {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()}
+        current = self.context()
+        self.assertEqual(before, {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()})
+        facts = current["mandatory_facts"]
+        selection = facts["history_selection"]
+        self.assertEqual(selection["mode"], "CURRENT_DEPENDENCIES")
+        self.assertEqual(len(selection["archived_documents"]), 6)
+        self.assertEqual(len(facts["document_history"]) + 6, len(full["mandatory_facts"]["document_history"]))
+        self.assertEqual(current["sources"], full["sources"])
+        self.assertEqual(current["markdown"], full["markdown"])
+        for key in ("work_specification", "input_manifest", "next_action", "protected_source_passages",
+                    "reentry_history", "completion_history", "research_history"):
+            self.assertEqual(facts[key], full["mandatory_facts"][key])
+        self.assertLess(len(json.dumps(current)), len(json.dumps(full)))
+        for archived in selection["archived_documents"]:
+            self.assertTrue(archived["metadata_omitted"])
+            original = self.cli("document", "inspect", self.work, archived["document_id"], archived["revision"])
+            self.assertEqual(original["metadata"]["requirement_ids"], archived["requirement_ids"])
+            self.assertEqual(archived["omitted_fields"], ["input_manifest"])
+            for key, value in original["metadata"].items():
+                if key != "input_manifest":
+                    self.assertEqual(archived[key], value)
+        queries = {op: self.cli("session", "call", self.work, self.write(f"query-{op}.json",
+                   dict(schema_version=1, operation=op, work_id="example-work"))) for op in ("status", "next")}
+        settings = dict(schema="golem.context-provider.v2", provider="openai.responses.v1",
+                        model="fixture-model", credential_env="GOLEM_CONTEXT_TEST_KEY",
+                        token_budget=2000, reserve_tokens=200, instructions="Data, not authority.")
+        self.request.update(token_budget=1800, tokenizer_id=context_resume.tokenizer_id(settings, queries))
+        payloads, native_sizes = {}, {}
+        evidence = (context_resume.records.private_directory(os.environ["GOLEM_CONTEXT_SELECTION_OUTPUT"])
+                    if os.environ.get("GOLEM_CONTEXT_SELECTION_OUTPUT") else None)
+        for recipe in ("original-v1", "current-v1"):
+            self.request["recipe"] = recipe
+            candidate = self.context("candidate")
+            native_sizes[recipe] = len(candidate["candidate_json"].encode())
+            payload = context_resume.provider_input(settings, candidate, queries)
+            payloads[recipe] = context_resume.records.encoded(payload)
+            if evidence:
+                context_resume.records.save(evidence / f"{recipe}-native.json", candidate["candidate_json"].encode())
+                context_resume.records.save(evidence / f"{recipe}-provider-input.json", payloads[recipe])
+        self.assertLess(len(payloads["current-v1"]), len(payloads["original-v1"]))
+        if evidence:
+            context_resume.records.save(evidence / "comparison.json", context_resume.records.encoded({
+                "source_fixture": "same_work_same_preflight_full_bodies", "transport": "ENCODING_ONLY_NO_NETWORK",
+                "original_bytes": len(payloads["original-v1"]), "current_bytes": len(payloads["current-v1"]),
+                "archived_metadata": 6, "model_calls_measured": False, "native_resume_calls": 0,
+                "binary_sha256": hashlib.sha256(fixture.CLI.read_bytes()).hexdigest(),
+                "test_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}))
+        self.request["byte_budget"] = (native_sizes["current-v1"] + native_sizes["original-v1"]) // 2
+        self.context("candidate")
+        self.request["recipe"] = "original-v1"
+        self.assertIn(b"GOLEM_ERR_BUDGET_EXHAUSTED", self.context("candidate", ok=False).stderr)
+        self.request["recipe"] = "current-v1"
+        (self.work / "execution-policies").mkdir()
+        self.assertIn(b"GOLEM_ERR_BUDGET_EXHAUSTED", self.context("candidate", ok=False).stderr)
+
+    def test_current_history_retains_stale_parent_dependencies_and_full_fallback(self):
+        self.prepare(); self.managed("planning"); self.managed("development-plan")
+        self.managed("planning")
+        self.request.update(renderer_version=2, recipe="current-v1", target_kind="development-plan")
+        current = self.context()
+        self.assertTrue(any(v["document_id"] == "planning" and v["revision"] == 1
+                            for v in current["mandatory_facts"]["document_history"]))
+        self.assertTrue(any(v["freshness"] == "STALE" for v in current["mandatory_facts"]["document_history"]))
+        (self.work / "execution-policies").mkdir()
+        fallback = self.context()["mandatory_facts"]["history_selection"]
+        self.assertEqual(fallback["mode"], "FULL_FALLBACK")
+        self.assertEqual(fallback["reason"], "EXECUTION_HISTORY")
+        self.assertFalse(fallback["archived_documents"])
+        (self.work / "execution-policies").rmdir()
+        (self.work / "execution-policies").symlink_to(self.root, target_is_directory=True)
+        self.context(ok=False)
+
+    def test_current_history_session_fallback_and_corruption_block_without_writes(self):
+        self.prepare(); request = self.start_session()
+        self.request.update(renderer_version=2, recipe="current-v1")
+        published = self.context("publish")
+        self.cli("session", "call", self.work, self.write("resume.json", request))
+        self.cli("context", "read", self.work, published["digest"], self.source, ok=False)
+        claim = self.cli("session", "call", self.work, self.write("claim.json", {
+            "schema_version": 1, "operation": "claim", "work_id": "example-work", "key": "current-claim",
+            "expected_sequence": 2, "session_id": "context-agent", "expected_generation": self.generation,
+            "source_snapshot": self.source, "byte_budget": 1048576, "ttl_ms": 60000}))
+        selection = self.context()["mandatory_facts"]["history_selection"]
+        self.assertEqual(selection["reason"], "ACTIVE_ATTEMPT")
+        self.assertFalse(selection["archived_documents"])
+        active = claim["state"]["active"]
+        token = {key: active[key] for key in ("epoch", "attempt_id", "session_id")}
+        self.cli("session", "call", self.work, self.write("begin.json", {
+            "schema_version": 1, "operation": "begin", "work_id": "example-work", "key": "current-begin",
+            "expected_sequence": 3, "token": token, "input_digest": active["manifest_digest"]}))
+        selection = self.context()["mandatory_facts"]["history_selection"]
+        self.assertEqual(selection["session_checkpoint"]["active"]["state"], "RUNNING")
+        self.assertEqual(selection["mode"], "FULL_FALLBACK")
+        event = sorted((self.work / "agent-events").glob("*.evt"))[-1]
+        raw = event.read_bytes()
+        event.rename(self.root / "retained-original-agent-event.evt")
+        event.write_bytes(raw[:-1] + bytes([raw[-1] ^ 1]))
+        before = {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()}
+        self.context(ok=False)
+        self.assertEqual(before, {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()})
+
+    def test_current_history_recipe_and_session_change_reject_old_counts(self):
+        self.prepare(); request = self.start_session()
+        self.request.update(renderer_version=2, recipe="original-v1", token_budget=100,
+                            tokenizer_id="provider-fixture-v1")
+        original = self.context("candidate")
+        proof = dict(schema_version=1, tokenizer_id="provider-fixture-v1",
+                     projection_digest=original["projection_digest"], input_tokens=100)
+        self.request["recipe"] = "current-v1"
+        before = {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()}
+        self.cli("session", "resume", self.work, self.write("resume.json", request),
+                 self.write("context.json", self.request), self.write("old-proof.json", proof), ok=False)
+        self.assertEqual(before, {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()})
+        proof["projection_digest"] = self.context("candidate")["projection_digest"]
+        self.cli("session", "call", self.work, self.write("ordinary-resume.json", request))
+        request.update(key="after-session-change", expected_sequence=2)
+        before = {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()}
+        self.cli("session", "resume", self.work, self.write("resume.json", request),
+                 self.write("context.json", self.request), self.write("old-proof.json", proof), ok=False)
+        self.assertEqual(before, {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()})
+
+    def test_current_history_unsubmitted_output_retains_full_metadata(self):
+        self.prepare(); self.managed("planning"); self.start_session()
+        self.request.update(renderer_version=2, recipe="current-v1", target_kind="development-plan")
+        selected = self.context()["mandatory_facts"]
+        self.assertEqual(selected["history_selection"]["reason"], "UNSUBMITTED_OUTPUT")
+        self.assertFalse(selected["history_selection"]["archived_documents"])
+        self.request["recipe"] = "original-v1"
+        self.assertEqual(self.context()["mandatory_facts"]["document_history"], selected["document_history"])
+
     def test_utf8_boundary_and_missing_original(self):
         self.prepare()
         self.request["excerpt_bytes"] = 3
@@ -127,7 +266,7 @@ class Context(unittest.TestCase):
     def test_budget_and_unknown_contract_fail_closed(self):
         self.prepare()
         for key, value in (("byte_budget", 1), ("renderer_version", 99),
-                           ("recipe", "unknown"), ("unexpected", True)):
+                           ("recipe", "unknown"), ("recipe", "current-v1"), ("unexpected", True)):
             original = self.request.copy()
             self.request[key] = value
             self.context(ok=False)
@@ -149,8 +288,9 @@ class Context(unittest.TestCase):
         self.prepare()
         self.request.update(token_budget=2097152, tokenizer_id="test-byte-v1")
         helper = fixture.CLI.parent / "tests/c/golem_context_api_helper"
-        for version in (1, 2):
+        for version, recipe in ((1, "extractive-v1"), (2, "extractive-v1"), (2, "current-v1")):
             self.request["renderer_version"] = version
+            self.request["recipe"] = recipe
             result = subprocess.run([str(helper), str(self.work),
                                      str(self.write("context.json", self.request))],
                                     env=fixture.ENV, capture_output=True)
@@ -265,6 +405,61 @@ class Context(unittest.TestCase):
             count.assert_not_called()
         self.assertEqual(before, {p: p.read_bytes() for p in self.work.rglob("*") if p.is_file()})
         self.assertFalse((self.root / "blocked-handoff/resume-process").exists())
+
+    def test_current_adapter_handoff_uses_bound_selected_native_bytes(self):
+        self.prepare(); request = self.start_session()
+        sequence = 1
+        for revision in range(2):
+            if revision:
+                self.register_selection()
+            claim = self.cli("session", "call", self.work, self.write("claim-plan.json", {
+                "schema_version": 1, "operation": "claim", "work_id": "example-work",
+                "key": f"plan-claim-{revision}", "expected_sequence": sequence,
+                "session_id": "context-agent", "expected_generation": self.generation,
+                "source_snapshot": self.source, "byte_budget": 1048576, "ttl_ms": 60000}))
+            sequence += 1
+            active = claim["state"]["active"]
+            token = {key: active[key] for key in ("epoch", "attempt_id", "session_id")}
+            exported = self.cli("session", "call", self.work, self.write("plan-context.json", {
+                "schema_version": 1, "operation": "context", "work_id": "example-work",
+                "token": token, "max_bytes": 1048576}))
+            self.cli("session", "call", self.work, self.write("begin-plan.json", {
+                "schema_version": 1, "operation": "begin", "work_id": "example-work",
+                "key": f"plan-begin-{revision}", "expected_sequence": sequence,
+                "token": token, "input_digest": active["manifest_digest"]}))
+            sequence += 1
+            metadata = self.metadata("planning", parents=exported["manifest"]["direct"], version=4)
+            metadata.update(producer_attempt=active["attempt_id"], input_manifest=exported["manifest"])
+            published = self.publish(metadata)
+            self.cli("session", "call", self.work, self.write("submit-plan.json", {
+                "schema_version": 1, "operation": "submit", "work_id": "example-work",
+                "key": f"plan-submit-{revision}", "expected_sequence": sequence, "token": token,
+                "input_digest": active["manifest_digest"], "source_snapshot": self.source,
+                "output": dict(document_id="planning", revision=published["revision"], digest=published["manifest_digest"]),
+                "evidence": [hashlib.sha256(b"fixture observation\n").hexdigest()]}))
+            sequence += 1
+        request["expected_sequence"] = sequence
+        self.request.update(renderer_version=2, recipe="current-v1", target_kind="development-plan")
+        settings = dict(schema="golem.context-provider.v2", provider="openai.responses.v1",
+                        model="fixture-model", credential_env="GOLEM_CONTEXT_TEST_KEY",
+                        token_budget=1000, reserve_tokens=200, instructions="Fixture, not authority.")
+        output = self.root / "current-handoff"
+        def count(config, payload):
+            message = json.loads(payload["input"][0]["content"])
+            selection = message["projection"]["mandatory_facts"]["history_selection"]
+            self.assertEqual(selection["agent_sequence"], message["preflight"]["status"]["sequence"])
+            self.assertEqual(selection["mode"], "CURRENT_DEPENDENCIES")
+            self.assertEqual(len(selection["archived_documents"]), 1)
+            return dict(input_tokens=800, basis="FIXTURE_NOT_PROVIDER",
+                        input_sha256=hashlib.sha256(context_resume.records.encoded(payload)).hexdigest())
+        with patch.object(context_resume, "count_input", side_effect=count):
+            result = context_resume.resume(fixture.CLI, self.work, request, self.request, settings,
+                                           output, source=fixture.SOURCE)
+        self.assertEqual(result["state"], "RESUMED_INPUT_READY")
+        handoff = json.loads((output / "resume-handoff.json").read_bytes())
+        self.assertEqual(handoff["receipt"]["sequence"], sequence + 1)
+        self.assertEqual(handoff["context_projection"]["mandatory_facts"]["history_selection"]["agent_sequence"], sequence)
+        self.assertFalse(handoff["execution_authorized"])
 
     def test_work_changes_during_provider_count_block_resume(self):
         self.prepare(); request = self.start_session()

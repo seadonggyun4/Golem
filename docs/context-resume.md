@@ -35,10 +35,11 @@ handoff. Existing ownership, binding, fencing and recovery rules are unchanged.
 
 Provider configuration `golem.context-provider.v2` selects the single-copy JSON
 representation and requires a context request with `renderer_version: 2`.
-For complete handoff it also requires explicit `recipe: "original-v1"` and zero
+For complete handoff it also requires explicit `recipe: "current-v1"` (recommended)
+or `"original-v1"` and zero
 omitted source bytes. Extractive projections remain available as reading aids,
 not as complete v2 execution context. `CONTEXT_INCOMPLETE_SOURCE` blocks before
-counting/resume; explicitly review original-v1 and adequate budgets rather than
+counting/resume; explicitly review a complete recipe and adequate budgets rather than
 silently changing the request, truncating history or using a summary fallback.
 The old config v1 requires renderer 1 and remains available for legacy consumers.
 There is no implicit representation switch or fallback. The example below is v2;
@@ -73,8 +74,11 @@ inspection instruction. Session active state, recent events and recovery hints
 are thus included in the counted input, not only retained off-message. Native
 workflow selection already verifies transitive parent closure, source freshness,
 QA dependencies and reentry context; complete source bodies preserve unmarked
-prose too. All metadata/history remain available: no recent-N truncation or
-model-inferred dependency pruning is used. Large Works may block on budget.
+prose too. Current-v1 selects metadata through the existing dependency contracts
+and records explicit archives/fallbacks; original-v1 retains full metadata. Both
+retain non-document histories, with no recent-N truncation or model-inferred
+dependency pruning. Large Works may block on budget. See
+[selection scope and negative cases](current-context-selection.md).
 
 Provider configuration is a bounded private regular JSON file:
 

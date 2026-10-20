@@ -33,7 +33,7 @@ def error_detail(error):
         "CONTEXT_PREFLIGHT_LIVE_OWNER_WAIT": ("WAIT_OWNER", "Respect the live owner; wait for lawful handoff/expiry, never force takeover."),
         "CONTEXT_PREFLIGHT_STALE_OR_UNSUPPORTED": ("READ_STATUS_NEXT", "Inspect current full status/next and engine compatibility; review a fresh request explicitly."),
         "CONTEXT_PREFLIGHT_REVIEW_REQUIRED": ("REVIEW_PREFLIGHT", "Inspect preserved full status/next; do not infer permission or retry effects."),
-        "CONTEXT_INCOMPLETE_SOURCE": ("REVIEW_ORIGINAL_CONTEXT", "Use explicit original-v1 with sufficient byte/token budgets; do not drop required source bodies."),
+        "CONTEXT_INCOMPLETE_SOURCE": ("REVIEW_ORIGINAL_CONTEXT", "Use explicit current-v1 or original-v1 with sufficient byte/token budgets; do not drop required source bodies."),
         "CONTEXT_PREFLIGHT_BINDING": ("READ_STATUS_NEXT", "Review fresh full status/next and count identical complete input; do not reuse old counts."),
         "CONTEXT_TOKEN_BUDGET_EXHAUSTED": ("REVIEW_BUDGET", "Review an adequate budget explicitly; do not truncate mandatory context or reuse counts."),
     }.get(code, ("INSPECT_ORIGINAL", "Inspect preserved logs and identical resume key; do not auto-retry or drop required facts."))
@@ -88,7 +88,7 @@ def provider_input(settings, candidate, preflight=None):
                 or preflight["status"]["sequence"] != preflight["next"]["sequence"]):
             raise ValueError("CONTEXT_PREFLIGHT_BINDING")
         projection = candidate["candidate"]
-        if (projection["request"].get("recipe") != "original-v1"
+        if (projection["request"].get("recipe") not in ("original-v1", "current-v1")
                 or not isinstance(projection.get("sources"), list)
                 or not projection["sources"]
                 or any(not isinstance(item, dict) or type(item.get("omitted_bytes")) is not int
@@ -216,7 +216,7 @@ def resume(cli, work, request, context, settings, output, *, source=None):
         if hint.get("lease_live") is True and hint.get("owner_session_id") != request.get("session_id"):
             raise ValueError("CONTEXT_PREFLIGHT_LIVE_OWNER_WAIT")
         if version == 2:
-            if context.get("recipe") != "original-v1":
+            if context.get("recipe") not in ("original-v1", "current-v1"):
                 raise ValueError("CONTEXT_INCOMPLETE_SOURCE")
             context["tokenizer_id"] = tokenizer_id(settings, queries)
         records.save(directory / "context-request.json", records.encoded(context))

@@ -61,6 +61,16 @@ class Reentry(Execution):
         inputs = self.inputs("development-plan")
         self.assertEqual(inputs["schema_version"], 3)
         self.assertEqual(inputs["reentry"]["decision_digest"], decision["decision_digest"])
+        context = dict(schema_version=1, renderer_version=2, recipe="original-v1", selection_id="selection",
+                       target_kind="development-plan", source_snapshot=self.source, byte_budget=2097152,
+                       excerpt_bytes=0, token_budget=0, tokenizer_id="none", agent_note="")
+        full = self.cli("context", "render", self.work, self.write("context-full.json", context))
+        context["recipe"] = "current-v1"
+        selected = self.cli("context", "render", self.work, self.write("context-current.json", context))
+        self.assertEqual(selected["mandatory_facts"]["history_selection"]["reason"],
+                         "AUTHORITY_OR_NON_DOCUMENT_HISTORY")
+        for name in ("document_history", "reentry_history", "input_manifest"):
+            self.assertEqual(full["mandatory_facts"][name], selected["mandatory_facts"][name])
         self.inputs("qa-result", ok=False)
         self.managed("development-plan")
         self.assertEqual(self.docs["planning"], old_plan)

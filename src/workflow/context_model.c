@@ -31,7 +31,8 @@ golem_status cx_request(golem_bytes bytes, struct json_object **out)
             s = GOLEM_ERR_PARSE;
     golem_digest source;
     if (s == GOLEM_OK && strcmp(dw_text(input, "recipe"), "extractive-v1") &&
-        strcmp(dw_text(input, "recipe"), "original-v1"))
+        strcmp(dw_text(input, "recipe"), "original-v1") &&
+        (strcmp(dw_text(input, "recipe"), "current-v1") || dw_uint(input, "renderer_version") != 2))
         s = GOLEM_ERR_UNSUPPORTED_VERSION;
     if (s == GOLEM_OK &&
         (!dw_id(dw_text(input, "selection_id")) || wf_kind(dw_text(input, "target_kind")) < 0 ||

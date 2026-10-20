@@ -16,7 +16,7 @@ current source digest and use an existing registered stage selection.
 {
   "schema_version": 1,
   "renderer_version": 2,
-  "recipe": "original-v1",
+  "recipe": "current-v1",
   "selection_id": "selection",
   "target_kind": "development-plan",
   "source_snapshot": "<64 lowercase hexadecimal characters>",
@@ -54,8 +54,27 @@ rejects v2 rather than silently downgrading. See the [decision and source review
 
 ## Preservation and authority
 
-- Full Work specification, acceptance criteria, document metadata/history, parent
+The default example uses [current-v1](current-context-selection.md): full source
+bodies and a conservative current-dependency metadata view (renderer 2 only).
+Unreferenced superseded plan metadata may become explicit archive references;
+current/stale metadata, their transitive parents/digest references, scope/selection,
+QA/results and non-document histories remain full. Archive entries retain identity,
+metadata/body hashes, requirements, parents and source. Inspect originals before
+reasoning about archived revisions; an archive is not the original metadata.
+
+Active attempts, unsubmitted output, execution state, authority/non-document
+history or unknown/complex selection state force full metadata fallback. Its mode
+and reason are explicit and budgets still apply. A corrupt session stream blocks.
+The session checkpoint sequence/head is part of current-v1 bytes, so session changes
+invalidate its saved projections/counts even without a document revision change.
+`original-v1` remains the explicit full-metadata alternative. Existing recipes,
+stored originals and full native validation are unchanged; this is not global
+semantic history pruning.
+
+- Full Work specification, acceptance criteria, document references, parent
   references, reentry/completion/research records and next action remain structured.
+  Full metadata/history remain available through original-v1; current-v1 marks any
+  omitted metadata and preserves archive retrieval references.
 - Input closure originals are verified using the existing workflow integrity gate.
   Each excerpt carries a manifest digest, body digest and exact byte accounting.
 - Lines containing registered requirement IDs or case-sensitive status/policy
