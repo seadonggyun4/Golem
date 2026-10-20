@@ -110,6 +110,7 @@ add_library(golem STATIC
     src/workflow/context_selection.c
     src/agent_session/clock.c
     src/agent_session/model.c
+    src/agent_session/rejection.c
     src/agent_session/storage.c
     src/agent_session/coordinator.c
     src/agent_session/binding.c

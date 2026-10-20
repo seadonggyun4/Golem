@@ -6,6 +6,7 @@
 extern "C" {
 #endif
 #define GOLEM_AGENT_SESSION_VERSION 1u
+#define GOLEM_AGENT_REJECT_OUTPUT_VERSION 1u
 #define GOLEM_AGENT_MAX_EVENTS 4096u
 #define GOLEM_AGENT_MAX_ATTEMPTS 256u
 #define GOLEM_AGENT_MAX_TTL_MS 3600000u
@@ -36,6 +37,10 @@ typedef struct golem_agent_clock {
  * lock before preparation. DONE and another live owner reject without writes.
  * Historical duplicate receipts retain their original semantics and are not
  * refreshed by preflight. Session IDs remain cooperative, not authenticated.
+ * Explicit reject_output requires RECOVERY_REQUIRED, exact current fences and a
+ * CAS approval artifact. It appends a schema-4 unsuccessful disposition, never
+ * accepted output or NO_EFFECTS. See docs/registered-output-rejection.md for the
+ * bounded effect scope, current-view invalidation and incompatible old writers.
  */
 golem_status golem_agent_session_call(golem_document_store *store, golem_bytes request,
     const golem_agent_clock *clock, golem_agent_reply *out, golem_diagnostic *diagnostic);

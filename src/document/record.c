@@ -79,6 +79,15 @@ golem_status dw_record_event(golem_document_store *s, int directory, bool agent,
     return event_publish(s, directory, agent, sequence, previous, payload, out, NULL, NULL);
 }
 
+golem_status dw_record_event_guarded(golem_document_store *s, int directory, bool agent,
+                                    uint64_t sequence, const golem_digest *previous,
+                                    const golem_digest *payload, golem_digest *out,
+                                    golem_status (*guard)(void *), void *context)
+{
+    if (!guard) return GOLEM_ERR_INVALID_ARGUMENT;
+    return event_publish(s, directory, agent, sequence, previous, payload, out, guard, context);
+}
+
 golem_status dw_event_write(golem_document_store *s, const golem_digest *payload,
                             golem_digest *out)
 {

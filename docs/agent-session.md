@@ -70,6 +70,7 @@ Use the most recent session sequence, not the document generation.
 | resume | session_id, ttl_ms |
 | submit | token, input_digest, source_snapshot, output, evidence |
 | reconcile | token, input_digest, source_snapshot, output, evidence, resolution |
+| reject_output | token, input_digest, source_snapshot, expected_generation, output, evidence, approval_digest |
 
 For one locked assessment/status/journal capture, use
 [Work records](work-records.md); existing `status` remains compatible.
@@ -264,10 +265,14 @@ and CAS evidence:
   It is rejected if a document attributed to the attempt is already registered.
   This is a self-reported resolution, never automatic proof that no effects exist.
 
-An irreconcilable/stale registered output stays blocked rather than being silently
-discarded or declared successful. Broader rejected-output revision/reentry and
-semantic gate policies are separate follow-up contracts. Do not edit coordinator
-files or replace a registry to circumvent a blocked claim.
+An incompatible registered output stays blocked unless the trusted caller uses
+the explicit, approved [registered-output rejection](registered-output-rejection.md)
+contract. That operation requires RECOVERY_REQUIRED and exact current fences;
+it records REJECTED_UNSUCCESSFUL, not acceptance or NO_EFFECTS, and keeps the
+original revision and all history. Unknown external effects, native execution
+state and multiple attributable outputs remain blocked. After disposition,
+normal fresh claims/revisions and actual required QA/completion are still needed.
+Do not edit coordinator files or replace a registry to circumvent a blocked claim.
 
 ## Durability, Budgets and Trust
 

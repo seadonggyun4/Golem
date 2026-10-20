@@ -79,6 +79,8 @@ golem_status cx_history_select(golem_document_store *s, struct json_object *fact
         fallback = "ACTIVE_ATTEMPT";
     if (st == GOLEM_OK && !fallback && log.state && as_unreceipted(s, &log) != GOLEM_OK)
         fallback = "UNSUBMITTED_OUTPUT";
+    if (st == GOLEM_OK && !fallback && dw_get(log.state, "rejected_outputs"))
+        fallback = "REJECTED_OUTPUT_HISTORY";
     if (!fallback && (s->reentry_count || s->completion_count || s->research_count ||
         s->runtime_profile_count || s->runtime_link_count || s->admission_link_count ||
         s->role_count || s->approval_count))

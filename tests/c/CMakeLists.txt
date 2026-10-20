@@ -587,6 +587,10 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/session_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_agent_client>)
     set_tests_properties(agent_session_cli PROPERTIES TIMEOUT 240)
+    add_test(NAME rejected_output_cli COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/rejected_output_integration.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_agent_client> ${CMAKE_C_COMPILER} -v)
+    set_tests_properties(rejected_output_cli PROPERTIES TIMEOUT 240 LABELS "session;recovery")
     add_executable(golem_binding_client binding_client.c)
     target_link_libraries(golem_binding_client PRIVATE Golem::golem)
     golem_configure_target(golem_binding_client)

@@ -15,7 +15,7 @@ typedef struct dw_entry {
 struct golem_document_store {
     golem_allocator allocator;
     int root, events;
-    bool writable, poisoned;
+    bool writable, poisoned, replaying;
     golem_evidence_store *cas;
     struct json_object *spec;
     dw_entry *entries;
@@ -92,6 +92,10 @@ golem_status dw_record_read(golem_document_store *s, int directory, bool agent,
 golem_status dw_record_event(golem_document_store *s, int directory, bool agent,
                             uint64_t sequence, const golem_digest *previous,
                             const golem_digest *payload, golem_digest *frame);
+golem_status dw_record_event_guarded(golem_document_store *s, int directory, bool agent,
+                                    uint64_t sequence, const golem_digest *previous,
+                                    const golem_digest *payload, golem_digest *frame,
+                                    golem_status (*guard)(void *), void *context);
 golem_status dw_record_reference(golem_document_store *s, int directory, const char *name,
                                 const golem_digest *payload, bool hexadecimal);
 golem_status dw_replay(golem_document_store *s);

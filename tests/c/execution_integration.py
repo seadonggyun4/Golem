@@ -84,6 +84,9 @@ class Execution(unittest.TestCase):
         self.managed("planning")
         if plan:
             self.managed("development-plan")
+        self.setup_execution_source(mode)
+
+    def setup_execution_source(self, mode="real"):
         self.repo = self.root / "project"
         self.repo.mkdir()
         (self.repo / "logic.c").write_text("int add(int a,int b) { return a-b; }\n")
@@ -126,7 +129,7 @@ int main(void) {
         self.git("commit", "-qm", "fixture")
         (self.repo / "user.txt").write_text("preexisting uncommitted user work\n")
         self.contract = {"schema_version": 1, "selection_id": "selection",
-            "development_plan": {"document_id": "development-plan", "revision": 1,
+            "development_plan": {"document_id": "development-plan", "revision": self.docs.get("development-plan", {}).get("revision", 1),
                 "digest": self.docs.get("development-plan", {}).get("manifest_digest", "a" * 64)},
             "snapshot_plan": {"schema_version": 1, "timeout_seconds": 15, "repositories": [{
                 "id": "project", "root": str(self.repo), "paths": ["logic.c", "test.c", "runner.py", "user.txt"],

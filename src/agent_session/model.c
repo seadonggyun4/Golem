@@ -38,8 +38,9 @@ golem_status as_reduce(struct json_object *prior, struct json_object *e, struct 
                          (!strcmp(op, "bind") || !strcmp(op, "claim") || !strcmp(op, "resume"));
     bool bound_claim = (dw_uint(e, "schema_version") == 2 || session_event) &&
                        !strcmp(op, "claim") && dw_get(d, "runtime_binding");
+    bool rejection = dw_uint(e, "schema_version") == 4 && !strcmp(op, "reject_output");
     if (!dw_keys(e, ek, 9) ||
-        (dw_uint(e, "schema_version") != 1 && !bound_claim && !session_event) ||
+        (dw_uint(e, "schema_version") != 1 && !bound_claim && !session_event && !rejection) ||
         seq != (prior ? dw_uint(prior, "sequence") : 0) + 1 || now == UINT64_MAX ||
         !dw_digest(e, "work_spec_digest", &digest) || !dw_id(dw_text(e, "key")) ||
         !dw_digest(e, "request_digest", &digest) || !dw_digest(e, "boot_id", &digest))
@@ -124,6 +125,18 @@ golem_status as_reduce(struct json_object *prior, struct json_object *e, struct 
             st = GOLEM_ERR_INVALID_STATE;
         else if (!number(a, "expires_ms", dw_uint(d, "expires_ms")) ||
                  (strcmp(op, "begin") == 0 && !text(a, "state", "RUNNING")))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+    } else if (!strcmp(op, "reject_output")) {
+        st = rejection ? as_rejection_shape(s, d, seq) : GOLEM_ERR_UNSUPPORTED_VERSION;
+        struct json_object *list = dw_get(s, "rejected_outputs");
+        if (st == GOLEM_OK && !list) {
+            list = json_object_new_array();
+            if (!dw_add(s, "rejected_outputs", list))
+                st = GOLEM_ERR_OUT_OF_MEMORY;
+        }
+        if (st == GOLEM_OK && !wf_append(list, as_rejection_summary(d)))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+        if (st == GOLEM_OK && json_object_object_add(s, "active", NULL) != 0)
             st = GOLEM_ERR_OUT_OF_MEMORY;
     } else if (strcmp(op, "submit") == 0 || strcmp(op, "reconcile") == 0) {
         const char *keys[] = {"token", "resolution", "output", "evidence", "trust"};

@@ -16,6 +16,7 @@
 #include "../policy/approval_internal.h"
 #include "../research/internal.h"
 #include "../runtime/profile_internal.h"
+#include "../agent_session/internal.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -293,8 +294,11 @@ GOLEM_RECORDED_API(golem_document_store_open,
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
     golem_document_store *s = NULL;
     golem_status st = allocate_store(root, writable, false, a, &s);
-    if (st == GOLEM_OK)
+    if (st == GOLEM_OK) {
+        s->replaying = true;
         st = dw_replay(s);
+        s->replaying = false;
+    }
     if (st == GOLEM_OK)
         *out = s;
     else
@@ -379,6 +383,8 @@ GOLEM_RECORDED_API(golem_document_submit,
         }
     if (st == GOLEM_OK)
         st = dw_preconditions(s, m);
+    if (st == GOLEM_OK)
+        st = as_registration_guard(s, m);
     if (st == GOLEM_OK)
         st = re_guard(s, dw_text(m, "kind"), true);
     if (st == GOLEM_OK)

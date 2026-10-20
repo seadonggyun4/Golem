@@ -16,8 +16,11 @@ golem_status as_publication_guard(void *context)
 {
     uint64_t now;
     golem_digest boot;
-    golem_status st = as_clock_read(NULL, &now, &boot);
-    return st == GOLEM_OK && !as_live(context, now, &boot) ? GOLEM_ERR_STALE_LEASE : st;
+    as_log *log = context;
+    golem_status st = as_clock_read(log->publication_clock, &now, &boot);
+    return st == GOLEM_OK &&
+                   (now < log->publication_observed_ms || !as_live(log, now, &boot))
+               ? GOLEM_ERR_STALE_LEASE : st;
 }
 
 static golem_status validate(golem_document_store *s, as_log *l, struct json_object *e)
@@ -42,7 +45,7 @@ static golem_status validate(golem_document_store *s, as_log *l, struct json_obj
         (!dw_equal(&boot, &l->boot) || now < l->observed_ms))
         return GOLEM_ERR_STALE_RESULT;
     if (strcmp(op, "begin") == 0 || strcmp(op, "heartbeat") == 0 || strcmp(op, "submit") == 0 ||
-        strcmp(op, "reconcile") == 0)
+        strcmp(op, "reconcile") == 0 || !strcmp(op, "reject_output"))
         if (!as_live(l, now, &boot))
             return GOLEM_ERR_STALE_RESULT;
     if (strcmp(op, "resume") == 0 && as_live(l, now, &boot) &&
@@ -78,6 +81,8 @@ static golem_status validate(golem_document_store *s, as_log *l, struct json_obj
     }
     if (!strcmp(op, "bind"))
         return ab_validate(s, e);
+    if (!strcmp(op, "reject_output"))
+        return as_rejection_validate(s, l->state, d, dw_uint(e, "sequence"));
     if (strcmp(op, "submit") == 0 || strcmp(op, "reconcile") == 0) {
         if (dw_get(d, "output") && !wf_resolve(s, dw_get(d, "output")))
             return GOLEM_ERR_IDENTITY_MISMATCH;
@@ -170,7 +175,7 @@ golem_status as_load(golem_document_store *s, const char *key, const golem_diges
     return st;
 }
 golem_status as_commit(golem_document_store *s, as_log *l, struct json_object *e,
-                       struct json_object **out)
+                       const golem_agent_clock *clock, struct json_object **out)
 {
     if (l->sequence >= GOLEM_AGENT_MAX_EVENTS)
         return GOLEM_ERR_BUDGET_EXHAUSTED;
@@ -188,8 +193,18 @@ golem_status as_commit(golem_document_store *s, as_log *l, struct json_object *e
         st = dw_record_prepare(s, e, AS_EVENT_MAX, &payload);
     if (st == GOLEM_OK && l->directory < 0)
         st = dw_dir(s->root, "agent-events", true, &l->directory);
-    if (st == GOLEM_OK)
-        st = dw_record_event(s, l->directory, true, l->sequence + 1, &l->last, &payload, &digest);
+    if (st == GOLEM_OK) {
+        const char *op = dw_text(e, "operation");
+        bool fenced = !strcmp(op, "begin") || !strcmp(op, "heartbeat") || !strcmp(op, "submit") ||
+                      !strcmp(op, "reconcile") || !strcmp(op, "reject_output");
+        if (fenced) {
+            l->publication_clock = clock;
+            l->publication_observed_ms = dw_uint(e, "observed_ms");
+            st = dw_record_event_guarded(s, l->directory, true, l->sequence + 1, &l->last,
+                                         &payload, &digest, as_publication_guard, l);
+        } else
+            st = dw_record_event(s, l->directory, true, l->sequence + 1, &l->last, &payload, &digest);
+    }
     if (st == GOLEM_OK) {
         *out = receipt;
         receipt = NULL;

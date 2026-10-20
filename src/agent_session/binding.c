@@ -354,7 +354,7 @@ GOLEM_RECORDED_API(golem_session_binding_call,
                 st = GOLEM_ERR_OUT_OF_MEMORY;
         }
         if (st == GOLEM_OK)
-            st = as_commit(s, &l, e, &response);
+            st = as_commit(s, &l, e, NULL, &response);
     }
     if (st == GOLEM_OK)
         st = ab_reply(response, out);

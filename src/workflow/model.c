@@ -1,6 +1,7 @@
 #include "internal.h"
 #include "template_internal.h"
 #include "../discovery/internal.h"
+#include "../agent_session/internal.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -118,6 +119,8 @@ golem_status wf_graph_make(golem_document_store *s, wf_graph *out)
         st = GOLEM_ERR_INVALID_GRAPH;
     if (st == GOLEM_OK)
         st = golem_document_graph_evaluate(g.nodes, n, &s->allocator, g.states, n, NULL);
+    if (st == GOLEM_OK)
+        st = as_rejection_graph(s, &g);
     if (st == GOLEM_OK)
         *out = g;
     else

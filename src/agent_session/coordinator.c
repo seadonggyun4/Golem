@@ -128,6 +128,8 @@ static bool request_schema(struct json_object *r)
         "schema_version", "operation",       "work_id", "key",      "expected_sequence", "token",
         "input_digest",   "source_snapshot", "output",  "evidence", "resolution"};
     const char *context[] = {"schema_version", "operation", "work_id", "token", "max_bytes"};
+    const char *reject[] = {"schema_version", "operation", "work_id", "key", "expected_sequence", "token",
+                            "input_digest", "source_snapshot", "expected_generation", "output", "evidence", "approval_digest"};
     bool bound =
         dw_uint(r, "schema_version") == 2 && (!strcmp(op, "claim") || !strcmp(op, "resume"));
     if ((dw_uint(r, "schema_version") != 1 && !bound) || !dw_id(dw_text(r, "work_id")))
@@ -150,6 +152,8 @@ static bool request_schema(struct json_object *r)
         return dw_keys(r, submit, 10);
     if (strcmp(op, "reconcile") == 0)
         return dw_keys(r, reconcile, 11);
+    if (strcmp(op, "reject_output") == 0)
+        return dw_keys(r, reject, 12);
     return false;
 }
 static bool request_values(struct json_object *r)
@@ -200,7 +204,11 @@ static bool request_values(struct json_object *r)
     if (!dw_digest(r, "source_snapshot", &digest))
         return false;
     const char *resolution = strcmp(op, "submit") == 0 ? "ADOPT_OUTPUT" : dw_text(r, "resolution");
-    if (strcmp(resolution, "ADOPT_OUTPUT") == 0) {
+    if (!strcmp(op, "reject_output")) {
+        if (!wf_reference(dw_get(r, "output")) || !dw_digest(r, "approval_digest", &digest) ||
+            !dw_uint(r, "expected_generation") || dw_uint(r, "expected_generation") > GOLEM_DOCUMENT_MAX_REVISIONS + 1)
+            return false;
+    } else if (strcmp(resolution, "ADOPT_OUTPUT") == 0) {
         if (!wf_reference(dw_get(r, "output")))
             return false;
     } else if (strcmp(resolution, "NO_EFFECTS") != 0 || dw_get(r, "output"))
@@ -251,7 +259,7 @@ golem_status as_unreceipted(golem_document_store *s, as_log *l)
             strcmp(dw_text(dw_get(dw_get(e->meta, "input_manifest"), "selection"), "document_id"),
                    selection) != 0)
             continue;
-        if (!receipted(l, e))
+        if (!receipted(l, e) && !as_rejected(l->state, &e->result.manifest_digest))
             return GOLEM_ERR_REQUIREMENTS_UNMET;
     }
     return GOLEM_OK;
@@ -653,6 +661,14 @@ static golem_status prepare(golem_document_store *s, as_log *l, struct json_obje
                 strcmp(op, "submit") == 0 ? "ADOPT_OUTPUT" : dw_text(r, "resolution");
             if (strcmp(dw_text(r, "source_snapshot"), dw_text(a, "source_snapshot")) != 0)
                 st = GOLEM_ERR_STALE_RESULT;
+            if (st == GOLEM_OK && !strcmp(op, "reject_output")) {
+                st = as_rejection_prepare(s, l, r, d);
+                if (st == GOLEM_OK)
+                    *out = d;
+                else
+                    json_object_put(d);
+                return st;
+            }
             if (st == GOLEM_OK && strcmp(resolution, "ADOPT_OUTPUT") == 0)
                 st = check_output(s, a, r);
             else if (st == GOLEM_OK && strcmp(resolution, "NO_EFFECTS") == 0) {
@@ -757,7 +773,8 @@ GOLEM_RECORDED_API(golem_agent_session_call,
             event = json_object_new_object();
             if (st == GOLEM_OK &&
                 (!dw_add(event, "schema_version",
-                         json_object_new_int(dw_get(data, "session_binding")   ? 3
+                         json_object_new_int(!strcmp(op, "reject_output") ? 4
+                                             : dw_get(data, "session_binding")   ? 3
                                              : dw_get(data, "runtime_binding") ? 2
                                                                                : 1)) ||
                  !add_uint(event, "sequence", log.sequence + 1) ||
@@ -780,7 +797,7 @@ GOLEM_RECORDED_API(golem_agent_session_call,
         }
         if (st == GOLEM_OK) {
             phase = "session.event_commit";
-            st = as_commit(s, &log, event, &response);
+            st = as_commit(s, &log, event, clock, &response);
         }
     }
     if (st == GOLEM_OK) {
