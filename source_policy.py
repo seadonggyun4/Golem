@@ -76,6 +76,7 @@ samples/research/request.json
 samples/runtime-profile.json
 samples/work-capsules/basic.json
 tests/c/fixtures/completion/v1-store.json
+tests/c/fixtures/session/wrong-kind-v1.json
 tests/c/fixtures/journal/v1_cancelled.hex
 tests/c/fixtures/journal/v1_default.hex
 tests/c/fixtures/journal/v1_invalid_transition.hex

@@ -144,6 +144,20 @@ class SourceSnapshotTests(unittest.TestCase):
             snapshot(root, output)
             self.assertEqual((output / name).read_bytes(), (root / name).read_bytes())
 
+    def test_rejection_fixture_is_reviewed_and_copied_verbatim(self):
+        root = Path(__file__).resolve().parents[1]
+        name = "tests/c/fixtures/session/wrong-kind-v1.json"
+        self.assertTrue(selected(name))
+        self.assertFalse(selected(name, "conan"))
+        for other in ("tests/c/fixtures/session/local-store.json",
+                      "tests/c/fixtures/session/wrong-kind-v2.json",
+                      "tests/c/fixtures/session/reports/wrong-kind-v1.json"):
+            self.assertFalse(selected(other), other)
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp).resolve()
+            snapshot(root, output)
+            self.assertEqual((output / name).read_bytes(), (root / name).read_bytes())
+
     def test_git_selection(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp).resolve()

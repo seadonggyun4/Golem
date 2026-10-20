@@ -236,6 +236,15 @@ qualification. The corrected approval, native-recording and rejection influence
 set passed 3/3, followed by 2/2 ASan/UBSan and 2/2 Release approval/rejection
 tests; the final commit still requires its own full-suite and CI results.
 
+At 258d63f, 18/20 remote checks passed, including the Linux/macOS native build
+matrix. Both public-alpha checks exposed a separate packaging omission: the new
+synthetic fixture was absent from the closed clean-source allowlist. Add only
+tests/c/fixtures/session/wrong-kind-v1.json, not a directory or extension glob.
+A new export regression fails before that correction and verifies byte-identical
+copying afterward, while neighboring unreviewed files remain excluded. All 14
+source/export tests and all 16 rejection cases from an actual clean export passed.
+These observations do not substitute for final-commit CI or product recovery.
+
 ## SDK Handoff
 
 Build and stage an SDK from the reviewed immutable commit, not a dirty source
