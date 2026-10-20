@@ -64,7 +64,46 @@ source/secret review; record exact pushed SHA and all remote CI conclusions.
 
 ## Observed local results
 
+### Requirement Disposition
+
+These labels distinguish implemented changes from previously satisfied behavior
+and uncompleted work. This patch is not completion of every lightweight-context
+optimization.
+
+| Requirement | Disposition | Code/evidence and remaining boundary |
+| --- | --- | --- |
+| Remove generated JSON/Markdown facts duplication | implemented | Renderer 2 omits only the generated Markdown facts block; renderer 1 unchanged. |
+| One reviewed model-facing lifecycle entry and automatic facts capture | already-satisfied | Existing `agent_lifecycle.run` reserves once, runs prepare/execute/finalize and captures mechanical facts; native fixture verifies one wrapper CLI invocation and three actual native argv records. No real model round-trip measurement. |
+| Reduce repeated lifecycle output | implemented | Default compact view, retained manifest-verified full output; no reduction in native subprocesses or evidence writes claimed. |
+| Current stage/source and explicit document dependency selection | already-satisfied | `wf_manifest`/`wf_closure` select current required roots and transitive parents, check source/QA/reentry and reject stale or missing inputs. Native session context already exports complete required bodies. |
+| Complete v2 provider input, including pending/recovery state | implemented | Original bodies, unchanged facts/history and bound full preflight; missing/budget-limited inputs block. This can be larger than an extractive reading aid. |
+| Reduce default metadata/history to a minimal sufficient current-decision set | not-done | `facts()` still includes all document/reentry/completion/research metadata/history. No current-only history selector or compact-history default was implemented. |
+| Truncate that history without a sufficient dependency/disposition contract | not-safe | A document parent DAG alone does not classify every cross-record constraint, judgment, unresolved effect or failure as active/resolved. Keeping full history or blocking on budget is the conservative fallback, not a claim of successful history reduction. |
+| Optional feature and actual runner boundaries | implemented | EN/KO README separates research/metrics/observability from ordinary Work, real local execution from noop daemon and Python prototype. No new optional subsystem. |
+| Heterogeneous CLI/JSON handoff and native safety gates | already-satisfied / implemented | Existing sequence, owner/binding, source/QA, lease, receipt and recovery gates retained; v2 adds exact envelope/preflight binding and shared short recovery errors, with native regression coverage. |
+| Parallel EPERM root cause eliminated | not-done | Unchanged isolated reruns passed; neither that nor remote CI alone diagnoses the original local parallel failure. |
+
+Safe history reduction needs an explicit, replay-validated active/resolved and
+dependency contract for non-document records as well as the existing document
+closure; legacy/unknown records must fall back to full history or block. It also
+needs fixtures with historical unresolved constraints/failures, pending effects,
+late receipts and changed sources that prove selection does not discard them.
+No such universal sufficiency contract is inferred from prose or recent-N order.
+Adding a selector that merely claims completeness would weaken the requested
+boundary; this limitation is reported rather than hidden as an implemented item.
+
+### Verification
+
 macOS arm64, 2026-10-20; no real provider or paid generation experiment.
+
+The native lifecycle fixture verified one initial wrapper CLI invocation dispatching
+three planned native processes; compact output was 576 bytes versus 775 bytes for
+the same full result. These sizes include temporary fixture paths and are not a
+general savings estimate. A separate duplicate wrapper invocation reuses the result
+with no new native dispatch/evidence writes. Actual model calls are not measured.
+Evidence: `/private/tmp/golem-lightweight-lifecycle-final/comparison.json`; the
+two-case native lifecycle fixture passed. This is distinct from provider-input
+bytes and from the four-phase context-resume CLI route.
 
 | Check | Observed result |
 | --- | --- |
@@ -86,6 +125,14 @@ failures), `golem-lightweight-followup-recheck.xml` (isolated rerun),
 `golem-lightweight-followup-asan.xml`, `golem-lightweight-followup-release.xml`
 (all under `/private/tmp`). Python totals were observed in command output, not
 fabricated JUnit. These temporary host files are not a durable CI archive.
+
+The original 34k/17k phase-1 comparison used extractive source prefixes and no
+on-message preflight. The final 132k/128k comparison below uses full source bodies
+for both versions, and additionally includes preflight in v2. They are different
+guarantee scopes, not successive measurements of the same task input. Completeness
+increases payload relative to the earlier reading aid; generated-facts deduplication
+is a separate, smaller gain under the stronger final handoff guarantee. Within each
+fixture, facts/source equality and the distinct version contracts are checked.
 
 The final same-fixture comparison uses `original-v1` for both versions. V2 also
 includes its full preflight observations. Actual production request bytes equal

@@ -1,5 +1,6 @@
 """Three-phase orchestration with a real native document mutation."""
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -44,10 +45,26 @@ class Lifecycle(fixture.Workflow):
         result = json.loads(first.stdout)
         self.assertEqual(result["status"], "FINISHED")
         self.assertFalse(result["product_acceptance"])
+        full = life.inspect(self.store / self.plan["run_id"])
+        self.assertEqual(full["controller_invocations"], 1)
+        self.assertEqual(len(full["steps"]), 3)
+        for phase in life.PHASES:
+            started = self.store / self.plan["run_id"] / phase / "execution/started.json"
+            self.assertEqual(json.loads(started.read_bytes())["argv"], self.plan["phases"][phase][0]["argv"])
+        measurements = {"wrapper_cli_invocations": 1, "native_subprocesses": 3,
+                        "model_calls_measured": False, "default_output_bytes": len(first.stdout),
+                        "full_output_bytes": len(life.io.encoded(full)),
+                        "execution_authorized": False, "product_acceptance": False}
+        self.assertLess(measurements["default_output_bytes"], measurements["full_output_bytes"])
+        if os.environ.get("GOLEM_LIFECYCLE_COMPARISON_OUTPUT"):
+            evidence = life.records.private_directory(os.environ["GOLEM_LIFECYCLE_COMPARISON_OUTPUT"])
+            life.records.save(evidence / "comparison.json", life.io.encoded(measurements))
         before = {str(p): life.records.digest(p) for p in self.work.rglob("*") if p.is_file()}
+        evidence_before = life.io.file_inventory(self.store / self.plan["run_id"])
         second = subprocess.run(command, capture_output=True, timeout=90)
         self.assertEqual(second.returncode, 0, second.stderr)
         self.assertEqual(json.loads(second.stdout), result)
+        self.assertEqual(evidence_before, life.io.file_inventory(self.store / self.plan["run_id"]))
         self.assertEqual(before, {str(p): life.records.digest(p) for p in self.work.rglob("*") if p.is_file()})
         self.assertEqual(self.next()["target_kind"], "planning")
 
