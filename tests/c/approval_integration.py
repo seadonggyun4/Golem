@@ -28,6 +28,7 @@ class Approval(unittest.TestCase):
     managed = base.Execution.managed
     git = base.Execution.git
     setup_execution = base.Execution.setup_execution
+    setup_execution_source = base.Execution.setup_execution_source
     prepare = base.Execution.prepare
     finish = base.Execution.finish
     result = base.Execution.result

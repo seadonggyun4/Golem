@@ -226,6 +226,16 @@ its raw-writer limitation above remains unchanged. These local runs precede the
 recovery commit; the exact-commit full-suite and remote CI records must be
 qualified separately, not inferred from the earlier 265a83a CI result.
 
+The full CTest process at a1f342f subsequently reported 386/388: approval_cli
+and its native_api_scenarios consumer both failed because the explicitly composed
+Approval fixture lacked the extracted setup_execution_source helper. Restore
+that delegation, not an approval bypass or a skipped test. The retained local
+bundle is FAIL; it also records inputs_unchanged=false because the correction was
+made after CTest exited but before bundle finalization. It is not an exact-source
+qualification. The corrected approval, native-recording and rejection influence
+set passed 3/3, followed by 2/2 ASan/UBSan and 2/2 Release approval/rejection
+tests; the final commit still requires its own full-suite and CI results.
+
 ## SDK Handoff
 
 Build and stage an SDK from the reviewed immutable commit, not a dirty source
