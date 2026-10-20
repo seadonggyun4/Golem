@@ -2,6 +2,10 @@
 
 [한국어](research.ko.md) · **English**
 
+For paper introductions and evaluation boundaries, use [research positioning](research-positioning.md):
+agents perform and judge tasks; Golem mechanically validates collaboration contracts.
+Headless CLI/API collaboration does not require a daemon or universal agent launcher.
+
 Research records are optional local records where the current agent structures a
 Work's case, per-attempt hypotheses, interventions, observations, and next
 decisions. They are not automatic research collection and do not capture an

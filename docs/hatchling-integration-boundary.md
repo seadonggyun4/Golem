@@ -2,7 +2,12 @@
 
 Golem and Hatchling are separate projects.
 
-Golem is a headless work runtime engine. Its job is to carry agent work to completion through `WorkCapsule`, `WorkRun`, `StageRun`, stage graph, lease, retry, evidence, and completion policy.
+Golem is a lightweight headless engine for agents to collaborate through work
+state and verification evidence. Agents interpret intent and perform tasks;
+Golem governs dependencies, ownership, handoffs and configured acceptance.
+External CLI/API clients need no mandatory daemon or provider launcher. Lower-level
+`WorkCapsule`, `WorkRun` and `StageRun` APIs and approved QA execution retain their
+own contracts. See [responsibilities](agent-golem-boundary.md).
 
 Hatchling is an optimizer/proxy/ledger for reducing agent execution cost. It is not itself a work agent. Its job is to observe execution, normalize provider usage, advise routing/cache/compression/fallback, and record cost lineage.
 

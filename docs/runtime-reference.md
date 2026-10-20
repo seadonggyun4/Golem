@@ -217,29 +217,37 @@ licensing process in [License](#license) apply to the Alpha as well.
 
 ## Name and Role
 
-**Golem implements AWE.** Its responsibility is durable, policy-bounded work execution.
+**Golem implements AWE (Agentic Workflow Engine).** It is a lightweight headless
+engine for agents to collaborate through work state and verification evidence.
 
-Golem assembles agents, tools, policies, and execution stages into a working whole.
+Agents interpret intent, plan and perform tasks. Golem manages state, dependencies,
+ownership, handoffs and evidence, mechanically validating configured contracts.
+See [Agent and Golem responsibilities](agent-golem-boundary.md).
 
 Development is driven by real work execution, service improvements, and measured engineering results.
 
 The runtime CLI, Python import, and C API use `golem`, and the CMake package is `Golem`.
 
-Golem is a headless execution engine that lets multiple agent providers run the same work cycle. It is not merely a document-writing tool: Markdown plans, results and evidence support a work runtime that helps agents carry work through to completion.
+External agents calling the CLI/API already provide headless orchestration.
+A daemon and universal direct agent execution are not required. Markdown and
+receipts support governed collaboration, not autonomous task judgment by Golem.
 
 ## Product Boundary
 
-Golem stays headless until the execution engine is useful on its own.
+Golem's engine remains headless; an assistant or UI can be a client above it.
 
 - No UI client in the runtime package.
 - CLI, JSON, and Markdown projection are allowed.
 - Every execution must leave evidence.
-- Agent providers must share the same `run_stage(input) -> result/evidence` contract.
+- Direct runtime adapters use `run_stage(input) -> result/evidence`; external
+  session clients use the session/document contracts instead.
 - Local autonomy is explicit and policy bounded.
 
 ## Runtime Direction
 
-Golem implements a C work runtime kernel plus CLI, daemon, evidence CAS, adapter protocol, cost layer, and policy layer.
+Golem implements a C workflow/runtime kernel, CLI, evidence CAS and policy gates,
+with optional local daemon, worker, adapter and cost surfaces. Approved local
+development/QA execution is real; generic provider dispatch is not implied.
 
 The current Python package is a smoke-testable prototype for the core model.
 Its console entrypoint is `golem-prototype`; `golem` is reserved for the C CLI.
@@ -853,6 +861,11 @@ Existing unbound runtime callers and CLI noop bundles retain their prior behavio
 
 ## Local Daemon MVP
 
+This is an optional lower-level queue, not a prerequisite for the normal
+external-agent session path. Its CLI worker is a simulation, not a generic
+Codex/Claude launcher. Real direct execution requires a separately connected and
+qualified host executor; the C callback alone does not implement that integration.
+
 `include/golem/daemon.h` provides a persistent local queue and a serialized,
 single-process scheduler. `include/golem/supervisor.h` provides a reusable POSIX
 subprocess supervisor. Neither depends on an optimizer, provider SDK, or UI.
@@ -1224,15 +1237,22 @@ It reuses the case-study redaction boundary and never writes to CAS/journal or
 changes completion authority. No network exporter, fabricated spans or live time
 series are created. See [the mapping, ownership and privacy contract](observability.md).
 
-## Next Development Order
+<a id="next-development-order"></a>
 
-1. Extend the noop coordinator with durable provider dispatch/reconciliation records.
-2. Extend declared-gate acceptance with independently authenticated review contracts.
-3. Add provider adapters for Codex, Claude, Gemini, and local CLI.
-4. Generalize persisted billing and add cross-process lease authority/recovery without reusing old tokens.
-5. Extend completion predicates and receipt projections to additional workflow modes.
-6. Extend the capability protocol with signed runner enrollment and envelopes.
-7. Add optional optimizer wire bridges and durable decision receipts using the implemented boundary.
+## Conditional Extensions
+
+These are separate capability candidates, not mandatory steps before external
+agents can collaborate or a promise that every path will launch providers.
+Prioritize demonstrated client needs while preserving the orchestration core.
+
+- If direct provider execution is promised, connect a real non-noop executor
+  with durable dispatch, reconciliation and acceptance evidence first.
+- If independent review is promised, add authenticated review contracts beyond
+  declared-gate acceptance; current receipts do not imply that identity.
+- Add provider-specific adapters only for explicitly supported integrations;
+  existing Codex/Claude client and usage paths are not universal daemon dispatch.
+- Extend billing, cross-process authority, completion modes, signed enrollment
+  or optimizer bridges only under separately specified contracts and tests.
 
 ## License
 

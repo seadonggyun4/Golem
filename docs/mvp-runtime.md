@@ -2,6 +2,11 @@
 
 The MVP is intentionally narrow and headless.
 
+This page describes the lower-level runtime model, not mandatory services for
+every client. The normal external-agent CLI/API workflow needs neither a daemon
+nor a universal agent launcher. Agents make task judgments; Golem validates
+state and evidence contracts. See [responsibilities](agent-golem-boundary.md).
+
 ## Fixed Scope
 
 1. `Work Capsule`

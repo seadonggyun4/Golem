@@ -2,6 +2,10 @@
 
 [English](research.md) · **한국어**
 
+논문 소개·평가 경계는 [논문용 포지셔닝](research-positioning.md)을 따른다.
+Agent는 작업을 판단·수행하고 Golem은 협업 계약을 기계적으로 검사한다.
+CLI/API 기반 headless 협업에 daemon이나 범용 agent 직접 실행은 필수가 아니다.
+
 현재 agent가 Work와 시도별 가설, 개입, 관측, 다음 판단을 구조화해 남기는
 선택적 로컬 기능이다. 자동 연구 수집이나 agent의 비공개 사고 과정 수집이 아니다.
 현재 지원 범위는 `ResearchCase`, 사전 `AttemptPlan`, `AttemptDecision`과

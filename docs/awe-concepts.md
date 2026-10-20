@@ -7,7 +7,15 @@ completion of agentic activity. `Work` denotes an individual managed unit of
 work; existing Work types, API names, schemas, and stored evidence retain their
 names. This terminology clarification does not change runtime behavior.
 
-Golem implements a headless runtime model for evidence-bound agent work. The central planning object is a `Work Capsule`; each execution is a `WorkRun` made of provider-specific `StageRun` attempts.
+Golem is a lightweight headless engine for agents to collaborate through work
+state and verification evidence. Agents decide what to do and how; Golem checks
+state, dependencies, ownership, handoffs and configured acceptance contracts.
+External CLI/API clients do not require a daemon or engine-owned agent launcher.
+See the [responsibility contract](agent-golem-boundary.md).
+
+The lower-level runtime represents a `Work Capsule` and `WorkRun` containing
+`StageRun` attempts. Those types do not imply that Golem launches a provider for
+every stage; the current-agent session/document workflow is a separate entry path.
 
 ## Promoted Concepts
 
@@ -29,4 +37,5 @@ Golem keeps the runtime small and evidence-bound:
 - stale lease rejection
 - append-only evidence
 - predecessor evidence digest requirements
-- local runner enrollment, signed envelopes, and capability probes for adapters
+- explicit adapter capabilities and trusted-host runner contracts where adopted;
+  authenticated enrollment and signed envelopes are not universal guarantees

@@ -5,7 +5,7 @@
 <h1 align="center">Golem — Agentic Workflow Engine</h1>
 
 <p align="center">
-  <strong>A headless work runtime that carries Markdown and verified results through to completion</strong>
+  <strong>A lightweight headless engine for AI agents to collaborate through work state and verification evidence</strong>
 </p>
 
 <p align="center"><em>Awaken the worker.</em></p>
@@ -20,9 +20,18 @@
 
 ## What Golem Does
 
-**Supported agents: Codex and Claude.** Golem helps the agent already working with you carry Markdown documents and verification results through to completion. Launching another agent is not the central idea.
+**Supported agent integrations: Codex and Claude.** External agents collaborate by calling Golem's CLI/API and handing off work state and verification evidence. This is headless orchestration without requiring Golem to launch every agent or run a daemon.
 
-The agent researches, writes documents and edits code. Golem manages document dependencies, freshness, execution evidence, permissions and completion conditions. **AWE (Agentic Workflow Engine) is the category; Golem is the product.** It provides a C17 engine, CLI, JSON and Markdown, without a UI client.
+The agent interprets user intent, plans, edits code and uses tools. Golem manages work state, dependencies, ownership, handoffs and evidence, and mechanically checks which submissions and completion claims satisfy the configured contracts. **AWE (Agentic Workflow Engine) is the category; Golem is the product.** It provides a C17 engine, CLI, JSON and Markdown, without a UI client.
+
+| Responsibility | Owner |
+| --- | --- |
+| Decide what to do and how; perform the task | AI agent, within user authority |
+| Enforce state transitions, ownership, input freshness and acceptance contracts | Golem |
+| Run explicitly approved development/QA commands and record observations | Golem's optional execution path |
+| Offer an assistant, UI or provider-specific launcher | Client/host integration, not a required engine service |
+
+The goal is to preserve the orchestration core while reducing agent-facing procedures and inputs, not weaken evidence or safety gates. "Lightweight" describes this boundary, not a measured token, billing or performance result. See [roles and execution boundaries](docs/agent-golem-boundary.md).
 
 ## Work Cycle
 
@@ -77,6 +86,7 @@ Research records, cohorts, detailed metrics, observability exports and provider
 usage adapters are optional surfaces, not documents every ordinary task must write.
 Native QA/evidence/completion requirements remain mandatory where configured.
 
+The local daemon is optional, not a prerequisite for agent collaboration.
 `run --noop` and the CLI daemon's `local.noop` worker simulate runtime stages;
 their success does not mean a real agent executed the user's task. The historical
 Python `golem-prototype` is not the native `golem` engine. Existing local command

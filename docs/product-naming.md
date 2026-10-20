@@ -10,7 +10,7 @@ unit. Historical evidence and API identifiers are not renamed.
 
 | Category | Final name | Role | Meaning |
 | --- | --- | --- | --- |
-| AWE | Golem | Workflow engine that assembles agents, tools, policies, and stages, then manages execution, verification, and recovery | The image of assembling parts into a working golem |
+| AWE | Golem | Lightweight headless engine for agents to hand off work state and verification evidence | The image of assembling parts into a working golem |
 | AWO | Hatchling | Optimizer that reduces service execution cost while preserving quality and safety constraints | Inspired by a young dragon guarding a pile of gold in *The Hobbit* |
 
 These names are metaphors. They do not imply official affiliation with, or rights
@@ -18,8 +18,12 @@ to use art from, any specific character or franchise.
 
 ## Purpose and Boundary
 
-Golem is responsible for work execution quality and stability. Hatchling is
-responsible for cost reduction inside quality and safety constraints.
+Agents interpret intent and perform tasks. Golem manages state, dependencies,
+ownership, handoffs and evidence, and mechanically validates configured contracts.
+Headless CLI/API collaboration requires no mandatory daemon or universal agent
+launcher. Approved QA execution remains supported. See the
+[responsibility contract](agent-golem-boundary.md). Hatchling is responsible for
+cost optimization inside quality and safety constraints, not a guarantee of savings.
 
 Golem keeps the policy boundary for execution, approval, and completion
 decisions. Hatchling provides cost-optimization proposals and does not replace

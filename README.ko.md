@@ -5,7 +5,7 @@
 <h1 align="center">Golem — Agentic Workflow Engine</h1>
 
 <p align="center">
-  <strong>문서와 검증 결과를 이어받아 일을 끝까지 수행하는 headless work runtime</strong>
+  <strong>서로 다른 AI Agent가 작업 상태와 검증 증거를 이어받아 협업하게 하는 경량 헤드리스 엔진</strong>
 </p>
 
 <p align="center"><em>Awaken the worker.</em></p>
@@ -20,9 +20,18 @@
 
 ## Golem이 하는 일
 
-**지원 에이전트: Codex · Claude.** 핵심은 별도 agent를 새로 띄우는 것보다, 지금 작업 중인 agent가 Markdown 문서와 검증 결과를 이어받아 완료까지 진행하도록 만드는 데 있습니다.
+**지원 agent 연동: Codex · Claude.** 외부 agent가 Golem CLI/API를 호출하고 작업 상태와 검증 증거를 인계하는 것만으로 headless orchestration이 성립합니다. Golem이 모든 agent를 직접 실행하거나 daemon을 구동할 필요는 없습니다.
 
-에이전트가 조사·문서 작성·코드 수정을 수행하고, Golem은 문서의 관계와 최신성, 실행 증거, 권한 및 완료 조건을 관리합니다. **AWE는 Agentic Workflow Engine이라는 분류명이며, 제품명은 Golem입니다.** C17 엔진과 CLI·JSON·Markdown을 제공하며 UI는 만들지 않습니다.
+Agent는 사용자 의도를 해석하고 계획하며 코드 수정과 도구 사용으로 작업을 수행합니다. Golem은 작업 상태·의존성·소유권·인계·검증 증거를 관리하고, 제출과 완료 주장이 설정된 계약을 지켰는지 기계적으로 판단합니다. **AWE는 Agentic Workflow Engine이라는 분류명이며, 제품명은 Golem입니다.** C17 엔진과 CLI·JSON·Markdown을 제공하며 UI는 만들지 않습니다.
+
+| 책임 | 담당 |
+| --- | --- |
+| 사용자 권한 안에서 무엇을 어떻게 할지 판단하고 수행 | AI Agent |
+| 상태 전이·소유권·입력 최신성·수락 계약 검사 | Golem |
+| 명시적으로 승인된 개발·QA 명령 실행과 관측 기록 | Golem의 선택적 실행 경로 |
+| 비서·UI·provider별 launcher 제공 | 엔진의 필수 서비스가 아닌 client/host 연동 |
+
+목표는 오케스트레이션 코어를 유지하면서 AI가 처리할 절차와 입력을 줄이는 것입니다. 증거·안전 검사를 줄인다는 뜻이 아닙니다. '경량'은 역할 경계를 뜻하며 토큰·청구액·성능 절감의 실측 결과가 아닙니다. [역할 및 실행 경계](docs/agent-golem-boundary.md)를 참고하세요.
 
 ## 작업 흐름
 
@@ -74,6 +83,7 @@ archive 참조를 유지하며, 이력·효과 판단이 불확실하면 full me
 연구 schema·cohort·상세 지표·observability·provider 사용량 adapter는 일반 작업마다
 작성할 필수 문서가 아닙니다. 설정된 native QA·증거·완료 조건은 유지됩니다.
 
+로컬 daemon은 선택 기능이며 agent 협업의 전제조건이 아닙니다.
 `run --noop`와 CLI daemon의 `local.noop` worker는 시뮬레이션이며 실제 에이전트
 작업 완료가 아닙니다. 과거 Python `golem-prototype`도 native `golem`과 구별합니다.
 인증된 원격 runner·임의 provider 실행·Windows runtime 지원을 이 예제가 보장하지
