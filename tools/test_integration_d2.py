@@ -160,5 +160,3 @@ class D2(unittest.TestCase):
         self.policy_path.unlink()
         with self.assertRaises((OSError, c.IntegrationError)):
             api.call("projects_list", {})
-
-
