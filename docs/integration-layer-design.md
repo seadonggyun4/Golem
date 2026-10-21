@@ -1,12 +1,12 @@
 # Golem Integration Layer and MCP Design
 
-상태: **설계 + D1 승인/읽기 + D2 local stdio + D3 opt-in local hook 구현**. 검토: 2026-10-21.
+상태: **설계 + D1 승인/읽기 + D2 local stdio + D3 opt-in hook + D4 명시적 typed mutation/승인 QA 구현**. 검토: 2026-10-21.
 기준 소스: `96ad031b3a28b189ee7183fcff2f6c34c0ddecfb`.
 schema·프로젝트 승인 registry·읽기 backend는 [D1 계약](integration-d1.md),
 읽기 MCP·전달 정책은 [D2 계약](integration-d2.md), opt-in startup/resume hook은
-[D3 계약](integration-d3.md)에 정리한다. 자동 client installer, 원격 인증 서비스나
+[D3 계약](integration-d3.md), 명시적 변경·승인 QA는 [D4 계약](integration-d4.md)에 정리한다. 자동 client installer, 원격 인증 서비스나
 실제 Hosted 모델 이해·운영 검증의 완료를 의미하지 않는다.
-기존 계약은 각 링크가 권위이며 D1-D3 계약에서 구현했다고 명시한 것 외의 이름·경로는 제안이다.
+기존 계약은 각 링크가 권위이며 D1-D4 계약에서 구현했다고 명시한 것 외의 이름·경로는 제안이다.
 MUST/금지는 향후 구현 요구사항이며 과거 저장 형식을 소급 변경하지 않는다.
 연구 근거·열람 범위·대안 비교: [조사 기록](integration-layer-references.md).
 
@@ -370,7 +370,9 @@ modern multi-round-trip/legacy 승인 요청 차이는 transport adapter에 한�
 ### Proposed Tools
 
 아래는 전체 목표 surface다. [D2](integration-d2.md)는 projects_list/work_inspect/history_read/
-context_get/handoff_prepare만 구현했다. 나머지는 제안이며 독립 closed schema·권한·한도 없이
+context_get/handoff_prepare를, [D4](integration-d4.md)는 별도 opt-in 서버에서 owner가 고정한
+session_claim/begin/resume/reconcile/submit, document_submit, execution_request를 구현했다.
+나머지는 제안이며 독립 closed schema·권한·한도 없이
 임의 operation dispatcher로 노출하지 않는다.
 
 | Tool | 매핑 | 효과 |
@@ -559,7 +561,11 @@ modern/legacy 실제 SDK stdio client 두 개를 disposable native Work로 시�
 실제 Codex/Claude 앱 자동 설치·소비 검증이나 standalone raw CAS resource를 포함한 전체 목표
 surface 완료가 아니다. [D3](integration-d3.md)의 Codex CLI 0.141.0·Claude Code 2.1.196
 local command hook은 실제 격리 client의 startup/resume·실패 전달로 검증한다.
-자동 installer를 포함한 D1 전체와 D4-D6, 모든 client/version의 hook 지원은 미완료다.
+별도 [D4](integration-d4.md)는 exact native bytes/action pin, 별도 owner mutation 동의,
+영속 intent·불확실 결과와 Work별 재실행 차단, 기존 C approval API의 opt-in local host를 사용한다.
+소유자가 검토한 action ID를 typed 도구로 호출하며 모델에 임의 경로·명령·승인 채널을 주지 않는다.
+자동 installer를 포함한 D1 전체와 D5-D6, 모든 client/version의 hook 지원은 미완료다.
+D4의 COMMIT_UNKNOWN quarantine 해제/수리도 D5의 별도 승인 복구 범위로 남겨 둔다.
 이 설계 작성은 실제 자동 설치·맥락 이해·비용 절감·제품 운영의 실증 결과가 아니다.
 
 ### Document-Only Review Results

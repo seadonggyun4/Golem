@@ -4,6 +4,8 @@ D3 adds local command-hook adapters for **Codex CLI 0.141.0** and **Claude Code
 2.1.196**, reusing unchanged [D1 approval](integration-d1.md) and
 [D2 disclosure/service](integration-d2.md) contracts. It does not install itself,
 modify a user's client settings, or introduce a new native execution path.
+The separate [D4 explicit mutation adapter](integration-d4.md) does not change
+this hook's scope or turn a startup/resume notice into mutation approval.
 
 **Client conversation resume is not Golem Work resume.** The hook never calls
 native start, claim, resume, heartbeat, begin, reconcile, submit, publish or

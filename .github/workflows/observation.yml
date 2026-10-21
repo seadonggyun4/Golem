@@ -20,16 +20,22 @@ jobs:
           python3 -m pip install jsonschema==4.23.0
           python3 tools/verify_integration_schema.py
           python3 tools/verify_hook_schema.py
+          python3 tools/verify_mutation_schema.py
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev libevent-dev
       - if: runner.os == 'macOS'
         run: brew install ninja openssl@3 pkg-config json-c md4c libevent
-      - run: cmake -S . -B build/events -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGOLEM_ENABLE_SANITIZERS=ON -DGOLEM_BUILD_EVENT_BRIDGE=ON
+      - run: cmake -S . -B build/events -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGOLEM_ENABLE_SANITIZERS=ON -DGOLEM_BUILD_EVENT_BRIDGE=ON -DGOLEM_BUILD_INTEGRATION_HOST=ON
       - run: cmake --build build/events --parallel 2
       - name: D2 real MCP stdio and native read-only handoff
         run: |
           python3 -m pip install -r tools/requirements-mcp.txt
           python3 tests/c/integration_d2_mcp.py build/events/golem .
+        env:
+          ASAN_OPTIONS: halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      - name: D4 real MCP typed mutations and owner-approved native QA
+        run: python3 tests/c/integration_d4_mutations.py build/events/golem . "$(command -v cc)" build/events/golem-integration-host --mcp
         env:
           ASAN_OPTIONS: halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1

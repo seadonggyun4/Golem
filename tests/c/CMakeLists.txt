@@ -510,6 +510,12 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/integration_d3_hooks.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR})
     set_tests_properties(integration_startup_hooks PROPERTIES TIMEOUT 240)
+    if(GOLEM_BUILD_INTEGRATION_HOST)
+        add_test(NAME integration_typed_mutations COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/integration_d4_mutations.py $<TARGET_FILE:golem_cli>
+            ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_integration_host>)
+        set_tests_properties(integration_typed_mutations PROPERTIES TIMEOUT 240)
+    endif()
     add_test(NAME work_record_writer COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/work_record_writer.py $<TARGET_FILE:golem_work_record_writer>)
     add_test(NAME work_record_reader COMMAND ${Python3_EXECUTABLE}

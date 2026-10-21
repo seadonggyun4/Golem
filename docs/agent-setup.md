@@ -16,6 +16,8 @@ contract; it does not install or activate a client MCP configuration.
 Optional [D3 startup/resume command hooks](integration-d3.md) forward a bounded
 status/reference notice, not raw documents or native execution authority. They
 require separate reviewed profiles and the client's own opt-in/trust workflow.
+Explicit [D4 typed mutations and owner-approved QA](integration-d4.md) use a
+separate server/policy. Neither D2 nor D3 acquires mutation authority by upgrade.
 
 For reviewed, repeatable application to a selected real project, use the
 [entrypoint plan/apply/check workflow](agent-entrypoint.md). It preserves existing

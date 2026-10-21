@@ -210,6 +210,28 @@ untrusted 자료 격리·계층별 시험 원칙을 재사용했다. 해당 논�
 원본 Work 변경 없이도 안전한 조회와 명시적 인계 준비를 제공하는 범위다. 선언 신원과
 data destination이 인증된 사실이라는 주장, 논문 근거만으로 전체 보안 PASS 판정은 하지 않는다.
 
+## D4 Native Mutation and Approval Review
+
+2026-10-21: inspected the public `agent_session.h`/`approval.h`/`execution.h`,
+session request parser and binding reducer, CLI context count verifier,
+approval scope/store/recheck and original execution integration fixtures.
+D4 uses those reducers and one-use receipts, not a new approval state machine.
+
+Reopened the [MCP tool specification](https://modelcontextprotocol.io/specification/2025-11-25/server/tools),
+[RFC 9396](https://www.rfc-editor.org/rfc/rfc9396.html),
+[Saltzer/Schroeder's original publication](https://web.mit.edu/Saltzer/www/publications/protection/)
+and [Security Engineering 3e, chapter 6](https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch06.pdf).
+Applied inferences are least privilege, exact action scope, full mediation and
+explicit application/OS trust boundaries. This is not OAuth or authenticated
+remote consent. The Chubby paper's PDF retrieval failed during this review;
+its existing design reference is retained, not reported as newly fully read.
+Full academic books were not read; the public chapter and paper material are
+the stated review scope. None of these sources proves the adapter correct.
+
+See [D4 contract and verification boundaries](integration-d4.md) for typed action
+pins, immutable request intent, native uncertainty, independent schema checks,
+actual stdio/native tests, same-UID limitations and deferred D5 recovery.
+
 ## D3 Client Hook Support Review
 
 검토일: 2026-10-21. 최신 문서의 기능을 설치된 구버전 client에 소급하지 않았다.

@@ -7,6 +7,8 @@ startup/resume notices; they do not turn a context reference into complete input
 The native core, D1 v1 schemas, project approval records and native evidence are
 unchanged. This is not automatic client installation, a resume hook, a remote
 gateway, a worker daemon, or permission to execute a Work.
+Explicit mutations use the separate [D4 owner-reviewed adapter](integration-d4.md);
+the D2 server and its transfer consent remain native read-only.
 
 ## Layers and Authority
 
