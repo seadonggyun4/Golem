@@ -9,6 +9,10 @@ Golem은 현재 Codex·Claude가 사용하는 문서 기반 작업 프로토콜�
 ## 빠른 적용
 
 다중 client 구조는 [통합 설계](integration-layer-design.md)를 따른다.
+선택형 [owner 설정 installer/bootstrap](integration-install.md)은 MCP 설정의 비관리
+바이트를 보존하고 승인된 빈 `.golem` 골격을 생성한다. Work·grant 생성, hook trust 승인,
+실제 client 활성화 판정은 하지 않는다.
+
 선택형 [D2 stdio MCP](integration-d2.md)는 D1 승인과 별도의 명시적 전달 승인을
 재사용한다. 아래는 프로젝트 설치 계약이며 client MCP 설정을 설치·활성화하지 않는다.
 별도 opt-in [D4 typed 변경·소유자 승인 QA](integration-d4.md)는 독립 서버·정책을 사용한다.

@@ -6,6 +6,11 @@ backend slice of the [integration design](integration-layer-design.md). It is
 service, native mutation API, or Work migration**. Existing projects/Works and
 the selected native executable must already exist. Nothing is installed in TRAP.
 
+The separate owner-only [client installer and approved bootstrap](integration-install.md)
+now implements lossless scoped MCP settings installation/removal and creation of
+an empty approved `.golem` scaffold. It reuses this unchanged approval/backend
+contract; configuration/scaffold creation does not create grants or native Works.
+
 The optional [D2 stdio MCP](integration-d2.md) reuses these unchanged contracts
 with a separately reviewed disclosure policy; D1 alone does not authorize it.
 
@@ -266,8 +271,9 @@ environment containing that pinned validator to reproduce it.
 Restricted host boot-clock denial is not a successful native test and is not
 hidden by a skip. Run the real native path on a permitted macOS/Linux host.
 
-Not implemented here: client config installation/removal, signed host identity,
-project bootstrap, multi-root auto-discovery, handoff/context delivery, all native
+Not implemented in this base module: client config installation/removal and
+empty scaffold bootstrap (provided separately by the owner installer), signed
+host identity, multi-root auto-discovery, handoff/context delivery, all native
 write tools, MCP transport, remote/cloud access, automatic updates or Windows
 native runtime. These remain separately gated work; the implementation does not
 relax any core permission, fencing, protection or evidence contract.

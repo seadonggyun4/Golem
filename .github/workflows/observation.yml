@@ -23,6 +23,7 @@ jobs:
           python3 tools/verify_mutation_schema.py
           python3 tools/verify_update_schema.py
           python3 tools/verify_gateway_schema.py
+          python3 tools/verify_install_schema.py
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev libevent-dev
       - if: runner.os == 'macOS'
@@ -60,6 +61,11 @@ jobs:
         run: |
           npm install --ignore-scripts --prefix "$RUNNER_TEMP/golem-hook-clients" @openai/codex@0.141.0 @anthropic-ai/claude-code@2.1.196
           python3 tests/c/integration_d3_hooks.py build/events/golem . --client-prefix "$RUNNER_TEMP/golem-hook-clients"
+        env:
+          ASAN_OPTIONS: halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      - name: D1 lossless client install removal and approved bootstrap
+        run: python3 tests/c/integration_d1_install.py build/events/golem . --client-prefix "$RUNNER_TEMP/golem-hook-clients"
         env:
           ASAN_OPTIONS: halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1

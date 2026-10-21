@@ -10,6 +10,10 @@ approved Golem-based work.
 ## Quick Application
 
 Multi-client architecture is described in the [integration design](integration-layer-design.md).
+The optional [owner config installer/bootstrap](integration-install.md) supports
+lossless scoped MCP settings and an approved empty `.golem` scaffold. It does not
+create Works/grants, enable hook trust or certify client activation.
+
 The optional [D2 stdio MCP](integration-d2.md) reuses D1 approvals with separate,
 explicit disclosure consent. The setup below remains the project installation
 contract; it does not install or activate a client MCP configuration.

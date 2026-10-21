@@ -1,10 +1,10 @@
 # Golem Integration Layer and MCP Design
 
-상태: **설계 + D1 승인/읽기 + D2 local stdio + D3 opt-in hook + D4 typed mutation/승인 QA + D5 유지보수 + D6 opt-in TLS gateway 구현**. 검토: 2026-10-21.
+상태: **설계 + D1 승인/읽기·owner 설정 installer/빈 bootstrap + D2 local stdio + D3 opt-in hook + D4 typed mutation/승인 QA + D5 유지보수 + D6 opt-in TLS gateway 구현**. 검토: 2026-10-22.
 기준 소스: `96ad031b3a28b189ee7183fcff2f6c34c0ddecfb`.
 schema·프로젝트 승인 registry·읽기 backend는 [D1 계약](integration-d1.md),
 읽기 MCP·전달 정책은 [D2 계약](integration-d2.md), opt-in startup/resume hook은
-[D3 계약](integration-d3.md), 명시적 변경·승인 QA는 [D4 계약](integration-d4.md)에 정리한다. 자동 client installer, 원격 인증 서비스나
+[D3 계약](integration-d3.md), 명시적 변경·승인 QA는 [D4 계약](integration-d4.md)에 정리한다. owner 설정 설치·제거와 승인 빈 bootstrap은 [D1 installer](integration-install.md)를 따른다. 모든 client의 자동 설치·hook trust, 원격 인증 서비스나
 실제 Hosted 모델 이해·운영 검증의 완료를 의미하지 않는다.
 업데이트·재로딩·quarantine 해제는 [D5 계약](integration-d5.md)을 따른다.
 원격 보안·인증·전달 동의의 구현 범위는 [D6 계약](integration-d6.md)을 따른다.
@@ -146,6 +146,12 @@ project/.golem/
 ignore는 암호화·유출 방지가 아니다.
 
 ### Install State Machine
+
+[현재 owner installer](integration-install.md)는 명시한 Codex TOML·Claude Code 프로젝트 JSON·
+Claude Desktop JSON의 MCP 항목만 무손실 변경한다. private before backup·계획 hash·중단 기록·
+동일 계획의 별도 승인 repair·client 중지 확인을 사용한다. 기존 hook은 보존하며 hook trust를
+설치하지 않는다. bootstrap은 새 `.golem/integration/manifest.json`만 만들고 Work/grant/SDK를
+생성하지 않는다. 아래 전체 목표 중 자동 탐지·모든 scope와 실제 host 활성화는 별도다.
 
 `DISCOVERED -> PLANNED -> OWNER_APPROVED -> APPLIED -> RELOAD_REQUIRED -> VERIFIED`.
 불일치/중단은 `BLOCKED/PARTIAL`. 적용과 실제 client 활성화 검증을 분리한다.
@@ -577,7 +583,8 @@ local command hook은 실제 격리 client의 startup/resume·실패 전달로 �
 영속 intent·불확실 결과와 Work별 재실행 차단, 기존 C approval API의 opt-in local host를 사용한다.
 소유자가 검토한 action ID를 typed 도구로 호출하며 모델에 임의 경로·명령·승인 채널을 주지 않는다.
 [D5](integration-d5.md)는 원본 기록을 유지하는 owner 유지보수·복구 경로를 구현한다.
-자동 installer를 포함한 D1 전체, 모든 client/version hook 및 실제 Hosted/외부 AS 활성화는 미완료다.
+선택 경로의 D1 MCP 설정 설치·제거와 승인 빈 bootstrap은 owner installer로 구현했다.
+모든 client/scope 자동 탐지·hook 설치/trust·runtime 배포 통합 및 실제 Hosted/외부 AS 활성화는 완료가 아니다.
 D6의 명시적 resource-server 경로는 구현했으며 지원 profile·보안 한계는 D6 계약을 따른다.
 D5의 quarantine 해제는 원래 불확실 결과를 성공으로 승격하지 않으며 native 효과를 재실행하지 않는다.
 이 설계 작성은 실제 자동 설치·맥락 이해·비용 절감·제품 운영의 실증 결과가 아니다.

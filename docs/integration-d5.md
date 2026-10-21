@@ -16,6 +16,10 @@ hashed, not automatically installed into Python environments or client settings.
 The owner must separately review runtime installation/configuration and reload
 each client. This is not an end-to-end client installer or signed distribution.
 
+The separate [D1 owner installer](integration-install.md) can apply/remove reviewed
+MCP settings for its supported profiles. It does not change this D5 transaction
+into automatic runtime installation, hook trust or actual client reload observation.
+
 Supported local mechanisms require POSIX private files, no-follow opens, fsync
 and flock on macOS/Linux. Windows, network filesystems, actual Desktop/Hosted
 reload, physical power loss and arbitrary historical engine compatibility are

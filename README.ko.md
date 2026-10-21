@@ -143,7 +143,7 @@ build/release/golem document inspect "$WORK" planning 1
 | --- | --- |
 | GitHub 소스로 Conan 패키지·CLI 설치 | [Conan 설치](docs/runtime-reference.md#conan-package) |
 | C/C++ 라이브러리 연동 | [Golem::golem 빌드·설치](docs/runtime-reference.md#development) |
-| 다중 client·MCP 설계와 읽기 연동 | [통합 설계](docs/integration-layer-design.md) · [D1 승인/읽기](docs/integration-d1.md) · [D2 MCP](docs/integration-d2.md) · [D3 Codex/Claude opt-in startup/resume hook](docs/integration-d3.md) (owner 명시 설정) |
+| 다중 client·MCP 설계와 읽기 연동 | [통합 설계](docs/integration-layer-design.md) · [D1 승인/읽기](docs/integration-d1.md) · [owner 설정 설치·bootstrap](docs/integration-install.md) · [D2 MCP](docs/integration-d2.md) · [D3 opt-in hook](docs/integration-d3.md) |
 | 명시적 typed 변경·소유자 승인 QA | [D4 local MCP·승인 host](docs/integration-d4.md) (별도 opt-in, hook은 읽기 전용 유지) |
 | 소유자 승인 업데이트·재로딩·불확실 결과 복구 | [D5 유지보수](docs/integration-d5.md) (staged pin, 자동 native 재개·효과 재시도 없음) |
 | Opt-in 원격 TLS gateway | [D6 인증·전달 동의](docs/integration-d6.md) (외부 AS·명시적 권한, Hosted 자동 설정 없음) |

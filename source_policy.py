@@ -32,6 +32,8 @@ TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.
     "test_integration_update.py", "verify_update_schema.py",
     "integration_gateway_contract.py", "integration_gateway_auth.py", "integration_gateway.py",
     "requirements-gateway.txt", "test_integration_gateway.py", "verify_gateway_schema.py",
+    "integration_config.py", "integration_install.py", "integration_launch.py",
+    "test_integration_install.py", "verify_install_schema.py",
     "judgment_record.py", "test_judgment_record.py",
     "revision_status.py", "test_revision_status.py",
     "remote_status.py", "test_remote_status.py",
