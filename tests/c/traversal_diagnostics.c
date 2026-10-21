@@ -82,6 +82,7 @@ static ssize_t test_readlinkat(int fd, const char *path, char *buffer, size_t si
 #define readdir test_readdir
 #define fstatat test_fstatat
 #define fstat test_fstat
+#undef _POSIX_C_SOURCE
 #ifdef TEST_WORKSPACE
 #include "../../src/workspace/git.c"
 #else

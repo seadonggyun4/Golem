@@ -14,6 +14,7 @@ static FILE *report_stream(char **data, size_t *size)
     return open_memstream(data, size);
 }
 #define open_memstream report_stream
+#undef _POSIX_C_SOURCE
 #include "../../src/reentry/store.c"
 #undef open_memstream
 

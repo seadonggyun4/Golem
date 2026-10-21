@@ -15,6 +15,7 @@ static int denied_format(int fd, const char *path, struct stat *out, int flags)
     return fstatat(fd, path, out, flags);
 }
 #define fstatat denied_format
+#undef _POSIX_C_SOURCE
 #include "../../src/daemon/queue.c"
 #undef fstatat
 

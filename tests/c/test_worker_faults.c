@@ -31,6 +31,7 @@ static golem_status observed(const char *exe, char *const argv[], const char *cw
 }
 #define pthread_create create_thread
 #define golem_supervisor_run_observed observed
+#undef _POSIX_C_SOURCE
 #include "../../src/daemon/worker.c"
 #undef pthread_create
 #undef golem_supervisor_run_observed

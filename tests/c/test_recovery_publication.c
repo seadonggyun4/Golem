@@ -40,6 +40,7 @@ static int publication_link(int olddir, const char *old, int newdir, const char 
 #define write publication_write
 #define fsync publication_sync
 #define linkat publication_link
+#undef _POSIX_C_SOURCE
 #include "../../src/cli/io.c"
 #undef write
 #undef fsync

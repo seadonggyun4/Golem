@@ -65,6 +65,8 @@ static int fault_unlinkat(int dir, const char *name, int flags)
 #define fchmod fault_fchmod
 #define linkat fault_linkat
 #define unlinkat fault_unlinkat
+/* libc may raise the selected feature level after the first system headers. */
+#undef _POSIX_C_SOURCE
 #include "../../src/document/storage.c"
 #undef openat
 #undef write

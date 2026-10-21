@@ -41,6 +41,7 @@ static ssize_t injected_write(int fd, const void *data, size_t size)
 #define gd_close fault_gd_close
 #define fsync injected_sync
 #define write injected_write
+#undef _POSIX_C_SOURCE
 #include "../../src/daemon/storage.c"
 #undef fsync
 #undef write
@@ -48,6 +49,7 @@ static ssize_t injected_write(int fd, const void *data, size_t size)
 #define ga_decode fault_ga_decode
 #define ga_load fault_ga_load
 #define ga_commit fault_ga_commit
+#undef _POSIX_C_SOURCE
 #include "../../src/daemon/admission_storage.c"
 
 int main(void)

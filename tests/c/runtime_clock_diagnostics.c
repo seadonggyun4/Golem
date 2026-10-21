@@ -10,6 +10,7 @@ static int test_clock(clockid_t clock, struct timespec *value)
     return 0;
 }
 #define clock_gettime test_clock
+#undef _POSIX_C_SOURCE
 #include "../../src/runtime/loop.c"
 #undef clock_gettime
 #include "test.h"

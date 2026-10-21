@@ -30,6 +30,7 @@ static golem_status test_supervisor(const char *exe, char *const argv[], const c
 #define clock_gettime test_clock
 #define pthread_join test_join
 #define golem_supervisor_run_observed test_supervisor
+#undef _POSIX_C_SOURCE
 #include "../../src/daemon/worker.c"
 #undef clock_gettime
 #undef pthread_join

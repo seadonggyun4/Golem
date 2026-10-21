@@ -47,6 +47,7 @@ static int boot_close(int fd) { (void)fd; errno = EBADF; return 0; }
 #endif
 #define clock_gettime clock_fault
 #define as_clock_read tested_clock
+#undef _POSIX_C_SOURCE
 #include "../../src/agent_session/clock.c"
 
 int main(void)

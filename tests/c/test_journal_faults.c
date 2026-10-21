@@ -37,6 +37,7 @@ static int injected_sync(int fd)
 #define golem_journal_checkpoint_get fault_checkpoint
 #define write injected_write
 #define fsync injected_sync
+#undef _POSIX_C_SOURCE
 #include "../../src/journal/file.c"
 #undef write
 #undef fsync

@@ -58,6 +58,7 @@ static golem_status probe_commit(golem_admission *a, const ga_event *event)
 #define as_clock_read probe_clock
 #define RAND_bytes probe_random
 #define ga_commit probe_commit
+#undef _POSIX_C_SOURCE
 #include "../../src/daemon/admission.c"
 
 static int initial_frames(const char *root, uint8_t frames[2][GA_FRAME_SIZE])

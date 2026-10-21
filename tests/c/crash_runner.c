@@ -21,6 +21,7 @@ static golem_status crash_append(golem_journal *journal, golem_journal_type type
 #define golem_daemon_open crash_daemon_open
 #define golem_daemon_tick crash_daemon_tick
 #define golem_daemon_close crash_daemon_close
+#undef _POSIX_C_SOURCE
 #include "../../src/daemon/scheduler.c"
 #undef gd_intent_write
 #undef gd_write

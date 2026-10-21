@@ -69,9 +69,11 @@ static int fault_link(int from, const char *old, int to, const char *name, int f
 #define fsync fault_sync
 #define close fault_close
 #define linkat fault_link
+#undef _POSIX_C_SOURCE
 #include "../../src/document/storage.c"
 #define golem_proof_publish fault_proof_publish
 #define golem_proof_verify_directory fault_proof_verify_directory
+#undef _POSIX_C_SOURCE
 #include "../../src/execution/proof_store.c"
 #undef golem_proof_publish
 #undef golem_proof_verify_directory

@@ -226,3 +226,16 @@ interpreter path contains spaces. Running directly through the SSD venv produced
 five fixture ENOENT errors; those are not hidden or counted as a product PASS.
 Fixtures were not altered to bypass any native guard. Physical power loss,
 external ingress/AS and actual Hosted activation remain unverified.
+
+The first remote run also exposed Ubuntu 26.04/glibc feature-macro promotion in
+older fault-injection fixtures: directly including an implementation after libc
+headers redefined `_POSIX_C_SOURCE` under `-Werror`. Test-only include boundaries
+now reset that macro before the implementation defines its requested profile.
+Two fixture targets reproduce the promoted macro even on other platforms. No
+production source, warning policy or protected/native runtime guard was changed.
+The failed run is retained; only the subsequent exact-revision CI can establish
+that this compatibility correction passes on the new Linux runner.
+With the include reset removed in a compiler-input-only negative probe, the
+promoted-feature fixture reproduces the same macro-redefinition error on macOS.
+The corrected ASan build and 18 focused fault/publication/diagnostic CTests pass
+locally; no native guard or `-Werror` check is disabled.

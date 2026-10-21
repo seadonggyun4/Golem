@@ -36,6 +36,7 @@ static int fake_closedir(DIR *d)
 #define close fake_close
 #define readdir fake_readdir
 #define closedir fake_closedir
+#undef _POSIX_C_SOURCE
 #include "../../src/document/registry.c"
 #undef openat
 #undef fdopendir

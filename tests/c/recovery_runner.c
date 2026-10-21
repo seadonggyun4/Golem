@@ -13,6 +13,7 @@ static ssize_t crash_write_byte(int fd, const void *data, size_t size);
 #define gd_recover_queue test_recover_queue
 #define golem_daemon_recover test_daemon_recover
 #define write crash_write_byte
+#undef _POSIX_C_SOURCE
 #include "../../src/daemon/recovery.c"
 #undef write
 #undef gd_intent_write

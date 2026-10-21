@@ -33,6 +33,7 @@ static int fault_close(int fd)
 #define write fault_write
 #define read fault_read
 #define close fault_close
+#undef _POSIX_C_SOURCE
 #include "../../src/daemon/resource_io.c"
 #undef write
 #undef read
