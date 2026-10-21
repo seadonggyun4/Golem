@@ -172,10 +172,14 @@ OpenSSL 3 development files, pkg-config, json-c 0.15+ and MD4C 0.4.8+.
 json-c must also pass the configure-time strict Unicode parsing probe. Unpatched
 0.18 rejects valid non-ASCII keys/values with `JSON_TOKENER_STRICT` (upstream
 [issue #875](https://github.com/json-c/json-c/issues/875)); do not disable strict
-parsing or remove Unicode fixtures to accommodate it. Use 0.19+, a distribution
-build carrying the fix, or known-working 0.17. Linux CI builds official 0.19 in a
-private runner prefix, checking the upstream published SHA-256; Conan pins 0.17
-until ConanCenter provides a corrected version. The functional probe permits
+parsing or remove Unicode fixtures to accommodate it. Use a corrected distribution
+build or known-working 0.17. Upstream 0.19 fixes Unicode, but its `NDEBUG` build
+has a separate container-deallocation leak: the release source calls
+`_json_object_put_maybe_free` inside `assert` (see
+[upstream source](https://github.com/json-c/json-c/blob/json-c-0.19/json_object.c)).
+Do not disable leak checks to accommodate it. Linux CI and Conan therefore both
+pin 0.17; CI checks the official tarball's published SHA-256 and installs it in a
+private runner prefix, without replacing system packages. The functional probe permits
 correctly patched versions and is rerun on reconfiguration. Cross-builds without
 an emulator cannot run this probe and explicitly report the target as unverified.
 The installed library still requires a compatible runtime json-c; replacing a

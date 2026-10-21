@@ -3,17 +3,17 @@ description: Install checksum-pinned upstream json-c without changing runner sys
 runs:
   using: composite
   steps:
-    - name: Build json-c 0.19 in a private runner prefix
+    - name: Build json-c 0.17 in a private runner prefix
       shell: bash
       run: |
         set -euo pipefail
-        root="$RUNNER_TEMP/golem-json-c-0.19"
+        root="$RUNNER_TEMP/golem-json-c-0.17"
         mkdir -p "$root"
         curl --fail --location --retry 3 --proto '=https' --tlsv1.2 \
-          https://s3.amazonaws.com/json-c_releases/releases/json-c-0.19-nodoc.tar.gz \
+          https://s3.amazonaws.com/json-c_releases/releases/json-c-0.17-nodoc.tar.gz \
           --output "$root/source.tar.gz"
         printf '%s  %s\n' \
-          704927172443309a8efeb162060bb215548e1286e5568514007dd2cc35a0a164 \
+          8df3b66597333dd365762cab2de2ff68e41e3808a04b692e696e0550648eefaa \
           "$root/source.tar.gz" | sha256sum --check --strict
         mkdir -p "$root/source"
         tar -xzf "$root/source.tar.gz" -C "$root/source" --strip-components=1

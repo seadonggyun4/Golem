@@ -244,8 +244,11 @@ The next Linux full-suite run reached the Unicode context fixtures and exposed
 unpatched system json-c 0.18 (upstream issue #875). The D6 TLS gate itself passed
 on both platforms. A configure-time strict Unicode behavior probe now rejects
 this dependency rather than weakening JSON validation or changing existing
-fixtures. Linux CI uses checksum-pinned official json-c 0.19 in a private runner
-prefix; Conan uses available, known-working 0.17 pending a corrected ConanCenter
-recipe. Locally, an isolated official 0.18 build reproduced probe rejection and
-0.19 passed. Failed CI evidence remains separate from subsequent revision results.
+fixtures. The first attempted Linux 0.19 Release dependency then exposed an
+upstream `NDEBUG` leak (container freeing was inside `assert`). Leak checks remain
+enabled. Linux CI and Conan now both pin official 0.17; CI uses a checksum-verified
+tarball in a private runner prefix. Locally, an isolated official 0.18 build reproduced probe rejection and
+0.17 and 0.19 passed (the probe checks Unicode, not memory lifetime). The two
+originally failing native/context CTests also passed locally under ASan. Failed
+CI evidence remains separate from subsequent revision results.
 See [dependency compatibility](runtime-reference.md#build-and-run).
