@@ -2,6 +2,8 @@
 
 Implemented slice: owner-launched **local stdio** MCP, D1-approved Work reads,
 complete native context candidates, and explicitly addressed handoff preparation.
+Optional [D3 command hooks](integration-d3.md) reuse this service for bounded
+startup/resume notices; they do not turn a context reference into complete input.
 The native core, D1 v1 schemas, project approval records and native evidence are
 unchanged. This is not automatic client installation, a resume hook, a remote
 gateway, a worker daemon, or permission to execute a Work.

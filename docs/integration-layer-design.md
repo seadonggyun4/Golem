@@ -1,11 +1,12 @@
 # Golem Integration Layer and MCP Design
 
-상태: **설계 + D1 승인/읽기 + D2 local stdio·명시적 맥락/인계 구현**. 검토: 2026-10-21.
+상태: **설계 + D1 승인/읽기 + D2 local stdio + D3 opt-in local hook 구현**. 검토: 2026-10-21.
 기준 소스: `96ad031b3a28b189ee7183fcff2f6c34c0ddecfb`.
 schema·프로젝트 승인 registry·읽기 backend는 [D1 계약](integration-d1.md),
-선택형 읽기 MCP와 전달 정책은 [D2 계약](integration-d2.md)에 정리한다.
-client installer, hook, 원격 인증 서비스나 실제 Hosted 앱 소비 검증의 완료를 의미하지 않는다.
-기존 계약은 각 링크가 권위이며 D1/D2 계약에서 구현했다고 명시한 것 외의 새 이름·경로는 제안이다.
+읽기 MCP·전달 정책은 [D2 계약](integration-d2.md), opt-in startup/resume hook은
+[D3 계약](integration-d3.md)에 정리한다. 자동 client installer, 원격 인증 서비스나
+실제 Hosted 모델 이해·운영 검증의 완료를 의미하지 않는다.
+기존 계약은 각 링크가 권위이며 D1-D3 계약에서 구현했다고 명시한 것 외의 이름·경로는 제안이다.
 MUST/금지는 향후 구현 요구사항이며 과거 저장 형식을 소급 변경하지 않는다.
 연구 근거·열람 범위·대안 비교: [조사 기록](integration-layer-references.md).
 
@@ -299,6 +300,11 @@ attach는 읽기 전용 논리 작업이다. binding 등록은 별도 owner-appr
 
 startup/compact hook은 이 read 절차만 수행한다. hook이 없으면 같은 service를 명시 호출한다.
 실패 시 맥락 동기화 실패·원인을 보여주고 예전 cache로 준비 완료를 선언하지 않는다.
+[D3 구현](integration-d3.md)은 높은 우선순위 hook 채널에 원문 문서를 넣지 않는다.
+완전한 native candidate는 private 영역에서 검증하고, 상태·digest·명시적 D2 조회 인자만
+2,000-byte notice로 전달한다. 원문은 MCP tool-result 채널에서 별도 조회하며 이 notice를
+필수 실행 입력 전달 완료로 취급하지 않는다. 실제 CLI startup/resume과 직접 compact/clear
+fixture 검증을 구분한다.
 
 ### Budgets
 
@@ -551,7 +557,9 @@ D1의 schema·승인 registry·읽기 backend와 [D2 local stdio MCP·명시적 
 구현했다. D2는 별도 owner 전달 정책으로 D1 권한을 재사용하며 native mutation은 하지 않는다.
 modern/legacy 실제 SDK stdio client 두 개를 disposable native Work로 시험한다.
 실제 Codex/Claude 앱 자동 설치·소비 검증이나 standalone raw CAS resource를 포함한 전체 목표
-surface 완료가 아니다. client installer를 포함한 D1 전체와 D3-D6는 여전히 미완료다.
+surface 완료가 아니다. [D3](integration-d3.md)의 Codex CLI 0.141.0·Claude Code 2.1.196
+local command hook은 실제 격리 client의 startup/resume·실패 전달로 검증한다.
+자동 installer를 포함한 D1 전체와 D4-D6, 모든 client/version의 hook 지원은 미완료다.
 이 설계 작성은 실제 자동 설치·맥락 이해·비용 절감·제품 운영의 실증 결과가 아니다.
 
 ### Document-Only Review Results

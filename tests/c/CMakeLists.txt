@@ -506,6 +506,10 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/integration_read_backend.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR})
     set_tests_properties(integration_read_backend PROPERTIES TIMEOUT 180)
+    add_test(NAME integration_startup_hooks COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/integration_d3_hooks.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR})
+    set_tests_properties(integration_startup_hooks PROPERTIES TIMEOUT 240)
     add_test(NAME work_record_writer COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/work_record_writer.py $<TARGET_FILE:golem_work_record_writer>)
     add_test(NAME work_record_reader COMMAND ${Python3_EXECUTABLE}

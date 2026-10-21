@@ -209,3 +209,33 @@ untrusted 자료 격리·계층별 시험 원칙을 재사용했다. 해당 논�
 대응 구현: [D2 계약](integration-d2.md). provider/model 호출·개인 client 설정·원격 gateway·
 원본 Work 변경 없이도 안전한 조회와 명시적 인계 준비를 제공하는 범위다. 선언 신원과
 data destination이 인증된 사실이라는 주장, 논문 근거만으로 전체 보안 PASS 판정은 하지 않는다.
+
+## D3 Client Hook Support Review
+
+검토일: 2026-10-21. 최신 문서의 기능을 설치된 구버전 client에 소급하지 않았다.
+기존 최소 권한·종단 검증·untrusted 자료/권한 분리 원칙을 재사용하며 별도 memory나
+orchestration authority를 추가하지 않는다. 학술서·논문만으로 hook 전달 성공을 판단하지 않는다.
+
+- OpenAI [Hooks](https://developers.openai.com/codex/hooks)와 그 공식
+  [SessionStart 설명](https://learn.chatgpt.com/docs/hooks#sessionstart)을 검색 후 직접 읽었다.
+  command hook stdin, 추가 developer context, 신뢰 검토, 비활성/미지원/큰 출력 처리를 대조했다.
+- 설치 CLI `codex-cli 0.141.0`의 `--help`, `features list`, app-server가 직접 생성한 JSON Schema,
+  hooks/list metadata를 확인했다. 최신 mcp_tool hook을 이 버전에 있다고 가정하지 않았다.
+- 공식 고정 소스 [session_start.rs](https://github.com/openai/codex/blob/rust-v0.141.0/codex-rs/hooks/src/events/session_start.rs),
+  [hook_config.rs](https://github.com/openai/codex/blob/rust-v0.141.0/codex-rs/config/src/hook_config.rs),
+  [discovery.rs](https://github.com/openai/codex/blob/rust-v0.141.0/codex-rs/hooks/src/engine/discovery.rs)를
+  읽어 네 source enum과 currentHash/trusted_hash 일치 검사를 대조했다. 실제 fixture는
+  정상 untrusted/trusted 경로를 쓰며 bypass flag나 전역 신뢰 변경을 사용하지 않는다.
+- Anthropic [Hooks reference](https://code.claude.com/docs/en/hooks#sessionstart),
+  [추가 맥락](https://code.claude.com/docs/en/hooks#add-context-for-claude),
+  [실패 처리](https://code.claude.com/docs/en/hooks#other-exit-codes)를 직접 읽었다.
+  실제 `2.1.196 (Claude Code)`의 CLI 기능과 구분했다. 최신 문서의 v2.1.251 resume 비용 필드,
+  v2.1.295 onFailure를 생성하지 않는다. disableAllHooks와 실제 hook 출력 소비를 시험했다.
+- 공식 npm의 `@openai/codex@0.141.0`, `@anthropic-ai/claude-code@2.1.196`의 bin 및 플랫폼별
+  optionalDependencies metadata를 조회하여 별도 CI 임시 prefix 설치를 구성했다.
+  실제 설치 파일의 SHA-256 pin과 신뢰·승인은 별개이며 버전 문자열은 publisher 인증이 아니다.
+
+중요한 설계 결과: raw Work 문서와 CLI 오류 원문을 높은 우선순위 additionalContext로
+승격하지 않고 bounded factual notice + D2 원문 조회를 사용한다. 출력에 필요한 원문을
+잘라 넣거나 reference만으로 complete input이라고 하지 않는다. 실제 client의 모델 요청에
+notice가 포함되는 시험도 **로컬 synthetic provider**이며 실제 Hosted 이해·요금·운영 실증이 아니다.

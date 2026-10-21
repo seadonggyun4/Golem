@@ -146,7 +146,7 @@ Replace the executable, Work root, protocol docs and target repository placehold
 | --- | --- |
 | Install the Conan package and CLI from GitHub source | [Conan installation](docs/runtime-reference.md#conan-package) |
 | Embed the C/C++ library | [Build and install Golem::golem](docs/runtime-reference.md#development) |
-| Review multi-client integration and MCP architecture | [Design](docs/integration-layer-design.md), [D1 approval/read backend](docs/integration-d1.md), [D2 read-only stdio MCP/context/handoff](docs/integration-d2.md) (explicit owner setup) |
+| Review multi-client integration and MCP architecture | [Design](docs/integration-layer-design.md), [D1 approval/read backend](docs/integration-d1.md), [D2 read-only MCP](docs/integration-d2.md), [D3 opt-in Codex/Claude startup/resume hooks](docs/integration-d3.md) (explicit owner setup) |
 | Use Python or TypeScript | [Language bindings](docs/runtime-reference.md#language-bindings) |
 | Select stages and check document freshness | [Workflow](docs/workflow.md) |
 | Enforce role deliverables before completion | [Role contracts](docs/role-contracts.md) |

@@ -13,6 +13,9 @@ Multi-client architecture is described in the [integration design](integration-l
 The optional [D2 stdio MCP](integration-d2.md) reuses D1 approvals with separate,
 explicit disclosure consent. The setup below remains the project installation
 contract; it does not install or activate a client MCP configuration.
+Optional [D3 startup/resume command hooks](integration-d3.md) forward a bounded
+status/reference notice, not raw documents or native execution authority. They
+require separate reviewed profiles and the client's own opt-in/trust workflow.
 
 For reviewed, repeatable application to a selected real project, use the
 [entrypoint plan/apply/check workflow](agent-entrypoint.md). It preserves existing
