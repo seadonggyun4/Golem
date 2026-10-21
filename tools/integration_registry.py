@@ -179,10 +179,12 @@ class Registry:
         require(action in ("approve", "revoke"), "OPERATION")
         if action == "revoke":
             require(current is not None and current["enrollment"] == enrollment, "REGISTRY_CONFLICT")
-        return {"schema": "golem.integration-plan.v1", "action": action,
+        plan = {"schema": "golem.integration-plan.v1", "action": action,
                 "registry": str(self.root), "registry_identity": self.root_identity,
                 "before_sha256": before, "generation": 1 if current is None else current["generation"] + 1,
                 "enrollment": enrollment, "producer": producer()}
+        require(len(encoded(plan)) <= contract.LIMIT, "PLAN_LIMIT")
+        return plan
 
     def plan(self, enrollment, action="approve"):
         with self.locked():
@@ -224,6 +226,7 @@ class Registry:
                       "reviewed_plan_sha256": reviewed_plan_sha256, "producer": plan["producer"],
                       "registry": str(self.root), "registry_identity": self.root_identity}
             data = encoded(record)
+            require(len(data) <= contract.LIMIT, "REGISTRY_RECORD_LIMIT")
             project_id = enrollment["project"]["project_id"]
             path = self.root / f"{project_id}.{record['generation']}.{sha(data)}.json"
             if path.exists():

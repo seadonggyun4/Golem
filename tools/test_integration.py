@@ -101,6 +101,29 @@ class Integration(unittest.TestCase):
         self.approve()
         self.expect("PLAN_STALE", lambda: self.registry.apply(self.enrollment, plan["plan_sha256"], approve_local_owner=True))
 
+    def test_plan_wrapper_limit_blocks_before_publication(self):
+        with patch.object(c, "LIMIT", len(c.encoded(self.enrollment)) + 100):
+            self.expect("PLAN_LIMIT", lambda: self.registry.plan(self.enrollment))
+        self.assertEqual(list(self.registry.root.iterdir()), [])
+
+    def test_record_wrapper_limit_never_activates_unreadable_snapshot(self):
+        plan = self.registry.plan(self.enrollment)
+        with patch.object(c, "LIMIT", len(c.encoded(plan["plan"]))):
+            self.expect("REGISTRY_RECORD_LIMIT", lambda: self.registry.apply(
+                self.enrollment, plan["plan_sha256"], approve_local_owner=True))
+        self.assertEqual(list(self.registry.root.iterdir()), [])
+
+    def test_unicode_result_wrapper_is_bounded_not_silently_truncated(self):
+        self.approve()
+        native = {"schema": "golem.work-record.v1", "work_id": "a", "work_specification": {"work_id": "a"},
+                  "execution_authorized": False, "note": "\uac00" * 120}
+        self.assertLess(len(json.dumps(native, ensure_ascii=False).encode()), 1024)
+        with patch.object(c, "MAX_NATIVE", 1024), patch.object(backend, "_native", return_value=(native, {})):
+            self.expect("NATIVE_OUTPUT_LIMIT", lambda: backend.read(self.registry, self.query("record")))
+        spool = next(self.registry.root.glob("read-*"))
+        self.assertFalse((spool / "result.json").exists())
+        self.assertNotIn("result", c.decode((spool / "failure.json").read_bytes()))
+
     def test_stale_pins_sdk_and_lineage_block(self):
         self.approve()
         for path in (self.sdk, self.cli, self.work / "events/00000001.evt"):

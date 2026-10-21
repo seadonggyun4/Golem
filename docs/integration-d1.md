@@ -31,6 +31,11 @@ Schema consumer alone does not enforce this lexical/native integer distinction.
 Cross-field, filesystem and authority constraints remain runtime checks.
 
 Requests are at most 256 KiB, depth 24, 512 array items and 256 object fields.
+The fully serialized plan and approval record must also fit 256 KiB before
+publication. The complete observation wrapper must fit 32 MiB after serialization,
+including Unicode escaping and metadata; an oversized wrapper fails with retained
+original streams rather than returning a truncated success. These are serialized
+byte bounds, not peak allocator or OS disk quotas.
 Project/SDK/Work arrays have additional bounds of 32. Native stdout/stderr each
 use the existing recorder's 32 MiB monitored limit; native result decoding keeps
 the same structural bounds. Large consolidated histories may therefore block

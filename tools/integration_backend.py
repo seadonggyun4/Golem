@@ -91,10 +91,12 @@ def read(registry, request):
                 result, result_ref = _native(project, work, request["operation"], native_request,
                                             output / request["operation"])
             check_project(project)
-            base.update(state="OBSERVED", result=result, native_observation=result_ref,
-                        identity_observation=record_ref, observations_atomic=False)
-            records.save(output / "result.json", encoded(base))
-            return base
+            observed = {**base, "state": "OBSERVED", "result": result, "native_observation": result_ref,
+                        "identity_observation": record_ref, "observations_atomic": False}
+            data = encoded(observed)
+            require(len(data) <= contract.MAX_NATIVE, "NATIVE_OUTPUT_LIMIT")
+            records.save(output / "result.json", data)
+            return observed
         except (IntegrationError, OSError, ValueError) as error:
             code = error.code if isinstance(error, IntegrationError) else "IO_OR_CONTRACT_ERROR"
             records.save(output / "failure.json", encoded({**base, "state": "BLOCKED", "code": code,
