@@ -222,8 +222,13 @@ original intent/logs and use original read-only status, record, approval recover
 and surviving effect evidence for owner investigation. Native recovery remains
 available through its original explicit API; do not invent a new QA attempt to
 escape uncertainty or discard the integration ledger. Re-enabling D4 after an
-ambiguous/crashed request requires a separately reviewed D5 recovery procedure;
-this release does not implement that procedure or silently create a new registry.
+ambiguous/crashed request requires the separately owner-reviewed
+[D5 recovery procedure](integration-d5.md#commit_unknown-clearance). It preserves
+the original uncertain result and retires the original logical action; no new
+registry, replacement request ID, or model-facing tool bypasses the quarantine.
+The D5-enabled D4 producer also fences maintenance admission and holds managed
+server/writer descriptors. Existing D4 policies require explicit producer review;
+D1/D2/D3 and native Work schemas are unchanged.
 
 Limits: 32 reviewed actions/policy, 128 retained mutation intents/registry, existing
 D1 16,384-entry/128-MiB audit admission limits, 256-KiB action/request envelope,

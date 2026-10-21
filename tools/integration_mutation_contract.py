@@ -10,7 +10,8 @@ import integration_transfer as transfer
 
 NAMES = ("session_claim", "session_begin", "session_resume", "session_reconcile",
          "session_submit", "document_submit", "execution_request")
-MODULES = ("integration_mutation_contract.py", "integration_mutations.py", "integration_mutation_mcp.py")
+MODULES = ("integration_mutation_contract.py", "integration_mutations.py", "integration_mutation_mcp.py",
+           "integration_lifecycle.py", "integration_recovery.py", "integration_update.py", "integration_reload_probe.py")
 TEXT = {"type": "string", "maxLength": c.LIMIT}
 LABEL = {"type": "string", "maxLength": 64, "pattern": "^[A-Za-z0-9_-]*$"}
 TOKEN = c.obj({"epoch": {"type": "integer", "minimum": 1, "maximum": 4096},

@@ -1,12 +1,13 @@
 # Golem Integration Layer and MCP Design
 
-상태: **설계 + D1 승인/읽기 + D2 local stdio + D3 opt-in hook + D4 명시적 typed mutation/승인 QA 구현**. 검토: 2026-10-21.
+상태: **설계 + D1 승인/읽기 + D2 local stdio + D3 opt-in hook + D4 명시적 typed mutation/승인 QA + D5 owner 유지보수 구현**. 검토: 2026-10-21.
 기준 소스: `96ad031b3a28b189ee7183fcff2f6c34c0ddecfb`.
 schema·프로젝트 승인 registry·읽기 backend는 [D1 계약](integration-d1.md),
 읽기 MCP·전달 정책은 [D2 계약](integration-d2.md), opt-in startup/resume hook은
 [D3 계약](integration-d3.md), 명시적 변경·승인 QA는 [D4 계약](integration-d4.md)에 정리한다. 자동 client installer, 원격 인증 서비스나
 실제 Hosted 모델 이해·운영 검증의 완료를 의미하지 않는다.
-기존 계약은 각 링크가 권위이며 D1-D4 계약에서 구현했다고 명시한 것 외의 이름·경로는 제안이다.
+업데이트·재로딩·quarantine 해제는 [D5 계약](integration-d5.md)을 따른다.
+기존 계약은 각 링크가 권위이며 D1-D5 계약에서 구현했다고 명시한 것 외의 이름·경로는 제안이다.
 MUST/금지는 향후 구현 요구사항이며 과거 저장 형식을 소급 변경하지 않는다.
 연구 근거·열람 범위·대안 비교: [조사 기록](integration-layer-references.md).
 
@@ -448,6 +449,11 @@ isError로 전달한다. native code/phase/diagnostic/errno와 원본 ref를 red
 
 ## 11. Updates and Recovery
 
+구현 계약은 [D5](integration-d5.md)다. owner-only freeze·staging·D1 CLI/SDK pin 전환,
+참여 descriptor quiescence, 실제 읽기 MCP probe와 owner reload 확인, 중단 경계 수리,
+원본 COMMIT_UNKNOWN을 보존하는 별도 승인 해제를 제공한다. 통합 runtime/client 설정의 자동
+설치나 실제 Desktop reload 관측은 포함하지 않는다. 아래 목표와 구현 경계를 혼동하지 않는다.
+
 단위는 engine commit/binary digest + matching SDK + integration schema/client adapter + MCP SDK/
 protocol profile + instruction bundle이다. version 문자열만으로 같다고 판정하지 않는다.
 project pin이 권위이며 전역 latest 설치가 pin을 바꾸지 않는다. 공용 pin-verifying launcher를
@@ -564,8 +570,9 @@ local command hook은 실제 격리 client의 startup/resume·실패 전달로 �
 별도 [D4](integration-d4.md)는 exact native bytes/action pin, 별도 owner mutation 동의,
 영속 intent·불확실 결과와 Work별 재실행 차단, 기존 C approval API의 opt-in local host를 사용한다.
 소유자가 검토한 action ID를 typed 도구로 호출하며 모델에 임의 경로·명령·승인 채널을 주지 않는다.
-자동 installer를 포함한 D1 전체와 D5-D6, 모든 client/version의 hook 지원은 미완료다.
-D4의 COMMIT_UNKNOWN quarantine 해제/수리도 D5의 별도 승인 복구 범위로 남겨 둔다.
+[D5](integration-d5.md)는 원본 기록을 유지하는 owner 유지보수·복구 경로를 구현한다.
+자동 installer를 포함한 D1 전체와 D6, 모든 client/version의 hook 지원은 미완료다.
+D5의 quarantine 해제는 원래 불확실 결과를 성공으로 승격하지 않으며 native 효과를 재실행하지 않는다.
 이 설계 작성은 실제 자동 설치·맥락 이해·비용 절감·제품 운영의 실증 결과가 아니다.
 
 ### Document-Only Review Results

@@ -148,6 +148,7 @@ Replace the executable, Work root, protocol docs and target repository placehold
 | Embed the C/C++ library | [Build and install Golem::golem](docs/runtime-reference.md#development) |
 | Review multi-client integration and MCP architecture | [Design](docs/integration-layer-design.md), [D1 approval/read backend](docs/integration-d1.md), [D2 read-only MCP](docs/integration-d2.md), [D3 opt-in Codex/Claude startup/resume hooks](docs/integration-d3.md) (explicit owner setup) |
 | Explicit typed mutations and owner-approved QA | [D4 local MCP and approval host](docs/integration-d4.md) (separate opt-in; hooks remain read-only) |
+| Owner-reviewed update, reload and uncertain-result recovery | [D5 maintenance](docs/integration-d5.md) (staged pins, no automatic native resume or effect retry) |
 | Use Python or TypeScript | [Language bindings](docs/runtime-reference.md#language-bindings) |
 | Select stages and check document freshness | [Workflow](docs/workflow.md) |
 | Enforce role deliverables before completion | [Role contracts](docs/role-contracts.md) |

@@ -18,6 +18,10 @@ status/reference notice, not raw documents or native execution authority. They
 require separate reviewed profiles and the client's own opt-in/trust workflow.
 Explicit [D4 typed mutations and owner-approved QA](integration-d4.md) use a
 separate server/policy. Neither D2 nor D3 acquires mutation authority by upgrade.
+[D5 owner maintenance](integration-d5.md) adds staged pin updates, read-only SDK
+reload probes and reviewed quarantine clearance without automatic client setup,
+native resume or effect retry. Re-review generation/producer-bound policies after
+a switch; an old D4 policy is not silently refreshed.
 
 For reviewed, repeatable application to a selected real project, use the
 [entrypoint plan/apply/check workflow](agent-entrypoint.md). It preserves existing

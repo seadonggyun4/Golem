@@ -10,6 +10,7 @@ import integration_mcp as readonly
 import integration_service as reads
 import integration_mutation_contract as contract
 import integration_mutations as mutations
+import integration_lifecycle as lifecycle
 
 
 def server(service):
@@ -61,7 +62,9 @@ def main():
     args = parser.parse_args()
     try:
         policy = contract.Policy(args.policy, args.reviewed_policy_sha256, approve_mutations=args.approve_mutations)
-        asyncio.run(run(mutations.Service(policy)))
+        bindings = [scope["binding"] for scope in policy.transfer.value["scopes"]]
+        with lifecycle.participation(policy.registry, bindings):
+            asyncio.run(run(mutations.Service(policy)))
         return 0
     except (c.IntegrationError, OSError, ValueError) as error:
         sys.stderr.write(c.encoded(mutations.blocked(error)).decode())

@@ -28,6 +28,8 @@ TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.
     "integration_mutation_contract.py", "integration_mutations.py", "integration_mutation_mcp.py",
     "integration_approval_host.c", "test_integration_mutations.py",
     "verify_mutation_schema.py",
+    "integration_lifecycle.py", "integration_update.py", "integration_recovery.py", "integration_reload_probe.py",
+    "test_integration_update.py", "verify_update_schema.py",
     "judgment_record.py", "test_judgment_record.py",
     "revision_status.py", "test_revision_status.py",
     "remote_status.py", "test_remote_status.py",

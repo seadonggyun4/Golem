@@ -12,6 +12,9 @@ Golem은 현재 Codex·Claude가 사용하는 문서 기반 작업 프로토콜�
 선택형 [D2 stdio MCP](integration-d2.md)는 D1 승인과 별도의 명시적 전달 승인을
 재사용한다. 아래는 프로젝트 설치 계약이며 client MCP 설정을 설치·활성화하지 않는다.
 별도 opt-in [D4 typed 변경·소유자 승인 QA](integration-d4.md)는 독립 서버·정책을 사용한다.
+[D5 소유자 유지보수](integration-d5.md)는 staged pin 전환·읽기 전용 SDK 재로딩 probe·승인된
+quarantine 해제를 제공한다. client 자동 설치·native 자동 재개·효과 재시도는 하지 않는다.
+전환 뒤 generation/producer에 결합된 정책을 재검토해야 하며 기존 D4 정책을 몰래 갱신하지 않는다.
 D2·D3는 업데이트만으로 쓰기 권한을 얻지 않는다.
 선택형 [D3 startup/resume command hook](integration-d3.md)은 원문 지침 주입이나
 native 실행 권한 없이 상태·근거 조회 안내를 전달한다. 별도 검토 profile과 해당

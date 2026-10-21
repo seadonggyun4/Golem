@@ -230,7 +230,30 @@ the stated review scope. None of these sources proves the adapter correct.
 
 See [D4 contract and verification boundaries](integration-d4.md) for typed action
 pins, immutable request intent, native uncertainty, independent schema checks,
-actual stdio/native tests, same-UID limitations and deferred D5 recovery.
+actual stdio/native tests and same-UID limitations. Owner-only recovery is now
+specified separately by [D5](integration-d5.md), without promoting native results.
+
+## D5 Update and Recovery Review
+
+Reviewed 2026-10-21 against existing D1-D4 source contracts. Public material was
+read for the following bounded purposes; full books were not exhaustively read.
+The implementation choices below are engineering inferences, not theorem claims.
+
+| Primary reference / academic source | Applied decision and boundary |
+| --- | --- |
+| [Saltzer and Schroeder, 1975, Basic Principles](https://web.mit.edu/Saltzer/www/publications/protection/Basic.html) | Complete mediation and fail-safe defaults: freeze gates each new D4 dispatch; uncertain evidence cannot authorize another effect. |
+| [Anderson, Security Engineering, 3e, chapter 6](https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch06.pdf) | Separate application consent, native authority and OS protection; same-UID administrative cooperation is not isolation from a malicious local owner. Reviewed the public chapter, not the entire book. |
+| [Winters et al., Software Engineering at Google, chapter 12](https://abseil.io/resources/swe-book/html/ch12.html) | Maintain behavior-oriented tests plus actual native/SDK boundaries; mocks are not evidence of real reload or native effects. Reviewed the public chapter, not the entire book. |
+| [SQLite, Atomic Commit](https://www.sqlite.org/atomiccommit.html) | Preserve intent before pointer transition, flush evidence, and inject interruptions on both sides of D1 commit. D5/D1 remain separate transactions; physical power-loss durability is not established by fault injection. |
+| [TUF, Roles and Metadata](https://theupdateframework.io/docs/metadata/) | Pin a consistent staged set and distinguish hashes from authenticated publishers, expiry and rollback protection. Manual owner-approved source builds do not implement TUF. |
+
+Chubby's existing paper reference remains part of the design background; PDF
+retrieval failed again in this review, so it is not claimed as newly fully read.
+D5 uses local descriptor locks, not a distributed consensus or lease protocol.
+No source supplies a way to infer absence of arbitrary external effects from a
+matching native directory: restoration and quarantine clearance require explicit
+owner effect inspection evidence. See [D5](integration-d5.md) for exact APIs,
+support limits and actual test boundaries.
 
 ## D3 Client Hook Support Review
 

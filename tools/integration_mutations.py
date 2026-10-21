@@ -2,6 +2,7 @@
 from contextlib import nullcontext
 from pathlib import Path
 import threading
+import os
 
 import execution_record as records
 import integration_backend as backend
@@ -9,6 +10,7 @@ import integration_contract as c
 import integration_registry as r
 import integration_service as reads
 import integration_mutation_contract as contract
+import integration_lifecycle as lifecycle
 
 
 def blocked(error, *, uncertain=False, evidence_id=None):
@@ -54,6 +56,7 @@ class Service:
             self._lock.release()
 
     def _admit(self, name, args):
+        lifecycle.fence(self.registry, args["project_id"])
         entry = next((v for v in self.policy.current()["actions"] if v["action_id"] == args["action_id"]), None)
         c.require(entry is not None and entry["tool"] == name and
                   entry["project_id"] == args["project_id"] and entry["work_id"] == args["work_id"], "MUTATION_SCOPE")
@@ -91,6 +94,10 @@ class Service:
         for directory in pending:
             previous = c.decode(r.regular(directory / "intent.json", private=True))
             if previous["lineage"] == lineage:
+                resolution = lifecycle.clearance(directory, previous)
+                if resolution is not None:
+                    c.require(resolution["retired"] != lifecycle.retired_identity(name, native), "RESOLVED_ACTION_REUSE_FORBIDDEN")
+                    continue
                 c.require((directory / "result.json").is_file(), "WORK_MUTATION_UNRESOLVED")
                 try:
                     result = self._result(directory)
@@ -185,6 +192,7 @@ class Service:
             entry, project, work, value, native, output, previous = self._admit(name, args)
             if previous is not None:
                 return previous
+            writer = lifecycle.lock(output / "writer.lock", create=True)
         dispatched = False
         try:
             preflight = self._preflight(entry, native)
@@ -193,6 +201,7 @@ class Service:
                 self._approval_preflight(project, work, value["approval"], output)
             argv = self._argv(entry, project, work, value, output)
             with self.registry.locked(exclusive=True):
+                lifecycle.fence(self.registry, args["project_id"])
                 self.policy.authorize(entry)
                 c.require(self.policy.action(entry)[0] == value, "ACTION_CHANGED")
                 # Last integration fence. The native reducer rechecks its own
@@ -202,6 +211,7 @@ class Service:
             admission = nullcontext() if value["approval"] else self.registry.locked()
             with admission:
                 if not value["approval"]:
+                    lifecycle.fence(self.registry, args["project_id"])
                     self.policy.authorize(entry)
                 process = records.capture(argv, output, 540 if value["approval"] else backend.TIMEOUT_SECONDS,
                     cwd=output, observe_source=False, env=backend.ENVIRONMENT, limit=c.MAX_NATIVE)
@@ -226,3 +236,5 @@ class Service:
                 return self._publish(output, result)
             except (OSError, ValueError):
                 return blocked(c.IntegrationError("RESULT_RECORDING_FAILED"), uncertain=dispatched, evidence_id=output.name)
+        finally:
+            os.close(writer)
