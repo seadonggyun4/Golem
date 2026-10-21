@@ -118,10 +118,28 @@ class D3(fixture.D2):
                     self.assertFalse(notice["automatic_retry_allowed"])
         self.assertEqual(before, self.inventory())
 
+    def test_npm_native_resolution_is_layout_independent_and_rejects_ambiguity(self):
+        import hook_client_fixture as client
+        prefix = self.root / "npm-fixture"
+        packages = prefix / "node_modules"
+        codex_root = packages / "@openai" / ("codex-" + client.npm_target())
+        codex = codex_root / "vendor/fixture/bin/codex"
+        claude = packages / "@anthropic-ai" / ("claude-code-" + client.npm_target()) / "claude"
+        for path in (codex, claude):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(b"synthetic native filename fixture")
+        self.assertEqual(client.npm_clients(prefix), {"codex-cli": codex, "claude-code": claude})
+        duplicate = codex_root / "vendor/fixture/codex/codex"
+        duplicate.parent.mkdir(parents=True)
+        duplicate.write_bytes(b"duplicate")
+        with self.assertRaises(ValueError):
+            client.npm_clients(prefix)
+
     def test_real_codex_startup_resume_and_failure_without_trust_bypass(self):
         import hook_client_fixture as client
         binary = CLIENTS["codex-cli"]
         profile = self.make_profile("codex-cli", binary)
+        binary = Path(profile.value["client_pin"]["path"])
         home = self.root / "codex-home"
         home.mkdir(mode=0o700)
         (home / "hooks.json").write_bytes(c.encoded(h.fragment(profile)))
@@ -217,9 +235,15 @@ if __name__ == "__main__":
     parser.add_argument("source")
     parser.add_argument("--codex-client", type=Path)
     parser.add_argument("--claude-client", type=Path)
+    parser.add_argument("--client-prefix", type=Path)
     args = parser.parse_args(ARGUMENTS)
     CLIENTS = {name: path.resolve(strict=True) for name, path in (
         ("codex-cli", args.codex_client), ("claude-code", args.claude_client)) if path is not None}
+    if args.client_prefix:
+        if CLIENTS:
+            parser.error("choose explicit clients or a temporary npm prefix, not both")
+        import hook_client_fixture
+        CLIENTS = hook_client_fixture.npm_clients(args.client_prefix)
     names = [name for name in D3.__dict__ if name.startswith("test_") and
         (not name.startswith("test_real_") or
          ("codex" in name and "codex-cli" in CLIENTS) or ("claude" in name and "claude-code" in CLIENTS))]

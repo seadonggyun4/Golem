@@ -207,3 +207,12 @@ class Hooks(unittest.TestCase):
         self.assertEqual(h.records.check(probes[0])["integrity"], "PASS")
         self.assertEqual((probes[0] / "stdout.log").read_bytes(), b"unexpected-version\n")
         self.assertEqual(before, self.inventory())
+
+    def test_created_scratch_home_is_canonical_without_relaxing_project_alias_rules(self):
+        target = self.root / "probe-scratch"
+        target.mkdir()
+        alias = self.root / "probe-scratch-alias"
+        alias.symlink_to(target, target_is_directory=True)
+        with patch.object(h.tempfile, "tempdir", str(alias)):
+            self.assertEqual(h.plan(self.value), self.value)
+        self.expect("SYMLINK", lambda: h.executable_pin(alias / "nonexistent"))

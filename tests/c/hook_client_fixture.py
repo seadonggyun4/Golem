@@ -7,12 +7,43 @@ import http.server
 import json
 import os
 from pathlib import Path
+import platform
 import signal
 import subprocess
+import sys
 import threading
 import time
 
 import codex_hosted
+
+
+def npm_target():
+    system = {"darwin": "darwin", "linux": "linux"}.get(sys.platform)
+    architecture = {"arm64": "arm64", "aarch64": "arm64", "x86_64": "x64", "AMD64": "x64"}.get(platform.machine())
+    if system is None or architecture is None:
+        raise ValueError("unsupported native client fixture platform")
+    return system + "-" + architecture
+
+
+def npm_clients(prefix):
+    root = Path(prefix).resolve(strict=True) / "node_modules"
+    target = npm_target()
+    result = {}
+    for name, package, filenames in (
+        ("codex-cli", root / "@openai" / ("codex-" + target), ("codex",)),
+        ("claude-code", root / "@anthropic-ai" / ("claude-code-" + target), ("claude", "claude.exe"))):
+        if not package.is_dir() or package.is_symlink():
+            raise ValueError("missing native package: " + name)
+        matches, count = [], 0
+        for directory, dirs, files in os.walk(package, followlinks=False):
+            count += len(dirs) + len(files)
+            if count > 128 or any((Path(directory) / item).is_symlink() for item in (*dirs, *files)):
+                raise ValueError("unsafe native package inventory")
+            matches.extend(Path(directory) / item for item in files if item in filenames)
+        if len(matches) != 1:
+            raise ValueError("missing or ambiguous native client: " + name)
+        result[name] = matches[0].resolve(strict=True)
+    return result
 
 
 @contextmanager

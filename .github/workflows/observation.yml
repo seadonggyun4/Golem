@@ -35,10 +35,8 @@ jobs:
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
       - name: D3 real pinned client startup and resume hooks (loopback fixtures only)
         run: |
-          npm install --prefix "$RUNNER_TEMP/golem-hook-clients" @openai/codex@0.141.0 @anthropic-ai/claude-code@2.1.196
-          CODEX_CLIENT="$(find "$RUNNER_TEMP/golem-hook-clients/node_modules/@openai" -type f -path '*/codex/codex' -print -quit)"
-          test -n "$CODEX_CLIENT"
-          python3 tests/c/integration_d3_hooks.py build/events/golem . --codex-client "$CODEX_CLIENT" --claude-client "$RUNNER_TEMP/golem-hook-clients/node_modules/@anthropic-ai/claude-code/bin/claude.exe"
+          npm install --ignore-scripts --prefix "$RUNNER_TEMP/golem-hook-clients" @openai/codex@0.141.0 @anthropic-ai/claude-code@2.1.196
+          python3 tests/c/integration_d3_hooks.py build/events/golem . --client-prefix "$RUNNER_TEMP/golem-hook-clients"
         env:
           ASAN_OPTIONS: halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1

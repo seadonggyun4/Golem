@@ -255,9 +255,9 @@ Source/support review: [D3 references](integration-layer-references.md#d3-client
 
 | Gate | Observed result |
 | --- | --- |
-| Full Python regression, including execution-boundary coverage | 535/535 PASS |
-| D3 focused profile/domain tests, included above | 14/14 PASS |
-| Native D3 plus both real pinned CLI lifecycle fixtures, ASan/UBSan binary | 7/7 PASS |
+| Full Python regression, including execution-boundary coverage | 536/536 PASS |
+| D3 focused profile/domain tests, included above | 15/15 PASS, including scratch-alias regression |
+| Native D3 plus both real pinned CLI lifecycle fixtures, ASan/UBSan binary | 8/8 PASS via temporary npm prefix |
 | Related D1/D3/session/binding/execution/completion/context CTests | 8/8 PASS |
 | Independent D3 JSON Schema assertions | 40/40 PASS |
 
@@ -265,6 +265,15 @@ An initial regression correctly rejected an unrecorded version subprocess. The
 probe was routed through the existing recorder with bounded output and retained
 evidence; no bypass allowlist was added. The installed Claude hardlink remained
 unchanged, and its fixture used only a temporary single-link snapshot.
+
+The first CI revision exposed two defects rather than an unsupported test:
+the native Codex npm file was under `vendor/<target>/bin/codex`, not the assumed
+`codex/codex` path, and a macOS `/var` temporary-home alias differed from physical
+cwd during a version probe. Official package inventories were inspected and the
+temporary-prefix resolver now requires exactly one native binary per supported
+platform package, rejects symlinks/ambiguity and needs no postinstall scripts.
+Only the newly created scratch HOME is canonicalized; registered root and pin
+checks are unchanged. Explicit alias and npm-layout regressions cover the fixes.
 
 Native gates ran on the host because the managed sandbox cannot exercise all
 boot-identity paths. CI independently runs native and actual-client fixtures on

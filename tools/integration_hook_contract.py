@@ -120,9 +120,10 @@ def plan(value):
         # Client caches may create symlinks. Keep disposable caches outside the
         # strict audit inventory; retain only recorder-owned evidence in it.
         with tempfile.TemporaryDirectory(prefix="golem-client-version-") as home:
-            result = records.capture([pin["path"], "--version"], output, 5, cwd=home, observe_source=False, limit=8192,
-                env={**backend.ENVIRONMENT, "HOME": home, "CODEX_HOME": home,
-                     "CLAUDE_CONFIG_DIR": home, "DISABLE_AUTOUPDATER": "1"})
+            scratch = str(Path(home).resolve(strict=True))
+            result = records.capture([pin["path"], "--version"], output, 5, cwd=scratch, observe_source=False, limit=8192,
+                env={**backend.ENVIRONMENT, "HOME": scratch, "CODEX_HOME": scratch,
+                     "CLAUDE_CONFIG_DIR": scratch, "DISABLE_AUTOUPDATER": "1"})
     expected = ("codex-cli " + value["client_version"] if value["client"] == "codex-cli" else
                 value["client_version"] + " (Claude Code)")
     c.require(result["returncode"] == 0 and result["reason"] == "EXIT" and result["recording"] == "RECORDED" and
