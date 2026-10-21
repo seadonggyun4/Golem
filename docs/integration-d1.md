@@ -2,9 +2,12 @@
 
 This implements the schema, local project-approval registry and fixed read-only
 backend slice of the [integration design](integration-layer-design.md). It is
-**not an MCP server, client auto-installer, session hook, remote authentication
+**not itself an MCP server, client auto-installer, session hook, remote authentication
 service, native mutation API, or Work migration**. Existing projects/Works and
 the selected native executable must already exist. Nothing is installed in TRAP.
+
+The optional [D2 stdio MCP](integration-d2.md) reuses these unchanged contracts
+with a separately reviewed disclosure policy; D1 alone does not authorize it.
 
 ## Contracts
 

@@ -141,7 +141,7 @@ build/release/golem document inspect "$WORK" planning 1
 | --- | --- |
 | GitHub 소스로 Conan 패키지·CLI 설치 | [Conan 설치](docs/runtime-reference.md#conan-package) |
 | C/C++ 라이브러리 연동 | [Golem::golem 빌드·설치](docs/runtime-reference.md#development) |
-| 다중 client·MCP 설계와 읽기 연동 | [통합 설계](docs/integration-layer-design.md) · [D1 승인 registry/읽기 backend](docs/integration-d1.md) (MCP 미구현) |
+| 다중 client·MCP 설계와 읽기 연동 | [통합 설계](docs/integration-layer-design.md) · [D1 승인/읽기](docs/integration-d1.md) · [D2 읽기 전용 stdio MCP·맥락·인계](docs/integration-d2.md) (owner 명시 설정) |
 | Python·TypeScript 연동 | [언어 바인딩](docs/runtime-reference.md#language-bindings) |
 | 단계 선택·문서 참조·최신성 | [워크플로우](docs/workflow.md) |
 | 역할별 산출물·실제 증거·완료 조건 | [역할 계약](docs/role-contracts.md) |

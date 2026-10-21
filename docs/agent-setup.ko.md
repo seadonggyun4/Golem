@@ -8,9 +8,9 @@ Golem은 현재 Codex·Claude가 사용하는 문서 기반 작업 프로토콜�
 
 ## 빠른 적용
 
-다중 client 등록·맥락 전달·MCP 연결은 [통합 설계](integration-layer-design.md)의
-제안 범위다. 아래는 현재의 명시적 프로젝트 설치 계약이며, 제안한 연결 계층이나
-MCP 서버를 설치하는 절차가 아니다.
+다중 client 구조는 [통합 설계](integration-layer-design.md)를 따른다.
+선택형 [D2 stdio MCP](integration-d2.md)는 D1 승인과 별도의 명시적 전달 승인을
+재사용한다. 아래는 프로젝트 설치 계약이며 client MCP 설정을 설치·활성화하지 않는다.
 
 실제 프로젝트에 반복 적용할 때는 [진입점 plan/apply/check](agent-entrypoint.md)를
 사용한다. 기존 규칙을 보존하고 의존 문서·실행 파일을 고정하며, 오래되거나

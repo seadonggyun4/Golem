@@ -1,10 +1,11 @@
 # Golem Integration Layer and MCP Design
 
-상태: **설계 + D1 일부 구현**. 작성·소스 검토: 2026-10-21.
+상태: **설계 + D1 승인/읽기 + D2 local stdio·명시적 맥락/인계 구현**. 검토: 2026-10-21.
 기준 소스: `96ad031b3a28b189ee7183fcff2f6c34c0ddecfb`.
-schema·프로젝트 승인 registry·읽기 backend의 구현 범위는 [D1 계약](integration-d1.md)에
-정리한다. 새 client installer, hook, 인증 서비스 또는 MCP 서버의 완료를 의미하지 않는다.
-기존 계약은 각 링크가 권위이며 D1 계약에서 구현했다고 명시한 것 외의 새 이름·경로는 제안이다.
+schema·프로젝트 승인 registry·읽기 backend는 [D1 계약](integration-d1.md),
+선택형 읽기 MCP와 전달 정책은 [D2 계약](integration-d2.md)에 정리한다.
+client installer, hook, 원격 인증 서비스나 실제 Hosted 앱 소비 검증의 완료를 의미하지 않는다.
+기존 계약은 각 링크가 권위이며 D1/D2 계약에서 구현했다고 명시한 것 외의 새 이름·경로는 제안이다.
 MUST/금지는 향후 구현 요구사항이며 과거 저장 형식을 소급 변경하지 않는다.
 연구 근거·열람 범위·대안 비교: [조사 기록](integration-layer-references.md).
 
@@ -362,7 +363,9 @@ modern multi-round-trip/legacy 승인 요청 차이는 transport adapter에 한�
 
 ### Proposed Tools
 
-미구현 이름이다. 독립 closed schema·권한·한도를 갖고 임의 operation dispatcher는 노출하지 않는다.
+아래는 전체 목표 surface다. [D2](integration-d2.md)는 projects_list/work_inspect/history_read/
+context_get/handoff_prepare만 구현했다. 나머지는 제안이며 독립 closed schema·권한·한도 없이
+임의 operation dispatcher로 노출하지 않는다.
 
 | Tool | 매핑 | 효과 |
 | --- | --- | --- |
@@ -544,9 +547,11 @@ clock injection은 물리 재부팅 시험이 아니다.
 | D5 | staged update/reload/recovery | T02/T15와 참여 client quiescence |
 | D6 | optional remote gateway | 별도 보안 검토·T18·승인된 실제 Hosted 연결 |
 
-D1의 schema·승인 registry·읽기 backend는 구현했다. client installer를 포함한 D1 전체와
-D2-D6는 완료하지 않았다. 다음 단계는 D1 계약의 검증된 범위 위에 client 설치와 D2의
-읽기 MCP를 별도로 구현하는 것이다.
+D1의 schema·승인 registry·읽기 backend와 [D2 local stdio MCP·명시적 맥락·인계](integration-d2.md)를
+구현했다. D2는 별도 owner 전달 정책으로 D1 권한을 재사용하며 native mutation은 하지 않는다.
+modern/legacy 실제 SDK stdio client 두 개를 disposable native Work로 시험한다.
+실제 Codex/Claude 앱 자동 설치·소비 검증이나 standalone raw CAS resource를 포함한 전체 목표
+surface 완료가 아니다. client installer를 포함한 D1 전체와 D3-D6는 여전히 미완료다.
 이 설계 작성은 실제 자동 설치·맥락 이해·비용 절감·제품 운영의 실증 결과가 아니다.
 
 ### Document-Only Review Results

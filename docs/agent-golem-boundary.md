@@ -52,8 +52,9 @@ add a mandatory daemon to the core.
 
 For proposed multi-client installation, project consent, identity mapping,
 context delivery and MCP access, see [integration layer design](integration-layer-design.md).
-It reuses these contracts but is not an implemented MCP server or automatic
-client installation feature.
+The [D2 stdio MCP slice](integration-d2.md) now reuses D1 approvals for explicit
+read/context/handoff delivery. Automatic client installation, native mutation
+and remote-gateway features are not supplied by that slice.
 
 Preserve the orchestration core while reducing the procedures and inputs an
 agent must handle. Reuse compact views with original retrieval, mechanical

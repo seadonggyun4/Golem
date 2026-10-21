@@ -185,3 +185,27 @@ The Update Framework, [Specification](https://theupdateframework.github.io/speci
 시작한다. 단일 필수 daemon, client별 engine 복제, 별도 semantic memory DB, 자유 shell tool,
 자동 대화 수집, roots 기반 승인, 모델/SDK의 무조건 최신 교체는 제외한다.
 후속 구현에서 SDK/version·라이선스·dependency inventory·실제 client profile을 다시 검증한다.
+
+## D2 SDK Implementation Review
+
+2026-10-21 D2에서는 기존 S8/S9/S11/S13/S14의 최소 권한·종단 검증·변화 이유별 모듈 분리·
+untrusted 자료 격리·계층별 시험 원칙을 재사용했다. 해당 논문/학술저서 전체를 새로 열람하거나
+그것만으로 구현의 보안성·효과를 입증했다고 주장하지 않는다. 이번에 직접 대조한 자료와 코드는:
+
+- [공식 Python SDK](https://github.com/modelcontextprotocol/python-sdk),
+  [배포 metadata](https://pypi.org/pypi/mcp/json): 확인한 배포는 mcp 2.3.0,
+  MIT license. 별도 venv에 실제 설치한 SDK와 mcp-types 2.3.0을 사용했다.
+- [Low-level Server](https://py.sdk.modelcontextprotocol.io/advanced/low-level-server/):
+  exact closed schema와 원래 인자 값을 보존하도록 low-level handler를 선택했다.
+  SDK가 domain argument 검증을 대신하지 않는다는 한계에 따라 D1 validator로 직접 검사한다.
+- [Client](https://py.sdk.modelcontextprotocol.io/client/) 및
+  [Protocol versions](https://py.sdk.modelcontextprotocol.io/protocol-versions/):
+  SDK Client의 auto discovery/legacy initialize를 별도 stdio 프로세스로 시험한다.
+  실제 Hosted 앱 활성화 시험과 혼동하지 않는다.
+- 설치된 `mcp/server/stdio.py` 2.3.0의 입력 reader와 protocol object parser를 직접 확인했다.
+  기본 reader의 line 크기/UTF-8 replacement/duplicate-key 동작에 의존하지 않고 D1 strict JSON과
+  512 KiB frame guard를 SDK 앞에 둔다. framing·JSON 검사일 뿐 별도 JSON-RPC engine은 아니다.
+
+대응 구현: [D2 계약](integration-d2.md). provider/model 호출·개인 client 설정·원격 gateway·
+원본 Work 변경 없이도 안전한 조회와 명시적 인계 준비를 제공하는 범위다. 선언 신원과
+data destination이 인증된 사실이라는 주장, 논문 근거만으로 전체 보안 PASS 판정은 하지 않는다.

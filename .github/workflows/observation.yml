@@ -25,6 +25,13 @@ jobs:
         run: brew install ninja openssl@3 pkg-config json-c md4c libevent
       - run: cmake -S . -B build/events -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGOLEM_ENABLE_SANITIZERS=ON -DGOLEM_BUILD_EVENT_BRIDGE=ON
       - run: cmake --build build/events --parallel 2
+      - name: D2 real MCP stdio and native read-only handoff
+        run: |
+          python3 -m pip install -r tools/requirements-mcp.txt
+          python3 tests/c/integration_d2_mcp.py build/events/golem .
+        env:
+          ASAN_OPTIONS: halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
       - run: ctest --test-dir build/events --output-on-failure -R 'event_reader|event_bridge|runtime_events|mutation_document'
         env:
           ASAN_OPTIONS: halt_on_error=1
