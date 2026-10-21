@@ -16,6 +16,19 @@ import execution_record as record
 
 
 class Records(unittest.TestCase):
+    def test_explicit_no_source_scan_retains_mechanical_evidence(self):
+        destination = self.root / "no-source-scan"
+        destination.mkdir(mode=0o700)
+        with patch.object(record, "source_observation", side_effect=AssertionError("must not scan")):
+            result = record.capture([sys.executable, "-c", "print('observed')"], destination, 5,
+                                    observe_source=False)
+        self.assertEqual(result["returncode"], 0)
+        before = json.loads((destination / "execution/source-before.json").read_bytes())
+        self.assertEqual(before["status"], "NOT_OBSERVED")
+        finish = json.loads((destination / "execution/result.json").read_bytes())
+        self.assertIsNone(finish["source_unchanged"])
+        self.assertTrue((destination / "execution/manifest.json").is_file())
+
     def test_private_protocol_is_bidirectional_but_never_persisted(self):
         destination = self.root / "protocol"
         secret = b"protocol-secret-fixture\n"

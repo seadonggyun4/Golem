@@ -19,6 +19,8 @@ TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.
     "codex_hosted.py", "test_codex_hosted.py",
     "provider_costs.py", "test_provider_costs.py",
     "context_resume.py", "test_context_resume.py",
+    "integration_contract.py", "integration_registry.py", "integration_backend.py", "test_integration.py",
+    "verify_integration_schema.py",
     "judgment_record.py", "test_judgment_record.py",
     "revision_status.py", "test_revision_status.py",
     "remote_status.py", "test_remote_status.py",
@@ -63,6 +65,12 @@ samples/documents/work.json
 samples/execution/contract-v2.json
 samples/execution/contract-v3.json
 samples/execution/contract.json
+samples/integration/binding.schema.json
+samples/integration/description.schema.json
+samples/integration/enrollment.schema.json
+samples/integration/grant.schema.json
+samples/integration/project.schema.json
+samples/integration/read.schema.json
 samples/reentry/decision.json
 samples/research/adjudication-request.json
 samples/research/attempt-request.json

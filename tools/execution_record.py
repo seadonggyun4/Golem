@@ -252,9 +252,11 @@ def _over_limit(paths, limit):
 
 
 def capture(argv, destination, timeout, cwd=None, *, source=None, env=None, limit=LIMIT,
-            extra_logs=()):
+            extra_logs=(), observe_source=True):
     """Record once before launch and once after reaping; never retry effects."""
     command = list(map(str, argv))
+    if type(observe_source) is not bool:
+        raise ValueError("observe_source must be boolean")
     if not command or any("\0" in s for s in command) or not math.isfinite(timeout) or timeout <= 0 or limit < 1:
         raise ValueError("invalid capture parameters")
     cwd = Path(cwd or Path.cwd()).resolve()
@@ -269,7 +271,8 @@ def capture(argv, destination, timeout, cwd=None, *, source=None, env=None, limi
         k: v for k, v in os.environ.items()
         if not k.startswith("GIT_") and k not in ("PYTHONPATH", "PYTHONHOME")}
     source = Path(source).resolve() if source is not None else cwd
-    before = source_observation(source, destination)
+    before = (source_observation(source, destination) if observe_source else
+              {"status": "NOT_OBSERVED", "diagnostic": "CALLER_DISABLED_SOURCE_SCAN"})
     save(record_dir / "source-before.json", encoded(before))
     binary = executable_identity(command, cwd, environment)
     start = {"schema": SCHEMA, "invocation_id": uuid.uuid4().hex,
@@ -336,7 +339,8 @@ def capture(argv, destination, timeout, cwd=None, *, source=None, env=None, limi
               "logs": {}, "recording": "INCOMPLETE", "record_path": str(record_dir)}
     try:
         result["logs"] = {p.name: metadata(p)["sha256"] for p in paths if p.exists() or p.is_symlink()}
-        after = source_observation(source, destination)
+        after = (source_observation(source, destination) if observe_source else
+                 {"status": "NOT_OBSERVED", "diagnostic": "CALLER_DISABLED_SOURCE_SCAN"})
         save(record_dir / "source-after.json", encoded(after))
         binary_after = executable_identity(command, cwd, environment)
         native_files, native_complete = native_inventory(native)

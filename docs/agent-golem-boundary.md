@@ -50,6 +50,11 @@ add a mandatory daemon to the core.
 
 ## Lightweight Boundary
 
+For proposed multi-client installation, project consent, identity mapping,
+context delivery and MCP access, see [integration layer design](integration-layer-design.md).
+It reuses these contracts but is not an implemented MCP server or automatic
+client installation feature.
+
 Preserve the orchestration core while reducing the procedures and inputs an
 agent must handle. Reuse compact views with original retrieval, mechanical
 execution records, dependency-bound current context and explicit lifecycle

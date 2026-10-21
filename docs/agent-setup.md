@@ -9,6 +9,11 @@ approved Golem-based work.
 
 ## Quick Application
 
+Future multi-client enrollment and MCP access are described in the
+[integration layer design](integration-layer-design.md) (proposal only).
+The setup below remains the current explicit project installation contract;
+it does not install that proposed layer or MCP server.
+
 For reviewed, repeatable application to a selected real project, use the
 [entrypoint plan/apply/check workflow](agent-entrypoint.md). It preserves existing
 rules, pins dependencies and refuses stale or ambiguous updates. The manual

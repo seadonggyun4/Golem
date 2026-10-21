@@ -15,6 +15,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Validate D1 public schemas independently
+        run: |
+          python3 -m pip install jsonschema==4.23.0
+          python3 tools/verify_integration_schema.py
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev libevent-dev
       - if: runner.os == 'macOS'

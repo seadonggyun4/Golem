@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Golem D1 grant",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "golem.integration-grant.v1"
+    },
+    "principal_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+      "maxLength": 64
+    },
+    "client_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+      "maxLength": 64
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "status",
+          "next",
+          "record",
+          "history"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true
+    },
+    "work_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+        "maxLength": 64
+      },
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true
+    },
+    "destination": {
+      "const": "LOCAL_HOST"
+    },
+    "assurance": {
+      "const": "LOCAL_COOPERATIVE"
+    }
+  },
+  "required": [
+    "schema",
+    "principal_id",
+    "client_id",
+    "operations",
+    "work_ids",
+    "destination",
+    "assurance"
+  ],
+  "additionalProperties": false
+}
