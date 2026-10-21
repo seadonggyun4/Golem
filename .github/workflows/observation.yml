@@ -22,6 +22,7 @@ jobs:
           python3 tools/verify_hook_schema.py
           python3 tools/verify_mutation_schema.py
           python3 tools/verify_update_schema.py
+          python3 tools/verify_gateway_schema.py
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev libevent-dev
       - if: runner.os == 'macOS'
@@ -42,6 +43,14 @@ jobs:
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
       - name: D5 staged updates, reload probes and COMMIT_UNKNOWN recovery
         run: python3 tests/c/integration_d5_maintenance.py build/events/golem . "$(command -v cc)" build/events/golem-integration-host --mcp
+        env:
+          ASAN_OPTIONS: halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      - name: D6 TLS JWT MCP gateway and native safety
+        run: |
+          python3 -m pip install -r tools/requirements-gateway.txt
+          python3 -m unittest discover -s tools -p 'test_integration_gateway.py'
+          python3 tests/c/integration_d6_gateway.py build/events/golem . "$(command -v cc)" build/events/golem-integration-host
         env:
           ASAN_OPTIONS: halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1

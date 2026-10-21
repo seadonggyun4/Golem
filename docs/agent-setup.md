@@ -22,6 +22,9 @@ separate server/policy. Neither D2 nor D3 acquires mutation authority by upgrade
 reload probes and reviewed quarantine clearance without automatic client setup,
 native resume or effect retry. Re-review generation/producer-bound policies after
 a switch; an old D4 policy is not silently refreshed.
+[D6 remote TLS access](integration-d6.md) requires separate issuer/subject/client
+mapping, remote disclosure consent and owner launch. Local hooks/MCP installation
+does not open a listener, transfer provider tokens or grant remote QA approval.
 
 For reviewed, repeatable application to a selected real project, use the
 [entrypoint plan/apply/check workflow](agent-entrypoint.md). It preserves existing

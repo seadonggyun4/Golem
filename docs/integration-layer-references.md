@@ -255,6 +255,31 @@ matching native directory: restoration and quarantine clearance require explicit
 owner effect inspection evidence. See [D5](integration-d5.md) for exact APIs,
 support limits and actual test boundaries.
 
+## D6 Remote Security Review
+
+Reviewed 2026-10-21 against the installed MCP/mcp-types 2.3.0 HTTP/auth sources,
+PyJWT 2.15.1 API and existing D1-D5 contracts. Primary-source review, not a claim
+that an external AS or Hosted account was activated:
+
+| Reference | Applied inference / limitation |
+| --- | --- |
+| [MCP authorization](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization) | Resource metadata/challenges and exact audience binding; external AS owns PKCE/issuance/refresh. |
+| [MCP transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports) | Validate Origin/Host, authenticate HTTP and preserve uncertainty after disconnect. Reuse SDK framing. |
+| [MCP security practices](https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices) | Separate each client/user's consent and downstream authority; no provider token passthrough, automatic URL/key fetch or implicit shared credential. |
+| [RFC 8725](https://www.rfc-editor.org/rfc/rfc8725.html), [RFC 9068](https://www.rfc-editor.org/rfc/rfc9068.html) | Fixed algorithm/key profile, explicit access-token typing, issuer/audience/subject/client/date validation; unsupported profiles fail closed. |
+| [RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html) | Restrict token privilege and distinguish bearer access from sender-constrained mechanisms; D6 does not claim DPoP or a full authorization-server implementation. |
+| [PyJWT API](https://pyjwt.readthedocs.io/en/stable/api.html) | Use library cryptographic verification with fixed RS256, required claims and strict audience, never token-selected algorithms or remote key URLs. |
+| [Saltzer and Schroeder, 1975](https://web.mit.edu/Saltzer/www/publications/protection/Basic.html), [Anderson, Security Engineering 3e, chapter 6](https://www.cl.cam.ac.uk/archive/rja14/Papers/SEv3-ch06.pdf) | Reuse complete mediation, least privilege and application/OS trust separation from the earlier bounded review; no claim of newly reading an entire academic book. |
+
+The native authority is intentionally not duplicated. A remote JWT authenticates
+the approved AS's subject/client assertion, not document truth, original native
+approver identity or permission to force ownership/retry. Live revocation fences
+new admission and late disclosure, but cannot undo an admitted external effect.
+Tests distinguish original D4 unknown commit from lost remote delivery of a
+durably known native result. Full books were not exhaustively reviewed; these
+sources guide engineering decisions and do not establish formal security or
+universal client interoperability. See [D6](integration-d6.md) for exact gates.
+
 ## D3 Client Hook Support Review
 
 검토일: 2026-10-21. 최신 문서의 기능을 설치된 구버전 client에 소급하지 않았다.

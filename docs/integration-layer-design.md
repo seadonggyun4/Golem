@@ -1,13 +1,14 @@
 # Golem Integration Layer and MCP Design
 
-상태: **설계 + D1 승인/읽기 + D2 local stdio + D3 opt-in hook + D4 명시적 typed mutation/승인 QA + D5 owner 유지보수 구현**. 검토: 2026-10-21.
+상태: **설계 + D1 승인/읽기 + D2 local stdio + D3 opt-in hook + D4 typed mutation/승인 QA + D5 유지보수 + D6 opt-in TLS gateway 구현**. 검토: 2026-10-21.
 기준 소스: `96ad031b3a28b189ee7183fcff2f6c34c0ddecfb`.
 schema·프로젝트 승인 registry·읽기 backend는 [D1 계약](integration-d1.md),
 읽기 MCP·전달 정책은 [D2 계약](integration-d2.md), opt-in startup/resume hook은
 [D3 계약](integration-d3.md), 명시적 변경·승인 QA는 [D4 계약](integration-d4.md)에 정리한다. 자동 client installer, 원격 인증 서비스나
 실제 Hosted 모델 이해·운영 검증의 완료를 의미하지 않는다.
 업데이트·재로딩·quarantine 해제는 [D5 계약](integration-d5.md)을 따른다.
-기존 계약은 각 링크가 권위이며 D1-D5 계약에서 구현했다고 명시한 것 외의 이름·경로는 제안이다.
+원격 보안·인증·전달 동의의 구현 범위는 [D6 계약](integration-d6.md)을 따른다.
+기존 계약은 각 링크가 권위이며 D1-D6 계약에서 구현했다고 명시한 것 외의 이름·경로는 제안이다.
 MUST/금지는 향후 구현 요구사항이며 과거 저장 형식을 소급 변경하지 않는다.
 연구 근거·열람 범위·대안 비교: [조사 기록](integration-layer-references.md).
 
@@ -487,6 +488,11 @@ config drift는 새 plan/approval 대상으로 자동 overwrite하지 않는다.
 
 ## 12. Remote and Hosted Mode
 
+[D6](integration-d6.md)는 owner가 선택한 AS의 짧은 수명 JWT를 검증하는 TLS resource server다.
+D1 승인·D2 전달 동의·D4 변경 승인·D5 유지보수를 재사용한다. 실제 loopback TLS/MCP/native 시험과
+실제 Hosted/외부 AS 활성화는 구분하며, 후자는 별도 승인 환경 없이는 미검증이다.
+자동 AS/discovery/proxy/token 발급 및 범용 실행 daemon을 구현했다고 주장하지 않는다.
+
 원격 client의 local project 접근은 owner가 선택한 gateway/delegate가 필요하다. 기본 localhost
 server를 외부 공개하는 설정 변경으로 대체하지 않는다. 다른 장치가 network filesystem의 같은
 `.golem`에 쓰는 모델은 지원하지 않는다. 한 권위 host가 기존 core lock을 사용한다.
@@ -571,7 +577,8 @@ local command hook은 실제 격리 client의 startup/resume·실패 전달로 �
 영속 intent·불확실 결과와 Work별 재실행 차단, 기존 C approval API의 opt-in local host를 사용한다.
 소유자가 검토한 action ID를 typed 도구로 호출하며 모델에 임의 경로·명령·승인 채널을 주지 않는다.
 [D5](integration-d5.md)는 원본 기록을 유지하는 owner 유지보수·복구 경로를 구현한다.
-자동 installer를 포함한 D1 전체와 D6, 모든 client/version의 hook 지원은 미완료다.
+자동 installer를 포함한 D1 전체, 모든 client/version hook 및 실제 Hosted/외부 AS 활성화는 미완료다.
+D6의 명시적 resource-server 경로는 구현했으며 지원 profile·보안 한계는 D6 계약을 따른다.
 D5의 quarantine 해제는 원래 불확실 결과를 성공으로 승격하지 않으며 native 효과를 재실행하지 않는다.
 이 설계 작성은 실제 자동 설치·맥락 이해·비용 절감·제품 운영의 실증 결과가 아니다.
 

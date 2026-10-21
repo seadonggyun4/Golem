@@ -15,6 +15,8 @@ Golem은 현재 Codex·Claude가 사용하는 문서 기반 작업 프로토콜�
 [D5 소유자 유지보수](integration-d5.md)는 staged pin 전환·읽기 전용 SDK 재로딩 probe·승인된
 quarantine 해제를 제공한다. client 자동 설치·native 자동 재개·효과 재시도는 하지 않는다.
 전환 뒤 generation/producer에 결합된 정책을 재검토해야 하며 기존 D4 정책을 몰래 갱신하지 않는다.
+[D6 원격 TLS 접근](integration-d6.md)은 별도 issuer/subject/client 매핑·원격 전달 동의·소유자
+실행을 요구한다. 로컬 hook/MCP 설치가 listener 공개·provider token 전달·원격 QA 승인을 만들지 않는다.
 D2·D3는 업데이트만으로 쓰기 권한을 얻지 않는다.
 선택형 [D3 startup/resume command hook](integration-d3.md)은 원문 지침 주입이나
 native 실행 권한 없이 상태·근거 조회 안내를 전달한다. 별도 검토 profile과 해당

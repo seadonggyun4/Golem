@@ -1,0 +1,4 @@
+-r requirements-mcp.txt
+PyJWT[crypto]==2.15.1
+cryptography==50.0.2
+uvicorn==0.54.0
