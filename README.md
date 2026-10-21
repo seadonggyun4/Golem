@@ -107,6 +107,8 @@ command. See [output modes and migration](docs/cli-output.md).
 
 Requires macOS or Linux, a C17 compiler, CMake 3.21+, Ninja, Python 3.11+, OpenSSL 3, pkg-config, json-c 0.15+ and MD4C 0.4.8+. See [platform dependencies](docs/runtime-reference.md#build-and-run) or [Conan installation](docs/runtime-reference.md#conan-package).
 
+json-c must pass strict Unicode parsing at configuration; unpatched 0.18 is unsupported (use 0.19+, a corrected distribution build, or 0.17).
+
 ```sh
 git clone https://github.com/seadonggyun4/Golem.git
 cd Golem

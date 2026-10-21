@@ -239,3 +239,13 @@ With the include reset removed in a compiler-input-only negative probe, the
 promoted-feature fixture reproduces the same macro-redefinition error on macOS.
 The corrected ASan build and 18 focused fault/publication/diagnostic CTests pass
 locally; no native guard or `-Werror` check is disabled.
+
+The next Linux full-suite run reached the Unicode context fixtures and exposed
+unpatched system json-c 0.18 (upstream issue #875). The D6 TLS gate itself passed
+on both platforms. A configure-time strict Unicode behavior probe now rejects
+this dependency rather than weakening JSON validation or changing existing
+fixtures. Linux CI uses checksum-pinned official json-c 0.19 in a private runner
+prefix; Conan uses available, known-working 0.17 pending a corrected ConanCenter
+recipe. Locally, an isolated official 0.18 build reproduced probe rejection and
+0.19 passed. Failed CI evidence remains separate from subsequent revision results.
+See [dependency compatibility](runtime-reference.md#build-and-run).

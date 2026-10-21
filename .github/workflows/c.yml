@@ -39,6 +39,8 @@ jobs:
       - if: runner.os == 'macOS'
         run: brew install cmake ninja openssl@3 pkg-config json-c md4c
       - run: python3 -m unittest discover -s tools -p 'test_*.py'
+      - if: runner.os == 'Linux'
+        uses: ./.github/actions/setup-json-c
       - run: python3 tools/verify_alpha.py --output "${{ runner.temp }}/alpha-records"
       - name: Preserve acceptance command evidence
         if: always()
@@ -69,6 +71,8 @@ jobs:
       - name: Install JSON dependencies (macOS)
         if: runner.os == 'macOS'
         run: brew install pkg-config json-c md4c
+      - if: runner.os == 'Linux'
+        uses: ./.github/actions/setup-json-c
       - name: Build and full-suite evidence
         run: >-
           python3 tools/verify_environment.py --preset ${{ matrix.preset }} --profile full-ci
@@ -118,6 +122,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev
       - if: runner.os == 'macOS'
         run: brew install cmake ninja openssl@3 pkg-config json-c md4c
+      - if: runner.os == 'Linux'
+        uses: ./.github/actions/setup-json-c
       - name: Diagnostic contract evidence (injection; runner is not a sandbox)
         run: >-
           python3 tools/verify_environment.py --preset dev --profile restricted-sandbox
@@ -150,6 +156,8 @@ jobs:
         run: sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev
       - if: runner.os == 'macOS'
         run: brew install ninja openssl@3 pkg-config json-c md4c
+      - if: runner.os == 'Linux'
+        uses: ./.github/actions/setup-json-c
       - run: cmake --preset bindings
       - run: cmake --build --preset bindings
       - run: ctest --preset bindings
@@ -173,6 +181,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update && sudo apt-get install -y clang ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev
+      - uses: ./.github/actions/setup-json-c
       - run: cmake --preset fuzz
       - run: cmake --build --preset fuzz
       - run: ctest --preset fuzz

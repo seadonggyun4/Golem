@@ -38,6 +38,36 @@ find_package(OpenSSL 3.0 REQUIRED COMPONENTS Crypto)
 find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONC REQUIRED IMPORTED_TARGET json-c>=0.15)
+if(NOT CMAKE_CROSSCOMPILING OR CMAKE_CROSSCOMPILING_EMULATOR)
+  include(CheckCSourceRuns)
+  include(CMakePushCheckState)
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_LIBRARIES PkgConfig::JSONC)
+  # Recheck after dependency upgrades; a cached success is not a new observation.
+  unset(GOLEM_JSONC_STRICT_UNICODE CACHE)
+  check_c_source_runs([=[
+    #include <json-c/json.h>
+    int main(void) {
+      const char text[] = {'{','"',(char)0xc2,(char)0xba,'"',':','"',
+                           (char)0xea,(char)0xb0,(char)0x80,'"','}',0};
+      struct json_tokener *tok = json_tokener_new();
+      if (!tok) return 1;
+      json_tokener_set_flags(tok, JSON_TOKENER_STRICT | JSON_TOKENER_VALIDATE_UTF8);
+      struct json_object *obj = json_tokener_parse_ex(tok, text, sizeof(text) - 1);
+      int ok = obj && json_tokener_get_error(tok) == json_tokener_success &&
+               json_tokener_get_parse_end(tok) == sizeof(text) - 1;
+      if (obj) json_object_put(obj);
+      json_tokener_free(tok);
+      return ok ? 0 : 1;
+    }
+  ]=] GOLEM_JSONC_STRICT_UNICODE)
+  cmake_pop_check_state()
+  if(NOT GOLEM_JSONC_STRICT_UNICODE)
+    message(FATAL_ERROR "json-c cannot parse valid Unicode with STRICT and VALIDATE_UTF8. Unpatched 0.18 has upstream bug #875; use 0.19+, a corrected distribution build, or known-working 0.17. See docs/runtime-reference.md. Do not disable strict parsing.")
+  endif()
+else()
+  message(WARNING "Cross-build: strict Unicode json-c behavior is unverified without an emulator; validate it on the target before use.")
+endif()
 pkg_check_modules(MD4C REQUIRED IMPORTED_TARGET md4c>=0.4.8)
 
 add_library(golem STATIC

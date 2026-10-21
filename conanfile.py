@@ -47,7 +47,8 @@ class GolemConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/3.6.0")
-        self.requires("json-c/0.18")
+        # ConanCenter has no 0.19 recipe yet; unpatched 0.18 rejects strict UTF-8.
+        self.requires("json-c/0.17")
         self.requires("md4c/0.5.2")
 
     def layout(self):

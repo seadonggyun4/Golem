@@ -27,6 +27,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev libevent-dev
       - if: runner.os == 'macOS'
         run: brew install ninja openssl@3 pkg-config json-c md4c libevent
+      - if: runner.os == 'Linux'
+        uses: ./.github/actions/setup-json-c
       - run: cmake -S . -B build/events -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGOLEM_ENABLE_SANITIZERS=ON -DGOLEM_BUILD_EVENT_BRIDGE=ON -DGOLEM_BUILD_INTEGRATION_HOST=ON
       - run: cmake --build build/events --parallel 2
       - name: D2 real MCP stdio and native read-only handoff

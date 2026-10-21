@@ -169,6 +169,18 @@ UI or external optimizer is required to run the C CLI.
 Prerequisites: C17 compiler, Git, CMake 3.21+, Ninja, Python 3.11+ for tests,
 OpenSSL 3 development files, pkg-config, json-c 0.15+ and MD4C 0.4.8+.
 
+json-c must also pass the configure-time strict Unicode parsing probe. Unpatched
+0.18 rejects valid non-ASCII keys/values with `JSON_TOKENER_STRICT` (upstream
+[issue #875](https://github.com/json-c/json-c/issues/875)); do not disable strict
+parsing or remove Unicode fixtures to accommodate it. Use 0.19+, a distribution
+build carrying the fix, or known-working 0.17. Linux CI builds official 0.19 in a
+private runner prefix, checking the upstream published SHA-256; Conan pins 0.17
+until ConanCenter provides a corrected version. The functional probe permits
+correctly patched versions and is rerun on reconfiguration. Cross-builds without
+an emulator cannot run this probe and explicitly report the target as unverified.
+The installed library still requires a compatible runtime json-c; replacing a
+shared dependency after configuration invalidates that observation.
+
 ```sh
 # Debian/Ubuntu dependencies:
 sudo apt-get install build-essential git cmake ninja-build python3 libssl-dev pkg-config libjson-c-dev libmd4c-dev

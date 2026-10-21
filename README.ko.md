@@ -102,6 +102,8 @@ Python 검증·벤치마크 실행 도구에는 [기계적 실행 기록](docs/e
 
 macOS 또는 Linux에서 C17 컴파일러, CMake 3.21+, Ninja, Python 3.11+, OpenSSL 3, pkg-config, json-c 0.15+, MD4C 0.4.8+가 필요합니다. [OS별 의존성](docs/runtime-reference.md#build-and-run) 또는 [Conan 설치](docs/runtime-reference.md#conan-package)를 참고하세요.
 
+json-c는 구성 시 strict Unicode 파싱 검사를 통과해야 합니다. 수정되지 않은 0.18은 지원하지 않습니다. 0.19 이상, 수정된 배포판 패키지 또는 0.17을 사용하세요.
+
 ```sh
 git clone https://github.com/seadonggyun4/Golem.git
 cd Golem
