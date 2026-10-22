@@ -791,3 +791,12 @@ JUnit은 `build/{dev,asan,release}/intent-d01-audit.xml`이다. 기존 설계 7�
 해시와 QA·실행·session 보호 코드가 변하지 않았음을 확인했다. 이 결과는 임시 fixture
 검증이며 실제 Work 복구·전원 손실·ENOSPC 검증을 의미하지 않는다. 원격 CI 결과는
 해당 커밋에 연결된 GitHub Actions 기록으로 별도 확인한다.
+
+CI 감사에서 D01의 직접 subprocess 호출 7곳(6개 함수)이 공통 실행 기록 경계의
+미검토 호출로 검출됐다. Git identity/worktree 조회는 읽기 전용이며 native 호출은
+pin·단일 FD·명시 환경·stdin 등록 bytes를 사용하는 내부 protocol이다. 기존 실행
+기록기는 input/pass_fds를 지원하지 않고 파일을 생성하므로 해당 protocol을 무조건
+대체하지 않는다. 이 6개 함수만 명시적으로 검토 예외에 등록하고 별도 AST 테스트로
+정확한 호출 수·run 사용·timeout·capture·환경·단일 FD 인자를 고정했다.
+mutation의 승인·receipt는 기존 host/native 경로에 보존한다. 이 예외는 일반 command
+실행 관측 로그의 자동 수집을 제공하지 않으며 제품 실행의 새 예외가 아니다.

@@ -282,12 +282,26 @@ class Records(unittest.TestCase):
 
 
 class Coverage(unittest.TestCase):
+    # D01 read-only identity probes cannot create observation files. Native
+    # mutations use pinned FD protocols and immutable owner intents/receipts;
+    # capture()/run() support neither input nor pass_fds. Keep this exception
+    # local and bounded, not a general opt-out for product commands.
+    D01_PROTOCOLS = {
+        ("tools/intent_authority.py", "repository_identity"): 2,
+        ("tools/intent_authority.py", "register"): 1,
+        ("tools/intent_authority.py", "native_inspect"): 1,
+        ("tools/intent_authority_lifecycle.py", "_native"): 1,
+        ("tools/intent_authority_lifecycle.py", "_pending_native"): 1,
+        ("tools/intent_authority_lifecycle.py", "_alias_native"): 1,
+    }
+
     def test_owned_python_launches_use_recording_boundary(self):
         root = Path(record.__file__).resolve().parents[1]
         allowed = {("tools/execution_record.py", "git"), ("tools/execution_record.py", "capture"),
                    ("tools/execution_record.py", "run_private"),
                    ("tools/agent_entrypoint.py", "git"), ("tools/instruction_bundle.py", "boundary"),
                    ("bench/benchmark.py", "cpu_name")}
+        allowed.update(self.D01_PROTOCOLS)
         found = set()
         paths = list((root / "tools").glob("*.py")) + [root / "bench/benchmark.py"]
         for path in paths:
@@ -304,6 +318,39 @@ class Coverage(unittest.TestCase):
                         parent = parents[parent]
                     found.add((path.relative_to(root).as_posix(), getattr(parent, "name", "<module>")))
         self.assertFalse(found - allowed, "Unreviewed execution bypass: " + str(found - allowed))
+
+    def test_d01_protocol_exceptions_remain_bounded(self):
+        root = Path(record.__file__).resolve().parents[1]
+        counts = dict.fromkeys(self.D01_PROTOCOLS, 0)
+        for filename in sorted({p for p, _ in counts}):
+            tree = ast.parse((root / filename).read_text())
+            for function in tree.body:
+                if not isinstance(function, ast.FunctionDef):
+                    continue
+                key = (filename, function.name)
+                if key not in counts:
+                    continue
+                for node in ast.walk(function):
+                    if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                            and isinstance(node.func.value, ast.Name) and node.func.value.id == "subprocess"
+                            and node.func.attr in {"run", "Popen", "check_call", "check_output", "call"}):
+                        continue
+                    counts[key] += 1
+                    self.assertEqual(node.func.attr, "run")
+                    kwargs = {k.arg: k.value for k in node.keywords}
+                    expected = {"env", "capture_output", "timeout", "check"}
+                    expected.add("stdin" if function.name in ("repository_identity", "native_inspect") else "input")
+                    if function.name != "repository_identity":
+                        expected.add("pass_fds")
+                        self.assertIsInstance(kwargs["pass_fds"], ast.Tuple)
+                        self.assertEqual(len(kwargs["pass_fds"].elts), 1)
+                    self.assertEqual(set(kwargs), expected)  # No shell or inherited stream options.
+                    self.assertIs(ast.literal_eval(kwargs["capture_output"]), True)
+                    self.assertIs(ast.literal_eval(kwargs["check"]), False)
+                    self.assertEqual(ast.literal_eval(kwargs["timeout"]),
+                                     10 if function.name == "repository_identity" else 15)
+                    self.assertIsInstance(kwargs["env"], (ast.Dict, ast.Name))
+        self.assertEqual(counts, self.D01_PROTOCOLS)
 
 
 if __name__ == "__main__":
