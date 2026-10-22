@@ -1,10 +1,15 @@
 """Host approval and script-byte boundaries; no shell safety inference."""
 import copy
+import fcntl
 import hashlib
+import os
+import subprocess
 import sys
+import time
 from pathlib import Path
 import unittest
 from execution_integration import Execution
+from discovery_integration import CLI, ENV
 
 
 class Boundary(Execution):
@@ -141,6 +146,51 @@ class Boundary(Execution):
         self.shell_call("run", checkpoint=self.cp["receipt_digest"], attempt_id="mutated", ok=False)
         self.shell_call("run", checkpoint=self.cp["receipt_digest"], attempt_id="mutated", ok=False)
         self.assertEqual((self.repo / "invoked").read_text(), "x")
+
+    def test_qa_holds_work_writer_lock_until_effect_finishes(self):
+        self.configure("printf x > invoked\n"
+                       "while [ ! -f release ]; do sleep 0.02; done\n"
+                       "printf '%s' '{\"schema_version\":1,\"cases\":["
+                       "{\"id\":\"fix\",\"status\":\"PASS\"},"
+                       "{\"id\":\"regression\",\"status\":\"PASS\"}]}'\n")
+        self.contract["gates"][0]["timeout_ms"] = 15000
+        self.refresh()
+        self.cp = self.shell_call("prepare", contract=self.contract)
+        self.finish()
+        request = self.write("qa-lock-request.json", {"schema_version": 1, "operation": "run",
+            "checkpoint": self.cp["receipt_digest"], "attempt_id": "lock-boundary"})
+        process = subprocess.Popen([str(CLI), "--output-mode", "full", "execution", "call",
+            str(self.work), str(request), "--approve-contract", self.approval,
+            "--approve-shell-contract", self.approval], env=ENV, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            deadline = time.monotonic() + 10
+            while not (self.repo / "invoked").exists() and process.poll() is None and time.monotonic() < deadline:
+                time.sleep(0.02)
+            self.assertTrue((self.repo / "invoked").exists(), "QA did not reach effect boundary")
+            self.assertIsNone(process.poll())
+            fd = os.open(self.work, os.O_RDONLY)
+            try:
+                for mode in (fcntl.LOCK_EX, fcntl.LOCK_SH):
+                    with self.assertRaises(BlockingIOError):
+                        fcntl.flock(fd, mode | fcntl.LOCK_NB)
+            finally:
+                os.close(fd)
+        finally:
+            (self.repo / "release").touch()
+            try:
+                stdout, stderr = process.communicate(timeout=20)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.communicate()
+                raise
+        self.assertEqual(process.returncode, 0, stderr.decode())
+        self.assertIn(b'"PASS"', stdout)
+        fd = os.open(self.work, os.O_RDONLY)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        finally:
+            os.close(fd)
 
 
 def load_tests(loader, tests, pattern):

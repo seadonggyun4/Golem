@@ -71,6 +71,11 @@ endif()
 pkg_check_modules(MD4C REQUIRED IMPORTED_TARGET md4c>=0.4.8)
 
 add_library(golem STATIC
+    src/intent/schema.c
+    src/intent/quota.c
+    src/intent/inventory.c
+    src/intent/journal.c
+    src/intent/fragment.c
     src/common/record.c
     src/inventory/model.c
     src/inventory/matcher.c

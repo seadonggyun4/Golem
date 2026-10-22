@@ -1,4 +1,38 @@
 add_executable(golem_context_api_helper context_api_helper.c)
+add_executable(golem_test_intent_quota test_intent_quota.c)
+add_executable(golem_test_intent_fragment test_intent_fragment.c)
+target_link_libraries(golem_test_intent_fragment PRIVATE Golem::golem)
+golem_configure_target(golem_test_intent_fragment)
+add_test(NAME intent_fragment COMMAND golem_test_intent_fragment)
+set_tests_properties(intent_fragment PROPERTIES TIMEOUT 30 LABELS "intent;restricted-diagnostic")
+add_executable(golem_intent_authority_host ../../tools/intent_authority_host.c)
+target_link_libraries(golem_intent_authority_host PRIVATE Golem::golem)
+golem_configure_target(golem_intent_authority_host)
+add_executable(golem_test_intent_journal test_intent_journal.c)
+target_link_libraries(golem_test_intent_journal PRIVATE Golem::golem)
+golem_configure_target(golem_test_intent_journal)
+add_test(NAME intent_journal COMMAND golem_test_intent_journal)
+set_tests_properties(intent_journal PROPERTIES TIMEOUT 120 LABELS "intent")
+add_executable(golem_test_intent_inventory test_intent_inventory.c)
+target_link_libraries(golem_test_intent_inventory PRIVATE Golem::golem)
+golem_configure_target(golem_test_intent_inventory)
+add_test(NAME intent_inventory COMMAND golem_test_intent_inventory)
+set_tests_properties(intent_inventory PROPERTIES TIMEOUT 30 LABELS "intent;restricted-diagnostic")
+target_link_libraries(golem_test_intent_quota PRIVATE Golem::golem)
+golem_configure_target(golem_test_intent_quota)
+add_test(NAME intent_quota COMMAND golem_test_intent_quota)
+set_tests_properties(intent_quota PROPERTIES TIMEOUT 30 LABELS "intent;restricted-diagnostic")
+add_executable(golem_test_intent_schema test_intent_schema.c)
+target_link_libraries(golem_test_intent_schema PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_intent_schema)
+foreach(case capacities utf8 coverage coverage-model source-set source domain)
+    add_test(NAME intent_schema_${case} COMMAND golem_test_intent_schema ${case}
+        ${CMAKE_CURRENT_SOURCE_DIR}/fixtures/intent/source-v1.json)
+    set_tests_properties(intent_schema_${case} PROPERTIES TIMEOUT 30 LABELS "intent;restricted-diagnostic")
+endforeach()
+add_executable(golem_intent_schema_helper intent_schema_helper.c)
+target_link_libraries(golem_intent_schema_helper PRIVATE Golem::golem)
+golem_configure_target(golem_intent_schema_helper)
 add_executable(golem_test_system_error test_system_error.c)
 target_link_libraries(golem_test_system_error PRIVATE Golem::golem Threads::Threads)
 golem_configure_target(golem_test_system_error)
@@ -378,6 +412,16 @@ foreach(case digest receipt roundtrip file corruption paths ownership concurrent
 endforeach()
 if(GOLEM_BUILD_CLI)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_test(NAME intent_authority_host COMMAND ${CMAKE_COMMAND} -E env
+        "GOLEM_INTENT_HOST=$<TARGET_FILE:golem_intent_authority_host>"
+        ${Python3_EXECUTABLE} -m unittest discover -s ${PROJECT_SOURCE_DIR}/tools
+        -p test_intent_authority.py)
+    set_tests_properties(intent_authority_host PROPERTIES TIMEOUT 180 LABELS "intent;integration")
+    add_test(NAME intent_schema_conformance COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/intent_schema_conformance.py
+        --native $<TARGET_FILE:golem_intent_schema_helper>)
+    # ASan starts a native helper for each negative case; each call also has a 15s bound.
+    set_tests_properties(intent_schema_conformance PROPERTIES TIMEOUT 180 LABELS "intent;restricted-diagnostic")
     add_executable(golem_output_helper output_helper.c
         ${PROJECT_SOURCE_DIR}/src/cli/output.c ${PROJECT_SOURCE_DIR}/src/cli/io.c
         ${PROJECT_SOURCE_DIR}/src/cli/json.c ${PROJECT_SOURCE_DIR}/src/cli/error.c)

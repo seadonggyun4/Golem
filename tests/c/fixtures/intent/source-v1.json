@@ -1,0 +1,21 @@
+{
+  "schema": "golem.intent.source.v1",
+  "project_id": "synthetic",
+  "work_id": "fixture-only",
+  "created_by_assertion": "UNVERIFIED-capture",
+  "body": {
+    "body_cas": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    "byte_length": 3,
+    "media_type": "text/plain",
+    "encoding": "UTF-8",
+    "origin": "MODEL_DRAFT",
+    "capture_ref": "UNVERIFIED-capture",
+    "designation": {
+      "scope_id": "fixture",
+      "ranges": [{"start": 0, "end": 3}],
+      "purpose": "PRODUCT_REQUIREMENT",
+      "decision_ref": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "execution_authority": false
+  }
+}

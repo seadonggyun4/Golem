@@ -24,6 +24,7 @@ jobs:
           python3 tools/verify_update_schema.py
           python3 tools/verify_gateway_schema.py
           python3 tools/verify_install_schema.py
+          python3 tests/c/intent_schema_conformance.py --schema
       - if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev libevent-dev
       - if: runner.os == 'macOS'

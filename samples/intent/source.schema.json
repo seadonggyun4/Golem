@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "P1 source structural draft, not an authority or semantic acceptance contract",
+  "$comment": "Private structural preparation, no issuer authentication or activation. Native verifies exact raw CAS, UTF-8, byte length and range boundaries separately. Approved object-domain identity is separate from raw CAS and schema acceptance. Full contract freeze awaits remaining ADR-D08 decisions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "project_id", "work_id", "created_by_assertion", "body"],
+  "properties": {
+    "schema": {"const": "golem.intent.source.v1"},
+    "project_id": {"$ref": "#/$defs/id"},
+    "work_id": {"anyOf": [{"$ref": "#/$defs/id"}, {"type": "null"}]},
+    "created_by_assertion": {"$ref": "#/$defs/text"},
+    "body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["body_cas", "byte_length", "media_type", "encoding", "origin", "capture_ref", "designation", "execution_authority"],
+      "properties": {
+        "body_cas": {"$ref": "#/$defs/digest_ref"},
+        "byte_length": {"type": "integer", "minimum": 0, "maximum": 16777216},
+        "media_type": {"enum": ["text/plain", "text/markdown"]},
+        "encoding": {"const": "UTF-8"},
+        "origin": {"enum": ["TRUSTED_USER_INPUT", "USER_DESIGNATED_DOCUMENT", "TOOL_OBSERVATION", "EXTERNAL_REFERENCE", "MODEL_DRAFT"]},
+        "capture_ref": {"$ref": "#/$defs/text"},
+        "execution_authority": {"const": false},
+        "designation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scope_id", "ranges", "purpose", "decision_ref"],
+          "properties": {
+            "scope_id": {"$ref": "#/$defs/id"},
+            "ranges": {"type": "array", "minItems": 1, "items": {
+              "type": "object", "additionalProperties": false, "required": ["start", "end"],
+              "properties": {
+                "start": {"type": "integer", "minimum": 0, "maximum": 16777216},
+                "end": {"type": "integer", "minimum": 0, "maximum": 16777216}
+              }
+            }},
+            "purpose": {"$ref": "#/$defs/text"},
+            "decision_ref": {"$ref": "#/$defs/digest_ref"}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9_-]+(?![\\s\\S])"},
+    "text": {"type": "string", "minLength": 1, "pattern": "^[^\u0000\ud800-\udfff]+$"},
+    "digest_ref": {"type": "string", "minLength": 64, "maxLength": 64, "pattern": "^[a-f0-9]+(?![\\s\\S])"}
+  }
+}
