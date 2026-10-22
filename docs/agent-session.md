@@ -4,6 +4,9 @@ This is the normal external-agent orchestration path: the agent judges and
 performs the task; Golem validates state, ownership, dependencies and evidence.
 No daemon or engine-owned agent launcher is required. An assistant can be one
 client. See [the shared responsibility contract](agent-golem-boundary.md).
+The [common architecture and process](architecture.md) connect these native
+transitions to D1-D6 without adding a second state machine. Startup hooks and
+read-only preflight do not automatically invoke any mutation shown below.
 
 For a verified projection plus provider-budgeted input handoff, use the explicit
 [context-aware resume](context-resume.md) entry point. Legacy session calls retain

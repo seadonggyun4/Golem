@@ -1,5 +1,10 @@
 # Conditional Markdown Workflow
 
+The [implemented architecture and development cycle](architecture.md#representative-development-cycle)
+place this dependency graph inside the agent/core process. The agent chooses
+plans and repairs; this API computes admissible inputs and next actions, not
+provider dispatch, implicit approvals or automatic stage execution.
+
 For structured docs/code/deploy procedure routing and captured selection proposals,
 see [task-specific procedures](task-procedures.md).
 

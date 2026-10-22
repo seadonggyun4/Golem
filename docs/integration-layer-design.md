@@ -9,6 +9,9 @@ schema·프로젝트 승인 registry·읽기 backend는 [D1 계약](integration-
 업데이트·재로딩·quarantine 해제는 [D5 계약](integration-d5.md)을 따른다.
 원격 보안·인증·전달 동의의 구현 범위는 [D6 계약](integration-d6.md)을 따른다.
 기존 계약은 각 링크가 권위이며 D1-D6 계약에서 구현했다고 명시한 것 외의 이름·경로는 제안이다.
+[현재 구현 아키텍처와 작업 프로세스](architecture.md)는 README와 공유하는 도식,
+저장 권위·역할·코드/회귀 대응표를 제공한다. 아래 기준 소스의 설계와 제안 layout은
+역사적 검토 맥락이며, 현재 동작·정확한 한도는 해당 구현 계약과 구분한다.
 MUST/금지는 향후 구현 요구사항이며 과거 저장 형식을 소급 변경하지 않는다.
 연구 근거·열람 범위·대안 비교: [조사 기록](integration-layer-references.md).
 
@@ -60,26 +63,33 @@ C facade는 별도 ABI·동등성 검증 후 같은 backend interface 아래 추
 
 ## 3. Architecture and Modules
 
-```text
-Owner-controlled installer / project approval UI
-                 |
-        private integration registry
-                 |
-Client A -- stdio MCP adapter A --+
-Client B -- stdio MCP adapter B --+-- integration service
-CLI/hook ------------------------+         |
-                                     NativeBackend
-                                pinned CLI / future C facade
-                                           |
-                              existing core gates and locks
-                                           |
-                               project/.golem/Work stores
+```mermaid
+flowchart TD
+    O["Owner-reviewed installation and approvals"] --> R["Private registry and pinned policies"]
+    A["Client A: local stdio MCP"] --> I["D2 approved read service"]
+    B["Client B: its own approved stdio policy"] --> I
+    H["Supported D3 hooks: reads only"] --> I
+    G["Optional D6 TLS gateway: authentication and delegate scopes"] --> I
+    A -->|"Separate approved actions"| W["Opt-in D4 typed mutation service"]
+    G -->|"Separate remote mutation approval"| W
+    R --> I
+    R --> W
+    I --> N["Fixed native backend: pinned CLI and full JSON; optional D4 approval host"]
+    W --> N
+    N --> C["Existing native APIs, gates, replay and locks"]
+    L["Independent direct CLI / C API callers"] --> C
+    C --> S["Explicitly selected Work stores; commonly under project .golem"]
+    M["D5 owner-only maintenance"] --> R
 ```
 
 기본은 **client가 필요할 때 시작하는 stdio 프로세스**다. 여러 프로세스가 같은 core
 store lock을 사용한다. 연결 수명 동안 Work handle을 열어 잠금을 점유하지 않는다.
 provider count·사용자 승인·네트워크 대기 중 Work lock을 유지하지 않는다.
 원격 gateway는 12절의 선택적 모드이며 기본 daemon이 아니다.
+도식의 D3 경로는 읽기 service에만 연결되며 D4 변경 권한을 얻지 않는다.
+D1/D5는 참여 integration caller의 승인·유지보수 경계다. 독립적인 직접 CLI/C 호출까지
+중개·freeze하는 OS 격리 계층으로 해석하지 않는다. 범용 C backend facade는 향후 연결이며
+현재 public C API가 존재한다는 이유만으로 구현 완료라고 표시하지 않는다.
 
 | 제안 모듈 | 책임 | 금지 |
 | --- | --- | --- |

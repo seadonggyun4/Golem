@@ -33,21 +33,61 @@ The agent interprets user intent, plans, edits code and uses tools. Golem manage
 
 The goal is to preserve the orchestration core while reducing agent-facing procedures and inputs, not weaken evidence or safety gates. "Lightweight" describes this boundary, not a measured token, billing or performance result. See [roles and execution boundaries](docs/agent-golem-boundary.md).
 
-## Work Cycle
+## Architecture
 
-```text
-User request
-→ Current agent starts or restores a Work in Golem
-→ Explore the project, research references and select scope
-→ Author and register Markdown for the necessary stages
-→ Develop against validated documents
-→ Run real QA and record results in Markdown
-→ Classify failures
-→ Revise affected documents → repeat development and QA
-→ Verify completion conditions and produce a completion report
+```mermaid
+flowchart TD
+    A["External agent: judgment, edits and tools"] -->|"Direct CLI / C API"| C["Native C17 core: state, ownership, dependencies and evidence"]
+    A -->|"Opt-in MCP / supported hooks"| I["Python integration layer: D1-D6"]
+    O["Owner-reviewed client, project, disclosure and action policies"] --> I
+    I -->|"Pinned CLI / fixed JSON requests"| C
+    C --> E["Approved execution, QA and current completion"]
+    C --> S["Explicit Work store, commonly under .golem"]
+    E --> S
+    S --> J["Durable events and receipts / content-addressed originals"]
+    S --> M["Derived Markdown and reports"]
 ```
 
-Select **only the necessary stages** from planning → UX → publishing → development → QA → audit. Downstream documents reference exact upstream revisions; changes trigger freshness checks on affected documents and verification results.
+The integration layer connects clients; it does not replace native acceptance.
+D1 handles approval and reviewed installation, D2 scoped reads/context/handoff,
+D3 read-only startup/resume notices, D4 separately approved typed mutations,
+D5 owner-controlled updates/reload/recovery, and D6 an optional authenticated TLS
+gateway. They are not six engines or mandatory background services. Work paths
+are explicit; a `.golem` directory alone grants no access. Client labels are not
+authenticated identities, and context delivery does not prove model consumption.
+
+See [implemented architecture, storage authority and code/test map](docs/architecture.md)
+for the complete process and [integration contracts](docs/integration-layer-design.md)
+for per-client support, approval and deployment limits.
+
+## Work Cycle
+
+Representative **development** path for an explicitly created/enrolled Work:
+
+```mermaid
+flowchart TD
+    S["Read status / next; review preflight"] --> G{"Current action admissible?"}
+    G -->|"No / effects uncertain"| B["Wait or explicit recovery; no blind retry"]
+    G -->|"Yes"| P["Per-artifact claim / context / begin; current plans; approved prepare"]
+    P --> A["Agent edits source"]
+    A --> D["Finish observation; register and submit development result"]
+    D --> Q["QA plan and own QA claim; approved gates; register and submit result"]
+    Q --> R{"QA outcome"}
+    R -->|"FAIL / ERROR"| F["Agent classifies failure and revises affected inputs"]
+    F --> S
+    R -->|"PASS"| V["Recheck current source, documents and evidence"]
+    V --> C["Explicit finalize and required report projection"]
+    C --> N["Native DONE only when current conditions hold"]
+```
+
+Each claim covers one required artifact, not this entire cycle. The standard
+stage-selection workflow requires planning, development, QA and completion
+verification; UX/publishing are conditional on scope. Documents mode and enrolled
+role contracts have their own predicates, not fabricated code/test success.
+Downstream inputs bind exact upstream revisions. Changed source or parents can
+invalidate earlier evidence: registration, QA PASS and current DONE are distinct.
+Startup hooks and preflight do not automatically resume, execute or take ownership;
+handoff preserves explicit state/evidence, not every client's entire conversation.
 
 | Capability | Behavior | Details |
 | --- | --- | --- |

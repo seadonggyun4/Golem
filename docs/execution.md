@@ -4,6 +4,9 @@ Golem keeps the current agent in control of editing. It does not launch another
 agent, execute Markdown code blocks, or interpret reference documents as grants.
 The C API is `include/golem/execution.h`; CLI commands use `golem execution`.
 This is a bounded local execution contract, not a general acceptance oracle.
+The [representative development cycle](architecture.md#representative-development-cycle)
+shows this optional execution path alongside per-artifact sessions, agent edits,
+registered receipts and separate completion. It is not a universal launcher.
 Opt-in contract v2 adds [verification bundles and log retention](verification-bundles.md)
 without rewriting historical v1 receipts or Markdown.
 Contract v3 adds [explicit shell approval and the execution boundary](execution-boundary.md).

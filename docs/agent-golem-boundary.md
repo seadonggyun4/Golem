@@ -30,8 +30,11 @@ Cooperative local labels and hashes are not authenticated identity or truth.
 
 ## Implementation Map
 
-Source reviewed against `6b73dba` on 2026-10-20; this is a documentation
+Source cross-checked against `b5a7992` on 2026-10-22; this is a documentation
 clarification, not a change to execution behavior or persisted contracts.
+The [implemented architecture and process](architecture.md) provide the common
+diagrams, D1-D6 responsibilities, storage authority and code/regression map used
+by both READMEs. Exact subsystem contracts remain authoritative.
 
 | Path | Actual contract | Product boundary |
 | --- | --- | --- |
@@ -50,11 +53,15 @@ add a mandatory daemon to the core.
 
 ## Lightweight Boundary
 
-For proposed multi-client installation, project consent, identity mapping,
-context delivery and MCP access, see [integration layer design](integration-layer-design.md).
-The [D2 stdio MCP slice](integration-d2.md) now reuses D1 approvals for explicit
-read/context/handoff delivery. Automatic client installation, native mutation
-and remote-gateway features are not supplied by that slice.
+For implemented multi-client approval, reviewed settings installation, identity
+mapping, context delivery and MCP access, see the
+[architecture overview](architecture.md#integration-responsibilities) and
+[integration design with per-slice contracts](integration-layer-design.md).
+[D2](integration-d2.md) reuses D1 approvals for explicit read/context/handoff,
+committed-reference evidence reads and current completion queries. Native
+mutations belong to separately approved D4 actions, updates/recovery to D5 and
+the optional authenticated gateway to D6; they are not hidden D2 capabilities.
+Supported owner-installed settings are not automatic Hosted setup or hook trust.
 
 Preserve the orchestration core while reducing the procedures and inputs an
 agent must handle. Reuse compact views with original retrieval, mechanical

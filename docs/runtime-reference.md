@@ -3,6 +3,10 @@
 Detailed reference retained from the former README. Commands run from the repository root.
 Start with the [English README](../README.md) or [Korean README](../README.ko.md).
 Subsystem descriptions apply to their individual APIs, not the entire product.
+The shared [implemented architecture and work process](architecture.md) shows
+the normal external-agent path, optional D1-D6 integrations, storage authority
+and code/test map. Native core, optional executors and integration transports
+are separate layers; daemon/noop examples below are not the default agent path.
 
 **Awaken the worker.**
 

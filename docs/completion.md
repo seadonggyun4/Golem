@@ -4,6 +4,10 @@ For combined revision-scoped E2E/local QA/remote CI/completion/deployment eviden
 see [revision status](revision-status.md). That view leaves native authority here
 unchanged; historical receipts and CI/deployment PASS never imply current overall
 completion.
+See the [implemented architecture and cycle](architecture.md#representative-development-cycle)
+for the distinction between document registration, observed QA PASS, current
+native DONE and integration delivery. None of these observations silently
+authorizes the next mutation or upgrades historical evidence.
 
 Golem verifies declared development acceptance, records an immutable completion
 receipt, and restores Markdown projections without rerunning an agent or test.
