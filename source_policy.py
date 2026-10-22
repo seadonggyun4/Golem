@@ -10,6 +10,8 @@ PRIVATE = frozenset({"project-docs", "credentials", "secrets", "reports", "works
 BASE = frozenset({"CMakeLists.txt", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"})
 TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.py",
     "execution_record.py", "test_execution_record.py",
+    "intent_authority.py", "intent_authority_lifecycle.py", "intent_authority_host.c",
+    "test_intent_authority.py", "benchmark_intent_journal.py", "test_benchmark_intent_journal.py",
     "native_record.py", "syscall_record.py", "test_syscall_record.py",
     "doctor_environment.py", "test_doctor_environment.py", "classify_failures.py",
     "test_classify_failures.py", "verify_environment.py", "test_verify_environment.py",
@@ -84,6 +86,7 @@ samples/integration/enrollment.schema.json
 samples/integration/grant.schema.json
 samples/integration/project.schema.json
 samples/integration/read.schema.json
+samples/intent/source.schema.json
 samples/reentry/decision.json
 samples/research/adjudication-request.json
 samples/research/attempt-request.json
@@ -98,6 +101,7 @@ samples/runtime-profile.json
 samples/work-capsules/basic.json
 tests/c/fixtures/completion/v1-store.json
 tests/c/fixtures/session/wrong-kind-v1.json
+tests/c/fixtures/intent/source-v1.json
 tests/c/fixtures/journal/v1_cancelled.hex
 tests/c/fixtures/journal/v1_default.hex
 tests/c/fixtures/journal/v1_invalid_transition.hex

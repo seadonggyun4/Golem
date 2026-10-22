@@ -57,6 +57,25 @@ class SourceSnapshotTests(unittest.TestCase):
         self.assertFalse(selected("tools/local_report.py"))
         self.assertFalse(selected("tools/project-docs/plan.py"))
 
+    def test_d01_export_keeps_only_reviewed_protocol_dependencies(self):
+        root = Path(__file__).resolve().parents[1]
+        required = ("tools/intent_authority.py", "tools/intent_authority_lifecycle.py",
+            "tools/intent_authority_host.c", "tools/test_intent_authority.py",
+            "tools/benchmark_intent_journal.py", "tools/test_benchmark_intent_journal.py",
+            "samples/intent/source.schema.json", "tests/c/fixtures/intent/source-v1.json")
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp).resolve()
+            exported = export_sources(root, output)
+            for name in required:
+                self.assertIn(name, exported)
+                self.assertEqual((output / name).read_bytes(), (root / name).read_bytes())
+            subprocess.run([sys.executable, "-c", "import intent_authority, intent_authority_lifecycle"],
+                           cwd=output / "tools", check=True, timeout=30)
+        for name in ("tools/intent_local_report.py", "samples/intent/owner-approval.json",
+                     "tests/c/fixtures/intent/live-evidence.json", ".git/golem-intent-authority.host-final.json",
+                     "authority/quarantine/evidence", "docs/intent-assurance-d01-host.ko.md"):
+            self.assertFalse(selected(name), name)
+
     def test_diagnostic_harness_runs_from_export_without_git_metadata(self):
         root = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as tmp:

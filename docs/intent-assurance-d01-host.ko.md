@@ -800,3 +800,8 @@ pin·단일 FD·명시 환경·stdin 등록 bytes를 사용하는 내부 protoco
 정확한 호출 수·run 사용·timeout·capture·환경·단일 FD 인자를 고정했다.
 mutation의 승인·receipt는 기존 host/native 경로에 보존한다. 이 예외는 일반 command
 실행 관측 로그의 자동 수집을 제공하지 않으며 제품 실행의 새 예외가 아니다.
+
+clean-source CI에서 새 native helper가 export allowlist에 누락된 것도 확인했다.
+검토한 D01 도구 6개와 schema/fixture 2개만 validation export에 추가하고, export 후
+파일 바이트 일치와 Python import를 검사한다. 실제 승인·authority·증거·개발문서는
+이 allowlist에 포함하지 않는다. Conan의 제품 소스 export 범위는 확장하지 않는다.
