@@ -70,4 +70,29 @@ golem_status gi_domain_digest(golem_bytes control, golem_digest *out, golem_diag
 golem_status gi_source_identity(golem_bytes control, golem_bytes text,
     golem_digest *out, golem_diagnostic *diagnostic);
 
+typedef struct gi_baseline_result {
+    size_t sources, requirements, constraints, coverage_rows;
+    bool has_questions;
+    bool source_coverage_unverified, references_unverified, semantic_review_required;
+} gi_baseline_result;
+/* Pure proposal shape/membership only. No registry insertion, identity issuance,
+ * store access, authority, activation or PASS. Input order/bytes are preserved;
+ * output changes only on success. Source ranges and referents remain unverified. */
+golem_status gi_baseline_validate(golem_bytes control, gi_baseline_result *out,
+    golem_diagnostic *diagnostic);
+
+typedef struct gi_source_input { golem_bytes control, text; } gi_source_input;
+typedef struct gi_baseline_coverage_result {
+    gi_baseline_result baseline;
+    size_t source_bytes, designated_bytes;
+    bool adoption_unverified, issuer_unverified;
+} gi_baseline_coverage_result;
+/* Explicit borrowed source set only: no filesystem/CAS/network resolution.
+ * Exact source membership, compatible scope and raw coverage are checked.
+ * All other referents, adoption, issuer and semantics remain unverified.
+ * No partial output on failure; no authority/activation or side effects. */
+golem_status gi_baseline_coverage_validate(golem_bytes control,
+    const gi_source_input *sources, size_t count, gi_baseline_coverage_result *out,
+    golem_diagnostic *diagnostic);
+
 #endif

@@ -265,6 +265,250 @@ golem_status gi_source_identity(golem_bytes control, golem_bytes text,
     return status == GOLEM_OK ? gi_domain_digest(control, out, d) : status;
 }
 
+static bool lower_digest(struct json_object *o)
+{
+    if (!string(o) || json_object_get_string_len(o) != 64) return false;
+    const char *s = json_object_get_string(o);
+    for (size_t i = 0; i < 64; ++i)
+        if (!((s[i] >= '0' && s[i] <= '9') || (s[i] >= 'a' && s[i] <= 'f'))) return false;
+    return true;
+}
+
+/* Sets are temporary lookup indexes, never a sorted/normalized wire form. */
+static golem_status baseline_refs(struct json_object *array, struct json_object *allowed,
+    struct json_object **out)
+{
+    if (!json_object_is_type(array, json_type_array)) return GOLEM_ERR_PARSE;
+    struct json_object *set = json_object_new_object();
+    if (!set) return GOLEM_ERR_OUT_OF_MEMORY;
+    golem_status st = GOLEM_OK;
+    for (size_t i = 0; i < json_object_array_length(array); ++i) {
+        struct json_object *ref = json_object_array_get_idx(array, i);
+        if (!lower_digest(ref)) { st = GOLEM_ERR_PARSE; break; }
+        const char *key = json_object_get_string(ref);
+        if (json_object_object_get_ex(set, key, NULL) ||
+            (allowed && !json_object_object_get_ex(allowed, key, NULL))) {
+            st = GOLEM_ERR_PARSE; break;
+        }
+        if (json_object_object_add(set, key, NULL) != 0) { st = GOLEM_ERR_OUT_OF_MEMORY; break; }
+    }
+    if (st == GOLEM_OK) *out = set;
+    else json_object_put(set);
+    return st;
+}
+
+/* json-c saturates overflowing integer tokens. Reject before parsing rather
+ * than accepting a different offset. All proposal numbers are uint64 integers. */
+static bool baseline_numbers(golem_bytes b)
+{
+    bool quoted = false;
+    for (size_t i = 0; i < b.size; ++i) {
+        unsigned char c = b.data[i];
+        if (quoted && c == '\\') { ++i; continue; }
+        if (c == '"') { quoted = !quoted; continue; }
+        if (quoted || c < '0' || c > '9') continue;
+        uint64_t n = 0;
+        do {
+            unsigned digit = b.data[i] - '0';
+            if (n > (UINT64_MAX - digit) / 10) return false;
+            n = n * 10 + digit;
+            ++i;
+        } while (i < b.size && b.data[i] >= '0' && b.data[i] <= '9');
+        --i;
+    }
+    return true;
+}
+
+golem_status gi_baseline_validate(golem_bytes control, gi_baseline_result *out, golem_diagnostic *d)
+{
+    if (!out || (!control.data && control.size)) return fail(d, GOLEM_ERR_INVALID_ARGUMENT, "intent.argument");
+    if (control.size > GI_CONTROL_MAX) return fail(d, GOLEM_ERR_OVERFLOW, "intent.limit.control_bytes");
+    if (!scalar_escapes(control) || !baseline_numbers(control))
+        return fail(d, GOLEM_ERR_PARSE, "intent.baseline.scalar");
+    struct json_object *o = NULL, *sets[4] = {NULL}, *seen = NULL;
+    golem_status st = golem_json_parse(control, GI_CONTROL_MAX, &o);
+    if (st != GOLEM_OK) return fail(d, st, "intent.baseline.json");
+    const char *code = "intent.baseline.schema";
+    const char *root[] = {"schema", "project_id", "work_id", "created_by_assertion", "body"};
+    const char *body_keys[] = {"source_refs", "previous_baseline_digest", "decision_refs",
+        "requirement_refs", "constraint_refs", "coverage_manifest", "issuer_policy_ref"};
+    const char *refs[] = {"source_refs", "decision_refs", "requirement_refs", "constraint_refs"};
+    const char *entry_keys[] = {"source_ref", "rows"};
+    const char *row_keys[] = {"start", "end", "classification", "requirement_refs",
+        "constraint_refs", "rationale", "review_refs"};
+    const char *classes[] = {"REQUIREMENT", "CONSTRAINT", "CONTEXT", "EXPLICIT_NON_GOAL",
+        "NON_NORMATIVE", "QUESTION_REQUIRED"};
+    struct json_object *body = get(o, "body"), *work = get(o, "work_id");
+    struct json_object *previous = get(body, "previous_baseline_digest");
+    gi_baseline_result result = {0};
+    st = GOLEM_ERR_PARSE;
+    if (!keys(o, root, 5) || !eq(get(o, "schema"), "golem.intent.baseline.v1") ||
+        !identifier(get(o, "project_id")) || (work && !identifier(work)) ||
+        !string(get(o, "created_by_assertion")) || !keys(body, body_keys, 7) ||
+        (previous && !lower_digest(previous)) || !lower_digest(get(body, "issuer_policy_ref"))) goto done;
+    code = "intent.baseline.refs";
+    for (size_t i = 0; i < 4; ++i) {
+        st = baseline_refs(get(body, refs[i]), NULL, &sets[i]);
+        if (st != GOLEM_OK) goto done;
+    }
+    result.sources = json_object_array_length(get(body, refs[0]));
+    result.requirements = json_object_array_length(get(body, refs[2]));
+    result.constraints = json_object_array_length(get(body, refs[3]));
+    st = GOLEM_ERR_PARSE;
+    if (!result.sources) goto done;
+    if (result.requirements > GI_REQUIREMENT_MAX) {
+        st = GOLEM_ERR_OVERFLOW; code = "intent.limit.requirements"; goto done;
+    }
+    code = "intent.baseline.coverage";
+    struct json_object *manifest = get(body, "coverage_manifest");
+    if (!json_object_is_type(manifest, json_type_array) ||
+        json_object_array_length(manifest) != result.sources) goto done;
+    seen = json_object_new_object();
+    if (!seen) { st = GOLEM_ERR_OUT_OF_MEMORY; goto done; }
+    for (size_t i = 0; i < result.sources; ++i) {
+        struct json_object *entry = json_object_array_get_idx(manifest, i);
+        struct json_object *source = get(entry, "source_ref"), *rows = get(entry, "rows");
+        if (!keys(entry, entry_keys, 2) || !lower_digest(source) ||
+            !json_object_is_type(rows, json_type_array)) goto done;
+        const char *key = json_object_get_string(source);
+        if (!json_object_object_get_ex(sets[0], key, NULL) ||
+            json_object_object_get_ex(seen, key, NULL)) goto done;
+        if (json_object_object_add(seen, key, NULL) != 0) { st = GOLEM_ERR_OUT_OF_MEMORY; goto done; }
+        for (size_t j = 0; j < json_object_array_length(rows); ++j) {
+            struct json_object *row = json_object_array_get_idx(rows, j);
+            uint64_t start, end;
+            if (!keys(row, row_keys, 7) || !uint_value(get(row, "start"), &start) ||
+                !uint_value(get(row, "end"), &end) || start >= end || !string(get(row, "rationale"))) goto done;
+            bool known = false;
+            for (size_t k = 0; k < 6; ++k) known |= eq(get(row, "classification"), classes[k]);
+            if (!known) goto done;
+            result.has_questions |= eq(get(row, "classification"), "QUESTION_REQUIRED");
+            const char *row_refs[] = {"requirement_refs", "constraint_refs", "review_refs"};
+            for (size_t k = 0; k < 3; ++k) {
+                struct json_object *tmp = NULL;
+                golem_status rs = baseline_refs(get(row, row_refs[k]), k < 2 ? sets[k + 2] : NULL, &tmp);
+                json_object_put(tmp);
+                if (rs != GOLEM_OK) { st = rs; goto done; }
+            }
+            ++result.coverage_rows;
+        }
+    }
+    result.source_coverage_unverified = true;
+    result.references_unverified = true;
+    result.semantic_review_required = true;
+    *out = result;
+    st = GOLEM_OK;
+done:
+    for (size_t i = 0; i < 4; ++i) json_object_put(sets[i]);
+    json_object_put(seen);
+    json_object_put(o);
+    return st == GOLEM_OK ? st : fail(d, st, code);
+}
+
+static golem_status baseline_source_coverage(struct json_object *source,
+    struct json_object *entry, golem_bytes text, gi_coverage_result *out, golem_diagnostic *d)
+{
+    struct json_object *ranges = get(get(get(source, "body"), "designation"), "ranges");
+    struct json_object *rows = get(entry, "rows");
+    size_t n = json_object_array_length(ranges), m = json_object_array_length(rows);
+    if (!m) return fail(d, GOLEM_ERR_INVALID_STATE, "intent.baseline.coverage_empty");
+    if (n > GI_CONTROL_MAX / sizeof(gi_span) || m > GI_CONTROL_MAX / sizeof(gi_coverage_row))
+        return fail(d, GOLEM_ERR_OVERFLOW, "intent.limit.control_bytes");
+    gi_span *spans = malloc(n * sizeof(*spans));
+    gi_coverage_row *coverage = malloc(m * sizeof(*coverage));
+    if (!spans || !coverage) {
+        free(spans); free(coverage);
+        return fail(d, GOLEM_ERR_OUT_OF_MEMORY, "intent.memory");
+    }
+    golem_status st = GOLEM_OK;
+    const char *classes[] = {"REQUIREMENT", "CONSTRAINT", "CONTEXT", "EXPLICIT_NON_GOAL",
+        "NON_NORMATIVE", "QUESTION_REQUIRED"};
+    for (size_t i = 0; i < n + m; ++i) {
+        struct json_object *r = json_object_array_get_idx(i < n ? ranges : rows, i < n ? i : i - n);
+        uint64_t start = 0, end = 0;
+        if (!uint_value(get(r, "start"), &start) || !uint_value(get(r, "end"), &end) ||
+            start > text.size || end > text.size) {
+            st = fail(d, GOLEM_ERR_PARSE, "intent.source.range"); break;
+        }
+        gi_span span = {(size_t)start, (size_t)end};
+        if (i < n) spans[i] = span;
+        else {
+            coverage[i - n].span = span;
+            coverage[i - n].classification = GI_REQUIREMENT;
+            for (size_t k = 0; k < 6; ++k)
+                if (eq(get(r, "classification"), classes[k])) coverage[i - n].classification = (gi_classification)k;
+        }
+    }
+    if (st == GOLEM_OK) st = gi_coverage_validate(text, spans, n, coverage, m, out, d);
+    free(spans); free(coverage);
+    return st;
+}
+
+golem_status gi_baseline_coverage_validate(golem_bytes control,
+    const gi_source_input *sources, size_t count, gi_baseline_coverage_result *out, golem_diagnostic *d)
+{
+    if (!out || (!sources && count)) return fail(d, GOLEM_ERR_INVALID_ARGUMENT, "intent.argument");
+    gi_baseline_coverage_result result = {0};
+    golem_status st = gi_baseline_validate(control, &result.baseline, d);
+    if (st != GOLEM_OK) return st;
+    if (count != result.baseline.sources)
+        return fail(d, GOLEM_ERR_INVALID_STATE, "intent.baseline.source_set");
+    /* Count is bounded by the validated control JSON's unique source refs. */
+    golem_bytes *bodies = malloc(count * sizeof(*bodies));
+    if (!bodies) return fail(d, GOLEM_ERR_OUT_OF_MEMORY, "intent.memory");
+    for (size_t i = 0; i < count; ++i) bodies[i] = sources[i].text;
+    st = gi_source_set_validate(bodies, count, &result.source_bytes, d);
+    free(bodies);
+    if (st != GOLEM_OK) return st;
+    struct json_object *baseline = NULL, *entries = json_object_new_object(), *seen = json_object_new_object();
+    if (!entries || !seen) { st = fail(d, GOLEM_ERR_OUT_OF_MEMORY, "intent.memory"); goto done; }
+    st = golem_json_parse(control, GI_CONTROL_MAX, &baseline);
+    if (st != GOLEM_OK) { st = fail(d, st, "intent.baseline.json"); goto done; }
+    struct json_object *manifest = get(get(baseline, "body"), "coverage_manifest");
+    for (size_t i = 0; i < count; ++i) {
+        struct json_object *e = json_object_array_get_idx(manifest, i);
+        struct json_object *held = json_object_get(e);
+        if (json_object_object_add(entries, json_object_get_string(get(e, "source_ref")), held) != 0) {
+            json_object_put(held); st = fail(d, GOLEM_ERR_OUT_OF_MEMORY, "intent.memory"); goto done;
+        }
+    }
+    for (size_t i = 0; i < count; ++i) {
+        golem_digest identity;
+        st = gi_source_identity(sources[i].control, sources[i].text, &identity, d);
+        if (st != GOLEM_OK) goto done;
+        char key[65]; size_t required = 0;
+        st = golem_digest_format(&identity, key, sizeof(key), &required);
+        if (st != GOLEM_OK) { st = fail(d, st, "intent.baseline.identity"); goto done; }
+        struct json_object *entry = NULL, *source = NULL;
+        if (!json_object_object_get_ex(entries, key, &entry) || json_object_object_get_ex(seen, key, NULL)) {
+            st = fail(d, GOLEM_ERR_INVALID_STATE, "intent.baseline.source_set"); goto done;
+        }
+        if (json_object_object_add(seen, key, NULL) != 0) {
+            st = fail(d, GOLEM_ERR_OUT_OF_MEMORY, "intent.memory"); goto done;
+        }
+        st = golem_json_parse(sources[i].control, GI_CONTROL_MAX, &source);
+        if (st != GOLEM_OK) { st = fail(d, st, "intent.source.json"); goto done; }
+        struct json_object *work = get(baseline, "work_id"), *source_work = get(source, "work_id");
+        if (!eq(get(source, "project_id"), json_object_get_string(get(baseline, "project_id"))) ||
+            (source_work && (!work || !eq(source_work, json_object_get_string(work))))) {
+            json_object_put(source);
+            st = fail(d, GOLEM_ERR_INVALID_STATE, "intent.baseline.source_scope"); goto done;
+        }
+        gi_coverage_result coverage;
+        st = baseline_source_coverage(source, entry, sources[i].text, &coverage, d);
+        json_object_put(source);
+        if (st != GOLEM_OK) goto done;
+        result.designated_bytes += coverage.designated_bytes;
+    }
+    result.baseline.source_coverage_unverified = false;
+    result.adoption_unverified = true;
+    result.issuer_unverified = true;
+    *out = result;
+done:
+    json_object_put(entries); json_object_put(seen); json_object_put(baseline);
+    return st;
+}
+
 golem_status gi_source_validate(golem_bytes control, golem_bytes text,
     gi_source_result *out, golem_diagnostic *d)
 {

@@ -1,5 +1,12 @@
 # P1 준비 기록과 quota-aware journal
 
+현재 상태(2026-10-23): 아래 초기 구현 기록 이후 D01 등록 및 승인 기반의 제한된 복구가
+[D01 host](intent-assurance-d01-host.ko.md)에 연결되었다. 최종 승인 자체의 부분 게시와
+그 이후 추가 복구 계층은 계속 차단한다. baseline proposal 순수 구조 validator와
+명시 제공 source의 identity/scope/실제 coverage 연결 검사는
+[P1 schema 현황](intent-assurance-p1-schema.ko.md)에 추가됐지만, source/baseline 다중 객체
+store·공유 CAS 귀속 index·baseline reducer는 아직 구현하지 않았다.
+
 2026-10-22. 승인된 D01·D08/v2 및 최초 lane 고정 계약을 사용하는
 **private native journal 경로**다. baseline reducer·제품 CLI·실제 authority 설치 완료는 아니다.
 [결정·용량 기록](intent-assurance-journal-capacity.ko.md)을 따른다.
