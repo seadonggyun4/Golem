@@ -78,6 +78,14 @@ jobs:
         env:
           ASAN_OPTIONS: halt_on_error=1
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      - name: Preserve orchestration evidence including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: orchestration-${{ matrix.os }}-${{ github.run_attempt }}
+          path: build/orchestration-validation/
+          if-no-files-found: warn
+          retention-days: 14
       - name: Collector checks and bounded observation benchmark
         run: |
           python3 -m unittest discover -s tools -p 'test_*.py'
