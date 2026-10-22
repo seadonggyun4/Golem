@@ -416,7 +416,9 @@ if(GOLEM_BUILD_CLI)
         "GOLEM_INTENT_HOST=$<TARGET_FILE:golem_intent_authority_host>"
         ${Python3_EXECUTABLE} -m unittest discover -s ${PROJECT_SOURCE_DIR}/tools
         -p test_intent_authority.py)
-    set_tests_properties(intent_authority_host PROPERTIES TIMEOUT 180 LABELS "intent;integration")
+    # 166 isolated host cases exceed 180s under parallel macOS CI; each Git/native
+    # subprocess retains its own 10/15s bound. Do not drop cases from the suite.
+    set_tests_properties(intent_authority_host PROPERTIES TIMEOUT 600 LABELS "intent;integration")
     add_test(NAME intent_schema_conformance COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/intent_schema_conformance.py
         --native $<TARGET_FILE:golem_intent_schema_helper>)

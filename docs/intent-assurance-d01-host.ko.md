@@ -805,3 +805,8 @@ clean-source CI에서 새 native helper가 export allowlist에 누락된 것도 
 검토한 D01 도구 6개와 schema/fixture 2개만 validation export에 추가하고, export 후
 파일 바이트 일치와 Python import를 검사한다. 실제 승인·authority·증거·개발문서는
 이 allowlist에 포함하지 않는다. Conan의 제품 소스 export 범위는 확장하지 않는다.
+
+후속 macOS Debug full-suite에서는 405개 중 `intent_authority_host` 한 묶음만
+180.11초 CTest timeout으로 실패했다. 166개 host case의 로컬 ASan 실행도 152초였으므로
+병렬 CI 부하를 고려해 묶음 상한을 600초로 조정했다. Git/native 개별 subprocess의
+10/15초 제한·검증 항목·실패 판정은 유지한다. 테스트 제외나 실패 무시는 하지 않는다.
