@@ -887,6 +887,11 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/candidate_diff_integration.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_candidate_host_helper>)
     set_tests_properties(candidate_diff_integration PROPERTIES TIMEOUT 180)
+    if(GOLEM_ENABLE_SANITIZERS)
+        # Real QA and Git subprocesses exceeded 180s in parallel macOS ASan CI.
+        # Keep every freshness/protection assertion and subprocess deadline.
+        set_tests_properties(candidate_diff_integration PROPERTIES TIMEOUT 300)
+    endif()
     add_test(NAME orchestration_benchmark COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/orchestration_benchmark.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_candidate_host_helper>

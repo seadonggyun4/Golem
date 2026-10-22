@@ -810,3 +810,10 @@ clean-source CI에서 새 native helper가 export allowlist에 누락된 것도 
 180.11초 CTest timeout으로 실패했다. 166개 host case의 로컬 ASan 실행도 152초였으므로
 병렬 CI 부하를 고려해 묶음 상한을 600초로 조정했다. Git/native 개별 subprocess의
 10/15초 제한·검증 항목·실패 판정은 유지한다. 테스트 제외나 실패 무시는 하지 않는다.
+
+다음 macOS ASan full-suite에서는 D01 host가 아닌 기존 `candidate_diff_integration`만
+180.12초 timeout으로 실패했다(404개 중 유일한 실패). 실제 QA·Git 호출과 보호/freshness
+assertion은 그대로 두고 sanitizer 구성에서만 해당 묶음 상한을 300초로 조정한다.
+일반 빌드의 180초 상한과 제품 실행·QA writer lock 계약은 변경하지 않는다.
+macOS arm64 호스트 ASan에서 해당 테스트를 3회 반복해 모두 통과했다
+(119.22초, 118.70초, 120.27초). 제한 환경의 native host 준비 실패와는 구분한다.
