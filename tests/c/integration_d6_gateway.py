@@ -39,6 +39,8 @@ class Remote:
         url = "https://127.0.0.1:" + str(listener.getsockname()[1]) + "/mcp"
         self.value, self.signing = support.credentials(self.root, r.file_pin(self.transfer_path), "fixture",
             mutation_pin=r.file_pin(self.policy_path) if mutate else None, resource=url)
+        if not mutate:
+            self.value["delegates"][0]["tools"] += ["evidence_read", "completion_check"]
         if mutate and isinstance(self, QA):
             self.value["delegates"][0]["tools"] = ["work_inspect", "execution_request"]
         if second:
@@ -105,6 +107,13 @@ class D6(Remote, d4.D4):
                             result, value = await self.rpc_call(client, "work_inspect", {"project_id": "project",
                                 "work_id": "example-work", "view": view})
                             self.assertFalse(result.is_error)
+                            self.assertFalse(value["native_state_changed"])
+                        key = value["result"]["documents"][0]["body_digest"]
+                        for tool, fields in (("evidence_read", {"digest": key, "max_bytes": 1048576}),
+                                             ("completion_check", {"selection_id": "selection"})):
+                            result, value = await self.rpc_call(client, tool, {
+                                "project_id": "project", "work_id": "example-work", **fields})
+                            self.assertFalse(result.is_error, value)
                             self.assertFalse(value["native_state_changed"])
                         result, value = await self.rpc_call(client, "context_get", self.context_args())
                         self.assertFalse(result.is_error, value)

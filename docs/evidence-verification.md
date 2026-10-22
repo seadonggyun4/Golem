@@ -5,6 +5,11 @@
 and domain interpretation are separate; neither replaces native QA/completion.
 There is no numeric confidence score, ordinal trust ladder, or universal PASS.
 
+For approved MCP retrieval, [D2 evidence reads](integration-d2.md#evidence-and-completion-reads)
+return complete native hash-verified bytes only for committed document or journal
+CAS references in the explicitly approved Work. This does not create a new
+verification envelope or elevate integrity to authenticity/content truth.
+
 ## Independent dimensions
 
 | Check | States | Meaning |

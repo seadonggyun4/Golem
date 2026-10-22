@@ -12,6 +12,31 @@ import revision_status
 
 
 class Completion(Reentry):
+    def test_read_only_check_matches_current_authority_without_projection_repair(self):
+        self.ready()
+        def check(action):
+            before = {str(p.relative_to(self.work)): (p.stat().st_mode, p.read_bytes())
+                      for p in self.work.rglob("*") if p.is_file()}
+            result = self.cli("completion", "check", self.work, self.write("check.json", {
+                "schema_version": 1, "operation": "resume", "selection_id": "selection"}))
+            self.assertEqual(result["action"], action)
+            self.assertEqual(result["acceptance_verified"], action == "DONE")
+            after = {str(p.relative_to(self.work)): (p.stat().st_mode, p.read_bytes())
+                     for p in self.work.rglob("*") if p.is_file()}
+            self.assertEqual(before, after)
+        check("VERIFY_COMPLETION")
+        self.finalize()
+        check("RECOVER_REPORT")
+        self.project()
+        check("DONE")
+        (self.repo / "logic.c").write_text("int add(int a,int b) { return a-b; }\n")
+        check("REVALIDATE_COMPLETION")
+        before = len(self.events())
+        self.cli("completion", "check", self.work, self.write("forbidden-check.json", {
+            "schema_version": 1, "operation": "finalize", "selection_id": "selection",
+            "key": "forbidden", "expected_generation": self.generation, "issues": []}), ok=False)
+        self.assertEqual(before, len(self.events()))
+
     def test_revision_status_preserves_live_authority_and_rejects_old_done(self):
         self.ready()
         self.finalize()

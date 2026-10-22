@@ -46,8 +46,16 @@ golem completion validate finalize.json
 golem completion call /path/to/work finalize.json
 golem completion report /path/to/work 1
 golem completion call /path/to/work resume.json
+golem completion check /path/to/work resume.json
 golem workflow next /path/to/work selection
 ```
+
+`completion check` accepts only a validated `operation: resume` request, opens
+the store read-only and reuses the native completion reducer. Unlike `report`,
+it never repairs projections; unlike the general `call` endpoint, it cannot
+finalize. It preserves WAIT, recovery, stale-history and current DONE decisions.
+This is not an agent-session resume or authorization to execute. D2's
+`golem_completion_check` uses this endpoint after its existing approval checks.
 
 `finalize.json` (replace generation with the current document generation):
 

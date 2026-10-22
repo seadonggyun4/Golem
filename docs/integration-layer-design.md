@@ -378,7 +378,7 @@ modern multi-round-trip/legacy 승인 요청 차이는 transport adapter에 한�
 ### Proposed Tools
 
 아래는 전체 목표 surface다. [D2](integration-d2.md)는 projects_list/work_inspect/history_read/
-context_get/handoff_prepare를, [D4](integration-d4.md)는 별도 opt-in 서버에서 owner가 고정한
+context_get/handoff_prepare/evidence_read/completion_check를, [D4](integration-d4.md)는 별도 opt-in 서버에서 owner가 고정한
 session_claim/begin/resume/reconcile/submit, document_submit, execution_request를 구현했다.
 나머지는 제안이며 독립 closed schema·권한·한도 없이
 임의 operation dispatcher로 노출하지 않는다.
@@ -386,10 +386,10 @@ session_claim/begin/resume/reconcile/submit, document_submit, execution_request�
 | Tool | 매핑 | 효과 |
 | --- | --- | --- |
 | `golem_projects_list` | 승인 registry subset | read; 미승인 path/타 project 이름 누출 금지 |
-| `golem_work_inspect` | record/status/next/completion | read; 독립 관측 구분 |
+| `golem_work_inspect` | record/status/next | read; completion은 별도 도구, 독립 관측 구분 |
 | `golem_context_get` | candidate/render | read; publish 몰래 호출 금지 |
 | `golem_history_read` | history schema 2 | read; FULL/DELTA/has_more 유지 |
-| `golem_evidence_read` | scoped store/CAS read | read; data class 검사 |
+| `golem_evidence_read` | 커밋된 문서 manifest/body·journal payload CAS read | read; D1 record + D2 전달 승인, 크기·hash 확인, 임의·전이 참조 해석 없음 |
 | `golem_handoff_prepare` | fact/judgment/evidence bundle | integration write, native read-only |
 | `golem_session_claim` | 원래 claim | native write; 모든 fence 유지 |
 | `golem_session_begin` | 원래 begin | native write; 효과 시작과 구분 |
@@ -398,7 +398,7 @@ session_claim/begin/resume/reconcile/submit, document_submit, execution_request�
 | `golem_document_submit` | 원래 문서 등록 | native write; session submit과 별개 |
 | `golem_session_submit` | 원래 output/evidence submit | native write; 문서 등록으로 대체 금지 |
 | `golem_execution_request` | approval/receipted execution | 승인 contract만, raw shell 금지 |
-| `golem_completion_check` | 원래 completion 읽기 | read; finalize/report materialize 아님 |
+| `golem_completion_check` | native completion check → 기존 resume 조회 | read; record/status/next 승인, finalize/report materialize·session resume 아님 |
 
 초기 읽기 release는 read 도구만 제공한다. start/heartbeat/reject_output/finalize 등은 원래 CLI에
 남기고 각 typed 도구를 별도 명세·시험 후 추가한다. escape hatch는 만들지 않는다.
@@ -567,7 +567,7 @@ clock injection은 물리 재부팅 시험이 아니다.
 | --- | --- | --- |
 | D0 | 이 설계·근거·traceability | 설계 검토; 구현 완료 아님 |
 | D1 | registry/grant/installer + readonly CLI backend | closed schemas, T01-T04/T10/T16/T19, no-write |
-| D2 | readonly MCP + explicit context/handoff | real wire/profile·두 client, T11-T13/T17/T20 |
+| D2 | readonly MCP + explicit context/handoff + scoped evidence/current completion | real wire/profile·두 client, T11-T13/T17/T20, orphan·손상·크기·무변경·과거 완료 구분 |
 | D3 | opt-in startup/resume hooks | host별 지원 관측·failure fallback, 자동 write 없음 |
 | D4 | typed mutations·승인 QA | T05-T10/T14와 native 회귀·동시성·sanitizer |
 | D5 | staged update/reload/recovery | T02/T15와 참여 client quiescence |

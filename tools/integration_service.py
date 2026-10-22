@@ -1,5 +1,7 @@
 """Transport-independent D2 reads and explicit, non-authoritative handoffs."""
 from pathlib import Path
+import base64
+import binascii
 import tempfile
 import threading
 
@@ -19,6 +21,9 @@ SCHEMAS = {
                             "cursor": {"type": ["object", "null"]}}),
     "context_get": c.obj(CONTEXT_ARGS),
     "handoff_prepare": c.obj({**CONTEXT_ARGS, "recipient_client_id": c.ID}),
+    "evidence_read": c.obj({**WORK_ARGS, "digest": c.DIGEST,
+                            "max_bytes": {"type": "integer", "minimum": 1, "maximum": 1048576}}),
+    "completion_check": c.obj({**WORK_ARGS, "selection_id": c.ID}),
 }
 
 
@@ -30,6 +35,8 @@ def blocked(error):
         "RESULT_BUDGET_EXCEEDED": "OWNER_REVIEW_RESULT_BUDGET_NO_TRUNCATION",
         "AUDIT_QUOTA": "OWNER_REVIEW_PRIVATE_AUDIT_CAPACITY_NO_AUTOMATIC_DELETION",
         "GRANT_STALE": "OWNER_REVIEW_CURRENT_APPROVAL_GENERATION",
+        "EVIDENCE_NOT_REFERENCED": "SELECT_COMMITTED_DOCUMENT_OR_JOURNAL_PAYLOAD_REFERENCE",
+        "EVIDENCE_BINDING": "OWNER_INSPECT_LOCAL_NATIVE_EVIDENCE_NO_RETRY",
     }.get(code, "REVIEW_OWNER_POLICY_AND_LOCAL_NATIVE_EVIDENCE")
     return {"schema": "golem.integration-error.v1", "state": "BLOCKED",
             "code": code,
@@ -94,6 +101,10 @@ class Service:
                 for operation in ("record", "status", "next"):
                     self._authorize(scope, args["work_id"], operation)
                 result = self._context(scope, args, name)
+            elif name in ("evidence_read", "completion_check"):
+                for operation in (("record", "status", "next") if name == "completion_check" else ("record",)):
+                    self._authorize(scope, args["work_id"], operation)
+                result = self._verified_query(scope, args, name)
             else:
                 operation = args["view"] if name == "work_inspect" else "history"
                 self._authorize(scope, args["work_id"], operation)
@@ -110,6 +121,86 @@ class Service:
             "destination_id": self.transfer.value["destination_id"], **result}
         c.require(len(c.encoded(response)) <= self.transfer.value["max_result_bytes"], "RESULT_BUDGET_EXCEEDED")
         return response
+
+    def _verified_query(self, scope, args, tool):
+        """Only fixed native read commands; no caller-selected paths or operations."""
+        work_id = args["work_id"]
+        before = self._read(scope, work_id, "record")["result"]
+        references = []
+        if tool == "evidence_read":
+            # Explicit committed CAS roles, not arbitrary hex found in prose,
+            # frame hashes, assessment hashes, raw log hashes or orphan objects.
+            for row in before.get("documents", []):
+                for field, role in (("digest", "DOCUMENT_MANIFEST"), ("body_digest", "DOCUMENT_BODY")):
+                    if row.get(field) == args["digest"]:
+                        references.append({"role": role, "document_id": row["document_id"],
+                                           "revision": row["revision"], "freshness": row["freshness"]})
+            for row in before.get("journal", []):
+                if row.get("payload_digest") == args["digest"]:
+                    references.append({"role": "JOURNAL_PAYLOAD", "stream": row["stream"],
+                                       "sequence": row["sequence"]})
+            c.require(bool(references), "EVIDENCE_NOT_REFERENCED")
+        project = self._authorize(scope, work_id, "record")
+        work = next(w for w in project["works"] if w["work_id"] == work_id)
+        backend._quota(self.registry.root)
+        output = Path(tempfile.mkdtemp(prefix="read-verified-", dir=self.registry.root))
+        if tool == "evidence_read":
+            command = ["evidence", "read", work["path"], args["digest"], str(args["max_bytes"])]
+        else:
+            request = {"schema_version": 1, "operation": "resume", "selection_id": args["selection_id"]}
+            records.save(output / "request.json", c.encoded(request))
+            command = ["completion", "check", work["path"], str(output / "request.json")]
+        try:
+            process = records.capture([project["cli"]["path"], "--output-mode", "full", *command],
+                output, backend.TIMEOUT_SECONDS, cwd=output, observe_source=False,
+                env=backend.ENVIRONMENT, limit=c.MAX_NATIVE)
+            c.require(process["returncode"] == 0 and process["reason"] == "EXIT" and
+                      process["recording"] == "RECORDED", "NATIVE_FAILURE")
+            value = c.decode(r.regular(output / "stdout.log", c.MAX_NATIVE, private=True), c.MAX_NATIVE)
+            c.require(isinstance(value, dict), "NATIVE_RESPONSE")
+            if tool == "evidence_read":
+                c.require(set(value) == {"schema_version", "algorithm", "digest", "size", "encoding", "data", "verified"}
+                          and type(value["schema_version"]) is int and value["schema_version"] == 1
+                          and value["algorithm"] == "sha256"
+                          and value["digest"] == args["digest"] and value["encoding"] == "base64"
+                          and value["verified"] is True and type(value["size"]) is int
+                          and isinstance(value["data"], str), "EVIDENCE_BINDING")
+                try:
+                    raw = base64.b64decode(value["data"], validate=True)
+                except (ValueError, binascii.Error):
+                    raise c.IntegrationError("EVIDENCE_BINDING") from None
+                c.require(len(raw) == value["size"] and len(raw) <= args["max_bytes"]
+                          and base64.b64encode(raw).decode() == value["data"]
+                          and c.sha(raw) == args["digest"], "EVIDENCE_BINDING")
+                result = {"view": tool, "result": value, "references": references,
+                          "verification": "SHA256_INTEGRITY_NOT_CONTENT_TRUTH",
+                          "content_role": "UNTRUSTED_DATA"}
+            else:
+                selection = value.get("selection")
+                c.require(isinstance(selection, dict)
+                          and selection.get("document_id") == args["selection_id"]
+                          and any(all(row.get(key) == selection.get(key)
+                                      for key in ("document_id", "revision", "digest"))
+                                  for row in before.get("documents", [])), "COMPLETION_BINDING")
+                c.require(type(value.get("schema_version")) is int and value["schema_version"] == 1
+                          and value.get("execution_authorized") is False
+                          and type(value.get("acceptance_verified")) is bool
+                          and isinstance(value.get("action"), str)
+                          and value["acceptance_verified"] == (value["action"] == "DONE"), "COMPLETION_BINDING")
+                result = {"view": tool, "selection_id": args["selection_id"], "result": value,
+                          "completion_authority": "NATIVE_CURRENT_SELECTION",
+                          "next_operation": "REVIEW_NATIVE_ACTION_NO_AUTOMATIC_EXECUTION"}
+            r.check_project(project)
+            after = self._read(scope, work_id, "record")["result"]
+            c.require(c.encoded(before) == c.encoded(after), "OBSERVATION_STALE")
+            result["work_record_sha256"] = c.sha(c.encoded(after))
+            result["observation_sha256"] = c.sha(c.encoded(value))
+            records.save(output / "delivery.json", c.encoded(result))
+            return result
+        except (c.IntegrationError, OSError, ValueError) as error:
+            records.save(output / "failure.json", c.encoded(blocked(error)))
+            error.evidence_path = str(output)
+            raise
 
     def _context(self, scope, args, tool):
         work_id = args["work_id"]

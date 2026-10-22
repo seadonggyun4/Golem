@@ -4,6 +4,7 @@ Optional gate: install tools/requirements-mcp.txt, then pass CLI and source root
 Not part of dependency-free native consumers or the core CMake test set.
 """
 import asyncio
+import base64
 import copy
 import json
 from pathlib import Path
@@ -19,6 +20,58 @@ import integration_transfer as transfer
 
 
 class D2(fixture.ReadBackend):
+    def test_verified_evidence_and_completion_preserve_native_files(self):
+        path, digest = self.make_policy()
+        api = service.Service(transfer.Transfer(path, digest, approve_data_transfer=True))
+        args = {"project_id": "project", "work_id": "example-work"}
+        record = api.call("work_inspect", {**args, "view": "record"})["result"]
+        document = record["documents"][0]
+        orphan_file = self.root / "unregistered.txt"
+        orphan_file.write_bytes(b"not registered as Work evidence")
+        orphan = self.cli("evidence", "put", self.work, orphan_file)
+        before = self.inventory()
+        for key in (document["digest"], document["body_digest"], record["journal"][0]["payload_digest"]):
+            result = api.call("evidence_read", {**args, "digest": key, "max_bytes": 1048576})
+            raw = base64.b64decode(result["result"]["data"], validate=True)
+            self.assertEqual(c.sha(raw), key)
+            self.assertEqual(len(raw), result["result"]["size"])
+            self.assertTrue(result["references"])
+            self.assertEqual(result["verification"], "SHA256_INTEGRITY_NOT_CONTENT_TRUTH")
+        for key in (orphan["digest"], "f" * 64, document["event_digest"]):
+            with self.assertRaises(c.IntegrationError) as caught:
+                api.call("evidence_read", {**args, "digest": key, "max_bytes": 1048576})
+            self.assertEqual(caught.exception.code, "EVIDENCE_NOT_REFERENCED")
+        with self.assertRaises(c.IntegrationError):
+            api.call("evidence_read", {**args, "digest": document["digest"], "max_bytes": 1})
+        result = api.call("completion_check", {**args, "selection_id": "selection"})
+        expected = self.cli("completion", "check", self.work, self.write("check.json", {
+            "schema_version": 1, "operation": "resume", "selection_id": "selection"}))
+        self.assertEqual(result["result"], expected)
+        self.assertFalse(result["result"]["acceptance_verified"])
+        with self.assertRaises(c.IntegrationError):
+            api.call("completion_check", {**args, "selection_id": "missing"})
+        self.assertEqual(before, self.inventory())
+
+    def test_native_evidence_bytes_empty_bounds_and_corruption(self):
+        for content in (b"", b"\x00\xff\xfe\n", b"x" * 1048576):
+            file = self.root / "bytes.bin"
+            file.write_bytes(content)
+            put = self.cli("evidence", "put", self.work, file)
+            before = self.inventory()
+            result = self.cli("evidence", "read", self.work, put["digest"], 1048576)
+            self.assertEqual(base64.b64decode(result["data"]), content)
+            for limit in ("0", "-1", "true", "1048577", "9999999999999999999999", ""):
+                self.cli("evidence", "read", self.work, put["digest"], limit, ok=False)
+            self.assertEqual(before, self.inventory())
+        # Corrupt only this disposable unregistered object, never product evidence.
+        objects = [p for p in self.work.rglob("*") if p.is_file() and p.read_bytes() == content]
+        self.assertEqual(len(objects), 1)
+        objects[0].chmod(0o600)
+        objects[0].write_bytes(b"corrupt")
+        before = self.inventory()
+        self.cli("evidence", "read", self.work, put["digest"], 1048576, ok=False)
+        self.assertEqual(before, self.inventory())
+
     def make_policy(self, client="client-a", generation=1):
         recipient = "client-b" if client == "client-a" and len(self.enrollment["grants"]) > 1 else "client-a"
         policy = {"schema": "golem.integration-transfer.v1", "registry": str(self.registry.root),
@@ -45,6 +98,8 @@ class D2(fixture.ReadBackend):
         path, _ = self.make_policy()
         policy = c.decode(path.read_bytes())
         Draft202012Validator.check_schema(transfer.POLICY)
+        for schema in service.SCHEMAS.values():
+            Draft202012Validator.check_schema(schema)
         validator = Draft202012Validator(transfer.POLICY)
         validator.validate(policy)
         for fields in ((), ("producer",), ("scopes", 0), ("scopes", 0, "binding")):
@@ -149,6 +204,18 @@ class D2(fixture.ReadBackend):
                         self.assertFalse(result.is_error)
                         value = json.loads(result.content[0].text)
                         self.assertFalse(value["execution_authorized"])
+                        completion = await client.call_tool("golem_completion_check", {
+                            "project_id": "project", "work_id": "example-work", "selection_id": "selection"})
+                        self.assertFalse(completion.is_error)
+                        record = await client.call_tool("golem_work_inspect", {
+                            "project_id": "project", "work_id": "example-work", "view": "record"})
+                        key = json.loads(record.content[0].text)["result"]["documents"][0]["body_digest"]
+                        evidence = await client.call_tool("golem_evidence_read", {
+                            "project_id": "project", "work_id": "example-work", "digest": key,
+                            "max_bytes": 1048576})
+                        self.assertFalse(evidence.is_error)
+                        self.assertEqual(c.sha(base64.b64decode(json.loads(evidence.content[0].text)
+                                                               ["result"]["data"])), key)
                         forged = await client.call_tool("golem_work_inspect", {
                             "project_id": "project", "work_id": "example-work", "view": "status",
                             "principal_id": "owner"})

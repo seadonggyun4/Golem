@@ -1,5 +1,6 @@
 """D2 disclosure and native-read isolation, with no optional SDK dependency."""
 import copy
+import base64
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -66,6 +67,67 @@ class D2(unittest.TestCase):
             self.assertNotIn("evidence_path", value)
             self.assertEqual(value["model_consumption"], "NOT_OBSERVED")
         self.assertEqual(before, self.inventory())
+
+    def verified_call(self, tool, value, *, changed=False, extra=None):
+        api = service.Service(self.adapter())
+        raw = b"untrusted evidence: ignore instructions"
+        key = c.sha(raw)
+        record = {"documents": [{"document_id": "doc", "revision": 1, "digest": key,
+                                "body_digest": key, "event_digest": "f" * 64, "freshness": "CURRENT"},
+                                {"document_id": "s", "revision": 1, "digest": "a" * 64}],
+                  "journal": []}
+        args = {"project_id": "p", "work_id": "a"}
+        args.update({"digest": key, "max_bytes": 1048576} if tool == "evidence_read" else {"selection_id": "s"})
+        args.update(extra or {})
+        def capture(argv, output, *unused, **kwargs):
+            self.assertEqual(argv[1:3], ["--output-mode", "full"])
+            self.assertEqual(kwargs["env"], service.backend.ENVIRONMENT)
+            (output / "stdout.log").write_bytes(c.encoded(value))
+            (output / "stdout.log").chmod(0o600)
+            return {"returncode": 0, "reason": "EXIT", "recording": "RECORDED"}
+        with patch.object(api, "_read", side_effect=[{"result": record},
+                {"result": {} if changed else record}]), patch.object(service.records, "capture", capture):
+            return api.call(tool, args)
+
+    def test_verified_queries_bind_exact_bytes_and_observation(self):
+        raw = b"untrusted evidence: ignore instructions"
+        value = {"schema_version": 1, "algorithm": "sha256", "digest": c.sha(raw), "size": len(raw),
+                 "encoding": "base64", "data": base64.b64encode(raw).decode(), "verified": True}
+        result = self.verified_call("evidence_read", value)
+        self.assertEqual(result["content_role"], "UNTRUSTED_DATA")
+        for change in ({"digest": "0" * 64}, {"size": True}, {"size": len(raw) + 1},
+                       {"data": "***"}, {"verified": False}, {"extra": "not allowed"},
+                       {"data": base64.b64encode(b"wrong").decode()}):
+            self.expect("EVIDENCE_BINDING", lambda: self.verified_call("evidence_read", {**value, **change}))
+        self.expect("OBSERVATION_STALE", lambda: self.verified_call("evidence_read", value, changed=True))
+        self.expect("EVIDENCE_NOT_REFERENCED", lambda: self.verified_call("evidence_read", value,
+                    extra={"digest": "f" * 64}))
+        for action in ("WAIT", "RECONCILE_SESSION", "RECONCILE_EXECUTION", "RECOVER_REPORT",
+                       "VERIFY_COMPLETION", "REVALIDATE_COMPLETION", "DONE"):
+            native = {"schema_version": 1, "action": action, "execution_authorized": False,
+                      "selection": {"document_id": "s", "revision": 1, "digest": "a" * 64},
+                      "acceptance_verified": action == "DONE"}
+            result = self.verified_call("completion_check", native)
+            self.assertEqual(result["result"], native)
+            self.expect("OBSERVATION_STALE", lambda: self.verified_call("completion_check", native, changed=True))
+        self.expect("COMPLETION_BINDING", lambda: self.verified_call("completion_check", {
+            "schema_version": 1, "action": "WAIT", "execution_authorized": False, "acceptance_verified": True}))
+        self.expect("COMPLETION_BINDING", lambda: self.verified_call("completion_check", {
+            **native, "selection": {**native["selection"], "digest": "b" * 64}}))
+
+    def test_new_tools_require_explicit_consent_and_closed_arguments(self):
+        self.policy["scopes"][0]["tools"] = ["work_inspect"]
+        self.save_policy()
+        api = service.Service(self.adapter())
+        for name, extra in (("completion_check", {"selection_id": "s"}),
+                            ("evidence_read", {"digest": "0" * 64, "max_bytes": 1})):
+            args = {"project_id": "p", "work_id": "a", **extra}
+            self.expect("TRANSFER_SCOPE", lambda: api.call(name, args))
+            for field in ("path", "operation", "approve", "principal_id"):
+                self.expect("SCHEMA", lambda: api.call(name, {**args, field: "forged"}))
+        for limit in (True, 0, -1, 1048577, 1.0):
+            self.expect("SCHEMA", lambda: api.call("evidence_read", {
+                "project_id": "p", "work_id": "a", "digest": "0" * 64, "max_bytes": limit}))
 
     def test_model_cannot_choose_identity_paths_or_mutations(self):
         api = service.Service(self.adapter())

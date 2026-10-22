@@ -3,18 +3,75 @@
 #include "output.h"
 #include "golem/version.h"
 #include "golem/record.h"
+#include "golem/allocator.h"
+#include <openssl/evp.h>
+#include <stdlib.h>
 int golem_cli_work(int argc, char **argv);
 int golem_cli_doctor(int argc, char **argv);
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
+/* Bounded, hash-verified bytes. Project/Work disclosure belongs to the caller's
+ * approval layer; this local CLI grants no remote filesystem authority. */
+static int evidence_read(int argc, char **argv)
+{
+    if (argc != 6) return 2;
+    size_t limit = 0;
+    for (const char *p = argv[5]; *p; ++p) {
+        if (*p < '0' || *p > '9' || limit > 1048576 / 10) return 2;
+        limit = limit * 10 + (size_t)(*p - '0');
+    }
+    if (!limit || limit > 1048576) return 2;
+    golem_digest digest;
+    golem_evidence_store *store = NULL;
+    uint8_t *bytes = NULL;
+    size_t size = 0;
+    golem_status st = golem_digest_parse((golem_string_view){argv[4], strlen(argv[4])}, &digest);
+    if (st == GOLEM_OK) st = golem_evidence_open(argv[3], false, NULL, &store, NULL);
+    if (st == GOLEM_OK) st = golem_evidence_read(store, &digest, limit, NULL, &bytes, &size, NULL);
+    golem_status closed = golem_evidence_close(store);
+    if (st == GOLEM_OK) st = closed;
+    char *encoded = NULL;
+    if (st == GOLEM_OK) {
+        encoded = malloc(4 * ((size + 2) / 3) + 1);
+        if (!encoded) st = GOLEM_ERR_OUT_OF_MEMORY;
+    }
+    if (st == GOLEM_OK) {
+        int n = EVP_EncodeBlock((unsigned char *)encoded, bytes, (int)size);
+        if (n < 0) st = GOLEM_ERR_IO;
+        else {
+            encoded[n] = '\0';
+            size_t capacity = (size_t)n + 256;
+            char *json = malloc(capacity);
+            if (!json) st = GOLEM_ERR_OUT_OF_MEMORY;
+            else {
+                int length = snprintf(json, capacity,
+                    "{\"schema_version\":1,\"algorithm\":\"sha256\",\"digest\":\"%s\","
+                    "\"size\":%zu,\"encoding\":\"base64\",\"data\":\"%s\",\"verified\":true}",
+                    argv[4], size, encoded);
+                if (length < 0 || (size_t)length >= capacity) st = GOLEM_ERR_IO;
+                else st = cli_output_write((golem_bytes){(const uint8_t *)json, (size_t)length});
+                if (st == GOLEM_OK && (fputc('\n', stdout) == EOF || fflush(stdout) || ferror(stdout)))
+                    st = GOLEM_ERR_IO;
+                free(json);
+            }
+        }
+    }
+    free(encoded);
+    golem_allocator_free(NULL, bytes);
+    cli_error_note(st, "evidence.read", NULL);
+    return st == GOLEM_OK ? 0 : 1;
+}
+
 static int usage(void)
 {
     fputs("Usage:\n"
         "  golem [--output-mode compact|full] [--output-store ABSOLUTE_DIR] COMMAND ...\n"
         "  golem output read SHA256\n"
-        "Default: compact large JSON responses; full preserves protocol output.\n"
+        "  golem evidence read STORE SHA256 MAX_BYTES (1..1048576, verified base64)\n"
+        "  golem completion check WORK REQUEST.json (read-only completion resume)\n", stderr);
+    fputs("Default: compact large JSON responses; full preserves protocol output.\n"
         "Output controls precede COMMAND. See docs/cli-output.md.\n"
         "Recording: set GOLEM_RECORD_ROOT to an existing private absolute directory.\n"
         "  golem init DIRECTORY\n"
@@ -142,6 +199,7 @@ static int dispatch(int argc, char **argv)
     if (argc >= 2 && strcmp(argv[1], "daemon") == 0) return golem_cli_daemon(argc, argv);
     if (argc >= 2 && strcmp(argv[1], "lineage") == 0) return golem_cli_lineage(argc, argv);
     if (argc < 3 || strcmp(argv[1], "evidence") != 0) return usage();
+    if (!strcmp(argv[2], "read")) return evidence_read(argc, argv);
     bool hash = strcmp(argv[2], "hash") == 0;
     bool put = strcmp(argv[2], "put") == 0;
     bool verify = strcmp(argv[2], "verify") == 0;

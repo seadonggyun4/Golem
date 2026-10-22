@@ -10,7 +10,8 @@ import sys
 import integration_contract as c
 import integration_registry as r
 
-NAMES = ("projects_list", "work_inspect", "history_read", "context_get", "handoff_prepare")
+NAMES = ("projects_list", "work_inspect", "history_read", "context_get", "handoff_prepare",
+         "evidence_read", "completion_check")
 PRODUCER_NAMES = ("integration_contract.py", "integration_registry.py", "integration_backend.py",
                   "execution_record.py", "verify_agent.py", "integration_transfer.py",
                   "integration_service.py", "integration_mcp.py")

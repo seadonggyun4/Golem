@@ -2,6 +2,8 @@
 
 Implemented slice: owner-launched **local stdio** MCP, D1-approved Work reads,
 complete native context candidates, and explicitly addressed handoff preparation.
+It also provides bounded committed-reference evidence reads and native current
+selection completion checks, without finalize or projection repair.
 Optional [D3 command hooks](integration-d3.md) reuse this service for bounded
 startup/resume notices; they do not turn a context reference into complete input.
 The native core, D1 v1 schemas, project approval records and native evidence are
@@ -70,7 +72,7 @@ policy has exactly these fields; all example paths and IDs are placeholders:
       "assurance": "LOCAL_COOPERATIVE"
     },
     "work_ids": ["work"],
-    "tools": ["projects_list", "work_inspect", "history_read", "context_get", "handoff_prepare"],
+    "tools": ["projects_list", "work_inspect", "history_read", "context_get", "handoff_prepare", "evidence_read", "completion_check"],
     "recipients": [{
       "schema": "golem.integration-client-binding.v1",
       "project_id": "project", "generation": 1,
@@ -130,12 +132,15 @@ are not enabled. No custom protocol fallback expands native authority.
 | `golem_history_read` | `limit` 1..256, opaque `cursor` or null | Original native FULL/DELTA, cursor, has_more semantics |
 | `golem_context_get` | selection_id, source_snapshot, target_kind, recipe | Complete renderer-v2 candidate and status/next preflight |
 | `golem_handoff_prepare` | Context arguments plus recipient_client_id | Same complete input, addressed to an explicitly approved recipient |
+| `golem_evidence_read` | digest (64 lowercase hex), max_bytes (1..1048576) | Complete hash-verified bytes, base64 encoded, with committed Work reference roles |
+| `golem_completion_check` | selection_id | Unmodified native current selection completion observation, not finalize or report |
 
 Every input is closed; boolean integers, unknown fields, model-selected binding,
 principal, path, shell command or approval are rejected. No administrative or
 mutation tool exists. List results require a current D1 record grant. Individual
 reads additionally require their original operation; context requires record,
-status and next. A tool listed for a broad scope may still be blocked for an
+status and next. Evidence reads require record; completion checks require record,
+status and next. Both also require explicit D2 tool consent. A tool listed for a broad scope may still be blocked for an
 individual operation whose D1 grant is narrower. No current-project selection
 state is held on the MCP connection.
 
@@ -143,8 +148,55 @@ Tools are the inline retrieval fallback, so clients need not support resources.
 No arbitrary-path, global-CAS or cached-resource reader is exposed. Native Work
 record/history/context carry their existing evidence and judgment references;
 D2 does not merge external assessment files into a new memory database or invent
-truth/QA verification for referenced material. Standalone raw evidence-resource
-retrieval and automatic host consumption remain outside this slice.
+truth/QA verification for referenced material. Arbitrary resource/file retrieval
+and automatic host consumption remain outside this slice.
+
+### Evidence and Completion Reads
+
+`evidence_read` uses the native replay-verified Work record to allow only explicit
+committed `documents[].digest` (manifest), `documents[].body_digest` (body), and
+`journal[].payload_digest` references. Returned `references` identify their roles,
+document revision/freshness or journal stream/sequence. Historical committed
+references remain historical; reading them does not make them current. The tool
+does not recursively interpret document text, metadata or arbitrary hex strings.
+Frame/event hashes, normalized assessment hashes, raw stream hashes and orphan
+CAS objects are not disclosure capabilities. Transitive receipt/log retrieval is
+not implicitly granted; use its separately specified native evidence contracts.
+
+The pinned CLI runs `evidence read APPROVED_WORK DIGEST MAX_BYTES`, opening CAS
+read-only and using `golem_evidence_read` to verify the complete object before
+publication. The service independently validates canonical base64, exact size and
+SHA-256. Empty and binary evidence are supported. Missing, corrupt or oversize
+objects fail without truncation. `verification: SHA256_INTEGRITY_NOT_CONTENT_TRUTH`
+and `content_role: UNTRUSTED_DATA` distinguish integrity from authenticity, semantic
+truth, approval and instructions. Full selected Work content consent is required;
+this is not redaction or secret detection.
+
+`completion_check` constructs the closed native v1 `operation: resume` request and
+calls `completion check APPROVED_WORK REQUEST.json`. This new local CLI entrypoint
+validates the request, rejects finalize, opens the document store read-only and
+reuses `golem_completion_call`. It is **completion observation**, not session resume.
+It does not call `completion report`, materialize missing projections, reconcile,
+claim, renew a lease, execute QA or finalize. The nested native result remains the
+authority: WAIT, recovery/revalidation actions and historical receipts are not
+promoted to DONE. `acceptance_verified` is true only for native current DONE;
+even DONE is not external product certification or authorization to execute.
+The returned selection ID/revision/digest must match a committed reference in
+the surrounding Work record as well as the explicitly requested selection ID.
+
+Both tools read the native Work record before and after the query and require
+identical encoded observations. A changed record is OBSERVATION_STALE, with no
+automatic retry. Source files can change outside the Work lock, so this is not an
+atomic snapshot or a guarantee about future state. Original native failure
+stdout/stderr and private delivery records remain under the bounded registry spool;
+they are not generic model-readable file paths. Encoded delivery must fit the
+owner's result budget or fail intact. No native evidence is created or repaired.
+
+**Upgrade:** changed CLI/SDK producer pins require existing D1/D5 owner review;
+changed D2 module bytes require a newly reviewed transfer policy. Adding these
+tools to the enum does not add them to existing policies. Keep narrower allowlists
+unless the owner explicitly approves the new disclosures. D4 and D6 reuse the
+same service; D6 additionally requires `golem.read` and its delegate tool allowlist.
 
 Results have schema `golem.integration-delivery.v1`, state AVAILABLE,
 `native_state_changed: false`, `execution_authorized: false`,
@@ -229,6 +281,12 @@ complete current/original context, handoff, stale source/selection, live foreign
 owner, wire rejection and modern/legacy reads with a forged clientInfo and D1
 revocation. It compares all native file bytes/modes and path additions/deletions.
 CI runs this optional SDK/native gate on macOS and Linux under sanitizers.
+The suite also covers committed body/manifest/journal reads, orphan/frame denial,
+size limits, empty/binary content, CAS corruption and both new tools through real
+modern/legacy stdio clients. Completion CTest covers VERIFY_COMPLETION,
+RECOVER_REPORT, DONE and REVALIDATE_COMPLETION without native file changes or
+projection repair; a finalize request sent to the check endpoint is rejected.
+The TLS gateway gate exercises both reads through separately approved delegates.
 
 Locally exercised platform: macOS. Linux is a distinct CI result, not inferred
 from macOS. Windows native runtime, actual Codex/Claude app installation, real
