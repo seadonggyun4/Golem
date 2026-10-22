@@ -96,7 +96,17 @@ class D3(fixture.D2):
 
     def test_corrupt_native_evidence_is_not_repaired_or_hidden(self):
         profile = self.make_profile()
-        victim = next(p for p in (self.work / "objects").rglob("*") if p.is_file())
+        decoy = self.root / "unregistered-evidence.txt"
+        decoy.write_bytes(b"synthetic unregistered evidence")
+        orphan = self.cli("evidence", "put", self.work, decoy)["digest"]
+        unreferenced = self.work / "objects/sha256" / orphan[:2] / orphan[2:]
+        unreferenced.chmod(0o600)
+        unreferenced.write_bytes(b"synthetic damaged orphan")
+        before = self.inventory()
+        notice = self.hook(profile, "resume")
+        self.assertEqual(notice["context_state"], "AVAILABLE_FOR_EXPLICIT_FETCH")
+        self.assertEqual(before, self.inventory())
+        victim = self.committed_body()
         victim.chmod(0o600)
         victim.write_bytes(b"synthetic corrupt object")
         before = self.inventory()

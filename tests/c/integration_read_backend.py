@@ -47,6 +47,14 @@ class ReadBackend(fixture.Workflow):
         return {str(p.relative_to(self.work)): (p.stat().st_mode, c.sha(p.read_bytes()) if p.is_file() else None)
                 for p in self.work.rglob("*")}
 
+    def committed_body(self):
+        # CAS enumeration also includes unreferenced objects and receipt objects;
+        # corruption must target a body that native replay is required to read.
+        digest = self.docs["scope"]["body_digest"]
+        path = self.work / "objects/sha256" / digest[:2] / digest[2:]
+        self.assertEqual(c.sha(path.read_bytes()), digest)
+        return path
+
     def test_real_native_status_next_record_history_preserve_all_bytes_and_modes(self):
         before = self.inventory()
         for operation in ("status", "next", "record", "history"):
@@ -86,8 +94,7 @@ class ReadBackend(fixture.Workflow):
         self.assertEqual(inventory, self.inventory())
 
     def test_native_corrupt_store_error_is_retained_not_repaired(self):
-        candidates = list((self.work / "objects").rglob("*"))
-        victim = next(p for p in candidates if p.is_file())
+        victim = self.committed_body()
         victim.chmod(0o600)
         victim.write_bytes(b"corrupt synthetic object")
         before = self.inventory()

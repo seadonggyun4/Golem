@@ -206,7 +206,7 @@ class D4(Actions, fixture.D2):
         self.assertEqual(before, self.inventory())
 
     def test_corrupt_evidence_preflight_never_attempts_a_mutation_or_repair(self):
-        victim = next(p for p in (self.work / "objects").rglob("*") if p.is_file())
+        victim = self.committed_body()
         victim.chmod(0o600)
         victim.write_bytes(b"synthetic damaged CAS")
         before = self.inventory()
