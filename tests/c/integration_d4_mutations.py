@@ -231,6 +231,10 @@ class D4(Actions, fixture.D2):
                     "--policy", str(self.policy_path), "--reviewed-policy-sha256", self.policy_digest, "--approve-mutations"])
                 async with Client(params, mode=mode, read_timeout_seconds=120) as client:
                     names = {t.name for t in (await client.list_tools()).tools}
+                    import integration_mcp as branding
+                    self.assertIsNotNone(client.server_info)
+                    self.assertEqual(c.sha(client.server_info.icons[0].src.encode()),
+                                     c.sha(branding.server_icons()[0].src.encode()))
                     self.assertIn("golem_session_claim", names)
                     self.assertNotIn("golem_session_resume", names)
                     forged = await client.call_tool("golem_session_claim", {**self.args, "approve": True})

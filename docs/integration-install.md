@@ -6,6 +6,30 @@ locks, strict values and audit bounds; D2 disclosure/grants; D3 executable pins;
 and D5's pinned interpreter/SDK command builder. Existing D1-D6 producer contracts
 and native formats are unchanged. No real product/client is configured by tests.
 
+## MCP Server Icon
+
+D2 stdio, D4 stdio and D6 gateway advertise the same public server icon through
+the SDK's `icons` metadata: `assets/Golem-mcp.png`, a 256x256 PNG embedded as a
+`data:image/png;base64,...` URI. No external image fetch, private filesystem path,
+project information or credentials are included. Tool results do not repeat it.
+The asset must accompany the source installation. Its SHA-256 is pinned in the
+existing producer-hashed `integration_mcp.py`; missing or changed bytes block
+server construction. Existing producer-pin updates still require the established
+explicit review procedure, not automatic policy reapproval.
+
+The owner-supplied original remains unchanged. The registration copy uses the
+central 880x880 pixels of the 1254x1254 original, resized to 256x256. Artwork fills
+the square without the original white surround or pre-rendered rounded frame;
+the client can apply its own mask. Bright clouds in the artwork are intentional.
+Client-added padding and whether a client displays server icons remain client
+behavior, not a server guarantee. This does not publish a registry listing or
+modify any installed client settings.
+
+The [official SDK icon documentation](https://py.sdk.modelcontextprotocol.io/servers/media/)
+describes icon metadata and data URIs. Regression tests inspect all three server
+initialization records and exercise icon delivery through actual stdio and TLS
+clients, separately from any product UI rendering claim.
+
 ## Supported Settings
 
 | Profile | Explicit selected target | Managed part |

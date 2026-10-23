@@ -17,6 +17,7 @@ import integration_read_backend as fixture
 import integration_contract as c
 import integration_service as service
 import integration_transfer as transfer
+import integration_mcp as branding
 
 
 class D2(fixture.ReadBackend):
@@ -199,6 +200,9 @@ class D2(fixture.ReadBackend):
                     self.assertEqual(legacy.protocol_version, "2025-11-25")
                     for client in (modern, legacy):
                         listed = await client.list_tools()
+                        self.assertIsNotNone(client.server_info)
+                        self.assertEqual(c.sha(client.server_info.icons[0].src.encode()),
+                                         c.sha(branding.server_icons()[0].src.encode()))
                         self.assertEqual({t.name for t in listed.tools}, {"golem_" + n for n in transfer.NAMES})
                         result = await client.call_tool("golem_context_get", self.context_args())
                         self.assertFalse(result.is_error)

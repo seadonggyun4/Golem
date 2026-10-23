@@ -103,6 +103,10 @@ class D6(Remote, d4.D4):
                     bearer = support.token(self.signing, self.value, sub=subject, client_id=oauth, scope="golem.read")
                     async with self.client(bearer=bearer, mode=mode) as client:
                         self.assertIn("golem_work_inspect", [t.name for t in (await client.list_tools()).tools])
+                        import integration_mcp as branding
+                        self.assertIsNotNone(client.server_info)
+                        self.assertEqual(c.sha(client.server_info.icons[0].src.encode()),
+                                         c.sha(branding.server_icons()[0].src.encode()))
                         for view in ("status", "next", "record"):
                             result, value = await self.rpc_call(client, "work_inspect", {"project_id": "project",
                                 "work_id": "example-work", "view": view})

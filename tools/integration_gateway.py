@@ -14,6 +14,7 @@ import integration_contract as c
 import integration_registry as r
 import integration_transfer as transfers
 import integration_service as reads
+from integration_mcp import server_icons
 import integration_mutation_contract as mutations
 import integration_mutations as writes
 import integration_lifecycle as lifecycle
@@ -129,7 +130,7 @@ class Gateway:
             return CallToolResult(content=[TextContent(type="text", text=c.encoded(value).decode())],
                 isError=value.get("state") in ("DELIVERY_UNCONFIRMED", "BLOCKED", "NOT_DISPATCHED", "COMMIT_UNKNOWN", "PENDING_APPROVAL"))
 
-        return Server("Golem D6", version="1", on_list_tools=list_tools, on_call_tool=call_tool,
+        return Server("Golem D6", version="1", icons=server_icons(), on_list_tools=list_tools, on_call_tool=call_tool,
             instructions="Scoped owner-approved gateway. No automatic resume, migration, retry or owner transfer. "
                          "Historical results and hash integrity do not establish current completion or truth.")
 
