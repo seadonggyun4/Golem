@@ -5,6 +5,7 @@
 #include "../completion/internal.h"
 #include "role_internal.h"
 #include "template_internal.h"
+#include "golem/system_error.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -170,9 +171,11 @@ golem_status wf_manifest(golem_document_store *s, dw_entry *plan, const char *ki
     if (k < 0 || !source || !budget || budget > GOLEM_WORKFLOW_CONTEXT_MAX)
         return GOLEM_ERR_INVALID_ARGUMENT;
     golem_digest selected_source;
-    if (!dw_digest(plan->meta, "source_snapshot", &selected_source) ||
-        !dw_equal(source, &selected_source))
+    if (!dw_digest(plan->meta, "source_snapshot", &selected_source))
         return GOLEM_ERR_STALE_RESULT;
+    if (!dw_equal(source, &selected_source))
+        return golem_system_error_note(GOLEM_ERR_STALE_RESULT, "workflow",
+                                       "source_snapshot_mismatch", 0);
     if (g->states[plan - s->entries] != GOLEM_DOCUMENT_CURRENT)
         return GOLEM_ERR_STALE_RESULT;
     golem_status st = wf_selection(s, plan->meta, g);

@@ -37,6 +37,40 @@ class D2(unittest.TestCase):
     def adapter(self):
         return transfer.Transfer(self.policy_path, self.digest, approve_data_transfer=True)
 
+    def test_context_failure_requires_exact_bounded_native_diagnostic(self):
+        process = {"returncode": 1, "reason": "EXIT", "recording": "RECORDED"}
+        diagnostic = {"schema": "golem.cli-error.v1", "code": "GOLEM_ERR_STALE_RESULT",
+            "category": "state", "status_code": 11, "exit_code": 1, "command": "context",
+            "phase": "command", "errno": None, "retry_effect": False,
+            "execution_authorized": False, "system_errors_omitted": 0,
+            "system_errors_role": "OBSERVATIONS_NOT_INFERRED_CAUSES",
+            "system_errors": [{"component": "workflow", "operation": "source_snapshot_mismatch",
+                "status_code": 11, "kind": "validation", "errno": None, "truncated": False}]}
+        stderr = self.root / "stderr.log"
+
+        def check(value, expected="NATIVE_FAILURE", state=process):
+            stderr.write_bytes(value)
+            stderr.chmod(0o600)
+            self.assertEqual(service.context_failure(state, self.root), expected)
+
+        check(b"private local path /secret\n" + c.encoded(diagnostic), "SOURCE_SNAPSHOT_MISMATCH")
+        for key, value in (("command", "session"), ("status_code", 5), ("exit_code", True),
+                           ("system_errors_omitted", 1), ("system_errors", [])):
+            check(c.encoded({**diagnostic, key: value}))
+        for key, value in (("operation", "other_stale"), ("truncated", True), ("errno", 1)):
+            changed = copy.deepcopy(diagnostic)
+            changed["system_errors"][0][key] = value
+            check(c.encoded(changed))
+        for value in (b"SOURCE_SNAPSHOT_MISMATCH", b"{broken", b"[]", b"x" * (c.LIMIT + 1),
+                      c.encoded(diagnostic) + b"\n" + c.encoded(diagnostic),
+                      b'{"schema":"duplicate","schema":"duplicate"}'):
+            check(value)
+        for key, value in (("reason", "TIMEOUT"), ("recording", "FAILED"), ("returncode", 0)):
+            check(c.encoded(diagnostic), state={**process, key: value})
+        error = c.IntegrationError("SOURCE_SNAPSHOT_MISMATCH")
+        self.assertFalse(service.blocked(error)["automatic_retry_allowed"])
+        self.assertNotIn("/secret", str(service.blocked(error)))
+
     def test_transfer_needs_owner_intent_and_exact_policy(self):
         self.expect("OWNER_TRANSFER_APPROVAL_REQUIRED", lambda: transfer.Transfer(self.policy_path, self.digest))
         self.expect("TRANSFER_POLICY_CHANGED", lambda: transfer.Transfer(self.policy_path, "0" * 64,

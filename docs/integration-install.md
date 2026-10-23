@@ -18,7 +18,7 @@ server construction. Existing producer-pin updates still require the established
 explicit review procedure, not automatic policy reapproval.
 
 The owner-supplied original remains unchanged. The registration copy uses the
-central 880x880 pixels of the 1254x1254 original, resized to 256x256. Artwork fills
+owner-requested expanded-background artwork, resized to 256x256. Artwork fills
 the square without the original white surround or pre-rendered rounded frame;
 the client can apply its own mask. Bright clouds in the artwork are intentional.
 Client-added padding and whether a client displays server icons remain client

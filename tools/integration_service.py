@@ -31,6 +31,7 @@ def blocked(error):
     code = getattr(error, "code", "IO_OR_CONTRACT_ERROR")
     next_operation = {
         "NATIVE_FAILURE": "INSPECT_LOCAL_NATIVE_STDOUT_STDERR_NO_RETRY",
+        "SOURCE_SNAPSHOT_MISMATCH": "READ_CURRENT_SELECTION_SNAPSHOT_AND_REVIEW_CONTEXT_NO_RETRY",
         "OBSERVATION_STALE": "READ_CURRENT_STATUS_NEXT_AND_REVIEW_CONTEXT",
         "RESULT_BUDGET_EXCEEDED": "OWNER_REVIEW_RESULT_BUDGET_NO_TRUNCATION",
         "AUDIT_QUOTA": "OWNER_REVIEW_PRIVATE_AUDIT_CAPACITY_NO_AUTOMATIC_DELETION",
@@ -44,6 +45,43 @@ def blocked(error):
             "automatic_retry_allowed": False,
             "next_operation": next_operation,
             "local_evidence_id": Path(error.evidence_path).name if getattr(error, "evidence_path", None) else None}
+
+
+def context_failure(process, output):
+    """Promote only the pinned native context diagnostic, never free-form stderr."""
+    fallback = "NATIVE_FAILURE"
+    if (process.get("returncode") != 1 or process.get("reason") != "EXIT" or
+            process.get("recording") != "RECORDED"):
+        return fallback
+    try:
+        lines = r.regular(Path(output) / "stderr.log", c.LIMIT, private=True).splitlines()
+        records_json = [c.decode(line) for line in lines if line.startswith(b"{")]
+        if len(records_json) != 1:
+            return fallback
+        diagnostic = records_json[0]
+        expected = {"schema": "golem.cli-error.v1", "code": "GOLEM_ERR_STALE_RESULT",
+                    "category": "state", "status_code": 11, "exit_code": 1,
+                    "command": "context", "phase": "command", "errno": None,
+                    "retry_effect": False, "execution_authorized": False,
+                    "system_errors_omitted": 0,
+                    "system_errors_role": "OBSERVATIONS_NOT_INFERRED_CAUSES"}
+        if not isinstance(diagnostic, dict) or any(
+                type(diagnostic.get(k)) is not type(v) or diagnostic.get(k) != v
+                for k, v in expected.items()):
+            return fallback
+        observations = diagnostic.get("system_errors")
+        if not isinstance(observations, list) or len(observations) != 1:
+            return fallback
+        observation = observations[0]
+        expected = {"component": "workflow", "operation": "source_snapshot_mismatch",
+                    "status_code": 11, "kind": "validation", "errno": None, "truncated": False}
+        if isinstance(observation, dict) and all(
+                type(observation.get(k)) is type(v) and observation.get(k) == v
+                for k, v in expected.items()):
+            return "SOURCE_SNAPSHOT_MISMATCH"
+    except (c.IntegrationError, OSError, ValueError):
+        pass
+    return fallback
 
 
 class Service:
@@ -114,6 +152,7 @@ class Service:
                           "observation_sha256": c.sha(c.encoded(observed["result"]))}
         self.transfer.current()
         response = {"schema": "golem.integration-delivery.v1", "state": "AVAILABLE",
+            "state_scope": "DELIVERY_ONLY", "work_completion_inferred": False,
             "native_state_changed": False, "execution_authorized": False,
             "ownership_transferred": False, "observations_atomic": False,
             "assurance": "LOCAL_COOPERATIVE", "model_consumption": "NOT_OBSERVED",
@@ -230,7 +269,7 @@ class Service:
                     work["path"], str(output / "request.json")], output, backend.TIMEOUT_SECONDS,
                     cwd=output, observe_source=False, env=backend.ENVIRONMENT, limit=c.MAX_NATIVE)
                 c.require(process["returncode"] == 0 and process["reason"] == "EXIT" and
-                          process["recording"] == "RECORDED", "NATIVE_FAILURE")
+                          process["recording"] == "RECORDED", context_failure(process, output))
                 candidate = c.decode(r.regular(output / "stdout.log", c.MAX_NATIVE, private=True), c.MAX_NATIVE)
                 c.require(isinstance(candidate, dict), "CONTEXT_CANDIDATE_BINDING")
                 text = candidate.get("candidate_json")

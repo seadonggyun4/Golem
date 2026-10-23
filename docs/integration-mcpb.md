@@ -47,6 +47,34 @@ support is declared; Windows is excluded because the existing registry uses
 
 ## Approval Boundary
 
+Version 0.1.1 uses expanded-background artwork, without an embedded white
+surround. Claude still controls the outer icon container and its padding.
+Updates do not silently refresh existing producer approvals: changed module
+hashes require a separately reviewed disclosure policy.
+
+Successful responses retain `state: AVAILABLE` for compatibility and add
+`state_scope: DELIVERY_ONLY` and `work_completion_inferred: false`. This means
+data is available, not that the Work is complete. Only the native completion
+result is authoritative for the queried selection; delivery never grants
+execution or ownership.
+
+For context candidates, an exact, bounded native snapshot-mismatch observation
+is surfaced as `SOURCE_SNAPSHOT_MISMATCH`, with no automatic retry. The native
+status remains `GOLEM_ERR_STALE_RESULT`. Other stale errors, malformed or
+incomplete diagnostics and recording failures remain `NATIVE_FAILURE`.
+Free-form stderr and private paths stay in local evidence, not model output.
+
+The 0.1.1 update was exercised in Claude Desktop 3.6556.2 on macOS using an
+owner-approved synthetic-only policy. Two prompts made three native read calls:
+status, completion and an intentionally mismatched context snapshot. Claude
+reported the delivery-only scope, refused to infer completion and relayed
+`SOURCE_SNAPSHOT_MISMATCH` with automatic retry disabled. This is a bounded
+client observation, not a guarantee about every model response. The expanded
+artwork was visible after installation; Claude's outer dark padding remained.
+The test connection and disclosure consent were disabled afterwards, with the
+previous configuration values restored. Existing producer approvals were not
+rewritten for the update.
+
 Installation is separate from Golem authorization. The owner must supply an
 existing private D2 disclosure policy, its explicitly reviewed SHA-256, and
 affirmative disclosure consent (default false). The entry adapter delegates to

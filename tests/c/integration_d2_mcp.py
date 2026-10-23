@@ -130,6 +130,8 @@ class D2(fixture.ReadBackend):
                 if tool == "handoff_prepare":
                     args["recipient_client_id"] = "client-a"
                 result = api.call(tool, args)
+                self.assertEqual(result["state_scope"], "DELIVERY_ONLY")
+                self.assertFalse(result["work_completion_inferred"])
                 payload = result["payload"]
                 self.assertEqual(c.sha(payload["candidate_json"].encode()), payload["projection_digest"])
                 self.assertEqual(payload["provider_budget"], "UNKNOWN")
@@ -142,9 +144,12 @@ class D2(fixture.ReadBackend):
         path, digest = self.make_policy()
         api = service.Service(transfer.Transfer(path, digest, approve_data_transfer=True))
         before = self.inventory()
-        for change in ({"source_snapshot": "f" * 64}, {"selection_id": "missing"}):
-            with self.assertRaises(c.IntegrationError):
+        for change, code in (({"source_snapshot": "f" * 64}, "SOURCE_SNAPSHOT_MISMATCH"),
+                             ({"selection_id": "missing"}, "NATIVE_FAILURE")):
+            with self.assertRaises(c.IntegrationError) as caught:
                 api.call("context_get", {**self.context_args(), **change})
+            self.assertEqual(caught.exception.code, code)
+            self.assertFalse(service.blocked(caught.exception)["automatic_retry_allowed"])
         self.assertEqual(before, self.inventory())
 
     def test_live_foreign_owner_is_not_resumed_or_taken_over(self):
