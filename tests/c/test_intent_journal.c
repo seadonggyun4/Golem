@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #define _DARWIN_C_SOURCE
 #include "../../src/intent/journal.h"
+#include "../../src/intent/schema.h"
 #include "test.h"
 #include <fcntl.h>
 #include <string.h>
@@ -502,8 +503,95 @@ static int partial_recovery(int interruption)
     cleanup(root, path); return 0;
 }
 
+static int object_reservation_restart(bool journal_present, unsigned damage)
+{
+    char path[] = "/tmp/golem-object-reservation-XXXXXX";
+    CHECK(mkdtemp(path) != NULL);
+    int root = open(path, O_RDONLY | O_DIRECTORY); CHECK(root >= 0);
+    gi_journal *j = NULL; CHECK(gi_journal_open(root, &j) == GOLEM_OK);
+    const char *z = "0000000000000000000000000000000000000000000000000000000000000000";
+    const char *b = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    char manifest[2048];
+    int n = snprintf(manifest, sizeof(manifest),
+        "{\"schema\":\"golem.intent.object-preparation.v1\",\"operation_id\":\"%s\","
+        "\"request_digest\":\"%s\",\"lane\":0,\"expected_sequence\":0,\"expected_head\":\"%s\","
+        "\"baseline_digest\":\"%s\",\"objects\":[{\"path\":\"objects/v1/domain/golem.intent.baseline.v1/%s\","
+        "\"kind\":\"domain\",\"byte_length\":10,\"digest\":\"%s\",\"disposition\":\"new\"}],"
+        "\"new_directories\":[\"objects\",\"objects/v1\",\"objects/v1/domain\","
+        "\"objects/v1/domain/golem.intent.baseline.v1\"]}", z, z, z, b, b, b);
+    CHECK(n > 0 && (size_t)n < sizeof(manifest));
+    gi_object_preparation_result plan;
+    CHECK(gi_object_preparation_validate(bytes(manifest), &plan, NULL) == GOLEM_OK);
+    char payload[GI_OBJECT_PUBLICATION_CAPACITY]; size_t length;
+    CHECK(gi_object_publication_encode(&plan.reservation.publication, payload, sizeof(payload), &length) == GOLEM_OK);
+    guard_context g = {root, 0, 2, j}; gi_journal_receipt receipt;
+    golem_digest zero = {{0}};
+    if (journal_present) CHECK(gi_journal_append(j, GI_QUOTA_INTAKE, &zero, &zero, 0, &zero,
+        bytes(damage == 6 ? "mismatched publication" : payload), guard, &g, &receipt) == GOLEM_ERR_POLICY_DENIED);
+    const char *file = damage == 2 ? "00000002.objects-prep" : "00000001.objects-prep";
+    int fd = openat(root, file, O_WRONLY | O_CREAT | O_EXCL, 0600); CHECK(fd >= 0);
+    size_t size = damage == 1 ? (size_t)n - 1 : (size_t)n;
+    CHECK(write(fd, manifest, size) == (ssize_t)size);
+    CHECK(fchmod(fd, damage == 3 ? 0600 : 0400) == 0); CHECK(close(fd) == 0);
+    if (damage == 4) CHECK(linkat(root, file, root, "00000001.objects-prep.pending", 0) == 0);
+    if (damage == 5) CHECK(mkdirat(root, "objects", 0700) == 0);
+    char partial[192];
+    (void)snprintf(partial, sizeof(partial), "objects/v1/domain/golem.intent.baseline.v1/%s.pending", b);
+    const char *object_dirs[] = {"objects", "objects/v1", "objects/v1/domain", "objects/v1/domain/golem.intent.baseline.v1"};
+    if (damage == 7) {
+        for (size_t i = 0; i < 4; ++i) CHECK(mkdirat(root, object_dirs[i], 0700) == 0);
+        fd = openat(root, partial, O_WRONLY | O_CREAT | O_EXCL, 0600); CHECK(fd >= 0);
+        CHECK(write(fd, "cut", 3) == 3); CHECK(close(fd) == 0);
+    }
+    gi_journal_close(j); CHECK(gi_journal_open(root, &j) == GOLEM_OK); g.j = j;
+    gi_journal_status state, sentinel; memset(&sentinel, 0xa5, sizeof(sentinel)); state = sentinel;
+    golem_status st = gi_journal_inspect(j, &state);
+    if (damage && damage != 5 && damage != 7) CHECK(st != GOLEM_OK && memcmp(&state, &sentinel, sizeof(state)) == 0);
+    else {
+        CHECK(st == GOLEM_OK && state.pending && state.committed == 0);
+        CHECK(state.usage.lane[0].value[GI_QUOTA_EVENTS] == 1);
+        CHECK(state.usage.lane[0].value[GI_QUOTA_PAYLOAD] == length);
+        uint64_t expected_bytes = size + (damage == 7 ? 3 : 0);
+        uint64_t expected_entries = damage == 7 ? 6 : damage == 5 ? 2 : 1;
+        if (journal_present) {
+            struct stat sb; CHECK(fstatat(root, "00000001.prep", &sb, 0) == 0);
+            expected_bytes += (uint64_t)sb.st_size + length; expected_entries += 2;
+        }
+        CHECK(state.usage.lane[0].value[GI_QUOTA_BYTES] == expected_bytes);
+        CHECK(state.usage.lane[0].value[GI_QUOTA_ENTRIES] == expected_entries);
+        gi_journal_status second; CHECK(gi_journal_inspect(j, &second) == GOLEM_OK);
+        CHECK(memcmp(&state, &second, sizeof(state)) == 0);
+    }
+    /* Neither ordinary writes nor D01 recovery may consume object reservations. */
+    g.mode = 0; g.calls = 0;
+    CHECK(gi_journal_append(j, GI_QUOTA_INTAKE, &zero, &zero, 0, &zero,
+        bytes(payload), guard, &g, &receipt) != GOLEM_OK);
+    gi_journal_pending_plan pending;
+    CHECK(gi_journal_pending_plan_get(j, &pending) != GOLEM_OK);
+    struct stat sb; CHECK(fstatat(root, "00000001.event", &sb, AT_SYMLINK_NOFOLLOW) < 0);
+    CHECK(fstatat(root, file, &sb, AT_SYMLINK_NOFOLLOW) == 0 && (size_t)sb.st_size == size);
+    char preserved[sizeof(manifest)]; fd = openat(root, file, O_RDONLY | O_NOFOLLOW);
+    CHECK(fd >= 0 && read(fd, preserved, sizeof(preserved)) == (ssize_t)size);
+    CHECK(close(fd) == 0 && memcmp(preserved, manifest, size) == 0);
+    if (!journal_present) CHECK(fstatat(root, "00000001.prep", &sb, AT_SYMLINK_NOFOLLOW) < 0);
+    gi_journal_close(j);
+    if (damage == 5) CHECK(unlinkat(root, "objects", AT_REMOVEDIR) == 0);
+    if (damage == 7) {
+        CHECK(unlinkat(root, partial, 0) == 0);
+        for (size_t i = 4; i > 0; --i) CHECK(unlinkat(root, object_dirs[i - 1], AT_REMOVEDIR) == 0);
+    }
+    cleanup(root, path); return 0;
+}
+
 int main(void)
 {
+    for (unsigned damage = 0; damage <= 5; ++damage) {
+        CHECK(object_reservation_restart(false, damage) == 0);
+        CHECK(object_reservation_restart(true, damage) == 0);
+    }
+    CHECK(object_reservation_restart(true, 6) == 0);
+    CHECK(object_reservation_restart(false, 7) == 0);
+    CHECK(object_reservation_restart(true, 7) == 0);
     for (int mode = 0; mode <= 6; ++mode) CHECK(scenario(mode) == 0);
     CHECK(saturation() == 0);
     CHECK(partial_preparation() == 0);

@@ -1,4 +1,9 @@
 add_executable(golem_context_api_helper context_api_helper.c)
+add_executable(golem_test_intent_object test_intent_object.c)
+target_link_libraries(golem_test_intent_object PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_intent_object)
+add_test(NAME intent_object COMMAND golem_test_intent_object)
+set_tests_properties(intent_object PROPERTIES TIMEOUT 30 LABELS "intent;restricted-diagnostic")
 add_executable(golem_test_intent_baseline test_intent_baseline.c)
 target_link_libraries(golem_test_intent_baseline PRIVATE Golem::golem PkgConfig::JSONC)
 golem_configure_target(golem_test_intent_baseline)
@@ -22,6 +27,11 @@ add_executable(golem_test_intent_inventory test_intent_inventory.c)
 target_link_libraries(golem_test_intent_inventory PRIVATE Golem::golem)
 golem_configure_target(golem_test_intent_inventory)
 add_test(NAME intent_inventory COMMAND golem_test_intent_inventory)
+add_executable(golem_test_intent_object_inventory test_intent_object_inventory.c)
+target_link_libraries(golem_test_intent_object_inventory PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_intent_object_inventory)
+add_test(NAME intent_object_inventory COMMAND golem_test_intent_object_inventory)
+set_tests_properties(intent_object_inventory PROPERTIES TIMEOUT 30 LABELS "intent;restricted-diagnostic")
 set_tests_properties(intent_inventory PROPERTIES TIMEOUT 30 LABELS "intent;restricted-diagnostic")
 target_link_libraries(golem_test_intent_quota PRIVATE Golem::golem)
 golem_configure_target(golem_test_intent_quota)
@@ -421,7 +431,7 @@ if(GOLEM_BUILD_CLI)
         "GOLEM_INTENT_HOST=$<TARGET_FILE:golem_intent_authority_host>"
         ${Python3_EXECUTABLE} -m unittest discover -s ${PROJECT_SOURCE_DIR}/tools
         -p test_intent_authority.py)
-    # 166 isolated host cases exceed 180s under parallel macOS CI; each Git/native
+    # Isolated host cases exceed 180s under parallel macOS CI; each Git/native
     # subprocess retains its own 10/15s bound. Do not drop cases from the suite.
     set_tests_properties(intent_authority_host PROPERTIES TIMEOUT 600 LABELS "intent;integration")
     add_test(NAME intent_schema_conformance COMMAND ${Python3_EXECUTABLE}

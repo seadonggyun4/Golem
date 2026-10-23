@@ -1,15 +1,18 @@
-"""Explicit D01 locator enrollment and read-only native host handoff.
+"""Explicit D01 enrollment, read-only handoff and approved proposal storage.
 
 Reuses integration registry path, inode and pin checks. A descriptor is an
 observation, never owner approval or a substitute for native owner flock.
 """
 from pathlib import Path
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 import fcntl
 import os
 import stat
 import subprocess
 import uuid
+import select
+import tempfile
+import time
 
 import integration_contract as contract
 from integration_contract import require, encoded, decode, sha, IntegrationError
@@ -381,3 +384,143 @@ def native_inspect(root, registration_sha256, *, git, bridge):
                 and value.get("execution_authorized") is False and value.get("pending") is False
                 and value.get("registration_sha256") == registration_sha256, "NATIVE_CONTRACT")
         return value
+
+
+def _object_store_snapshot(root, registration_sha256, *, git, bridge):
+    """Called under common-dir lock; never turns authorized_root into a writer."""
+    contract._validate(registration_sha256, contract.DIGEST)
+    repository = repository_identity(root, git=git)
+    value = _load(repository)
+    require(value is not None, "AUTHORITY_REGISTRATION_REQUIRED")
+    require(value["registration_sha256"] == registration_sha256, "REGISTRATION_PIN_MISMATCH")
+    record = value["record"]
+    require(record["producer"] == _producer(), "PRODUCER_CHANGED")
+    require(record["repository"]["git"] == repository["git"], "GIT_PIN_MISMATCH")
+    verify_observation(record["repository"], record["authority"])
+    observed = authority_identity(Path(record["authority"]["path"]), repository,
+                                  [Path(p["path"]) for p in record["authority"]["pins"]])
+    require(observed == record["authority"], "AUTHORITY_IDENTITY_OR_PIN_CHANGED")
+    require(file_pin(bridge) in observed["pins"], "NATIVE_BRIDGE_PIN_REQUIRED")
+    return {"registration": value, "requesting_repository": repository, "bridge": file_pin(bridge)}
+
+
+def _object_store_plan(snapshot, operation, request, expected_sequence, expected_head, baseline, sources):
+    for digest in (operation, request, expected_head):
+        contract._validate(digest, contract.DIGEST)
+    require(type(expected_sequence) is int and 0 <= expected_sequence < 2**64, "SEQUENCE_INVALID")
+    require(type(baseline) is bytes and 0 < len(baseline) <= contract.LIMIT, "BASELINE_LIMIT")
+    require(type(sources) is tuple and 0 < len(sources) <= 4096, "SOURCE_LIMIT")
+    total = 0
+    def item(data):
+        return {"byte_length": len(data), "sha256": sha(data)}
+    rows = []
+    for source in sources:
+        require(type(source) is tuple and len(source) == 2, "SOURCE_INPUT_INVALID")
+        control, text = source
+        require(type(control) is bytes and 0 < len(control) <= contract.LIMIT, "SOURCE_CONTROL_LIMIT")
+        require(type(text) is bytes and 0 < len(text) <= 16 * 1024**2, "SOURCE_BODY_LIMIT")
+        total += len(text)
+        require(total <= 64 * 1024**2, "SOURCE_SET_LIMIT")
+        rows.append({"control": item(control), "text": item(text)})
+    plan = {"schema": "golem.intent-object-store-plan.v1", "snapshot": snapshot,
+            "operation_id": operation, "request_digest": request, "expected_sequence": expected_sequence,
+            "expected_head": expected_head, "baseline": item(baseline), "sources": rows,
+            "lane": "intake", "execution_authorized": False}
+    require(len(encoded(plan)) <= contract.LIMIT, "PLAN_LIMIT")
+    return {"plan": plan, "plan_sha256": sha(encoded(plan))}
+
+
+def object_store_plan(root, registration_sha256, operation, request, expected_sequence, expected_head,
+                      baseline, sources, *, git, bridge):
+    """Review-only exact input/pin binding, not semantic approval or a write."""
+    bridge = real_path(str(bridge))
+    repository = repository_identity(root, git=git)
+    with _common_lock(repository):
+        snapshot = _object_store_snapshot(root, registration_sha256, git=git, bridge=bridge)
+        require(snapshot["requesting_repository"] == repository, "REPOSITORY_IDENTITY_CHANGED")
+        return _object_store_plan(snapshot, operation, request, expected_sequence, expected_head, baseline, sources)
+
+
+def store_objects(root, registration_sha256, operation, request, expected_sequence, expected_head,
+                  baseline, sources, reviewed_plan_sha256, *, git, bridge, approve_local_owner=False):
+    """Store an intake proposal only, with EX locator lock and per-phase host guard.
+
+    A bridge interruption has an unknown commit outcome: never retry or clean up
+    authority files here. The native inspector remains the source of truth.
+    """
+    require(approve_local_owner is True, "OWNER_APPROVAL_REQUIRED")
+    contract._validate(reviewed_plan_sha256, contract.DIGEST)
+    bridge = real_path(str(bridge))
+    repository = repository_identity(root, git=git)
+    with _common_lock(repository, exclusive=True), ExitStack() as stack:
+        snapshot = _object_store_snapshot(root, registration_sha256, git=git, bridge=bridge)
+        require(snapshot["requesting_repository"] == repository, "REPOSITORY_IDENTITY_CHANGED")
+        plan = _object_store_plan(snapshot, operation, request, expected_sequence, expected_head, baseline, sources)
+        require(plan["plan_sha256"] == reviewed_plan_sha256, "PLAN_STALE")
+        authority = snapshot["registration"]["record"]["authority"]
+        root_fd = os.open(authority["path"], os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+        stack.callback(os.close, root_fd)
+        def guard():
+            require(_object_store_snapshot(root, registration_sha256, git=git, bridge=bridge) == snapshot, "PLAN_STALE")
+            info = os.fstat(root_fd)
+            require({"device": info.st_dev, "inode": info.st_ino} == authority["identity"], "AUTHORITY_CHANGED")
+        guard()
+        inputs = []
+        for data in (baseline, *(part for source in sources for part in source)):
+            file = stack.enter_context(tempfile.TemporaryFile())
+            file.write(data)
+            file.flush()
+            inputs.append(file.fileno())
+        child_read, parent_write = os.pipe()
+        parent_read, child_write = os.pipe()
+        stack.callback(os.close, parent_write)
+        stack.callback(os.close, parent_read)
+        output = stack.enter_context(tempfile.TemporaryFile())
+        errors = stack.enter_context(tempfile.TemporaryFile())
+        args = [str(bridge), "--store-objects-fd", str(root_fd), registration_sha256, operation, request,
+                str(expected_sequence), expected_head, str(child_read), str(child_write), *map(str, inputs)]
+        try:
+            process = subprocess.Popen(args, pass_fds=(root_fd, child_read, child_write, *inputs),
+                stdin=subprocess.DEVNULL, stdout=output, stderr=errors,
+                env={"PATH": "/usr/bin:/bin", "LANG": "C", "LC_ALL": "C"})
+        finally:
+            os.close(child_read)
+            os.close(child_write)
+        try:
+            deadline = time.monotonic() + 120
+            requests = 0
+            while True:
+                remaining = deadline - time.monotonic()
+                require(remaining > 0, "OBJECT_STORE_COMMIT_UNKNOWN")
+                ready, _, _ = select.select([parent_read], [], [], remaining)
+                require(bool(ready), "OBJECT_STORE_COMMIT_UNKNOWN")
+                message = os.read(parent_read, 1)
+                if not message:
+                    break
+                requests += 1
+                require(message == b"G" and requests <= 4, "NATIVE_GUARD_PROTOCOL")
+                guard()
+                require(os.write(parent_write, b"A") == 1, "OBJECT_STORE_COMMIT_UNKNOWN")
+            process.wait(timeout=max(0.01, deadline - time.monotonic()))
+            require(process.returncode == 0, "OBJECT_STORE_BLOCKED_OR_COMMIT_UNKNOWN")
+            guard()
+            output.seek(0)
+            data = output.read(contract.LIMIT + 1)
+            require(len(data) <= contract.LIMIT, "NATIVE_OUTPUT_LIMIT")
+            result = decode(data)
+            require(isinstance(result, dict) and result.get("schema") == "golem.intent-object-store-result.v1"
+                    and result.get("execution_authorized") is False
+                    and result.get("registration_sha256") == registration_sha256, "NATIVE_CONTRACT")
+            require(type(result.get("sequence")) is int and result["sequence"] > 0
+                    and type(result.get("replayed")) is bool, "NATIVE_CONTRACT")
+            contract._validate(result.get("event_digest"), contract.DIGEST)
+            return {**result, "reviewed_plan_sha256": reviewed_plan_sha256}
+        except (IntegrationError, OSError, subprocess.TimeoutExpired) as error:
+            # Once spawned, even a failed final host check may follow a commit.
+            # Preserve the precise cause, but never imply rollback/no effects.
+            cause = error.code if isinstance(error, IntegrationError) else type(error).__name__
+            raise IntegrationError("OBJECT_STORE_COMMIT_UNKNOWN:" + cause) from error
+        finally:
+            if process.poll() is None:
+                process.kill()
+            process.wait()

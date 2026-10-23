@@ -248,9 +248,16 @@ int main(void)
     CHECK(linked_limits() == 0);
     CHECK(linked_coverage() == 0);
     CHECK(check_wire(fixture, strlen(fixture), true) == 0);
-    golem_digest identity;
+    golem_digest identity, expected, saved;
     CHECK(gi_domain_digest((golem_bytes){(const uint8_t *)fixture, strlen(fixture)}, &identity, NULL)
-        == GOLEM_ERR_UNSUPPORTED_VERSION);
+        == GOLEM_OK);
+    CHECK(gi_baseline_identity((golem_bytes){(const uint8_t *)fixture, strlen(fixture)}, &expected, NULL) == GOLEM_OK);
+    CHECK(memcmp(&identity, &expected, sizeof(identity)) == 0);
+    saved = identity;
+    const char *incomplete = "{\"schema\":\"golem.intent.baseline.v1\"}";
+    CHECK(gi_baseline_identity((golem_bytes){(const uint8_t *)incomplete, strlen(incomplete)}, &identity, NULL) != GOLEM_OK);
+    CHECK(memcmp(&saved, &identity, sizeof(identity)) == 0);
+    CHECK(gi_baseline_identity((golem_bytes){NULL, 0}, NULL, NULL) == GOLEM_ERR_INVALID_ARGUMENT);
     CHECK(replace_wire("\"end\":1", "\"end\":18446744073709551616", false) == 0);
     CHECK(replace_wire("\"end\":1", "\"end\":18446744073709551615", true) == 0);
     CHECK(replace_wire("\"end\":1", "\"end\":1e0", false) == 0);

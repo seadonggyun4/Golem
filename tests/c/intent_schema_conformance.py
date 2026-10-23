@@ -134,7 +134,17 @@ def main():
             assert expected != hashlib.sha256(domain[:-1] + len(wire).to_bytes(8, "little") + wire).hexdigest()
             assert expected != hashlib.sha256(domain + len(wire).to_bytes(8, "big") + wire).hexdigest()
             domain_vectors += 1
-        for wire in (b'{"schema":"golem.intent.baseline.v1"}', minimum + b" " * 262144):
+        for name in ("golem.intent.baseline.v1", "golem.intent.object-preparation.v1"):
+            for value in ({"schema": name}, {"schema": name, "unverified": "\ud55c\U0001f600"}):
+                for ascii_only in (True, False):
+                    wire = json.dumps(value, ensure_ascii=ascii_only).encode()
+                    status, actual = native(args.native, wire, digest=True)
+                    expected = hashlib.sha256(name.encode("ascii") + b"\0" + len(wire).to_bytes(8, "little") + wire).hexdigest()
+                    assert status == 0 and actual == expected
+                    assert expected != hashlib.sha256(wire).hexdigest()
+                    domain_vectors += 1
+        for wire in (b'{"schema":"golem.intent.baseline.v2"}',
+                     b'{"schema":"golem.intent.object-publication.v1"}', minimum + b" " * 262144):
             assert native(args.native, wire, digest=True)[0] != 0
     print(json.dumps({"scope": "P1_STRUCTURAL_PREPARATION_ONLY", "shape_cases": checked,
                       "native_representation_and_content_cases": representation_cases,

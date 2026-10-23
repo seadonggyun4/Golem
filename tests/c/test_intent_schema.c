@@ -222,7 +222,8 @@ static int domain_identity(void)
     CHECK(golem_digest_bytes(control, &raw) == GOLEM_OK && memcmp(&raw, &digest, sizeof(raw)) != 0);
     CHECK(gi_domain_digest(bytes(" {\"schema\":\"golem.intent.source.v1\"}\n"), &digest, NULL) == GOLEM_OK);
     CHECK(memcmp(&digest, &expected, sizeof(digest)) != 0);
-    const char *unknown[] = {"{}", "{\"schema\":\"golem.intent.baseline.v1\"}",
+    const char *unknown[] = {"{}", "{\"schema\":\"golem.intent.baseline.v2\"}",
+        "{\"schema\":\"golem.intent.object-publication.v1\"}",
         "{\"schema\":\"golem.intent.source.v2\"}", "{\"schema\":\"golem.intent.source.v1\\u0000\"}",
         "{\"schema\":true}", "{\"schema\":\"golem.intent.source.v1\",\"schema\":\"other\"}"};
     for (size_t i = 0; i < sizeof(unknown) / sizeof(*unknown); ++i) {

@@ -2,6 +2,7 @@
 #define GOLEM_INTENT_SCHEMA_INTERNAL_H
 
 #include "golem/evidence.h"
+#include "object.h"
 
 /* P1 preparation only: private, pure validators, not an installed API or an
  * authority store. No issuer, activation, or gate verdict.
@@ -60,7 +61,8 @@ golem_status gi_coverage_validate(golem_bytes text, const gi_span *designated, s
  * Metadata is never reserialized or assigned an authoritative object identity. */
 golem_status gi_source_validate(golem_bytes control, golem_bytes text,
     gi_source_result *out, golem_diagnostic *diagnostic);
-/* Approved ADR-D08 primitive. Explicit source.v1 and quota-preparation.v1 registry.
+/* Approved ADR-D08 primitive. Explicit source.v1, quota-preparation.v1,
+ * baseline.v1 and object-preparation.v1 registry.
  * SHA256(schema ASCII + NUL || uint64_le(exact JSON length) || exact JSON).
  * This checks JSON/scalar validity and registered schema, not its full shape or
  * provenance. A digest is byte identity, never a receipt or acceptance verdict. */
@@ -80,6 +82,11 @@ typedef struct gi_baseline_result {
  * output changes only on success. Source ranges and referents remain unverified. */
 golem_status gi_baseline_validate(golem_bytes control, gi_baseline_result *out,
     golem_diagnostic *diagnostic);
+/* Structure validation before exact-byte identity. Does not resolve sources,
+ * authenticate adoption or publish anything. Store callers must separately
+ * validate source coverage and trusted authority guards before publication. */
+golem_status gi_baseline_identity(golem_bytes control, golem_digest *out,
+    golem_diagnostic *diagnostic);
 
 typedef struct gi_source_input { golem_bytes control, text; } gi_source_input;
 typedef struct gi_baseline_coverage_result {
@@ -94,5 +101,16 @@ typedef struct gi_baseline_coverage_result {
 golem_status gi_baseline_coverage_validate(golem_bytes control,
     const gi_source_input *sources, size_t count, gi_baseline_coverage_result *out,
     golem_diagnostic *diagnostic);
+
+typedef struct gi_object_preparation_result {
+    gi_object_reservation reservation;
+    size_t objects, new_objects, new_directories;
+    uint64_t new_object_bytes;
+} gi_object_preparation_result;
+/* Closed manifest shape/path checks and exact-byte identity only. The caller
+ * must still verify actual bytes, reuse provenance, directory existence and
+ * complete baseline/source membership under the authority lock. */
+golem_status gi_object_preparation_validate(golem_bytes control,
+    gi_object_preparation_result *out, golem_diagnostic *diagnostic);
 
 #endif

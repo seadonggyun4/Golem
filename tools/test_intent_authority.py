@@ -109,6 +109,7 @@ class IdentityTests(unittest.TestCase):
         if not os.environ.get("GOLEM_INTENT_HOST"):
             self.skipTest("native bridge path required")
         bridge = Path(os.environ["GOLEM_INTENT_HOST"]).resolve()
+        self.bridge = bridge
         pins = pins or [self.pin, bridge]
         plan = host.registration_plan(self.repo, self.authority, pins, git=self.git_binary)
         return host.register(self.repo, self.authority, pins, plan["plan_sha256"],
@@ -127,6 +128,279 @@ class IdentityTests(unittest.TestCase):
         with self.assertRaisesRegex(IntegrationError, "AUTHORITY_CONFLICT"):
             host.registration_plan(self.repo, competing, [self.pin], git=self.git_binary)
         self.assertEqual(len(list(self.authority.iterdir())), 3)
+
+    def test_object_preparation_does_not_authorize_host_access(self):
+        import hashlib
+        import json
+        value = self.enroll()
+        baseline = "b" * 64
+        manifest = {
+            "schema": "golem.intent.object-preparation.v1",
+            "operation_id": "0" * 64, "request_digest": "0" * 64,
+            "lane": 0, "expected_sequence": 1,
+            "expected_head": hashlib.sha256((self.authority / "00000001.event").read_bytes()).hexdigest(),
+            "baseline_digest": baseline,
+            "objects": [{"path": f"objects/v1/domain/golem.intent.baseline.v1/{baseline}",
+                         "kind": "domain", "byte_length": 10, "digest": baseline, "disposition": "new"}],
+            "new_directories": ["objects", "objects/v1", "objects/v1/domain",
+                                "objects/v1/domain/golem.intent.baseline.v1"],
+        }
+        prepared = self.authority / "00000002.objects-prep"
+        prepared.write_bytes(json.dumps(manifest, separators=(",", ":")).encode())
+        prepared.chmod(0o400)
+        before = {p.name: p.read_bytes() for p in self.authority.iterdir()}
+        with self.assertRaises(IntegrationError):
+            host.native_inspect(self.repo, value["registration_sha256"], git=self.git_binary,
+                                bridge=Path(os.environ["GOLEM_INTENT_HOST"]).resolve())
+        self.assertEqual(before, {p.name: p.read_bytes() for p in self.authority.iterdir()})
+        self.assertFalse((self.authority / "00000002.event").exists())
+
+    def object_commit_fixture(self, sequence, *, coverage_end=3, source_project="demo", extra=False, inputs_only=False):
+        import hashlib
+        import json
+        def wire(value):
+            return json.dumps(value, separators=(",", ":")).encode()
+        def domain(schema, data):
+            return hashlib.sha256(schema.encode() + b"\0" + struct.pack("<Q", len(data)) + data).hexdigest()
+        text = b"abc"
+        raw = hashlib.sha256(text).hexdigest()
+        source_schema = "golem.intent.source.v1"
+        source = wire({"schema": source_schema, "project_id": source_project, "work_id": None,
+            "created_by_assertion": "fixture", "body": {"body_cas": raw, "byte_length": 3,
+                "media_type": "text/plain", "encoding": "UTF-8", "origin": "MODEL_DRAFT",
+                "capture_ref": "fixture", "designation": {"scope_id": "opaque", "ranges": [{"start": 0, "end": 3}],
+                    "purpose": "PRODUCT_REQUIREMENT", "decision_ref": "b" * 64}, "execution_authority": False}})
+        source_digest = domain(source_schema, source)
+        baseline_schema = "golem.intent.baseline.v1"
+        baseline = wire({"schema": baseline_schema, "project_id": "demo", "work_id": None,
+            "created_by_assertion": "fixture", "body": {"source_refs": [source_digest],
+                "previous_baseline_digest": None, "decision_refs": [], "requirement_refs": [], "constraint_refs": [],
+                "issuer_policy_ref": "c" * 64, "coverage_manifest": [{"source_ref": source_digest, "rows": [
+                    {"start": 0, "end": coverage_end, "classification": "CONTEXT", "requirement_refs": [],
+                     "constraint_refs": [], "rationale": "fixture, not approval", "review_refs": []}]}]}})
+        baseline_digest = domain(baseline_schema, baseline)
+        if inputs_only:
+            return baseline, ((source, text),)
+        objects = [(f"objects/v1/raw/sha256/{raw}", "raw", raw, text),
+            (f"objects/v1/domain/{source_schema}/{source_digest}", "domain", source_digest, source),
+            (f"objects/v1/domain/{baseline_schema}/{baseline_digest}", "domain", baseline_digest, baseline)]
+        if extra:
+            digest = hashlib.sha256(b"extra").hexdigest()
+            objects.append((f"objects/v1/raw/sha256/{digest}", "raw", digest, b"extra"))
+        rows, directories = [], []
+        for name, kind, digest, data in objects:
+            target = self.authority / name
+            parents = list(Path(name).parents)[:-1]
+            for parent in reversed(parents):
+                directory = self.authority / parent
+                if not directory.exists():
+                    directory.mkdir(mode=0o700)
+                    directories.append(parent.as_posix())
+            disposition = "reuse" if target.exists() else "new"
+            if disposition == "new":
+                target.write_bytes(data)
+                target.chmod(0o400)
+            else:
+                self.assertEqual(target.read_bytes(), data)
+            rows.append({"path": name, "kind": kind, "byte_length": len(data), "digest": digest, "disposition": disposition})
+        head = hashlib.sha256((self.authority / f"{sequence-1:08}.event").read_bytes()).hexdigest()
+        operation = hashlib.sha256(f"object-operation-{sequence}".encode()).hexdigest()
+        request = hashlib.sha256(f"object-request-{sequence}".encode()).hexdigest()
+        prep_schema = "golem.intent.object-preparation.v1"
+        manifest = wire({"schema": prep_schema, "operation_id": operation, "request_digest": request,
+            "lane": 0, "expected_sequence": sequence - 1, "expected_head": head, "baseline_digest": baseline_digest,
+            "objects": rows, "new_directories": directories})
+        payload = wire({"schema": "golem.intent.object-publication.v1", "preparation_digest": domain(prep_schema, manifest),
+            "baseline_digest": baseline_digest, "operation_id": operation, "request_digest": request})
+        journal_schema = "golem.intent.quota-preparation.v1"
+        prep = wire({"schema": journal_schema, "lane": 0, "sequence": sequence, "payload_bytes": len(payload),
+            "operation_id": operation, "request_digest": request, "previous_event_digest": head,
+            "payload_digest": hashlib.sha256(payload).hexdigest()})
+        event = struct.pack("<8sQ32s32s", b"GIQEV001", sequence, bytes.fromhex(head), bytes.fromhex(domain(journal_schema, prep)))
+        for suffix, data in (("objects-prep", manifest), ("prep", prep), ("payload", payload), ("event", event)):
+            target = self.authority / f"{sequence:08}.{suffix}"
+            self.assertFalse(target.exists())
+            target.write_bytes(data)
+            target.chmod(0o400)
+        return objects
+
+    def snapshot(self):
+        return {str(p.relative_to(self.base)): (p.stat().st_ino, p.stat().st_mode,
+                p.read_bytes() if p.is_file() else None) for p in self.base.rglob("*")}
+
+    def object_store_args(self, value, operation="d" * 64, **fixture):
+        baseline, sources = self.object_commit_fixture(2, inputs_only=True, **fixture)
+        observed = host.native_inspect(self.repo, value["registration_sha256"], git=self.git_binary, bridge=self.bridge)
+        return (self.repo, value["registration_sha256"], operation, "e" * 64,
+                observed["committed"], observed["head"], baseline, sources)
+
+    def test_object_store_commit_reuse_and_replay(self):
+        value = self.enroll()
+        args = self.object_store_args(value)
+        kw = {"git": self.git_binary, "bridge": self.bridge}
+        before = self.snapshot()
+        plan = host.object_store_plan(*args, **kw)
+        self.assertEqual(before, self.snapshot())
+        with self.assertRaisesRegex(IntegrationError, "OWNER_APPROVAL_REQUIRED"):
+            host.store_objects(*args, plan["plan_sha256"], **kw)
+        with self.assertRaisesRegex(IntegrationError, "PLAN_STALE"):
+            host.store_objects(*args, "0" * 64, approve_local_owner=True, **kw)
+        self.assertEqual(before, self.snapshot())
+        result = host.store_objects(*args, plan["plan_sha256"], approve_local_owner=True, **kw)
+        self.assertEqual(result["sequence"], 2)
+        self.assertFalse(result["execution_authorized"])
+        self.assertFalse(result["replayed"])
+        observed = host.native_inspect(self.repo, value["registration_sha256"], **kw)
+        paths = list(self.authority.rglob("*"))
+        self.assertEqual(observed["usage"][0], [2,
+            sum(p.stat().st_size for p in self.authority.glob("*.payload")),
+            sum(p.stat().st_size for p in paths if p.is_file()), len(paths)])
+        self.assertEqual(observed["usage"][1:], [[0, 0, 0, 0], [0, 0, 0, 0]])
+        committed = self.snapshot()
+        replay = host.store_objects(*args, plan["plan_sha256"], approve_local_owner=True, **kw)
+        self.assertTrue(replay["replayed"])
+        self.assertEqual(committed, self.snapshot())
+        next_args = self.object_store_args(value, operation="f" * 64)
+        plan = host.object_store_plan(*next_args, **kw)
+        host.store_objects(*next_args, plan["plan_sha256"], approve_local_owner=True, **kw)
+        prep = host.decode((self.authority / "00000003.objects-prep").read_bytes())
+        self.assertEqual(prep["new_directories"], [])
+        self.assertTrue(all(row["disposition"] == "reuse" for row in prep["objects"]))
+        self.assertEqual(host.native_inspect(self.repo, value["registration_sha256"], **kw)["committed"], 3)
+
+    def test_object_store_rejects_invalid_coverage_before_write(self):
+        value = self.enroll()
+        args = self.object_store_args(value, coverage_end=2)
+        kw = {"git": self.git_binary, "bridge": self.bridge}
+        plan = host.object_store_plan(*args, **kw)
+        before = self.snapshot()
+        with self.assertRaises(IntegrationError):
+            host.store_objects(*args, plan["plan_sha256"], approve_local_owner=True, **kw)
+        self.assertEqual(before, self.snapshot())
+
+    def object_store_interruption(self, phase):
+        value = self.enroll()
+        args = self.object_store_args(value)
+        kw = {"git": self.git_binary, "bridge": self.bridge}
+        plan = host.object_store_plan(*args, **kw)
+        before = self.snapshot()
+        original = host._object_store_snapshot
+        calls = 0
+        def guarded(*a, **k):
+            nonlocal calls
+            calls += 1
+            # Initial snapshot, pre-spawn, then four native guards.
+            if calls == phase + 2:
+                raise IntegrationError("FIXTURE_GUARD_DENIED")
+            return original(*a, **k)
+        with patch.object(host, "_object_store_snapshot", side_effect=guarded):
+            with self.assertRaises(IntegrationError):
+                host.store_objects(*args, plan["plan_sha256"], approve_local_owner=True, **kw)
+        if phase <= 2:
+            self.assertEqual(before, self.snapshot())
+            return
+        self.assertTrue((self.authority / "00000002.objects-prep").exists())
+        self.assertEqual((self.authority / "00000002.prep").exists(), phase == 4)
+        self.assertFalse((self.authority / "00000002.event").exists())
+        pending = self.snapshot()
+        with self.assertRaises(IntegrationError):
+            host.store_objects(*args, plan["plan_sha256"], approve_local_owner=True, **kw)
+        self.assertEqual(pending, self.snapshot())
+        with self.assertRaises(IntegrationError):
+            host.native_inspect(self.repo, value["registration_sha256"], **kw)
+
+    def test_object_store_host_guard_before_manifest(self):
+        self.object_store_interruption(2)
+
+    def test_object_store_host_guard_after_objects(self):
+        self.object_store_interruption(3)
+
+    def test_object_store_host_guard_before_event(self):
+        self.object_store_interruption(4)
+
+    def test_object_store_stale_head_and_owner_lock(self):
+        value = self.enroll()
+        args = self.object_store_args(value)
+        kw = {"git": self.git_binary, "bridge": self.bridge}
+        stale = (*args[:5], "0" * 64, *args[6:])
+        plan = host.object_store_plan(*stale, **kw)
+        before = self.snapshot()
+        with self.assertRaises(IntegrationError):
+            host.store_objects(*stale, plan["plan_sha256"], approve_local_owner=True, **kw)
+        self.assertEqual(before, self.snapshot())
+        plan = host.object_store_plan(*args, **kw)
+        fd = os.open(self.authority, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            with self.assertRaises(IntegrationError):
+                host.store_objects(*args, plan["plan_sha256"], approve_local_owner=True, **kw)
+        finally:
+            os.close(fd)
+        self.assertEqual(before, self.snapshot())
+
+    def test_object_store_changed_input_and_pin_require_new_plan(self):
+        value = self.enroll()
+        args = self.object_store_args(value)
+        kw = {"git": self.git_binary, "bridge": self.bridge}
+        plan = host.object_store_plan(*args, **kw)
+        before = self.snapshot()
+        changed = (*args[:6], args[6] + b" ", args[7])
+        with self.assertRaisesRegex(IntegrationError, "PLAN_STALE"):
+            host.store_objects(*changed, plan["plan_sha256"], approve_local_owner=True, **kw)
+        self.assertEqual(before, self.snapshot())
+        self.pin.write_bytes(b"changed fixture pin")
+        before = self.snapshot()
+        with self.assertRaises(IntegrationError):
+            host.store_objects(*args, plan["plan_sha256"], approve_local_owner=True, **kw)
+        self.assertEqual(before, self.snapshot())
+
+    def test_object_history_graph_and_reuse(self):
+        value = self.enroll()
+        objects = self.object_commit_fixture(2)
+        self.object_commit_fixture(3)
+        bridge = Path(os.environ["GOLEM_INTENT_HOST"]).resolve()
+        def snapshot():
+            return {p.relative_to(self.authority).as_posix(): p.read_bytes()
+                    for p in self.authority.rglob("*") if p.is_file()}
+        before = snapshot()
+        observed = host.native_inspect(self.repo, value["registration_sha256"], git=self.git_binary, bridge=bridge)
+        self.assertEqual(observed["committed"], 3)
+        self.assertFalse(observed["execution_authorized"])
+        self.assertEqual(before, snapshot())
+        for name in ("00000002.objects-prep", "00000003.payload", objects[0][0], objects[1][0]):
+            with self.subTest(name=name):
+                target = self.authority / name
+                original = target.read_bytes()
+                target.chmod(0o600)
+                target.write_bytes(b"damaged")
+                target.chmod(0o400)
+                with self.assertRaises(IntegrationError):
+                    host.native_inspect(self.repo, value["registration_sha256"], git=self.git_binary, bridge=bridge)
+                target.chmod(0o600)
+                target.write_bytes(original)
+                target.chmod(0o400)
+        self.assertEqual(before, snapshot())
+
+    def test_object_history_rejects_incomplete_coverage(self):
+        value = self.enroll()
+        self.object_commit_fixture(2, coverage_end=2)
+        with self.assertRaises(IntegrationError):
+            host.native_inspect(self.repo, value["registration_sha256"], git=self.git_binary,
+                                bridge=Path(os.environ["GOLEM_INTENT_HOST"]).resolve())
+
+    def test_object_history_rejects_cross_project_source(self):
+        value = self.enroll()
+        self.object_commit_fixture(2, source_project="other")
+        with self.assertRaises(IntegrationError):
+            host.native_inspect(self.repo, value["registration_sha256"], git=self.git_binary,
+                                bridge=Path(os.environ["GOLEM_INTENT_HOST"]).resolve())
+
+    def test_object_history_rejects_extra_object(self):
+        value = self.enroll()
+        self.object_commit_fixture(2, extra=True)
+        with self.assertRaises(IntegrationError):
+            host.native_inspect(self.repo, value["registration_sha256"], git=self.git_binary,
+                                bridge=Path(os.environ["GOLEM_INTENT_HOST"]).resolve())
 
     def test_stale_plan_and_missing_locator(self):
         plan = host.registration_plan(self.repo, self.authority, [self.pin], git=self.git_binary)

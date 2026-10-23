@@ -1,4 +1,8 @@
+#define _POSIX_C_SOURCE 200809L
 #include "../src/intent/journal.h"
+#include "../src/intent/schema.h"
+#include <sys/stat.h>
+#include <unistd.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -262,9 +266,90 @@ static int alias_command(int argc, char **argv)
 }
 
 /* Fixed local-owner registration/change capability, not a public issuer API. */
+static int object_fd(const char *s)
+{
+    char *end; errno = 0; long n = strtol(s, &end, 10);
+    return errno || !*s || *end || n < 3 || n > INT_MAX ? -1 : (int)n;
+}
+
+static golem_status object_input(const char *arg, size_t limit, golem_bytes *out)
+{
+    int fd = object_fd(arg); struct stat a, b;
+    if (fd < 0 || fstat(fd, &a) || !S_ISREG(a.st_mode) || a.st_uid != geteuid() ||
+        (a.st_mode & 077) || a.st_size <= 0 || (uint64_t)a.st_size > limit) return GOLEM_ERR_INVALID_ARGUMENT;
+    size_t n = (size_t)a.st_size, at = 0; uint8_t *data = malloc(n);
+    if (!data) return GOLEM_ERR_OUT_OF_MEMORY;
+    while (at < n) {
+        ssize_t got = pread(fd, data + at, n - at, (off_t)at);
+        if (got < 0 && errno == EINTR) continue;
+        if (got <= 0) { free(data); return GOLEM_ERR_IO; }
+        at += (size_t)got;
+    }
+    if (fstat(fd, &b) || a.st_dev != b.st_dev || a.st_ino != b.st_ino || a.st_size != b.st_size ||
+        a.st_mode != b.st_mode || a.st_uid != b.st_uid) { free(data); return GOLEM_ERR_INVALID_STATE; }
+    *out = (golem_bytes){data, n}; return GOLEM_OK;
+}
+
+static golem_status object_guard(void *context)
+{
+    int *fds = context; char byte = 'G'; ssize_t n;
+    do { n = write(fds[1], &byte, 1); } while (n < 0 && errno == EINTR);
+    if (n != 1) return GOLEM_ERR_POLICY_DENIED;
+    do { n = read(fds[0], &byte, 1); } while (n < 0 && errno == EINTR);
+    return n == 1 && byte == 'A' ? GOLEM_OK : GOLEM_ERR_POLICY_DENIED;
+}
+
+static int store_objects_command(int argc, char **argv)
+{
+    if (argc < 13 || (argc - 11) % 2) return 2;
+    int root = object_fd(argv[2]), guards[] = {object_fd(argv[8]), object_fd(argv[9])};
+    if (root < 0 || guards[0] < 0 || guards[1] < 0) return 2;
+    char *end; errno = 0; unsigned long long seq = strtoull(argv[6], &end, 10);
+    if (errno || !*argv[6] || *end || argv[6][0] == '-') return 2;
+    golem_digest registration, operation, request, head;
+    golem_digest *digests[] = {&registration, &operation, &request, &head};
+    const unsigned indices[] = {3, 4, 5, 7};
+    golem_status st = GOLEM_OK;
+    for (size_t i = 0; st == GOLEM_OK && i < 4; ++i)
+        st = golem_digest_parse((golem_string_view){argv[indices[i]], strlen(argv[indices[i]])}, digests[i]);
+    size_t count = (size_t)(argc - 11) / 2, total = 0;
+    gi_source_input *sources = calloc(count, sizeof(*sources)); golem_bytes baseline = {0};
+    if (!sources) st = GOLEM_ERR_OUT_OF_MEMORY;
+    if (st == GOLEM_OK) st = object_input(argv[10], 262144, &baseline);
+    for (size_t i = 0; st == GOLEM_OK && i < count; ++i) {
+        st = object_input(argv[11 + 2*i], 262144, &sources[i].control);
+        if (st == GOLEM_OK) st = object_input(argv[12 + 2*i], 16777216, &sources[i].text);
+        total += sources[i].text.size;
+        if (total > 67108864) st = GOLEM_ERR_OVERFLOW;
+    }
+    gi_journal *j = NULL; authority_chain chain = {0};
+    const char key[] = "golem.intent.authority-registration.v1";
+    if (st == GOLEM_OK) st = gi_journal_open(root, &j);
+    if (st == GOLEM_OK) st = golem_digest_bytes((golem_bytes){(const uint8_t *)key, sizeof(key)-1}, &chain.initial);
+    if (st == GOLEM_OK) st = gi_journal_visit(j, visit_binding, &chain);
+    if (st == GOLEM_OK && (!chain.found || memcmp(chain.current.bytes, registration.bytes, 32))) st = GOLEM_ERR_INVALID_STATE;
+    gi_journal_receipt receipt;
+    if (st == GOLEM_OK) st = gi_journal_store_objects(j, &operation, &request, seq, &head,
+        baseline, sources, count, object_guard, guards, &receipt);
+    gi_journal_close(j); free((void *)baseline.data);
+    if (sources) for (size_t i = 0; i < count; ++i) { free((void *)sources[i].control.data); free((void *)sources[i].text.data); }
+    free(sources);
+    if (st != GOLEM_OK) {
+        printf("{\"schema\":\"golem.intent-object-store-result.v1\",\"execution_authorized\":false,\"error\":%d}\n", (int)st);
+        return 1;
+    }
+    char hex[GOLEM_DIGEST_HEX_CAPACITY]; size_t required;
+    if (golem_digest_format(&receipt.digest, hex, sizeof(hex), &required) != GOLEM_OK) return 1;
+    printf("{\"schema\":\"golem.intent-object-store-result.v1\",\"execution_authorized\":false,"
+           "\"registration_sha256\":\"%s\",\"sequence\":%llu,\"event_digest\":\"%s\",\"replayed\":%s}\n",
+           argv[3], (unsigned long long)receipt.sequence, hex, receipt.replayed ? "true" : "false");
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     if (argc < 4) return 2;
+    if (!strcmp(argv[1], "--store-objects-fd")) return store_objects_command(argc, argv);
     if (!strcmp(argv[1], "--plan-fragment-fd") || !strcmp(argv[1], "--preserve-fragment-fd") ||
         !strcmp(argv[1], "--finish-fragment-fd") || !strcmp(argv[1], "--detach-fragment-fd")) return alias_command(argc, argv);
     if (!strcmp(argv[1], "--plan-damage-fd") || !strcmp(argv[1], "--preserve-damage-fd") ||

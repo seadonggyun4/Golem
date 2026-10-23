@@ -2,6 +2,12 @@
 
 ## 현재 상태 (2026-10-23)
 
+후속 object-store 준비 승인으로 baseline.v1·object-preparation.v1 domain registry와
+구조 검증 후 `gi_baseline_identity`를 추가했다. 아래 registry 두 종류/미등록 회귀 설명은
+그 이전 validator 단계 기록이다. [새 승인 계약과 구현 현황](intent-assurance-p1-object-store.ko.md)을
+따른다. 후속 object store의 과거 commit 검증·native 게시·별도 승인 host 저장 연결은
+그 문서의 현재 구현 절을 기준으로 한다. 아래 내용은 validator 단계의 이력이다.
+
 아래 과거 단계별 기록과 현재 상태를 구분한다. D01 등록/복구와 D08 무삭제·한도 거부·
 초기 rollover 제외·v2 quota·최초 lane/peak 회계는 후속 승인 및 구현된 범위다.
 [D01 host](intent-assurance-d01-host.ko.md), [private journal](intent-assurance-p1-journal.ko.md)을 따른다.

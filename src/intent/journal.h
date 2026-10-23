@@ -28,6 +28,8 @@ typedef struct gi_journal_operation {
  * Never creates a root, migrates Work, or changes existing document journals. */
 golem_status gi_journal_open(int registered_root_fd, gi_journal **out);
 void gi_journal_close(gi_journal *journal);
+/* Validates committed object history and reports attributed staging read-only.
+ * Pending object publication is never a D01 recovery authorization. */
 golem_status gi_journal_inspect(gi_journal *journal, gi_journal_status *out);
 /* Read-only ordered metadata replay after full journal validation. The visitor
  * must not reenter or close this handle. Pending records are included. */
@@ -119,4 +121,11 @@ golem_status gi_journal_append(gi_journal *journal, gi_quota_lane lane,
     uint64_t expected_sequence, const golem_digest *expected_head,
     golem_bytes payload, gi_journal_guard guard, void *context,
     gi_journal_receipt *out);
+struct gi_source_input;
+/* Internal intake-only proposal storage, never adoption/ACTIVE. Inputs must
+ * remain alive and immutable through the call. A trusted D01 host guard is
+ * mandatory. Prepared failures are preserved and block subsequent writes. */
+golem_status gi_journal_store_objects(gi_journal *, const golem_digest *operation, const golem_digest *request,
+    uint64_t expected_sequence, const golem_digest *expected_head, golem_bytes baseline,
+    const struct gi_source_input *, size_t source_count, gi_journal_guard, void *, gi_journal_receipt *);
 #endif

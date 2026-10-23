@@ -6,6 +6,8 @@
 #include "journal.h"
 #include "fragment.h"
 #include "inventory.h"
+#include "object_inventory.h"
+#include "object_graph.h"
 #include "schema.h"
 #include "../common/json.h"
 #include <errno.h>
@@ -435,6 +437,90 @@ static golem_status damage_read(gi_journal *j, size_t seq, unsigned kind, const 
     return st;
 }
 
+/* Read-only restoration of object publication history and a prepared tail.
+ * Committed graphs are verified before use; only inspection/the live publisher
+ * may observe a prepared tail. It is never a D01 pending-event recovery target. */
+static golem_status restore_object_reservation(gi_journal *j, replay *r,
+    uint64_t *known_files, uint64_t *known_bytes, uint64_t *known_directories, bool allow_pending)
+{
+    gi_object_manifest_input *inputs = calloc(RECORDS + 1, sizeof(*inputs));
+    if (!inputs) return GOLEM_ERR_OUT_OF_MEMORY;
+    size_t count = 0; golem_status st = GOLEM_OK;
+    for (size_t seq = 1; st == GOLEM_OK && seq <= r->count + 1; ++seq) {
+        char path[64]; uint8_t *data = NULL, *actual = NULL;
+        size_t size = 0, actual_size = 0; bool exists = false, found = false;
+        record *rec = seq <= r->count ? &r->records[seq - 1] : NULL;
+        name(path, sizeof(path), seq, "objects-prep");
+        st = read_file(j->root, path, GI_CONTROL_MAX, &data, &size, &exists);
+        struct stat sb;
+        if (st == GOLEM_OK && exists && (seq > RECORDS || fstatat(j->root, path, &sb, AT_SYMLINK_NOFOLLOW) < 0 ||
+            sb.st_nlink != 1 || (sb.st_mode & 07777) != 0400)) st = GOLEM_ERR_INVALID_STATE;
+        if (st == GOLEM_OK && rec && rec->payload_ready) {
+            name(path, sizeof(path), seq, "payload");
+            st = read_file(j->root, path, GI_CONTROL_MAX, &actual, &actual_size, &found);
+            if (st == GOLEM_OK && !found) st = GOLEM_ERR_INVALID_STATE;
+        }
+        if (st == GOLEM_OK && !exists && actual) {
+            struct json_object *o = NULL, *schema = NULL;
+            if (golem_json_parse((golem_bytes){actual, actual_size}, GI_CONTROL_MAX, &o) == GOLEM_OK &&
+                json_object_object_get_ex(o, "schema", &schema) && json_object_is_type(schema, json_type_string) &&
+                !strcmp(json_object_get_string(schema), "golem.intent.object-publication.v1")) st = GOLEM_ERR_INVALID_STATE;
+            json_object_put(o);
+        }
+        if (st != GOLEM_OK || !exists) { free(data); free(actual); continue; }
+        if ((!rec || !rec->committed || rec->staging) && !allow_pending) {
+            free(data); free(actual); st = GOLEM_ERR_INVALID_STATE; break;
+        }
+        gi_object_preparation_result manifest;
+        st = gi_object_preparation_validate((golem_bytes){data, size}, &manifest, NULL);
+        const uint8_t *head = rec ? rec->prep + 96 : r->status.head.bytes;
+        if (st == GOLEM_OK && (manifest.reservation.sequence != seq ||
+            memcmp(manifest.reservation.head.bytes, head, 32) || (!rec && r->status.pending))) st = GOLEM_ERR_INVALID_STATE;
+        char payload[GI_OBJECT_PUBLICATION_CAPACITY]; size_t length = 0;
+        if (st == GOLEM_OK) st = gi_object_publication_encode(&manifest.reservation.publication, payload, sizeof(payload), &length);
+        for (size_t i = 0; st == GOLEM_OK && i < r->count; ++i)
+            if (i + 1 != seq && !memcmp(r->records[i].prep + 32, manifest.reservation.publication.operation.bytes, 32))
+                st = GOLEM_ERR_INVALID_STATE;
+        gi_object_journal_binding binding = {0};
+        if (st == GOLEM_OK && rec) {
+            golem_digest digest; st = golem_digest_bytes((golem_bytes){(uint8_t *)payload, length}, &digest);
+            if (st == GOLEM_OK && (number(rec->prep + 8) != GI_QUOTA_INTAKE || number(rec->prep + 24) != length ||
+                memcmp(rec->prep + 128, digest.bytes, 32) || memcmp(rec->prep + 32, manifest.reservation.publication.operation.bytes, 32) ||
+                memcmp(rec->prep + 64, manifest.reservation.publication.request.bytes, 32) ||
+                (actual && (actual_size != length || memcmp(actual, payload, length))))) st = GOLEM_ERR_INVALID_STATE;
+            binding = (gi_object_journal_binding){GI_QUOTA_INTAKE, seq, manifest.reservation.head, {(uint8_t *)payload, length}};
+        }
+        free(actual);
+        gi_quota_state projected;
+        if (st == GOLEM_OK) st = gi_object_reservation_project(&r->status.usage, &manifest.reservation, rec ? &binding : NULL, &projected);
+        if (st == GOLEM_OK) {
+            inputs[count++] = (gi_object_manifest_input){{data, size}, rec && rec->committed};
+            r->status.usage = projected;
+            r->status.usage.lane[GI_QUOTA_INTAKE].value[GI_QUOTA_BYTES] += size;
+            ++r->status.usage.lane[GI_QUOTA_INTAKE].value[GI_QUOTA_ENTRIES];
+            gi_quota_usage zero = {{0}}; gi_quota_state checked;
+            st = gi_quota_project(&r->status.usage, GI_QUOTA_INTAKE, &zero, &zero, &checked);
+            if (!rec || !rec->committed) r->status.pending = true;
+            ++*known_files; *known_bytes += size;
+        } else free(data);
+    }
+    gi_object_inventory objects;
+    if (st == GOLEM_OK && count) st = gi_object_inventory_scan(j->root, inputs, count, &objects);
+    for (size_t i = 0; st == GOLEM_OK && i < count; ++i) if (inputs[i].committed) {
+        gi_baseline_coverage_result coverage;
+        st = gi_object_graph_validate(j->root, inputs[i].bytes, &coverage);
+    }
+    if (st == GOLEM_OK && count) {
+        r->status.usage.lane[GI_QUOTA_INTAKE].value[GI_QUOTA_BYTES] += objects.actual.logical_bytes;
+        r->status.usage.lane[GI_QUOTA_INTAKE].value[GI_QUOTA_ENTRIES] += objects.actual.files + objects.actual.directories;
+        *known_files += objects.actual.files; *known_bytes += objects.actual.logical_bytes;
+        *known_directories += objects.actual.directories;
+    }
+    for (size_t i = 0; i < count; ++i) free((void *)inputs[i].bytes.data);
+    free(inputs);
+    return st;
+}
+
 static golem_status restore_mode(gi_journal *j, replay *r, int recovery_kind)
 {
     memset(r, 0, sizeof(*r));
@@ -442,16 +528,16 @@ static golem_status restore_mode(gi_journal *j, replay *r, int recovery_kind)
     if (fstat(j->root, &root) < 0) return GOLEM_ERR_IO;
     if (root.st_uid != geteuid() || (root.st_mode & 0077)) return GOLEM_ERR_POLICY_DENIED;
     gi_inventory inventory;
-    golem_status st = gi_inventory_scan(j->root, 33792, 1, &inventory);
+    golem_status st = gi_inventory_scan(j->root, 33792, 4, &inventory);
     if (st != GOLEM_OK) return st;
     struct stat quarantine_dir;
     bool has_quarantine = fstatat(j->root, "quarantine", &quarantine_dir, AT_SYMLINK_NOFOLLOW) == 0;
     if (!has_quarantine && errno != ENOENT) return GOLEM_ERR_IO;
-    if (inventory.directories != (has_quarantine ? 1u : 0u) ||
-        (has_quarantine && (!S_ISDIR(quarantine_dir.st_mode) || quarantine_dir.st_uid != geteuid() ||
+    if ((has_quarantine && (!S_ISDIR(quarantine_dir.st_mode) || quarantine_dir.st_uid != geteuid() ||
          (quarantine_dir.st_mode & 0077)))) return GOLEM_ERR_INVALID_STATE;
     if (has_quarantine) ++r->status.usage.lane[GI_QUOTA_INTAKE].value[GI_QUOTA_ENTRIES];
     uint64_t known_files = 0, known_bytes = 0;
+    uint64_t known_directories = has_quarantine ? 1u : 0u;
     for (size_t seq = 1; seq <= RECORDS; ++seq) {
         char path[64]; uint8_t *data = NULL; size_t size = 0; bool exists = false;
         name(path, sizeof(path), seq, "prep");
@@ -572,7 +658,10 @@ static golem_status restore_mode(gi_journal *j, replay *r, int recovery_kind)
         if (event_exists) { ++r->status.committed; r->status.head = rec->event; }
         r->status.pending = pending || !event_exists;
     }
-    if ((has_quarantine && !r->count) || known_files != inventory.files || known_bytes != inventory.logical_bytes)
+    st = restore_object_reservation(j, r, &known_files, &known_bytes, &known_directories, recovery_kind == -2);
+    if (st != GOLEM_OK) return st;
+    if ((has_quarantine && !r->count) || known_files != inventory.files || known_bytes != inventory.logical_bytes ||
+        known_directories != inventory.directories)
         return GOLEM_ERR_INVALID_STATE; /* Unattributed file, gap or partial prep. */
     gi_quota_usage zero = {{0}}; gi_quota_state checked;
     return gi_quota_project(&r->status.usage, GI_QUOTA_INTAKE, &zero, &zero, &checked);
@@ -604,7 +693,7 @@ golem_status gi_journal_inspect(gi_journal *j, gi_journal_status *out)
     if (j->busy || j->owner != getpid()) return GOLEM_ERR_INVALID_STATE;
     replay *r = malloc(sizeof(*r));
     if (!r) return GOLEM_ERR_OUT_OF_MEMORY;
-    golem_status st = restore(j, r);
+    golem_status st = restore_mode(j, r, -2);
     if (st == GOLEM_OK) *out = r->status;
     free(r); return st;
 }
@@ -670,12 +759,11 @@ golem_status gi_journal_lookup(gi_journal *j, const golem_digest *operation,
     free(r); return st;
 }
 
-static golem_status publish(gi_journal *j, size_t seq, const char *suffix, golem_bytes bytes)
+static golem_status publish_name(int root, const char *final, golem_bytes bytes)
 {
-    char final[64], pending[80];
-    name(final, sizeof(final), seq, suffix);
+    char pending[256];
     (void)snprintf(pending, sizeof(pending), "%s.pending", final);
-    int fd = openat(j->root, pending, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+    int fd = openat(root, pending, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
     if (fd < 0) return GOLEM_ERR_IO;
     golem_status st = GOLEM_OK; size_t used = 0;
     while (used < bytes.size) {
@@ -686,11 +774,16 @@ static golem_status publish(gi_journal *j, size_t seq, const char *suffix, golem
     }
     if (st == GOLEM_OK && (fchmod(fd, 0400) < 0 || fsync(fd) < 0)) st = GOLEM_ERR_IO;
     if (close(fd) < 0 && st == GOLEM_OK) st = GOLEM_ERR_IO;
-    if (st == GOLEM_OK && (linkat(j->root, pending, j->root, final, 0) < 0 || fsync(j->root) < 0))
+    if (st == GOLEM_OK && (linkat(root, pending, root, final, 0) < 0 || fsync(root) < 0))
         st = GOLEM_ERR_IO;
     /* Only this successful live publication removes its own staging name. */
-    if (st == GOLEM_OK && (unlinkat(j->root, pending, 0) < 0 || fsync(j->root) < 0)) st = GOLEM_ERR_IO;
+    if (st == GOLEM_OK && (unlinkat(root, pending, 0) < 0 || fsync(root) < 0)) st = GOLEM_ERR_IO;
     return st;
+}
+static golem_status publish(gi_journal *j, size_t seq, const char *suffix, golem_bytes bytes)
+{
+    char final[64]; name(final, sizeof(final), seq, suffix);
+    return publish_name(j->root, final, bytes);
 }
 
 static golem_status alias_plan(gi_journal *j, unsigned kind, replay *r, gi_journal_alias_plan *out)
@@ -1500,4 +1593,218 @@ golem_status gi_journal_append(gi_journal *j, gi_quota_lane lane,
     if (st == GOLEM_OK) *out = (gi_journal_receipt){seq, event_digest, false};
     if (started && st != GOLEM_OK) j->poisoned = true;
     free(wire); free(r); j->busy = false; return st;
+}
+
+typedef struct object_blob {
+    char path[192]; gi_object_kind kind; golem_digest digest; golem_bytes bytes; bool fresh;
+} object_blob;
+static bool json_set(struct json_object *o, const char *key, struct json_object *value)
+{
+    if (!value) return false;
+    if (json_object_object_add(o, key, value) == 0) return true;
+    json_object_put(value); return false;
+}
+static golem_status blob_add(object_blob *blobs, size_t *count, gi_object_kind kind,
+    const golem_digest *digest, golem_bytes bytes)
+{
+    object_blob b = {0}; b.kind = kind; b.digest = *digest; b.bytes = bytes;
+    golem_status st = gi_object_path(kind, digest, b.path, sizeof(b.path));
+    if (st != GOLEM_OK) return st;
+    for (size_t i = 0; i < *count; ++i) if (!strcmp(blobs[i].path, b.path))
+        return blobs[i].bytes.size == bytes.size && (!bytes.size || !memcmp(blobs[i].bytes.data, bytes.data, bytes.size)) ?
+            GOLEM_OK : GOLEM_ERR_INVALID_STATE;
+    blobs[(*count)++] = b; return GOLEM_OK;
+}
+static golem_status object_parent(int root, const char *path, int *out, char leaf[192])
+{
+    struct stat base; if (fstat(root, &base) < 0) return GOLEM_ERR_IO;
+    char copy[192]; if (strlen(path) >= sizeof(copy)) return GOLEM_ERR_INVALID_ARGUMENT;
+    strcpy(copy, path); char *part = copy, *slash;
+    int parent = openat(root, ".", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+    if (parent < 0) return GOLEM_ERR_IO;
+    while ((slash = strchr(part, '/'))) {
+        *slash = 0; int child = openat(parent, part, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+        struct stat sb; golem_status st = GOLEM_OK;
+        if (child < 0) st = GOLEM_ERR_IO;
+        else if (fstat(child, &sb) < 0 || sb.st_dev != base.st_dev || sb.st_uid != geteuid() ||
+            (sb.st_mode & 07777) != 0700) st = GOLEM_ERR_INVALID_STATE;
+        if (close(parent) < 0 && st == GOLEM_OK) st = GOLEM_ERR_IO;
+        if (st != GOLEM_OK) { if (child >= 0) close(child); return st; }
+        parent = child; part = slash + 1;
+    }
+    strcpy(leaf, part); *out = parent; return GOLEM_OK;
+}
+static golem_status object_manifest(gi_journal *j, object_blob *blobs, size_t count,
+    const golem_digest *operation, const golem_digest *request, uint64_t sequence,
+    const golem_digest *head, const golem_digest *baseline, struct json_object **out)
+{
+    struct json_object *m = json_object_new_object(), *rows = json_object_new_array(), *dirs = json_object_new_array();
+    struct json_object *seen = json_object_new_object();
+    if (!m || !rows || !dirs || !seen) { json_object_put(m); json_object_put(rows); json_object_put(dirs); json_object_put(seen); return GOLEM_ERR_OUT_OF_MEMORY; }
+    golem_status st = GOLEM_OK; size_t required;
+    char op[65], req[65], prev[65], base[65];
+    (void)golem_digest_format(operation, op, sizeof(op), &required);
+    (void)golem_digest_format(request, req, sizeof(req), &required);
+    (void)golem_digest_format(head, prev, sizeof(prev), &required);
+    (void)golem_digest_format(baseline, base, sizeof(base), &required);
+    if (!json_set(m, "schema", json_object_new_string("golem.intent.object-preparation.v1")) ||
+        !json_set(m, "operation_id", json_object_new_string(op)) || !json_set(m, "request_digest", json_object_new_string(req)) ||
+        !json_set(m, "lane", json_object_new_int(GI_QUOTA_INTAKE)) || !json_set(m, "expected_sequence", json_object_new_uint64(sequence)) ||
+        !json_set(m, "expected_head", json_object_new_string(prev)) || !json_set(m, "baseline_digest", json_object_new_string(base))) st = GOLEM_ERR_OUT_OF_MEMORY;
+    for (size_t i = 0; st == GOLEM_OK && i < count; ++i) {
+        object_blob *b = &blobs[i]; struct stat sb;
+        if (fstatat(j->root, b->path, &sb, AT_SYMLINK_NOFOLLOW) == 0) {
+            uint8_t *existing = NULL; size_t n = 0;
+            st = gi_object_load(j->root, b->kind, &b->digest, b->bytes.size, &existing, &n);
+            if (st == GOLEM_OK && (n != b->bytes.size || (n && memcmp(existing, b->bytes.data, n)))) st = GOLEM_ERR_INVALID_STATE;
+            free(existing);
+        } else if (errno == ENOENT) b->fresh = true; else st = GOLEM_ERR_IO;
+        if (st != GOLEM_OK) break;
+        char hex[65]; (void)golem_digest_format(&b->digest, hex, sizeof(hex), &required);
+        struct json_object *row = json_object_new_object();
+        if (!row) { st = GOLEM_ERR_OUT_OF_MEMORY; break; }
+        if (!json_set(row, "path", json_object_new_string(b->path)) ||
+            !json_set(row, "kind", json_object_new_string(b->kind == GI_OBJECT_RAW ? "raw" : "domain")) ||
+            !json_set(row, "byte_length", json_object_new_uint64(b->bytes.size)) ||
+            !json_set(row, "digest", json_object_new_string(hex)) ||
+            !json_set(row, "disposition", json_object_new_string(b->fresh ? "new" : "reuse")) ||
+            json_object_array_add(rows, row) != 0) { json_object_put(row); st = GOLEM_ERR_OUT_OF_MEMORY; break; }
+        if (!b->fresh) continue;
+        char parent[192]; strcpy(parent, b->path);
+        for (char *slash = strchr(parent, '/'); slash && st == GOLEM_OK; slash = strchr(slash + 1, '/')) {
+            *slash = 0;
+            if (!json_object_object_get_ex(seen, parent, NULL)) {
+                if (fstatat(j->root, parent, &sb, AT_SYMLINK_NOFOLLOW) < 0) {
+                    if (errno != ENOENT) st = GOLEM_ERR_IO;
+                    else {
+                        struct json_object *v = json_object_new_string(parent);
+                        if (!v || json_object_array_add(dirs, v) != 0) { json_object_put(v); st = GOLEM_ERR_OUT_OF_MEMORY; }
+                    }
+                } else if (!S_ISDIR(sb.st_mode) || sb.st_uid != geteuid() || (sb.st_mode & 07777) != 0700) st = GOLEM_ERR_INVALID_STATE;
+                if (st == GOLEM_OK && json_object_object_add(seen, parent, NULL) != 0) st = GOLEM_ERR_OUT_OF_MEMORY;
+            }
+            *slash = '/';
+        }
+    }
+    if (st == GOLEM_OK && !json_set(m, "objects", json_object_get(rows))) st = GOLEM_ERR_OUT_OF_MEMORY;
+    if (st == GOLEM_OK && !json_set(m, "new_directories", json_object_get(dirs))) st = GOLEM_ERR_OUT_OF_MEMORY;
+    json_object_put(rows); json_object_put(dirs); json_object_put(seen);
+    if (st == GOLEM_OK) *out = m; else json_object_put(m);
+    return st;
+}
+
+golem_status gi_journal_store_objects(gi_journal *j, const golem_digest *operation, const golem_digest *request,
+    uint64_t expected_sequence, const golem_digest *expected_head, golem_bytes baseline,
+    const gi_source_input *sources, size_t source_count, gi_journal_guard guard, void *context, gi_journal_receipt *out)
+{
+    if (!j || !operation || !request || !expected_head || !guard || !out || !sources || !source_count)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    if (j->poisoned || j->busy || j->owner != getpid()) return GOLEM_ERR_INVALID_STATE;
+    j->busy = true; bool started = false;
+    replay *r = malloc(sizeof(*r)); object_blob *blobs = NULL;
+    struct json_object *manifest = NULL; uint8_t *wire = NULL; size_t wire_size = 0, count = 0;
+    golem_status st = r ? guard(context) : GOLEM_ERR_OUT_OF_MEMORY;
+    if (st == GOLEM_OK) st = restore(j, r);
+    gi_baseline_coverage_result coverage; golem_digest base;
+    if (st == GOLEM_OK) st = gi_baseline_coverage_validate(baseline, sources, source_count, &coverage, NULL);
+    if (st == GOLEM_OK) st = gi_baseline_identity(baseline, &base, NULL);
+    if (st == GOLEM_OK) for (size_t i = 0; i < r->count; ++i) {
+        record *rec = &r->records[i]; if (memcmp(rec->prep + 32, operation->bytes, 32)) continue;
+        char path[64]; uint8_t *data = NULL; size_t n = 0; bool exists = false;
+        name(path, sizeof(path), i + 1, "objects-prep");
+        st = read_file(j->root, path, GI_CONTROL_MAX, &data, &n, &exists);
+        gi_object_preparation_result old;
+        if (st == GOLEM_OK && (!exists || !rec->committed || r->status.pending || memcmp(rec->prep + 64, request->bytes, 32))) st = GOLEM_ERR_INVALID_STATE;
+        if (st == GOLEM_OK) st = gi_object_preparation_validate((golem_bytes){data, n}, &old, NULL);
+        if (st == GOLEM_OK && memcmp(&base, &old.reservation.publication.baseline, sizeof(base))) st = GOLEM_ERR_INVALID_STATE;
+        free(data);
+        if (st == GOLEM_OK) *out = (gi_journal_receipt){i + 1, rec->event, true};
+        goto done;
+    }
+    if (st == GOLEM_OK && (r->status.pending || r->count == RECORDS || expected_sequence != r->status.committed ||
+        memcmp(expected_head, &r->status.head, sizeof(*expected_head)))) st = GOLEM_ERR_INVALID_STATE;
+    gi_journal_status before = {0}; if (st == GOLEM_OK) before = r->status;
+    if (st == GOLEM_OK) { blobs = calloc(1 + 2 * source_count, sizeof(*blobs)); if (!blobs) st = GOLEM_ERR_OUT_OF_MEMORY; }
+    if (st == GOLEM_OK) st = blob_add(blobs, &count, GI_OBJECT_BASELINE, &base, baseline);
+    for (size_t i = 0; st == GOLEM_OK && i < source_count; ++i) {
+        golem_digest digest;
+        st = gi_source_identity(sources[i].control, sources[i].text, &digest, NULL);
+        if (st == GOLEM_OK) st = blob_add(blobs, &count, GI_OBJECT_SOURCE, &digest, sources[i].control);
+        if (st == GOLEM_OK) st = golem_digest_bytes(sources[i].text, &digest);
+        if (st == GOLEM_OK) st = blob_add(blobs, &count, GI_OBJECT_RAW, &digest, sources[i].text);
+    }
+    if (st == GOLEM_OK) st = object_manifest(j, blobs, count, operation, request, expected_sequence, expected_head, &base, &manifest);
+    const char *json = NULL; size_t json_size = 0; gi_object_preparation_result plan;
+    if (st == GOLEM_OK) {
+        json = json_object_to_json_string_ext(manifest, JSON_C_TO_STRING_PLAIN);
+        if (!json) st = GOLEM_ERR_OUT_OF_MEMORY;
+        else { json_size = strlen(json); st = gi_object_preparation_validate((golem_bytes){(const uint8_t *)json, json_size}, &plan, NULL); }
+    }
+    char payload[GI_OBJECT_PUBLICATION_CAPACITY]; size_t payload_size = 0;
+    if (st == GOLEM_OK) st = gi_object_publication_encode(&plan.reservation.publication, payload, sizeof(payload), &payload_size);
+    uint8_t prep[PREP_SIZE] = {0}, frame[FRAME_SIZE] = {0}; golem_digest payload_digest, prep_digest, event_digest;
+    size_t seq = st == GOLEM_OK ? r->count + 1 : 0;
+    if (st == GOLEM_OK) st = golem_digest_bytes((golem_bytes){(uint8_t *)payload, payload_size}, &payload_digest);
+    if (st == GOLEM_OK) {
+        memcpy(prep, "GIQPRE01", 8); encode(prep + 8, GI_QUOTA_INTAKE); encode(prep + 16, seq); encode(prep + 24, payload_size);
+        memcpy(prep + 32, operation->bytes, 32); memcpy(prep + 64, request->bytes, 32);
+        memcpy(prep + 96, expected_head->bytes, 32); memcpy(prep + 128, payload_digest.bytes, 32);
+        st = prep_encode(prep, &wire, &wire_size);
+    }
+    if (st == GOLEM_OK) st = gi_domain_digest((golem_bytes){wire, wire_size}, &prep_digest, NULL);
+    if (st == GOLEM_OK) {
+        uint64_t files = 4 + plan.new_objects, bytes = json_size + wire_size + payload_size + FRAME_SIZE + plan.new_object_bytes;
+        gi_quota_usage retained = {{1, payload_size, bytes, files + plan.new_directories}};
+        gi_quota_usage peak = {{1, payload_size, 2 * bytes, 2 * files + plan.new_directories}};
+        gi_quota_state checked; st = gi_quota_project(&r->status.usage, GI_QUOTA_INTAKE, &retained, &peak, &checked);
+    }
+    if (st == GOLEM_OK) st = guard(context);
+    if (st == GOLEM_OK) st = restore(j, r);
+    if (st == GOLEM_OK && memcmp(&before, &r->status, sizeof(before))) st = GOLEM_ERR_INVALID_STATE;
+    if (st == GOLEM_OK) { started = true; st = publish(j, seq, "objects-prep", (golem_bytes){(const uint8_t *)json, json_size}); }
+    struct json_object *dirs = NULL;
+    if (manifest) (void)json_object_object_get_ex(manifest, "new_directories", &dirs);
+    for (size_t i = 0; st == GOLEM_OK && i < json_object_array_length(dirs); ++i) {
+        int parent = -1; char leaf[192];
+        st = object_parent(j->root, json_object_get_string(json_object_array_get_idx(dirs, i)), &parent, leaf);
+        if (st == GOLEM_OK && (mkdirat(parent, leaf, 0700) < 0 || fsync(parent) < 0)) st = GOLEM_ERR_IO;
+        if (parent >= 0 && close(parent) < 0 && st == GOLEM_OK) st = GOLEM_ERR_IO;
+    }
+    for (size_t i = 0; st == GOLEM_OK && i < count; ++i) if (blobs[i].fresh) {
+        int parent = -1; char leaf[192]; st = object_parent(j->root, blobs[i].path, &parent, leaf);
+        if (st == GOLEM_OK) st = publish_name(parent, leaf, blobs[i].bytes);
+        if (parent >= 0 && close(parent) < 0 && st == GOLEM_OK) st = GOLEM_ERR_IO;
+    }
+    if (st == GOLEM_OK) st = guard(context);
+    if (st == GOLEM_OK) st = restore_mode(j, r, -2);
+    if (st == GOLEM_OK) st = gi_object_graph_validate(j->root, (golem_bytes){(const uint8_t *)json, json_size}, &coverage);
+    if (st == GOLEM_OK) {
+        gi_quota_usage retained = {{0, 0, wire_size + payload_size + FRAME_SIZE, 3}};
+        gi_quota_usage peak = {{0, 0, 2 * (wire_size + payload_size + FRAME_SIZE), 6}};
+        gi_quota_state checked; st = gi_quota_project(&r->status.usage, GI_QUOTA_INTAKE, &retained, &peak, &checked);
+    }
+    if (st == GOLEM_OK) st = publish(j, seq, "prep", (golem_bytes){wire, wire_size});
+    if (st == GOLEM_OK) st = publish(j, seq, "payload", (golem_bytes){(uint8_t *)payload, payload_size});
+    if (st == GOLEM_OK) st = guard(context);
+    if (st == GOLEM_OK) st = restore_mode(j, r, -2);
+    if (st == GOLEM_OK && (r->count != seq || r->status.committed != seq - 1 ||
+        memcmp(r->records[seq - 1].prep, prep, PREP_SIZE) || !r->records[seq - 1].payload_ready || r->records[seq - 1].staging))
+        st = GOLEM_ERR_INVALID_STATE;
+    if (st == GOLEM_OK) st = gi_object_graph_validate(j->root, (golem_bytes){(const uint8_t *)json, json_size}, &coverage);
+    if (st == GOLEM_OK) {
+        gi_quota_usage retained = {{0, 0, FRAME_SIZE, 1}}, peak = {{0, 0, 2 * FRAME_SIZE, 2}};
+        gi_quota_state checked; st = gi_quota_project(&r->status.usage, GI_QUOTA_INTAKE, &retained, &peak, &checked);
+    }
+    if (st == GOLEM_OK) {
+        memcpy(frame, "GIQEV001", 8); encode(frame + 8, seq); memcpy(frame + 16, expected_head->bytes, 32);
+        memcpy(frame + 48, prep_digest.bytes, 32); st = golem_digest_bytes((golem_bytes){frame, sizeof(frame)}, &event_digest);
+    }
+    if (st == GOLEM_OK) st = publish(j, seq, "event", (golem_bytes){frame, sizeof(frame)});
+    if (st == GOLEM_OK) st = restore(j, r);
+    if (st == GOLEM_OK && (r->status.pending || r->status.committed != seq || memcmp(&r->status.head, &event_digest, sizeof(event_digest))))
+        st = GOLEM_ERR_INVALID_STATE;
+    if (st == GOLEM_OK) *out = (gi_journal_receipt){seq, event_digest, false};
+done:
+    if (started && st != GOLEM_OK) j->poisoned = true;
+    free(wire); free(blobs); json_object_put(manifest); free(r); j->busy = false; return st;
 }

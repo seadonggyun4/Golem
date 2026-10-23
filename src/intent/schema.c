@@ -2,6 +2,7 @@
 #include "../common/json.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 static golem_status fail(golem_diagnostic *d, golem_status status, const char *code)
 {
@@ -231,7 +232,8 @@ static bool scalar_escapes(golem_bytes b)
 
 golem_status gi_domain_digest(golem_bytes control, golem_digest *out, golem_diagnostic *d)
 {
-    static const char *const registry[] = {"golem.intent.source.v1", "golem.intent.quota-preparation.v1"};
+    static const char *const registry[] = {"golem.intent.source.v1", "golem.intent.quota-preparation.v1",
+        "golem.intent.baseline.v1", "golem.intent.object-preparation.v1"};
     if (!out || (!control.data && control.size)) return fail(d, GOLEM_ERR_INVALID_ARGUMENT, "intent.argument");
     if (control.size > GI_CONTROL_MAX) return fail(d, GOLEM_ERR_OVERFLOW, "intent.limit.control_bytes");
     if (!scalar_escapes(control)) return fail(d, GOLEM_ERR_PARSE, "intent.source.unicode_escape");
@@ -403,6 +405,103 @@ done:
     json_object_put(seen);
     json_object_put(o);
     return st == GOLEM_OK ? st : fail(d, st, code);
+}
+
+golem_status gi_baseline_identity(golem_bytes control, golem_digest *out, golem_diagnostic *d)
+{
+    if (!out) return fail(d, GOLEM_ERR_INVALID_ARGUMENT, "intent.argument");
+    gi_baseline_result proposal;
+    golem_status st = gi_baseline_validate(control, &proposal, d);
+    return st == GOLEM_OK ? gi_domain_digest(control, out, d) : st;
+}
+
+golem_status gi_object_preparation_validate(golem_bytes control,
+    gi_object_preparation_result *out, golem_diagnostic *d)
+{
+    if (!out || (!control.data && control.size)) return fail(d, GOLEM_ERR_INVALID_ARGUMENT, "intent.argument");
+    if (control.size > GI_CONTROL_MAX) return fail(d, GOLEM_ERR_OVERFLOW, "intent.limit.control_bytes");
+    if (!scalar_escapes(control) || !baseline_numbers(control)) return fail(d, GOLEM_ERR_PARSE, "intent.objects.scalar");
+    struct json_object *o = NULL, *paths = NULL, *directories = NULL;
+    golem_status st = golem_json_parse(control, GI_CONTROL_MAX, &o);
+    if (st != GOLEM_OK) return fail(d, st, "intent.objects.json");
+    const char *root[] = {"schema", "operation_id", "request_digest", "lane", "expected_sequence",
+        "expected_head", "baseline_digest", "objects", "new_directories"};
+    const char *row_keys[] = {"path", "kind", "byte_length", "digest", "disposition"};
+    const char *allowed_dirs[] = {"objects", "objects/v1", "objects/v1/raw", "objects/v1/raw/sha256",
+        "objects/v1/domain", "objects/v1/domain/golem.intent.source.v1", "objects/v1/domain/golem.intent.baseline.v1"};
+    struct json_object *objects = get(o, "objects"), *dirs = get(o, "new_directories");
+    gi_object_preparation_result result = {0}; uint64_t lane = 0, previous = 0;
+    st = GOLEM_ERR_PARSE;
+    if (!keys(o, root, 9) || !eq(get(o, "schema"), "golem.intent.object-preparation.v1") ||
+        !uint_value(get(o, "lane"), &lane) || lane != GI_QUOTA_INTAKE ||
+        !uint_value(get(o, "expected_sequence"), &previous) || previous == UINT64_MAX ||
+        !digest(get(o, "operation_id"), &result.reservation.publication.operation) ||
+        !digest(get(o, "request_digest"), &result.reservation.publication.request) ||
+        !digest(get(o, "expected_head"), &result.reservation.head) ||
+        !digest(get(o, "baseline_digest"), &result.reservation.publication.baseline) ||
+        !json_object_is_type(objects, json_type_array) || !json_object_is_type(dirs, json_type_array)) goto done;
+    result.reservation.sequence = previous + 1;
+    paths = json_object_new_object(); directories = json_object_new_object();
+    if (!paths || !directories) { st = GOLEM_ERR_OUT_OF_MEMORY; goto done; }
+    bool baseline_present = false;
+    result.objects = json_object_array_length(objects);
+    for (size_t i = 0; i < result.objects; ++i) {
+        struct json_object *row = json_object_array_get_idx(objects, i);
+        uint64_t length = 0;
+        if (!keys(row, row_keys, 5) || !string(get(row, "path")) || !lower_digest(get(row, "digest")) ||
+            !uint_value(get(row, "byte_length"), &length) ||
+            !(eq(get(row, "disposition"), "new") || eq(get(row, "disposition"), "reuse"))) goto done;
+        const char *path = json_object_get_string(get(row, "path")), *prefix = NULL;
+        if (eq(get(row, "kind"), "raw")) prefix = "objects/v1/raw/sha256/";
+        else if (eq(get(row, "kind"), "domain")) {
+            const char *source = "objects/v1/domain/golem.intent.source.v1/";
+            const char *baseline = "objects/v1/domain/golem.intent.baseline.v1/";
+            if (!strncmp(path, source, strlen(source))) prefix = source;
+            else if (!strncmp(path, baseline, strlen(baseline))) {
+                prefix = baseline;
+                if (!eq(get(row, "digest"), json_object_get_string(get(o, "baseline_digest")))) goto done;
+                baseline_present = true;
+            }
+        }
+        if (!prefix || length > (eq(get(row, "kind"), "raw") ? GI_SOURCE_MAX : GI_CONTROL_MAX)) goto done;
+        char expected[160];
+        int n = snprintf(expected, sizeof(expected), "%s%s", prefix, json_object_get_string(get(row, "digest")));
+        if (n < 0 || (size_t)n >= sizeof(expected) || strcmp(path, expected) || json_object_object_get_ex(paths, path, NULL)) goto done;
+        if (json_object_object_add(paths, path, NULL) != 0) { st = GOLEM_ERR_OUT_OF_MEMORY; goto done; }
+        if (eq(get(row, "disposition"), "new")) { ++result.new_objects; result.new_object_bytes += length; }
+    }
+    if (!baseline_present) goto done;
+    result.new_directories = json_object_array_length(dirs);
+    for (size_t i = 0; i < result.new_directories; ++i) {
+        struct json_object *dir = json_object_array_get_idx(dirs, i);
+        if (!string(dir)) goto done;
+        const char *path = json_object_get_string(dir); bool allowed = false, used = false;
+        for (size_t k = 0; k < sizeof(allowed_dirs) / sizeof(*allowed_dirs); ++k) allowed |= !strcmp(path, allowed_dirs[k]);
+        if (!allowed || json_object_object_get_ex(directories, path, NULL)) goto done;
+        /* Every listed ancestor must precede its child. An omitted ancestor
+         * must be verified as already present by the future store caller. */
+        for (size_t j = i + 1; j < result.new_directories; ++j) {
+            struct json_object *parent = json_object_array_get_idx(dirs, j);
+            if (!string(parent)) goto done;
+            const char *p = json_object_get_string(parent); size_t len = strlen(p);
+            if (strlen(path) > len && !strncmp(path, p, len) && path[len] == '/') goto done;
+        }
+        for (size_t j = 0; j < result.objects; ++j) {
+            struct json_object *row = json_object_array_get_idx(objects, j);
+            const char *p = json_object_get_string(get(row, "path")); size_t len = strlen(path);
+            if (strlen(p) > len && !strncmp(p, path, len) && p[len] == '/') {
+                if (eq(get(row, "disposition"), "reuse")) goto done;
+                used = true;
+            }
+        }
+        if (!used) goto done;
+        if (json_object_object_add(directories, path, NULL) != 0) { st = GOLEM_ERR_OUT_OF_MEMORY; goto done; }
+    }
+    st = gi_domain_digest(control, &result.reservation.publication.preparation, d);
+    if (st == GOLEM_OK) *out = result;
+done:
+    json_object_put(paths); json_object_put(directories); json_object_put(o);
+    return st == GOLEM_OK ? st : fail(d, st, "intent.objects.preparation");
 }
 
 static golem_status baseline_source_coverage(struct json_object *source,
