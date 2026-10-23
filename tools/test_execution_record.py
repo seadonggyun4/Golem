@@ -290,6 +290,9 @@ class Coverage(unittest.TestCase):
         ("tools/intent_authority.py", "repository_identity"): 2,
         ("tools/intent_authority.py", "register"): 1,
         ("tools/intent_authority.py", "native_inspect"): 1,
+        # Proposal publication requires a duplex guard while the native owner
+        # lock is held. Generic capture cannot service that FD protocol.
+        ("tools/intent_authority.py", "store_objects"): 1,
         ("tools/intent_authority_lifecycle.py", "_native"): 1,
         ("tools/intent_authority_lifecycle.py", "_pending_native"): 1,
         ("tools/intent_authority_lifecycle.py", "_alias_native"): 1,
@@ -336,6 +339,18 @@ class Coverage(unittest.TestCase):
                             and node.func.attr in {"run", "Popen", "check_call", "check_output", "call"}):
                         continue
                     counts[key] += 1
+                    if key == ("tools/intent_authority.py", "store_objects"):
+                        self.assertEqual(node.func.attr, "Popen")
+                        kwargs = {k.arg: k.value for k in node.keywords}
+                        self.assertEqual(set(kwargs), {"pass_fds", "stdin", "stdout", "stderr", "env"})
+                        self.assertEqual(ast.unparse(kwargs["pass_fds"]),
+                                         "(root_fd, child_read, child_write, *inputs)")
+                        self.assertEqual(ast.unparse(kwargs["stdin"]), "subprocess.DEVNULL")
+                        self.assertEqual(ast.unparse(kwargs["stdout"]), "output")
+                        self.assertEqual(ast.unparse(kwargs["stderr"]), "errors")
+                        self.assertEqual(ast.literal_eval(kwargs["env"]),
+                                         {"PATH": "/usr/bin:/bin", "LANG": "C", "LC_ALL": "C"})
+                        continue
                     self.assertEqual(node.func.attr, "run")
                     kwargs = {k.arg: k.value for k in node.keywords}
                     expected = {"env", "capture_output", "timeout", "check"}

@@ -361,7 +361,8 @@ static golem_status damage_read(gi_journal *j, size_t seq, unsigned kind, const 
     size_t stored_n = 0, cut_n = 0, env_n = 0, raw_n = 0, expected_n = 0;
     bool exists = false; struct stat f = {0}, q = {0}, t = {0}, e = {0}, s = {0}, check;
     (void)snprintf(final, sizeof(final), "%s.fragment.damage", base);
-    (void)snprintf(pending, sizeof(pending), "%s.pending", final);
+    int length = snprintf(pending, sizeof(pending), "%s.pending", final);
+    if (length < 0 || (size_t)length >= sizeof(pending)) return GOLEM_ERR_OVERFLOW;
     golem_status st = GOLEM_OK;
     p.final_present = fstatat(fd, final, &f, AT_SYMLINK_NOFOLLOW) == 0;
     if (!p.final_present && errno != ENOENT) st = GOLEM_ERR_IO;
@@ -782,7 +783,9 @@ static golem_status publish_name(int root, const char *final, golem_bytes bytes)
 }
 static golem_status publish(gi_journal *j, size_t seq, const char *suffix, golem_bytes bytes)
 {
-    char final[64]; name(final, sizeof(final), seq, suffix);
+    char final[96];
+    int length = snprintf(final, sizeof(final), "%08zu.%s", seq, suffix);
+    if (length < 0 || (size_t)length >= sizeof(final)) return GOLEM_ERR_OVERFLOW;
     return publish_name(j->root, final, bytes);
 }
 

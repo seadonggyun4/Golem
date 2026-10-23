@@ -228,3 +228,12 @@ event 직전 guard 거부는 원문·pending 보존, event 미게시, 재진입 
 기존 QA writer 경계 검사도 통과했다. 실제 등록 authority·TRAP·실제 Work·제품 증거는 사용하지
 않았으며, Linux/Windows·원격 CI·실제 프로젝트 설치는 미검증이다. 이 단계에서 커밋·푸시는
 수행하지 않았다. 미승인 상태 전이와 추가 복구 계층은 활성화하지 않았다.
+
+### 최종 점검 후 CI 보완
+
+위 로컬 검증 이후 `2b227ba`를 main에 게시하고 원격 CI를 실행했다. 첫 실행에서 GCC의
+파일명 format-truncation 검사와 새 host FD 호출의 실행 경계 등록 누락이 확인됐다.
+파일명 길이 초과는 명시적으로 거부하도록 보완하고, proposal host의 단일 duplex FD 호출은
+기존 D01 protocol 예외에 한정해 정제된 환경·명시적 FD·표준 입출력 격리를 회귀 검사한다.
+일반 product 명령의 기록 의무나 QA 보호 검사를 완화하지 않는다. 최종 CI 판정은 이후
+수정 커밋의 GitHub Actions 결과를 기준으로 하며, 첫 실패를 통과로 재분류하지 않는다.
