@@ -70,7 +70,11 @@ class D3(fixture.D2):
         before = self.inventory()
         notice = self.hook(profile, "resume")
         self.assertEqual(notice["context_state"], "BLOCKED")
-        self.assertEqual(notice["code"], "NATIVE_FAILURE")
+        self.assertEqual(notice["code"], "SOURCE_SNAPSHOT_MISMATCH")
+        self.assertFalse(notice["execution_authorized"])
+        self.assertFalse(notice["automatic_retry_allowed"])
+        self.assertEqual(notice["next_operation"],
+                         "READ_CURRENT_SELECTION_SNAPSHOT_AND_REVIEW_CONTEXT_NO_RETRY")
         self.assertIn("resume_preflight", notice)
         plan = self.registry.plan(self.enrollment, "revoke")
         self.registry.apply(self.enrollment, plan["plan_sha256"], action="revoke", approve_local_owner=True)
