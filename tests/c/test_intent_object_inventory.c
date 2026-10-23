@@ -62,7 +62,8 @@ static int scenario(unsigned mode)
         "\"objects/v1/domain\",\"objects/v1/domain/golem.intent.baseline.v1\"]}",
         z, z, z, domain_hex, raw_path, raw_hex, domain_path, strlen(body), domain_hex);
     CHECK(length > 0 && (size_t)length < sizeof(manifest));
-    gi_object_manifest_input inputs[2] = {{bytes(manifest), mode == 1 || mode == 8 || mode == 10 || mode == 11}, {0}};
+    gi_object_manifest_input inputs[2] = {0};
+    inputs[0] = (gi_object_manifest_input){bytes(manifest), mode == 1 || mode == 8 || mode == 10 || mode == 11};
     size_t count = 1; struct json_object *second = NULL;
     if (mode != 0) {
         for (size_t i = 0; i < 6; ++i) CHECK(mkdirat(root, dirs[i], 0700) == 0);
