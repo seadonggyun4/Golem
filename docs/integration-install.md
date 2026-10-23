@@ -214,5 +214,11 @@ Format/support basis reviewed 2026-10-22:
   design guidance, not a distributed transaction or TUF compliance claim.
 
 Windows, network filesystems, physical power-loss recovery, every client version,
-real Desktop/Hosted activation and installer-driven hook trust remain unverified
+real Hosted activation and installer-driven hook trust remain unverified
 or unsupported as stated above. Tests never touch TRAP or real Work evidence.
+
+Separate owner-approved [Codex desktop verification](integration-codex-desktop.md)
+on 2026-10-24 exercised six read tools with three synthetic Works in a new
+conversation. Shared configuration and startup success did not establish tool
+exposure in the existing conversation. This result does not certify automatic
+installation, existing-chat hot reload or every desktop client version.

@@ -294,6 +294,13 @@ Hosted consumption, physical reboot/power loss and arbitrary historical engines
 remain NOT_VERIFIED by this D2 slice. No TRAP install, existing Work resume,
 migration, product acceptance, VM or UACTT is performed.
 
+Later, separately approved [Codex desktop synthetic verification](integration-codex-desktop.md)
+on 2026-10-24 completed eight actual calls across the six read tools in a new
+conversation. The earlier D2 slice's limits above remain historical test scope,
+not a claim that no desktop integration has subsequently been exercised. The
+existing conversation still lacked tool exposure; general hot reload and real
+Hosted gateway consumption remain unverified.
+
 Design and source basis: [integration design](integration-layer-design.md),
 [reference review](integration-layer-references.md#d2-sdk-implementation-review).
 
