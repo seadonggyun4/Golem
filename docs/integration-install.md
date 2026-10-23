@@ -32,6 +32,10 @@ clients, separately from any product UI rendering claim.
 
 ## Supported Settings
 
+For Claude's extension UI branding, see [MCPB packaging](integration-mcpb.md).
+Manual `mcpServers` configuration and MCP protocol `serverInfo.icons` are not the
+same registration surface as the desktop extension manifest's `icon`.
+
 | Profile | Explicit selected target | Managed part |
 | --- | --- | --- |
 | `codex-config` | `config.toml`, user or trusted-project layer | One `mcp_servers.NAME` table |
