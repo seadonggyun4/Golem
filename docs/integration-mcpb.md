@@ -47,6 +47,29 @@ support is declared; Windows is excluded because the existing registry uses
 
 ## Approval Boundary
 
+Version 0.1.2 adds a setup-only MCP mode for missing consent, missing policy,
+changed policy digest or changed producer pins. Initialization remains available,
+but the only tool is `golem_setup_status`; it returns fixed public guidance and
+`project_access_enabled: false`. It never returns configured paths, policy
+contents, registry identifiers or Work data. Without consent it does not read
+the policy. No project tool, enrollment or approval-writing capability is
+available in this mode. It cannot transition to normal access within a running
+process: the owner must review settings and restart the extension.
+
+`OWNER_TRANSFER_APPROVAL_REQUIRED` means disclosure consent is off;
+`PRODUCER_CHANGED` means the policy pins different module bytes;
+`TRANSFER_POLICY_CHANGED` means the file differs from its reviewed digest.
+Do not fix these by automatically regenerating pins or enabling consent.
+Other validation failures receive generic public setup guidance, not raw
+exception details. Dependency, transport and asset-integrity failures can still
+prevent startup; this is not a claim that every failure becomes a connected UI.
+Claude controls its own connection banner; the detailed cause is available to
+the model through the setup tool and in structured local stderr.
+
+The 0.1.2 packaging adapter does not change D2 producer modules, so the explicitly
+reviewed 0.1.1 policy remains compatible when its native pins and grants still
+validate. Existing settings and approvals are never migrated automatically.
+
 Version 0.1.1 uses expanded-background artwork, without an embedded white
 surround. Claude still controls the outer icon container and its padding.
 Updates do not silently refresh existing producer approvals: changed module
@@ -77,8 +100,8 @@ rewritten for the update.
 
 Installation is separate from Golem authorization. The owner must supply an
 existing private D2 disclosure policy, its explicitly reviewed SHA-256, and
-affirmative disclosure consent (default false). The entry adapter delegates to
-the unchanged D2 entry point. Registry grants, producer pins, native read guards
+affirmative disclosure consent (default false). Normal access uses the unchanged
+D2 Transfer, Service and MCP transport. Registry grants, producer pins, native read guards
 and output limits remain enforced. No auto-enrollment, bootstrap, Work resume,
 mutation, issuer approval or policy regeneration is provided.
 
@@ -91,10 +114,20 @@ restriction is not an OS sandbox. Obtain explicit consent before installation.
 ## Verification and Rollback
 
 Tests check deterministic contents, producer-byte preservation, false/missing
-consent rejection, digest syntax, and extracted-bundle modern/legacy stdio
+consent blocking project access, digest syntax, and extracted-bundle modern/legacy stdio
 connections with an empty approval registry. No actual Work is needed for icon
 testing. The generated manifest was separately checked against the official
 [0.4 JSON Schema](https://github.com/modelcontextprotocol/mcpb/blob/main/schemas/mcpb-manifest-v0.4.schema.json).
+
+Version 0.1.2 was installed in Claude Desktop 3.6556.2 on 2026-10-23 with
+explicit owner approval. A real `projects_list` call returned only the approved
+synthetic project and its three synthetic Works, with six read-only native
+tools and no execution authority. Consent and the connection were left enabled
+at the owner's request; per-call client approval remains required. The synthetic
+project's 84 files and the existing manual client configuration were unchanged.
+Missing-consent, stale-producer and changed-policy setup responses were verified
+with extracted-package modern and legacy MCP stdio tests; these are protocol
+checks, not claims about every Claude error banner or other client versions.
 
 For client verification, use a disposable empty registry and no project grants.
 Inspect preview, installed extension details and connector details separately;

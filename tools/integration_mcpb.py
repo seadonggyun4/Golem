@@ -13,7 +13,7 @@ from integration_registry import regular
 def manifest():
     return {
         "manifest_version": "0.4", "name": "golem", "display_name": "Golem",
-        "version": "0.1.1",
+        "version": "0.1.2",
         "description": "Owner-approved, read-only Golem workflow context and evidence.",
         "author": {"name": "Golem contributors"},
         "repository": {"type": "git", "url": "https://github.com/seadonggyun4/Golem"},
@@ -33,7 +33,7 @@ def manifest():
                 "description": "Exact digest of the policy you reviewed, not an automatically computed approval.",
                 "required": True},
             "approve_data_transfer": {"type": "boolean", "title": "Approve this policy's disclosure to Claude",
-                "description": "Explicit disclosure consent only; does not grant native execution authority.",
+                "description": "Off: only setup guidance, no Work access. On: disclose the reviewed scope to Claude; never grants execution authority.",
                 "default": False, "required": True}}}
 
 
@@ -42,7 +42,7 @@ def build():
     dependencies = regular(root / "tools/requirements-mcp.txt").decode().splitlines()
     payloads = {
         "manifest.json": json.dumps(manifest(), indent=2).encode() + b"\n",
-        "pyproject.toml": ("[project]\nname = \"golem-desktop\"\nversion = \"0.1.1\"\n"
+        "pyproject.toml": ("[project]\nname = \"golem-desktop\"\nversion = \"0.1.2\"\n"
             "requires-python = \">=3.11\"\ndependencies = " + json.dumps(dependencies) + "\n").encode(),
         "assets/Golem-mcp.png": branding.icon_bytes(),
         "LICENSE": regular(root / "LICENSE"),

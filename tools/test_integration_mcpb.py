@@ -1,10 +1,10 @@
 import asyncio
+import copy
 from importlib.metadata import PackageNotFoundError, version
 import io
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
 import tempfile
 import unittest
@@ -58,27 +58,57 @@ class Bundle(unittest.TestCase):
                     async with Client(params, mode=mode, read_timeout_seconds=30) as client:
                         self.assertEqual((await client.list_tools()).tools, [])
                         self.assertEqual(client.server_info.icons[0].src, branding.server_icons()[0].src)
+                    stale = copy.deepcopy(policy)
+                    stale['producer']['integration_service.py'] = '0' * 64
+                    stale_raw = contract.encoded(stale)
+                    stale_path = root / ('stale-' + mode + '.json')
+                    records.save(stale_path, stale_raw)
+                    for code, changes in (
+                        ('OWNER_TRANSFER_APPROVAL_REQUIRED', {'GOLEM_APPROVE_DATA_TRANSFER': 'false',
+                            'GOLEM_TRANSFER_POLICY': '/private/never-read-policy.json'}),
+                        ('PRODUCER_CHANGED', {'GOLEM_TRANSFER_POLICY': str(stale_path),
+                            'GOLEM_REVIEWED_POLICY_SHA256': contract.sha(stale_raw)}),
+                        ('TRANSFER_POLICY_CHANGED', {'GOLEM_REVIEWED_POLICY_SHA256': 'f' * 64})):
+                        blocked_params = StdioServerParameters(command=sys.executable,
+                            args=params.args, cwd=str(package), env={**params.env, **changes})
+                        async with Client(blocked_params, mode=mode, read_timeout_seconds=30) as client:
+                            self.assertEqual([t.name for t in (await client.list_tools()).tools],
+                                             ['golem_setup_status'])
+                            result = await client.call_tool('golem_setup_status', {})
+                            notice = json.loads(result.content[0].text)
+                            self.assertEqual(notice['code'], code)
+                            self.assertFalse(notice['project_access_enabled'])
+                            self.assertFalse(notice['execution_authorized'])
+                            self.assertNotIn(str(root), result.content[0].text)
+                            self.assertNotIn('/private/never-read-policy.json', result.content[0].text)
+                            denied = await client.call_tool('golem_work_inspect', {})
+                            self.assertTrue(denied.is_error)
+                            invalid = await client.call_tool('golem_setup_status', {'approve': True})
+                            self.assertTrue(invalid.is_error)
+                            self.assertEqual([t.name for t in (await client.list_tools()).tools],
+                                             ['golem_setup_status'])
             asyncio.run(asyncio.wait_for(exercise(), timeout=60))
             self.assertEqual(list(authority.root.iterdir()), [])
 
-    def test_explicit_consent_delegates_to_unchanged_d2_entry(self):
+    def test_explicit_consent_uses_unchanged_transfer_and_service(self):
         with patch.dict(os.environ, {'GOLEM_TRANSFER_POLICY': '/owner/policy.json',
                 'GOLEM_REVIEWED_POLICY_SHA256': 'a' * 64,
-                'GOLEM_APPROVE_DATA_TRANSFER': 'true'}), patch.object(sys, 'argv', ['entry']), \
-                patch.object(branding, 'main', return_value=23) as serve:
-            self.assertEqual(entry.main(), 23)
-            serve.assert_called_once_with()
-            self.assertEqual(sys.argv[1:], ['--policy', '/owner/policy.json',
-                '--reviewed-policy-sha256', 'a' * 64, '--approve-data-transfer'])
+                'GOLEM_APPROVE_DATA_TRANSFER': 'true'}), patch.object(entry, 'Transfer') as approved:
+            service, notice = entry.configured_service()
+            self.assertIsNone(notice)
+            self.assertIs(service.transfer, approved.return_value)
+            approved.assert_called_once_with(Path('/owner/policy.json'), 'a' * 64, approve_data_transfer=True)
 
-    def test_malformed_policy_digest_never_starts_server(self):
+    def test_malformed_policy_digest_never_constructs_project_service(self):
         for digest in ('', 'A' * 64, 'a' * 63, 'a' * 65):
             with patch.dict(os.environ, {'GOLEM_TRANSFER_POLICY': '/owner/policy.json',
                     'GOLEM_REVIEWED_POLICY_SHA256': digest,
                     'GOLEM_APPROVE_DATA_TRANSFER': 'true'}), \
-                    patch.object(branding, 'main') as serve, patch('sys.stderr', io.StringIO()):
-                self.assertEqual(entry.main(), 1)
-                serve.assert_not_called()
+                    patch.object(entry, 'Transfer') as approved:
+                service, notice = entry.configured_service()
+                self.assertIsNone(service)
+                self.assertEqual(notice['code'], 'MCPB_REVIEWED_POLICY_REQUIRED')
+                approved.assert_not_called()
 
     def test_reproducible_public_allowlist_and_original_producer_bytes(self):
         data = bundle.build()
@@ -102,11 +132,22 @@ class Bundle(unittest.TestCase):
             env.update(GOLEM_TRANSFER_POLICY="/not-enrolled/policy.json",
                        GOLEM_REVIEWED_POLICY_SHA256="a" * 64,
                        GOLEM_APPROVE_DATA_TRANSFER=consent)
-            result = subprocess.run([sys.executable, str(Path(bundle.__file__).with_name(
-                "integration_mcpb_entry.py"))], env=env, capture_output=True)
-            self.assertEqual(result.returncode, 1)
-            self.assertEqual(result.stdout, b"")
-            self.assertIn(b"OWNER_TRANSFER_APPROVAL_REQUIRED", result.stderr)
+            with patch.dict(os.environ, env, clear=True), patch.object(entry, 'Transfer') as approved:
+                service, notice = entry.configured_service()
+                self.assertIsNone(service)
+                self.assertEqual(notice['code'], 'OWNER_TRANSFER_APPROVAL_REQUIRED')
+                approved.assert_not_called()
+
+    def test_setup_errors_never_disclose_exception_details_or_infer_approval(self):
+        for error in (OSError('/private/secret'), contract.IntegrationError('unknown-private-data')):
+            with patch.dict(os.environ, {'GOLEM_TRANSFER_POLICY': '/private/secret',
+                    'GOLEM_REVIEWED_POLICY_SHA256': 'a' * 64, 'GOLEM_APPROVE_DATA_TRANSFER': 'true'}), \
+                    patch.object(entry, 'Transfer', side_effect=error):
+                service, notice = entry.configured_service()
+                self.assertIsNone(service)
+                self.assertEqual(notice['code'], 'SETUP_VALIDATION_FAILED')
+                self.assertNotIn('private', json.dumps(notice))
+                self.assertFalse(notice['approval_modified'])
 
 
 if __name__ == "__main__":
