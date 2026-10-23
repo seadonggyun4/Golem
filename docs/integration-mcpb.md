@@ -105,11 +105,58 @@ D2 Transfer, Service and MCP transport. Registry grants, producer pins, native r
 and output limits remain enforced. No auto-enrollment, bootstrap, Work resume,
 mutation, issuer approval or policy regeneration is provided.
 
-The packaged producer bytes are unchanged, so existing policy module hashes
-remain comparable. Runtime updates still require review; this is not the D1
+The packaged producer bytes match the selected source revision, not necessarily
+the previously installed release. Runtime updates still require review; this is not the D1
 installer's runtime-pin transaction and does not claim its launch receipt.
 Claude's local-extension warning concerns broad OS process access: a Golem grant
 restriction is not an OS sandbox. Obtain explicit consent before installation.
+
+## Audit Capacity and Interpretation (0.1.3)
+
+Version 0.1.3 changes producer modules and requires separately reviewed pins;
+existing policies are not rewritten. For an approved project, `projects_list`
+also returns `golem.integration-audit-capacity.v1`: bounded metadata inventory,
+limits, remaining read directories/entries/bytes and explicit blocking reasons.
+The aggregate covers the shared registry, not a particular Work. It exposes no
+file names or contents and is omitted when no projects are approved. The listing
+does not consume a read directory and remains available at audit saturation.
+
+The unchanged limits are 256 read directories, 16384 entries and 128 MiB logical
+file bytes. Inventory errors, unsafe links/types and incomplete scans fail
+closed; unknown remaining capacity is null, never zero or unlimited. A complete
+observation does not reserve capacity, verify physical free space or guarantee
+admission. Byte and entry limits are rechecked at each native read; future output
+sizes are not reserved by this preflight.
+
+Before compound queries create their first read record, the service checks read
+directory headroom: context/handoff need five slots, evidence/completion three,
+status/history one. These conservative costs include before/after observations;
+early failure can consume fewer slots. Per-read checks remain in place. Stop on
+`AUDIT_QUOTA`; do not automatically retry, delete evidence, raise limits or create
+a replacement registry. Retention, rotation and durable archival policies remain
+undecided and are not implemented by this release.
+
+`AVAILABLE` still describes delivery only, including when the nested capacity
+report is `BLOCKED`. Native `RECONCILE_SESSION` is not proof that all required
+documents exist or that there is a unique cause. `EVIDENCE_NOT_REFERENCED` means
+no supported committed reference was established, not that storage lacks the
+object. A null `local_evidence_id` is not proof that no audit record was written.
+Errors do not determine the Work's outcome. These explicit fields and MCP
+instructions guide interpretation without changing native completion authority.
+
+On 2026-10-23, owner-approved 0.1.3 installation in Claude Desktop 3.6556.2
+was checked with three sequential synthetic-only calls: capacity listing,
+completion and intentional unreferenced evidence denial. Claude distinguished
+observed capacity from reservation, reconcile action from document completeness,
+and missing reference/identifier from absent bytes/audit records. Client log
+request/response intervals were 114/750/107 ms respectively (one sample each,
+excluding model inference and human approval waits; not a performance guarantee).
+The synthetic project's 84 files, prior approval records/policies and manual
+client configuration remained unchanged. The approved connection and disclosure
+consent stayed enabled. This is bounded macOS client verification, not proof that
+all model answers avoid overgeneralization. Saturation, unsafe inventory and
+compound-call headroom rejection are covered by local regression fixtures, not
+by filling the active client registry again.
 
 ## Verification and Rollback
 

@@ -44,7 +44,13 @@ class D2(fixture.ReadBackend):
             self.assertEqual(caught.exception.code, "EVIDENCE_NOT_REFERENCED")
         with self.assertRaises(c.IntegrationError):
             api.call("evidence_read", {**args, "digest": document["digest"], "max_bytes": 1})
+        capacity = api.call("projects_list", {})["audit_capacity"]
+        self.assertEqual(capacity, api.call("projects_list", {})["audit_capacity"])
         result = api.call("completion_check", {**args, "selection_id": "selection"})
+        after_capacity = api.call("projects_list", {})["audit_capacity"]
+        self.assertEqual(after_capacity["usage"]["read_directories"] -
+                         capacity["usage"]["read_directories"], 3)
+        self.assertIn("NOT_PROOF_ALL_DOCUMENTS", result["action_semantics"])
         expected = self.cli("completion", "check", self.work, self.write("check.json", {
             "schema_version": 1, "operation": "resume", "selection_id": "selection"}))
         self.assertEqual(result["result"], expected)

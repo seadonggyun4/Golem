@@ -1,5 +1,6 @@
 """D1 fixed, read-only native backend. No mutation requests or provider calls."""
 from pathlib import Path
+import os
 import stat
 import tempfile
 
@@ -10,25 +11,76 @@ from integration_registry import check_project, regular
 
 ENVIRONMENT = {"LANG": "C", "LC_ALL": "C", "PATH": "/usr/bin:/bin"}
 TIMEOUT_SECONDS = 15
+AUDIT_LIMITS = {"entries": 16384, "bytes": 134217728, "read_directories": 256}
 
 
-def _quota(root):
+def audit_capacity(root):
+    """Bounded metadata-only observation, under the caller's registry lock."""
     entries, size, reads = 0, 0, 0
+    reasons = set()
+    complete = True
     pending = [root]
-    while pending:
-        directory = pending.pop()
-        for path in directory.iterdir():
-            info = path.lstat()
-            entries += 1
-            require(entries <= 16384 and not stat.S_ISLNK(info.st_mode), "AUDIT_QUOTA")
-            if path.parent == root and path.name.startswith("read-"):
-                reads += 1
-            if stat.S_ISDIR(info.st_mode):
-                pending.append(path)
-            else:
-                require(stat.S_ISREG(info.st_mode) and info.st_nlink == 1, "AUDIT_QUOTA")
-                size += info.st_size
-            require(reads < 256 and size <= 134217728, "AUDIT_QUOTA")
+    try:
+        while pending:
+            directory = pending.pop()
+            with os.scandir(directory) as children:
+                for child in children:
+                    info = child.stat(follow_symlinks=False)
+                    entries += 1
+                    if entries > AUDIT_LIMITS["entries"]:
+                        reasons.add("ENTRY_LIMIT")
+                        complete = False
+                        break
+                    if directory == root and child.name.startswith("read-"):
+                        reads += 1
+                    if stat.S_ISLNK(info.st_mode):
+                        reasons.add("UNSAFE_FILE_TYPE")
+                        complete = False
+                    elif stat.S_ISDIR(info.st_mode):
+                        pending.append(Path(child.path))
+                    elif not stat.S_ISREG(info.st_mode):
+                        reasons.add("UNSAFE_FILE_TYPE")
+                        complete = False
+                    else:
+                        if info.st_nlink != 1:
+                            reasons.add("UNSAFE_HARDLINK")
+                        size += info.st_size
+            if entries > AUDIT_LIMITS["entries"]:
+                break
+    except OSError:
+        reasons.add("INVENTORY_UNREADABLE")
+        complete = False
+    if reads >= AUDIT_LIMITS["read_directories"]:
+        reasons.add("READ_DIRECTORY_LIMIT")
+    if size > AUDIT_LIMITS["bytes"]:
+        reasons.add("BYTE_LIMIT")
+    usage = {"entries": entries, "bytes": size, "read_directories": reads}
+    return {"schema": "golem.integration-audit-capacity.v1",
+            "state": "BLOCKED" if reasons else "OBSERVED",
+            "reasons": sorted(reasons), "inventory_complete": complete,
+            "usage": usage, "usage_is_lower_bound": not complete,
+            "limits": dict(AUDIT_LIMITS),
+            "remaining": {key: max(0, limit - usage[key]) if complete else None
+                          for key, limit in AUDIT_LIMITS.items()},
+            "scope": "SHARED_REGISTRY_AGGREGATE_NOT_PER_WORK",
+            "admission_guaranteed": False, "reservation_created": False,
+            "physical_free_space_verified": False, "automatic_deletion_allowed": False,
+            "next_operation": "OWNER_REVIEW_PRIVATE_AUDIT_CAPACITY_NO_AUTOMATIC_DELETION" if reasons
+                              else "RECHECK_CAPACITY_AT_CALL_NO_RESERVATION"}
+
+
+def _quota(root, required_read_directories=1):
+    observed = audit_capacity(root)
+    if (observed["inventory_complete"] and
+            observed["remaining"]["read_directories"] < required_read_directories):
+        observed["reasons"] = sorted(set(observed["reasons"]) | {"READ_DIRECTORY_HEADROOM"})
+        observed["state"] = "BLOCKED"
+        observed["next_operation"] = "OWNER_REVIEW_PRIVATE_AUDIT_CAPACITY_NO_AUTOMATIC_DELETION"
+    if observed["state"] == "BLOCKED":
+        error = IntegrationError("AUDIT_QUOTA")
+        error.audit_capacity = observed
+        raise error
+    return observed
 
 
 def _native(project, work, operation, request, destination):

@@ -25,6 +25,8 @@ SCHEMAS = {
                             "max_bytes": {"type": "integer", "minimum": 1, "maximum": 1048576}}),
     "completion_check": c.obj({**WORK_ARGS, "selection_id": c.ID}),
 }
+AUDIT_READ_COST = {"work_inspect": 1, "history_read": 1, "context_get": 5,
+                   "handoff_prepare": 5, "evidence_read": 3, "completion_check": 3}
 
 
 def blocked(error):
@@ -38,13 +40,23 @@ def blocked(error):
         "GRANT_STALE": "OWNER_REVIEW_CURRENT_APPROVAL_GENERATION",
         "EVIDENCE_NOT_REFERENCED": "SELECT_COMMITTED_DOCUMENT_OR_JOURNAL_PAYLOAD_REFERENCE",
         "EVIDENCE_BINDING": "OWNER_INSPECT_LOCAL_NATIVE_EVIDENCE_NO_RETRY",
+        "AUDIT_QUOTA": "OWNER_REVIEW_PRIVATE_AUDIT_CAPACITY_NO_AUTOMATIC_DELETION",
     }.get(code, "REVIEW_OWNER_POLICY_AND_LOCAL_NATIVE_EVIDENCE")
-    return {"schema": "golem.integration-error.v1", "state": "BLOCKED",
+    response = {"schema": "golem.integration-error.v1", "state": "BLOCKED",
             "code": code,
             "native_state_changed": False, "execution_authorized": False,
             "automatic_retry_allowed": False,
             "next_operation": next_operation,
-            "local_evidence_id": Path(error.evidence_path).name if getattr(error, "evidence_path", None) else None}
+            "local_evidence_id": Path(error.evidence_path).name if getattr(error, "evidence_path", None) else None,
+            "local_evidence_id_semantics": "IDENTIFIER_ONLY_NULL_DOES_NOT_PROVE_NO_AUDIT_RECORD",
+            "work_outcome": "NOT_DETERMINED_BY_THIS_ERROR"}
+    if code == "EVIDENCE_NOT_REFERENCED":
+        response["explanation"] = "No supported committed document or journal reference matches this digest. Storage existence and content truth were not determined."
+    if code == "AUDIT_QUOTA":
+        response["explanation"] = "Private audit capacity or inventory safety checks blocked admission. This does not prove physical disk exhaustion or Work failure."
+        if isinstance(getattr(error, "audit_capacity", None), dict):
+            response["audit_capacity"] = error.audit_capacity
+    return response
 
 
 def context_failure(process, output):
@@ -133,15 +145,23 @@ class Service:
     def _call_locked(self, name, args):
         if name == "projects_list":
             result = {"projects": [v for v in self.available() if name in v["tools"]]}
+            if result["projects"]:
+                result["audit_capacity"] = backend.audit_capacity(self.registry.root)
+                result["audit_read_directory_cost"] = {
+                    tool: AUDIT_READ_COST.get(tool, 0)
+                    for tool in sorted({t for v in result["projects"] for t in v["tools"]})}
+                result["capacity_semantics"] = "READ_SLOTS_ONLY_BYTES_AND_ENTRIES_RECHECKED_NO_ADMISSION_GUARANTEE"
         else:
             scope = self.transfer.scope(args["project_id"], args["work_id"], name)
             if name in ("context_get", "handoff_prepare"):
                 for operation in ("record", "status", "next"):
                     self._authorize(scope, args["work_id"], operation)
+                backend._quota(self.registry.root, AUDIT_READ_COST[name])
                 result = self._context(scope, args, name)
             elif name in ("evidence_read", "completion_check"):
                 for operation in (("record", "status", "next") if name == "completion_check" else ("record",)):
                     self._authorize(scope, args["work_id"], operation)
+                backend._quota(self.registry.root, AUDIT_READ_COST[name])
                 result = self._verified_query(scope, args, name)
             else:
                 operation = args["view"] if name == "work_inspect" else "history"
@@ -228,6 +248,7 @@ class Service:
                           and value["acceptance_verified"] == (value["action"] == "DONE"), "COMPLETION_BINDING")
                 result = {"view": tool, "selection_id": args["selection_id"], "result": value,
                           "completion_authority": "NATIVE_CURRENT_SELECTION",
+                          "action_semantics": "NATIVE_ACTION_ONLY_NOT_PROOF_ALL_DOCUMENTS_EXIST_OR_OF_A_UNIQUE_CAUSE",
                           "next_operation": "REVIEW_NATIVE_ACTION_NO_AUTOMATIC_EXECUTION"}
             r.check_project(project)
             after = self._read(scope, work_id, "record")["result"]

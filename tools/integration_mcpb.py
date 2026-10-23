@@ -13,7 +13,7 @@ from integration_registry import regular
 def manifest():
     return {
         "manifest_version": "0.4", "name": "golem", "display_name": "Golem",
-        "version": "0.1.2",
+        "version": "0.1.3",
         "description": "Owner-approved, read-only Golem workflow context and evidence.",
         "author": {"name": "Golem contributors"},
         "repository": {"type": "git", "url": "https://github.com/seadonggyun4/Golem"},
@@ -42,7 +42,7 @@ def build():
     dependencies = regular(root / "tools/requirements-mcp.txt").decode().splitlines()
     payloads = {
         "manifest.json": json.dumps(manifest(), indent=2).encode() + b"\n",
-        "pyproject.toml": ("[project]\nname = \"golem-desktop\"\nversion = \"0.1.2\"\n"
+        "pyproject.toml": ("[project]\nname = \"golem-desktop\"\nversion = \"0.1.3\"\n"
             "requires-python = \">=3.11\"\ndependencies = " + json.dumps(dependencies) + "\n").encode(),
         "assets/Golem-mcp.png": branding.icon_bytes(),
         "LICENSE": regular(root / "LICENSE"),
