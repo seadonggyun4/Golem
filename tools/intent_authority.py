@@ -386,6 +386,138 @@ def native_inspect(root, registration_sha256, *, git, bridge):
         return value
 
 
+BASELINE_READ_MAX = 128 * 1024 * 1024
+_READ_BLOB = contract.obj({"length": {"type": "integer", "minimum": 0,
+                                    "maximum": 16 * 1024 * 1024}, "sha256": contract.DIGEST})
+_READ_FLAGS = {"committed": True, "source_coverage_unverified": False,
+               "references_unverified": True, "semantic_review_required": True,
+               "adoption_unverified": True, "issuer_unverified": True, "execution_authorized": False}
+_READ_METADATA = contract.obj({
+    "schema": contract.enum("golem.intent.baseline-read.v1"),
+    **{key: contract.DIGEST for key in ("registration_sha256", "operation_id", "request_digest",
+                                       "baseline_digest", "event_digest", "observed_head")},
+    "commit_sequence": {"type": "integer", "minimum": 1, "maximum": 6208},
+    **{key: {"const": value} for key, value in _READ_FLAGS.items()},
+    # Boolean is checked explicitly; the common validator's numeric rule rejects bool.
+    "source_count": contract.INTEGER, "source_bytes": contract.INTEGER,
+    "designated_bytes": contract.INTEGER,
+    "baseline": _READ_BLOB,
+    "sources": contract.array(contract.obj({"source_digest": contract.DIGEST,
+                                            "control": _READ_BLOB, "text": _READ_BLOB}), maximum=262144),
+})
+
+
+def _read_json(raw):
+    require(len(raw) <= contract.LIMIT, "NATIVE_OUTPUT_LIMIT")
+    try:
+        value = contract.strict_json(raw.decode("utf-8", errors="strict"))
+        require(isinstance(value, dict), "NATIVE_CONTRACT")
+        return value
+    except (UnicodeError, ValueError, RecursionError):
+        raise IntegrationError("NATIVE_CONTRACT") from None
+
+
+def _read_domain(schema, raw):
+    return sha(schema.encode("ascii") + b"\0" + len(raw).to_bytes(8, "little") + raw)
+
+
+def _decode_baseline_read(wire, registration, operation, request, baseline_digest):
+    """Decode only a successful, fully buffered private response. No authority writes."""
+    require(8 <= len(wire) <= BASELINE_READ_MAX, "NATIVE_OUTPUT_LIMIT")
+    size = int.from_bytes(wire[:8], "little")
+    require(0 < size <= contract.LIMIT and 8 + size <= len(wire), "NATIVE_CONTRACT")
+    meta = _read_json(bytes(wire[8:8 + size]))
+    require(type(meta.get("has_questions")) is bool, "NATIVE_CONTRACT")
+    contract._validate({k: v for k, v in meta.items() if k != "has_questions"}, _READ_METADATA)
+    require((meta["registration_sha256"], meta["operation_id"], meta["request_digest"], meta["baseline_digest"])
+            == (registration, operation, request, baseline_digest), "NATIVE_CONTRACT")
+    require(meta["source_count"] == len(meta["sources"]), "NATIVE_CONTRACT")
+    offset = 8 + size
+
+    def blob(descriptor, limit):
+        nonlocal offset
+        n = descriptor["length"]
+        require(n <= limit and n <= len(wire) - offset, "NATIVE_CONTRACT")
+        value = bytes(wire[offset:offset + n]); offset += n
+        require(sha(value) == descriptor["sha256"], "NATIVE_DIGEST_MISMATCH")
+        return value
+
+    baseline = blob(meta["baseline"], contract.LIMIT)
+    require(_read_domain("golem.intent.baseline.v1", baseline) == baseline_digest, "NATIVE_DIGEST_MISMATCH")
+    body = _read_json(baseline).get("body")
+    require(isinstance(body, dict) and body.get("source_refs") == [r["source_digest"] for r in meta["sources"]],
+            "NATIVE_SOURCE_ORDER")
+    sources = []; total = 0
+    for row in meta["sources"]:
+        control = blob(row["control"], contract.LIMIT)
+        text = blob(row["text"], 16 * 1024 * 1024)
+        total += len(text)
+        require(total <= 64 * 1024 * 1024, "NATIVE_OUTPUT_LIMIT")
+        require(_read_domain("golem.intent.source.v1", control) == row["source_digest"], "NATIVE_DIGEST_MISMATCH")
+        source_body = _read_json(control).get("body")
+        require(isinstance(source_body, dict) and source_body.get("body_cas") == sha(text), "NATIVE_DIGEST_MISMATCH")
+        try:
+            text.decode("utf-8", errors="strict")
+        except UnicodeError:
+            raise IntegrationError("NATIVE_CONTRACT") from None
+        sources.append((control, text))
+    require(offset == len(wire) and total == meta["source_bytes"] and meta["designated_bytes"] <= total,
+            "NATIVE_CONTRACT")
+    return {"metadata": meta, "baseline": baseline, "sources": tuple(sources)}
+
+
+def _receive_baseline_read(process):
+    """Drain both pipes with byte/time bounds; never use unbounded communicate()."""
+    deadline = time.monotonic() + 30
+    output = bytearray(); errors = bytearray()
+    streams = {process.stdout.fileno(): output, process.stderr.fileno(): errors}
+    try:
+        while streams:
+            remaining = deadline - time.monotonic()
+            require(remaining > 0, "NATIVE_READ_TIMEOUT")
+            ready, _, _ = select.select(list(streams), [], [], remaining)
+            for fd in ready:
+                target = streams[fd]
+                limit = BASELINE_READ_MAX if target is output else contract.LIMIT
+                chunk = os.read(fd, min(65536, limit - len(target) + 1))
+                if not chunk:
+                    del streams[fd]; continue
+                require(len(chunk) <= limit - len(target), "NATIVE_OUTPUT_LIMIT")
+                target.extend(chunk)
+                if target is output and len(output) >= 8:
+                    require(0 < int.from_bytes(output[:8], "little") <= contract.LIMIT, "NATIVE_OUTPUT_LIMIT")
+        remaining = deadline - time.monotonic()
+        require(remaining > 0, "NATIVE_READ_TIMEOUT")
+        code = process.wait(timeout=remaining)
+        if code != 0:
+            require(errors != b"intent.baseline_read.output_limit code=14\n", "NATIVE_OUTPUT_LIMIT")
+            raise IntegrationError("NATIVE_BASELINE_READ_BLOCKED")
+        return output
+    except subprocess.TimeoutExpired:
+        raise IntegrationError("NATIVE_READ_TIMEOUT") from None
+    finally:
+        if process.poll() is None:
+            process.kill()
+        process.wait()
+        process.stdout.close(); process.stderr.close()
+
+
+def read_baseline(root, registration_sha256, operation_id, request_digest, baseline_digest, *, git, bridge):
+    """Private exact-commit reader; post-read registration/pin checks precede return."""
+    for digest in (registration_sha256, operation_id, request_digest, baseline_digest):
+        contract._validate(digest, contract.DIGEST)
+    bridge = real_path(str(bridge))
+    with authorized_root(root, registration_sha256, git=git) as (fd, record):
+        require(file_pin(bridge) in record["authority"]["pins"], "NATIVE_BRIDGE_PIN_REQUIRED")
+        process = subprocess.Popen([str(bridge), "--read-baseline-fd", str(fd), registration_sha256,
+                                    operation_id, request_digest, baseline_digest], pass_fds=(fd,),
+                                   stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   env={"PATH": "/usr/bin:/bin", "LANG": "C", "LC_ALL": "C"})
+        wire = _receive_baseline_read(process)
+        value = _decode_baseline_read(wire, registration_sha256, operation_id, request_digest, baseline_digest)
+    return value
+
+
 def _object_store_snapshot(root, registration_sha256, *, git, bridge):
     """Called under common-dir lock; never turns authorized_root into a writer."""
     contract._validate(registration_sha256, contract.DIGEST)

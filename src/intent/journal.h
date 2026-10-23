@@ -1,6 +1,13 @@
 #ifndef GOLEM_INTENT_JOURNAL_INTERNAL_H
 #define GOLEM_INTENT_JOURNAL_INTERNAL_H
 #include "quota.h"
+#include "object_graph.h"
+#define GI_BASELINE_READ_MAX (128u * 1024u * 1024u)
+typedef struct gi_baseline_read {
+    gi_object_graph graph;
+    uint64_t commit_sequence;
+    golem_digest event, observed_head;
+} gi_baseline_read;
 
 typedef struct gi_journal gi_journal;
 typedef struct gi_journal_status {
@@ -28,6 +35,10 @@ typedef struct gi_journal_operation {
  * Never creates a root, migrates Work, or changes existing document journals. */
 golem_status gi_journal_open(int registered_root_fd, gi_journal **out);
 void gi_journal_close(gi_journal *journal);
+/* Exact committed publication only, read-only and failure-atomic. Dispose the
+ * owned graph on success. No ACTIVE/adoption/execution authorization. */
+golem_status gi_journal_read_baseline(gi_journal *, const golem_digest *operation,
+    const golem_digest *request, const golem_digest *baseline, gi_baseline_read *out);
 /* Validates committed object history and reports attributed staging read-only.
  * Pending object publication is never a D01 recovery authorization. */
 golem_status gi_journal_inspect(gi_journal *journal, gi_journal_status *out);

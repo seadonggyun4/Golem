@@ -206,7 +206,7 @@ native 상태를 확인해야 한다. 성공 결과에도 `execution_authorized=
 - QA writer lock·보호 계약·기존 증거·TRAP·실제 Work를 수정하지 않는다.
 - macOS 외 플랫폼 및 원격 CI 결과는 별도 검증 없이는 통과로 주장하지 않는다.
 
-### 현재 연결 검증 결과
+### 저장 연결 검증 결과 (reader 추가 이전)
 
 macOS arm64에서 다음을 실행했다. host CTest는 여러 Python 사례를 포함하는 하나의 CTest다.
 
@@ -237,3 +237,80 @@ event 직전 guard 거부는 원문·pending 보존, event 미게시, 재진입 
 기존 D01 protocol 예외에 한정해 정제된 환경·명시적 FD·표준 입출력 격리를 회귀 검사한다.
 일반 product 명령의 기록 의무나 QA 보호 검사를 완화하지 않는다. 최종 CI 판정은 이후
 수정 커밋의 GitHub Actions 결과를 기준으로 하며, 첫 실패를 통과로 재분류하지 않는다.
+
+## Committed baseline 읽기 전용 조회 (2026-10-23)
+
+승인된 조회 계약을 `gi_journal_read_baseline`과 private host `read_baseline`에 연결했다.
+선택자는 `operation_id`, `request_digest`, `baseline_digest` 세 값이며 정확한 committed 게시
+한 건만 선택한다. 최신/ACTIVE 자동 선택이나 다른 참조 객체의 자동 확장은 없다.
+기존 D01 등록·producer/Git/bridge pin·common-dir SH lock과 native owner lock을 유지한다.
+전체 journal과 과거 object commit을 재검증하며 pending·손상·선택자 불일치는 차단한다.
+
+`gi_object_graph_load`는 기존 graph 검증을 공유하여 원본 baseline JSON과 source JSON·UTF-8
+원문을 소유한 snapshot을 반환한다. source 순서는 manifest의 저장 순서가 아니라 baseline의
+`source_refs` 순서다. coverage는 원본 baseline에 그대로 있으며 요약·재작성·절단하지 않는다.
+native 오류 시 호출자 결과는 변경하지 않고, 성공 시 graph는 호출자가 dispose한다.
+
+### Private 응답 계약
+
+`--read-baseline-fd`는 host와 native 사이의 내부 프로토콜이며 공개 제품 CLI/MCP가 아니다.
+응답은 `uint64_le(metadata 길이)` 8바이트, metadata UTF-8 JSON, baseline 원본, 각 source의
+JSON·원문 순서다. metadata schema는 `golem.intent.baseline-read.v1`이다.
+
+- 선택자와 `registration_sha256`, `commit_sequence`, `event_digest`, `observed_head`를 포함한다.
+  과거 게시 sequence/event와 조회 중 관측한 현재 journal head는 구분된다.
+- baseline descriptor와 각 source의 control/text descriptor는 `length`, 원본 raw `sha256`이다.
+  source에는 domain `source_digest`도 포함한다. host는 baseline/source domain digest,
+  baseline의 source 순서, source의 body CAS, 전체 길이·종료 상태를 대조한다.
+- metadata 최대 256KiB, 헤더를 포함한 전체 응답 최대 128MiB다. 기존 JSON 각 256KiB,
+  원문 각 16MiB·source 집합 64MiB 상한도 유지한다. native는 송신 전에 전체 크기를 확인하고,
+  host는 stdout을 수신하면서 상한을 적용한다. stderr도 256KiB, 실행은 30초로 제한한다.
+  시간/출력 초과는 자식 종료·회수 후 실패하며 원문을 로그나 authority에 저장하지 않는다.
+- 저장 가능한 객체도 조회 응답 한도를 넘으면 조회를 거부할 수 있다. 이는 메모리 사용량 보장,
+  저장 quota 변경, 자동 분할·상향이 아니다. `intent.baseline_read.output_limit` 또는
+  host `NATIVE_OUTPUT_LIMIT`은 별도의 한도 오류다.
+- host의 수신·digest 검증과 context 종료 시 등록/pin 재검사가 전부 성공해야 결과를 반환한다.
+  잘림·추가 bytes·비정상 종료·pin 변경 시 부분 결과를 성공으로 노출하지 않는다.
+
+### 검증 상태의 의미
+
+| 필드 | 성공 응답의 값·의미 |
+|---|---|
+| `committed` | true: 선택한 proposal의 저장 commit이 검증됨 |
+| `source_coverage_unverified` | false: 원문 identity·scope·실제 byte 구간 coverage 검증 |
+| `source_count`, `source_bytes`, `designated_bytes` | 검증한 source 수·원문 합계·지정 구간 합계 |
+| `has_questions` | QUESTION_REQUIRED가 있으면 true, 삭제하거나 승인으로 바꾸지 않음 |
+| `references_unverified` | true: source 이외 참조 객체는 해석하지 않음 |
+| `semantic_review_required` | true: coverage 분류의 의미적 타당성을 인증하지 않음 |
+| `adoption_unverified`, `issuer_unverified` | true: 사용자 채택·issuer 인증은 미검증 |
+| `execution_authorized` | false: ACTIVE·실행 허가·PASS를 뜻하지 않음 |
+
+reader는 기존 복구 marker를 우회하거나 복구를 호출하지 않는다. 추가 복구 계층, 실제 authority
+등록·Work 변경, TRAP 설치·실행은 포함하지 않는다. native 원본 bytes와 위 메타데이터의 조회만
+추가하며 QA writer lock과 보호 검사 계약은 그대로 유지한다.
+
+### Reader 검증 결과
+
+macOS arm64의 임시 저장소·authority에서 실행했다. 기존 실제 authority와 증거는 사용하지 않았다.
+
+| 검사 | 결과 |
+|---|---|
+| dev 기존 intent·execution boundary 회귀 | 17/17 PASS |
+| dev 신규 reader·갱신한 journal 실패 원자성 검사 | 2/2 PASS |
+| ASan/UBSan reader·journal·object inventory | 3/3 PASS |
+| Release reader·journal·object inventory | 3/3 PASS |
+| ASan/UBSan 및 Release bridge의 reader host 사례 | 각각 7/7 PASS |
+| Python 실행 경계 audit 및 수신 한도·timeout 사례 | 3/3 PASS |
+| `git diff --check` | PASS |
+
+원본 bytes·다중 source 순서·한글·QUESTION_REQUIRED, 과거 commit/현재 head 구분,
+잘못된 선택자·owner lock 경합·pending·과거 원문 손상 거부, source/원문 digest,
+전송 잘림·추가 bytes·잘못된 상태 flag·출력 한도·stderr 한도·비정상 종료·timeout,
+조회 중 pin 변경을 검사했다. native graph 한도 경계 및 실패 시 호출자 결과 보존과
+조회 전후 inode/mode/bytes·journal usage 무변경도 검사했다. 기존 execution boundary
+suite의 QA writer lock 검사를 통과했다.
+
+출력 한도 경계는 작은 한도 주입과 native graph byte budget으로 검증했다. 128MiB 전체를
+실제로 전송하는 부하 시험, Linux/Windows 실행, 원격 CI는 이번 reader 변경에서 수행하지 않았다.
+위 표는 최초 로컬 구현 검증 기록이다. 게시 후 원격 결과는 해당 커밋의 GitHub Actions를
+별도로 확인하며 로컬 결과로 대신하지 않는다. 추가 복구 계층이나 미승인 상태 전이는 없다.

@@ -1696,6 +1696,42 @@ static golem_status object_manifest(gi_journal *j, object_blob *blobs, size_t co
     return st;
 }
 
+golem_status gi_journal_read_baseline(gi_journal *j, const golem_digest *operation,
+    const golem_digest *request, const golem_digest *baseline, gi_baseline_read *out)
+{
+    if (!j || !operation || !request || !baseline || !out) return GOLEM_ERR_INVALID_ARGUMENT;
+    if (j->poisoned || j->busy || j->owner != getpid()) return GOLEM_ERR_INVALID_STATE;
+    j->busy = true;
+    replay *r = malloc(sizeof(*r));
+    gi_baseline_read result = {0}; uint8_t *data = NULL;
+    golem_status st = r ? restore(j, r) : GOLEM_ERR_OUT_OF_MEMORY;
+    if (st == GOLEM_OK && r->status.pending) st = GOLEM_ERR_INVALID_STATE;
+    bool found = false;
+    for (size_t i = 0; st == GOLEM_OK && i < r->count; ++i) {
+        record *rec = &r->records[i];
+        if (memcmp(rec->prep + 32, operation->bytes, 32)) continue;
+        found = true;
+        if (!rec->committed || memcmp(rec->prep + 64, request->bytes, 32)) { st = GOLEM_ERR_INVALID_STATE; break; }
+        char path[64]; size_t n = 0; bool exists = false;
+        name(path, sizeof(path), i + 1, "objects-prep");
+        st = read_file(j->root, path, GI_CONTROL_MAX, &data, &n, &exists);
+        gi_object_preparation_result manifest;
+        if (st == GOLEM_OK && !exists) st = GOLEM_ERR_INVALID_STATE;
+        if (st == GOLEM_OK) st = gi_object_preparation_validate((golem_bytes){data, n}, &manifest, NULL);
+        if (st == GOLEM_OK && memcmp(baseline, &manifest.reservation.publication.baseline, sizeof(*baseline))) st = GOLEM_ERR_INVALID_STATE;
+        if (st == GOLEM_OK) st = gi_object_graph_load(j->root, (golem_bytes){data, n}, GI_BASELINE_READ_MAX - 8, &result.graph);
+        if (st == GOLEM_OK) {
+            result.commit_sequence = i + 1; result.event = rec->event; result.observed_head = r->status.head;
+        }
+        break;
+    }
+    if (st == GOLEM_OK && !found) st = GOLEM_ERR_NOT_FOUND;
+    if (st == GOLEM_OK) *out = result;
+    else gi_object_graph_dispose(&result.graph);
+    free(data); free(r); j->busy = false;
+    return st;
+}
+
 golem_status gi_journal_store_objects(gi_journal *j, const golem_digest *operation, const golem_digest *request,
     uint64_t expected_sequence, const golem_digest *expected_head, golem_bytes baseline,
     const gi_source_input *sources, size_t source_count, gi_journal_guard guard, void *context, gi_journal_receipt *out)

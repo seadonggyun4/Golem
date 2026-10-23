@@ -188,6 +188,14 @@ static int scenario(int mode)
             CHECK(gi_journal_visit(j, NULL, &v) == GOLEM_ERR_INVALID_ARGUMENT);
         }
     }
+    /* A generic journal event, pending state or poisoned handle must never
+     * yield a partial baseline snapshot or overwrite caller-owned output. */
+    gi_baseline_read read_result, read_sentinel;
+    memset(&read_sentinel, 0xa5, sizeof(read_sentinel)); read_result = read_sentinel;
+    CHECK(gi_journal_read_baseline(j, &op, &req, &zero, &read_result) != GOLEM_OK);
+    CHECK(memcmp(&read_result, &read_sentinel, sizeof(read_result)) == 0);
+    CHECK(gi_journal_read_baseline(j, NULL, &req, &zero, &read_result) == GOLEM_ERR_INVALID_ARGUMENT);
+    CHECK(memcmp(&read_result, &read_sentinel, sizeof(read_result)) == 0);
     gi_journal_close(j); cleanup(root, path); return 0;
 }
 static int saturation(void)

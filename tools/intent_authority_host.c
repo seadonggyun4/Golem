@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "../src/intent/journal.h"
 #include "../src/intent/schema.h"
+#include "../src/common/json.h"
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
@@ -46,6 +47,113 @@ static golem_status visit_binding(void *context, const golem_digest *operation,
     if (!memcmp(request->bytes, chain->target.bytes, 32)) chain->target_seen = true;
     chain->found = true;
     return successor_key(request, &chain->successor);
+}
+
+static bool read_field(struct json_object *o, const char *key, struct json_object *value)
+{
+    if (!value) return false;
+    if (json_object_object_add(o, key, value) == 0) return true;
+    json_object_put(value); return false;
+}
+
+static struct json_object *read_blob(golem_bytes bytes)
+{
+    golem_digest digest; char hex[65]; size_t required;
+    if (golem_digest_bytes(bytes, &digest) != GOLEM_OK) return NULL;
+    if (golem_digest_format(&digest, hex, sizeof(hex), &required) != GOLEM_OK) return NULL;
+    struct json_object *o = json_object_new_object();
+    if (!o) return NULL;
+    if (!read_field(o, "length", json_object_new_uint64(bytes.size)) ||
+        !read_field(o, "sha256", json_object_new_string(hex))) { json_object_put(o); return NULL; }
+    return o;
+}
+
+static golem_status read_response(const gi_baseline_read *read, char **argv)
+{
+    const gi_object_graph *g = &read->graph;
+    const gi_baseline_coverage_result *c = &g->coverage;
+    struct json_object *m = json_object_new_object(), *sources = json_object_new_array();
+    if (!m || !sources) { json_object_put(m); json_object_put(sources); return GOLEM_ERR_OUT_OF_MEMORY; }
+    char event[65], head[65]; size_t required;
+    (void)golem_digest_format(&read->event, event, sizeof(event), &required);
+    (void)golem_digest_format(&read->observed_head, head, sizeof(head), &required);
+    bool ok = read_field(m, "schema", json_object_new_string("golem.intent.baseline-read.v1")) &&
+        read_field(m, "registration_sha256", json_object_new_string(argv[3])) &&
+        read_field(m, "operation_id", json_object_new_string(argv[4])) &&
+        read_field(m, "request_digest", json_object_new_string(argv[5])) &&
+        read_field(m, "baseline_digest", json_object_new_string(argv[6])) &&
+        read_field(m, "commit_sequence", json_object_new_uint64(read->commit_sequence)) &&
+        read_field(m, "event_digest", json_object_new_string(event)) &&
+        read_field(m, "observed_head", json_object_new_string(head)) &&
+        read_field(m, "committed", json_object_new_boolean(true)) &&
+        read_field(m, "source_coverage_unverified", json_object_new_boolean(c->baseline.source_coverage_unverified)) &&
+        read_field(m, "references_unverified", json_object_new_boolean(c->baseline.references_unverified)) &&
+        read_field(m, "semantic_review_required", json_object_new_boolean(c->baseline.semantic_review_required)) &&
+        read_field(m, "adoption_unverified", json_object_new_boolean(c->adoption_unverified)) &&
+        read_field(m, "issuer_unverified", json_object_new_boolean(c->issuer_unverified)) &&
+        read_field(m, "execution_authorized", json_object_new_boolean(false)) &&
+        read_field(m, "has_questions", json_object_new_boolean(c->baseline.has_questions)) &&
+        read_field(m, "source_count", json_object_new_uint64(g->source_count)) &&
+        read_field(m, "source_bytes", json_object_new_uint64(c->source_bytes)) &&
+        read_field(m, "designated_bytes", json_object_new_uint64(c->designated_bytes)) &&
+        read_field(m, "baseline", read_blob(g->baseline));
+    size_t total = 8 + g->baseline.size;
+    golem_status st = GOLEM_OK;
+    for (size_t i = 0; ok && st == GOLEM_OK && i < g->source_count; ++i) {
+        const gi_source_input *s = &g->sources[i];
+        golem_digest digest; char hex[65];
+        st = gi_source_identity(s->control, s->text, &digest, NULL);
+        if (st != GOLEM_OK) break;
+        (void)golem_digest_format(&digest, hex, sizeof(hex), &required);
+        if (s->control.size > GI_BASELINE_READ_MAX - total) { st = GOLEM_ERR_OVERFLOW; break; }
+        total += s->control.size;
+        if (s->text.size > GI_BASELINE_READ_MAX - total) { st = GOLEM_ERR_OVERFLOW; break; }
+        total += s->text.size;
+        struct json_object *row = json_object_new_object();
+        if (!row) { ok = false; break; }
+        ok = read_field(row, "source_digest", json_object_new_string(hex)) &&
+            read_field(row, "control", read_blob(s->control)) && read_field(row, "text", read_blob(s->text));
+        if (!ok || json_object_array_add(sources, row) != 0) { json_object_put(row); ok = false; }
+    }
+    if (ok) ok = read_field(m, "sources", json_object_get(sources));
+    const char *json = ok ? json_object_to_json_string_ext(m, JSON_C_TO_STRING_PLAIN) : NULL;
+    size_t n = json ? strlen(json) : 0;
+    if (!json) st = GOLEM_ERR_OUT_OF_MEMORY;
+    if (st == GOLEM_OK && (n > GI_CONTROL_MAX || n > GI_BASELINE_READ_MAX - total)) st = GOLEM_ERR_OVERFLOW;
+    /* Nothing is emitted until all metadata and total-size checks succeed. */
+    if (st == GOLEM_OK) {
+        uint8_t header[8]; for (unsigned i = 0; i < 8; ++i) header[i] = (uint8_t)((uint64_t)n >> (8 * i));
+        if (fwrite(header, 1, 8, stdout) != 8 || fwrite(json, 1, n, stdout) != n ||
+            fwrite(g->baseline.data, 1, g->baseline.size, stdout) != g->baseline.size) st = GOLEM_ERR_IO;
+        for (size_t i = 0; st == GOLEM_OK && i < g->source_count; ++i) {
+            const gi_source_input *s = &g->sources[i];
+            if (fwrite(s->control.data, 1, s->control.size, stdout) != s->control.size ||
+                fwrite(s->text.data, 1, s->text.size, stdout) != s->text.size) st = GOLEM_ERR_IO;
+        }
+        if (fflush(stdout) != 0) st = GOLEM_ERR_IO;
+    }
+    json_object_put(m); json_object_put(sources); return st;
+}
+
+static int read_baseline_command(int argc, char **argv)
+{
+    if (argc != 7) return 2;
+    char *end = NULL; errno = 0; long fd = strtol(argv[2], &end, 10);
+    if (errno || !*argv[2] || *end || fd < 3 || fd > INT_MAX) return 2;
+    golem_digest selector[4]; golem_status st = GOLEM_OK;
+    for (size_t i = 0; st == GOLEM_OK && i < 4; ++i)
+        st = golem_digest_parse((golem_string_view){argv[3 + i], strlen(argv[3 + i])}, &selector[i]);
+    gi_journal *j = NULL; gi_baseline_read result = {0}; authority_chain chain = {0};
+    const char key[] = "golem.intent.authority-registration.v1";
+    if (st == GOLEM_OK) st = gi_journal_open((int)fd, &j);
+    if (st == GOLEM_OK) st = golem_digest_bytes((golem_bytes){(const uint8_t *)key, sizeof(key) - 1}, &chain.initial);
+    if (st == GOLEM_OK) st = gi_journal_visit(j, visit_binding, &chain);
+    if (st == GOLEM_OK && (!chain.found || memcmp(&chain.current, &selector[0], sizeof(selector[0])))) st = GOLEM_ERR_INVALID_STATE;
+    if (st == GOLEM_OK) st = gi_journal_read_baseline(j, &selector[1], &selector[2], &selector[3], &result);
+    if (st == GOLEM_OK) st = read_response(&result, argv);
+    gi_object_graph_dispose(&result.graph); gi_journal_close(j);
+    if (st != GOLEM_OK) fprintf(stderr, "intent.baseline_read.%s code=%d\n", st == GOLEM_ERR_OVERFLOW ? "output_limit" : "blocked", (int)st);
+    return st == GOLEM_OK ? 0 : 1;
 }
 
 static int pending_command(int argc, char **argv)
@@ -349,6 +457,7 @@ static int store_objects_command(int argc, char **argv)
 int main(int argc, char **argv)
 {
     if (argc < 4) return 2;
+    if (!strcmp(argv[1], "--read-baseline-fd")) return read_baseline_command(argc, argv);
     if (!strcmp(argv[1], "--store-objects-fd")) return store_objects_command(argc, argv);
     if (!strcmp(argv[1], "--plan-fragment-fd") || !strcmp(argv[1], "--preserve-fragment-fd") ||
         !strcmp(argv[1], "--finish-fragment-fd") || !strcmp(argv[1], "--detach-fragment-fd")) return alias_command(argc, argv);

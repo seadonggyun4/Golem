@@ -7,7 +7,7 @@ import sys
 import struct
 import inspect
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from integration_contract import IntegrationError
 import fcntl
@@ -267,6 +267,160 @@ class IdentityTests(unittest.TestCase):
         self.assertEqual(prep["new_directories"], [])
         self.assertTrue(all(row["disposition"] == "reuse" for row in prep["objects"]))
         self.assertEqual(host.native_inspect(self.repo, value["registration_sha256"], **kw)["committed"], 3)
+
+    def reader_fixture(self):
+        value = self.enroll()
+        objects = self.object_commit_fixture(2)
+        manifest = host.decode((self.authority / "00000002.objects-prep").read_bytes())
+        args = (self.repo, value["registration_sha256"], manifest["operation_id"],
+                manifest["request_digest"], manifest["baseline_digest"])
+        return args, {"git": self.git_binary, "bridge": self.bridge}, objects
+
+    def test_baseline_reader_exact_commit_and_read_only(self):
+        args, kw, objects = self.reader_fixture()
+        self.object_commit_fixture(3)
+        before = self.snapshot()
+        value = host.read_baseline(*args, **kw)
+        self.assertEqual(value["baseline"], objects[2][3])
+        self.assertEqual(value["sources"], ((objects[1][3], objects[0][3]),))
+        m = value["metadata"]
+        self.assertEqual(m["commit_sequence"], 2)
+        self.assertEqual(m["event_digest"], host.sha((self.authority / "00000002.event").read_bytes()))
+        self.assertEqual(m["observed_head"], host.sha((self.authority / "00000003.event").read_bytes()))
+        self.assertEqual((m["source_count"], m["source_bytes"], m["designated_bytes"], m["has_questions"]), (1, 3, 3, False))
+        for key, expected in host._READ_FLAGS.items():
+            self.assertIs(m[key], expected)
+        self.assertEqual(before, self.snapshot())
+
+    def test_baseline_reader_selector_and_owner_lock(self):
+        args, kw, _ = self.reader_fixture()
+        before = self.snapshot()
+        for index in (2, 3, 4):
+            bad = list(args); bad[index] = "0" * 64
+            with self.assertRaises(IntegrationError):
+                host.read_baseline(*bad, **kw)
+        fd = os.open(self.authority, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            with self.assertRaises(IntegrationError):
+                host.read_baseline(*args, **kw)
+        finally:
+            os.close(fd)
+        self.assertEqual(before, self.snapshot())
+
+    def test_baseline_reader_pending_and_historical_corruption(self):
+        args, kw, objects = self.reader_fixture()
+        self.object_commit_fixture(3)
+        event = self.authority / "00000003.event"
+        pending = self.authority / "00000003.event.pending"
+        event.rename(pending)
+        before = self.snapshot()
+        with self.assertRaises(IntegrationError):
+            host.read_baseline(*args, **kw)
+        self.assertEqual(before, self.snapshot())
+        pending.rename(event)
+        raw = self.authority / objects[0][0]
+        raw.chmod(0o600); raw.write_bytes(b"bad"); raw.chmod(0o400)
+        before = self.snapshot()
+        with self.assertRaises(IntegrationError):
+            host.read_baseline(*args, **kw)
+        self.assertEqual(before, self.snapshot())
+
+    def test_baseline_reader_rejects_transport_damage_and_flags(self):
+        args, kw, _ = self.reader_fixture()
+        captured = []
+        original = host._receive_baseline_read
+        def receive(process):
+            wire = original(process); captured.append(bytes(wire)); return wire
+        with patch.object(host, "_receive_baseline_read", side_effect=receive):
+            host.read_baseline(*args, **kw)
+        wire = captured[0]; size = int.from_bytes(wire[:8], "little")
+        for bad in (wire[:7], wire[:-1], wire + b"x", wire[:-1] + b"X",
+                    (host.contract.LIMIT + 1).to_bytes(8, "little") + wire[8:]):
+            with self.assertRaises(IntegrationError):
+                host._decode_baseline_read(bad, *args[1:])
+        for key, bad_value in (("committed", False), ("execution_authorized", True),
+                               ("references_unverified", False), ("source_count", 2),
+                               ("source_bytes", 4), ("extra", True), ("has_questions", 1)):
+            meta = host.decode(wire[8:8 + size]); meta[key] = bad_value
+            encoded = host.encoded(meta)
+            bad = len(encoded).to_bytes(8, "little") + encoded + wire[8 + size:]
+            with self.assertRaises(IntegrationError):
+                host._decode_baseline_read(bad, *args[1:])
+        with patch.object(host, "BASELINE_READ_MAX", len(wire) - 1):
+            with self.assertRaisesRegex(IntegrationError, "NATIVE_OUTPUT_LIMIT"):
+                host.read_baseline(*args, **kw)
+
+    def test_baseline_reader_post_read_pin_failure_returns_nothing(self):
+        args, kw, _ = self.reader_fixture()
+        original = host._decode_baseline_read
+        def decode_then_change(*values):
+            result = original(*values)
+            self.pin.write_bytes(b"changed during read")
+            return result
+        with patch.object(host, "_decode_baseline_read", side_effect=decode_then_change):
+            with self.assertRaises(IntegrationError):
+                host.read_baseline(*args, **kw)
+
+    def test_baseline_reader_receive_limits_exit_and_timeout(self):
+        def process(output, error=b"", code=0):
+            p = Mock()
+            for name, data in (("stdout", output), ("stderr", error)):
+                read_fd, write_fd = os.pipe()
+                os.write(write_fd, data); os.close(write_fd)
+                stream = os.fdopen(read_fd, "rb")
+                self.addCleanup(stream.close)
+                setattr(p, name, stream)
+            p.wait.return_value = code; p.poll.return_value = code
+            return p
+        p = process((host.contract.LIMIT + 1).to_bytes(8, "little"))
+        with self.assertRaisesRegex(IntegrationError, "NATIVE_OUTPUT_LIMIT"):
+            host._receive_baseline_read(p)
+        p = process((1).to_bytes(8, "little") + b"x", code=1)
+        with self.assertRaisesRegex(IntegrationError, "NATIVE_BASELINE_READ_BLOCKED"):
+            host._receive_baseline_read(p)
+        p = process(b"", b"intent.baseline_read.output_limit code=14\n", code=1)
+        with self.assertRaisesRegex(IntegrationError, "NATIVE_OUTPUT_LIMIT"):
+            host._receive_baseline_read(p)
+        p = process(b"", b"too much stderr")
+        with patch.object(host.contract, "LIMIT", 3):
+            with self.assertRaisesRegex(IntegrationError, "NATIVE_OUTPUT_LIMIT"):
+                host._receive_baseline_read(p)
+        p = process(b""); p.poll.return_value = None
+        with patch.object(host.time, "monotonic", side_effect=[0, 31]):
+            with self.assertRaisesRegex(IntegrationError, "NATIVE_READ_TIMEOUT"):
+                host._receive_baseline_read(p)
+        p.kill.assert_called_once()
+        p.wait.assert_called_once()
+
+    def test_baseline_reader_unicode_order_and_questions(self):
+        value = self.enroll()
+        args = list(self.object_store_args(value))
+        baseline = host.decode(args[6]); first = host.decode(args[7][0][0])
+        first["body"]["origin"] = "MODEL_DRAFT"
+        first["body"]["capture_ref"] = "second source"
+        text = "한".encode("utf-8")
+        first["body"]["body_cas"] = host.sha(text)
+        control = host.encoded(first)
+        digest = host._read_domain("golem.intent.source.v1", control)
+        body = baseline["body"]
+        body["source_refs"].insert(0, digest)
+        row = dict(body["coverage_manifest"][0]["rows"][0])
+        row["classification"] = "QUESTION_REQUIRED"
+        body["coverage_manifest"].append({"source_ref": digest, "rows": [row]})
+        args[6] = host.encoded(baseline)
+        # Input order intentionally differs from baseline order.
+        args[7] = (*args[7], (control, text))
+        kw = {"git": self.git_binary, "bridge": self.bridge}
+        plan = host.object_store_plan(*args, **kw)
+        host.store_objects(*args, plan["plan_sha256"], approve_local_owner=True, **kw)
+        before = self.snapshot()
+        result = host.read_baseline(*args[:4], host._read_domain("golem.intent.baseline.v1", args[6]), **kw)
+        self.assertEqual(result["baseline"], args[6])
+        self.assertEqual(result["sources"], tuple(reversed(args[7])))
+        self.assertTrue(result["metadata"]["has_questions"])
+        self.assertEqual(result["metadata"]["designated_bytes"], 6)
+        self.assertEqual(before, self.snapshot())
 
     def test_object_store_rejects_invalid_coverage_before_write(self):
         value = self.enroll()

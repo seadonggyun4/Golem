@@ -16,9 +16,14 @@ golem_configure_target(golem_test_intent_fragment)
 add_test(NAME intent_fragment COMMAND golem_test_intent_fragment)
 set_tests_properties(intent_fragment PROPERTIES TIMEOUT 30 LABELS "intent;restricted-diagnostic")
 add_executable(golem_intent_authority_host ../../tools/intent_authority_host.c)
-target_link_libraries(golem_intent_authority_host PRIVATE Golem::golem)
+target_link_libraries(golem_intent_authority_host PRIVATE Golem::golem PkgConfig::JSONC)
 golem_configure_target(golem_intent_authority_host)
 add_executable(golem_test_intent_journal test_intent_journal.c)
+add_executable(golem_test_intent_reader test_intent_reader.c)
+target_link_libraries(golem_test_intent_reader PRIVATE Golem::golem)
+golem_configure_target(golem_test_intent_reader)
+add_test(NAME intent_reader COMMAND golem_test_intent_reader)
+set_tests_properties(intent_reader PROPERTIES TIMEOUT 30 LABELS "intent;restricted-diagnostic")
 target_link_libraries(golem_test_intent_journal PRIVATE Golem::golem)
 golem_configure_target(golem_test_intent_journal)
 add_test(NAME intent_journal COMMAND golem_test_intent_journal)
@@ -432,7 +437,7 @@ if(GOLEM_BUILD_CLI)
         ${Python3_EXECUTABLE} -m unittest discover -s ${PROJECT_SOURCE_DIR}/tools
         -p test_intent_authority.py)
     # Isolated host cases exceed 180s under parallel macOS CI; each Git/native
-    # subprocess retains its own 10/15s bound. Do not drop cases from the suite.
+    # subprocess retains its own 10/15/30s bound. Do not drop cases from the suite.
     set_tests_properties(intent_authority_host PROPERTIES TIMEOUT 600 LABELS "intent;integration")
     add_test(NAME intent_schema_conformance COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/intent_schema_conformance.py

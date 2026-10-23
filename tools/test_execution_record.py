@@ -290,6 +290,9 @@ class Coverage(unittest.TestCase):
         ("tools/intent_authority.py", "repository_identity"): 2,
         ("tools/intent_authority.py", "register"): 1,
         ("tools/intent_authority.py", "native_inspect"): 1,
+        # Read-only private bytes must not create observation records. Pipes
+        # enforce limits during receive, including stderr and a deadline.
+        ("tools/intent_authority.py", "read_baseline"): 1,
         # Proposal publication requires a duplex guard while the native owner
         # lock is held. Generic capture cannot service that FD protocol.
         ("tools/intent_authority.py", "store_objects"): 1,
@@ -339,6 +342,17 @@ class Coverage(unittest.TestCase):
                             and node.func.attr in {"run", "Popen", "check_call", "check_output", "call"}):
                         continue
                     counts[key] += 1
+                    if key == ("tools/intent_authority.py", "read_baseline"):
+                        self.assertEqual(node.func.attr, "Popen")
+                        kwargs = {k.arg: k.value for k in node.keywords}
+                        self.assertEqual(set(kwargs), {"pass_fds", "stdin", "stdout", "stderr", "env"})
+                        self.assertEqual(ast.unparse(kwargs["pass_fds"]), "(fd,)")
+                        self.assertEqual(ast.unparse(kwargs["stdin"]), "subprocess.DEVNULL")
+                        for stream in ("stdout", "stderr"):
+                            self.assertEqual(ast.unparse(kwargs[stream]), "subprocess.PIPE")
+                        self.assertEqual(ast.literal_eval(kwargs["env"]),
+                                         {"PATH": "/usr/bin:/bin", "LANG": "C", "LC_ALL": "C"})
+                        continue
                     if key == ("tools/intent_authority.py", "store_objects"):
                         self.assertEqual(node.func.attr, "Popen")
                         kwargs = {k.arg: k.value for k in node.keywords}
