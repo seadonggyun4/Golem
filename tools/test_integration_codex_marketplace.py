@@ -125,6 +125,16 @@ class Adapter(unittest.TestCase):
                 adapter.serve(self.state)
             execute.assert_not_called()
 
+    def test_status_works_when_host_denies_writable_lock_open(self):
+        self.configure()
+        original = os.open
+        def readonly_host(path, flags, *args, **kwargs):
+            if Path(path).name == 'owner.lock' and flags & os.O_ACCMODE != os.O_RDONLY:
+                raise PermissionError('readonly host')
+            return original(path, flags, *args, **kwargs)
+        with patch.object(adapter.os, 'open', side_effect=readonly_host):
+            self.assertEqual(adapter.status(self.state)['state'], 'CONFIGURED')
+
     def test_setup_errors_are_private_and_do_not_emit_protocol_stdout(self):
         result = subprocess.run([sys.executable, '-I', '-B', str(SCRIPT), 'serve',
             '--state', str(self.root / 'missing')], capture_output=True, timeout=10)

@@ -90,7 +90,7 @@ def directory(path, create=False, private=False):
 def locked(state, write=False):
     state = directory(state, create=write)
     private = directory(state / 'golem-launcher', create=write, private=True)
-    flags = os.O_RDWR | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK
+    flags = (os.O_RDWR if write else os.O_RDONLY) | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK
     fd = os.open(private / 'owner.lock', flags | (os.O_CREAT if write else 0), 0o600)
     try:
         info = os.fstat(fd)
