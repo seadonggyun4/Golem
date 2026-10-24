@@ -21,6 +21,23 @@ import integration_mcp as branding
 
 
 class D2(fixture.ReadBackend):
+    def test_distinct_counters_on_unchanged_native_work(self):
+        path, digest = self.make_policy()
+        api = service.Service(transfer.Transfer(path, digest, approve_data_transfer=True))
+        args = {"project_id": "project", "work_id": "example-work"}
+        before = self.inventory()
+        status = api.call("work_inspect", {**args, "view": "status"})
+        next_view = api.call("work_inspect", {**args, "view": "next"})
+        completion = api.call("completion_check", {**args, "selection_id": "selection"})
+        self.assertEqual(status["result"]["sequence"], next_view["result"]["sequence"])
+        self.assertEqual(next_view["result"]["document_generation"], completion["result"]["generation"])
+        self.assertNotEqual(status["result"]["sequence"], completion["result"]["generation"])
+        self.assertEqual(status["counter_semantics"]["fields_if_present"]["result.sequence"]["domain"],
+                         "AGENT_SESSION_EVENTS")
+        self.assertEqual(completion["counter_semantics"]["fields_if_present"]["result.generation"]["domain"],
+                         "DOCUMENT_GENERATION")
+        self.assertEqual(before, self.inventory())
+
     def test_verified_evidence_and_completion_preserve_native_files(self):
         path, digest = self.make_policy()
         api = service.Service(transfer.Transfer(path, digest, approve_data_transfer=True))
@@ -211,6 +228,9 @@ class D2(fixture.ReadBackend):
                     self.assertEqual(legacy.protocol_version, "2025-11-25")
                     for client in (modern, legacy):
                         listed = await client.list_tools()
+                        descriptions = {t.name: t.description for t in listed.tools}
+                        self.assertIn("not session events", descriptions["golem_completion_check"])
+                        self.assertIn("agent-session events", descriptions["golem_work_inspect"])
                         self.assertIsNotNone(client.server_info)
                         self.assertEqual(c.sha(client.server_info.icons[0].src.encode()),
                                          c.sha(branding.server_icons()[0].src.encode()))

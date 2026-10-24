@@ -61,7 +61,7 @@ def setup_server(notice):
         return CallToolResult(content=[TextContent(type="text", text=c.encoded(value).decode())],
                               isError=not valid)
 
-    return Server("Golem (setup required)", version="0.1.3", icons=mcp.server_icons(),
+    return Server("Golem (setup required)", version="0.1.4", icons=mcp.server_icons(),
         on_list_tools=list_tools, on_call_tool=call_tool,
         instructions="Golem project access is blocked. " + notice["message"] +
                      " Only setup status is available. The owner must review settings and restart; never infer approval.")

@@ -188,6 +188,38 @@ all model answers avoid overgeneralization. Saturation, unsafe inventory and
 compound-call headroom rejection are covered by local regression fixtures, not
 by filling the active client registry again.
 
+## Counter Interpretation (0.1.4)
+
+Version 0.1.4 adds counter-domain metadata, relevant tool descriptions and server
+instructions; see the [D2 counter contract](integration-d2.md#counter-interpretation).
+The native counters and completion/reconciliation decisions are unchanged.
+The earlier interpretation that sequence/generation differences imply different
+observation times was unsupported: these are different counters, not timestamps.
+Changed producer bytes require a separately reviewed policy; do not rewrite old pins.
+
+On 2026-10-24, a separately approved temporary 0.1.4 extension in Claude Desktop
+3.6556.2 completed exactly four actual calls: capacity listing, then the same
+synthetic Work's status, next and selection completion check. Capacity was
+OBSERVED with no blocking reasons and 237 read directories remaining. Client-log
+request/response intervals were 151/207/131/260 ms, excluding inference and human
+approval waits. These are individual samples, not performance guarantees.
+
+Claude identified session sequence 1, document generation 4 and receipt position
+0 as distinct domains and explicitly declined to infer observation-time changes,
+state changes or inconsistency from their difference. It also distinguished
+AVAILABLE delivery from native completion and execution authority. This is a
+bounded successful counter-interpretation check, not proof of perfect model
+explanations: its wording that non-atomic observations are not one snapshot was
+stronger than the contract's absence of an atomicity guarantee. Its explanation
+of other native actions was not independently certified by this test.
+
+The test extension's disclosure consent and enablement were turned off afterward;
+its package, policies and audit records were retained. The existing Golem
+connection and consent stayed enabled with their original policy. All 84
+synthetic file hashes/modes, original reviewed policy hashes and manual client
+configuration were unchanged. TRAP and real Works were not modified. Existing
+active connections were deliberately not upgraded to the new producer bytes.
+
 ## Verification and Rollback
 
 Tests check deterministic contents, producer-byte preservation, false/missing

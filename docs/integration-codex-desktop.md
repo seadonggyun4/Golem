@@ -207,6 +207,39 @@ recorded observation. The GitHub catalog is a distribution source, not an
 OpenAI-reviewed public directory listing. Private connection records and source
 launcher arguments are excluded from this document and the repository.
 
+## Counter-domain regression verification
+
+On 2026-10-24, an owner-approved temporary MCP connection used the revised
+counter-domain contract against the same three synthetic Works and six read
+tools. The existing conversation did not expose it. An explicitly approved new
+conversation initially also returned NOT_EXPOSED without any native calls;
+the capability notification arrived later. Those observations were retained.
+Once the namespace was exposed, the new conversation completed its first four
+actual calls: capacity listing, then one Work's status, next and selection
+completion check, without native retries or CLI/SDK substitutes.
+
+Capacity was OBSERVED, reasons empty, with 144 read directories remaining. The
+three subsequent reads conservatively needed five slots. Status/next session
+sequence was 1, next/completion document generation was 4 and completion receipt
+position was 0. Codex correctly mapped the separate domains and explained that
+neither their difference nor `observations_atomic=false` establishes a time
+change, state change or inconsistency. It kept AVAILABLE delivery separate from
+native RECONCILE_SESSION, BLOCKED/UNRECEIPTED_OUTPUT and absent execution rights.
+
+The temporary MCP entry was removed after verification. Semantic comparison of
+Codex configuration against the pre-test snapshot was equal; the CLI's removal
+of an unrelated empty args array was restored. Existing GitHub-plugin and Claude
+connections stayed unchanged. Private test policies, audit records and traces
+were retained outside the repository. Original policy/manual-config hashes and
+all 84 synthetic file hashes/modes were unchanged. No new hook, Work resume,
+write permission, TRAP access or real Work operation was introduced.
+
+Local regression also checks equal and unequal cross-domain values, unchanged
+native result hashes/context payloads, unchanged native fixture files and real
+modern/legacy MCP tool descriptions. This verifies a bounded model interaction,
+not a guarantee about every future answer or existing-chat capability reload.
+The existing active pinned producers were preserved, not silently upgraded.
+
 ## Preservation and Limits
 
 For the initial manual-server run, final checks compared Codex settings, the exact Golem launcher and

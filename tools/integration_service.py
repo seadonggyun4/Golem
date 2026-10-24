@@ -27,6 +27,37 @@ SCHEMAS = {
 }
 AUDIT_READ_COST = {"work_inspect": 1, "history_read": 1, "context_get": 5,
                    "handoff_prepare": 5, "evidence_read": 3, "completion_check": 3}
+COUNTER_GUIDANCE = (
+    "Session sequence and document generation are different counters, not timestamps. "
+    "For example sequence=1 and generation=4 can describe the same unchanged Work. "
+    "Their difference proves neither a state change, a different observation time nor inconsistency. "
+    "observations_atomic=false means no atomicity guarantee; it does not prove a change occurred.")
+
+
+def counter_semantics(tool, view=None):
+    """Describe known native fields without changing values or inferring ordering."""
+    session = {"domain": "AGENT_SESSION_EVENTS", "definition": "Agent-session event sequence"}
+    document = {"domain": "DOCUMENT_GENERATION", "definition": "Registered document revision count plus one"}
+    completion = {"domain": "COMPLETION_RECEIPT_POSITION",
+                  "definition": "Position of latest receipt for the selection in the Work completion stream; zero if absent"}
+    fields = {}
+    if tool == "work_inspect" and view in ("status", "next"):
+        fields["result.sequence"] = session
+        if view == "next":
+            fields["result.document_generation"] = document
+    elif tool == "completion_check":
+        fields = {"result.generation": document, "result.completion_sequence": completion,
+                  "result.boundary.session_sequence": session}
+    elif tool in ("context_get", "handoff_prepare"):
+        fields = {"payload.preflight.status.sequence": session,
+                  "payload.preflight.next.sequence": session,
+                  "payload.preflight.next.document_generation": document}
+    if not fields:
+        return None
+    return {"schema": "golem.integration-counter-semantics.v1", "fields_if_present": fields,
+            "cross_domain_comparison_allowed": False, "counters_are_timestamps": False,
+            "cross_domain_difference_proves_observation_change": False,
+            "non_atomic_observations_prove_change": False}
 
 
 def blocked(error):
@@ -178,6 +209,9 @@ class Service:
             "assurance": "LOCAL_COOPERATIVE", "model_consumption": "NOT_OBSERVED",
             "destination": self.transfer.value["destination"],
             "destination_id": self.transfer.value["destination_id"], **result}
+        semantics = counter_semantics(name, args.get("view"))
+        if semantics is not None:
+            response["counter_semantics"] = semantics
         c.require(len(c.encoded(response)) <= self.transfer.value["max_result_bytes"], "RESULT_BUDGET_EXCEEDED")
         return response
 

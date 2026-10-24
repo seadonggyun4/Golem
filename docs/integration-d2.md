@@ -14,6 +14,33 @@ the D2 server and its transfer consent remain native read-only.
 
 ## Layers and Authority
 
+### Counter interpretation
+
+Counter-bearing responses include additive `golem.integration-counter-semantics.v1`
+metadata in `counter_semantics.fields_if_present`. It describes known field paths,
+not a guarantee that every path is present in every native result.
+
+| Native field | Counter domain | Meaning |
+| --- | --- | --- |
+| status/next `sequence`, completion `boundary.session_sequence` | AGENT_SESSION_EVENTS | Agent-session event sequence |
+| next `document_generation`, completion `generation` | DOCUMENT_GENERATION | Registered document revision count plus one |
+| completion `completion_sequence` | COMPLETION_RECEIPT_POSITION | Latest receipt position for the selection in the Work completion stream; zero if absent |
+
+Context/handoff preflight status/next carry the same domains. These counters are
+not timestamps. For example, sequence 1 and generation 4 can describe an unchanged
+Work; equality also does not make different domains comparable. Neither their
+numeric difference nor `observations_atomic=false` proves a different observation
+time, state change or inconsistency. The latter withholds an atomicity guarantee;
+it does not assert an observed change. Use native bindings, guards and explicit
+observations for freshness decisions, never cross-domain arithmetic.
+
+The service preserves native values, observation hashes and context payload bytes.
+Metadata remains outside the hashed native result/payload and within the existing
+output budget. MCP initialization instructions and relevant tool descriptions
+repeat the distinction. No sequence gate, completion authority or resume behavior
+is changed. Updated producer modules require separately reviewed policy pins;
+existing approvals are not rewritten.
+
 | Layer | Implementation | Responsibility |
 | --- | --- | --- |
 | Owner disclosure policy | `tools/integration_transfer.py` | Closed schema, exact reviewed bytes, one declared client, destination and recipients |
