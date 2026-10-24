@@ -36,7 +36,8 @@ The goal is to preserve the orchestration core while reducing agent-facing proce
 ## MCP
 
 Golem provides locally installed MCP access for **Codex and Claude**, with
-owner-approved project scope and explicit context disclosure.
+owner-approved project scope and explicit context disclosure. Codex installs
+from the GitHub-backed marketplace and includes **Golem Setup**; Claude uses MCPB.
 
 ![Golem local Codex plugin, developed by Donggyun Seo](assets/Golem-codex-plugin.png)
 

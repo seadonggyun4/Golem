@@ -1,0 +1,4 @@
+interface:
+  display_name: "Golem Setup"
+  short_description: "Connect and diagnose an approved Golem launcher"
+  default_prompt: "Use $golem-setup to connect my approved local Golem launcher."

@@ -37,6 +37,8 @@ Agent는 사용자 의도를 해석하고 계획하며 코드 수정과 도구 �
 
 Golem은 **Codex와 Claude용 로컬 설치 MCP**를 제공합니다.
 프로젝트 접근 범위와 맥락 전달은 소유자의 명시적 승인이 필요합니다.
+Codex는 GitHub 기반 marketplace에서 설치하며 **Golem Setup** 스킬을 포함합니다.
+Claude는 MCPB 확장으로 설치합니다.
 
 ![Donggyun Seo가 개발한 Golem 로컬 Codex 플러그인](assets/Golem-codex-plugin.png)
 

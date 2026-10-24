@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "golem-local": {
+      "type": "stdio",
+      "command": "python3",
+      "cwd": "./",
+      "args": ["-I", "-B", "scripts/launcher.py", "serve"]
+    }
+  }
+}

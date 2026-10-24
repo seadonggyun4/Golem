@@ -1,9 +1,95 @@
 # Codex Local MCP Plugin Setup
 
-Golem can be installed as a local Codex plugin, with its own listing and icon.
-The verified 0.1.3 package uses the supported compatibility manifest layout.
-This is a local installation, not a public plugin-directory release, a Hosted
-gateway or a self-contained engine distribution. Developer: **Donggyun Seo**.
+Golem provides a GitHub-backed Codex marketplace with a local MCP plugin and
+**Golem Setup** skill. Developer: **Donggyun Seo**. Website:
+https://github.com/seadonggyun4/Golem.
+
+## GitHub Installation
+
+The repository catalog is `.agents/plugins/marketplace.json`; the public package
+is `plugins/golem`, version 0.2.0. This is the plugin package version, separate
+from the native engine and Claude MCPB versions. It uses the supported Codex
+compatibility manifest layout and performs local execution. Git-backed distribution
+does not publish an OpenAI-reviewed directory listing or a Hosted gateway.
+
+```sh
+codex plugin marketplace add seadonggyun4/Golem --json
+codex plugin add golem@golem --json
+codex plugin list --marketplace golem --json
+codex mcp list --json
+```
+
+Use the CLI bundled with the intended desktop client. Review the fetched revision
+before installation; use the supported marketplace `--ref` option for a selected
+Git revision. Updates do not approve changed native producers automatically.
+The server name is `golem-local`, distinct from older disabled manual `golem`.
+
+The package contains a stdlib-only POSIX adapter, icon, license, manifest and
+setup skill. It requires `python3` on the desktop client's PATH. No Python package
+download, engine download, hook, project scan or policy bootstrap occurs at launch.
+The client sets the installed package's working directory and `PLUGIN_DATA`.
+The adapter keeps its private connection record under `PLUGIN_DATA/golem-launcher`.
+Do not edit the installed package or put personal launcher paths into Git.
+
+## Connect an Approved Launcher
+
+Run **Golem Setup** from the plugin's skills or initial setup action. It first
+inspects the resolved server's `PLUGIN_ROOT` and `PLUGIN_DATA`, then checks setup
+status. It connects an existing reviewed D1 launcher; it does not grant projects,
+choose Works or create a disclosure policy. Prepare the existing runtime and
+[D1/D2 approvals](#prerequisites-and-approval) separately when needed.
+
+Export only the exact approved `command` and `args` to an explicitly selected
+private JSON file, mode 0600. Review that file and its SHA-256. The installed
+adapter supports these owner operations (paths and digest are placeholders):
+
+```sh
+python3 -I -B /installed/golem/scripts/launcher.py status --state /private/plugin-data
+python3 -I -B /installed/golem/scripts/launcher.py configure \
+  --state /private/plugin-data --launcher /private/reviewed-launcher.json \
+  --reviewed-launcher-sha256 REVIEWED_SHA256 --approve-launcher
+```
+
+The record preserves the exact launcher JSON and its reviewed digest. The
+adapter validates owner-private files, symlinks, hardlinks, limits and closed
+fields; takes a nonblocking owner lock; fsyncs and publishes without overwriting
+an existing record. Matching repeat configuration is read-only; different input
+returns `EXISTING_APPROVAL_DIFFERS`. Pending publication blocks status and launch
+with `PARTIAL_PUBLICATION`. Preserve such records for review; no automatic repair,
+deletion, rollback or additional recovery layer is implemented.
+
+Serving replaces the adapter process with the exact command/arguments and keeps
+stdio intact. No shell is introduced. Existing launcher runtime, producer,
+config and disclosure checks still run. A recorded launcher does not certify its
+project permissions; `status` explicitly reports `project_access_verified=false`.
+Before configuration, launch exits with structured public setup guidance on
+stderr and emits no MCP protocol stdout. It does not advertise a setup MCP tool.
+
+The adapter is a cooperative same-user boundary, not an OS sandbox or signed
+owner identity. Plugin updates can replace adapter code, so review the fetched
+code/revision as well as the private launcher. Keep the managed D1 installation
+state and configuration available even after disabling its duplicate client entry.
+
+## Transition From the Local Synthetic Package
+
+Back up settings and the old package privately. Install `golem@golem`, configure
+its private data with the exact existing synthetic launcher, and verify the new
+resolved `golem-local` command before disabling `golem@golem-synthetic`. Preserve
+the old installation, its settings and every approval/audit record. Keep the
+manual `golem` table disabled. Do not enable both plugin servers during testing.
+Scope comes from the existing reviewed policy: three synthetic Works and six
+read tools in the verification case, not from this general package's metadata.
+
+After a supported reload/catalog refresh, confirm **Golem Setup** discovery and
+the new MCP tools in the actual desktop conversation. Only then perform the
+approved reads. A fresh conversation or owner-coordinated reload may be needed;
+configuration alone is not tool-exposure proof. Claude configuration is independent.
+
+## Legacy Generated Local Package
+
+The 0.1.3 generator below remains available for explicit host-local packaging.
+The Git-backed package above avoids distributing machine-specific paths in a
+marketplace package. Both paths retain the existing native and approval gates.
 
 ## Prerequisites and Approval
 
