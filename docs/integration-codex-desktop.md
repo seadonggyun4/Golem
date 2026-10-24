@@ -111,6 +111,51 @@ and TRAP were not modified. Normal private audit appends are expected.
 This existing-chat refresh succeeded in this run; it does not erase the earlier
 exposure failure or promise universal hot reload.
 
+## Public Generator Reinstallation
+
+The public generator introduced in `620659d` was subsequently exercised against
+the same approved synthetic installation on 2026-10-24. An explicit private JSON
+containing only the previously reviewed command and argument array was supplied
+to `tools/integration_codex_plugin.py`. A fresh output used the existing
+marketplace/server identifiers; the previous package was backed up privately.
+The generated catalog and package were placed at the already registered local
+source and reinstalled with the desktop client's bundled `plugin add` command.
+No new marketplace, policy, grant, hook or manual-server setting was required.
+
+The installed plugin files matched the public generator's output byte for byte.
+The launcher values and parsed Codex configuration were unchanged. Both clients'
+reviewed policy hashes and all 84 synthetic project file hashes still matched
+their retained baselines. Package generation and installation did not alter
+the native engine or its producer pins. Private launch inputs, backups and
+generated host-specific packages remain outside the public repository.
+
+The approved desktop conversation again exposed `mcp__golem_synthetic` and
+completed the following actual calls, with zero errors or retries:
+
+| Tool | Calls | Caller elapsed time (ms) |
+| --- | ---: | --- |
+| golem_projects_list | 1 | 384 |
+| golem_work_inspect | 3 | 160, 205, 252 |
+| golem_history_read | 1 | 114 |
+| golem_context_get | 1 | 436 |
+| golem_evidence_read | 1 | 234 |
+| golem_completion_check | 1 | 243 |
+
+All responses were AVAILABLE with execution_authorized=false,
+native_state_changed=false and ownership_transferred=false. Completion still
+returned RECONCILE_SESSION, acceptance_verified=false and completion_sequence=0.
+Context remained READING_AID with execution_ready=false. The entire conversation
+turn took 32.657 seconds, including model processing; these single samples are
+not a latency distribution or a performance comparison.
+
+This confirms public generation, installed-file identity and actual desktop
+calls within the approved scope. It does not independently establish a new
+server process after reinstallation or universal client hot reload. No new UI
+screenshot was taken in this run; earlier icon/developer display observations
+remain separately scoped. Existing Claude connection, evidence, TRAP and real
+Works were preserved. Expected private integration audit appends are distinct
+from native Work mutation.
+
 ## Preservation and Limits
 
 For the initial manual-server run, final checks compared Codex settings, the exact Golem launcher and

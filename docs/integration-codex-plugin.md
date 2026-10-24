@@ -182,6 +182,10 @@ command. Do not delete its registry, audit records or retained approvals. Do not
 automatically re-enable the preserved manual server: that is another explicit
 configuration decision. Uninstalling is not revocation of already delivered data.
 
+The public generator was also exercised through reinstallation and eight actual
+desktop calls using the same approved scope; see
+[public generator verification](integration-codex-desktop.md#public-generator-reinstallation).
+
 See [actual calls and UI verification](integration-codex-desktop.md#plugin-path-verification)
 and [official plugin packaging](https://developers.openai.com/plugins/build/plugins).
 The latter also describes a newer portable manifest; this record does not claim
