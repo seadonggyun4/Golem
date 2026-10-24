@@ -53,6 +53,7 @@ marketplace listing. Installation does not grant project access or execution.
 flowchart TD
     A["External agent: judgment, edits and tools"] -->|"Direct CLI / C API"| C["Native C17 core: state, ownership, dependencies and evidence"]
     A --> L["Local Codex plugin / Claude MCPB"]
+    G["GitHub marketplace / Golem Setup"] --> L
     L -->|"stdio MCP: approved reads and context"| I["Python integration layer: D1-D6"]
     A -->|"Separately opt-in supported hooks"| I
     O["Owner-reviewed client, project, disclosure and action policies"] --> I

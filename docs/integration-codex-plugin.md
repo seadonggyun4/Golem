@@ -91,6 +91,11 @@ the new MCP tools in the actual desktop conversation. Only then perform the
 approved reads. A fresh conversation or owner-coordinated reload may be needed;
 configuration alone is not tool-exposure proof. Claude configuration is independent.
 
+The [actual GitHub transition](integration-codex-desktop.md#github-marketplace-and-setup-skill)
+verified installed-file identity, setup skill discovery and eight scoped desktop
+calls. It also exposed and fixed writable lock access in read-only setup status;
+the initial failure and subsequent successful observation are recorded separately.
+
 ## Legacy Generated Local Package
 
 The 0.1.3 generator below remains available for explicit host-local packaging.

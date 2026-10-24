@@ -31,6 +31,7 @@ flowchart TD
     U["User"] --> A["External agent: Codex, Claude or another explicit client"]
     A -->|"Plans, edits and tools"| P["Product source checkout"]
     A --> L["Local Codex plugin / Claude MCPB"]
+    G["GitHub Codex marketplace / Golem Setup"] --> L
     L -->|"stdio: scoped reads and context"| I["Python integration services: D1-D6"]
     A -->|"Separately opt-in supported hook"| I
     O["Owner-reviewed project, client, disclosure and action policies"] --> I
@@ -64,7 +65,9 @@ The optional CLI daemon's `local.noop` worker is simulation, not actual agent wo
 ### Local Client Packages
 
 The [Codex plugin](integration-codex-plugin.md) references an existing reviewed
-D1 launcher. The [Claude MCPB](integration-mcpb.md#install-and-configure) packages
+D1 launcher through a user-private adapter record. Its GitHub marketplace ships
+common code and a setup skill, while the user's command/arguments and approval
+remain local. The [Claude MCPB](integration-mcpb.md#install-and-configure) packages
 unchanged D2 producer modules with a consent-checking entry adapter. Both reuse
 the same scoped read contracts; they are not new workflow engines. Their icon
 and developer metadata control presentation, not identity authentication.
@@ -224,6 +227,7 @@ no old Work is automatically migrated or downgraded.
 | Approved observed development/QA, not agent launch | [execution API](../include/golem/execution.h), [execution store](../src/execution/store.c) | [execution integration](../tests/c/execution_integration.py), [execution boundary](execution-boundary.md) |
 | Current acceptance versus historical receipts | [completion store](../src/completion/store.c), [read-only CLI](../src/cli/completion.c) | [completion integration](../tests/c/completion_integration.py) |
 | Fixed native backend, disclosure, scoped reads | [backend](../tools/integration_backend.py), [service](../tools/integration_service.py) | [D2 native/MCP gate](../tests/c/integration_d2_mcp.py) |
+| GitHub plugin, setup skill and explicit local launcher | [package](../plugins/golem/.codex-plugin/plugin.json), [adapter](../plugins/golem/scripts/launcher.py) | [adapter regression](../tools/test_integration_codex_marketplace.py), [actual desktop transition](integration-codex-desktop.md#github-marketplace-and-setup-skill) |
 | Separate typed mutation and durable uncertainty | [mutation service](../tools/integration_mutations.py) | [D4 gate](../tests/c/integration_d4_mutations.py), [D5 gate](../tests/c/integration_d5_maintenance.py) |
 | Optional authenticated remote reuse | [gateway](../tools/integration_gateway.py) | [D6 TLS/MCP gate](../tests/c/integration_d6_gateway.py) |
 

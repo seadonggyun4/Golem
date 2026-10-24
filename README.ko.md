@@ -54,6 +54,7 @@ Claude는 MCPB 확장으로 설치합니다.
 flowchart TD
     A["외부 Agent: 판단·코드 수정·도구 사용"] -->|"직접 CLI / C API"| C["Native C17 core: 상태·소유권·의존성·증거 검사"]
     A --> L["로컬 Codex 플러그인 / Claude MCPB"]
+    G["GitHub marketplace / Golem Setup"] --> L
     L -->|"stdio MCP: 승인된 조회·맥락"| I["Python integration layer: D1-D6"]
     A -->|"별도로 opt-in한 지원 hook"| I
     O["소유자가 검토한 client·프로젝트·전달·변경 정책"] --> I

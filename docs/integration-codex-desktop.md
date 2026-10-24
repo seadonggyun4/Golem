@@ -156,6 +156,57 @@ remain separately scoped. Existing Claude connection, evidence, TRAP and real
 Works were preserved. Expected private integration audit appends are distinct
 from native Work mutation.
 
+## GitHub Marketplace and Setup Skill
+
+On 2026-10-24, the owner approved transition to the repository-backed `golem`
+marketplace. Package `golem@golem` 0.2.0 was installed from GitHub, with developer
+Donggyun Seo, website https://github.com/seadonggyun4/Golem and the
+`golem-setup` skill registered as the initial setup skill. Tracked installed
+package bytes matched the reviewed source. The existing exact synthetic launcher
+was connected through the owner-private adapter record; native producer/runtime
+pins and both model-service policies were retained. The old local
+`golem@golem-synthetic` installation was preserved but disabled, and manual
+`golem` remained disabled. The new server is `golem-local`.
+
+The first setup observation failed with SETUP_VALIDATION_FAILED and exit code 1:
+status opened the owner lock with writable access, which the agent's read-only
+sandbox rejected. No native query was performed in that attempt. The adapter
+was corrected to use a read-only descriptor and shared lock for status/serve;
+configure keeps exclusive writable locking. A regression simulates a host that
+rejects writable lock opens. The corrected package source is `3393070`.
+The existing private approval was neither rewritten nor regenerated.
+
+The actual desktop conversation discovered and applied `golem:golem-setup`.
+Its subsequent installed-script status returned CONFIGURED, exit code 0, in
+847 ms. It then used the plugin's `mcp__golem_local` tools for these calls:
+
+| Tool | Calls | Caller elapsed time (ms) |
+| --- | ---: | --- |
+| golem_projects_list | 1 | 357 |
+| golem_work_inspect | 3 | 239, 203, 263 |
+| golem_history_read | 1 | 186 |
+| golem_context_get | 1 | 1120 |
+| golem_evidence_read | 1 | 1383 |
+| golem_completion_check | 1 | 986 |
+
+All eight calls returned AVAILABLE with zero errors/retries and
+execution_authorized=false, native_state_changed=false,
+ownership_transferred=false. Native completion remained RECONCILE_SESSION with
+acceptance_verified=false and completion_sequence=0. Context remained READING_AID,
+execution_ready=false. This bounded observation verifies skill discovery, setup
+diagnosis and actual calls; these timings are not a performance distribution.
+The earlier setup failure remains a separate observation.
+
+Semantic config comparison allowed only the new Git marketplace/plugin and the
+old plugin's disablement. Other settings, both reviewed policies and all 84
+synthetic file hashes were unchanged. Existing evidence and Claude connection
+were preserved, with normal private read-audit appends. TRAP and real Works were
+not modified. No new screenshot was taken: the installed website/skill/icon
+metadata was checked, while actual UI rendering remains the earlier separately
+recorded observation. The GitHub catalog is a distribution source, not an
+OpenAI-reviewed public directory listing. Private connection records and source
+launcher arguments are excluded from this document and the repository.
+
 ## Preservation and Limits
 
 For the initial manual-server run, final checks compared Codex settings, the exact Golem launcher and
