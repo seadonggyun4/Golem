@@ -39,8 +39,8 @@ class Adapter(unittest.TestCase):
         self.assertTrue(self.configure()['changed'])
         self.assertFalse(self.configure()['changed'])
         data = b'protocol input\n\x00\xff'
-        result = subprocess.run([sys.executable, '-I', '-B', str(SCRIPT), 'serve'],
-            env={**os.environ, 'PLUGIN_DATA': str(self.state)}, input=data,
+        result = subprocess.run([sys.executable, '-I', '-B', str(SCRIPT), 'serve',
+            '--state', str(self.state)], env=os.environ, input=data,
             capture_output=True, timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, data)

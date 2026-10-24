@@ -167,8 +167,8 @@ def main():
     parser.add_argument('--approve-launcher', action='store_true')
     args = parser.parse_args()
     try:
-        state = args.state or Path(os.environ.get('PLUGIN_DATA', ''))
-        require(state.is_absolute(), 'PLUGIN_DATA_REQUIRED')
+        state = args.state or Path.home() / '.local/share/golem/codex-plugin'
+        require(state.is_absolute(), 'STATE_PATH_REQUIRED')
         if args.operation == 'configure':
             require(args.launcher is not None and args.reviewed_launcher_sha256 is not None,
                     'REVIEWED_LAUNCHER_REQUIRED')

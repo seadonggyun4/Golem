@@ -10,9 +10,10 @@ launcher. Installation grants no project access. Reuse the user's existing
 authorization and preserve unrelated settings, approvals, evidence and clients.
 
 1. Inspect this plugin's resolved MCP configuration with the intended client's
-   `codex mcp list --json`. Use its exact `PLUGIN_ROOT` and `PLUGIN_DATA` values;
-   do not guess a data directory or print unrelated settings. The adapter needs
-   Python 3 and a POSIX host. Run its `status --state DATA` first.
+   `codex mcp list --json`. Resolve the installed script from its exact working
+   directory; do not print unrelated settings. The adapter needs Python 3 and a
+   POSIX host. Run `status` first. Its default state is the current user's
+   `~/.local/share/golem/codex-plugin`, calculated without scanning projects.
 2. If unconfigured, locate the launcher explicitly selected by the owner. Export
    only its exact absolute `command` and string `args` into a new owner-private
    JSON file (0600). Do not copy a whole config, credentials or approval registry.
@@ -20,7 +21,9 @@ authorization and preserve unrelated settings, approvals, evidence and clients.
    scope and SHA-256. Do not infer approval from finding a file or calculating a
    hash. Obtain owner authorization if the current request does not cover this
    connection; do not ask again for the same authorized scope.
-3. Invoke the installed adapter with `configure --state DATA --launcher FILE
+3. Create only the chosen state path's missing parent directories with private
+   permissions when needed; preserve existing directory modes. Invoke the
+   installed adapter with `configure --launcher FILE
    --reviewed-launcher-sha256 DIGEST --approve-launcher`. This records a reviewed
    local command, not project grants. The existing launcher still enforces its
    native/runtime/producer/policy pins. Never rewrite those pins to fix startup.

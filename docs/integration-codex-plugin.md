@@ -27,26 +27,32 @@ The server name is `golem-local`, distinct from older disabled manual `golem`.
 The package contains a stdlib-only POSIX adapter, icon, license, manifest and
 setup skill. It requires `python3` on the desktop client's PATH. No Python package
 download, engine download, hook, project scan or policy bootstrap occurs at launch.
-The client sets the installed package's working directory and `PLUGIN_DATA`.
-The adapter keeps its private connection record under `PLUGIN_DATA/golem-launcher`.
+The client sets the installed package's working directory. The adapter's default
+state is `~/.local/share/golem/codex-plugin` for the executing OS user, with its
+private connection record in the `golem-launcher` subdirectory. This avoids
+depending on client-specific `PLUGIN_DATA` injection. `--state` can explicitly
+select a different state for owner CLI diagnostics/tests; the packaged server
+always uses the default path. No project or home-directory scan is performed.
 Do not edit the installed package or put personal launcher paths into Git.
 
 ## Connect an Approved Launcher
 
 Run **Golem Setup** from the plugin's skills or initial setup action. It first
-inspects the resolved server's `PLUGIN_ROOT` and `PLUGIN_DATA`, then checks setup
-status. It connects an existing reviewed D1 launcher; it does not grant projects,
+inspects the resolved server's installed working directory, then checks setup
+status at the documented default state. It connects an existing reviewed D1 launcher; it does not grant projects,
 choose Works or create a disclosure policy. Prepare the existing runtime and
 [D1/D2 approvals](#prerequisites-and-approval) separately when needed.
 
 Export only the exact approved `command` and `args` to an explicitly selected
 private JSON file, mode 0600. Review that file and its SHA-256. The installed
 adapter supports these owner operations (paths and digest are placeholders):
+Create the default state's missing parent directories privately before configure;
+preserve existing directory modes. Status and serving never create directories.
 
 ```sh
-python3 -I -B /installed/golem/scripts/launcher.py status --state /private/plugin-data
+python3 -I -B /installed/golem/scripts/launcher.py status
 python3 -I -B /installed/golem/scripts/launcher.py configure \
-  --state /private/plugin-data --launcher /private/reviewed-launcher.json \
+  --launcher /private/reviewed-launcher.json \
   --reviewed-launcher-sha256 REVIEWED_SHA256 --approve-launcher
 ```
 
