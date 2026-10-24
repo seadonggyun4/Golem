@@ -33,12 +33,27 @@ Agent는 사용자 의도를 해석하고 계획하며 코드 수정과 도구 �
 
 목표는 오케스트레이션 코어를 유지하면서 AI가 처리할 절차와 입력을 줄이는 것입니다. 증거·안전 검사를 줄인다는 뜻이 아닙니다. '경량'은 역할 경계를 뜻하며 토큰·청구액·성능 절감의 실측 결과가 아닙니다. [역할 및 실행 경계](docs/agent-golem-boundary.md)를 참고하세요.
 
+## MCP
+
+Golem은 **Codex와 Claude용 로컬 설치 MCP**를 제공합니다.
+프로젝트 접근 범위와 맥락 전달은 소유자의 명시적 승인이 필요합니다.
+
+![Donggyun Seo가 개발한 Golem 로컬 Codex 플러그인](assets/Golem-codex-plugin.png)
+
+[Codex 플러그인 설치·설정](docs/integration-codex-plugin.md) ·
+[Claude Desktop 설치·설정](docs/integration-mcpb.md#install-and-configure)
+
+이미지는 검증한 합성 전용 설치 사례이며 공개 marketplace 등록을 뜻하지 않습니다.
+설치만으로 프로젝트 접근이나 실행 권한을 부여하지 않습니다.
+
 ## 아키텍처
 
 ```mermaid
 flowchart TD
     A["외부 Agent: 판단·코드 수정·도구 사용"] -->|"직접 CLI / C API"| C["Native C17 core: 상태·소유권·의존성·증거 검사"]
-    A -->|"Opt-in MCP / 지원 hook"| I["Python integration layer: D1-D6"]
+    A --> L["로컬 Codex 플러그인 / Claude MCPB"]
+    L -->|"stdio MCP: 승인된 조회·맥락"| I["Python integration layer: D1-D6"]
+    A -->|"별도로 opt-in한 지원 hook"| I
     O["소유자가 검토한 client·프로젝트·전달·변경 정책"] --> I
     I -->|"고정된 CLI / JSON 요청"| C
     C --> E["승인된 실행·QA·현재 완료 판정"]
@@ -54,6 +69,10 @@ D4는 별도 승인된 typed 변경, D5는 소유자 주도 업데이트·reload
 D6는 선택적 인증 TLS gateway를 담당합니다. 여섯 엔진이나 필수 상주 서비스가 아닙니다.
 Work 경로는 명시적으로 선택하며, `.golem` 디렉토리의 존재만으로 권한이 생기지 않습니다.
 client 이름은 인증된 신원이 아니며, 맥락 전달은 모델이 실제 입력을 소비했다는 증거가 아닙니다.
+
+로컬 패키지는 D1/D2를 재사용하며 자동 hook·Work 재개·쓰기 권한을 추가하지 않습니다.
+`AVAILABLE`은 데이터 전달 상태이지 native `DONE`이 아닙니다.
+실제 데스크톱 호출 결과와 client별 표시 한계는 설치 문서에 구분해 기록했습니다.
 
 전체 흐름과 저장 권위·코드/회귀 대응표는 [구현 아키텍처](docs/architecture.md),
 client별 지원·승인·배포 경계는 [통합 계약](docs/integration-layer-design.md)을 참고하세요.

@@ -33,6 +33,9 @@ clients, separately from any product UI rendering claim.
 ## Supported Settings
 
 For Claude's extension UI branding, see [MCPB packaging](integration-mcpb.md).
+For Codex's installed plugin listing, see [local plugin setup](integration-codex-plugin.md).
+That package references the existing reviewed launcher; it does not replace D1
+enrollment or the managed configuration/launch checks described here.
 Manual `mcpServers` configuration and MCP protocol `serverInfo.icons` are not the
 same registration surface as the desktop extension manifest's `icon`.
 

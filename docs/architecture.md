@@ -1,7 +1,9 @@
 # Implemented Architecture and Work Process
 
-This is the current implementation map, reviewed against `b5a7992` on
-2026-10-22. It describes existing behavior, not a deployment or migration plan.
+The core implementation map was reviewed against `b5a7992` on 2026-10-22;
+local client packaging was cross-checked against the `5aef1cd` source and the
+owner-approved 0.1.3 desktop installations on 2026-10-24.
+It describes existing behavior, not a deployment or migration plan.
 Subsystem contracts linked below remain authoritative for exact schemas and
 limits. Historical design snapshots and frozen evidence are not rewritten.
 
@@ -28,7 +30,9 @@ paperwork for every ordinary Work. See [the responsibility contract](agent-golem
 flowchart TD
     U["User"] --> A["External agent: Codex, Claude or another explicit client"]
     A -->|"Plans, edits and tools"| P["Product source checkout"]
-    A -->|"Opt-in MCP or supported hook"| I["Python integration services: D1-D6"]
+    A --> L["Local Codex plugin / Claude MCPB"]
+    L -->|"stdio: scoped reads and context"| I["Python integration services: D1-D6"]
+    A -->|"Separately opt-in supported hook"| I
     O["Owner-reviewed project, client, disclosure and action policies"] --> I
     I -->|"Pinned CLI, fixed argv, full JSON"| C["Native C17 core"]
     A -->|"Direct CLI or C API"| C
@@ -56,6 +60,37 @@ The usual local MCP transport is a client-launched stdio process. Work handles
 are opened for bounded operations, not held for the entire MCP connection.
 The optional D6 network service is separate from an engine-owned agent daemon.
 The optional CLI daemon's `local.noop` worker is simulation, not actual agent work.
+
+### Local Client Packages
+
+The [Codex plugin](integration-codex-plugin.md) references an existing reviewed
+D1 launcher. The [Claude MCPB](integration-mcpb.md#install-and-configure) packages
+unchanged D2 producer modules with a consent-checking entry adapter. Both reuse
+the same scoped read contracts; they are not new workflow engines. Their icon
+and developer metadata control presentation, not identity authentication.
+
+```mermaid
+sequenceDiagram
+    participant O as Owner
+    participant H as Codex or Claude
+    participant I as Local MCP integration
+    participant N as Native core
+    O->>H: Install reviewed local package
+    O->>I: Separate project grants, pins and disclosure consent
+    H->>I: Initialize and discover permitted tools
+    H->>I: Explicit scoped read request
+    I->>I: Recheck grants, pins and audit capacity
+    I->>N: Fixed read-only request
+    N-->>I: Current state or native blocker
+    I-->>H: Bounded result and delivery/authority distinction
+```
+
+Installation, startup, tool exposure, a successful call and UI rendering are
+separate observations. The verified packages add no hooks, automatic Work resume
+or native mutations. Local process access is not an OS sandbox. `AVAILABLE`
+does not imply native completion or execution permission; a read can still
+append private integration audit records. See the
+[actual Codex desktop results](integration-codex-desktop.md#plugin-path-verification).
 
 ## Integration Responsibilities
 

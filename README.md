@@ -33,12 +33,27 @@ The agent interprets user intent, plans, edits code and uses tools. Golem manage
 
 The goal is to preserve the orchestration core while reducing agent-facing procedures and inputs, not weaken evidence or safety gates. "Lightweight" describes this boundary, not a measured token, billing or performance result. See [roles and execution boundaries](docs/agent-golem-boundary.md).
 
+## MCP
+
+Golem provides locally installed MCP access for **Codex and Claude**, with
+owner-approved project scope and explicit context disclosure.
+
+![Golem local Codex plugin, developed by Donggyun Seo](assets/Golem-codex-plugin.png)
+
+[Codex plugin setup](docs/integration-codex-plugin.md) ·
+[Claude Desktop setup](docs/integration-mcpb.md#install-and-configure)
+
+The screenshot shows the verified synthetic-only installation, not a public
+marketplace listing. Installation does not grant project access or execution.
+
 ## Architecture
 
 ```mermaid
 flowchart TD
     A["External agent: judgment, edits and tools"] -->|"Direct CLI / C API"| C["Native C17 core: state, ownership, dependencies and evidence"]
-    A -->|"Opt-in MCP / supported hooks"| I["Python integration layer: D1-D6"]
+    A --> L["Local Codex plugin / Claude MCPB"]
+    L -->|"stdio MCP: approved reads and context"| I["Python integration layer: D1-D6"]
+    A -->|"Separately opt-in supported hooks"| I
     O["Owner-reviewed client, project, disclosure and action policies"] --> I
     I -->|"Pinned CLI / fixed JSON requests"| C
     C --> E["Approved execution, QA and current completion"]
@@ -55,6 +70,10 @@ D5 owner-controlled updates/reload/recovery, and D6 an optional authenticated TL
 gateway. They are not six engines or mandatory background services. Work paths
 are explicit; a `.golem` directory alone grants no access. Client labels are not
 authenticated identities, and context delivery does not prove model consumption.
+
+The local packages reuse D1/D2 and add no automatic hook, Work resume or write
+authority. `AVAILABLE` describes data delivery, not native `DONE`. Actual desktop
+calls and client-specific display limits are recorded in the setup guides.
 
 See [implemented architecture, storage authority and code/test map](docs/architecture.md)
 for the complete process and [integration contracts](docs/integration-layer-design.md)

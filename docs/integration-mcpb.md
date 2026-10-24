@@ -45,6 +45,36 @@ this first packaging path. Do not claim an offline or hermetic runtime. POSIX
 support is declared; Windows is excluded because the existing registry uses
 `fcntl`. Actual client UI testing is macOS only, not Linux certification.
 
+## Install and Configure
+
+1. Prepare the engine/runtime and explicitly enroll the intended projects and
+   Works using [D1](integration-d1.md). Review a separate
+   [D2 disclosure policy](integration-d2.md) for Claude as the model-service
+   destination. A Codex approval is not interchangeable with Claude consent.
+2. Build a new MCPB using the command above. Inspect its contents and selected
+   producer version before installation; no private approval should be bundled.
+3. In Claude Desktop, open Settings > Extensions > Advanced settings > Install
+   Extension and select that MCPB. Review and accept the local-process warning
+   explicitly. Installing the extension is not an OS sandbox or a project grant.
+4. In the extension settings, select **Reviewed disclosure policy**, enter its
+   exact **Reviewed policy SHA-256**, and turn on **Approve this policy's
+   disclosure to Claude** only after reviewing that exact scope. Save and enable
+   the extension. Never calculate a new hash merely to bypass a mismatch.
+5. Confirm the connector starts and inspect its exposed tools. Without valid
+   consent/pins, `golem_setup_status` may be the only tool: read its diagnostic
+   rather than treating connection success as project access. Native/runtime
+   failures can still prevent startup entirely.
+6. In a test conversation, list permitted projects, inspect one approved Work
+   and check context/evidence/completion within that grant. Separate transport
+   success from native acceptance. Stop on quota or stale-policy errors.
+
+Preserve unrelated extensions, manual MCP configuration and approvals. If
+switching from a manual Golem connection, obtain approval before disabling that
+entry to avoid duplicate launches. Producer changes require fresh review; there
+is no automatic policy migration. Do not reinstall an active working connection
+merely to reproduce this guide. See the bounded version-specific observations
+below and [Codex's different plugin setup](integration-codex-plugin.md).
+
 ## Approval Boundary
 
 Version 0.1.2 adds a setup-only MCP mode for missing consent, missing policy,

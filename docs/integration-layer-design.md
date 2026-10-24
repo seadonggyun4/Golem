@@ -605,6 +605,15 @@ D5의 quarantine 해제는 원래 불확실 결과를 성공으로 승격하지 
 대화별 도구 노출을 구분한다. 이는 승인된 합성 범위의 실측이며, 기존 대화의 자동
 재로딩·모든 client·실제 Work·비용 절감·제품 완료를 입증하지 않는다.
 
+같은 날 후속 [로컬 Codex 플러그인 설치](integration-codex-plugin.md)는 기존 승인 launcher를
+재사용했다. 수동 `golem`은 비활성 상태로 보존하고, 이름 충돌을 피한 플러그인 서버
+`golem-synthetic`에서 읽기 호출 8회를 추가로 확인했다. 소유자가 제공한 화면으로
+목록·아이콘·개발자 `Donggyun Seo` 표시를 확인했다. 이때 기존 합성 검증 대화의
+도구 갱신은 성공했지만 앞선 노출 실패를 일반적인 hot reload 보장으로 바꾸지 않는다.
+[Claude MCPB 설치](integration-mcpb.md#install-and-configure)는 별도 패키징·전달 동의
+경로이며, 두 설치 모두 native 권한을 확대하지 않는다. 머신 전용 Codex 생성기·설정·승인은
+공개 배포물이 아니며 README에는 승인된 UI 이미지와 설치 문서 링크만 제공한다.
+
 ### Document-Only Review Results
 
 2026-10-21 macOS 작업에서 새 문서의 로컬 참조·JSON 예시·S1-S15 참조와 T01-T20 식별자,
