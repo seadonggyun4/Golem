@@ -31,9 +31,31 @@ The local process has the user's OS access; Golem policy is not an OS sandbox.
 ## Prepare a Private Marketplace
 
 Create a new owner-controlled directory outside the source checkout and private
-evidence stores. The host-specific generator used in the verification is private,
-not shipped in this repository. The following layout and templates reproduce
-its packaging contract without disclosing that installation's settings:
+evidence stores. The reusable public generator accepts a private JSON file with
+exactly `command` (absolute interpreter path) and `args` (string array), copied
+from your reviewed launcher. It reads no client configuration or approval policy
+automatically. Do not include credentials in launcher arguments.
+
+```sh
+python3 tools/integration_codex_plugin.py \
+  --launcher /private/reviewed-launcher.json \
+  --output /private/new-local-marketplace \
+  --marketplace golem-local --server golem-local
+```
+
+Output must not exist. Identifier syntax, duplicate fields, extra fields, NUL
+and `${...}` client expansion are rejected before publication. Only five files
+are emitted: catalog, plugin manifest, MCP declaration, icon and license. Output
+directories are private and files are mode 0600. A disk failure can leave partial
+output; preserve it and choose a fresh path after review. No install or approval
+is performed. Generated `.mcp.json` contains the explicitly supplied local paths,
+so keep the generated package private; the public generator contains no host paths.
+It does not authenticate your launcher or grant native authority. Existing D1
+launch checks remain responsible for pins and authorization.
+
+The historical synthetic example below uses `golem-synthetic`; when using the
+generator defaults, substitute `golem-local` in installation commands. The
+following layout and templates describe the same packaging contract:
 
 ```text
 local-marketplace/
