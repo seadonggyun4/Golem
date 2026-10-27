@@ -431,7 +431,7 @@
     },
     {
       "path": "tools/test_integration_m4.py",
-      "sha256": "9209539a0c9688d410e34e99b00f5c54baef5add3f27596941d35e22485d90df"
+      "sha256": "494429eb57919a80338a3e5734ab317385889aad9921594870cf17cee12c946c"
     },
     {
       "path": "tools/test_capability_m4.py",

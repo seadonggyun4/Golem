@@ -175,9 +175,10 @@ class OwnerHelpers(unittest.TestCase):
         h=self.approved();self.input_path.write_bytes(b'changed');self.expect('HELPER_INPUT_CHANGED',lambda:h.command(self.entry,self.action))
         self.input_path.write_bytes(b'{}\n');self.row['python']['sha256']='f'*64;self.save_helpers();self.expect('HELPER_EXECUTABLE_CHANGED',lambda:self.approved().command(self.entry,self.action))
     def test_plan_commands_and_inputs_require_declared_executable_pins(self):
-        plan={'schema':'golem.agent-command-plan.v1','task':'code','commands':[{'id':'x','argv':['/usr/bin/true'],'timeout':1}]};self.input_path.write_bytes(c.encoded(plan));self.row.update(helper='agent_io',argv=['run','--plan',str(self.input_path)],inputs=[r.file_pin(self.input_path)],effects=['HOST_EXECUTION','FILESYSTEM_WRITE','NATIVE_WRITE','GIT']);self.save_helpers()
+        executable=Path('/usr/bin/true').resolve()
+        plan={'schema':'golem.agent-command-plan.v1','task':'code','commands':[{'id':'x','argv':[str(executable)],'timeout':1}]};self.input_path.write_bytes(c.encoded(plan));self.row.update(helper='agent_io',argv=['run','--plan',str(self.input_path)],inputs=[r.file_pin(self.input_path)],effects=['HOST_EXECUTION','FILESYSTEM_WRITE','NATIVE_WRITE','GIT']);self.save_helpers()
         self.expect('HELPER_COMMAND_EXECUTABLE_NOT_PINNED',lambda:self.approved().command(self.entry,self.action))
-        self.row['executables']=[r.file_pin(Path('/usr/bin/true').resolve())];self.save_helpers();self.assertIn('agent_io.py',self.approved().command(self.entry,self.action)[2])
+        self.row['executables']=[r.file_pin(executable)];self.save_helpers();self.assertIn('agent_io.py',self.approved().command(self.entry,self.action)[2])
     def test_foreign_work_arguments_reject(self):
         self.row['argv']+=['--work-id','foreign'];self.save_helpers();self.expect('HELPER_ARGUMENT_BINDING',lambda:self.approved().command(self.entry,self.action))
     def test_helper_single_dispatch_exact_argv_and_original_result_only(self):
@@ -219,9 +220,21 @@ class OwnerHelpers(unittest.TestCase):
             value=c.decode(output.getvalue());self.assertIsInstance(value,dict)
         self.assertEqual(self.helper_path.read_bytes(),original);self.assertFalse(self.output_path.exists())
     def test_usage_client_command_needs_explicit_executable_pin(self):
-        self.row.update(helper='usage_pipeline',argv=['run-claude','--directory',str(self.output_path),'--','/usr/bin/true'],effects=list(helpers.EFFECTS));self.save_helpers()
+        executable=Path('/usr/bin/true').resolve()
+        self.row.update(helper='usage_pipeline',argv=['run-claude','--directory',str(self.output_path),'--',str(executable)],effects=list(helpers.EFFECTS));self.save_helpers()
         self.expect('HELPER_COMMAND_EXECUTABLE_NOT_PINNED',lambda:self.approved().command(self.entry,self.action))
-        self.row['executables']=[r.file_pin(Path('/usr/bin/true').resolve())];self.save_helpers();self.assertEqual(self.approved().command(self.entry,self.action)[-1],'/usr/bin/true')
+        self.row['executables']=[r.file_pin(executable)];self.save_helpers();self.assertEqual(self.approved().command(self.entry,self.action)[-1],str(executable))
+    def test_executable_alias_is_not_approved_by_target_pin(self):
+        executable=Path('/usr/bin/true').resolve();alias=self.root/'executable-alias';alias.symlink_to(executable)
+        self.row.update(helper='usage_pipeline',argv=['run-claude','--directory',str(self.output_path),'--',str(alias)],effects=list(helpers.EFFECTS),executables=[r.file_pin(executable)]);self.save_helpers()
+        with patch.object(helpers.records,'capture') as capture:
+            self.expect('HELPER_COMMAND_EXECUTABLE_NOT_PINNED',lambda:self.approved().command(self.entry,self.action))
+            capture.assert_not_called()
+        plan={'schema':'golem.agent-command-plan.v1','task':'code','commands':[{'id':'x','argv':[str(alias)],'timeout':1}]};self.input_path.write_bytes(c.encoded(plan))
+        self.row.update(helper='agent_io',argv=['run','--plan',str(self.input_path)],inputs=[r.file_pin(self.input_path)],effects=['HOST_EXECUTION','FILESYSTEM_WRITE','NATIVE_WRITE','GIT']);self.save_helpers()
+        with patch.object(helpers.records,'capture') as capture:
+            self.expect('HELPER_COMMAND_EXECUTABLE_NOT_PINNED',lambda:self.approved().command(self.entry,self.action))
+            capture.assert_not_called()
     def test_duplicate_output_and_missing_argument_cannot_escape_scope(self):
         self.row['argv']+=['--output',str(self.project/'foreign')];self.save_helpers();self.expect('HELPER_OUTPUT_ARGUMENT',lambda:self.approved().command(self.entry,self.action))
         self.row['argv']=['ingest','--output'];self.save_helpers();self.expect('HELPER_ARGUMENT_VALUE_REQUIRED',lambda:self.approved().command(self.entry,self.action))

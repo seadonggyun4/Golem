@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "c6e58941076c586efa4de6043bd3af678a1625e10bce3bb6ab48dc1e5c9bebff",
+  "inventory_sha256": "626511a26471e23820f52e1ac3fbec64fda836f405b5828418a4266f057e1ff9",
   "selected_source_count": 552,
   "selected_observation_count": 2282,
   "selected_capability_count": 1187,
@@ -5550,7 +5550,7 @@
     },
     {
       "path": "tools/test_integration_m4.py",
-      "sha256": "9209539a0c9688d410e34e99b00f5c54baef5add3f27596941d35e22485d90df"
+      "sha256": "494429eb57919a80338a3e5734ab317385889aad9921594870cf17cee12c946c"
     },
     {
       "path": "tools/test_capability_m4.py",
@@ -57325,7 +57325,7 @@
     },
     {
       "path": "tools/test_integration_m4.py",
-      "sha256": "9209539a0c9688d410e34e99b00f5c54baef5add3f27596941d35e22485d90df",
+      "sha256": "494429eb57919a80338a3e5734ab317385889aad9921594870cf17cee12c946c",
       "shape_sha256": "208582b983912411da1f191fb4d9a873872fa3ca3b2dd5e89f0d6575780395a9",
       "role": "M0_FIXTURE_REGRESSION"
     },
