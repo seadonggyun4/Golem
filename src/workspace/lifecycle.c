@@ -226,7 +226,7 @@ GOLEM_RECORDED_API(golem_workspace_call,
         (operation == GOLEM_WORKSPACE_CREATE ? !ws_oid(base) : base != NULL) ||
         (operation == GOLEM_WORKSPACE_RETAIN ? evidence == NULL : evidence != NULL))
         return GOLEM_ERR_INVALID_ARGUMENT;
-    if (!store->writable || store->poisoned)
+    if ((!store->writable && operation != GOLEM_WORKSPACE_RESUME) || store->poisoned)
         return GOLEM_ERR_INVALID_STATE;
     if (!strcmp(dw_text(store->spec, "permission"), "DENY"))
         return GOLEM_ERR_POLICY_DENIED;

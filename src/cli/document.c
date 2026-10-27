@@ -2,6 +2,7 @@
 #include "work.h"
 #include "golem/document.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -13,6 +14,16 @@ static bool digest_field(struct json_object *o,const char *name,const golem_dige
 }
 int golem_cli_document(int argc,char **argv)
 {
+    if (argc == 4 && !strcmp(argv[1], "work") && !strcmp(argv[2], "validate")) {
+        cli_blob input = {0};
+        golem_status st = cli_read(argv[3], GOLEM_DOCUMENT_MAX_JSON, &input);
+        if (st == GOLEM_OK)
+            st = golem_work_spec_validate((golem_bytes){input.data, input.size}, NULL);
+        free(input.data);
+        if (st != GOLEM_OK)
+            return cli_emit(st, NULL);
+        return puts("{\"schema_version\":1,\"structurally_valid\":true,\"acceptance_verified\":false}") < 0 ? 1 : 0;
+    }
     bool start=argc==5 && strcmp(argv[1],"work")==0 && strcmp(argv[2],"start")==0;
     bool submit=argc==7 && strcmp(argv[1],"document")==0 && strcmp(argv[2],"submit")==0;
     bool inspect=argc==6 && strcmp(argv[1],"document")==0 && strcmp(argv[2],"inspect")==0;

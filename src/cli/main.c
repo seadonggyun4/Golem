@@ -88,6 +88,7 @@ static int usage(void)
         "  golem proof render WORK REQUEST.json | verify WORK REQUEST.json PACK.json\n"
         "  golem proof publish PACK.json PRIVATE_ROOT | verify-dir PRIVATE_ROOT MANIFEST_SHA256\n"
         "  golem proof integrity PACK.json [EXPECTED_MANIFEST_SHA256]\n"
+        "  golem inventory validate POLICY.json | capture ROOT POLICY.json | compare BASE.json CURRENT.json POLICY.json\n"
         "  golem candidate validate MANIFEST.json | gates WORK CHECKPOINT_SHA256 | status WORK GROUP\n"
         "  golem research case create WORK_DIR CASE_JSON KEY\n"
         "  golem research attempt plan|record WORK_DIR ATTEMPT_JSON KEY\n"
@@ -194,7 +195,7 @@ static int dispatch(int argc, char **argv)
     if (argc == 2 && strcmp(argv[1], "--help") == 0) { (void)usage(); return 0; }
     if (argc == 2 && strcmp(argv[1], "--version") == 0) { puts(GOLEM_VERSION_STRING); return 0; }
     if (argc >= 2 && (strcmp(argv[1], "init") == 0 || strcmp(argv[1], "capsule") == 0 ||
-        strcmp(argv[1], "run") == 0 || strcmp(argv[1], "replay") == 0 || strcmp(argv[1], "cost") == 0)) return golem_cli_work(argc, argv);
+        strcmp(argv[1], "run") == 0 || strcmp(argv[1], "replay") == 0 || strcmp(argv[1], "cost") == 0 || strcmp(argv[1], "inventory") == 0)) return golem_cli_work(argc, argv);
     if (argc >= 2 && strcmp(argv[1], "adapter") == 0) return golem_cli_adapter(argc, argv);
     if (argc >= 2 && strcmp(argv[1], "daemon") == 0) return golem_cli_daemon(argc, argv);
     if (argc >= 2 && strcmp(argv[1], "lineage") == 0) return golem_cli_lineage(argc, argv);

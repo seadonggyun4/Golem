@@ -57,7 +57,8 @@ typedef struct golem_workspace_result {
 } golem_workspace_result;
 
 /* All inputs borrowed for call; result is caller-owned and unchanged on error.
- * Requires an exclusive writable Work store. Candidate is ASCII [A-Za-z0-9_-]
+ * Mutations require an exclusive writable Work store. RESUME also accepts a
+ * locked read-only store and never publishes or repairs state. Candidate is ASCII [A-Za-z0-9_-]
  * (1..64). CREATE requires full lowercase 40/64 hex commit, never a mutable ref.
  * Other operations require base_commit=NULL. RETAIN requires a verified Work CAS
  * evidence digest; other operations require evidence=NULL. No allocation escapes.

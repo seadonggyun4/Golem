@@ -111,6 +111,17 @@ def decode(data, limit=LIMIT):
 
 
 def _validate(value, rule):
+    if 'oneOf' in rule:
+        require(type(rule['oneOf']) is list and 1 <= len(rule['oneOf']) <= 16, 'SCHEMA')
+        matches = 0
+        for branch in rule['oneOf']:
+            try:
+                _validate(value, branch)
+                matches += 1
+            except IntegrationError:
+                pass
+        require(matches == 1, 'SCHEMA')
+        return
     if "const" in rule:
         require(type(value) is type(rule["const"]) and value == rule["const"], "SCHEMA")
         return

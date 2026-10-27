@@ -5,9 +5,20 @@ description: Connect or diagnose an explicitly approved local Golem launcher for
 
 # Golem Setup
 
-Use the installed plugin's `scripts/launcher.py` to connect an existing reviewed
-launcher. Installation grants no project access. Reuse the user's existing
-authorization and preserve unrelated settings, approvals, evidence and clients.
+For an explicit setup/maintenance request, first inspect the intended client's
+resolved MCP command and installed working directory. Installation grants no
+project access. Reuse the user's existing authorization and preserve unrelated
+settings, approvals, evidence and clients.
+
+The numbered adapter steps below apply only when that declaration actually runs
+this package's `scripts/launcher.py`. A private launcher-only package runs its
+explicitly reviewed command directly and may include no adapter script, tools
+directory or feature inventory. For that layout, preserve the resolved launcher
+and its existing owner/runtime/policy pins; use actual tool discovery to diagnose
+its scope. Do not run a missing adapter, configure the default adapter state, or
+search the host for a replacement. Use the original owner installation/maintenance
+contract only when this request authorizes a concrete connection change, then
+verify reload and calls separately.
 
 1. Inspect this plugin's resolved MCP configuration with the intended client's
    `codex mcp list --json`. Resolve the installed script from its exact working
@@ -44,3 +55,22 @@ same-user local process, not an OS sandbox or an authenticated approval issuer.
 
 For current installation details see
 https://github.com/seadonggyun4/Golem/blob/main/docs/integration-codex-plugin.md.
+
+When a feature artifact is explicitly supplied for packaging or maintenance,
+inspect that selected artifact's
+`tools/integration_distribution.py catalog` and its feature-package.json. Profile
+selection is a tool ceiling, not a grant. The profile artifacts require an external
+owner-pinned Python/SDK/native runtime; they are not signed self-contained releases.
+Missing runtime/signature/host qualification is not installation success.
+
+Use package-local `tools/integration_owner_maintenance.py schema|plan|inspect` for
+the existing installation or D5 maintenance contracts. Its apply path requires
+the exact reviewed original plan digest and explicit owner authorization; no
+repair or automatic rollback is exposed. A reload ACK alone is insufficient:
+D5 ready retains its existing required runtime probe, Work inventories and owner
+checks. Do not run probes, stop clients, apply plans or reload when the active
+request permits only code/fixtures. Preserve partial/unknown results for review.
+
+For ordinary Work requests, use the separate Golem Work skill and currently
+exposed tools. Do not start setup, reinstall, reconnect or change owner policies
+merely because a Work operation fails or a packaged feature is unavailable.

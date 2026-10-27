@@ -84,6 +84,7 @@ def main():
         build, prefix = work / "build", work / "install"
         execute(["cmake", "-S", source, "-B", build, "-G", "Ninja",
              "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_TESTING=ON",
+             f"-DPython3_EXECUTABLE={sys.executable}",
              "-DGOLEM_WARNINGS_AS_ERRORS=ON", "-DGOLEM_BUILD_CLI=ON",
              "-DCMAKE_INSTALL_LIBDIR=lib",
              "-DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF"], work, env)

@@ -234,7 +234,13 @@ class D2(fixture.ReadBackend):
                         self.assertIsNotNone(client.server_info)
                         self.assertEqual(c.sha(client.server_info.icons[0].src.encode()),
                                          c.sha(branding.server_icons()[0].src.encode()))
-                        self.assertEqual({t.name for t in listed.tools}, {"golem_" + n for n in transfer.NAMES})
+                        # This fixture supplies D1/D2 only. M1 external files,
+                        # M2 owner actions and M5 host results need separate contracts.
+                        conditional = {"artifact_read", "configuration_read", "events_read",
+                            "revision_read", "usage_read", "bundle_read", "workspace_read",
+                            "approved_action_prepare", "action_confirm"}
+                        self.assertEqual({t.name for t in listed.tools},
+                                         {"golem_" + n for n in set(transfer.NAMES) - conditional})
                         result = await client.call_tool("golem_context_get", self.context_args())
                         self.assertFalse(result.is_error)
                         value = json.loads(result.content[0].text)

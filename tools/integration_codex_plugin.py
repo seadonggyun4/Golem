@@ -35,14 +35,7 @@ def build(output, launcher, marketplace='golem-local', server='golem-local'):
         if '\x00' in value or '${' in value:
             raise ValueError('NUL and client variable expansion are forbidden')
     root = Path(__file__).resolve().parents[1]
-    manifest = {'name': 'golem', 'version': '0.1.3',
-        'description': 'Owner-approved local workflow context and evidence.',
-        'author': {'name': 'Donggyun Seo'}, 'mcpServers': './.mcp.json',
-        'requires_local_executor': True, 'license': 'PolyForm-Noncommercial-1.0.0',
-        'interface': {'displayName': 'Golem', 'developerName': 'Donggyun Seo',
-            'shortDescription': 'Read approved workflow context and evidence',
-            'category': 'Developer Tools', 'composerIcon': './assets/icon.png',
-            'logo': './assets/icon.png'}}
+    manifest = json.loads(regular(root / 'plugins/golem/.codex-plugin/plugin.json'))
     def encoded(value):
         return (json.dumps(value, indent=2) + '\n').encode()
     files = {
@@ -54,6 +47,9 @@ def build(output, launcher, marketplace='golem-local', server='golem-local'):
         'plugins/golem/.mcp.json': encoded({'mcpServers': {server: {'type': 'stdio', **command}}}),
         'plugins/golem/assets/icon.png': branding.icon_bytes(),
         'plugins/golem/LICENSE': regular(root / 'LICENSE')}
+    from integration_distribution import SKILLS
+    for source in SKILLS:
+        files[source] = regular(root / source)
     output.mkdir(mode=0o700)
     for name, data in files.items():
         path = output / name

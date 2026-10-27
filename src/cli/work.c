@@ -1,6 +1,7 @@
 #define _POSIX_C_SOURCE 200809L
 #include "work.h"
 #include "../evidence/internal.h"
+#include "golem/inventory.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,6 +50,109 @@ static int usage(void)
 }
 int golem_cli_work(int argc, char **argv)
 {
+    if (argc >= 3 && !strcmp(argv[1], "inventory")) {
+        bool validate = argc == 4 && !strcmp(argv[2], "validate");
+        bool capture = argc == 5 && !strcmp(argv[2], "capture");
+        bool compare = argc == 6 && !strcmp(argv[2], "compare");
+        if (!validate && !capture && !compare)
+            return usage();
+        cli_blob policy = {0}, baseline = {0}, current = {0};
+        golem_inventory_reply reply = {0};
+        golem_status status = cli_read(argv[validate ? 3 : capture ? 4 : 5],
+                                       GOLEM_INVENTORY_MAX_JSON, &policy);
+        if (status == GOLEM_OK && validate)
+            status = golem_inventory_policy_validate((golem_bytes){policy.data, policy.size}, NULL);
+        if (status == GOLEM_OK && capture)
+            status = golem_inventory_capture(argv[3], (golem_bytes){policy.data, policy.size}, &reply, NULL);
+        if (status == GOLEM_OK && compare)
+            status = cli_read(argv[3], GOLEM_INVENTORY_MAX_JSON, &baseline);
+        if (status == GOLEM_OK && compare)
+            status = cli_read(argv[4], GOLEM_INVENTORY_MAX_JSON, &current);
+        if (status == GOLEM_OK && compare)
+            status = golem_inventory_compare((golem_bytes){baseline.data, baseline.size},
+                                             (golem_bytes){current.data, current.size},
+                                             (golem_bytes){policy.data, policy.size}, &reply, NULL);
+        struct json_object *out = NULL;
+        if (status == GOLEM_OK && validate) {
+            out = json_object_new_object();
+            if (!out || !cli_json_add(out, "valid", json_object_new_boolean(true)))
+                status = GOLEM_ERR_OUT_OF_MEMORY;
+        } else if (status == GOLEM_OK)
+            status = cli_json_parse((golem_bytes){reply.data, reply.size}, &out);
+        golem_inventory_reply_free(&reply);
+        free(policy.data);
+        free(baseline.data);
+        free(current.data);
+        return cli_emit(status, out);
+    }
+
+    if (argc == 7 && !strcmp(argv[1], "cost") && !strcmp(argv[2], "inbox") && !strcmp(argv[6], "1")) {
+        /* Disposable first-stage accounting only: no agent, Work store, journal,
+         * stage PASS, settlement or persisted live-run authority is created. */
+        cli_blob input = {0};
+        golem_work_capsule *capsule = NULL;
+        golem_work_run *run = NULL;
+        golem_status status = cli_read(argv[3], CLI_CAPSULE_MAX, &input);
+        if (status == GOLEM_OK)
+            status = cli_capsule_decode((golem_bytes){input.data, input.size}, &capsule);
+        if (status == GOLEM_OK)
+            status = golem_work_run_create(argv[4], capsule, 1, &run);
+        golem_cost_options options = {.version = GOLEM_COST_VERSION, .currency = "USD", .entry_capacity = 1, .report_capacity = 256};
+        if (status == GOLEM_OK)
+            status = golem_work_run_cost_enable(run, &options);
+        if (status == GOLEM_OK)
+            status = golem_work_run_cost_inbox_enable(run, argv[5], false);
+        golem_stage_snapshot stage;
+        if (status == GOLEM_OK)
+            status = golem_work_run_begin(run, false, false, &stage);
+        if (status == GOLEM_OK)
+            status = golem_work_run_cost_inbox_sync(run, 1, true);
+        golem_status inbox_status = GOLEM_ERR_COST_INCOMPLETE;
+        if (status == GOLEM_OK)
+            status = golem_work_run_cost_inbox_status(run, &inbox_status);
+        const golem_cost_ledger *ledger = golem_work_run_cost_borrow(run);
+        golem_cost_entry entry;
+        golem_cost_totals totals, stage_totals;
+        if (status == GOLEM_OK)
+            status = golem_cost_ledger_entry_get(ledger, 1, &entry);
+        if (status == GOLEM_OK)
+            status = golem_cost_ledger_totals_get(ledger, &totals);
+        if (status == GOLEM_OK)
+            status = golem_cost_ledger_stage_totals_get(ledger, stage.stage, &stage_totals);
+        if (status == GOLEM_OK)
+            status = golem_cost_ledger_options_get(ledger, &options);
+        struct json_object *out = json_object_new_object(), *reports = json_object_new_array();
+        if (!out || !reports)
+            status = GOLEM_ERR_OUT_OF_MEMORY;
+        for (size_t i = 0; status == GOLEM_OK && i < entry.report_count; ++i) {
+            golem_provider_usage report;
+            status = golem_cost_ledger_report_get(ledger, 1, i, &report);
+            struct json_object *row = json_object_new_object();
+            if (status == GOLEM_OK && (!cli_json_add(row, "provider", json_object_new_string(report.provider)) ||
+                !cli_json_add(row, "model", json_object_new_string(report.model)) ||
+                !cli_json_add(row, "request_id", json_object_new_string(report.request_id)) ||
+                !cli_json_add(row, "usage_known", json_object_new_boolean(report.actual.usage_known)) ||
+                !cli_json_add(row, "cost_known", json_object_new_boolean(report.actual.cost_known)) ||
+                (report.actual.cost_known ? !cli_json_add(row, "nano_cost", cli_json_u64(report.actual.nano_cost)) : json_object_object_add(row, "nano_cost", NULL) != 0) ||
+                !cli_json_append(reports, row)))
+                status = GOLEM_ERR_OUT_OF_MEMORY;
+        }
+        if (status == GOLEM_OK && (!cli_json_add(out, "schema", json_object_new_string("golem.accounting-reconstruction.v1")) ||
+            !cli_json_add(out, "live_run_updated", json_object_new_boolean(false)) ||
+            !cli_json_add(out, "acceptance_verified", json_object_new_boolean(false)) ||
+            !cli_json_add(out, "unsettled", cli_json_u64(totals.unsettled)) ||
+            !cli_json_add(out, "stage_reports", cli_json_u64(stage_totals.reports)) ||
+            !cli_json_add(out, "inbox_status", json_object_new_string(golem_status_string(inbox_status))) ||
+            !cli_json_add(out, "currency", json_object_new_string(options.currency)) ||
+            !cli_json_add(out, "reports", json_object_get(reports))))
+            status = GOLEM_ERR_OUT_OF_MEMORY;
+        json_object_put(reports);
+        golem_work_run_free(run);
+        golem_work_capsule_free(capsule);
+        free(input.data);
+        return cli_emit(status, out);
+    }
+
     golem_status s = GOLEM_OK;
     struct json_object *out = NULL;
     if (strcmp(argv[1], "init") == 0) {

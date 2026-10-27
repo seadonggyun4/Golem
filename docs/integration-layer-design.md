@@ -1,5 +1,11 @@
 # Golem Integration Layer and MCP Design
 
+기존 기능 전체의 MCP/owner 제공 경로와 사용성 보완은
+[전 기능 MCP 연결·단계별 계획](mcp-full-coverage-plan.ko.md)을 참고한다.
+이 보완 계획은 검토용이며, 아래 D1~D6의 구현 범위를 전체 제품 기능 제공 완료로 확대하지 않는다.
+M0 인계 재검증·분석기 수정과 전체 scope 미완료 상태는
+[최신 M0 검토 기록](mcp-m0-review-2026-10-26.ko.md)을 따른다. 실제 client E2E는 보류 중이다.
+
 상태: **설계 + D1 승인/읽기·owner 설정 installer/빈 bootstrap + D2 local stdio + D3 opt-in hook + D4 typed mutation/승인 QA + D5 유지보수 + D6 opt-in TLS gateway 구현**. 검토: 2026-10-22.
 기준 소스: `96ad031b3a28b189ee7183fcff2f6c34c0ddecfb`.
 schema·프로젝트 승인 registry·읽기 backend는 [D1 계약](integration-d1.md),
@@ -622,3 +628,39 @@ D5의 quarantine 해제는 원래 불확실 결과를 성공으로 승격하지 
 이 테스트는 disposable fixture/기존 provider mock 경로이며 새 MCP 서버·client hook·remote
 인증·실제 provider 입력을 시험한 것이 아니다. native runtime 전체·Linux/Windows·원격 CI를
 이번 문서 작업으로 재검증하지 않았다. 기존 제품 설치/Work/VM은 변경하지 않았다.
+
+M0 전수 정적 inventory는 [최신 출구 검토](mcp-m0-review-2026-10-26.ko.md)와
+[재계산 근거](mcp-m0-reconciliation.json)에서 source/operation/검토 blocker 0을 확인한다.
+미제공 facade·owner 관리·지원 제외를 구분했으며 실제 E2E·제품 delivery 완료·권한 확대를 뜻하지 않는다.
+
+
+### M1 local read extension (2026-10-26)
+
+The development worktree adds 21 closed local read tools to D2 and delegates them through D4. Native reads preserve raw bytes and check unchanged Work records; resource reads require a separate optional owner-selected file/ID/SHA/tool policy. Existing scopes and remote gateway allowlists do not expand automatically. Completion/reentry inspect is nonprojecting; reentry status opens read-only. Execution bundle/render reads are bound to committed receipt references. Historical usage/revision/billing claims never become live acceptance or delegated billing authority.
+
+See [M1 read implementation and fixed 120-item reconciliation](mcp-m1-read-coverage.ko.md) for the schemas, input limits, retained M3/M4/M6 boundaries and fixture results. Actual client/native Work E2E, installation/policy activation and commit/push remain NOT_RUN. M0 repository/operation checks include the three new runtime modules as product sources.
+
+
+### M2 preparation extension (2026-10-26)
+
+Six closed preparation tools share D2 scope and D4 read delegation. They derive common native fences and document references from scoped observations, preserve supplied artifact bytes, and retain immutable instance/basis/age-bound plans in the existing audit spool. Retry of a preparation correlation retrieves the original plan/key; it never dispatches or repairs an action. The D4 pure action shape was separated from mandatory owner asset checks; actual Policy.action still uses native_action with approval required. Already approved actions are re-read by exact pin without changing their bytes; owner pin paths remain local.
+
+[The M2 implementation record](mcp-m2-preparation.ko.md) retains all 134 preparation dependencies and their M3-M5 native obligations. Source/operation/effect checks and adversarial fixtures distinguish this common preparation layer from new typed native operations, owner approval, dispatch admission or actual client E2E. Active connections/approvals/Works and the original repository remain unchanged; commit/push and real E2E are NOT_RUN.
+
+
+M3 development update (2026-10-26): [task action contract](mcp-m3-task-actions.ko.md) connects the frozen 60 M3 obligations through 20 additional exact-owner D4 actions and existing M2 preparation/native reducers. Creation does not register or grant a new Work; approval requests remain pending; noop remains simulation. M4/M5 delivery 130 remains separate. Static/fixture regressions pass; actual client/Work E2E, active policy/connection changes, commit and push are NOT_RUN.
+
+
+M4 development update (2026-10-26): [approved execution/evidence contract and 83-row map](mcp-m4-quality-evidence.ko.md) adds four D2 reads and seven D4 actions, retaining M2/M3 and original QA host authority. Optional helper effects require a separate exact owner policy and default to disabled. Accounting is a disposable first-stage reconstruction, not live-run attachment/settlement. M5 delivery 47 remains. Static/fixture regressions pass; actual external service/client/Work E2E, active policy/connection changes, CI, commit and push are NOT_RUN.
+
+
+## M5 bounded native parallel facade (2026-10-26)
+
+See [M5 contracts and 47-row source map](mcp-m5-parallel-candidates.ko.md). Optional parallel-host owner policy is separate from M4 helper effects and binds native config/socket identity, all registered parent/child/target Works, roots, exact actions/request digests and separate operator termination attestations. No server startup, generic execution, auto-repair or retry is added. Parent read observations reuse the native host's existing handle; comparison child handles are read-only. Workspace RESUME remains an exact D4 action; workspace_read only retrieves the original immutable D4 result without creating intent or native calls. Original QA approvals/bytes/keys/pins and COMMIT_UNKNOWN semantics stay in place.
+
+M2 immutable spool also hosts review-only DAG and merge proposals. Syntax/reference/cycle and all referenced Work basis checks grant no readiness, edge satisfaction, resource reservation, QA PASS or target applicability. Task scheduler, typed-edge evidence acceptance, receiver resource broker, merge queue, integration workspace/fresh QA, target-ref CAS broker and merge publication receipt remain NOT_IMPLEMENTED. Fixed M5 facade delivery47/47 does not discharge those proposals. No actual client/Work E2E, external service, approval application, host connection, merge, commit or push was performed.
+
+
+## M6 명시 범위 기록 (2026-10-26)
+
+M6 adds separate Setup/Work skills, five finite owner-intersected feature ceilings, deterministic public review artifacts with generated integration schemas, and an owner-local bridge to unchanged Installer/D5 plans and exact apply guards. D4 entry retains participation; no MCP owner-management tools, automatic grants/repair or active installation/reload are added. External owner-pinned runtime remains required; signed self-contained distribution and host qualification remain unimplemented/unverified. Owner83 boundaries and M5 seven unimplemented obligations remain explicit. 상세 계약·처리표·검증은 [M6 기록](mcp-m6-distribution.ko.md)을 따른다.

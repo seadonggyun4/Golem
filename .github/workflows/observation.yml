@@ -1,21 +1,32 @@
-name: Read-only observation
-on: [push, pull_request]
+# Reusable only: automatic execution is selected by c.yml.
+name: "MCP contracts"
+'on':
+  workflow_call:
+    inputs:
+      full:
+        type: "boolean"
+        default: false
+      clients:
+        type: "boolean"
+        default: false
 permissions:
-  contents: read
+  contents: "read"
 jobs:
   sse:
+    runs-on: "${{ matrix.os }}"
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+        os: ["ubuntu-latest", "macos-latest"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: "actions/checkout@v4"
         with:
-          python-version: '3.11'
-      - name: Validate D1 public schemas independently
+          persist-credentials: false
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.11"
+      - name: "Validate D1 public schemas independently"
         run: |
           python3 -m pip install jsonschema==4.23.0
           python3 tools/verify_integration_schema.py
@@ -25,72 +36,79 @@ jobs:
           python3 tools/verify_gateway_schema.py
           python3 tools/verify_install_schema.py
           python3 tests/c/intent_schema_conformance.py --schema
-      - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev libevent-dev
-      - if: runner.os == 'macOS'
-        run: brew install ninja openssl@3 pkg-config json-c md4c libevent
-      - if: runner.os == 'Linux'
-        uses: ./.github/actions/setup-json-c
-      - run: cmake -S . -B build/events -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGOLEM_ENABLE_SANITIZERS=ON -DGOLEM_BUILD_EVENT_BRIDGE=ON -DGOLEM_BUILD_INTEGRATION_HOST=ON
-      - run: cmake --build build/events --parallel 2
-      - name: D2 real MCP stdio and native read-only handoff
+      - if: "runner.os == 'Linux'"
+        run: "sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev libevent-dev"
+      - if: "runner.os == 'macOS'"
+        run: "brew install ninja openssl@3 pkg-config json-c md4c libevent"
+      - if: "runner.os == 'Linux'"
+        uses: "./.github/actions/setup-json-c"
+      - run: "cmake -S . -B build/events -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGOLEM_ENABLE_SANITIZERS=ON -DGOLEM_BUILD_EVENT_BRIDGE=ON -DGOLEM_BUILD_INTEGRATION_HOST=ON"
+      - run: "cmake --build build/events --parallel 2"
+      - name: "D2 real MCP stdio and native read-only handoff"
         run: |
           python3 -m pip install -r tools/requirements-mcp.txt
           python3 tests/c/integration_d2_mcp.py build/events/golem .
         env:
-          ASAN_OPTIONS: halt_on_error=1
-          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      - name: D4 real MCP typed mutations and owner-approved native QA
-        run: python3 tests/c/integration_d4_mutations.py build/events/golem . "$(command -v cc)" build/events/golem-integration-host --mcp
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+      - name: "D4 real MCP typed mutations and owner-approved native QA"
+        run: "python3 tests/c/integration_d4_mutations.py build/events/golem . \"$(command -v cc)\" build/events/golem-integration-host --mcp"
         env:
-          ASAN_OPTIONS: halt_on_error=1
-          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      - name: D5 staged updates, reload probes and COMMIT_UNKNOWN recovery
-        run: python3 tests/c/integration_d5_maintenance.py build/events/golem . "$(command -v cc)" build/events/golem-integration-host --mcp
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+      - name: "D5 staged updates, reload probes and COMMIT_UNKNOWN recovery"
+        run: "python3 tests/c/integration_d5_maintenance.py build/events/golem . \"$(command -v cc)\" build/events/golem-integration-host --mcp"
         env:
-          ASAN_OPTIONS: halt_on_error=1
-          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      - name: D6 TLS JWT MCP gateway and native safety
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+      - name: "D6 TLS JWT MCP gateway and native safety"
         run: |
           python3 -m pip install -r tools/requirements-gateway.txt
-          python3 -m unittest discover -s tools -p 'test_integration_gateway.py'
           python3 tests/c/integration_d6_gateway.py build/events/golem . "$(command -v cc)" build/events/golem-integration-host
         env:
-          ASAN_OPTIONS: halt_on_error=1
-          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      - name: D3 real pinned client startup and resume hooks (loopback fixtures only)
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+      - name: "Pure native M2-M5 validators, digest and accounting fixtures"
+        run: "PYTHONPATH=tools python3 -m unittest test_integration_m2.Preparations.test_native_session_validator_component_without_work_or_client test_integration_m3.NativeValidators test_integration_m4.DisposableCoreComponent test_integration_m5.PureNativeComponents"
+        env:
+          GOLEM_M2_COMPONENT_CLI: "${{ github.workspace }}/build/events/golem"
+          GOLEM_M3_COMPONENT_CLI: "${{ github.workspace }}/build/events/golem"
+          GOLEM_M4_COMPONENT_CLI: "${{ github.workspace }}/build/events/golem"
+          GOLEM_M5_COMPONENT_CLI: "${{ github.workspace }}/build/events/golem"
+      - name: "D3 real pinned client startup and resume hooks (loopback fixtures only)"
         run: |
           npm install --ignore-scripts --prefix "$RUNNER_TEMP/golem-hook-clients" @openai/codex@0.141.0 @anthropic-ai/claude-code@2.1.196
           python3 tests/c/integration_d3_hooks.py build/events/golem . --client-prefix "$RUNNER_TEMP/golem-hook-clients"
         env:
-          ASAN_OPTIONS: halt_on_error=1
-          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      - name: D1 lossless client install removal and approved bootstrap
-        run: python3 tests/c/integration_d1_install.py build/events/golem . --client-prefix "$RUNNER_TEMP/golem-hook-clients"
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+        if: "inputs.full || inputs.clients"
+      - name: "D1 lossless client install removal and approved bootstrap"
+        run: "python3 tests/c/integration_d1_install.py build/events/golem . --client-prefix \"$RUNNER_TEMP/golem-hook-clients\""
         env:
-          ASAN_OPTIONS: halt_on_error=1
-          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      - run: ctest --test-dir build/events --output-on-failure -R 'event_reader|event_bridge|runtime_events|mutation_document'
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+        if: "inputs.full || inputs.clients"
+      - run: "ctest --test-dir build/events --output-on-failure -R 'event_reader|event_bridge|runtime_events|mutation_document'"
         env:
-          ASAN_OPTIONS: halt_on_error=1
-          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      - name: Orchestration contract matrix
-        run: python3 tools/verify_orchestration.py --build build/events --output build/orchestration-validation
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+      - name: "Orchestration contract matrix"
+        run: "python3 tools/verify_orchestration.py --build build/events --output build/orchestration-validation"
         env:
-          ASAN_OPTIONS: halt_on_error=1
-          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      - name: Preserve orchestration evidence including failures
-        if: always()
-        uses: actions/upload-artifact@v4
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+      - name: "Preserve orchestration evidence including failures"
+        if: "always()"
+        uses: "actions/upload-artifact@v4"
         with:
-          name: orchestration-${{ matrix.os }}-${{ github.run_attempt }}
-          path: build/orchestration-validation/
-          if-no-files-found: warn
+          name: "orchestration-${{ matrix.os }}-${{ github.run_attempt }}"
+          path: "build/orchestration-validation/"
+          if-no-files-found: "warn"
           retention-days: 14
-      - name: Collector checks and bounded observation benchmark
-        run: |
-          python3 -m unittest discover -s tools -p 'test_*.py'
-          ctest --test-dir build/events --output-on-failure -R '^orchestration_(validation_report|benchmark)$'
+      - name: "Bounded observation benchmark (full validation only)"
+        run: "ctest --test-dir build/events --output-on-failure --no-tests=error -R '^orchestration_(validation_report|benchmark)$'"
         env:
-          ASAN_OPTIONS: halt_on_error=1
-          UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+        if: "inputs.full"

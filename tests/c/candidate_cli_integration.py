@@ -126,6 +126,29 @@ class CandidateCLI(Changes):
             source_snapshot=self.source, output=None, evidence=[evidence], resolution="NO_EFFECTS")
         self.token = None
 
+    def test_workspace_preparation_does_not_relax_active_or_attestation_guards(self):
+        self.setup_host()
+        self.assertFalse((self.root / "not-created").exists())
+        events = {p.name: p.read_bytes() for p in (self.work / "events").iterdir() if p.is_file()}
+        for operation, fields, attest, code in (
+            ("workspace-resume", {}, False, "GOLEM_ERR_LEASE_BUSY"),
+            ("workspace-activate", {}, False, "GOLEM_ERR_LEASE_BUSY"),
+            ("workspace-seal", {}, False, "GOLEM_ERR_APPROVAL_REQUIRED"),
+            ("workspace-seal", {}, True, "GOLEM_ERR_LEASE_BUSY"),
+            ("workspace-retain", {"evidence": "e" * 64}, True, "GOLEM_ERR_LEASE_BUSY"),
+            ("workspace-remove", {}, True, "GOLEM_ERR_LEASE_BUSY"),
+        ):
+            request = self.write("workspace-guard.json", dict(operation=operation, candidate="a", **fields))
+            digest = self.raw("candidate", "request-digest", request).strip()
+            argv = [str(CLI), "candidate", "call", str(self.socket), str(request), "--approve-request", digest]
+            if attest:
+                argv += ["--attest-termination", digest]
+            reply = subprocess.run(argv, capture_output=True, env=ENV, timeout=30)
+            self.assertNotEqual(reply.returncode, 0)
+            self.assertIn(code, reply.stderr.decode())
+            self.assertEqual(events, {p.name: p.read_bytes() for p in (self.work / "events").iterdir() if p.is_file()})
+            self.assertFalse((self.root / "not-created").exists())
+
     def test_cli_claim_qa_comparison_selection(self):
         self.check_cli_selection()
 
@@ -149,7 +172,12 @@ class CandidateCLI(Changes):
         report = self.settle(qa["receipt_digest"])
         self.assertEqual(report["candidates"][0]["state"], "FINISHED")
         self.settle(qa["receipt_digest"])  # Same settlement is idempotent.
-        self.assertEqual(self.group("compare")["decision"], "SOLE_PASS")
+        child_before = {str(p.relative_to(self.work)): p.read_bytes()
+                        for p in self.work.rglob("*") if p.is_file()}
+        comparison = self.group("compare")
+        self.assertEqual(comparison["decision"], "SOLE_PASS", comparison)
+        self.assertEqual({str(p.relative_to(self.work)): p.read_bytes()
+                          for p in self.work.rglob("*") if p.is_file()}, child_before)
         self.group("select", "a", approve=False, ok=False)
         self.group("select", "a")
         self.rpc("shutdown")

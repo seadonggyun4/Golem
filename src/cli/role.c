@@ -6,6 +6,16 @@
 
 int golem_cli_role(int argc, char **argv)
 {
+    if (argc == 4 && !strcmp(argv[2], "request-validate")) {
+        cli_blob input = {0};
+        golem_status st = cli_read(argv[3], GOLEM_DOCUMENT_MAX_JSON, &input);
+        if (st == GOLEM_OK)
+            st = golem_role_request_validate((golem_bytes){input.data, input.size}, NULL);
+        free(input.data);
+        if (st != GOLEM_OK)
+            return cli_emit(st, NULL);
+        return puts("{\"schema_version\":1,\"structurally_valid\":true,\"acceptance_verified\":false}") < 0 ? 1 : 0;
+    }
     bool sample = argc == 4 && !strcmp(argv[2], "template");
     bool validate = argc == 4 && !strcmp(argv[2], "validate");
     bool call = (argc == 5 || (argc == 7 && !strcmp(argv[5], "--approve-contract"))) &&

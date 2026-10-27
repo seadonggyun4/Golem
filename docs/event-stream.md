@@ -121,8 +121,10 @@ ctest --test-dir build/events --output-on-failure -R 'event_reader|event_bridge|
 The HTTP tests exercise real loopback sockets, reconnect and restart, source
 immutability, cursor gaps, auth rejection, subscriber admission, connection churn,
 heartbeat and credential revocation. They do not prove production traffic capacity.
-`.github/workflows/observation.yml` enables the optional target under sanitizers
-on Linux and macOS; a local macOS run is not a remote Linux CI pass.
+`.github/workflows/observation.yml` is a reusable contract selected by the main CI
+for relevant native/MCP changes or full qualification. It enables the optional
+target under sanitizers on Linux and macOS; a local macOS run is not a remote
+Linux CI pass. See [change-scoped CI](conformance.md#change-scoped-github-ci).
 
 - [WHATWG SSE](https://html.spec.whatwg.org/multipage/server-sent-events.html):
   frame termination, comment heartbeats and Last-Event-ID behavior.

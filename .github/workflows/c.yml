@@ -1,187 +1,635 @@
-name: C foundation
-on: [push, pull_request]
+# CI entrypoint and reviewed selectors are tested in the changes job.
+name: "CI"
+'on':
+  push:
+    branches: ["main"]
+    tags: ["v*"]
+  pull_request:
+  merge_group:
+    types: ["checks_requested"]
+  workflow_dispatch:
 permissions:
-  contents: read
+  contents: "read"
+concurrency:
+  group: "${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}"
+  cancel-in-progress: "${{ github.event_name != 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/') }}"
 jobs:
-  syscall-diagnostics:
-    runs-on: ubuntu-24.04
+  changes:
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 5
+    outputs:
+      native: "${{ steps.plan.outputs.native }}"
+      python_tools: "${{ steps.plan.outputs.python_tools }}"
+      prototype: "${{ steps.plan.outputs.prototype }}"
+      integration: "${{ steps.plan.outputs.integration }}"
+      bindings: "${{ steps.plan.outputs.bindings }}"
+      package: "${{ steps.plan.outputs.package }}"
+      fuzz: "${{ steps.plan.outputs.fuzz }}"
+      syscall: "${{ steps.plan.outputs.syscall }}"
+      clients: "${{ steps.plan.outputs.clients }}"
+      full: "${{ steps.plan.outputs.full }}"
+      plan: "${{ steps.plan.outputs.plan }}"
+      native_matrix: "${{ steps.plan.outputs.native_matrix }}"
+      python_matrix: "${{ steps.plan.outputs.python_matrix }}"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: "actions/checkout@v4"
         with:
-          python-version: '3.11'
-      - run: sudo apt-get update && sudo apt-get install -y strace
-      - name: Real descendant syscall and tracer-exit tests
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.14"
+      - name: "Classify complete Git diff and test selection contracts"
+        id: "plan"
+        shell: "python"
+        run: |
+          import argparse
+          import json
+          import os
+          from pathlib import Path, PurePosixPath
+          import re
+          import subprocess
+          import tempfile
+          import unittest
+
+          LANES = ('native', 'python_tools', 'prototype', 'integration', 'bindings', 'package', 'fuzz', 'syscall', 'clients', 'full')
+          PACKAGED_DOCS = {'docs/mcp-m6-distribution.ko.md', 'docs/integration-install.md',
+                           'docs/integration-d5.md', 'docs/mcp-m5-parallel-candidates.ko.md'}
+          CLIENT_PATHS = {'tools/integration_hooks.py', 'tools/integration_hook_contract.py',
+                          'tools/integration_config.py', 'tools/integration_install.py', 'tools/integration_launch.py',
+                          'tools/test_integration_hooks.py', 'tools/test_integration_install.py',
+                          'plugins/golem/scripts/launcher.py', 'tests/c/integration_d3_hooks.py', 'tests/c/integration_d1_install.py'}
+          GUIDES = ('README.md', 'README.ko.md', 'docs/integration-codex-plugin.md', 'docs/integration-mcpb.md')
+
+
+          def select(paths, force=False):
+              selected = dict.fromkeys(LANES, False)
+              reasons = set()
+              def enable(*names):
+                  for name in names:
+                      selected[name] = True
+              for path in paths:
+                  if (not path or PurePosixPath(path).is_absolute() or '..' in PurePosixPath(path).parts
+                          or any(ord(c) < 32 for c in path) or '\\' in path):
+                      enable('full'); reasons.add('unrecognized-path'); continue
+                  if path.startswith(('.github/',)):
+                      enable('full'); reasons.add('ci-contract'); continue
+                  if path in ('CMakeLists.txt', 'CMakePresets.json', 'source_policy.py', 'LICENSE', 'NOTICE',
+                              'COMMERCIAL-LICENSE.md', '.gitignore', '.gitattributes') or path.startswith('cmake/'):
+                      enable('full'); reasons.add('shared-build-export-contract'); continue
+                  if path in PACKAGED_DOCS or path.startswith('docs/mcp-'):
+                      enable('python_tools'); continue
+                  if path.startswith('docs/') and path.endswith('.json'):
+                      enable('python_tools'); continue
+                  if path.startswith(('docs/', 'assets/')) and path.endswith(('.md', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif')) or path.endswith('.md') and '/' not in path:
+                      continue
+                  if path in CLIENT_PATHS:
+                      enable('python_tools', 'integration', 'clients'); continue
+                  if path.startswith(('plugins/', '.agents/plugins/')):
+                      enable('python_tools', 'integration'); continue
+                  if path.startswith('bindings/'):
+                      enable('bindings', 'python_tools'); continue
+                  if path in ('conanfile.py',) or path.startswith('test_package/') or path == 'tools/install_conan_cli.py':
+                      enable('package', 'python_tools'); continue
+                  if path.startswith('fuzz/'):
+                      enable('fuzz'); continue
+                  if path.startswith('src/golem/') and path.endswith('.py') or path in ('pyproject.toml',) or path.startswith('tests/') and path.endswith('.py') and not path.startswith(('tests/c/', 'tests/consumer/')):
+                      enable('prototype'); continue
+                  if path.startswith('src/') or path.startswith('include/'):
+                      enable('native', 'python_tools', 'integration', 'bindings', 'package', 'fuzz'); continue
+                  if path.startswith(('tests/c/', 'tests/consumer/', 'samples/', 'bench/')):
+                      enable('native', 'python_tools', 'integration'); continue
+                  if path.startswith(('tools/capability_', 'tools/test_capability_')) and path.endswith('.py'):
+                      enable('python_tools'); continue
+                  if path in ('tools/syscall_record.py', 'tools/test_syscall_record.py'):
+                      enable('native', 'python_tools', 'syscall'); continue
+                  if path in ('tools/requirements-mcp.txt', 'tools/requirements-gateway.txt') or path.startswith(('tools/integration_', 'tools/test_integration')):
+                      enable('python_tools', 'integration')
+                      if path.endswith(('.c', '.h')):
+                          enable('native')
+                      continue
+                  # An unmapped file cannot silently become a documentation-only change.
+                  enable('full'); reasons.add('unmapped-dependency')
+              if force:
+                  enable('full'); reasons.add('explicit-full-or-unavailable-diff')
+              if selected['full']:
+                  selected = dict.fromkeys(LANES, True)
+              return {'lanes': selected, 'reasons': sorted(reasons), 'changed_files': len(paths)}
+
+
+          def git(*args):
+              return subprocess.run(['git', '-c', 'core.fsmonitor=false', *args], check=True, capture_output=True, timeout=30,
+                                    env={**os.environ, 'GIT_OPTIONAL_LOCKS':'0', 'GIT_CONFIG_NOSYSTEM':'1', 'GIT_CONFIG_GLOBAL':os.devnull}).stdout
+
+
+          def changed_paths(event_name, event, invoke=git):
+              if event_name == 'workflow_dispatch' or event.get('ref', '').startswith('refs/tags/'):
+                  return [], True
+              if event_name == 'pull_request':
+                  base = event['pull_request']['base']['sha']; head = event['pull_request']['head']['sha']
+              elif event_name == 'push':
+                  base = event['before']; head = event['after']
+              elif event_name == 'merge_group':
+                  base = event['merge_group']['base_sha']; head = event['merge_group']['head_sha']
+              else:
+                  return [], True
+              if not all(isinstance(v, str) and re.fullmatch(r'[0-9a-f]{40,64}', v) and set(v) != {'0'} for v in (base, head)):
+                  return [], True
+              if event_name == 'pull_request':
+                  base = invoke('merge-base', base, head).decode().strip()
+                  if not re.fullmatch(r'[0-9a-f]{40,64}', base):
+                      raise ValueError('invalid merge base')
+              raw = invoke('diff', '--no-renames', '--name-only', '-z', base, head, '--')
+              if len(raw) > 8 * 1024 * 1024 or raw and not raw.endswith(b'\0'):
+                  raise ValueError('invalid diff inventory')
+              return [p.decode('utf-8') for p in raw.split(b'\0') if p], False
+
+
+          def inspect_guides(root):
+              count = 0
+              for name in GUIDES:
+                  path = root / name
+                  text = path.read_text()
+                  if text.count('```') % 2 or text.count('<details>') != text.count('</details>'):
+                      raise ValueError('unbalanced guide markup: ' + name)
+                  for target in re.findall(r'\[[^\]\n]*\]\(([^)\n]+)\)', text):
+                      if re.match(r'[a-z]+:', target):
+                          continue
+                      relative, _, anchor = target.partition('#')
+                      dest = (path.parent / relative).resolve() if relative else path
+                      if not dest.is_relative_to(root.resolve()) or not dest.is_file():
+                          raise ValueError('missing guide link: ' + name)
+                      if anchor:
+                          headings = [re.sub(r'[^\w\- ]', '', re.sub('<[^>]*>', '', line.lstrip('# ').lower())).replace(' ', '-')
+                                      for line in dest.read_text().splitlines() if re.match(r'^#{1,6} ', line)]
+                          if anchor not in headings:
+                              raise ValueError('missing guide anchor: ' + name)
+                      count += 1
+              return count
+
+
+          class RoutingTests(unittest.TestCase):
+              def test_doc_only_does_not_build(self):
+                  for paths in (['README.md'], ['README.ko.md', 'docs/integration-mcpb.md'], ['assets/Golem.png']):
+                      self.assertFalse(any(select(paths)['lanes'].values()))
+
+              def test_finite_groups(self):
+                  cases = [(['src/common/json.c'], {'native','python_tools','integration','bindings','package','fuzz'}),
+                           (['tools/integration_distribution.py'], {'python_tools','integration'}),
+                           (['plugins/golem/skills/golem-work/SKILL.md'], {'python_tools','integration'}),
+                           (['.agents/plugins/marketplace.json'], {'python_tools','integration'}),
+                           (['bindings/python/golem/__init__.py'], {'bindings','python_tools'}),
+                           (['conanfile.py'], {'package','python_tools'}),
+                           (['tools/capability_m6.py'], {'python_tools'}),
+                           (['tools/integration_hooks.py'], {'python_tools','integration','clients'}),
+                           (['tests/c/integration_d1_install.py'], {'python_tools','integration','clients'}),
+                           (['docs/mcp-m0-observations.json'], {'python_tools'}),
+                           (['docs/integration-d5.md'], {'python_tools'}),
+                           (['src/golem/core.py'], {'prototype'}), (['pyproject.toml'], {'prototype'}),
+                           (['tests/test_cli.py'], {'prototype'}), (['fuzz/parse.c'], {'fuzz'}),
+                           (['tools/test_syscall_record.py'], {'native','python_tools','syscall'}),
+                           (['tests/c/cli_integration.py'], {'native','python_tools','integration'}),
+                           (['tools/integration_approval_host.c'], {'native','python_tools','integration'})]
+                  for paths, expected in cases:
+                      with self.subTest(paths=paths):
+                          self.assertEqual({k for k,v in select(paths)['lanes'].items() if v}, expected)
+
+              def test_unknown_shared_build_and_unsafe_are_full(self):
+                  for path in ('new-runtime/file.ext', 'CMakeLists.txt', 'source_policy.py', '.github/workflows/c.yml',
+                               '.github/actions/setup-json-c/action.yml', '../outside', '/absolute', 'file\nname', 'tools/new.py', 'docs/new_runtime.py', 'assets/loader.js', 'tests/hidden.c'):
+                      with self.subTest(path=path):
+                          self.assertTrue(all(select([path])['lanes'].values()))
+                  self.assertTrue(all(select([], force=True)['lanes'].values()))
+
+              def test_union_deletion_and_large_change_sets(self):
+                  self.assertTrue(select(['README.md','src/core/store.c'])['lanes']['native'])
+                  self.assertTrue(select([f'docs/{i}.md' for i in range(350)]+['include/golem/core.h'])['lanes']['native'])
+                  self.assertFalse(any(select([])['lanes'].values()))
+
+              def test_event_ranges_are_exact_and_rename_detection_disabled(self):
+                  base, head, ancestor = 'a'*40, 'b'*40, 'c'*40
+                  for event_name, event, expected_base in [('push', {'before':base,'after':head}, base),
+                      ('pull_request', {'pull_request':{'base':{'sha':base},'head':{'sha':head}}}, ancestor),
+                      ('merge_group', {'merge_group':{'base_sha':base,'head_sha':head}}, base)]:
+                      calls=[]
+                      def invoke(*args):
+                          calls.append(args)
+                          return (ancestor+'\n').encode() if args[0]=='merge-base' else b'old.c\0new.c\0'
+                      paths, force=changed_paths(event_name,event,invoke)
+                      self.assertEqual(paths,['old.c','new.c']);self.assertFalse(force)
+                      self.assertEqual(calls[-1],('diff','--no-renames','--name-only','-z',expected_base,head,'--'))
+
+              def test_new_branch_tag_manual_and_missing_diff_never_skip(self):
+                  for name,event in [('push',{'before':'0'*40,'after':'a'*40}),('push',{'ref':'refs/tags/v1'}),
+                                     ('workflow_dispatch',{}),('unknown',{}),('push',{'before':'--bad','after':'a'*40})]:
+                      self.assertTrue(changed_paths(name,event)[1])
+                  with self.assertRaises(subprocess.CalledProcessError):
+                      changed_paths('push',{'before':'a'*40,'after':'b'*40},lambda *a: (_ for _ in ()).throw(subprocess.CalledProcessError(1,a)))
+
+              def test_real_git_multi_commit_rename_and_delete(self):
+                  with tempfile.TemporaryDirectory() as tmp:
+                      def run(*args):
+                          return subprocess.run(['git','-C',tmp,*args],check=True,capture_output=True).stdout
+                      run('init','-q'); run('config','user.email','fixture@example.invalid');run('config','user.name','Fixture')
+                      p=Path(tmp);(p/'old.c').write_text('old');(p/'gone.h').write_text('gone');run('add','.');run('commit','-qm','base');base=run('rev-parse','HEAD').decode().strip()
+                      (p/'old.c').rename(p/'new.c');run('add','-A');run('commit','-qm','rename');(p/'gone.h').unlink();run('add','-A');run('commit','-qm','delete');head=run('rev-parse','HEAD').decode().strip()
+                      paths,force=changed_paths('push',{'before':base,'after':head},run)
+                      self.assertEqual(set(paths),{'old.c','new.c','gone.h'});self.assertFalse(force)
+
+
+          def main():
+              parser=argparse.ArgumentParser();parser.add_argument('--self-test',action='store_true');parser.add_argument('--paths',nargs='*');parser.add_argument('--local',action='store_true');args=parser.parse_args()
+              result=unittest.TextTestRunner(verbosity=1).run(unittest.defaultTestLoader.loadTestsFromTestCase(RoutingTests))
+              if not result.wasSuccessful():
+                  raise SystemExit(1)
+              if args.self_test:
+                  return
+              force=False
+              if args.paths is not None:
+                  paths=args.paths
+              elif args.local:
+                  raw=git('diff','--no-renames','--name-only','-z','HEAD','--')+git('ls-files','--others','--exclude-standard','-z')
+                  paths=sorted(set(p.decode() for p in raw.split(b'\0') if p))
+              else:
+                  try:
+                      event=json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+                      paths,force=changed_paths(os.environ['GITHUB_EVENT_NAME'],event)
+                  except (KeyError,ValueError,OSError,subprocess.SubprocessError):
+                      paths,force=[],True
+              plan=select(paths,force)
+              plan['guide_links_checked']=inspect_guides(Path.cwd())
+              native=[{'os':os_name,'preset':preset} for os_name in ('ubuntu-latest','macos-latest') for preset in ('dev','release','asan')] if plan['lanes']['full'] else [
+                  {'os':'ubuntu-latest','preset':'release'},{'os':'macos-latest','preset':'release'},{'os':'ubuntu-latest','preset':'asan'}]
+              if not args.local and args.paths is None:
+                  output=os.environ['GITHUB_OUTPUT']
+                  with open(output,'a') as stream:
+                      for key,value in plan['lanes'].items():
+                          stream.write(f'{key}={str(value).lower()}\n')
+                      stream.write('plan='+json.dumps(plan,separators=(',',':'))+'\n')
+                      stream.write('native_matrix='+json.dumps({'include':native},separators=(',',':'))+'\n')
+                      stream.write('python_matrix='+json.dumps({'os':['ubuntu-latest','macos-latest'] if plan['lanes']['full'] else ['ubuntu-latest']},separators=(',',':'))+'\n')
+                  dest=Path(os.environ['RUNNER_TEMP'])/'ci-plan.json';dest.write_text(json.dumps(plan,indent=2)+'\n')
+                  with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as stream:
+                      stream.write('## Selected checks\n\n'+ '\n'.join(f'- {k}: {v}' for k,v in plan['lanes'].items())+'\n\nChanged paths: '+str(len(paths))+'; unavailable diff uses full validation.\n')
+              print(json.dumps(plan,indent=2))
+
+
+          if __name__=='__main__':
+              main()
+      - name: "Reconcile actual M0 source scope and permission boundaries"
+        run: "python3 tools/capability_check.py --root \"$(pwd -P)\" --repository-sources > \"$RUNNER_TEMP/m0-reconciliation.json\""
+      - name: "Preserve selection manifest"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "ci-plan-${{ github.run_attempt }}"
+          path: |
+            ${{ runner.temp }}/ci-plan.json
+            ${{ runner.temp }}/m0-reconciliation.json
+          if-no-files-found: "warn"
+          retention-days: 14
+        if: "always()"
+  workflow-lint:
+    needs: ["changes"]
+    if: "needs.changes.outputs.full == 'true'"
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 5
+    steps:
+      - uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+      - name: "Check Actions syntax with checksum-pinned actionlint"
+        shell: "bash"
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/actionlint.tar.gz"
+          curl --fail --location --retry 3 --proto '=https' --tlsv1.2 \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
+            --output "$archive"
+          printf '%s  %s\n' 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8 "$archive" | sha256sum --check --strict
+          tar -xzf "$archive" -C "$RUNNER_TEMP" actionlint
+          if ! command -v shellcheck >/dev/null; then
+            sudo apt-get update && sudo apt-get install -y shellcheck
+          fi
+          "$RUNNER_TEMP/actionlint" -color
+  python:
+    needs: ["changes"]
+    if: "needs.changes.outputs.python_tools == 'true' || needs.changes.outputs.prototype == 'true'"
+    runs-on: "${{ matrix.os }}"
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix: "${{ fromJSON(needs.changes.outputs.python_matrix) }}"
+    steps:
+      - uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.14"
+      - name: "Install fixture SDKs"
+        if: "needs.changes.outputs.python_tools == 'true'"
+        run: "python3 -m pip install -r tools/requirements-gateway.txt jsonschema==4.23.0"
+      - name: "Python tool, MCP feature and M0 regression tests"
+        if: "needs.changes.outputs.python_tools == 'true'"
+        run: "python3 -m unittest discover -s tools -p 'test_*.py'"
+      - name: "Historical prototype regression (only its own changes or full validation)"
+        if: "needs.changes.outputs.prototype == 'true'"
+        run: "PYTHONPATH=src python3 -m unittest discover -s tests"
+  native:
+    needs: ["changes"]
+    if: "needs.changes.outputs.native == 'true'"
+    runs-on: "${{ matrix.os }}"
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix: "${{ fromJSON(needs.changes.outputs.native_matrix) }}"
+    steps:
+      - uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.11"
+      - name: "Install Ninja (Linux)"
+        if: "runner.os == 'Linux'"
+        run: "sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev"
+      - name: "Install Ninja (macOS)"
+        if: "runner.os == 'macOS'"
+        run: "brew list ninja || brew install ninja"
+      - name: "Install OpenSSL (macOS)"
+        if: "runner.os == 'macOS'"
+        run: "brew list openssl@3 || brew install openssl@3"
+      - name: "Install JSON dependencies (macOS)"
+        if: "runner.os == 'macOS'"
+        run: "brew install pkg-config json-c md4c"
+      - if: "runner.os == 'Linux'"
+        uses: "./.github/actions/setup-json-c"
+      - name: "Build and full-suite evidence"
+        run: "python3 tools/verify_environment.py --preset ${{ matrix.preset }} --profile full-ci --root \"${{ runner.temp }}\" --output \"${{ runner.temp }}/verification-full\" --define GOLEM_BUILD_BENCHMARKS=ON --define GOLEM_BUILD_BINDINGS=ON"
         env:
-          GOLEM_TRACE_TEST_OUTPUT: ${{ runner.temp }}/syscall-tests
-        run: python3 tools/test_syscall_record.py --linux-integration
-      - name: Preserve trace evidence including failures
-        if: always()
-        uses: actions/upload-artifact@v4
+          ASAN_OPTIONS: "${{ matrix.os == 'ubuntu-latest' && matrix.preset == 'asan' && 'detect_leaks=1:halt_on_error=1' || 'halt_on_error=1' }}"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+      - name: "Preserve full-suite evidence (including failures)"
+        if: "always()"
+        uses: "actions/upload-artifact@v4"
         with:
-          name: syscall-diagnostics-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/syscall-tests/
-          if-no-files-found: error
+          name: "verification-${{ matrix.os }}-${{ matrix.preset }}-${{ github.run_attempt }}"
+          path: "${{ runner.temp }}/verification-full/"
+          if-no-files-found: "error"
           retention-days: 14
-  public-alpha:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev
-      - if: runner.os == 'macOS'
-        run: brew install cmake ninja openssl@3 pkg-config json-c md4c
-      - run: python3 -m unittest discover -s tools -p 'test_*.py'
-      - if: runner.os == 'Linux'
-        uses: ./.github/actions/setup-json-c
-      - run: python3 tools/verify_alpha.py --output "${{ runner.temp }}/alpha-records"
-      - name: Preserve acceptance command evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: alpha-${{ matrix.os }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/alpha-records/
-          if-no-files-found: warn
-          retention-days: 14
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        preset: [dev, release, asan]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Ninja (Linux)
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev
-      - name: Install Ninja (macOS)
-        if: runner.os == 'macOS'
-        run: brew list ninja || brew install ninja
-      - name: Install OpenSSL (macOS)
-        if: runner.os == 'macOS'
-        run: brew list openssl@3 || brew install openssl@3
-      - name: Install JSON dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: brew install pkg-config json-c md4c
-      - if: runner.os == 'Linux'
-        uses: ./.github/actions/setup-json-c
-      - name: Build and full-suite evidence
-        run: >-
-          python3 tools/verify_environment.py --preset ${{ matrix.preset }} --profile full-ci
-          --root "${{ runner.temp }}" --output "${{ runner.temp }}/verification-full"
-          --define GOLEM_BUILD_BENCHMARKS=ON --define GOLEM_BUILD_BINDINGS=ON
-      - name: Preserve full-suite evidence (including failures)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: verification-${{ matrix.os }}-${{ matrix.preset }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/verification-full/
-          if-no-files-found: error
-          retention-days: 14
-      - name: Linux kernel resource enforcement (isolated fixture)
-        if: runner.os == 'Linux' && matrix.preset == 'release'
-        shell: bash
+      - name: "Linux kernel resource enforcement (isolated fixture)"
+        if: "runner.os == 'Linux' && matrix.preset == 'release'"
+        shell: "bash"
         run: |
           set -euo pipefail
           scope="/sys/fs/cgroup/golem-fixture-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           sudo mkdir "$scope"
           trap 'sudo rmdir "$scope"' EXIT
           sudo python3 tools/verify_resource.py --build build/release --scope "$scope"
-      - name: Runtime contract evidence (fixtures, not live agents)
-        if: matrix.preset == 'release'
-        run: python3 tools/verify_runtime.py --build build/release --output build/runtime-validation
-      - name: Linux leak checks
-        if: runner.os == 'Linux' && matrix.preset == 'asan'
-        run: ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 ctest --test-dir build/asan --output-on-failure
-      - run: cmake --install build/${{ matrix.preset }} --prefix "${{ runner.temp }}/golem"
-      - run: cmake -S tests/consumer -B build/consumer -G Ninja -DCMAKE_PREFIX_PATH="${{ runner.temp }}/golem"
-      - run: cmake --build build/consumer
-      - run: ctest --test-dir build/consumer --output-on-failure
-      - name: Python prototype regression
-        run: PYTHONPATH=src python3 -m unittest discover -s tests
-  restricted-diagnostics:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev
-      - if: runner.os == 'macOS'
-        run: brew install cmake ninja openssl@3 pkg-config json-c md4c
-      - if: runner.os == 'Linux'
-        uses: ./.github/actions/setup-json-c
-      - name: Diagnostic contract evidence (injection; runner is not a sandbox)
-        run: >-
-          python3 tools/verify_environment.py --preset dev --profile restricted-sandbox
-          --root "${{ runner.temp }}" --output "${{ runner.temp }}/verification-diagnostic"
-      - name: Preserve diagnostic evidence (including failures)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: diagnostic-${{ matrix.os }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/verification-diagnostic/
-          if-no-files-found: error
-          retention-days: 14
+      - name: "Runtime contract evidence (fixtures, not live agents)"
+        if: "matrix.preset == 'release'"
+        run: "python3 tools/verify_runtime.py --build build/release --output build/runtime-validation"
+      - run: "cmake --install build/${{ matrix.preset }} --prefix \"${{ runner.temp }}/golem\""
+      - run: "cmake -S tests/consumer -B build/consumer -G Ninja -DCMAKE_PREFIX_PATH=\"${{ runner.temp }}/golem\""
+      - run: "cmake --build build/consumer"
+      - run: "ctest --test-dir build/consumer --output-on-failure"
   language-bindings:
+    needs: ["changes"]
+    if: "needs.changes.outputs.bindings == 'true'"
+    runs-on: "${{ matrix.os }}"
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+        os: ["ubuntu-latest", "macos-latest"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: "actions/checkout@v4"
         with:
-          python-version: '3.11'
-      - uses: actions/setup-node@v4
+          persist-credentials: false
+      - uses: "actions/setup-python@v5"
         with:
-          node-version: '22'
-      - if: runner.os == 'Linux'
-        run: sudo apt-get update
-      - if: runner.os == 'Linux'
-        run: sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev
-      - if: runner.os == 'macOS'
-        run: brew install ninja openssl@3 pkg-config json-c md4c
-      - if: runner.os == 'Linux'
-        uses: ./.github/actions/setup-json-c
-      - run: cmake --preset bindings
-      - run: cmake --build --preset bindings
-      - run: ctest --preset bindings
-      - name: Qualify isolation and language contracts (derived evidence only)
-        run: python3 tools/verify_isolation.py --build build/bindings --bindings build/bindings --output build/isolation-validation
-      - run: npm ci --prefix bindings/typescript --ignore-scripts --no-audit --no-fund
-      - run: npm run --prefix bindings/typescript typecheck
-      - run: python -m pip install ./bindings/python
-      - run: cmake --install build/bindings --prefix "${{ github.workspace }}/build/install-bindings"
-      - run: cmake -E copy_directory build/install-bindings build/relocated-bindings
-      - run: cmake -S bindings/tests/consumer -B build/binding-c-consumer -G Ninja -DCMAKE_PREFIX_PATH="${{ github.workspace }}/build/relocated-bindings"
-      - run: cmake --build build/binding-c-consumer
-      - run: ctest --test-dir build/binding-c-consumer --output-on-failure
-      - run: npm pack ./bindings/typescript --ignore-scripts --pack-destination build/bindings
-      - run: npm install --prefix build/node-binding-consumer --ignore-scripts --no-audit --no-fund ./build/bindings/golem-awe-runtime-0.1.0.tgz
-      - run: python bindings/tests/test_installed.py build/relocated-bindings . build/node-binding-consumer/node_modules/@golem-awe/runtime
-      - run: cmake -E copy bindings/typescript/tests/consumer.ts build/node-binding-consumer/consumer.mts
-      - run: node bindings/typescript/node_modules/typescript/bin/tsc --strict --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext build/node-binding-consumer/consumer.mts
+          python-version: "3.11"
+      - uses: "actions/setup-node@v4"
+        with:
+          node-version: "22"
+      - if: "runner.os == 'Linux'"
+        run: "sudo apt-get update"
+      - if: "runner.os == 'Linux'"
+        run: "sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev"
+      - if: "runner.os == 'macOS'"
+        run: "brew install ninja openssl@3 pkg-config json-c md4c"
+      - if: "runner.os == 'Linux'"
+        uses: "./.github/actions/setup-json-c"
+      - run: "cmake --preset bindings"
+      - run: "cmake --build --preset bindings"
+      - run: "ctest --preset bindings"
+      - name: "Qualify isolation and language contracts (derived evidence only)"
+        run: "python3 tools/verify_isolation.py --build build/bindings --bindings build/bindings --output build/isolation-validation"
+      - run: "npm ci --prefix bindings/typescript --ignore-scripts --no-audit --no-fund"
+      - run: "npm run --prefix bindings/typescript typecheck"
+      - run: "python -m pip install ./bindings/python"
+      - run: "cmake --install build/bindings --prefix \"${{ github.workspace }}/build/install-bindings\""
+      - run: "cmake -E copy_directory build/install-bindings build/relocated-bindings"
+      - run: "cmake -S bindings/tests/consumer -B build/binding-c-consumer -G Ninja -DCMAKE_PREFIX_PATH=\"${{ github.workspace }}/build/relocated-bindings\""
+      - run: "cmake --build build/binding-c-consumer"
+      - run: "ctest --test-dir build/binding-c-consumer --output-on-failure"
+      - run: "npm pack ./bindings/typescript --ignore-scripts --pack-destination build/bindings"
+      - run: "npm install --prefix build/node-binding-consumer --ignore-scripts --no-audit --no-fund ./build/bindings/golem-awe-runtime-0.1.0.tgz"
+      - run: "python bindings/tests/test_installed.py build/relocated-bindings . build/node-binding-consumer/node_modules/@golem-awe/runtime"
+      - run: "cmake -E copy bindings/typescript/tests/consumer.ts build/node-binding-consumer/consumer.mts"
+      - run: "node bindings/typescript/node_modules/typescript/bin/tsc --strict --noEmit --target ES2022 --module NodeNext --moduleResolution NodeNext build/node-binding-consumer/consumer.mts"
+  mcp:
+    needs: ["changes"]
+    if: "needs.changes.outputs.integration == 'true'"
+    uses: "./.github/workflows/observation.yml"
+    with:
+      full: "${{ needs.changes.outputs.full == 'true' }}"
+      clients: "${{ needs.changes.outputs.clients == 'true' }}"
+  package:
+    needs: ["changes"]
+    if: "needs.changes.outputs.package == 'true'"
+    uses: "./.github/workflows/conan.yml"
+    with:
+      full: "${{ needs.changes.outputs.full == 'true' }}"
+  public-alpha:
+    needs: ["changes"]
+    if: "needs.changes.outputs.full == 'true'"
+    runs-on: "${{ matrix.os }}"
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "macos-latest"]
+    steps:
+      - uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.11"
+      - if: "runner.os == 'Linux'"
+        run: "sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev"
+      - if: "runner.os == 'macOS'"
+        run: "brew install cmake ninja openssl@3 pkg-config json-c md4c"
+      - if: "runner.os == 'Linux'"
+        uses: "./.github/actions/setup-json-c"
+      - run: "python3 tools/verify_alpha.py --output \"${{ runner.temp }}/alpha-records\""
+      - name: "Preserve acceptance command evidence"
+        if: "always()"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "alpha-${{ matrix.os }}-${{ github.run_attempt }}"
+          path: "${{ runner.temp }}/alpha-records/"
+          if-no-files-found: "warn"
+          retention-days: 14
+  restricted-diagnostics:
+    needs: ["changes"]
+    if: "needs.changes.outputs.full == 'true'"
+    runs-on: "${{ matrix.os }}"
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "macos-latest"]
+    steps:
+      - uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.11"
+      - if: "runner.os == 'Linux'"
+        run: "sudo apt-get update && sudo apt-get install -y ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev"
+      - if: "runner.os == 'macOS'"
+        run: "brew install cmake ninja openssl@3 pkg-config json-c md4c"
+      - if: "runner.os == 'Linux'"
+        uses: "./.github/actions/setup-json-c"
+      - name: "Diagnostic contract evidence (injection; runner is not a sandbox)"
+        run: "python3 tools/verify_environment.py --preset dev --profile restricted-sandbox --root \"${{ runner.temp }}\" --output \"${{ runner.temp }}/verification-diagnostic\""
+      - name: "Preserve diagnostic evidence (including failures)"
+        if: "always()"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "diagnostic-${{ matrix.os }}-${{ github.run_attempt }}"
+          path: "${{ runner.temp }}/verification-diagnostic/"
+          if-no-files-found: "error"
+          retention-days: 14
+  syscall-diagnostics:
+    needs: ["changes"]
+    if: "needs.changes.outputs.syscall == 'true'"
+    runs-on: "ubuntu-24.04"
+    timeout-minutes: 10
+    steps:
+      - uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+      - uses: "actions/setup-python@v5"
+        with:
+          python-version: "3.11"
+      - run: "sudo apt-get update && sudo apt-get install -y strace"
+      - name: "Real descendant syscall and tracer-exit tests"
+        env:
+          GOLEM_TRACE_TEST_OUTPUT: "${{ runner.temp }}/syscall-tests"
+        run: "python3 tools/test_syscall_record.py --linux-integration"
+      - name: "Preserve trace evidence including failures"
+        if: "always()"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "syscall-diagnostics-${{ github.run_attempt }}"
+          path: "${{ runner.temp }}/syscall-tests/"
+          if-no-files-found: "error"
+          retention-days: 14
   parser-fuzz:
-    runs-on: ubuntu-latest
+    needs: ["changes"]
+    if: "needs.changes.outputs.fuzz == 'true'"
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt-get install -y clang ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev
-      - uses: ./.github/actions/setup-json-c
-      - run: cmake --preset fuzz
-      - run: cmake --build --preset fuzz
-      - run: ctest --preset fuzz
+      - uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+      - run: "sudo apt-get update && sudo apt-get install -y clang ninja-build libssl-dev pkg-config libjson-c-dev libmd4c-dev"
+      - uses: "./.github/actions/setup-json-c"
+      - run: "cmake --preset fuzz"
+      - run: "cmake --build --preset fuzz"
+      - run: "ctest --preset fuzz"
+  ready:
+    name: "CI Ready"
+    needs: ["changes", "workflow-lint", "python", "native", "language-bindings", "mcp", "package", "public-alpha", "restricted-diagnostics", "syscall-diagnostics", "parser-fuzz"]
+    if: "always()"
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 5
+    steps:
+      - name: "Require every selected check to succeed"
+        shell: "python"
+        env:
+          NEEDS_JSON: "${{ toJSON(needs) }}"
+          PLAN_JSON: "${{ needs.changes.outputs.plan }}"
+        run: |
+          import json
+          import os
+          import unittest
+
+
+          def required(plan):
+              if set(plan) != {'native','python_tools','prototype','integration','bindings','package','fuzz','syscall','clients','full'} or any(type(v) is not bool for v in plan.values()):
+                  raise ValueError('Invalid selection manifest')
+              if plan['clients'] and not plan['integration'] or plan['full'] and not all(plan.values()):
+                  raise ValueError('Inconsistent selection manifest')
+              return {'workflow-lint':plan['full'], 'python':plan['python_tools'] or plan['prototype'],
+                      'native':plan['native'], 'language-bindings':plan['bindings'], 'mcp':plan['integration'],
+                      'package':plan['package'], 'public-alpha':plan['full'], 'restricted-diagnostics':plan['full'],
+                      'syscall-diagnostics':plan['syscall'], 'parser-fuzz':plan['fuzz']}
+
+
+          def require_ready(needs, plan):
+              expected=required(plan)
+              if set(needs) != set(expected) | {'changes'} or needs['changes']['result'] != 'success':
+                  raise ValueError('Change selection or dependency inventory failed')
+              failed=[name for name,selected in expected.items()
+                      if needs[name]['result'] not in ('success','skipped') or selected and needs[name]['result'] != 'success']
+              if failed:
+                  raise ValueError('Failed, cancelled or unexpectedly skipped checks: '+', '.join(failed))
+
+
+          class GateTests(unittest.TestCase):
+              def fixture(self, full):
+                  plan=dict.fromkeys(('native','python_tools','prototype','integration','bindings','package','fuzz','syscall','clients','full'),full)
+                  needs={name:{'result':'success' if selected else 'skipped'} for name,selected in required(plan).items()}
+                  needs['changes']={'result':'success'}
+                  return needs,plan
+
+              def test_success_and_intentionally_unselected(self):
+                  for full in (False,True):
+                      require_ready(*self.fixture(full))
+
+              def test_every_required_failure_cancellation_and_skip(self):
+                  for name in self.fixture(True)[0]:
+                      for status in ('failure','cancelled','skipped','timed_out'):
+                          needs,plan=self.fixture(True);needs[name]['result']=status
+                          with self.subTest(job=name,status=status),self.assertRaises(ValueError):
+                              require_ready(needs,plan)
+
+              def test_unselected_failure_and_unknown_or_missing_dependency_fail(self):
+                  needs,plan=self.fixture(False);needs['mcp']['result']='failure'
+                  with self.assertRaises(ValueError):require_ready(needs,plan)
+                  for name in ('mcp','unknown'):
+                      needs,plan=self.fixture(False)
+                      if name=='mcp':del needs[name]
+                      else:needs[name]={'result':'success'}
+                      with self.assertRaises(ValueError):require_ready(needs,plan)
+
+              def test_missing_or_non_boolean_manifest_fails(self):
+                  needs,plan=self.fixture(False)
+                  for value in ({},{**plan,'full':'false'}):
+                      with self.assertRaises(ValueError):require_ready(needs,value)
+
+
+          result=unittest.TextTestRunner(verbosity=1).run(unittest.defaultTestLoader.loadTestsFromTestCase(GateTests))
+          if not result.wasSuccessful():
+              raise SystemExit(1)
+          try:
+              require_ready(json.loads(os.environ['NEEDS_JSON']),json.loads(os.environ['PLAN_JSON'])['lanes'])
+          except (KeyError,ValueError,TypeError) as error:
+              raise SystemExit(str(error))
+          print('PASS: every selected check succeeded; unselected checks were intentionally skipped.')

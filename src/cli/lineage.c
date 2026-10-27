@@ -1,4 +1,5 @@
-#include "internal.h"
+#include "work.h"
+#include <stdlib.h>
 #include "golem/lineage.h"
 #include <inttypes.h>
 #include <stdio.h>
@@ -26,6 +27,33 @@ static bool sequence_parse(const char *text, uint64_t *out)
 
 int golem_cli_lineage(int argc, char **argv)
 {
+    if (argc == 5 && !strcmp(argv[2], "store")) {
+        cli_blob input = {0};
+        golem_lineage *graph = NULL;
+        golem_evidence_store *store = NULL;
+        golem_digest digest;
+        golem_status status = cli_read(argv[4], CLI_BUNDLE_MAX, &input);
+        if (status == GOLEM_OK)
+            status = golem_lineage_decode((golem_bytes){input.data, input.size}, NULL, &graph, NULL);
+        if (status == GOLEM_OK)
+            status = golem_evidence_open(argv[3], true, NULL, &store, NULL);
+        if (status == GOLEM_OK)
+            status = golem_lineage_store(graph, store, &digest, NULL);
+        golem_status closed = golem_evidence_close(store);
+        if (status == GOLEM_OK)
+            status = closed;
+        if (status == GOLEM_OK) {
+            char hex[GOLEM_DIGEST_HEX_CAPACITY];
+            size_t required;
+            status = golem_digest_format(&digest, hex, sizeof(hex), &required);
+            if (status == GOLEM_OK && printf("{\"graph_digest\":\"%s\",\"acceptance_verified\":false}\n", hex) < 0)
+                status = GOLEM_ERR_IO;
+        }
+        golem_lineage_free(graph);
+        free(input.data);
+        return status == GOLEM_OK ? 0 : cli_emit(status, NULL);
+    }
+
     if (argc < 3) return usage();
     bool trace = strcmp(argv[2], "trace") == 0;
     bool verify = strcmp(argv[2], "verify") == 0;

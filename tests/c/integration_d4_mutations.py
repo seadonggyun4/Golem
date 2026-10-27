@@ -230,7 +230,13 @@ class D4(Actions, fixture.D2):
                     str(fixture.fixture.fixture.SOURCE / "tools/integration_mutation_mcp.py"),
                     "--policy", str(self.policy_path), "--reviewed-policy-sha256", self.policy_digest, "--approve-mutations"])
                 async with Client(params, mode=mode, read_timeout_seconds=120) as client:
-                    names = {t.name for t in (await client.list_tools()).tools}
+                    tools = (await client.list_tools()).tools
+                    names = {t.name for t in tools}
+                    historical = next(t for t in tools if t.name == 'golem_execution_read')
+                    self.assertTrue(historical.annotations.read_only_hint)
+                    self.assertTrue(historical.annotations.idempotent_hint)
+                    self.assertFalse(historical.annotations.destructive_hint)
+                    self.assertFalse(historical.annotations.open_world_hint)
                     import integration_mcp as branding
                     self.assertIsNotNone(client.server_info)
                     self.assertEqual(c.sha(client.server_info.icons[0].src.encode()),
@@ -286,6 +292,15 @@ class QA(Actions, execution.Execution):
         self.assertEqual(result["native_reply"]["record"]["status"], "PASS")
         self.assertEqual(self.invoke("execution_request"), result)
         self.assertEqual((self.repo / "invoked").read_text(), "x")
+
+        before = {str(p): c.sha(p.read_bytes()) for p in self.work.rglob('*') if p.is_file()}
+        with patch.object(records, 'capture', side_effect=AssertionError('historical read cannot launch native')):
+            reply = self.api.call('execution_read', {**self.args, 'operation': 'stored_result'})
+        self.assertEqual(reply['result'], result)
+        self.assertFalse(reply['native_state_changed'])
+        self.assertFalse(reply['native_dispatch_performed'])
+        self.assertEqual(before, {str(p): c.sha(p.read_bytes()) for p in self.work.rglob('*') if p.is_file()})
+        self.assertEqual((self.repo / 'invoked').read_text(), 'x')
 
     def test_receipted_prepare_and_finish_reuse_existing_core(self):
         self.approve_qa("owner-prepare", request={"schema_version": 1, "operation": "prepare", "contract": self.contract})

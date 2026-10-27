@@ -7,11 +7,19 @@ import sys
 import integration_contract as c
 import integration_registry as r
 import integration_transfer as transfer
+import integration_task_actions as tasks
+import integration_quality_actions as quality
+import integration_parallel_actions as parallel
 
 NAMES = ("session_claim", "session_begin", "session_resume", "session_reconcile",
-         "session_submit", "document_submit", "execution_request")
+         "session_submit", "document_submit", "execution_request",
+    "session_start", "session_heartbeat", "session_reject_output", "binding_attach",
+    "role_enroll", "role_assess", "completion_finalize", "completion_report", "reentry_decide",
+    "reentry_report", "document_project", "work_create", "context_publish", "discovery_snapshot",
+    "profile_register", "run_link", "work_noop_run", "adapter_noop_run", "lineage_store", "approval_request",
+    "evidence_import", "proof_publish", "research_request", "research_export", "cost_inbox_reconcile", "helper_execute", "execution_verify", "inventory_capture", "candidate_request", "workspace_request")
 MODULES = ("integration_mutation_contract.py", "integration_mutations.py", "integration_mutation_mcp.py",
-           "integration_lifecycle.py", "integration_recovery.py", "integration_update.py", "integration_reload_probe.py")
+           "integration_parallel_hosts.py", "integration_parallel_actions.py", "integration_quality_actions.py", "integration_quality_reads.py", "integration_helper_contract.py", "integration_task_actions.py", "integration_lifecycle.py", "integration_recovery.py", "integration_update.py", "integration_reload_probe.py")
 TEXT = {"type": "string", "maxLength": c.LIMIT}
 LABEL = {"type": "string", "maxLength": 64, "pattern": "^[A-Za-z0-9_-]*$"}
 TOKEN = c.obj({"epoch": {"type": "integer", "minimum": 1, "maximum": 4096},
@@ -50,7 +58,7 @@ def validate(value):
     return value
 
 
-def native_action(entry, value):
+def action_shape(entry, value, *, allow_missing_approval=False):
     """Only the envelope is ours; native parsers and reducers remain authoritative."""
     c.bounded(value)
     c.require(len(c.encoded(value)) <= c.LIMIT, "JSON_SIZE")
@@ -58,6 +66,12 @@ def native_action(entry, value):
     request = c.decode(value["native_json"].encode())
     c.require(isinstance(request, dict), "NATIVE_ACTION")
     name, owner = entry["tool"], entry["session_id"]
+    if name in parallel.NAMES:
+        return parallel.shape(entry, value)
+    if name in quality.NAMES:
+        return quality.shape(entry, value)
+    if name in tasks.NAMES:
+        return tasks.shape(entry, value)
     if name.startswith("session_"):
         operation = name.removeprefix("session_")
         fields = {"schema_version": {"type": "integer", "minimum": 1, "maximum": 2},
@@ -117,12 +131,23 @@ def native_action(entry, value):
     else:
         c.require(not value["context_json"] and not value["count_json"], "ACTION_CONTEXT_SCOPE")
     if name == "execution_request":
-        c.require(value["approval"] is not None, "PENDING_APPROVAL")
+        if value["approval"] is None:
+            c.require(allow_missing_approval is True, "PENDING_APPROVAL")
+            return request
         c._validate(value["approval"], QA)
         shell = value["approval"]["shell_contract"]
         c.require(not shell or len(shell) == 64, "SCHEMA")
         if shell:
             c._validate(shell, c.DIGEST)
+    else:
+        c.require(value["approval"] is None, "ACTION_APPROVAL_SCOPE")
+    return request
+
+
+def native_action(entry, value):
+    """Dispatch validation always requires approval and rechecks owner asset pins."""
+    request = action_shape(entry, value)
+    if entry["tool"] == "execution_request":
         decision_pin = value["approval"]["decision"]
         c.require(Path(decision_pin["path"]).exists(), "PENDING_APPROVAL")
         data = r.regular(Path(decision_pin["path"]), private=True)
@@ -130,8 +155,6 @@ def native_action(entry, value):
         c._validate(c.decode(data), DECISION)
         c.require(r.file_pin(Path(value["approval"]["host"]["path"])) == value["approval"]["host"], "PIN_MISMATCH")
         c.require(os.access(value["approval"]["host"]["path"], os.X_OK), "CLI_NOT_EXECUTABLE")
-    else:
-        c.require(value["approval"] is None, "ACTION_APPROVAL_SCOPE")
     return request
 
 
@@ -167,7 +190,11 @@ class Policy:
         data = r.regular(Path(entry["action"]["path"]), private=True)
         c.require(c.sha(data) == entry["action"]["sha256"], "ACTION_CHANGED")
         value = c.decode(data)
-        return value, native_action(entry, value)
+        request = native_action(entry, value)
+        if entry["tool"] in tasks.NAMES:
+            project, _ = self.authorize(entry)
+            tasks.authorize(entry, request, project)
+        return value, request
 
 
 def main():

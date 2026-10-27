@@ -7,6 +7,12 @@ import threading
 
 import execution_record as records
 import integration_backend as backend
+import integration_preparations as preparations
+import integration_quality_reads as quality_reads
+import integration_parallel_reads as parallel_reads
+import integration_parallel_preparations as parallel_preparations
+import integration_reads as extended_reads
+import integration_read_resources as read_resources
 import integration_contract as c
 import integration_registry as r
 from integration_transfer import NAMES
@@ -15,6 +21,15 @@ WORK_ARGS = {"project_id": c.ID, "work_id": c.ID}
 CONTEXT_ARGS = {**WORK_ARGS, "selection_id": c.ID, "source_snapshot": c.DIGEST,
                 "target_kind": c.ID, "recipe": c.enum("current-v1", "original-v1")}
 SCHEMAS = {
+    "parallel_prepare": parallel_preparations.SCHEMAS["parallel_prepare"],
+    "merge_prepare": parallel_preparations.SCHEMAS["merge_prepare"],
+    "workspace_read": parallel_reads.SCHEMAS["workspace_read"],
+    "candidate_read": parallel_reads.SCHEMAS["candidate_read"],
+    "inventory_read": parallel_reads.SCHEMAS["inventory_read"],
+    "proof_read": quality_reads.SCHEMAS["proof_read"],
+    "research_read": quality_reads.SCHEMAS["research_read"],
+    "cost_read": quality_reads.SCHEMAS["cost_read"],
+    "execution_read": quality_reads.SCHEMAS["execution_read"],
     "projects_list": c.obj({}),
     "work_inspect": c.obj({**WORK_ARGS, "view": c.enum("status", "next", "record")}),
     "history_read": c.obj({**WORK_ARGS, "limit": {"type": "integer", "minimum": 1, "maximum": 256},
@@ -24,9 +39,37 @@ SCHEMAS = {
     "evidence_read": c.obj({**WORK_ARGS, "digest": c.DIGEST,
                             "max_bytes": {"type": "integer", "minimum": 1, "maximum": 1048576}}),
     "completion_check": c.obj({**WORK_ARGS, "selection_id": c.ID}),
+    "inputs_prepare": preparations.SCHEMAS["inputs_prepare"],
+    "action_prepare": preparations.SCHEMAS["action_prepare"],
+    "contract_prepare": preparations.SCHEMAS["contract_prepare"],
+    "approved_action_prepare": preparations.SCHEMAS["approved_action_prepare"],
+    "plan_read": preparations.SCHEMAS["plan_read"],
+    "action_confirm": preparations.SCHEMAS["action_confirm"],
+    "workflow_read": extended_reads.SCHEMAS["workflow_read"],
+    "template_read": extended_reads.SCHEMAS["template_read"],
+    "role_read": extended_reads.SCHEMAS["role_read"],
+    "session_read": extended_reads.SCHEMAS["session_read"],
+    "binding_read": extended_reads.SCHEMAS["binding_read"],
+    "document_read": extended_reads.SCHEMAS["document_read"],
+    "context_read": extended_reads.SCHEMAS["context_read"],
+    "discovery_read": extended_reads.SCHEMAS["discovery_read"],
+    "events_read": read_resources.SCHEMAS["events_read"],
+    "journal_read": extended_reads.SCHEMAS["journal_read"],
+    "profile_read": extended_reads.SCHEMAS["profile_read"],
+    "diagnostic_read": extended_reads.SCHEMAS["diagnostic_read"],
+    "native_validate": extended_reads.SCHEMAS["native_validate"],
+    "report_read": extended_reads.SCHEMAS["report_read"],
+    "approval_read": extended_reads.SCHEMAS["approval_read"],
+    "reentry_read": extended_reads.SCHEMAS["reentry_read"],
+    "artifact_read": read_resources.SCHEMAS["artifact_read"],
+    "usage_read": read_resources.SCHEMAS["usage_read"],
+    "revision_read": read_resources.SCHEMAS["revision_read"],
+    "configuration_read": read_resources.SCHEMAS["configuration_read"],
+    "bundle_read": read_resources.SCHEMAS["bundle_read"],
 }
-AUDIT_READ_COST = {"work_inspect": 1, "history_read": 1, "context_get": 5,
-                   "handoff_prepare": 5, "evidence_read": 3, "completion_check": 3}
+AUDIT_READ_COST = {"workspace_read":3,"candidate_read":3,"inventory_read":3,"proof_read":3,"research_read":3,"cost_read":3,"execution_read":3,"work_inspect": 1, "history_read": 1, "context_get": 5,
+                   "handoff_prepare": 5, "evidence_read": 3, "completion_check": 3,
+                   'workflow_read': 3, 'template_read': 3, 'role_read': 3, 'session_read': 3, 'binding_read': 3, 'document_read': 3, 'context_read': 3, 'discovery_read': 3, 'events_read': 1, 'journal_read': 3, 'profile_read': 3, 'diagnostic_read': 3, 'native_validate': 3, 'report_read': 3, 'approval_read': 3, 'reentry_read': 3, 'artifact_read': 1, 'usage_read': 1, 'revision_read': 1, 'configuration_read': 1, 'bundle_read': 1}
 COUNTER_GUIDANCE = (
     "Session sequence and document generation are different counters, not timestamps. "
     "For example sequence=1 and generation=4 can describe the same unchanged Work. "
@@ -128,13 +171,20 @@ def context_failure(process, output):
 
 
 class Service:
-    def __init__(self, transfer):
+    def __init__(self, transfer, resources=None, preparation_policy=None):
         self.transfer = transfer
+        self.resources = resources
+        self.preparation_policy = preparation_policy
+        preparations.initialize(self)
         self.registry = transfer.registry
         # Native document locks and spool admission are serialized within a host.
         self._lock = threading.Lock()
 
     def _read(self, scope, work_id, operation, limit=64, cursor=None):
+        hosts = getattr(self, "parallel_hosts", None)
+        if hosts is not None and hosts.parent(scope["binding"]["project_id"], work_id) is not None and operation in ("record", "status", "next"):
+            self._authorize(scope, work_id, operation)
+            return hosts.read(scope, work_id, operation)
         return backend.read(self.registry, {"schema": "golem.integration-read.v1",
             "binding": scope["binding"], "work_id": work_id, "operation": operation,
             "limit": limit, "cursor": cursor})
@@ -155,7 +205,10 @@ class Service:
                     except (c.IntegrationError, OSError, ValueError):
                         continue
                     result.append({"project_id": scope["binding"]["project_id"], "work_id": work_id,
-                                   "tools": scope["tools"]})
+                                   "tools": [name for name in scope["tools"] if (name != "workspace_read" or getattr(self, "parallel_result", None) is not None and getattr(self, "parallel_hosts", None) is not None and self.parallel_hosts.parent(scope["binding"]["project_id"], work_id) is not None) and (name not in read_resources.NAMES or
+                                             self.resources is not None and self.resources.permitted(scope["binding"]["project_id"], work_id, name)) and
+                                             (name not in preparations.OWNER_NAMES or preparations.owner_available(self, scope["binding"]["project_id"], work_id))],
+                                   "read_resources": self.resources.catalog(scope["binding"]["project_id"], work_id, scope["tools"]) if self.resources is not None else []})
         return result
 
     def tools(self):
@@ -194,6 +247,18 @@ class Service:
                     self._authorize(scope, args["work_id"], operation)
                 backend._quota(self.registry.root, AUDIT_READ_COST[name])
                 result = self._verified_query(scope, args, name)
+            elif name in ('inputs_prepare','action_prepare','contract_prepare','approved_action_prepare','plan_read','action_confirm'):
+                result = preparations.read(self, scope, name, args)
+            elif name in ('parallel_prepare','merge_prepare'):
+                result = parallel_preparations.read(self, scope, name, args)
+            elif name in ('candidate_read','inventory_read','workspace_read'):
+                result = parallel_reads.read(self, scope, name, args)
+            elif name in ('proof_read','research_read','cost_read','execution_read'):
+                result = quality_reads.read(self, scope, name, args)
+            elif name in ('artifact_read', 'usage_read', 'revision_read', 'configuration_read', 'bundle_read', 'events_read'):
+                result = read_resources.read(self, scope, name, args)
+            elif name in ('workflow_read', 'template_read', 'role_read', 'session_read', 'binding_read', 'document_read', 'context_read', 'discovery_read', 'journal_read', 'profile_read', 'diagnostic_read', 'native_validate', 'report_read', 'approval_read', 'reentry_read'):
+                result = extended_reads.read(self, scope, name, args)
             else:
                 operation = args["view"] if name == "work_inspect" else "history"
                 self._authorize(scope, args["work_id"], operation)

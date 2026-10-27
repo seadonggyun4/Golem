@@ -1,5 +1,11 @@
 # 원문 대조·병렬 실행·MCP 배포 개발계획
 
+기존 기능의 MCP 제공 누락·사용성 보완과 이 계획의 연결은
+[전 기능 MCP 연결 계획](mcp-full-coverage-plan.ko.md)에 정리한다.
+해당 M 단계는 이 문서의 IA-R/P 단계·승인된 D01/D08을 대체하거나 미결 정책을 확정하지 않는다.
+M0의 현재 구현·정적/fixture 검증·남은 source/operation 의무는
+[인계 재검토 기록](mcp-m0-review-2026-10-26.ko.md)에 분리해 기록한다. 실제 client E2E는 NOT_RUN이다.
+
 상태: **구현 전 설계 제안**. 작성·소스 대조: 2026-10-22. 이 문서는 구현 승인, 실행 승인, 기능 완료 또는 테스트 PASS 기록이 아니다.
 
 ## 1. 기준과 읽는 순서
@@ -157,3 +163,37 @@ flowchart TD
 검토 보완으로 control/protected 전이 분리, resolution 준비/commit, 시험 하위 사례와 추적표를 구체화해도 ADR-D01–D08/M01은 계속 미결이다. 이는 절차적 모순을 제거하는 설계 제안이며 사용자가 새 기술 선택·모든 구현·실행 정책을 승인했다는 뜻이 아니다.
 
 이 문서 작성에서 제품 빌드·제품 테스트·설치·Git commit/push를 실행하지 않는다. 문서 링크·JSON 구문·근거 경로·용어와 문서 diff만 확인하고 그 범위를 최종 보고한다.
+
+M0 전수 정적 inventory는 [최신 출구 검토](mcp-m0-review-2026-10-26.ko.md)와
+[재계산 근거](mcp-m0-reconciliation.json)에서 source/operation/검토 blocker 0을 확인한다.
+미제공 facade·owner 관리·지원 제외를 구분했으며 실제 E2E·제품 delivery 완료·권한 확대를 뜻하지 않는다.
+
+
+### M1 local read extension (2026-10-26)
+
+The development worktree adds 21 closed local read tools to D2 and delegates them through D4. Native reads preserve raw bytes and check unchanged Work records; resource reads require a separate optional owner-selected file/ID/SHA/tool policy. Existing scopes and remote gateway allowlists do not expand automatically. Completion/reentry inspect is nonprojecting; reentry status opens read-only. Execution bundle/render reads are bound to committed receipt references. Historical usage/revision/billing claims never become live acceptance or delegated billing authority.
+
+See [M1 read implementation and fixed 120-item reconciliation](mcp-m1-read-coverage.ko.md) for the schemas, input limits, retained M3/M4/M6 boundaries and fixture results. Actual client/native Work E2E, installation/policy activation and commit/push remain NOT_RUN. M0 repository/operation checks include the three new runtime modules as product sources.
+
+
+### M2 preparation extension (2026-10-26)
+
+Six closed preparation tools share D2 scope and D4 read delegation. They derive common native fences and document references from scoped observations, preserve supplied artifact bytes, and retain immutable instance/basis/age-bound plans in the existing audit spool. Retry of a preparation correlation retrieves the original plan/key; it never dispatches or repairs an action. The D4 pure action shape was separated from mandatory owner asset checks; actual Policy.action still uses native_action with approval required. Already approved actions are re-read by exact pin without changing their bytes; owner pin paths remain local.
+
+[The M2 implementation record](mcp-m2-preparation.ko.md) retains all 134 preparation dependencies and their M3-M5 native obligations. Source/operation/effect checks and adversarial fixtures distinguish this common preparation layer from new typed native operations, owner approval, dispatch admission or actual client E2E. Active connections/approvals/Works and the original repository remain unchanged; commit/push and real E2E are NOT_RUN.
+
+
+M3 development update (2026-10-26): [task action contract](mcp-m3-task-actions.ko.md) connects the frozen 60 M3 obligations through 20 additional exact-owner D4 actions and existing M2 preparation/native reducers. Creation does not register or grant a new Work; approval requests remain pending; noop remains simulation. M4/M5 delivery 130 remains separate. Static/fixture regressions pass; actual client/Work E2E, active policy/connection changes, commit and push are NOT_RUN.
+
+
+M4 development update (2026-10-26): [approved execution/evidence contract and 83-row map](mcp-m4-quality-evidence.ko.md) adds four D2 reads and seven D4 actions, retaining M2/M3 and original QA host authority. Optional helper effects require a separate exact owner policy and default to disabled. Accounting is a disposable first-stage reconstruction, not live-run attachment/settlement. M5 delivery 47 remains. Static/fixture regressions pass; actual external service/client/Work E2E, active policy/connection changes, CI, commit and push are NOT_RUN.
+
+
+## M5 구현 연결 기록 (2026-10-26)
+
+[M5 실제 제공·47개 근거](mcp-m5-parallel-candidates.ko.md)는 기존 native best-of-N candidate/workspace/inventory 경로와 한정 owner host 계약을 연결한다. 종료는 별도 OPERATOR_ATTESTED 자료이며 관측된 reap이나 containment를 뜻하지 않는다. M4 helper는 scheduler로 전용하지 않는다. 원래 P4/P5 병렬 설계는 계속 구현 제안이며, DAG/merge 준비는 기존 M2 spool의 비권한 참조 검토만 제공한다. scheduler·typed-edge 수락·receiver 자원 broker·merge queue·통합 workspace/fresh QA·target CAS broker·merge receipt는 미구현이다. Work 완료·현재 target PASS/채택 가능성·실제 merge를 추론하지 않는다. 기존 승인/설치/연결/실제 Work는 변경하지 않았으며 실제 E2E·외부 호출·승인 적용·merge·commit/push는 NOT_RUN이다.
+
+
+## M6 명시 범위 기록 (2026-10-26)
+
+M6는 Setup/업무 스킬과 5개 source feature ceiling, 공개 파일·schema·import closure 패키지 검증, 기존 Installer/D5 owner 경로를 연결했다. 서명/trust root·embedded runtime/P7 release를 확정하지 않았다. owner83개·M5 미구현7개·unsupported17개를 보존한다. 실제 설치/연결/재로딩/승인 적용·서비스·client/Work E2E·merge·commit/push는 NOT_RUN이다. 상세 계약·처리표·검증은 [M6 기록](mcp-m6-distribution.ko.md)을 따른다.

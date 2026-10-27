@@ -1,0 +1,1910 @@
+{
+  "schema": "golem.m7-m8-observations.v1",
+  "as_of_utc": "2026-10-27T01:41:11.828249+00:00",
+  "source_head": "2e690091a55f366d5f99580ee375fca7610f2f77",
+  "dirty_source": true,
+  "source_inventory_sha256": "bcce0aac247d67a89c8d38366a0fc9e672e0b536c43b055c46da39b0c97f30ca",
+  "counts": {
+    "sources": 552,
+    "observations": 2282,
+    "capabilities": 1187,
+    "product_surfaces": 444,
+    "D2": 43,
+    "D4": 37
+  },
+  "artifact_index": {
+    "parallel": {
+      "sha256": "7be8ab569cfb8aa3e49f735ec69125b0013793c9527c745e0aabccdace18d159",
+      "bytes": 441548,
+      "payload_files": 81,
+      "manifest_version": "0.1.8",
+      "no_private_extra_files": true,
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED"
+    },
+    "prepare": {
+      "sha256": "ae823f5b7ffde749cce65b67d7a93cf6caf001dad30c29ac258d124b3b97e267",
+      "bytes": 441410,
+      "payload_files": 81,
+      "manifest_version": "0.1.8",
+      "no_private_extra_files": true,
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED"
+    },
+    "quality": {
+      "sha256": "34390b4203902bf4bd62e8975e7ed6d874ec3c88b976eb593a7f05b363ff76cc",
+      "bytes": 441582,
+      "payload_files": 81,
+      "manifest_version": "0.1.8",
+      "no_private_extra_files": true,
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED"
+    },
+    "read": {
+      "sha256": "8cfe7177ad40491c86a9c33f3919068c1caa7e8343c457ce2405d898cebc3543",
+      "bytes": 441374,
+      "payload_files": 81,
+      "manifest_version": "0.1.8",
+      "no_private_extra_files": true,
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED"
+    },
+    "task": {
+      "sha256": "f377f2d3a1b9d30bcb6210c269234af2c68ea5bb51cfe0ca84a4bb7fb2af4fb4",
+      "bytes": 441610,
+      "payload_files": 81,
+      "manifest_version": "0.1.8",
+      "no_private_extra_files": true,
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED"
+    }
+  },
+  "fixed_outputs_byte_reproducible": {
+    "mcp-m0-reconciliation.json": true,
+    "mcp-m0-integrated-connections.json": true,
+    "mcp-m0-public-observations.json": true,
+    "mcp-m0-handler-observations.json": true,
+    "mcp-m0-connection-observations.json": true,
+    "mcp-m0-mutation-graph.json": true,
+    "mcp-m0-repository-scope.md": true,
+    "mcp-m0-observations.md": true
+  },
+  "tests": {
+    "integration": {
+      "count": 376,
+      "result": "PASS",
+      "skipped": 0,
+      "log_sha256": "634f9a271ea85a4498d73a0a5a0442a3d9ef9ce9f4892bad45204d600146ac4a"
+    },
+    "capability": {
+      "count": 366,
+      "result": "PASS",
+      "skipped": 0,
+      "log_sha256": "fc7a5e8e858b0bce39af25233a90d4c100dc01a0e9d302e6864beb7a664db4cf"
+    },
+    "native_d2_sdk": {
+      "count": 9,
+      "result": "PASS",
+      "skipped": 0,
+      "log_sha256": "6081131e509fec01aa23b9b5eafbe7659a70eca2486bd334bf6b944fd0d046b2"
+    },
+    "native_d4_sdk": {
+      "count": 15,
+      "result": "PASS",
+      "skipped": 0,
+      "log_sha256": "8a9c13e833acb9937348b3789b67bf9cb0501c87216bc306ec9a5ff0e4eac8fa"
+    },
+    "repository_and_source_roles": {
+      "count": 16,
+      "result": "PASS",
+      "skipped": 0,
+      "log_sha256": "52c362876502d36059bfa1f4602fd392c4f17ad041aa059f5d03edd18604540f"
+    },
+    "startup_and_metadata_subset": {
+      "count": 8,
+      "result": "PASS",
+      "skipped": 0,
+      "log_sha256": "8aca8ae0c69fd4bbef74abbb056481cad0fe4168ecbbe848c39367908ee195bf",
+      "included_in_integration": true
+    },
+    "native_action_regression_subset": {
+      "count": 48,
+      "result": "PASS",
+      "skipped": 0,
+      "log_sha256": "9578fef6286a12ce1babb66501d22e13c81f1dd1daafa5c0d21fcc173dc9fee2",
+      "included_in_integration": true
+    },
+    "metadata_static_subset": {
+      "count": 18,
+      "result": "PASS",
+      "skipped": 0,
+      "log_sha256": "9f94225fcfdf66dc3548a61b614c174a61c65dc5084397d458a5f2794ff120c7",
+      "included_in_capability": true
+    }
+  },
+  "tool_capability_mapping": {
+    "projects_list": "d2.projects_list",
+    "work_inspect": "d2.work_inspect",
+    "evidence_read": "d2.evidence_read",
+    "approved_action_prepare": "m2.tool.approved_action_prepare",
+    "plan_read": "m2.tool.plan_read",
+    "action_confirm": "m2.tool.action_confirm",
+    "session_claim": "d4.session_claim",
+    "completion_check": "d2.completion_check",
+    "execution_read": "m4.tool.execution_read",
+    "execution_request": "d4.execution_request",
+    "document_submit": "d4.document_submit",
+    "completion_finalize": "m3.tool.completion_finalize",
+    "completion_report": "m3.tool.completion_report"
+  },
+  "client_e2e": {
+    "codex": {
+      "client": "ChatGPT desktop Codex",
+      "version": "26.1021.31345",
+      "bundled_cli": "0.164.0-alpha.11.1",
+      "plugin": "0.2.2",
+      "server": "golem-m7-skills",
+      "thread_id": "01a17867-5d3c-7bc1-9858-b14cc8e51899",
+      "claim_observed_in_plugin": "0.2.1",
+      "claim_thread_id": "01a17849-9f30-7301-9220-b9b6be253551",
+      "runtime_modules_identical_to_claim_source": true,
+      "actual_calls": "OBSERVED",
+      "tool_count": 13,
+      "source_consumption_probe": "PASS",
+      "existing_unauthorized_work": "TRANSFER_SCOPE/NOT_DISPATCHED",
+      "claim": "NATIVE_RESULT_RECORDED",
+      "native_sequence_after": 2,
+      "historical_result_retrieval": "PASS_SAME_ID_ONE_RETRIEVAL",
+      "completion": "WAIT",
+      "acceptance_verified": false,
+      "request_id": "8be3791fd4bf456da3b5a02725c1acc7",
+      "native_receipt": "abbf6d2453af8154ff91cd2e010b5762f813cda533be92a1d6aa21626cb39a40",
+      "attempts_after": 1,
+      "claim_result_sha256": "ac49d1649bc90dcfff8243b50acd265ed04c62c796f2bf322f3bb4a62d3ced6f",
+      "current_native_state_matches_immutable_claim_result": true,
+      "immutable_historical_native_state_changed": "POSSIBLE",
+      "claim_replay_is_not_a_new_claim_or_lease": true,
+      "qa_v4": {
+        "request_id": "f6a1d74409774955b1282b7ef0d50e11",
+        "plan_id": "56168240b76649a78c79e09e89fe1b43",
+        "state": "BLOCKED_BY_AUTOMATIC_APPROVAL_REVIEW",
+        "native_dispatched": false,
+        "retry_performed": false,
+        "completion_action": "AUTHOR_DOCUMENT",
+        "completion_target": "qa-result",
+        "acceptance_verified": false,
+        "empty_selection_schema_failure_corrected_by_one_readonly_query": true
+      },
+      "qa_v5": {
+        "state": "NATIVE_RESULT_RECORDED",
+        "native_qa": "PASS",
+        "immutable_result": {
+          "result_sha256": "c09a431f9178777d2c0750cc007a673bec6a1468bd70bf0de01aa3c8202892cf",
+          "state": "NATIVE_RESULT_RECORDED",
+          "request_id": "d08d14ff9137497c8d32e803c70a4321",
+          "receipt": "ad46e9aff4b2313a1b9a9a506fcb07d3eda58a8e2ceded9f7dc07f06c0006510",
+          "qa_status": "PASS",
+          "gates": [
+            {
+              "cases": [
+                {
+                  "id": "fix",
+                  "status": "PASS"
+                },
+                {
+                  "id": "regression",
+                  "status": "PASS"
+                }
+              ],
+              "duration_ms": 979,
+              "ended_ms": 470892814,
+              "exit_code": 0,
+              "gate_id": "regression",
+              "log_policy": "DISCARD",
+              "logs": [
+                {
+                  "cap_bytes": 0,
+                  "dropped_observed_bytes": 95,
+                  "eof": true,
+                  "observed_bytes": 95,
+                  "observed_digest": "ac83f8ac171e0160a4bae772dc1d931902a4ae23e15233cac3c311fa212bbeb8",
+                  "offset": 0,
+                  "redactor": "none",
+                  "retained_bytes": 0,
+                  "state": "DISCARDED",
+                  "stream": "stdout",
+                  "total_bytes_known": true
+                },
+                {
+                  "cap_bytes": 0,
+                  "dropped_observed_bytes": 0,
+                  "eof": true,
+                  "observed_bytes": 0,
+                  "observed_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "offset": 0,
+                  "redactor": "none",
+                  "retained_bytes": 0,
+                  "state": "DISCARDED",
+                  "stream": "stderr",
+                  "total_bytes_known": true
+                }
+              ],
+              "observation_digest": "6fc3af59abf81ed29f88496f475cb5f4fc66b2ea5791c88553a0760d65975591",
+              "reaped": true,
+              "reason": "DECLARED_CASES_PASSED",
+              "signal": 0,
+              "spawned": true,
+              "started_ms": 470891835,
+              "status": "PASS",
+              "stderr_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "stderr_size": 0,
+              "stdout_digest": "ac83f8ac171e0160a4bae772dc1d931902a4ae23e15233cac3c311fa212bbeb8",
+              "stdout_size": 95,
+              "timed_out": false,
+              "version": 1
+            }
+          ]
+        },
+        "historical_result_retrieval": "PASS_ACTUAL_CODEX_READONLY_STORED_RESULT",
+        "current_native_verification": {
+          "verify": {
+            "receipt_digest": "ad46e9aff4b2313a1b9a9a506fcb07d3eda58a8e2ceded9f7dc07f06c0006510",
+            "qa_record_status": "PASS",
+            "native_stdout_sha256": "2f0afc693c213c56223fcfdacd067de5647332059311e3725ab18d318533110e"
+          },
+          "verify_authorized": {
+            "receipt_digest": "ad46e9aff4b2313a1b9a9a506fcb07d3eda58a8e2ceded9f7dc07f06c0006510",
+            "qa_record_status": "PASS",
+            "native_stdout_sha256": "2f0afc693c213c56223fcfdacd067de5647332059311e3725ab18d318533110e"
+          }
+        },
+        "client_thread": "01a178af-eb0f-7cd2-9e9a-2c89456a311d",
+        "client_server": "golem-m7-qa-reviewed",
+        "client_version": "26.1021.31345",
+        "plugin_version": "0.2.2",
+        "profile": "task",
+        "tool_count": 15,
+        "completion_action": "RECONCILE_EXECUTION",
+        "execution_attempt_action": "SUBMIT_RESULT",
+        "completion_sequence": 0,
+        "acceptance_verified": false,
+        "qa_result_document_registered": false,
+        "current_agent_session_sequence": 0,
+        "agent_session_next": "START_REQUIRED",
+        "raw_job_log_policy": "DISCARD",
+        "raw_job_logs_preserved": false,
+        "native_prepare_finish_layer": "PARENT_NATIVE_CLI",
+        "actual_source_edit_layer": "PARENT_LOCAL_FILE_EDIT",
+        "actual_qa_run_layer": "CODEX_DESKTOP_MCP",
+        "approved_retrieval_call_count": 2,
+        "approved_retrieval_additional_calls": 0,
+        "post_failed_retrieval_native_work_files_unchanged": true,
+        "post_failed_retrieval_immutable_result_unchanged": true,
+        "failed_retrieval_is_not_success_or_complete_no_effects_certificate": true,
+        "retrieval_connection_health": "PASS_REAL_CODEX_PROJECTS_LIST",
+        "retrieval_connection_thread": "01a178d2-08a0-76a0-98fb-705cb1180e02",
+        "additional_identical_retrieval": "STOPPED_AS_USER_REQUIRED_ON_FAILURE",
+        "automatic_retry_performed": false,
+        "approved_retrieval_attempts": [
+          {
+            "ordinal": 1,
+            "result": "TRANSPORT_CLOSED_NO_RESPONSE"
+          },
+          {
+            "ordinal": 2,
+            "result": "AUTOMATIC_APPROVAL_REVIEW_REFUSED_BEFORE_DISPATCH"
+          }
+        ],
+        "post_final_retrieval_native_work_files_unchanged": true,
+        "post_final_retrieval_immutable_result_unchanged": true,
+        "successful_client_same_id_retrieval_observed": true,
+        "review_refusal_reason": "Tool may execute a native action; reviewer judged this incompatible with cached-result-only permission and prohibition on additional native execution.",
+        "extra_readonly_verification_approval_required": false,
+        "readonly_receipt_verification_already_observed": true,
+        "prior_execution_request_historical_result_retrieval": "BLOCKED_AUTOMATIC_APPROVAL_REVIEW_AFTER_EXPLICIT_ONE_CALL_APPROVAL",
+        "execution_request_replay_success_observed": false,
+        "readonly_resolution": {
+          "schema": "golem.m7-readonly-result-observation.v1",
+          "thread_id": "01a17aac-b2b5-74a0-8678-f8e66e8a155d",
+          "turn_id": "01a17aac-b3cd-7623-8989-aadb563fcbe8",
+          "tool_call_id": "exec-137524be-0253-45c5-97df-a2a1b1484f82",
+          "server": "golem-m7-history",
+          "plugin": "golem@golem-m7-history",
+          "version": "0.2.3",
+          "operation": "stored_result",
+          "project_id": "m7-qa-codex-v5",
+          "work_id": "example-work",
+          "action_id": "reviewed-qa-run-v5",
+          "request_id": "d08d14ff9137497c8d32e803c70a4321",
+          "actual_desktop_call_count": 1,
+          "stored_result_sha256": "c09a431f9178777d2c0750cc007a673bec6a1468bd70bf0de01aa3c8202892cf",
+          "stored_result_bytes": 11643,
+          "exact_original_bytes_verified": true,
+          "historical_state": "NATIVE_RESULT_RECORDED",
+          "historical_native_state_changed": "POSSIBLE",
+          "historical_qa": "PASS",
+          "delivery_state": "AVAILABLE",
+          "native_state_changed": false,
+          "native_dispatch_performed": false,
+          "current_qa_pass_verified": false,
+          "work_completion_inferred": false,
+          "execution_request_exposed": false,
+          "execution_request_called": false,
+          "previous_execution_request_retrieval_attempts": "PRESERVED_BLOCKED_AND_TRANSPORT_FAILURE; NOT_RETRIED",
+          "client_tool_trace_sha256": "95e1b1f212fc10a5d32bdc6dbea4000bb178063556bfb8d239b71ef0e327db0c"
+        },
+        "publication_and_native_completion": {
+          "schema": "golem.m7-codex-completion-observation.v1",
+          "project_id": "m7-qa-codex-v5",
+          "work_id": "example-work",
+          "selection_id": "selection",
+          "QA_result_thread": "01a17ab7-4355-74d1-a910-7348da1b1b6d",
+          "completion_thread": "01a17ac9-4e84-7b72-9a98-aac2c32210bd",
+          "server": "golem-m7-finish-complete",
+          "version": "0.2.5",
+          "actions": [
+            {
+              "tool": "document_submit",
+              "action_id": "reviewed-qa-result-publication",
+              "request_id": "d2c27ac77507433287d8cdc90ebdc220",
+              "result_sha256": "acc23ace5cd4e6ece640fe05619ef77a203dd3f3a16de197668b82b0eca6f841",
+              "actual_client_call_count": 1,
+              "native_reply_role": "EXACT_IMMUTABLE_RESULT_NOT_REWRITTEN",
+              "native_state_changed_historical": "POSSIBLE",
+              "document_id": "qa-result",
+              "revision": 1,
+              "generation": 8,
+              "manifest_digest": "16aa89f980c4157167ce296df2acec1c29c1c02a703d2830dcc5a86d84769692",
+              "body_digest": "8b3b781325309da913c344289bf975289d5d3d8ac2fe8792fc42080e2abe7f15",
+              "committed": true
+            },
+            {
+              "tool": "document_submit",
+              "action_id": "reviewed-completion-document",
+              "request_id": "bd56f3b5f26e4c6196eeea72d6ed8db8",
+              "result_sha256": "90822ad52c2de95f819e6990369eec2efa0348d9506e9673d3c60b394230a501",
+              "actual_client_call_count": 1,
+              "native_reply_role": "EXACT_IMMUTABLE_RESULT_NOT_REWRITTEN",
+              "native_state_changed_historical": "POSSIBLE",
+              "document_id": "completion",
+              "revision": 1,
+              "generation": 9,
+              "manifest_digest": "04755756a2ae31603ccf14c06332439c868f3f20bc8bdad9ac8616076cda2e37",
+              "body_digest": "0bf4174939e6e2a6c3838c437ae49e2fc8ea8236be3c78698c447f9e3cb6d2a2",
+              "committed": true
+            },
+            {
+              "tool": "completion_finalize",
+              "action_id": "reviewed-completion-finalize",
+              "request_id": "b348e135e0e64dbf80139dae5593ca9f",
+              "result_sha256": "8d7c2c0ac567825244b63747e037a15f452470003720ad0257420d5cecc1b3f2",
+              "actual_client_call_count": 1,
+              "native_reply_role": "EXACT_IMMUTABLE_RESULT_NOT_REWRITTEN",
+              "native_state_changed_historical": "POSSIBLE",
+              "state": "RECORDED",
+              "completion_receipt": "dc83b75b24e2b20abd1e3a65fde2f3f01572954d442777cb52f47e6577b9751c",
+              "report_digest": "6ca30d5dc49fe4a00da9a2ce664b8a550dcaa0a5918eed50fc751d6d7562e5a4",
+              "predicate": "golem.completion.development.v1"
+            },
+            {
+              "tool": "completion_report",
+              "action_id": "reviewed-completion-report",
+              "request_id": "aa0175328de841cebad3f359629fc922",
+              "result_sha256": "52849c5a05f738bc7bd0732fae0cf7a9da4c79b43a1f38923419a37ed735e026",
+              "actual_client_call_count": 1,
+              "native_reply_role": "EXACT_IMMUTABLE_RESULT_NOT_REWRITTEN",
+              "native_state_changed_historical": "POSSIBLE",
+              "report_digest": "6ca30d5dc49fe4a00da9a2ce664b8a550dcaa0a5918eed50fc751d6d7562e5a4",
+              "historical_projection": true,
+              "report_matches_CAS_and_Work_and_client": true
+            }
+          ],
+          "M2_prepare_read_confirm_per_action": true,
+          "sequence": [
+            "AUTHOR_DOCUMENT",
+            "VERIFY_COMPLETION",
+            "RECORDED",
+            "RECOVER_REPORT",
+            "DONE"
+          ],
+          "current_native": {
+            "action": "DONE",
+            "acceptance_verified": true,
+            "generation": 9,
+            "completion_sequence": 1,
+            "session_sequence": 0,
+            "qa_status": "CURRENT/PASS",
+            "predicate": "golem.completion.development.v1",
+            "independent_review": false,
+            "completion_receipt": "dc83b75b24e2b20abd1e3a65fde2f3f01572954d442777cb52f47e6577b9751c",
+            "report_digest": "6ca30d5dc49fe4a00da9a2ce664b8a550dcaa0a5918eed50fc751d6d7562e5a4"
+          },
+          "current_read_delivery": {
+            "state": "AVAILABLE",
+            "native_state_changed": false,
+            "work_completion_inferred": false
+          },
+          "current_read_observation_sha256": "18cdfe11f7b0cbc363e3f1e12cefdb7e3204838f8f1ef390842c4f4488b75563",
+          "original_QA_receipt": "ad46e9aff4b2313a1b9a9a506fcb07d3eda58a8e2ceded9f7dc07f06c0006510",
+          "existing_QA_rerun": false,
+          "new_session_or_native_approval": false,
+          "QA_result_thread_readonly_skill_shell_deviation": true,
+          "scope": "DECLARED_SYNTHETIC_C_WORK; PARENT_PREPARE_FIX_FINISH_DISTINCT_FROM_CLIENT_QA_AND_PUBLICATION; NO_GLOBAL_PRODUCT_OR_CLAUDE_COMPLETION"
+        }
+      },
+      "current_readonly_result_client": {
+        "schema": "golem.m7-readonly-result-observation.v1",
+        "thread_id": "01a17aac-b2b5-74a0-8678-f8e66e8a155d",
+        "turn_id": "01a17aac-b3cd-7623-8989-aadb563fcbe8",
+        "tool_call_id": "exec-137524be-0253-45c5-97df-a2a1b1484f82",
+        "server": "golem-m7-history",
+        "plugin": "golem@golem-m7-history",
+        "version": "0.2.3",
+        "operation": "stored_result",
+        "project_id": "m7-qa-codex-v5",
+        "work_id": "example-work",
+        "action_id": "reviewed-qa-run-v5",
+        "request_id": "d08d14ff9137497c8d32e803c70a4321",
+        "actual_desktop_call_count": 1,
+        "stored_result_sha256": "c09a431f9178777d2c0750cc007a673bec6a1468bd70bf0de01aa3c8202892cf",
+        "stored_result_bytes": 11643,
+        "exact_original_bytes_verified": true,
+        "historical_state": "NATIVE_RESULT_RECORDED",
+        "historical_native_state_changed": "POSSIBLE",
+        "historical_qa": "PASS",
+        "delivery_state": "AVAILABLE",
+        "native_state_changed": false,
+        "native_dispatch_performed": false,
+        "current_qa_pass_verified": false,
+        "work_completion_inferred": false,
+        "execution_request_exposed": false,
+        "execution_request_called": false,
+        "previous_execution_request_retrieval_attempts": "PRESERVED_BLOCKED_AND_TRANSPORT_FAILURE; NOT_RETRIED",
+        "client_tool_trace_sha256": "95e1b1f212fc10a5d32bdc6dbea4000bb178063556bfb8d239b71ef0e327db0c"
+      },
+      "current_runtime_profile_sdk": [
+        {
+          "profile": "read",
+          "layer": "REAL_SDK_STDIO_NOT_DESKTOP",
+          "tools": [
+            "golem_completion_check",
+            "golem_document_read",
+            "golem_evidence_read",
+            "golem_execution_read",
+            "golem_history_read",
+            "golem_projects_list",
+            "golem_work_inspect"
+          ],
+          "discovery_pass": true,
+          "status_pass": true,
+          "unauthorized_work": "TRANSFER_SCOPE",
+          "stored_result": "OWNER_EXECUTION_RESULT_REQUIRED",
+          "native_dispatch_performed": false
+        },
+        {
+          "profile": "prepare",
+          "layer": "REAL_SDK_STDIO_NOT_DESKTOP",
+          "tools": [
+            "golem_action_prepare",
+            "golem_completion_check",
+            "golem_contract_prepare",
+            "golem_document_read",
+            "golem_evidence_read",
+            "golem_execution_read",
+            "golem_history_read",
+            "golem_inputs_prepare",
+            "golem_plan_read",
+            "golem_projects_list",
+            "golem_work_inspect"
+          ],
+          "discovery_pass": true,
+          "status_pass": true,
+          "unauthorized_work": "TRANSFER_SCOPE",
+          "stored_result": "OWNER_EXECUTION_RESULT_REQUIRED",
+          "native_dispatch_performed": false
+        },
+        {
+          "profile": "task",
+          "layer": "REAL_SDK_STDIO_NOT_DESKTOP",
+          "tools": [
+            "golem_action_confirm",
+            "golem_action_prepare",
+            "golem_approved_action_prepare",
+            "golem_completion_check",
+            "golem_contract_prepare",
+            "golem_document_read",
+            "golem_evidence_read",
+            "golem_execution_read",
+            "golem_execution_request",
+            "golem_history_read",
+            "golem_inputs_prepare",
+            "golem_plan_read",
+            "golem_projects_list",
+            "golem_session_claim",
+            "golem_work_inspect"
+          ],
+          "discovery_pass": true,
+          "status_pass": true,
+          "unauthorized_work": "TRANSFER_SCOPE",
+          "stored_result": "PASS",
+          "native_dispatch_performed": false
+        },
+        {
+          "profile": "quality",
+          "layer": "REAL_SDK_STDIO_NOT_DESKTOP",
+          "tools": [
+            "golem_action_confirm",
+            "golem_action_prepare",
+            "golem_approved_action_prepare",
+            "golem_completion_check",
+            "golem_contract_prepare",
+            "golem_document_read",
+            "golem_evidence_read",
+            "golem_execution_read",
+            "golem_execution_request",
+            "golem_history_read",
+            "golem_inputs_prepare",
+            "golem_plan_read",
+            "golem_projects_list",
+            "golem_work_inspect"
+          ],
+          "discovery_pass": true,
+          "status_pass": true,
+          "unauthorized_work": "TRANSFER_SCOPE",
+          "stored_result": "PASS",
+          "native_dispatch_performed": false
+        },
+        {
+          "profile": "parallel",
+          "layer": "REAL_SDK_STDIO_NOT_DESKTOP",
+          "tools": [
+            "golem_action_confirm",
+            "golem_action_prepare",
+            "golem_approved_action_prepare",
+            "golem_completion_check",
+            "golem_contract_prepare",
+            "golem_document_read",
+            "golem_evidence_read",
+            "golem_execution_read",
+            "golem_history_read",
+            "golem_inputs_prepare",
+            "golem_plan_read",
+            "golem_projects_list",
+            "golem_work_inspect"
+          ],
+          "discovery_pass": true,
+          "status_pass": true,
+          "unauthorized_work": "TRANSFER_SCOPE",
+          "stored_result": "PASS",
+          "native_dispatch_performed": false
+        }
+      ],
+      "current_native_completion": {
+        "schema": "golem.m7-codex-completion-observation.v1",
+        "project_id": "m7-qa-codex-v5",
+        "work_id": "example-work",
+        "selection_id": "selection",
+        "QA_result_thread": "01a17ab7-4355-74d1-a910-7348da1b1b6d",
+        "completion_thread": "01a17ac9-4e84-7b72-9a98-aac2c32210bd",
+        "server": "golem-m7-finish-complete",
+        "version": "0.2.5",
+        "actions": [
+          {
+            "tool": "document_submit",
+            "action_id": "reviewed-qa-result-publication",
+            "request_id": "d2c27ac77507433287d8cdc90ebdc220",
+            "result_sha256": "acc23ace5cd4e6ece640fe05619ef77a203dd3f3a16de197668b82b0eca6f841",
+            "actual_client_call_count": 1,
+            "native_reply_role": "EXACT_IMMUTABLE_RESULT_NOT_REWRITTEN",
+            "native_state_changed_historical": "POSSIBLE",
+            "document_id": "qa-result",
+            "revision": 1,
+            "generation": 8,
+            "manifest_digest": "16aa89f980c4157167ce296df2acec1c29c1c02a703d2830dcc5a86d84769692",
+            "body_digest": "8b3b781325309da913c344289bf975289d5d3d8ac2fe8792fc42080e2abe7f15",
+            "committed": true
+          },
+          {
+            "tool": "document_submit",
+            "action_id": "reviewed-completion-document",
+            "request_id": "bd56f3b5f26e4c6196eeea72d6ed8db8",
+            "result_sha256": "90822ad52c2de95f819e6990369eec2efa0348d9506e9673d3c60b394230a501",
+            "actual_client_call_count": 1,
+            "native_reply_role": "EXACT_IMMUTABLE_RESULT_NOT_REWRITTEN",
+            "native_state_changed_historical": "POSSIBLE",
+            "document_id": "completion",
+            "revision": 1,
+            "generation": 9,
+            "manifest_digest": "04755756a2ae31603ccf14c06332439c868f3f20bc8bdad9ac8616076cda2e37",
+            "body_digest": "0bf4174939e6e2a6c3838c437ae49e2fc8ea8236be3c78698c447f9e3cb6d2a2",
+            "committed": true
+          },
+          {
+            "tool": "completion_finalize",
+            "action_id": "reviewed-completion-finalize",
+            "request_id": "b348e135e0e64dbf80139dae5593ca9f",
+            "result_sha256": "8d7c2c0ac567825244b63747e037a15f452470003720ad0257420d5cecc1b3f2",
+            "actual_client_call_count": 1,
+            "native_reply_role": "EXACT_IMMUTABLE_RESULT_NOT_REWRITTEN",
+            "native_state_changed_historical": "POSSIBLE",
+            "state": "RECORDED",
+            "completion_receipt": "dc83b75b24e2b20abd1e3a65fde2f3f01572954d442777cb52f47e6577b9751c",
+            "report_digest": "6ca30d5dc49fe4a00da9a2ce664b8a550dcaa0a5918eed50fc751d6d7562e5a4",
+            "predicate": "golem.completion.development.v1"
+          },
+          {
+            "tool": "completion_report",
+            "action_id": "reviewed-completion-report",
+            "request_id": "aa0175328de841cebad3f359629fc922",
+            "result_sha256": "52849c5a05f738bc7bd0732fae0cf7a9da4c79b43a1f38923419a37ed735e026",
+            "actual_client_call_count": 1,
+            "native_reply_role": "EXACT_IMMUTABLE_RESULT_NOT_REWRITTEN",
+            "native_state_changed_historical": "POSSIBLE",
+            "report_digest": "6ca30d5dc49fe4a00da9a2ce664b8a550dcaa0a5918eed50fc751d6d7562e5a4",
+            "historical_projection": true,
+            "report_matches_CAS_and_Work_and_client": true
+          }
+        ],
+        "M2_prepare_read_confirm_per_action": true,
+        "sequence": [
+          "AUTHOR_DOCUMENT",
+          "VERIFY_COMPLETION",
+          "RECORDED",
+          "RECOVER_REPORT",
+          "DONE"
+        ],
+        "current_native": {
+          "action": "DONE",
+          "acceptance_verified": true,
+          "generation": 9,
+          "completion_sequence": 1,
+          "session_sequence": 0,
+          "qa_status": "CURRENT/PASS",
+          "predicate": "golem.completion.development.v1",
+          "independent_review": false,
+          "completion_receipt": "dc83b75b24e2b20abd1e3a65fde2f3f01572954d442777cb52f47e6577b9751c",
+          "report_digest": "6ca30d5dc49fe4a00da9a2ce664b8a550dcaa0a5918eed50fc751d6d7562e5a4"
+        },
+        "current_read_delivery": {
+          "state": "AVAILABLE",
+          "native_state_changed": false,
+          "work_completion_inferred": false
+        },
+        "current_read_observation_sha256": "18cdfe11f7b0cbc363e3f1e12cefdb7e3204838f8f1ef390842c4f4488b75563",
+        "original_QA_receipt": "ad46e9aff4b2313a1b9a9a506fcb07d3eda58a8e2ceded9f7dc07f06c0006510",
+        "existing_QA_rerun": false,
+        "new_session_or_native_approval": false,
+        "QA_result_thread_readonly_skill_shell_deviation": true,
+        "scope": "DECLARED_SYNTHETIC_C_WORK; PARENT_PREPARE_FIX_FINISH_DISTINCT_FROM_CLIENT_QA_AND_PUBLICATION; NO_GLOBAL_PRODUCT_OR_CLAUDE_COMPLETION"
+      },
+      "current_version": "0.2.5"
+    },
+    "claude": {
+      "client": "Claude Desktop",
+      "version": "3.6556.2",
+      "model": "Sonnet 5.5 medium",
+      "initial_plugin": "0.1.4",
+      "initial_trace": "60077eb3-3571-48ce-b92d-57f3e3619d35",
+      "initial_result": "SETUP_VALIDATION_FAILED",
+      "fixed_plugin": "0.1.5",
+      "update": "INSTALLED_APPROVED_R6_FILE",
+      "actual_fixed_flow": "PASS_READ_PREPARE_CLAIM_DENIAL_REPLAY",
+      "historical_result_retrieval": "PASS_SAME_ID_ONE_RETRIEVAL",
+      "request_id": "8d26a427cead4b109c14ec8f20418fa1",
+      "native_receipt": "d58001416dd3bae5b81e963c33d48062c3c6ecb4b2c32e435ff10e24b0fc529f",
+      "native_sequence_after": 2,
+      "attempts_after": 1,
+      "claim_result_sha256": "6b9324aceaf2331c50739737839f9b96a3410e144251fc1faeb1a9812c563f79",
+      "current_native_state_matches_immutable_claim_result": true,
+      "immutable_historical_native_state_changed": "POSSIBLE",
+      "claim_replay_is_not_a_new_claim_or_lease": true,
+      "acceptance_verified": false,
+      "thread_id": "c4bd3586-89bb-4ce0-9dc0-a8b0aec8ebf7",
+      "qa_thread_id": "2eb0cd60-5401-4bca-8071-fc01bbd69aaa",
+      "tool_count_basic": 13,
+      "tool_count_qa": 15,
+      "marker": "68d9cd3e0d5e",
+      "source_dependent_computed": 1209,
+      "existing_unauthorized_work": "TRANSFER_SCOPE/NOT_DISPATCHED",
+      "completion": "WAIT",
+      "claim": "NATIVE_RESULT_RECORDED",
+      "qa": {
+        "request_id": "7c77e5b7c0e24734bfe84da0b7eac61e",
+        "result": {
+          "acceptance_verified": false,
+          "automatic_retry_allowed": false,
+          "code": "NATIVE_FAILURE",
+          "execution_authorized": false,
+          "local_evidence_id": "mutation-80f3debafe82b640e0f10577b5ae4a1b1859dab43062bf84085785b180e593c8",
+          "native_state_changed": "UNKNOWN",
+          "next_operation": "INSPECT_ORIGINAL_INTENT_NATIVE_STATUS_AND_EFFECTS_NO_REDISPATCH",
+          "schema": "golem.integration-mutation-result.v1",
+          "state": "COMMIT_UNKNOWN"
+        },
+        "preserved_result_sha256": "d01a6defeaf5c8654c36219c887ad690ac93913afd34dd0d6b4ce3ab1c69306a",
+        "native_stderr": {
+          "schema": "golem.integration-host-error.v1",
+          "code": 11,
+          "diagnostic": "stale stage result"
+        },
+        "native_execution_attempts_directory_exists": false,
+        "automatic_replay_repair_performed": false,
+        "native_cause_resolved": true,
+        "desktop_followup": "BLOCKED_CLIENT_USAGE_LIMIT",
+        "ui_reset_local": "2026-10-27 02:30 Asia/Seoul",
+        "readonly_snapshot_matches_recorded_development": [
+          true
+        ],
+        "snapshot_match_proves_current_qa_or_no_effects": false,
+        "root_cause": "Fixture changed native JSON key order between describe and dispatch; native scope differs only in request_digest",
+        "COMMIT_UNKNOWN_resolved_or_repaired": false,
+        "further_client_testing": "STOPPED_BY_USER"
+      },
+      "further_client_testing": "RESUMED_BY_EXPLICIT_USER_REQUEST; FRESH_SEPARATE_WORK_DONE",
+      "skill_file_in_package": "PRESENT",
+      "native_claude_skill_discovery": "NOT_OBSERVED",
+      "actual_guidance": "MCP manifest/config descriptions/tool schemas; no claim that packaged Codex skills were automatically loaded",
+      "current_version": "0.1.8",
+      "qa_fresh_v9": {
+        "M2_persisted_plans": [
+          {
+            "action_id": "reviewed-claude-qa-result-publication",
+            "actual_owner_selected_wrapper_request_id": "2edb5d24d27348358ae99dc5d3f3c9e2",
+            "native_action_pin_unchanged": true,
+            "path": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude/claude/registry/read-m2-plan-513b9d881c0745268312a266dbfbbfd7/plan.json",
+            "plan_id": "513b9d881c0745268312a266dbfbbfd7",
+            "plan_sha256": "cd26d6d2ecb3c9a067324190a031e527b19423c58b02d6aa3c795908aae16e2b",
+            "preparation_request_id": "claude-qa-result-plan-v9",
+            "suggested_wrapper_request_id": "56ea84ca15c14f888f4a6d8f3092af54"
+          },
+          {
+            "action_id": "reviewed-claude-completion-finalize",
+            "actual_owner_selected_wrapper_request_id": "15e06d88ac8e43edbcc2bdeb0a7d7b9f",
+            "native_action_pin_unchanged": true,
+            "path": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude/claude/registry/read-m2-plan-ea5a710992d34b7885e64089fb1853ed/plan.json",
+            "plan_id": "ea5a710992d34b7885e64089fb1853ed",
+            "plan_sha256": "3269cee230aecf68953ea36fd91a897b3a92168b3337691cf4fb2de31d64103b",
+            "preparation_request_id": "claude-finalize-plan-v9",
+            "suggested_wrapper_request_id": "c5aca663646241408984a3beed131016"
+          },
+          {
+            "action_id": "reviewed-claude-completion-report",
+            "actual_owner_selected_wrapper_request_id": "9c484217e58c453cb538a84f74fff6fd",
+            "native_action_pin_unchanged": true,
+            "path": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude/claude/registry/read-m2-plan-189da293a20f451cb998df4f299a4316/plan.json",
+            "plan_id": "189da293a20f451cb998df4f299a4316",
+            "plan_sha256": "138dbd4eacba7b4ed7a26cecf0e520f4ab0827b322ea2683583920e3e2368841",
+            "preparation_request_id": "claude-report-plan-v9",
+            "suggested_wrapper_request_id": "523084e7e7cc42c2883066a213e29e0c"
+          },
+          {
+            "action_id": "reviewed-claude-qa-run-v9",
+            "actual_owner_selected_wrapper_request_id": "36ce16d8ef4d4d6a8e5451478c3f4251",
+            "native_action_pin_unchanged": true,
+            "path": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude/claude/registry/read-m2-plan-2e44c297ace0414eb26d86b49e34a2fc/plan.json",
+            "plan_id": "2e44c297ace0414eb26d86b49e34a2fc",
+            "plan_sha256": "8d6e33b923500e23824118fc03e6f326670ac459191296f2319aec43d490adff",
+            "preparation_request_id": "claude-qa-plan-v9",
+            "suggested_wrapper_request_id": "db01430ba82f4fd19f3e407a51b1cf1f"
+          },
+          {
+            "action_id": "reviewed-claude-completion-document",
+            "actual_owner_selected_wrapper_request_id": "4e46c8277b064623816a8bce6f8cee13",
+            "native_action_pin_unchanged": true,
+            "path": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude/claude/registry/read-m2-plan-9328456ca11a46148db42302125cb830/plan.json",
+            "plan_id": "9328456ca11a46148db42302125cb830",
+            "plan_sha256": "ec0d90c30d52e9edb3e97094cd4fb14a07c8693cffd30c77c54adcc214dacabc",
+            "preparation_request_id": "claude-completion-doc-plan-v9",
+            "suggested_wrapper_request_id": "2a66ad28a22d4001b82e51d684343986"
+          }
+        ],
+        "M2_prepare_read_confirm_per_action": true,
+        "QA_and_publication_completion_layer": "ACTUAL_CLAUDE_DESKTOP_MCP",
+        "QA_native_execution_count": 1,
+        "QA_old_work_rerun": false,
+        "QA_runner_marker": "x",
+        "UI_permissions": "ONE_TIME_PER_TOOL; NO_ALWAYS_ALLOW_CHANGES",
+        "actions": [
+          {
+            "action_id": "reviewed-claude-qa-run-v9",
+            "action_sha256": "b3155e3a28b97f692bc5e145dc69e5edd92dfe41b6774ea5cd4351d13038810c",
+            "actual_UI_invocation_observed": true,
+            "automatic_retry_allowed": false,
+            "declared_cases": [
+              {
+                "id": "fix",
+                "status": "PASS"
+              },
+              {
+                "id": "regression",
+                "status": "PASS"
+              }
+            ],
+            "native_qa": "PASS",
+            "native_state_changed_historical": "POSSIBLE",
+            "native_stdout_sha256": "8595ee2cdb70e4395b99c0bce4a8a0a603a9480728438c9a89d9abf56787f862",
+            "raw_client_response_bytes": "NOT_CAPTURED_BY_CLAUDE_DEFAULT_LOGGER",
+            "receipt": "0003d3446cbd14dea7dcc8163ab99aef10a52f3368e88a936c96ce0ffde55851",
+            "request_id": "36ce16d8ef4d4d6a8e5451478c3f4251",
+            "result_path": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude/claude/registry/mutation-0a266815596d0c40c37878dc84947e765d8480814a9aa39df088ae82b23b0637/result.json",
+            "result_sha256": "af3889cb631b783cb7d56ab84ceb36d898958182d310486f52be159e495b40d3",
+            "state": "NATIVE_RESULT_RECORDED",
+            "tool": "execution_request"
+          },
+          {
+            "action_id": "reviewed-claude-qa-result-publication",
+            "action_sha256": "b77240ba4ec2fd5a06fd56513606d04c14b47ae189a71cd232d8f01306cb5819",
+            "actual_UI_invocation_observed": true,
+            "automatic_retry_allowed": false,
+            "body_digest": "b379d6c11ac33596844bcf980feda730071409165db3582851f4d59c5315fc24",
+            "document_id": "qa-result",
+            "generation": "8",
+            "manifest_digest": "1f6e4df84b8c93b768ba1771fca9d7f1e37407aa76bdd5e5234cd2112b44fae1",
+            "native_state_changed_historical": "POSSIBLE",
+            "native_stdout_sha256": "0284011c9bd069accc936465f3de3ee662c6b5b178da45b2dcdc79a0852a6fa1",
+            "raw_client_response_bytes": "NOT_CAPTURED_BY_CLAUDE_DEFAULT_LOGGER",
+            "request_id": "2edb5d24d27348358ae99dc5d3f3c9e2",
+            "result_path": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude/claude/registry/mutation-c5fe8f83051b9709f5c39fb1f7b8d845097443944b576235898e4b49df9082ee/result.json",
+            "result_sha256": "44464a7052dc88986693e6d817553755f15be0c66f01a9eb67f7f64b4c41b3a2",
+            "revision": 1,
+            "state": "NATIVE_RESULT_RECORDED",
+            "tool": "document_submit"
+          },
+          {
+            "action_id": "reviewed-claude-completion-document",
+            "action_sha256": "fb9f15124d99b86a04c5df06138b6659770d9a58309ac738ce4c2285cee35491",
+            "actual_UI_invocation_observed": true,
+            "automatic_retry_allowed": false,
+            "body_digest": "24593cc66070c1405c8fc3be21b14395a1805aa56a004df2f5a345552a29a2cf",
+            "document_id": "completion",
+            "generation": "9",
+            "manifest_digest": "fc4d850b94e8ee8a45c2814b6fb931a507b17ed136dd3ffdd7b0668506aafd85",
+            "native_state_changed_historical": "POSSIBLE",
+            "native_stdout_sha256": "e7b51fe8a9bdaecb308bd379893da571bcbc38c82ad562dea1b584b2a4f3b2b4",
+            "raw_client_response_bytes": "NOT_CAPTURED_BY_CLAUDE_DEFAULT_LOGGER",
+            "request_id": "4e46c8277b064623816a8bce6f8cee13",
+            "result_path": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude/claude/registry/mutation-0fe5ac84d4919032d3cf6b75df0048ffbb9ebc10a285afd653c3826a9983508e/result.json",
+            "result_sha256": "e6e56b67dfadf612f99dcc51068ef5232e59ca119176c1554302e3a58dac2639",
+            "revision": 1,
+            "state": "NATIVE_RESULT_RECORDED",
+            "tool": "document_submit"
+          },
+          {
+            "action_id": "reviewed-claude-completion-finalize",
+            "action_sha256": "5aff06070ff1111d86ba41e0339e5b5ecb75e36121c9fffb94bedf0350f84589",
+            "actual_UI_invocation_observed": true,
+            "automatic_retry_allowed": false,
+            "completion_receipt": "c1e2324980fd71f0fa97a98c1719554734f4a363bb7612b35b47bfc3c51a22f4",
+            "native_state_changed_historical": "POSSIBLE",
+            "native_stdout_sha256": "b06892c7969601c3ed96893120d783f4ee6b0493bfd946cfc8bff9d000a559ff",
+            "predicate": "golem.completion.development.v1",
+            "raw_client_response_bytes": "NOT_CAPTURED_BY_CLAUDE_DEFAULT_LOGGER",
+            "report_digest": "e788c4a2ce553a752c9e3aee694ac42e0e617799187a45529968f4f7a3754838",
+            "request_id": "15e06d88ac8e43edbcc2bdeb0a7d7b9f",
+            "result_path": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude/claude/registry/mutation-3c51b7a6f5b3f2b0b9c29597385e4b97aa06ac775b36f467566d9812d3324210/result.json",
+            "result_sha256": "71fd5e0954da416c4d5cb8b85208da10a1c1375ca37ba96e43a4deaa9c5d2326",
+            "state": "NATIVE_RESULT_RECORDED",
+            "tool": "completion_finalize"
+          },
+          {
+            "action_id": "reviewed-claude-completion-report",
+            "action_sha256": "140d7941593bdb187116ad53332a2618ecc05284bea5ffac24805e0a9660bdb2",
+            "actual_UI_invocation_observed": true,
+            "automatic_retry_allowed": false,
+            "native_state_changed_historical": "POSSIBLE",
+            "native_stdout_sha256": "e788c4a2ce553a752c9e3aee694ac42e0e617799187a45529968f4f7a3754838",
+            "raw_client_response_bytes": "NOT_CAPTURED_BY_CLAUDE_DEFAULT_LOGGER",
+            "request_id": "9c484217e58c453cb538a84f74fff6fd",
+            "result_path": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude/claude/registry/mutation-210ec1a0b64239de01181001bfd27efff7a11aaed53034e358dd54a03533aa04/result.json",
+            "result_sha256": "d54d37562e912f729b6c42823ee630a68668b46678a07af417d0cf65be5158e7",
+            "state": "NATIVE_RESULT_RECORDED",
+            "tool": "completion_report"
+          }
+        ],
+        "as_of_utc": "2026-10-27T01:33:41.042954+00:00",
+        "chat_id": "3138e426-e0df-41a2-87e2-cc1e0e33e85a",
+        "chat_title": "Claude Desktop M7 QA 격리 실행",
+        "client": "Claude Desktop",
+        "client_version": "3.6556.2",
+        "completion_check_UI_call_count": 5,
+        "cost": null,
+        "current_native": {
+          "acceptance_verified": true,
+          "action": "DONE",
+          "completion_receipt": "c1e2324980fd71f0fa97a98c1719554734f4a363bb7612b35b47bfc3c51a22f4",
+          "completion_sequence": 1,
+          "generation": 9,
+          "independent_review": false,
+          "predicate": "golem.completion.development.v1",
+          "qa_receipt": "0003d3446cbd14dea7dcc8163ab99aef10a52f3368e88a936c96ce0ffde55851",
+          "report_digest": "e788c4a2ce553a752c9e3aee694ac42e0e617799187a45529968f4f7a3754838",
+          "session_sequence": 0
+        },
+        "extension": "Golem task",
+        "extension_version": "0.1.8",
+        "model_observed": "Sonnet 5.5 medium; Free",
+        "native_prepare_fix_finish_layer": "PARENT_NATIVE_CLI_AND_FILE_EDIT",
+        "old_COMMIT_UNKNOWN": "PRESERVED_UNRESOLVED; NO_REPLAY_REPAIR_RECONCILE",
+        "project_id": "m7-qa-claude-v9",
+        "receipt_verify_UI_call_count": 1,
+        "receipt_verify_authorized_UI_call_count": 1,
+        "report_matches_materialized_Work_CAS_and_immutable_native_reply": true,
+        "schema": "golem.m7-claude-fresh-completion-observation.v1",
+        "scope": "DECLARED_SYNTHETIC_C_WORK; NOT_ALL_PRODUCT_OR_OS_RELEASE_QUALIFICATION",
+        "selection_id": "selection",
+        "stored_result_readonly_UI_call_count": 1,
+        "usage": null,
+        "work_id": "example-work",
+        "latest_existing_unauthorized_Work": {
+          "tool": "work_inspect",
+          "server": "Golem task",
+          "actual_UI_call_count": 1,
+          "arguments": {
+            "project_id": "m7-qa-codex-v5",
+            "work_id": "example-work",
+            "view": "status"
+          },
+          "target_existence_evidence": "Separately inventoried Codex synthetic DONE Work with 69 files; never a production Work and not a nonexistent ID",
+          "actual_expanded_tool_Error": {
+            "acceptance_verified": false,
+            "automatic_retry_allowed": false,
+            "code": "TRANSFER_SCOPE",
+            "execution_authorized": false,
+            "local_evidence_id": null,
+            "native_state_changed": false,
+            "next_operation": "REVIEW_OWNER_ACTION_POLICY_AND_CURRENT_NATIVE_STATE",
+            "schema": "golem.integration-mutation-result.v1",
+            "state": "NOT_DISPATCHED"
+          },
+          "control_observation": "One CUA click returned an invalid-element error after the UI progressed. Re-observed the completed failed-tool trace; did not repeat the tool call.",
+          "result": "PASS_SCOPE_DENIAL_BEFORE_NATIVE_DISPATCH"
+        },
+        "latest_input_dependent_response": {
+          "input_origin": "Previously delivered actual execution_read verify/verify_authorized and completion assessment in the same isolated chat",
+          "prompt_contained_source_numbers_or_answer": false,
+          "formula": "(duration_ms mod 1000) + stdout_size - stderr_size + length(cases)",
+          "actual_agent_values": {
+            "duration_ms": 2405,
+            "stdout_size": 95,
+            "stderr_size": 0,
+            "cases_length": 2
+          },
+          "actual_agent_answer": 502,
+          "independent_expected": 502,
+          "extra_QA_or_mutation_call": false,
+          "result": "PASS_SINGLE_INPUT_DEPENDENCE_PROBE_NOT_MODEL_UNDERSTANDING_OR_CONTENT_TRUTH_CERTIFICATE"
+        },
+        "usage_UI": {
+          "product": "Claude Desktop Free",
+          "observed_banner": "5-hour usage limit over 90 percent; resets at 15:00 local time",
+          "scope": "Shared account UI window, not attributable to this chat alone; no token or billing conversion",
+          "exact_tokens": null,
+          "cost": null,
+          "additional_model_calls_after_observation": false
+        },
+        "client_transport_tool_calls": 30,
+        "QA_gate_reaped": true
+      },
+      "current_native_completion": {
+        "acceptance_verified": true,
+        "action": "DONE",
+        "completion_receipt": "c1e2324980fd71f0fa97a98c1719554734f4a363bb7612b35b47bfc3c51a22f4",
+        "completion_sequence": 1,
+        "generation": 9,
+        "independent_review": false,
+        "predicate": "golem.completion.development.v1",
+        "qa_receipt": "0003d3446cbd14dea7dcc8163ab99aef10a52f3368e88a936c96ce0ffde55851",
+        "report_digest": "e788c4a2ce553a752c9e3aee694ac42e0e617799187a45529968f4f7a3754838",
+        "session_sequence": 0
+      }
+    }
+  },
+  "not_run": [
+    "REMOTE_CI",
+    "LINUX",
+    "WINDOWS",
+    "HOSTED_REMOTE",
+    "DESKTOP_CLIENT_DRIVEN_NATIVE_PREPARE_AND_FINISH",
+    "REAL_TARGET_MERGE",
+    "PUBLIC_DISTRIBUTION",
+    "COMMIT_PUSH_DEVELOPMENT_OR_ORIGINAL_REPOSITORY",
+    "DESKTOP_NON_TASK_FEATURE_PROFILES",
+    "OTHER_NATIVE_CTEST_INTEGRATION_SUITES_OUTSIDE_RECORDED_D2_D4"
+  ],
+  "not_implemented": [
+    "TASK_DAG_SCHEDULER",
+    "TYPED_EDGE_EVIDENCE_ACCEPTANCE",
+    "RESOURCE_RECEIVER_BROKER",
+    "MERGE_QUEUE",
+    "INTEGRATION_WORKSPACE_AND_FRESH_QA",
+    "TARGET_REF_CAS_BROKER",
+    "MERGE_PUBLICATION_RECEIPT",
+    "P7_SELF_CONTAINED_RUNTIME",
+    "P7_SIGNING_AND_TRUST_ROOT",
+    "P7_FULL_HOST_QUALIFICATION_AND_UPDATE_DISTRIBUTION"
+  ],
+  "milestones": {
+    "M7_CODEX_REQUESTED_SCOPE": "PASS_ACTUAL_CLIENT_QA_RESULT_AND_COMPLETION_DOCUMENT_PUBLICATION_FINALIZE_REPORT_AND_CURRENT_NATIVE_DONE; ORIGINAL_QA_NOT_RERUN",
+    "M7": "PASS_BOTH_CLIENTS_DECLARED_SYNTHETIC_C_WORKS_CURRENT_NATIVE_DONE; FULL_ALL_PRODUCT_PROFILE_OS_OR_RELEASE_EXIT_NOT_CLAIMED; HISTORICAL_CLAUDE_UNKNOWN_UNRESOLVED",
+    "M8": "PASS_CURRENT_MACOS_SOURCE_PACKAGE_LEDGER_STATIC_FIXTURE_REGRESSION_AND_BOTH_ACTUAL_CLIENT_EVIDENCE_RECONCILIATION; NOT_GLOBAL_OS_OR_PUBLIC_RELEASE_QUALIFICATION",
+    "M7_CLAUDE_REQUESTED_SCOPE": "PASS_LATEST_0.1.8_ACTUAL_CLIENT_SINGLE_QA_READONLY_STORED_RESULT_VERIFICATION_QA_DOCUMENT_COMPLETION_DOCUMENT_FINALIZE_REPORT_CURRENT_NATIVE_DONE; OLD_UNKNOWN_PRESERVED"
+  },
+  "sandbox_observation": {
+    "native_read_in_sandbox": "EPERM sysctlbyname session.boot_identity_clock",
+    "read_only_final_verification": "PASS_WITH_EXPLICIT_HOST_PERMISSION",
+    "mutation_retry_or_guard_weakening": false
+  },
+  "ledger_counts": {
+    "selected_blockers": 0,
+    "repository_blockers": 0,
+    "delivery_backlog": 0,
+    "owner_management_backlog": 83,
+    "unsupported": 17
+  },
+  "cost": null,
+  "usage": {
+    "codex_test_threads": 17,
+    "scope": "Seventeen explicitly authorized test chats cumulative token_count only; excludes parent/Claude; cache/reasoning counters may overlap; no billing conversion",
+    "observed_cumulative_input_tokens": 6343562,
+    "observed_cumulative_output_tokens": 21393,
+    "claude": null,
+    "cost": null,
+    "cost_state": "UNKNOWN",
+    "observed_chat_count": 17,
+    "unknown_chat_count": 0,
+    "all_test_chat_input_tokens": 6343562,
+    "all_test_chat_output_tokens": 21393
+  },
+  "codex_final_installed": {
+    "plugin": "golem@golem-m7-finish-complete",
+    "version": "0.2.5",
+    "installed": "/Users/dgseo/.codex/plugins/cache/golem-m7-finish-complete/golem/0.2.5",
+    "inventory_sha256": "a5f32382029ae81cd72401d76dd21b13d54f59b56ba9ce86f2a853925d43b585",
+    "identity_kind": "FILE_INVENTORY_NOT_ARCHIVE_SHA",
+    "all_installed_source_bytes_match": true,
+    "launcher_sha256": "8ac3dcb8c856e2444622fe241aff9ef18cc5bacbc6220d067deb676646f29668",
+    "execution_request_exposed": false,
+    "native_actions": [
+      "document_submit",
+      "completion_finalize",
+      "completion_report"
+    ]
+  },
+  "qa_fixture_cause": {
+    "native_scope_difference": [
+      "request_digest"
+    ],
+    "semantic_json_equality_is_not_exact_approval_equality": true,
+    "original_unknown_preserved": true
+  },
+  "previous_artifact_index_r6": {
+    "parallel": {
+      "sha256": "7aa2df0c81cec383c73a4e080c3e1bd94ebf009b72f3cc618269e2f8b1ab1b18",
+      "bytes": 440218,
+      "payload_files": 81,
+      "manifest_version": "0.1.5",
+      "no_private_extra_files": true,
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED"
+    },
+    "prepare": {
+      "sha256": "da7ab2d151b35d620c22dd595f152e1d1b3646827dfd5b4f2f92aca53d33c6fd",
+      "bytes": 440077,
+      "payload_files": 81,
+      "manifest_version": "0.1.5",
+      "no_private_extra_files": true,
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED"
+    },
+    "quality": {
+      "sha256": "ac5f0200f5156d6e1455c386c76486b89705c182ba28946425660405f3bdf392",
+      "bytes": 440246,
+      "payload_files": 81,
+      "manifest_version": "0.1.5",
+      "no_private_extra_files": true,
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED"
+    },
+    "read": {
+      "sha256": "7eb4316486fbe3d5bfd76edf1031ced19776098512a8bf2887a4f9a6638cd5a4",
+      "bytes": 440040,
+      "payload_files": 81,
+      "manifest_version": "0.1.5",
+      "no_private_extra_files": true,
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED"
+    },
+    "task": {
+      "sha256": "bd60ba9c0f7ac705a4c2adfafb051b18f903ede8fd53a27939f343fb401627b7",
+      "bytes": 440276,
+      "payload_files": 81,
+      "manifest_version": "0.1.5",
+      "no_private_extra_files": true,
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED"
+    }
+  },
+  "prior_native_unit_validation": {
+    "count": 39,
+    "result": "PASS",
+    "skipped": 0,
+    "selection": "selected native unit tests; not all CTest integration suites",
+    "log_sha256": "ed430dc7b73947c6550c6338d397228d03561aee401c5ec30db2c34480994a5c",
+    "status": "RETAINED_PRIOR_PASS_UNCHANGED_NATIVE_SOURCE_AND_BINARY_NOT_RERUN"
+  },
+  "readonly_result_implementation": {
+    "schema_operation": "execution_read.stored_result",
+    "capability_id": "m4.tool.execution_read",
+    "source": [
+      "tools/integration_quality_reads.py",
+      "tools/integration_mutations.py",
+      "tools/integration_mutation_mcp.py"
+    ],
+    "authorization": "EXISTING_D2_DISCLOSURE_AND_CURRENT_EXACT_D4_EXECUTION_ACTION_PINS",
+    "admission": "existing_only=True",
+    "native_dispatch_path": false,
+    "intent_creation_path": false,
+    "native_approval_application": false,
+    "missing_or_corrupt_result": "BLOCK",
+    "unknown": "PRESERVE_ORIGINAL_UNCERTAINTY",
+    "original_qa_policy_or_approval_modified": false,
+    "policy_revision": "SEPARATE_FILES_ONLY_CURRENT_PRODUCER_AND_TRANSFER_PIN; ACTIONS_AND_GRANTS_IDENTICAL",
+    "current_annotations": "execution_read readOnlyHint/idempotentHint true; execution_request unchanged",
+    "codex_version": "0.2.3",
+    "feature_mcpb_version": "0.1.6",
+    "claude_installed_version": "0.1.5_ON_HOLD"
+  },
+  "preservation_r7": {
+    "as_of_utc": "2026-10-27T00:11:36.859229+00:00",
+    "original_baseline_files_verified": 897,
+    "native_source_changes_this_task": 0,
+    "staged_diff_bytes": 0,
+    "heads_unchanged": true,
+    "existing_m7_work_new_native_execution_or_approval_applied": false,
+    "original_qa_work_files_verified": 55,
+    "original_mutation_evidence_files_verified": 328,
+    "all_r7_baseline_hashes_unchanged": {
+      "native_work": true,
+      "mutation_evidence": true,
+      "claude_settings": true,
+      "qa_policy": true
+    },
+    "claude_main_config_unchanged": true,
+    "claude_continues_on_hold": true,
+    "codex_changed_paths": [
+      "/marketplaces/golem-m7-current",
+      "/marketplaces/golem-m7-fixed",
+      "/marketplaces/golem-m7-history",
+      "/marketplaces/golem-m7-local",
+      "/marketplaces/golem-m7-qa",
+      "/marketplaces/golem-m7-qa-diagnostic",
+      "/marketplaces/golem-m7-qa-reviewed",
+      "/marketplaces/golem-m7-release",
+      "/marketplaces/golem-m7-runtime",
+      "/marketplaces/golem-m7-skills",
+      "/plugins/golem@golem-m7-history",
+      "/plugins/golem@golem-m7-qa-reviewed"
+    ],
+    "active_test_plugin_keys": [
+      "golem@golem-m7-qa-reviewed",
+      "golem@golem-m7-history"
+    ],
+    "production_work_fully_inventoried": false,
+    "installed_history_plugin_source_match": true
+  },
+  "evidence_paths_r7": {
+    "root": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r7",
+    "artifacts": "artifacts/",
+    "runtime": "installed-runtime/",
+    "actual_client_trace": "private/codex-history-client-trace.json",
+    "actual_client_observation": "private/codex-history-observation.json",
+    "authorization_diff": "private/policy-review.json",
+    "preservation": "private/preservation-final.json",
+    "regression_logs": "private/"
+  },
+  "previous_artifact_index_r7": {
+    "parallel": {
+      "sha256": "b7118343bc8467721dcaf26849ed773bc1e262043d7b092f3af8085eb8384cd0",
+      "bytes": 441075,
+      "payload_files": 81,
+      "manifest_version": "0.1.6",
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED",
+      "no_private_extra_files": true
+    },
+    "prepare": {
+      "sha256": "c8481af51082d12985e2b70c7a0485a85a61172c24325af54f3c2cfcfda0a10a",
+      "bytes": 440935,
+      "payload_files": 81,
+      "manifest_version": "0.1.6",
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED",
+      "no_private_extra_files": true
+    },
+    "quality": {
+      "sha256": "5128474cb1f6a461aecb902b66c475b7d901b5ccfa153d25d4fca7a85e9213f9",
+      "bytes": 441106,
+      "payload_files": 81,
+      "manifest_version": "0.1.6",
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED",
+      "no_private_extra_files": true
+    },
+    "read": {
+      "sha256": "bb1661574454b4cb4d0bf8d7607d8c50835c576d5caa5bb0c277ffae4f717beb",
+      "bytes": 440899,
+      "payload_files": 81,
+      "manifest_version": "0.1.6",
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED",
+      "no_private_extra_files": true
+    },
+    "task": {
+      "sha256": "f08d7844d9a8981ef567e9a4c7f415854cc53ffccd6728adbe0d9155a6a9c56c",
+      "bytes": 441135,
+      "payload_files": 81,
+      "manifest_version": "0.1.6",
+      "self_contained": false,
+      "signature": "NOT_IMPLEMENTED",
+      "trust_root": "NOT_SELECTED",
+      "no_private_extra_files": true
+    }
+  },
+  "current_profile_sdk_fixtures": [
+    {
+      "profile": "read",
+      "layer": "REAL_SDK_STDIO_ISOLATED_DISCOVERY_FIXTURE_NOT_DESKTOP_OR_NATIVE_WORK",
+      "tools": [
+        "golem_approval_read",
+        "golem_binding_read",
+        "golem_candidate_read",
+        "golem_completion_check",
+        "golem_context_get",
+        "golem_context_read",
+        "golem_cost_read",
+        "golem_diagnostic_read",
+        "golem_discovery_read",
+        "golem_document_read",
+        "golem_evidence_read",
+        "golem_execution_read",
+        "golem_handoff_prepare",
+        "golem_history_read",
+        "golem_inventory_read",
+        "golem_journal_read",
+        "golem_native_validate",
+        "golem_profile_read",
+        "golem_projects_list",
+        "golem_proof_read",
+        "golem_reentry_read",
+        "golem_report_read",
+        "golem_research_read",
+        "golem_role_read",
+        "golem_session_read",
+        "golem_template_read",
+        "golem_work_inspect",
+        "golem_workflow_read"
+      ],
+      "source_runtime": "r8/final/installed-runtime",
+      "owner_ceiling_pass": true,
+      "disclosure_pass": true,
+      "unauthorized_work": "TRANSFER_SCOPE",
+      "helper_and_host_disabled": true,
+      "native_action_dispatched": false
+    },
+    {
+      "profile": "prepare",
+      "layer": "REAL_SDK_STDIO_ISOLATED_DISCOVERY_FIXTURE_NOT_DESKTOP_OR_NATIVE_WORK",
+      "tools": [
+        "golem_action_prepare",
+        "golem_approval_read",
+        "golem_binding_read",
+        "golem_candidate_read",
+        "golem_completion_check",
+        "golem_context_get",
+        "golem_context_read",
+        "golem_contract_prepare",
+        "golem_cost_read",
+        "golem_diagnostic_read",
+        "golem_discovery_read",
+        "golem_document_read",
+        "golem_evidence_read",
+        "golem_execution_read",
+        "golem_handoff_prepare",
+        "golem_history_read",
+        "golem_inputs_prepare",
+        "golem_inventory_read",
+        "golem_journal_read",
+        "golem_merge_prepare",
+        "golem_native_validate",
+        "golem_parallel_prepare",
+        "golem_plan_read",
+        "golem_profile_read",
+        "golem_projects_list",
+        "golem_proof_read",
+        "golem_reentry_read",
+        "golem_report_read",
+        "golem_research_read",
+        "golem_role_read",
+        "golem_session_read",
+        "golem_template_read",
+        "golem_work_inspect",
+        "golem_workflow_read"
+      ],
+      "source_runtime": "r8/final/installed-runtime",
+      "owner_ceiling_pass": true,
+      "disclosure_pass": true,
+      "unauthorized_work": "TRANSFER_SCOPE",
+      "helper_and_host_disabled": true,
+      "native_action_dispatched": false
+    },
+    {
+      "profile": "task",
+      "layer": "REAL_SDK_STDIO_ISOLATED_DISCOVERY_FIXTURE_NOT_DESKTOP_OR_NATIVE_WORK",
+      "tools": [
+        "golem_action_confirm",
+        "golem_action_prepare",
+        "golem_approval_read",
+        "golem_approved_action_prepare",
+        "golem_binding_read",
+        "golem_candidate_read",
+        "golem_completion_check",
+        "golem_context_get",
+        "golem_context_read",
+        "golem_contract_prepare",
+        "golem_cost_read",
+        "golem_diagnostic_read",
+        "golem_discovery_read",
+        "golem_document_read",
+        "golem_evidence_read",
+        "golem_execution_read",
+        "golem_handoff_prepare",
+        "golem_history_read",
+        "golem_inputs_prepare",
+        "golem_inventory_read",
+        "golem_journal_read",
+        "golem_merge_prepare",
+        "golem_native_validate",
+        "golem_parallel_prepare",
+        "golem_plan_read",
+        "golem_profile_read",
+        "golem_projects_list",
+        "golem_proof_read",
+        "golem_reentry_read",
+        "golem_report_read",
+        "golem_research_read",
+        "golem_role_read",
+        "golem_session_claim",
+        "golem_session_read",
+        "golem_template_read",
+        "golem_work_inspect",
+        "golem_workflow_read"
+      ],
+      "source_runtime": "r8/final/installed-runtime",
+      "owner_ceiling_pass": true,
+      "disclosure_pass": true,
+      "unauthorized_work": "TRANSFER_SCOPE",
+      "helper_and_host_disabled": true,
+      "native_action_dispatched": false
+    },
+    {
+      "profile": "quality",
+      "layer": "REAL_SDK_STDIO_ISOLATED_DISCOVERY_FIXTURE_NOT_DESKTOP_OR_NATIVE_WORK",
+      "tools": [
+        "golem_action_confirm",
+        "golem_action_prepare",
+        "golem_approval_read",
+        "golem_approved_action_prepare",
+        "golem_binding_read",
+        "golem_candidate_read",
+        "golem_completion_check",
+        "golem_context_get",
+        "golem_context_read",
+        "golem_contract_prepare",
+        "golem_cost_read",
+        "golem_diagnostic_read",
+        "golem_discovery_read",
+        "golem_document_read",
+        "golem_evidence_read",
+        "golem_execution_read",
+        "golem_handoff_prepare",
+        "golem_history_read",
+        "golem_inputs_prepare",
+        "golem_inventory_read",
+        "golem_journal_read",
+        "golem_merge_prepare",
+        "golem_native_validate",
+        "golem_parallel_prepare",
+        "golem_plan_read",
+        "golem_profile_read",
+        "golem_projects_list",
+        "golem_proof_read",
+        "golem_reentry_read",
+        "golem_report_read",
+        "golem_research_read",
+        "golem_role_read",
+        "golem_session_read",
+        "golem_template_read",
+        "golem_work_inspect",
+        "golem_workflow_read"
+      ],
+      "source_runtime": "r8/final/installed-runtime",
+      "owner_ceiling_pass": true,
+      "disclosure_pass": true,
+      "unauthorized_work": "TRANSFER_SCOPE",
+      "helper_and_host_disabled": true,
+      "native_action_dispatched": false
+    },
+    {
+      "profile": "parallel",
+      "layer": "REAL_SDK_STDIO_ISOLATED_DISCOVERY_FIXTURE_NOT_DESKTOP_OR_NATIVE_WORK",
+      "tools": [
+        "golem_action_confirm",
+        "golem_action_prepare",
+        "golem_approval_read",
+        "golem_approved_action_prepare",
+        "golem_binding_read",
+        "golem_candidate_read",
+        "golem_completion_check",
+        "golem_context_get",
+        "golem_context_read",
+        "golem_contract_prepare",
+        "golem_cost_read",
+        "golem_diagnostic_read",
+        "golem_discovery_read",
+        "golem_document_read",
+        "golem_evidence_read",
+        "golem_execution_read",
+        "golem_handoff_prepare",
+        "golem_history_read",
+        "golem_inputs_prepare",
+        "golem_inventory_read",
+        "golem_journal_read",
+        "golem_merge_prepare",
+        "golem_native_validate",
+        "golem_parallel_prepare",
+        "golem_plan_read",
+        "golem_profile_read",
+        "golem_projects_list",
+        "golem_proof_read",
+        "golem_reentry_read",
+        "golem_report_read",
+        "golem_research_read",
+        "golem_role_read",
+        "golem_session_read",
+        "golem_template_read",
+        "golem_work_inspect",
+        "golem_workflow_read"
+      ],
+      "source_runtime": "r8/final/installed-runtime",
+      "owner_ceiling_pass": true,
+      "disclosure_pass": true,
+      "unauthorized_work": "TRANSFER_SCOPE",
+      "helper_and_host_disabled": true,
+      "native_action_dispatched": false
+    }
+  ],
+  "preservation_r8": {
+    "as_of_utc": "2026-10-27T00:40:44.288210+00:00",
+    "original_work55_files_unchanged": true,
+    "work_files_added": 14,
+    "original_qa_evidence328_files_unchanged": true,
+    "original_qa_result_sha256": "c09a431f9178777d2c0750cc007a673bec6a1468bd70bf0de01aa3c8202892cf",
+    "existing_qa_rerun": false,
+    "existing_qa_runner_marker": "x",
+    "qa_source19_root_files_unchanged": true,
+    "claude_settings_and_main_config_unchanged": true,
+    "claude_on_hold": true,
+    "original897_repo_files_unchanged": true,
+    "native_src_include_unchanged": true,
+    "dispatch_parser_approval_and_lock_modules_identical_to_r7": true,
+    "existing_qa_host_decision_pins_unchanged": true,
+    "heads_unchanged": true,
+    "staging_empty": true,
+    "codex_config_only_test_paths_changed": [
+      "/marketplaces/golem-m7-current",
+      "/marketplaces/golem-m7-finish-complete",
+      "/marketplaces/golem-m7-finish-document",
+      "/marketplaces/golem-m7-finish-final",
+      "/marketplaces/golem-m7-finish-qa",
+      "/marketplaces/golem-m7-finish-ready",
+      "/marketplaces/golem-m7-finish-serial",
+      "/marketplaces/golem-m7-fixed",
+      "/marketplaces/golem-m7-history",
+      "/marketplaces/golem-m7-local",
+      "/marketplaces/golem-m7-qa",
+      "/marketplaces/golem-m7-qa-diagnostic",
+      "/marketplaces/golem-m7-qa-reviewed",
+      "/marketplaces/golem-m7-release",
+      "/marketplaces/golem-m7-runtime",
+      "/marketplaces/golem-m7-skills",
+      "/plugins/golem@golem-m7-finish-complete",
+      "/plugins/golem@golem-m7-history",
+      "/plugins/golem@golem-m7-qa-reviewed"
+    ],
+    "current_test_plugin_keys": [
+      "golem@golem-m7-qa-reviewed",
+      "golem@golem-m7-history",
+      "golem@golem-m7-finish-complete"
+    ],
+    "new_work_events": "QA_RESULT, COMPLETION_DOCUMENT, COMPLETION_RECEIPT; REPORT_MATERIALIZATION",
+    "current_native_acceptance": "DONE",
+    "native_completion_receipt": "dc83b75b24e2b20abd1e3a65fde2f3f01572954d442777cb52f47e6577b9751c",
+    "report_digest": "6ca30d5dc49fe4a00da9a2ce664b8a550dcaa0a5918eed50fc751d6d7562e5a4",
+    "report_matches_CAS_and_client_stdout": true,
+    "production_work_fully_inventoried": false
+  },
+  "startup_contention_fix": {
+    "source": [
+      "tools/integration_distribution_entry.py",
+      "tools/integration_mcp.py",
+      "tools/integration_mutation_mcp.py"
+    ],
+    "confirmed_error": "REGISTRY_BUSY",
+    "one_shot_launcher_delay_was_insufficient": true,
+    "wait_scope": [
+      "initial_configuration",
+      "existing_participation_entry",
+      "read_only_service_tools_metadata"
+    ],
+    "deadline_seconds_per_phase": 5,
+    "interval_seconds": 0.05,
+    "deadline_checked_between_attempts_not_IO_preemption": true,
+    "native_action_or_call_tool_retry": false,
+    "other_error_retry": false,
+    "existing_lock_and_approval_modules_changed": false,
+    "metadata_receiver_is_service_tools_only": true,
+    "prior_failed_chat_actions": "NOT_RUN",
+    "own_intermediate_plugins_retired": 5,
+    "audit_or_participation_evidence_deleted": false,
+    "participation_limit_changed": false
+  },
+  "startup_failure_threads": [
+    {
+      "thread_id": "01a17ab9-5393-7003-8e4f-84424cae6e35",
+      "result": "NOT_RUN_NO_DOCUMENT_OR_COMPLETION_ACTION_CALL"
+    },
+    {
+      "thread_id": "01a17abc-62b7-7a80-9471-d1f1e58e3d5c",
+      "result": "NOT_RUN_NO_DOCUMENT_OR_COMPLETION_ACTION_CALL"
+    },
+    {
+      "thread_id": "01a17abe-5f02-7400-b91f-7c2a823d407b",
+      "result": "NOT_RUN_NO_DOCUMENT_OR_COMPLETION_ACTION_CALL"
+    },
+    {
+      "thread_id": "01a17ac4-b9b2-77e2-95e7-466a3da27f4f",
+      "result": "NOT_RUN_NO_DOCUMENT_OR_COMPLETION_ACTION_CALL"
+    }
+  ],
+  "evidence_paths_r8": {
+    "root": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r8",
+    "final_packages": "final/artifacts",
+    "runtime": "final/installed-runtime",
+    "QA_result_publication": "qa/observation.json",
+    "actual_completion_actions": "final/current/observation.json",
+    "actual_client_trace": "final/current/client-tool-io.json",
+    "independent_native_done": "private/final-completion-check.json",
+    "preservation": "private/preservation-final.json",
+    "regression": "private/*-final.log"
+  },
+  "tests_r9": {
+    "unique_tests": 96,
+    "initial_run": {
+      "attempted": 96,
+      "passed": 95,
+      "skipped": 1,
+      "failures": 0,
+      "errors": 0,
+      "log_sha256": "e28ebb46bf858cd8a6e89e9d4a45148fc4791c1a9fba590c053ea8a60c205c60"
+    },
+    "skipped_native_component_resolution": {
+      "explicit_CLI": "r5/native-golem",
+      "attempted": 1,
+      "passed": 1,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "log_sha256": "16b0bb83d7ed3d91b3283d7d144b53a3f4d211f3df498042b57d9a85b0b7fd2d"
+    },
+    "final_unique_passed": 96,
+    "final_unresolved_skips": 0,
+    "modules": [
+      "test_integration_mutations",
+      "test_integration_m2",
+      "test_integration_m6"
+    ],
+    "scope": "DISPOSABLE_FIXTURE_REGRESSION; NO_EXISTING_WORK_OR_CLIENT_REPLAY",
+    "full_r8_suites": "RETAINED_SAME_SOURCE_INVENTORY; NOT_RERUN_R9",
+    "repository_source_role_after_documentation": {
+      "count": 16,
+      "passed": 16,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "log_sha256": "cc3fb7693c1da7ee0cddea5ec4a874610dec3ab00a70c25071bb70a0c60f6dc7",
+      "scope": "CURRENT_R9_DOCUMENTATION_AND_SOURCE_ROLE_FIXTURE_REGRESSION"
+    }
+  },
+  "source_reconciliation_r9": {
+    "schema": "golem.m8-claude-source-reconciliation.v1",
+    "as_of_utc": "2026-10-27T01:14:19.048988+00:00",
+    "counts": {
+      "sources": 552,
+      "observations": 2282,
+      "capabilities": 1187,
+      "product_surfaces": 444,
+      "D2": 43,
+      "D4": 37
+    },
+    "source_inventory_sha256": "bcce0aac247d67a89c8d38366a0fc9e672e0b536c43b055c46da39b0c97f30ca",
+    "fixed_outputs_byte_reproducible": {
+      "mcp-m0-reconciliation.json": true,
+      "mcp-m0-integrated-connections.json": true,
+      "mcp-m0-public-observations.json": true,
+      "mcp-m0-handler-observations.json": true,
+      "mcp-m0-connection-observations.json": true,
+      "mcp-m0-mutation-graph.json": true,
+      "mcp-m0-repository-scope.md": true,
+      "mcp-m0-observations.md": true
+    },
+    "artifact_index": {
+      "parallel": {
+        "sha256": "7be8ab569cfb8aa3e49f735ec69125b0013793c9527c745e0aabccdace18d159",
+        "payload_files": 81,
+        "manifest_version": "0.1.8",
+        "source_byte_identical": true
+      },
+      "prepare": {
+        "sha256": "ae823f5b7ffde749cce65b67d7a93cf6caf001dad30c29ac258d124b3b97e267",
+        "payload_files": 81,
+        "manifest_version": "0.1.8",
+        "source_byte_identical": true
+      },
+      "quality": {
+        "sha256": "34390b4203902bf4bd62e8975e7ed6d874ec3c88b976eb593a7f05b363ff76cc",
+        "payload_files": 81,
+        "manifest_version": "0.1.8",
+        "source_byte_identical": true
+      },
+      "read": {
+        "sha256": "8cfe7177ad40491c86a9c33f3919068c1caa7e8343c457ce2405d898cebc3543",
+        "payload_files": 81,
+        "manifest_version": "0.1.8",
+        "source_byte_identical": true
+      },
+      "task": {
+        "sha256": "f377f2d3a1b9d30bcb6210c269234af2c68ea5bb51cfe0ca84a4bb7fb2af4fb4",
+        "payload_files": 81,
+        "manifest_version": "0.1.8",
+        "source_byte_identical": true
+      }
+    },
+    "ledger_counts": {
+      "selected_blockers": 0,
+      "repository_blockers": 0,
+      "delivery_backlog": 0,
+      "owner_management_backlog": 83,
+      "unsupported": 17
+    },
+    "global_release_qualification": false
+  },
+  "preservation_r9": {
+    "schema": "golem.m7-claude-preservation.v1",
+    "as_of_utc": "2026-10-27T01:37:26.668523+00:00",
+    "preserved": {
+      "unknown_evidence": {
+        "files": 100,
+        "all_original_bytes_unchanged": true
+      },
+      "unknown_work": {
+        "files": 44,
+        "all_original_bytes_unchanged": true
+      },
+      "unknown_policy": {
+        "files": 1,
+        "all_original_bytes_unchanged": true
+      },
+      "unknown_action": {
+        "files": 1,
+        "all_original_bytes_unchanged": true
+      },
+      "unknown_decision": {
+        "files": 1,
+        "all_original_bytes_unchanged": true
+      },
+      "codex_done_work": {
+        "files": 69,
+        "all_original_bytes_unchanged": true
+      }
+    },
+    "original_repo_files": 897,
+    "original_repo_all_original_bytes_unchanged": true,
+    "native_src_include_unchanged": true,
+    "original_main_Claude_config_unchanged": true,
+    "test_extension_settings": "ONLY_REVIEWED_R9_CLOSURE_POLICY_AND_DIGEST_CHANGED; RESOURCE_CONSENT_FALSE",
+    "old_COMMIT_UNKNOWN": "UNRESOLVED_PRESERVED_NO_REPLAY_REPAIR_RECONCILE",
+    "Codex_DONE_Work_files": 69,
+    "Codex_QA_runner": "x",
+    "new_Claude_QA_runner": "x",
+    "new_preexisting_user_txt_preserved": true,
+    "heads_unchanged": true,
+    "staging_empty_both_repositories": true,
+    "commit_push": false,
+    "codex_config_diff_from_original_baseline": [
+      "/marketplaces/golem-m7-current",
+      "/marketplaces/golem-m7-finish-complete",
+      "/marketplaces/golem-m7-finish-document",
+      "/marketplaces/golem-m7-finish-final",
+      "/marketplaces/golem-m7-finish-qa",
+      "/marketplaces/golem-m7-finish-ready",
+      "/marketplaces/golem-m7-finish-serial",
+      "/marketplaces/golem-m7-fixed",
+      "/marketplaces/golem-m7-history",
+      "/marketplaces/golem-m7-local",
+      "/marketplaces/golem-m7-qa",
+      "/marketplaces/golem-m7-qa-diagnostic",
+      "/marketplaces/golem-m7-qa-reviewed",
+      "/marketplaces/golem-m7-release",
+      "/marketplaces/golem-m7-runtime",
+      "/marketplaces/golem-m7-skills",
+      "/plugins/golem@golem-m7-finish-complete",
+      "/plugins/golem@golem-m7-history",
+      "/plugins/golem@golem-m7-qa-reviewed"
+    ],
+    "production_work_fully_inventoried": false,
+    "new_rejected_approval_request": "PENDING_UNAPPROVED_PRESERVED; NATIVE_ACTION_ORDER_MISMATCH_REFUSED_WITHOUT_QA_DISPATCH"
+  },
+  "Claude_runtime_r9": {
+    "scope": "Only the approved task extension process and its directly owned Python child; no environment or unrelated command retained",
+    "managed_MCP_server_intentionally_left_active": true,
+    "processes": [
+      {
+        "pid": 59539,
+        "ppid": 59538,
+        "command": "/Users/dgseo/.local/bin/uv run --directory /Users/dgseo/Library/Application Support/Claude/Claude Extensions/local.mcpb.golem-contributors.golem-task tools/integration_distribution_entry.py"
+      },
+      {
+        "pid": 59542,
+        "ppid": 59539,
+        "command": "/Users/dgseo/Library/Application Support/Claude/Claude Extensions/local.mcpb.golem-contributors.golem-task/.venv/bin/python3 tools/integration_distribution_entry.py",
+        "interpreter": "/Users/dgseo/Library/Application Support/Claude/Claude Extensions/local.mcpb.golem-contributors.golem-task/.venv/bin/python3",
+        "canonical_interpreter": "/Users/dgseo/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/bin/python3.11",
+        "MCP_distributions": [
+          {
+            "name": "mcp",
+            "version": "2.3.0"
+          }
+        ],
+        "pyvenv_configuration": "home = /Users/dgseo/.local/share/uv/python/cpython-3.11.14-macos-aarch64-none/bin\nimplementation = CPython\nuv = 0.9.13\nversion_info = 3.11.14\ninclude-system-site-packages = false\nprompt = golem-desktop\n"
+      }
+    ],
+    "observation_matches": 2
+  },
+  "Claude_UI_evidence_r9": {
+    "schema": "golem.m7-claude-ui-observation.v1",
+    "chat_id": "3138e426-e0df-41a2-87e2-cc1e0e33e85a",
+    "chat_title": "Claude Desktop M7 QA 격리 실행",
+    "observation_method": "Claude native UI accessibility observations and expanded tool Request/Error panels through cua_repl; no private application database access",
+    "current_completion_UI": {
+      "action": "DONE",
+      "acceptance_verified": true,
+      "generation": 9,
+      "completion_sequence": 1,
+      "report_digest": "e788c4a2ce553a752c9e3aee694ac42e0e617799187a45529968f4f7a3754838"
+    },
+    "unauthorized_existing_test_Work": {
+      "tool": "work_inspect",
+      "server": "Golem task",
+      "actual_UI_call_count": 1,
+      "arguments": {
+        "project_id": "m7-qa-codex-v5",
+        "work_id": "example-work",
+        "view": "status"
+      },
+      "target_existence_evidence": "Separately inventoried Codex synthetic DONE Work with 69 files; never a production Work and not a nonexistent ID",
+      "actual_expanded_tool_Error": {
+        "acceptance_verified": false,
+        "automatic_retry_allowed": false,
+        "code": "TRANSFER_SCOPE",
+        "execution_authorized": false,
+        "local_evidence_id": null,
+        "native_state_changed": false,
+        "next_operation": "REVIEW_OWNER_ACTION_POLICY_AND_CURRENT_NATIVE_STATE",
+        "schema": "golem.integration-mutation-result.v1",
+        "state": "NOT_DISPATCHED"
+      },
+      "control_observation": "One CUA click returned an invalid-element error after the UI progressed. Re-observed the completed failed-tool trace; did not repeat the tool call.",
+      "result": "PASS_SCOPE_DENIAL_BEFORE_NATIVE_DISPATCH"
+    },
+    "input_dependent_response": {
+      "input_origin": "Previously delivered actual execution_read verify/verify_authorized and completion assessment in the same isolated chat",
+      "prompt_contained_source_numbers_or_answer": false,
+      "formula": "(duration_ms mod 1000) + stdout_size - stderr_size + length(cases)",
+      "actual_agent_values": {
+        "duration_ms": 2405,
+        "stdout_size": 95,
+        "stderr_size": 0,
+        "cases_length": 2
+      },
+      "actual_agent_answer": 502,
+      "independent_expected": 502,
+      "extra_QA_or_mutation_call": false,
+      "result": "PASS_SINGLE_INPUT_DEPENDENCE_PROBE_NOT_MODEL_UNDERSTANDING_OR_CONTENT_TRUTH_CERTIFICATE"
+    },
+    "usage_UI": {
+      "product": "Claude Desktop Free",
+      "observed_banner": "5-hour usage limit over 90 percent; resets at 15:00 local time",
+      "scope": "Shared account UI window, not attributable to this chat alone; no token or billing conversion",
+      "exact_tokens": null,
+      "cost": null,
+      "additional_model_calls_after_observation": false
+    }
+  },
+  "active_connections_r9": {
+    "Claude_test_extension": "Golem task 0.1.8 enabled; r9 closure policy only; execution_request not exposed; uv/Python server intentionally active",
+    "original_Claude_Golem": "PRESERVED",
+    "Codex_test_plugins": [
+      "golem@golem-m7-qa-reviewed 0.2.2",
+      "golem@golem-m7-history 0.2.3",
+      "golem@golem-m7-finish-complete 0.2.5"
+    ],
+    "original_Codex_Golem": "PRESERVED",
+    "temporary_native_QA_process": "REAPED_TRUE; no additional candidate/helper host started",
+    "evidence_deleted": false
+  },
+  "historical_unresolved": {
+    "Claude_original_COMMIT_UNKNOWN": {
+      "request_id": "7c77e5b7c0e24734bfe84da0b7eac61e",
+      "result_sha256": "d01a6defeaf5c8654c36219c887ad690ac93913afd34dd0d6b4ce3ab1c69306a",
+      "state": "COMMIT_UNKNOWN",
+      "replayed": false,
+      "repaired": false,
+      "reconciled": false,
+      "cleared": false,
+      "fresh_Work_success_does_not_resolve_old_unknown": true
+    },
+    "fresh_v9_rejected_approval": "PENDING_UNAPPROVED_PRESERVED; NATIVE_ACTION_KEY_ORDER_MISMATCH_DIAGNOSED; DISTINCT_EXACT_ORDER_REQUEST_APPROVED_BEFORE_SINGLE_QA"
+  },
+  "client_evidence_limits_r9": {
+    "actual_UI_invocations": "OBSERVED_EXACT_OUTER_ARGUMENTS; EACH_ONE_TIME_APPROVAL",
+    "native_immutable_result_and_current_predicate": "INDEPENDENTLY_HASHED_AND_PARSED",
+    "server_read_delivery_artifacts": "CURRENT_COMPLETION_TRANSITIONS_AND_RECEIPT_VERIFICATIONS_CAPTURED",
+    "default_Claude_log": "METHOD_ID_RESULT_METADATA_ONLY; RAW_FULL_CLIENT_RESPONSE_BYTES_NOT_CAPTURED",
+    "stored_result_readonly_operation": "ACTUAL_UI_SUCCESS_OBSERVED; ORIGINAL_IMMUTABLE_BYTES_HASH_PRESERVED; NO_NEW_NATIVE_EXECUTION",
+    "hash_is_truth": false,
+    "provider_authenticity_verified": false,
+    "Claude_native_Skills_discovery": "NOT_OBSERVED; MANIFEST_AND_TOOL_GUIDANCE_USED",
+    "usage": null,
+    "cost": null
+  },
+  "evidence_paths_r9": {
+    "root": "/Volumes/Extreme SSD/golem-project/m7m8-validation-20261026/r9-claude",
+    "package": "artifacts/golem-task-0.1.8.mcpb",
+    "installed_byte_identity": "private/installed-0.1.8.json",
+    "QA_and_completion": "private/claude-completion-observation.json",
+    "full_exact_native_actions": "private/full-native-actions.json",
+    "actual_client_UI_chat": "https://claude.ai/chat/3138e426-e0df-41a2-87e2-cc1e0e33e85a",
+    "client_transport_metadata": "private/claude-task-client-new.log",
+    "native_current_DONE": "private/current-native-completion.json",
+    "server_read_deliveries": "private/server-read-deliveries.json",
+    "M2_plans": "private/M2-plan-evidence.json",
+    "source_reconciliation": "private/source-reconciliation.json",
+    "preservation": "private/preservation-current.json",
+    "regression": "private/regression-current.log",
+    "native_component": "private/regression-native-component.log"
+  }
+}

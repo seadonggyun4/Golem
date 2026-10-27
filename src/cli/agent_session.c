@@ -8,6 +8,16 @@
 
 int golem_cli_agent_session(int argc, char **argv)
 {
+    if (argc == 4 && !strcmp(argv[2], "validate")) {
+        cli_blob input = {0};
+        golem_status st = cli_read(argv[3], GOLEM_DOCUMENT_MAX_JSON, &input);
+        if (st == GOLEM_OK)
+            st = golem_agent_request_validate((golem_bytes){input.data, input.size}, NULL);
+        free(input.data);
+        if (st != GOLEM_OK)
+            return cli_emit(st, NULL);
+        return puts("{\"schema_version\":1,\"structurally_valid\":true,\"acceptance_verified\":false}") < 0 ? 1 : 0;
+    }
     bool resume = (argc == 6 || argc == 7) && !strcmp(argv[2], "resume");
     if (!resume && (argc != 5 || strcmp(argv[2], "call") != 0)) {
         fputs("usage: golem session call WORK REQUEST.json\n"
@@ -77,6 +87,16 @@ int golem_cli_agent_session(int argc, char **argv)
 
 int golem_cli_session_binding(int argc, char **argv)
 {
+    if (argc == 5 && !strcmp(argv[1], "agent") && !strcmp(argv[2], "binding") && !strcmp(argv[3], "validate")) {
+        cli_blob input = {0};
+        golem_status st = cli_read(argv[4], GOLEM_DOCUMENT_MAX_JSON, &input);
+        if (st == GOLEM_OK)
+            st = golem_session_binding_request_validate((golem_bytes){input.data, input.size});
+        free(input.data);
+        if (st != GOLEM_OK)
+            return cli_emit(st, NULL);
+        return puts("{\"schema_version\":1,\"structurally_valid\":true,\"acceptance_verified\":false}") < 0 ? 1 : 0;
+    }
     bool history = argc == 5 && !strcmp(argv[1], "work") && !strcmp(argv[2], "history");
     bool record = argc == 5 && !strcmp(argv[1], "work") && !strcmp(argv[2], "record");
     bool binding = argc == 6 && !strcmp(argv[1], "agent") && !strcmp(argv[2], "binding") &&

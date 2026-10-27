@@ -1,26 +1,38 @@
 {
   "name": "golem",
-  "version": "0.2.0",
+  "version": "0.2.5",
   "description": "Owner-approved local workflow context and evidence.",
-  "author": {"name": "Donggyun Seo", "url": "https://github.com/seadonggyun4/Golem"},
+  "author": {
+    "name": "Donggyun Seo",
+    "url": "https://github.com/seadonggyun4/Golem"
+  },
   "homepage": "https://github.com/seadonggyun4/Golem",
   "repository": "https://github.com/seadonggyun4/Golem",
   "license": "PolyForm-Noncommercial-1.0.0",
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "requires_local_executor": true,
-  "extensions": {"com.openai": {"onboardingSkill": "./skills/golem-setup/SKILL.md"}},
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/golem-setup/SKILL.md"
+    }
+  },
   "interface": {
     "displayName": "Golem",
     "shortDescription": "Read approved workflow context and evidence",
-    "longDescription": "Connect your reviewed local Golem launcher. Project access and disclosure require separate owner approval. Includes setup and diagnostics; no automatic Work resume or execution.",
+    "longDescription": "Connect a reviewed local launcher and use currently exposed owner-scoped Work tools. Includes separate setup and Work skills; feature packaging grants no authority or automatic resume.",
     "developerName": "Donggyun Seo",
     "category": "Developer Tools",
-    "capabilities": ["Read approved Works", "Inspect context and evidence"],
+    "capabilities": [
+      "Read approved Works",
+      "Inspect context and evidence"
+    ],
     "websiteURL": "https://github.com/seadonggyun4/Golem",
     "supportURL": "https://github.com/seadonggyun4/Golem/issues",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/icon.png",
-    "defaultPrompt": ["Set up Golem using my approved local launcher."]
+    "defaultPrompt": [
+      "Set up Golem using my approved local launcher."
+    ]
   }
 }

@@ -292,3 +292,21 @@ These are engineering inferences, not proofs of exactly-once effects:
   authorization and enforcement boundaries; a same-UID file is not remote identity.
 - [Existing approval contract and references](approvals.md): one-use consumption,
   durable uncertainty and recovery reuse, without a duplicate approval reducer.
+
+## Stored execution results (M7, 2026-10-27)
+
+`golem_execution_read` operation `stored_result` takes only `project_id`,
+`work_id`, `action_id`, and the original `request_id`. It requires the existing
+D2 disclosure scope and a current D4 exact `execution_request` action. It reuses
+D4 admission with `existing_only=True`, current owner/asset pins, request identity,
+private regular-file reads, and immutable result/reference validation. It has no
+native command, subprocess, intent creation, approval application or repair path.
+Missing intent/result, corruption, scope changes and pending or changed approval
+assets block. A recorded COMMIT_UNKNOWN stays COMMIT_UNKNOWN inside the historical
+result; the outer AVAILABLE/native_state_changed=false describes this read only.
+
+The original JSON bytes are returned as bounded base64 with SHA-256 alongside
+the decoded historical result. Integrity does not prove truth, current QA PASS,
+acceptance or Work completion. Never fall back to execution_request for lookup.
+`execution_read` annotations identify its existing fixed reads as read-only and
+idempotent; enforcement comes from the closed schemas and service paths.

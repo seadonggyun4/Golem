@@ -210,5 +210,144 @@ class D4(unittest.TestCase):
             self.expect("RESUME_COUNT_REQUIRED", lambda: contract.native_action(entry, bad))
 
 
+class StoredExecutionResult(unittest.TestCase):
+    for name in ('approve', 'query', 'expect', 'inventory', 'save_policy', 'adapter', 'repin', 'api'):
+        locals()[name] = getattr(D4, name)
+
+    def setUp(self):
+        D4.setUp(self)
+        self.entry.update(tool='execution_request', action_id='qa')
+        self.args['action_id'] = 'qa'
+        self.action['native_json'] = c.encoded({'schema_version': 1, 'operation': 'run',
+            'checkpoint': 'a' * 64, 'attempt_id': 'original-attempt'}).decode()
+        self.decision = self.root / 'decision.json'
+        self.decision.write_bytes(c.encoded({'schema': 'golem.integration-local-decision.v1',
+            'action_digest': 'a' * 64, 'issuer': 'b' * 64, 'operation': 'approve', 'policy_epoch': 1}))
+        self.decision.chmod(0o600)
+        self.action['approval'] = {'host': mutations.r.file_pin(self.cli),
+            'decision': mutations.r.file_pin(self.decision), 'request_receipt': 'c' * 64,
+            'contract': 'd' * 64, 'shell_contract': ''}
+        self.repin()
+
+    def seed(self, state='NATIVE_RESULT_RECORDED'):
+        api = self.api()
+        with self.registry.locked(exclusive=True):
+            *_, output, previous = api._admit('execution_request', self.args)
+            self.assertIsNone(previous)
+            result = {'schema': 'golem.integration-mutation-result.v1', 'state': state,
+                'native_state_changed': 'UNKNOWN' if state == 'COMMIT_UNKNOWN' else 'POSSIBLE',
+                'automatic_retry_allowed': False, 'local_evidence_id': output.name,
+                'native_reply': {'historical': True, 'outcome': 'PASS'}}
+            api._publish(output, result)
+        return api, output, result
+
+    def lookup(self, api, **changes):
+        return api.call('execution_read', {**self.args, 'operation': 'stored_result', **changes})
+
+    def files(self):
+        return {str(p.relative_to(self.root)): (p.stat().st_mode, c.sha(p.read_bytes()))
+                for p in self.root.rglob('*') if p.is_file()}
+
+    def test_exact_bytes_no_native_dispatch_no_intent_or_audit_writes(self):
+        import base64
+        api, output, result = self.seed()
+        before = self.files()
+        with patch.object(mutations.records, 'capture', side_effect=AssertionError('no native')), \
+             patch.object(api, '_mutate', side_effect=AssertionError('no mutation')):
+            reply = self.lookup(api)
+        self.assertEqual(reply['state'], 'AVAILABLE')
+        self.assertFalse(reply['native_state_changed'])
+        self.assertEqual(reply['result'], result)
+        self.assertEqual(base64.b64decode(reply['stored_result']['data']), (output / 'result.json').read_bytes())
+        self.assertEqual(reply['stored_result']['sha256'], c.sha((output / 'result.json').read_bytes()))
+        for flag in ('native_dispatch_performed', 'execution_authorized', 'current_qa_pass_verified',
+                     'current_native_acceptance_verified', 'work_completion_inferred', 'automatic_retry_allowed'):
+            self.assertFalse(reply[flag])
+        self.assertEqual(before, self.files())
+
+    def test_missing_request_and_missing_final_record_never_create_or_repair(self):
+        api = self.api()
+        before = self.files()
+        self.expect('ORIGINAL_RESULT_NOT_FOUND', lambda: self.lookup(api))
+        self.assertEqual(before, self.files())
+        api, output, _ = self.seed()
+        (output / 'result.json').unlink()
+        before = self.files()
+        self.expect('ORIGINAL_RESULT_NOT_RECORDED', lambda: self.lookup(api))
+        self.assertEqual(before, self.files())
+
+    def test_corrupt_hash_and_symlink_block_without_repair(self):
+        api, output, _ = self.seed()
+        path = output / 'result.json'
+        raw = path.read_bytes()
+        path.write_bytes(raw + b' ')
+        before = self.files()
+        self.expect('MUTATION_RECORD_CORRUPT', lambda: self.lookup(api))
+        self.assertEqual(before, self.files())
+        path.unlink()
+        path.symlink_to(self.decision)
+        with self.assertRaises((c.IntegrationError, OSError)):
+            self.lookup(api)
+
+    def test_unknown_stays_unknown_inside_read_only_delivery(self):
+        api, _, result = self.seed('COMMIT_UNKNOWN')
+        reply = self.lookup(api)
+        self.assertEqual(reply['result'], result)
+        self.assertEqual(reply['result']['native_state_changed'], 'UNKNOWN')
+        self.assertFalse(reply['native_state_changed'])
+
+    def test_no_cross_work_action_or_request_and_no_argument_injection(self):
+        api, _, _ = self.seed()
+        for change, code in (({'work_id': 'foreign'}, 'TRANSFER_SCOPE'),
+                             ({'action_id': 'foreign'}, 'MUTATION_SCOPE'),
+                             ({'request_id': 'foreign'}, 'ORIGINAL_RESULT_NOT_FOUND'),
+                             ({'argv': []}, 'SCHEMA'), ({'tool': 'session_claim'}, 'SCHEMA')):
+            self.expect(code, lambda: self.lookup(api, **change))
+
+    def test_current_owner_revocation_and_action_pins_remain_required(self):
+        api, _, _ = self.seed()
+        self.action_path.write_bytes(self.action_path.read_bytes() + b' ')
+        self.expect('ACTION_CHANGED', lambda: self.lookup(api))
+        self.repin()
+        api = self.api()
+        self.approve('revoke')
+        self.expect('PROJECT_APPROVAL_REQUIRED', lambda: self.lookup(api))
+
+    def test_pending_and_changed_decision_block(self):
+        api, _, _ = self.seed()
+        self.decision.unlink()
+        self.expect('PENDING_APPROVAL', lambda: self.lookup(api))
+        self.decision.write_bytes(b'{}')
+        self.decision.chmod(0o600)
+        self.expect('DECISION_CHANGED', lambda: self.lookup(api))
+
+    def test_policy_change_and_same_request_changed_native_bytes_block(self):
+        api, _, _ = self.seed()
+        original = self.mutation_path.read_bytes()
+        self.mutation_path.write_bytes(original + b' ')
+        self.expect('MUTATION_POLICY_CHANGED', lambda: self.lookup(api))
+        self.mutation_path.write_bytes(original)
+        self.action['native_json'] += ' '
+        self.repin()
+        self.expect('REQUEST_CONFLICT', lambda: self.lookup(self.api()))
+
+    def test_unrelated_policy_addition_does_not_rewrite_original_intent(self):
+        _, output, result = self.seed()
+        before = (output / 'intent.json').read_bytes()
+        self.mutation_policy['actions'].append({**self.entry, 'action_id': 'unrelated'})
+        self.mutation_path.write_bytes(c.encoded(self.mutation_policy))
+        self.mutation_digest = c.sha(self.mutation_path.read_bytes())
+        self.assertEqual(self.lookup(self.api())['result'], result)
+        self.assertEqual((output / 'intent.json').read_bytes(), before)
+
+    def test_d2_only_service_cannot_read_owner_records_or_build_native_command(self):
+        api, _, _ = self.seed()
+        from integration_service import Service
+        from integration_quality_reads import command
+        self.expect('OWNER_EXECUTION_RESULT_REQUIRED', lambda: self.lookup(Service(api.policy.transfer)))
+        self.expect('STORED_RESULT_HAS_NO_NATIVE_COMMAND', lambda: command('execution_read',
+            {**self.args, 'operation': 'stored_result'}, str(self.work), self.root))
+
+
 if __name__ == "__main__":
     unittest.main()

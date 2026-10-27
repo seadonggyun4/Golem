@@ -41,6 +41,33 @@ static int bundle(int argc, char **argv)
 
 int golem_cli_execution(int argc,char **argv)
 {
+    if (argc == 5 && (!strcmp(argv[2], "verify") || !strcmp(argv[2], "verify-authorized"))) {
+        cli_blob input = {0};
+        struct json_object *request = NULL;
+        golem_execution_reply reply = {0};
+        golem_document_store *store = NULL;
+        golem_status st = cli_read(argv[4], GOLEM_DOCUMENT_MAX_JSON, &input);
+        if (st == GOLEM_OK)
+            st = cli_json_parse((golem_bytes){input.data, input.size}, &request);
+        if (st == GOLEM_OK && strcmp(cli_json_text(json_object_object_get(request, "operation")), "verify"))
+            st = GOLEM_ERR_INVALID_ARGUMENT;
+        if (st == GOLEM_OK)
+            st = golem_document_store_open(argv[3], false, NULL, &store, NULL);
+        if (st == GOLEM_OK)
+            st = !strcmp(argv[2], "verify")
+                ? golem_execution_call(store, (golem_bytes){input.data, input.size}, NULL, &reply, NULL)
+                : golem_execution_call_authorized(store, (golem_bytes){input.data, input.size}, NULL, &reply, NULL);
+        golem_status closed = golem_document_store_close(store);
+        if (st == GOLEM_OK)
+            st = closed;
+        if (st == GOLEM_OK && (cli_output_write((golem_bytes){reply.data, reply.size}) != GOLEM_OK || fputc('\n', stdout) == EOF))
+            st = GOLEM_ERR_IO;
+        free(input.data);
+        json_object_put(request);
+        golem_execution_reply_free(&reply);
+        return st == GOLEM_OK ? 0 : cli_emit(st, NULL);
+    }
+
     if (argc >= 3 && !strcmp(argv[2], "bundle"))
         return bundle(argc, argv);
     bool validate=argc==4 && strcmp(argv[2],"validate")==0;

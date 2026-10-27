@@ -14,9 +14,10 @@ import integration_mutation_contract as mutations
 
 TEXT = {"type": "string", "minLength": 1, "maxLength": 1024, "pattern": "^[^\\x00-\\x20\\x7f]+$"}
 MODULES = ("integration_gateway_contract.py", "integration_gateway_auth.py", "integration_gateway.py", "requirements-gateway.txt")
+REMOTE_READ_NAMES = ("projects_list", "work_inspect", "history_read", "context_get", "handoff_prepare", "evidence_read", "completion_check")
 DELEGATE = c.obj({"delegate_id": c.ID, "subject": TEXT, "oauth_client_id": TEXT,
     "destination_id": c.ID, "transfer_policy": c.PIN, "mutation_policy": {**c.PIN, "type": ["object", "null"]},
-    "tools": c.array(c.enum(*transfer.NAMES, *mutations.NAMES), 12)})
+    "tools": c.array(c.enum(*REMOTE_READ_NAMES, *mutations.NAMES), 12)})
 REVOCATIONS = c.obj({"schema": {"const": "golem.integration-remote-revocations.v1"}, "epoch": c.INTEGER,
     "disabled": {"type": "boolean"}, "not_before": c.INTEGER,
     "revoked_jtis": c.array(TEXT, 1024, 0), "revoked_delegates": c.array(c.ID, 32, 0)})

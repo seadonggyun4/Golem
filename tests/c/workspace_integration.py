@@ -61,6 +61,23 @@ class Workspace(unittest.TestCase):
         self.call(5, evidence=ready[2])
         return ready
 
+    def test_readonly_resume_verifies_without_mutation_or_repair(self):
+        def contents():
+            return {str(p.relative_to(self.work)): p.read_bytes()
+                    for p in self.work.rglob("*") if p.is_file()}
+        ready = self.call(1)
+        before = contents()
+        self.assertEqual(self.call(2, env={"WS_READONLY": "1"}), ready)
+        for operation in (1, 3, 4, 5, 6):
+            self.call(operation, evidence=ready[2] if operation == 5 else "-",
+                      env={"WS_READONLY": "1"}, ok=False)
+        self.call(2, env={"WS_READONLY": "1", "WS_DENY": "1"}, ok=False)
+        self.assertEqual(contents(), before)
+        # Identity drift remains a hard error on the read-only path.
+        (self.path / ".git").write_text("gitdir: /invalid/fixture\n")
+        self.call(2, env={"WS_READONLY": "1"}, ok=False)
+        self.assertEqual(contents(), before)
+
     def test_lifecycle_and_receipts_survive_removal(self):
         ready = self.retained()
         self.assertEqual(ready[0], 2)

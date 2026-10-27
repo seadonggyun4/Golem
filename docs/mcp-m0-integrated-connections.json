@@ -1,0 +1,4923 @@
+{
+  "d2_fallback": {
+    "paths": [
+      [
+        "action_confirm",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "action_prepare",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "approval_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "approved_action_prepare",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "artifact_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "binding_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "bundle_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "candidate_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "completion_check",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "literal"
+          ],
+          [
+            246,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "configuration_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "context_get",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "context_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "contract_prepare",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "cost_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "diagnostic_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "discovery_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "document_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "events_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "evidence_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "literal"
+          ],
+          [
+            246,
+            "remainder"
+          ]
+        ]
+      ],
+      [
+        "execution_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "handoff_prepare",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "history_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "remainder"
+          ],
+          [
+            263,
+            "remainder"
+          ]
+        ]
+      ],
+      [
+        "inputs_prepare",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "inventory_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "journal_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "merge_prepare",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "native_validate",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "parallel_prepare",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "plan_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "profile_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "projects_list",
+        [
+          [
+            230,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "proof_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "reentry_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "report_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "research_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "revision_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "role_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "session_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "template_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "usage_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "work_inspect",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "remainder"
+          ],
+          [
+            263,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "workflow_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "remainder"
+          ],
+          [
+            256,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "workspace_read",
+        [
+          [
+            230,
+            "remainder"
+          ],
+          [
+            240,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            250,
+            "remainder"
+          ],
+          [
+            252,
+            "remainder"
+          ],
+          [
+            254,
+            "literal"
+          ]
+        ]
+      ]
+    ],
+    "blockers": [],
+    "routing_only": true,
+    "execution_verified": false,
+    "authority_verified": false
+  },
+  "d4_delegation": {
+    "reads": [
+      "action_confirm",
+      "action_prepare",
+      "approval_read",
+      "approved_action_prepare",
+      "artifact_read",
+      "binding_read",
+      "bundle_read",
+      "candidate_read",
+      "completion_check",
+      "configuration_read",
+      "context_get",
+      "context_read",
+      "contract_prepare",
+      "cost_read",
+      "diagnostic_read",
+      "discovery_read",
+      "document_read",
+      "events_read",
+      "evidence_read",
+      "execution_read",
+      "handoff_prepare",
+      "history_read",
+      "inputs_prepare",
+      "inventory_read",
+      "journal_read",
+      "merge_prepare",
+      "native_validate",
+      "parallel_prepare",
+      "plan_read",
+      "profile_read",
+      "projects_list",
+      "proof_read",
+      "reentry_read",
+      "report_read",
+      "research_read",
+      "revision_read",
+      "role_read",
+      "session_read",
+      "template_read",
+      "usage_read",
+      "work_inspect",
+      "workflow_read",
+      "workspace_read"
+    ],
+    "delegated": [
+      "adapter_noop_run",
+      "approval_request",
+      "binding_attach",
+      "candidate_request",
+      "completion_finalize",
+      "completion_report",
+      "context_publish",
+      "cost_inbox_reconcile",
+      "discovery_snapshot",
+      "document_project",
+      "document_submit",
+      "evidence_import",
+      "execution_request",
+      "execution_verify",
+      "helper_execute",
+      "inventory_capture",
+      "lineage_store",
+      "profile_register",
+      "proof_publish",
+      "reentry_decide",
+      "reentry_report",
+      "research_export",
+      "research_request",
+      "role_assess",
+      "role_enroll",
+      "run_link",
+      "session_begin",
+      "session_claim",
+      "session_heartbeat",
+      "session_reconcile",
+      "session_reject_output",
+      "session_resume",
+      "session_start",
+      "session_submit",
+      "work_create",
+      "work_noop_run",
+      "workspace_request"
+    ],
+    "helper": "Service._mutate",
+    "blockers": [],
+    "helper_body_verified": false,
+    "execution_verified": false,
+    "authority_verified": false
+  },
+  "d4_mutation_graph": {
+    "edges": [
+      [
+        "Service._mutate",
+        "self._admit(name, args)",
+        "CONFIRMED",
+        [
+          [
+            274,
+            [
+              [
+                "FunctionDef",
+                "body",
+                0,
+                null
+              ],
+              [
+                "With",
+                "body",
+                0,
+                [
+                  "withitem(context_expr=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='registry', ctx=Load()), attr='locked', ctx=Load()), keywords=[keyword(arg='exclusive', value=Constant(value=True))]))"
+                ]
+              ],
+              [
+                "Assign",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ]
+        ]
+      ],
+      [
+        "Service._mutate",
+        "self._preflight(entry, native)",
+        "CONFIRMED",
+        [
+          [
+            283,
+            [
+              [
+                "FunctionDef",
+                "body",
+                2,
+                null
+              ],
+              [
+                "Try",
+                "body",
+                1,
+                [
+                  "Tuple(elts=[Attribute(value=Name(id='c', ctx=Load()), attr='IntegrationError', ctx=Load()), Name(id='OSError', ctx=Load()), Name(id='ValueError', ctx=Load()), Name(id='KeyError', ctx=Load()), Name(id='TypeError', ctx=Load())], ctx=Load())"
+                ]
+              ],
+              [
+                "Assign",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ]
+        ]
+      ],
+      [
+        "Service._mutate",
+        "self._argv(entry, project, work, value, output)",
+        "CONFIRMED",
+        [
+          [
+            287,
+            [
+              [
+                "FunctionDef",
+                "body",
+                2,
+                null
+              ],
+              [
+                "Try",
+                "body",
+                4,
+                [
+                  "Tuple(elts=[Attribute(value=Name(id='c', ctx=Load()), attr='IntegrationError', ctx=Load()), Name(id='OSError', ctx=Load()), Name(id='ValueError', ctx=Load()), Name(id='KeyError', ctx=Load()), Name(id='TypeError', ctx=Load())], ctx=Load())"
+                ]
+              ],
+              [
+                "Assign",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ]
+        ]
+      ],
+      [
+        "Service._mutate",
+        "self.policy.authorize(entry)",
+        "CONFIRMED",
+        [
+          [
+            290,
+            [
+              [
+                "FunctionDef",
+                "body",
+                2,
+                null
+              ],
+              [
+                "Try",
+                "body",
+                5,
+                [
+                  "Tuple(elts=[Attribute(value=Name(id='c', ctx=Load()), attr='IntegrationError', ctx=Load()), Name(id='OSError', ctx=Load()), Name(id='ValueError', ctx=Load()), Name(id='KeyError', ctx=Load()), Name(id='TypeError', ctx=Load())], ctx=Load())"
+                ]
+              ],
+              [
+                "With",
+                "body",
+                1,
+                [
+                  "withitem(context_expr=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='registry', ctx=Load()), attr='locked', ctx=Load()), keywords=[keyword(arg='exclusive', value=Constant(value=True))]))"
+                ]
+              ],
+              [
+                "Expr",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ],
+          [
+            301,
+            [
+              [
+                "FunctionDef",
+                "body",
+                2,
+                null
+              ],
+              [
+                "Try",
+                "body",
+                7,
+                [
+                  "Tuple(elts=[Attribute(value=Name(id='c', ctx=Load()), attr='IntegrationError', ctx=Load()), Name(id='OSError', ctx=Load()), Name(id='ValueError', ctx=Load()), Name(id='KeyError', ctx=Load()), Name(id='TypeError', ctx=Load())], ctx=Load())"
+                ]
+              ],
+              [
+                "With",
+                "body",
+                0,
+                [
+                  "withitem(context_expr=Name(id='admission', ctx=Load()))"
+                ]
+              ],
+              [
+                "If",
+                "body",
+                1,
+                "UnaryOp(op=Not(), operand=Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='approval'), ctx=Load()))"
+              ],
+              [
+                "Expr",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ],
+          [
+            326,
+            [
+              [
+                "FunctionDef",
+                "body",
+                2,
+                null
+              ],
+              [
+                "Try",
+                "body",
+                12,
+                [
+                  "Tuple(elts=[Attribute(value=Name(id='c', ctx=Load()), attr='IntegrationError', ctx=Load()), Name(id='OSError', ctx=Load()), Name(id='ValueError', ctx=Load()), Name(id='KeyError', ctx=Load()), Name(id='TypeError', ctx=Load())], ctx=Load())"
+                ]
+              ],
+              [
+                "With",
+                "body",
+                0,
+                [
+                  "withitem(context_expr=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='registry', ctx=Load()), attr='locked', ctx=Load())))"
+                ]
+              ],
+              [
+                "Expr",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ]
+        ]
+      ],
+      [
+        "Service._mutate",
+        "self.policy.action(entry)",
+        "CONFIRMED",
+        [
+          [
+            291,
+            [
+              [
+                "FunctionDef",
+                "body",
+                2,
+                null
+              ],
+              [
+                "Try",
+                "body",
+                5,
+                [
+                  "Tuple(elts=[Attribute(value=Name(id='c', ctx=Load()), attr='IntegrationError', ctx=Load()), Name(id='OSError', ctx=Load()), Name(id='ValueError', ctx=Load()), Name(id='KeyError', ctx=Load()), Name(id='TypeError', ctx=Load())], ctx=Load())"
+                ]
+              ],
+              [
+                "With",
+                "body",
+                2,
+                [
+                  "withitem(context_expr=Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='registry', ctx=Load()), attr='locked', ctx=Load()), keywords=[keyword(arg='exclusive', value=Constant(value=True))]))"
+                ]
+              ],
+              [
+                "Expr",
+                "value",
+                0,
+                null
+              ],
+              [
+                "Call",
+                "args",
+                0,
+                null
+              ],
+              [
+                "Compare",
+                "left",
+                0,
+                null
+              ],
+              [
+                "Subscript",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ]
+        ]
+      ],
+      [
+        "Service._mutate",
+        "records.capture(argv, output, 540 if value[\"approval\"] else backend.TIMEOUT_SECONDS, cwd=output, observe_source=False, env=backend.ENVIRONMENT, limit=c.MAX_NATIVE)",
+        "CONFIRMED",
+        [
+          [
+            306,
+            [
+              [
+                "FunctionDef",
+                "body",
+                2,
+                null
+              ],
+              [
+                "Try",
+                "body",
+                7,
+                [
+                  "Tuple(elts=[Attribute(value=Name(id='c', ctx=Load()), attr='IntegrationError', ctx=Load()), Name(id='OSError', ctx=Load()), Name(id='ValueError', ctx=Load()), Name(id='KeyError', ctx=Load()), Name(id='TypeError', ctx=Load())], ctx=Load())"
+                ]
+              ],
+              [
+                "With",
+                "body",
+                2,
+                [
+                  "withitem(context_expr=Name(id='admission', ctx=Load()))"
+                ]
+              ],
+              [
+                "If",
+                "orelse",
+                0,
+                "Compare(left=Name(id='name', ctx=Load()), ops=[Eq()], comparators=[Constant(value='helper_execute')])"
+              ],
+              [
+                "Assign",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ]
+        ]
+      ],
+      [
+        "Service._admit",
+        "self.policy.authorize(entry)",
+        "CONFIRMED",
+        [
+          [
+            117,
+            [
+              [
+                "FunctionDef",
+                "body",
+                3,
+                null
+              ],
+              [
+                "Assign",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ]
+        ]
+      ],
+      [
+        "Service._admit",
+        "self.policy.action(entry)",
+        "CONFIRMED",
+        [
+          [
+            120,
+            [
+              [
+                "FunctionDef",
+                "body",
+                5,
+                null
+              ],
+              [
+                "Assign",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ]
+        ]
+      ],
+      [
+        "Policy.authorize",
+        "self.current()",
+        "CONFIRMED",
+        [
+          [
+            180,
+            [
+              [
+                "FunctionDef",
+                "body",
+                0,
+                null
+              ],
+              [
+                "Expr",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ]
+        ]
+      ],
+      [
+        "Policy.action",
+        "native_action(entry, value)",
+        "CONFIRMED",
+        [
+          [
+            193,
+            [
+              [
+                "FunctionDef",
+                "body",
+                3,
+                null
+              ],
+              [
+                "Assign",
+                "value",
+                0,
+                null
+              ]
+            ]
+          ]
+        ]
+      ]
+    ],
+    "prefix_mapping": [
+      [
+        "session_begin",
+        "begin"
+      ],
+      [
+        "session_claim",
+        "claim"
+      ],
+      [
+        "session_reconcile",
+        "reconcile"
+      ],
+      [
+        "session_resume",
+        "resume"
+      ],
+      [
+        "session_submit",
+        "submit"
+      ]
+    ],
+    "argv_routes": [
+      [
+        "document_submit",
+        [
+          "document",
+          "submit"
+        ]
+      ],
+      [
+        "execution_request",
+        [
+          "host",
+          "execute"
+        ]
+      ],
+      [
+        "session_begin",
+        [
+          "session",
+          "call"
+        ]
+      ],
+      [
+        "session_claim",
+        [
+          "session",
+          "call"
+        ]
+      ],
+      [
+        "session_reconcile",
+        [
+          "session",
+          "call"
+        ]
+      ],
+      [
+        "session_resume",
+        [
+          "session",
+          "resume"
+        ]
+      ],
+      [
+        "session_submit",
+        [
+          "session",
+          "call"
+        ]
+      ]
+    ],
+    "blockers": [],
+    "receiver_identity_verified": false,
+    "policy_satisfied": false,
+    "native_execution_verified": false,
+    "unregistered_helpers_traced": false
+  },
+  "m1_reads": {
+    "native_tools": [
+      "approval_read",
+      "binding_read",
+      "context_read",
+      "diagnostic_read",
+      "discovery_read",
+      "document_read",
+      "journal_read",
+      "native_validate",
+      "profile_read",
+      "reentry_read",
+      "report_read",
+      "role_read",
+      "session_read",
+      "template_read",
+      "workflow_read"
+    ],
+    "resource_tools": [
+      "artifact_read",
+      "bundle_read",
+      "configuration_read",
+      "events_read",
+      "revision_read",
+      "usage_read"
+    ],
+    "checked_functions": 37,
+    "blockers": [],
+    "client_delivery_verified": false,
+    "runtime_receiver_verified": false,
+    "native_execution_verified": false,
+    "policy_satisfied": false
+  },
+  "m1_backlog": {
+    "baseline_count": 120,
+    "dispositions": [
+      [
+        "HOST_DEPENDENCY",
+        20
+      ],
+      [
+        "MIXED_READ_ACTION",
+        3
+      ],
+      [
+        "OWNER_BOUNDARY",
+        5
+      ],
+      [
+        "PREPARATION_BOUNDARY",
+        1
+      ],
+      [
+        "READ_FACADE",
+        84
+      ],
+      [
+        "SHARED_CORE_FACADE",
+        7
+      ]
+    ],
+    "remaining_actions": [
+      [
+        "cli.route.context",
+        "M3"
+      ],
+      [
+        "cli.route.discovery",
+        "M3"
+      ],
+      [
+        "cli.dispatch.discovery.snapshot",
+        "M3"
+      ],
+      [
+        "surface.tools.agent_entrypoint.py.commands.read",
+        "M6"
+      ],
+      [
+        "surface.tools.billing_evidence.py.commands.read",
+        "M4"
+      ],
+      [
+        "surface.tools.instruction_bundle.py.commands.read",
+        "M6"
+      ],
+      [
+        "surface.tools.integration_gateway_contract.py.commands.read",
+        "M6"
+      ],
+      [
+        "surface.tools.integration_hook_contract.py.commands.read",
+        "M6"
+      ],
+      [
+        "surface.tools.integration_mutation_contract.py.commands.read",
+        "M6"
+      ]
+    ],
+    "blockers": [],
+    "client_e2e": "NOT_RUN",
+    "runtime_verified": false,
+    "policy_satisfied": false
+  },
+  "m2_preparation": {
+    "tools": [
+      "action_confirm",
+      "action_prepare",
+      "approved_action_prepare",
+      "contract_prepare",
+      "inputs_prepare",
+      "plan_read"
+    ],
+    "checked_functions": 29,
+    "backlog_dependencies": 134,
+    "retained_delivery_milestones": [
+      [
+        "M3",
+        60
+      ],
+      [
+        "M4",
+        45
+      ],
+      [
+        "M5",
+        29
+      ]
+    ],
+    "blockers": [],
+    "approval_created": false,
+    "native_execution_verified": false,
+    "client_e2e": "NOT_RUN"
+  },
+  "m3_task_actions": {
+    "tools": [
+      "adapter_noop_run",
+      "approval_request",
+      "binding_attach",
+      "completion_finalize",
+      "completion_report",
+      "context_publish",
+      "discovery_snapshot",
+      "document_project",
+      "lineage_store",
+      "profile_register",
+      "reentry_decide",
+      "reentry_report",
+      "role_assess",
+      "role_enroll",
+      "run_link",
+      "session_heartbeat",
+      "session_reject_output",
+      "session_start",
+      "work_create",
+      "work_noop_run"
+    ],
+    "backlog_count": 60,
+    "checked_functions": 22,
+    "blockers": [],
+    "native_execution_verified": false,
+    "policy_satisfaction_verified": false,
+    "client_e2e": "NOT_RUN"
+  },
+  "m4_quality_evidence": {
+    "read_tools": [
+      "cost_read",
+      "execution_read",
+      "proof_read",
+      "research_read"
+    ],
+    "action_tools": [
+      "cost_inbox_reconcile",
+      "evidence_import",
+      "execution_verify",
+      "helper_execute",
+      "proof_publish",
+      "research_export",
+      "research_request"
+    ],
+    "backlog_count": 83,
+    "checked_functions": 40,
+    "blockers": [],
+    "native_execution_verified": false,
+    "provider_authenticity_verified": false,
+    "client_e2e": "NOT_RUN",
+    "external_service_calls": "NOT_RUN"
+  },
+  "m5_parallel_candidates": {
+    "read_tools": [
+      "candidate_read",
+      "inventory_read",
+      "workspace_read"
+    ],
+    "action_tools": [
+      "candidate_request",
+      "inventory_capture",
+      "workspace_request"
+    ],
+    "preparation_tools": [
+      "merge_prepare",
+      "parallel_prepare"
+    ],
+    "backlog_count": 47,
+    "checked_functions": 52,
+    "blockers": [],
+    "scheduler_implemented": false,
+    "merge_broker_implemented": false,
+    "native_execution_verified": false,
+    "client_e2e": "NOT_RUN",
+    "actual_merge": "NOT_RUN",
+    "implementation_required": [
+      "TASK_DAG_SCHEDULER",
+      "TYPED_EDGE_EVIDENCE_ACCEPTANCE",
+      "RESOURCE_RECEIVER_BROKER",
+      "MERGE_QUEUE",
+      "INTEGRATION_WORKSPACE_AND_FRESH_QA",
+      "TARGET_REF_CAS_BROKER",
+      "MERGE_PUBLICATION_RECEIPT"
+    ]
+  },
+  "m6_feature_distribution": {
+    "profiles": [
+      "parallel",
+      "prepare",
+      "quality",
+      "read",
+      "task"
+    ],
+    "owner_backlog_count": 83,
+    "checked_functions": 41,
+    "blockers": [],
+    "owner_backlog_discharged": false,
+    "actual_installation": "NOT_RUN",
+    "actual_reload": "NOT_RUN",
+    "client_e2e": "NOT_RUN",
+    "self_contained_runtime": "NOT_IMPLEMENTED",
+    "signing_trust_root": "NOT_SELECTED",
+    "scheduler_or_merge_implemented": false
+  },
+  "d1_backend": {
+    "operation_routes": [
+      [
+        "status",
+        [
+          "session",
+          "call"
+        ]
+      ],
+      [
+        "next",
+        [
+          "session",
+          "call"
+        ]
+      ],
+      [
+        "record",
+        [
+          "work",
+          "record"
+        ]
+      ],
+      [
+        "history",
+        [
+          "work",
+          "history"
+        ]
+      ]
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "authority_verified": false,
+    "native_read_only_verified": false
+  },
+  "d4_transport": {
+    "declared_tool_names": [
+      "golem_action_confirm",
+      "golem_action_prepare",
+      "golem_adapter_noop_run",
+      "golem_approval_read",
+      "golem_approval_request",
+      "golem_approved_action_prepare",
+      "golem_artifact_read",
+      "golem_binding_attach",
+      "golem_binding_read",
+      "golem_bundle_read",
+      "golem_candidate_read",
+      "golem_candidate_request",
+      "golem_completion_check",
+      "golem_completion_finalize",
+      "golem_completion_report",
+      "golem_configuration_read",
+      "golem_context_get",
+      "golem_context_publish",
+      "golem_context_read",
+      "golem_contract_prepare",
+      "golem_cost_inbox_reconcile",
+      "golem_cost_read",
+      "golem_diagnostic_read",
+      "golem_discovery_read",
+      "golem_discovery_snapshot",
+      "golem_document_project",
+      "golem_document_read",
+      "golem_document_submit",
+      "golem_events_read",
+      "golem_evidence_import",
+      "golem_evidence_read",
+      "golem_execution_read",
+      "golem_execution_request",
+      "golem_execution_verify",
+      "golem_handoff_prepare",
+      "golem_helper_execute",
+      "golem_history_read",
+      "golem_inputs_prepare",
+      "golem_inventory_capture",
+      "golem_inventory_read",
+      "golem_journal_read",
+      "golem_lineage_store",
+      "golem_merge_prepare",
+      "golem_native_validate",
+      "golem_parallel_prepare",
+      "golem_plan_read",
+      "golem_profile_read",
+      "golem_profile_register",
+      "golem_projects_list",
+      "golem_proof_publish",
+      "golem_proof_read",
+      "golem_reentry_decide",
+      "golem_reentry_read",
+      "golem_reentry_report",
+      "golem_report_read",
+      "golem_research_export",
+      "golem_research_read",
+      "golem_research_request",
+      "golem_revision_read",
+      "golem_role_assess",
+      "golem_role_enroll",
+      "golem_role_read",
+      "golem_run_link",
+      "golem_session_begin",
+      "golem_session_claim",
+      "golem_session_heartbeat",
+      "golem_session_read",
+      "golem_session_reconcile",
+      "golem_session_reject_output",
+      "golem_session_resume",
+      "golem_session_start",
+      "golem_session_submit",
+      "golem_template_read",
+      "golem_usage_read",
+      "golem_work_create",
+      "golem_work_inspect",
+      "golem_work_noop_run",
+      "golem_workflow_read",
+      "golem_workspace_read",
+      "golem_workspace_request"
+    ],
+    "blockers": [],
+    "callback_expressions_only": true,
+    "runtime_receiver_verified": false,
+    "client_delivery_verified": false
+  },
+  "c_edge.dispatch.golem_cli_adapter": {
+    "caller": "dispatch",
+    "callee": "golem_cli_adapter",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"adapter\" ) = = 0"
+    ],
+    "selectors": [
+      "adapter"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_agent_session": {
+    "caller": "dispatch",
+    "callee": "golem_cli_agent_session",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"session\" ) = = 0"
+    ],
+    "selectors": [
+      "session"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_approval": {
+    "caller": "dispatch",
+    "callee": "golem_cli_approval",
+    "conditions": [
+      "argc > = 2 & & ! strcmp ( argv [ 1 ] , \"approval\" )"
+    ],
+    "selectors": [
+      "approval"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_candidate": {
+    "caller": "dispatch",
+    "callee": "golem_cli_candidate",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"candidate\" ) = = 0"
+    ],
+    "selectors": [
+      "candidate"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_completion": {
+    "caller": "dispatch",
+    "callee": "golem_cli_completion",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"completion\" ) = = 0"
+    ],
+    "selectors": [
+      "completion"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_context": {
+    "caller": "dispatch",
+    "callee": "golem_cli_context",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"context\" ) = = 0"
+    ],
+    "selectors": [
+      "context"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_daemon": {
+    "caller": "dispatch",
+    "callee": "golem_cli_daemon",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"daemon\" ) = = 0"
+    ],
+    "selectors": [
+      "daemon"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_discovery": {
+    "caller": "dispatch",
+    "callee": "golem_cli_discovery",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"discovery\" ) = = 0"
+    ],
+    "selectors": [
+      "discovery"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_doctor": {
+    "caller": "dispatch",
+    "callee": "golem_cli_doctor",
+    "conditions": [
+      "argc > = 2 & & ! strcmp ( argv [ 1 ] , \"doctor\" )"
+    ],
+    "selectors": [
+      "doctor"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_document": {
+    "caller": "dispatch",
+    "callee": "golem_cli_document",
+    "conditions": [
+      "argc > = 2 & & ( strcmp ( argv [ 1 ] , \"work\" ) = = 0 | | strcmp ( argv [ 1 ] , \"document\" ) = = 0 )"
+    ],
+    "selectors": [
+      "document",
+      "work"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_events": {
+    "caller": "dispatch",
+    "callee": "golem_cli_events",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"events\" ) = = 0"
+    ],
+    "selectors": [
+      "events"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_execution": {
+    "caller": "dispatch",
+    "callee": "golem_cli_execution",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"execution\" ) = = 0"
+    ],
+    "selectors": [
+      "execution"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_journal": {
+    "caller": "dispatch",
+    "callee": "golem_cli_journal",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"journal\" ) = = 0"
+    ],
+    "selectors": [
+      "journal"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_lineage": {
+    "caller": "dispatch",
+    "callee": "golem_cli_lineage",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"lineage\" ) = = 0"
+    ],
+    "selectors": [
+      "lineage"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_output": {
+    "caller": "dispatch",
+    "callee": "golem_cli_output",
+    "conditions": [
+      "argc > = 2 & & ! strcmp ( argv [ 1 ] , \"output\" )"
+    ],
+    "selectors": [
+      "output"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_proof": {
+    "caller": "dispatch",
+    "callee": "golem_cli_proof",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"proof\" ) = = 0"
+    ],
+    "selectors": [
+      "proof"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_reentry": {
+    "caller": "dispatch",
+    "callee": "golem_cli_reentry",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"reentry\" ) = = 0"
+    ],
+    "selectors": [
+      "reentry"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_research": {
+    "caller": "dispatch",
+    "callee": "golem_cli_research",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"research\" ) = = 0"
+    ],
+    "selectors": [
+      "research"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_role": {
+    "caller": "dispatch",
+    "callee": "golem_cli_role",
+    "conditions": [
+      "argc > = 2 & & ! strcmp ( argv [ 1 ] , \"role\" )"
+    ],
+    "selectors": [
+      "role"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_runtime_profile": {
+    "caller": "dispatch",
+    "callee": "golem_cli_runtime_profile",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"profile\" ) = = 0"
+    ],
+    "selectors": [
+      "profile"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_session_binding": {
+    "caller": "dispatch",
+    "callee": "golem_cli_session_binding",
+    "conditions": [
+      "argc > = 2 & & ! strcmp ( argv [ 1 ] , \"agent\" )",
+      "argc > = 3 & & ! strcmp ( argv [ 1 ] , \"work\" ) & & ( ! strcmp ( argv [ 2 ] , \"history\" ) | | ! strcmp ( argv [ 2 ] , \"record\" ) )"
+    ],
+    "selectors": [
+      "agent",
+      "work"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_work": {
+    "caller": "dispatch",
+    "callee": "golem_cli_work",
+    "conditions": [
+      "argc > = 2 & & ( strcmp ( argv [ 1 ] , \"init\" ) = = 0 | | strcmp ( argv [ 1 ] , \"capsule\" ) = = 0 | | strcmp ( argv [ 1 ] , \"run\" ) = = 0 | | strcmp ( argv [ 1 ] , \"replay\" ) = = 0 | | strcmp ( argv [ 1 ] , \"cost\" ) = = 0 | | strcmp ( argv [ 1 ] , \"inventory\" ) = = 0 )"
+    ],
+    "selectors": [
+      "capsule",
+      "cost",
+      "init",
+      "inventory",
+      "replay",
+      "run"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.dispatch.golem_cli_workflow": {
+    "caller": "dispatch",
+    "callee": "golem_cli_workflow",
+    "conditions": [
+      "argc > = 2 & & strcmp ( argv [ 1 ] , \"workflow\" ) = = 0"
+    ],
+    "selectors": [
+      "workflow"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_edge.golem_cli_workflow.golem_cli_workflow_template": {
+    "caller": "golem_cli_workflow",
+    "callee": "golem_cli_workflow_template",
+    "conditions": [
+      "argc > = 3 & & ! strcmp ( argv [ 2 ] , \"template\" )"
+    ],
+    "selectors": [
+      "template"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "transitive_verified": false
+  },
+  "c_closure.events": {
+    "function": "golem_cli_events",
+    "calls": [
+      "cli_error_note",
+      "fflush",
+      "fprintf",
+      "free",
+      "fwrite",
+      "golem_runtime_cursor_parse",
+      "golem_runtime_events_export",
+      "golem_runtime_events_snapshot",
+      "golem_status_string",
+      "malloc",
+      "strcmp",
+      "strlen"
+    ],
+    "native": [
+      "golem_runtime_cursor_parse",
+      "golem_runtime_events_snapshot",
+      "golem_runtime_events_export",
+      "golem_status_string"
+    ],
+    "external": [
+      "strcmp",
+      "strlen",
+      "malloc",
+      "fwrite",
+      "fflush",
+      "free",
+      "fprintf"
+    ],
+    "blockers": [],
+    "execution_verified": false
+  },
+  "source_role.src/common/record_internal.h": {
+    "path": "src/common/record_internal.h",
+    "symbols": [
+      [
+        "gr_api_begin",
+        [
+          "golem_status"
+        ],
+        [
+          "const",
+          "char",
+          "*",
+          "operation",
+          ",",
+          "golem_record",
+          "*",
+          "*",
+          "record",
+          ",",
+          "golem_diagnostic",
+          "*",
+          "d"
+        ]
+      ],
+      [
+        "gr_api_finish",
+        [
+          "golem_status"
+        ],
+        [
+          "const",
+          "char",
+          "*",
+          "name",
+          ",",
+          "golem_record",
+          "*",
+          "record",
+          ",",
+          "golem_status",
+          "operation",
+          ",",
+          "golem_diagnostic",
+          "*",
+          "d"
+        ]
+      ],
+      [
+        "gr_api_rejected",
+        [
+          "golem_status"
+        ],
+        [
+          "const",
+          "char",
+          "*",
+          "operation"
+        ]
+      ],
+      [
+        "gr_api_finish_required",
+        [
+          "golem_status"
+        ],
+        [
+          "const",
+          "char",
+          "*",
+          "name",
+          ",",
+          "golem_record",
+          "*",
+          "record",
+          ",",
+          "golem_status",
+          "started",
+          ",",
+          "golem_status",
+          "operation"
+        ]
+      ],
+      [
+        "gr_context_capture",
+        [
+          "golem_status"
+        ],
+        [
+          "gr_context",
+          "*",
+          "out"
+        ]
+      ],
+      [
+        "gr_context_dispose",
+        [
+          "void"
+        ],
+        [
+          "gr_context",
+          "*",
+          "context"
+        ]
+      ],
+      [
+        "gr_context_attach",
+        [
+          "golem_status"
+        ],
+        [
+          "const",
+          "gr_context",
+          "*",
+          "context"
+        ]
+      ],
+      [
+        "gr_context_detach",
+        [
+          "golem_status"
+        ],
+        [
+          "const",
+          "gr_context",
+          "*",
+          "context"
+        ]
+      ],
+      [
+        "REVIEWED_HEADER_TOKENS",
+        [
+          "#",
+          "ifndef",
+          "GOLEM_RECORD_INTERNAL_H",
+          "#",
+          "define",
+          "GOLEM_RECORD_INTERNAL_H",
+          "#",
+          "include",
+          "\"golem/record.h\"",
+          "#",
+          "include",
+          "<",
+          "errno",
+          ".",
+          "h",
+          ">",
+          "golem_status",
+          "gr_api_begin",
+          "(",
+          "const",
+          "char",
+          "*",
+          "operation",
+          ",",
+          "golem_record",
+          "*",
+          "*",
+          "record",
+          ",",
+          "golem_diagnostic",
+          "*",
+          "d",
+          ")",
+          ";",
+          "golem_status",
+          "gr_api_finish",
+          "(",
+          "const",
+          "char",
+          "*",
+          "name",
+          ",",
+          "golem_record",
+          "*",
+          "record",
+          ",",
+          "golem_status",
+          "operation",
+          ",",
+          "golem_diagnostic",
+          "*",
+          "d",
+          ")",
+          ";",
+          "golem_status",
+          "gr_api_rejected",
+          "(",
+          "const",
+          "char",
+          "*",
+          "operation",
+          ")",
+          ";",
+          "golem_status",
+          "gr_api_finish_required",
+          "(",
+          "const",
+          "char",
+          "*",
+          "name",
+          ",",
+          "golem_record",
+          "*",
+          "record",
+          ",",
+          "golem_status",
+          "started",
+          ",",
+          "golem_status",
+          "operation",
+          ")",
+          ";",
+          "typedef",
+          "struct",
+          "gr_context",
+          "{",
+          "char",
+          "*",
+          "root",
+          ",",
+          "*",
+          "source",
+          ";",
+          "char",
+          "parent",
+          "[",
+          "3",
+          "3",
+          "]",
+          ";",
+          "}",
+          "gr_context",
+          ";",
+          "golem_status",
+          "gr_context_capture",
+          "(",
+          "gr_context",
+          "*",
+          "out",
+          ")",
+          ";",
+          "void",
+          "gr_context_dispose",
+          "(",
+          "gr_context",
+          "*",
+          "context",
+          ")",
+          ";",
+          "golem_status",
+          "gr_context_attach",
+          "(",
+          "const",
+          "gr_context",
+          "*",
+          "context",
+          ")",
+          ";",
+          "golem_status",
+          "gr_context_detach",
+          "(",
+          "const",
+          "gr_context",
+          "*",
+          "context",
+          ")",
+          ";",
+          "#",
+          "define",
+          "GOLEM_RECORDED_API",
+          "(",
+          "name",
+          ",",
+          "parameters",
+          ",",
+          "arguments",
+          ",",
+          "diagnostic",
+          ")",
+          "\\",
+          "static",
+          "golem_status",
+          "name",
+          "#",
+          "#",
+          "_recorded_body",
+          "parameters",
+          ";",
+          "\\",
+          "golem_status",
+          "name",
+          "parameters",
+          "\\",
+          "{",
+          "\\",
+          "int",
+          "gr_errno",
+          "=",
+          "errno",
+          ";",
+          "\\",
+          "golem_record",
+          "*",
+          "gr_scope",
+          "=",
+          "NULL",
+          ";",
+          "\\",
+          "golem_status",
+          "gr_status",
+          "=",
+          "gr_api_begin",
+          "(",
+          "#",
+          "name",
+          ",",
+          "&",
+          "gr_scope",
+          ",",
+          "diagnostic",
+          ")",
+          ";",
+          "\\",
+          "errno",
+          "=",
+          "gr_errno",
+          ";",
+          "\\",
+          "if",
+          "(",
+          "gr_status",
+          "!",
+          "=",
+          "GOLEM_OK",
+          ")",
+          "return",
+          "gr_status",
+          ";",
+          "\\",
+          "gr_status",
+          "=",
+          "name",
+          "#",
+          "#",
+          "_recorded_body",
+          "arguments",
+          ";",
+          "\\",
+          "gr_errno",
+          "=",
+          "errno",
+          ";",
+          "\\",
+          "gr_status",
+          "=",
+          "gr_api_finish",
+          "(",
+          "#",
+          "name",
+          ",",
+          "gr_scope",
+          ",",
+          "gr_status",
+          ",",
+          "diagnostic",
+          ")",
+          ";",
+          "\\",
+          "errno",
+          "=",
+          "gr_errno",
+          ";",
+          "\\",
+          "return",
+          "gr_status",
+          ";",
+          "\\",
+          "}",
+          "\\",
+          "static",
+          "golem_status",
+          "name",
+          "#",
+          "#",
+          "_recorded_body",
+          "parameters",
+          "#",
+          "define",
+          "GOLEM_RECORDED_REQUIRED_API",
+          "(",
+          "name",
+          ",",
+          "parameters",
+          ",",
+          "arguments",
+          ")",
+          "\\",
+          "static",
+          "golem_status",
+          "name",
+          "#",
+          "#",
+          "_recorded_body",
+          "parameters",
+          ";",
+          "\\",
+          "golem_status",
+          "name",
+          "parameters",
+          "\\",
+          "{",
+          "\\",
+          "int",
+          "gr_errno",
+          "=",
+          "errno",
+          ";",
+          "\\",
+          "golem_record",
+          "*",
+          "gr_scope",
+          "=",
+          "NULL",
+          ";",
+          "\\",
+          "golem_status",
+          "gr_started",
+          "=",
+          "gr_api_begin",
+          "(",
+          "#",
+          "name",
+          ",",
+          "&",
+          "gr_scope",
+          ",",
+          "NULL",
+          ")",
+          ";",
+          "\\",
+          "errno",
+          "=",
+          "gr_errno",
+          ";",
+          "\\",
+          "golem_status",
+          "gr_status",
+          "=",
+          "name",
+          "#",
+          "#",
+          "_recorded_body",
+          "arguments",
+          ";",
+          "\\",
+          "gr_errno",
+          "=",
+          "errno",
+          ";",
+          "\\",
+          "gr_status",
+          "=",
+          "gr_api_finish_required",
+          "(",
+          "#",
+          "name",
+          ",",
+          "gr_scope",
+          ",",
+          "gr_started",
+          ",",
+          "gr_status",
+          ")",
+          ";",
+          "\\",
+          "errno",
+          "=",
+          "gr_errno",
+          ";",
+          "\\",
+          "return",
+          "gr_status",
+          ";",
+          "\\",
+          "}",
+          "\\",
+          "static",
+          "golem_status",
+          "name",
+          "#",
+          "#",
+          "_recorded_body",
+          "parameters",
+          "#",
+          "define",
+          "GOLEM_RECORDED_RELEASE_API",
+          "(",
+          "name",
+          ",",
+          "parameters",
+          ",",
+          "arguments",
+          ")",
+          "\\",
+          "static",
+          "void",
+          "name",
+          "#",
+          "#",
+          "_recorded_body",
+          "parameters",
+          ";",
+          "\\",
+          "void",
+          "name",
+          "parameters",
+          "\\",
+          "{",
+          "\\",
+          "int",
+          "gr_errno",
+          "=",
+          "errno",
+          ";",
+          "\\",
+          "golem_record",
+          "*",
+          "gr_scope",
+          "=",
+          "NULL",
+          ";",
+          "\\",
+          "golem_status",
+          "gr_started",
+          "=",
+          "gr_api_begin",
+          "(",
+          "#",
+          "name",
+          ",",
+          "&",
+          "gr_scope",
+          ",",
+          "NULL",
+          ")",
+          ";",
+          "\\",
+          "errno",
+          "=",
+          "gr_errno",
+          ";",
+          "\\",
+          "name",
+          "#",
+          "#",
+          "_recorded_body",
+          "arguments",
+          ";",
+          "\\",
+          "gr_errno",
+          "=",
+          "errno",
+          ";",
+          "\\",
+          "(",
+          "void",
+          ")",
+          "gr_api_finish_required",
+          "(",
+          "#",
+          "name",
+          ",",
+          "gr_scope",
+          ",",
+          "gr_started",
+          ",",
+          "GOLEM_OK",
+          ")",
+          ";",
+          "\\",
+          "errno",
+          "=",
+          "gr_errno",
+          ";",
+          "\\",
+          "}",
+          "\\",
+          "static",
+          "void",
+          "name",
+          "#",
+          "#",
+          "_recorded_body",
+          "parameters",
+          "#",
+          "endif"
+        ]
+      ]
+    ],
+    "cli_names": [],
+    "blockers": [],
+    "rationale": "The eight private recorder/context declarations and three exact named wrappers are instrumentation dependencies; they introduce no independently dispatched Work operation. Wrapper bodies are checked against separate token models; native callers retain their own operation and closure obligations.",
+    "file_surface_reviewed": true,
+    "execution_verified": false
+  },
+  "source_role.src/cli/internal.h": {
+    "path": "src/cli/internal.h",
+    "symbols": [
+      [
+        "golem_cli_lineage",
+        [
+          "int"
+        ],
+        [
+          "int",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv"
+        ]
+      ],
+      [
+        "golem_cli_adapter",
+        [
+          "int"
+        ],
+        [
+          "int",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv"
+        ]
+      ],
+      [
+        "golem_cli_daemon",
+        [
+          "int"
+        ],
+        [
+          "int",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv"
+        ]
+      ],
+      [
+        "golem_cli_journal",
+        [
+          "int"
+        ],
+        [
+          "int",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv"
+        ]
+      ],
+      [
+        "REVIEWED_HEADER_TOKENS",
+        [
+          "#",
+          "ifndef",
+          "GOLEM_CLI_INTERNAL_H",
+          "#",
+          "define",
+          "GOLEM_CLI_INTERNAL_H",
+          "#",
+          "include",
+          "\"error.h\"",
+          "int",
+          "golem_cli_lineage",
+          "(",
+          "int",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv",
+          ")",
+          ";",
+          "int",
+          "golem_cli_adapter",
+          "(",
+          "int",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv",
+          ")",
+          ";",
+          "int",
+          "golem_cli_daemon",
+          "(",
+          "int",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv",
+          ")",
+          ";",
+          "int",
+          "golem_cli_journal",
+          "(",
+          "int",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv",
+          ")",
+          ";",
+          "#",
+          "endif"
+        ]
+      ]
+    ],
+    "cli_names": [],
+    "blockers": [],
+    "rationale": "Four private CLI forward declarations only; selected dispatcher edges and callee implementation obligations remain separate.",
+    "file_surface_reviewed": true,
+    "execution_verified": false
+  },
+  "source_role.src/cli/output.h": {
+    "path": "src/cli/output.h",
+    "symbols": [
+      [
+        "cli_output_options",
+        [
+          "int"
+        ],
+        [
+          "int",
+          "*",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv"
+        ]
+      ],
+      [
+        "cli_output_write",
+        [
+          "golem_status"
+        ],
+        [
+          "golem_bytes",
+          "bytes"
+        ]
+      ],
+      [
+        "golem_cli_output",
+        [
+          "int"
+        ],
+        [
+          "int",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv"
+        ]
+      ],
+      [
+        "REVIEWED_HEADER_TOKENS",
+        [
+          "#",
+          "ifndef",
+          "GOLEM_CLI_OUTPUT_H",
+          "#",
+          "define",
+          "GOLEM_CLI_OUTPUT_H",
+          "#",
+          "include",
+          "\"golem/types.h\"",
+          "int",
+          "cli_output_options",
+          "(",
+          "int",
+          "*",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv",
+          ")",
+          ";",
+          "golem_status",
+          "cli_output_write",
+          "(",
+          "golem_bytes",
+          "bytes",
+          ")",
+          ";",
+          "int",
+          "golem_cli_output",
+          "(",
+          "int",
+          "argc",
+          ",",
+          "char",
+          "*",
+          "*",
+          "argv",
+          ")",
+          ";",
+          "#",
+          "endif"
+        ]
+      ]
+    ],
+    "cli_names": [],
+    "blockers": [],
+    "rationale": "Three private presentation/CLI declarations; output command is already inventoried and options/write helpers remain caller closure obligations. This header grants no native API termination boundary.",
+    "file_surface_reviewed": true,
+    "execution_verified": false
+  },
+  "source_role.tools/integration_contract.py": {
+    "path": "tools/integration_contract.py",
+    "symbols": [
+      [
+        "ClassDef",
+        "IntegrationError"
+      ],
+      [
+        "FunctionDef",
+        "IntegrationError.__init__"
+      ],
+      [
+        "FunctionDef",
+        "require"
+      ],
+      [
+        "FunctionDef",
+        "encoded"
+      ],
+      [
+        "FunctionDef",
+        "sha"
+      ],
+      [
+        "FunctionDef",
+        "obj"
+      ],
+      [
+        "FunctionDef",
+        "array"
+      ],
+      [
+        "FunctionDef",
+        "enum"
+      ],
+      [
+        "FunctionDef",
+        "bounded"
+      ],
+      [
+        "FunctionDef",
+        "decode"
+      ],
+      [
+        "FunctionDef",
+        "_validate"
+      ],
+      [
+        "FunctionDef",
+        "validate"
+      ],
+      [
+        "FunctionDef",
+        "schema"
+      ]
+    ],
+    "cli_names": [],
+    "blockers": [],
+    "rationale": "D1 closed schema constructors, decoder and validators, including require; no standalone CLI or tool registration. Behavior and runtime enforcement are not certified by the symbol inventory.",
+    "file_surface_reviewed": true,
+    "execution_verified": false
+  },
+  "source_role.tools/integration_transfer.py": {
+    "path": "tools/integration_transfer.py",
+    "symbols": [
+      [
+        "FunctionDef",
+        "producer"
+      ],
+      [
+        "FunctionDef",
+        "validate"
+      ],
+      [
+        "ClassDef",
+        "Transfer"
+      ],
+      [
+        "FunctionDef",
+        "Transfer.__init__"
+      ],
+      [
+        "FunctionDef",
+        "Transfer.current"
+      ],
+      [
+        "FunctionDef",
+        "Transfer.scope"
+      ],
+      [
+        "FunctionDef",
+        "main"
+      ]
+    ],
+    "cli_names": [
+      "schema",
+      "plan"
+    ],
+    "blockers": [],
+    "rationale": "D2 policy helper/Transfer methods and the explicit schema/plan owner diagnostic CLI. NAMES declaration/guard attribution is checked by d2_fallback; neither CLI command grants authority or executes a Work.",
+    "file_surface_reviewed": true,
+    "execution_verified": false
+  },
+  "source_role.tools/integration_backend.py": {
+    "path": "tools/integration_backend.py",
+    "symbols": [
+      [
+        "FunctionDef",
+        "audit_capacity"
+      ],
+      [
+        "FunctionDef",
+        "_quota"
+      ],
+      [
+        "FunctionDef",
+        "_native"
+      ],
+      [
+        "FunctionDef",
+        "read"
+      ]
+    ],
+    "cli_names": [],
+    "blockers": [],
+    "rationale": "Internal D1 read/audit backend: audit_capacity, quota, native read transport and read. It has no independent model registration or CLI; D1 status/next/record/history remain operation-specific core/read obligations, not implicit mutation rights.",
+    "file_surface_reviewed": true,
+    "execution_verified": false
+  },
+  "source_role.tools/integration_mutations.py": {
+    "path": "tools/integration_mutations.py",
+    "symbols": [
+      [
+        "FunctionDef",
+        "blocked"
+      ],
+      [
+        "ClassDef",
+        "Service"
+      ],
+      [
+        "FunctionDef",
+        "Service.__init__"
+      ],
+      [
+        "FunctionDef",
+        "Service.tools"
+      ],
+      [
+        "FunctionDef",
+        "Service.call"
+      ],
+      [
+        "FunctionDef",
+        "Service.result"
+      ],
+      [
+        "FunctionDef",
+        "Service.execution_result"
+      ],
+      [
+        "FunctionDef",
+        "Service._admit"
+      ],
+      [
+        "FunctionDef",
+        "Service._result"
+      ],
+      [
+        "FunctionDef",
+        "Service._preflight"
+      ],
+      [
+        "FunctionDef",
+        "Service._argv"
+      ],
+      [
+        "FunctionDef",
+        "Service._approval_preflight"
+      ],
+      [
+        "FunctionDef",
+        "Service._publish"
+      ],
+      [
+        "FunctionDef",
+        "Service._mutate"
+      ]
+    ],
+    "cli_names": [],
+    "blockers": [],
+    "rationale": "D4 service/helper implementation below its seven closed typed names and D2 delegation. All file-level definitions are accounted; exact reviewed action/native graph remains mandatory and no actual receiver/policy satisfaction is inferred.",
+    "file_surface_reviewed": true,
+    "execution_verified": false
+  },
+  "source_role.tools/integration_mutation_mcp.py": {
+    "path": "tools/integration_mutation_mcp.py",
+    "symbols": [
+      [
+        "FunctionDef",
+        "server"
+      ],
+      [
+        "AsyncFunctionDef",
+        "server.list_tools"
+      ],
+      [
+        "AsyncFunctionDef",
+        "server.call_tool"
+      ],
+      [
+        "AsyncFunctionDef",
+        "run"
+      ],
+      [
+        "FunctionDef",
+        "main"
+      ]
+    ],
+    "cli_names": [],
+    "blockers": [],
+    "rationale": "D4 owner-launched stdio adapter: server/list_tools/call_tool, run and main. It exposes prefixed names from the D2/D4 closed contracts; transport callback execution/client activation is NOT_RUN and no new native operation is inferred.",
+    "file_surface_reviewed": true,
+    "execution_verified": false
+  },
+  "domain.golem_agent_session_call": {
+    "api": "golem_agent_session_call",
+    "operations": [
+      "begin",
+      "claim",
+      "context",
+      "heartbeat",
+      "next",
+      "reconcile",
+      "reject_output",
+      "resume",
+      "start",
+      "status",
+      "submit"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_agent_request_validate": {
+    "api": "golem_agent_request_validate",
+    "operations": [
+      "begin",
+      "claim",
+      "context",
+      "heartbeat",
+      "next",
+      "reconcile",
+      "reject_output",
+      "resume",
+      "start",
+      "status",
+      "submit"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_agent_session_resume_context": {
+    "api": "golem_agent_session_resume_context",
+    "operations": [
+      "resume"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_approval_call": {
+    "api": "golem_approval_call",
+    "operations": [
+      "approve",
+      "deny",
+      "expire",
+      "recover",
+      "request",
+      "revoke",
+      "status"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_approval_request_validate": {
+    "api": "golem_approval_request_validate",
+    "operations": [
+      "approve",
+      "deny",
+      "expire",
+      "recover",
+      "request",
+      "revoke",
+      "status"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_completion_call": {
+    "api": "golem_completion_call",
+    "operations": [
+      "finalize",
+      "resume"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_completion_validate": {
+    "api": "golem_completion_validate",
+    "operations": [
+      "finalize",
+      "resume"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_execution_call": {
+    "api": "golem_execution_call",
+    "operations": [
+      "finish",
+      "prepare",
+      "run",
+      "verify"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_execution_call_authorized": {
+    "api": "golem_execution_call_authorized",
+    "operations": [
+      "finish",
+      "prepare",
+      "run",
+      "verify"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_execution_call_receipted": {
+    "api": "golem_execution_call_receipted",
+    "operations": [
+      "finish",
+      "prepare",
+      "run"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_approval_describe": {
+    "api": "golem_approval_describe",
+    "operations": [
+      "finish",
+      "prepare",
+      "run"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_role_call": {
+    "api": "golem_role_call",
+    "operations": [
+      "assess",
+      "enroll",
+      "evaluate",
+      "status"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_role_request_validate": {
+    "api": "golem_role_request_validate",
+    "operations": [
+      "assess",
+      "enroll",
+      "evaluate",
+      "status"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_reentry_call": {
+    "api": "golem_reentry_call",
+    "operations": [
+      "decide",
+      "status"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_reentry_validate": {
+    "api": "golem_reentry_validate",
+    "operations": [
+      "decide",
+      "status"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_session_binding_call": {
+    "api": "golem_session_binding_call",
+    "operations": [
+      "attach",
+      "inspect"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_session_binding_request_validate": {
+    "api": "golem_session_binding_request_validate",
+    "operations": [
+      "attach",
+      "inspect"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_research_call": {
+    "api": "golem_research_call",
+    "operations": [
+      "adjudicate",
+      "attempt-plan",
+      "attempt-record",
+      "case-create",
+      "cohort-create",
+      "cohort-observe",
+      "outcome-enroll"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_research_validate": {
+    "api": "golem_research_validate",
+    "operations": [
+      "adjudicate",
+      "attempt-plan",
+      "attempt-record",
+      "case-create",
+      "cohort-create",
+      "cohort-observe",
+      "outcome-enroll"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_candidate_call": {
+    "api": "golem_candidate_call",
+    "operations": [
+      "cancel",
+      "cohort-record",
+      "compare",
+      "create",
+      "diff",
+      "diff-seal",
+      "enroll",
+      "finish",
+      "reserve",
+      "review",
+      "review-check",
+      "select",
+      "start",
+      "status",
+      "target-check"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_workspace_call": {
+    "api": "golem_workspace_call",
+    "operations": [
+      "GOLEM_WORKSPACE_ACTIVATE",
+      "GOLEM_WORKSPACE_CREATE",
+      "GOLEM_WORKSPACE_REMOVE",
+      "GOLEM_WORKSPACE_RESUME",
+      "GOLEM_WORKSPACE_RETAIN",
+      "GOLEM_WORKSPACE_SEAL"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "domain.golem_binding_call": {
+    "api": "golem_binding_call",
+    "operations": [
+      "GOLEM_BINDING_DESCRIBE_ADAPTER",
+      "GOLEM_BINDING_REPLAY",
+      "GOLEM_BINDING_VALIDATE"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "policy_satisfied": false
+  },
+  "c_graph": {
+    "roots": [
+      [
+        "src/cli/workflow.c",
+        "golem_cli_workflow"
+      ],
+      [
+        "src/cli/main.c",
+        "dispatch"
+      ],
+      [
+        "src/cli/adapter.c",
+        "golem_cli_adapter"
+      ],
+      [
+        "src/cli/agent_session.c",
+        "golem_cli_agent_session"
+      ],
+      [
+        "src/cli/approval.c",
+        "golem_cli_approval"
+      ],
+      [
+        "src/cli/candidate.c",
+        "golem_cli_candidate"
+      ],
+      [
+        "src/cli/completion.c",
+        "golem_cli_completion"
+      ],
+      [
+        "src/cli/context.c",
+        "golem_cli_context"
+      ],
+      [
+        "src/cli/daemon.c",
+        "golem_cli_daemon"
+      ],
+      [
+        "src/cli/discovery.c",
+        "golem_cli_discovery"
+      ],
+      [
+        "src/cli/doctor.c",
+        "golem_cli_doctor"
+      ],
+      [
+        "src/cli/document.c",
+        "golem_cli_document"
+      ],
+      [
+        "src/cli/events.c",
+        "golem_cli_events"
+      ],
+      [
+        "src/cli/execution.c",
+        "golem_cli_execution"
+      ],
+      [
+        "src/cli/journal.c",
+        "golem_cli_journal"
+      ],
+      [
+        "src/cli/lineage.c",
+        "golem_cli_lineage"
+      ],
+      [
+        "src/cli/output.c",
+        "golem_cli_output"
+      ],
+      [
+        "src/cli/runtime_profile.c",
+        "golem_cli_runtime_profile"
+      ],
+      [
+        "src/cli/proof.c",
+        "golem_cli_proof"
+      ],
+      [
+        "src/cli/reentry.c",
+        "golem_cli_reentry"
+      ],
+      [
+        "src/cli/research.c",
+        "golem_cli_research"
+      ],
+      [
+        "src/cli/role.c",
+        "golem_cli_role"
+      ],
+      [
+        "src/cli/work.c",
+        "golem_cli_work"
+      ],
+      [
+        "src/cli/workflow_template.c",
+        "golem_cli_workflow_template"
+      ]
+    ],
+    "checked_nodes": 291,
+    "checked_calls": 4597,
+    "public_endpoints": [
+      "golem_adapter_descriptor_current",
+      "golem_adapter_descriptor_decode",
+      "golem_adapter_descriptor_digest",
+      "golem_adapter_descriptor_encode",
+      "golem_adapter_descriptor_from_v1",
+      "golem_adapter_dispatch",
+      "golem_adapter_envelope_decode",
+      "golem_adapter_envelope_encode",
+      "golem_adapter_free",
+      "golem_adapter_msgpack_decode",
+      "golem_adapter_msgpack_encode",
+      "golem_adapter_noop_create",
+      "golem_adapter_noop_run_stage",
+      "golem_adapter_probe",
+      "golem_adapter_request_init",
+      "golem_adapter_result_validate",
+      "golem_admission_close",
+      "golem_admission_grant",
+      "golem_admission_lookup",
+      "golem_admission_open_diagnostic",
+      "golem_agent_reply_free",
+      "golem_agent_request_validate",
+      "golem_agent_session_call",
+      "golem_agent_session_resume_context",
+      "golem_allocator_alloc",
+      "golem_allocator_alloc_zero",
+      "golem_allocator_free",
+      "golem_approval_call",
+      "golem_approval_describe",
+      "golem_approval_request_validate",
+      "golem_candidate_call",
+      "golem_candidate_gate_digest",
+      "golem_candidate_validate",
+      "golem_completion_call",
+      "golem_completion_report",
+      "golem_completion_validate",
+      "golem_context_publish",
+      "golem_context_read",
+      "golem_context_render",
+      "golem_cost_ledger_entry_get",
+      "golem_cost_ledger_options_get",
+      "golem_cost_ledger_report_get",
+      "golem_cost_ledger_stage_totals_get",
+      "golem_cost_ledger_totals_get",
+      "golem_daemon_close",
+      "golem_daemon_init",
+      "golem_daemon_inspect",
+      "golem_daemon_open",
+      "golem_daemon_recover",
+      "golem_daemon_submit",
+      "golem_daemon_tick",
+      "golem_diagnostic_clear",
+      "golem_diagnostic_set",
+      "golem_digest_bytes",
+      "golem_digest_file",
+      "golem_digest_format",
+      "golem_digest_parse",
+      "golem_discovery_report",
+      "golem_discovery_snapshot",
+      "golem_discovery_validate",
+      "golem_document_graph_evaluate",
+      "golem_document_inspect",
+      "golem_document_metadata",
+      "golem_document_project",
+      "golem_document_store_close",
+      "golem_document_store_create",
+      "golem_document_store_open",
+      "golem_document_submit",
+      "golem_document_validate",
+      "golem_evidence_close",
+      "golem_evidence_import",
+      "golem_evidence_open",
+      "golem_evidence_put",
+      "golem_evidence_read",
+      "golem_evidence_receipt_store",
+      "golem_evidence_receipt_verify",
+      "golem_evidence_verify",
+      "golem_execution_bundle_inspect",
+      "golem_execution_bundle_verify",
+      "golem_execution_call",
+      "golem_execution_call_authorized",
+      "golem_execution_contract_validate",
+      "golem_execution_render",
+      "golem_execution_reply_free",
+      "golem_harness_probe",
+      "golem_harness_probe_encode",
+      "golem_inventory_capture",
+      "golem_inventory_compare",
+      "golem_inventory_policy_validate",
+      "golem_inventory_reply_free",
+      "golem_journal_append",
+      "golem_journal_close",
+      "golem_journal_created_encode",
+      "golem_journal_event_encode",
+      "golem_journal_inspect",
+      "golem_journal_open",
+      "golem_journal_reader_init",
+      "golem_journal_reader_next",
+      "golem_journal_replay",
+      "golem_lineage_decode",
+      "golem_lineage_free",
+      "golem_lineage_load",
+      "golem_lineage_node_get",
+      "golem_lineage_predecessors",
+      "golem_lineage_stage_get",
+      "golem_lineage_stats_get",
+      "golem_lineage_store",
+      "golem_proof_integrity",
+      "golem_proof_publish",
+      "golem_proof_render",
+      "golem_proof_verify",
+      "golem_proof_verify_directory",
+      "golem_reentry_call",
+      "golem_reentry_report",
+      "golem_reentry_validate",
+      "golem_replay_create",
+      "golem_replay_expect_checkpoint",
+      "golem_replay_feed",
+      "golem_replay_finish",
+      "golem_replay_free",
+      "golem_research_bundle",
+      "golem_research_bundle_verify",
+      "golem_research_call",
+      "golem_research_compare",
+      "golem_research_inspect",
+      "golem_research_metrics",
+      "golem_research_metrics_report",
+      "golem_research_observability",
+      "golem_research_redaction_validate",
+      "golem_research_report",
+      "golem_research_status",
+      "golem_research_validate",
+      "golem_role_call",
+      "golem_role_request_validate",
+      "golem_role_template",
+      "golem_role_validate",
+      "golem_runtime_cursor_parse",
+      "golem_runtime_events_export",
+      "golem_runtime_events_snapshot",
+      "golem_runtime_link_run",
+      "golem_runtime_profile_current",
+      "golem_runtime_profile_digest",
+      "golem_runtime_profile_free",
+      "golem_runtime_profile_parse",
+      "golem_runtime_profile_register",
+      "golem_session_binding_call",
+      "golem_session_binding_request_validate",
+      "golem_stage_graph_create",
+      "golem_stage_graph_default_spec",
+      "golem_stage_graph_free",
+      "golem_stage_name",
+      "golem_status_string",
+      "golem_supervisor_run_at",
+      "golem_supervisor_run_bulk",
+      "golem_system_error_note",
+      "golem_work_capsule_create",
+      "golem_work_capsule_free",
+      "golem_work_history",
+      "golem_work_record",
+      "golem_work_run_begin",
+      "golem_work_run_cost_borrow",
+      "golem_work_run_cost_enable",
+      "golem_work_run_cost_inbox_enable",
+      "golem_work_run_cost_inbox_status",
+      "golem_work_run_cost_inbox_sync",
+      "golem_work_run_cost_plan",
+      "golem_work_run_cost_report",
+      "golem_work_run_cost_settle",
+      "golem_work_run_create",
+      "golem_work_run_finish",
+      "golem_work_run_free",
+      "golem_work_run_id_borrow",
+      "golem_work_run_snapshot_get",
+      "golem_work_spec_validate",
+      "golem_workflow_inputs",
+      "golem_workflow_next",
+      "golem_workflow_select",
+      "golem_workflow_template_builtin",
+      "golem_workflow_template_instantiate",
+      "golem_workflow_template_validate",
+      "golem_workflow_trace",
+      "golem_workspace_call"
+    ],
+    "callback_endpoints": [
+      "callback.golem_agent_clock.read",
+      "callback.golem_workspace_host.check"
+    ],
+    "blockers": [],
+    "execution_verified": false,
+    "receiver_identity_verified": false,
+    "policy_satisfied": false
+  },
+  "native_operation_surfaces": {
+    "surfaces": {
+      "golem_agent_session_call": {
+        "public_owners": [
+          "golem_agent_session_call"
+        ],
+        "blockers": [],
+        "execution_verified": false
+      },
+      "prepare": {
+        "public_owners": [
+          "golem_agent_session_call"
+        ],
+        "blockers": [],
+        "execution_verified": false
+      },
+      "query": {
+        "public_owners": [
+          "golem_agent_session_call"
+        ],
+        "blockers": [],
+        "execution_verified": false
+      },
+      "co_validate_v1": {
+        "public_owners": [
+          "golem_completion_call",
+          "golem_completion_validate"
+        ],
+        "blockers": [],
+        "execution_verified": false
+      }
+    },
+    "blockers": [],
+    "execution_verified": false
+  },
+  "whole_file_surfaces": {
+    "reviewed_paths": [
+      "CMakeLists.txt",
+      "CMakePresets.json",
+      "bindings/native/bridge.c",
+      "bindings/python/src/golem_runtime/__init__.py",
+      "bindings/typescript/index.d.ts",
+      "bindings/typescript/index.mjs",
+      "bindings/typescript/native/addon.c",
+      "conanfile.py",
+      "include/golem/adapter_descriptor.h",
+      "include/golem/adapter_protocol.h",
+      "include/golem/admission.h",
+      "include/golem/agent_session.h",
+      "include/golem/allocator.h",
+      "include/golem/approval.h",
+      "include/golem/arena.h",
+      "include/golem/binding.h",
+      "include/golem/candidate.h",
+      "include/golem/cli.h",
+      "include/golem/completion.h",
+      "include/golem/context.h",
+      "include/golem/core.h",
+      "include/golem/cost.h",
+      "include/golem/daemon.h",
+      "include/golem/discovery.h",
+      "include/golem/document.h",
+      "include/golem/error.h",
+      "include/golem/event_reader.h",
+      "include/golem/evidence.h",
+      "include/golem/execution.h",
+      "include/golem/gateway.h",
+      "include/golem/inventory.h",
+      "include/golem/journal.h",
+      "include/golem/lease.h",
+      "include/golem/lineage.h",
+      "include/golem/optimization.h",
+      "include/golem/policy.h",
+      "include/golem/prepared_runtime.h",
+      "include/golem/proof.h",
+      "include/golem/record.h",
+      "include/golem/reentry.h",
+      "include/golem/replay.h",
+      "include/golem/research.h",
+      "include/golem/resource.h",
+      "include/golem/role_contract.h",
+      "include/golem/runtime.h",
+      "include/golem/runtime_event.h",
+      "include/golem/runtime_profile.h",
+      "include/golem/session_binding.h",
+      "include/golem/supervisor.h",
+      "include/golem/system_error.h",
+      "include/golem/types.h",
+      "include/golem/version.h",
+      "include/golem/worker.h",
+      "include/golem/workflow.h",
+      "include/golem/workflow_template.h",
+      "include/golem/workspace.h",
+      "plugins/golem/.codex-plugin/plugin.json",
+      "plugins/golem/.mcp.json",
+      "plugins/golem/scripts/launcher.py",
+      "plugins/golem/skills/golem-setup/SKILL.md",
+      "pyproject.toml",
+      "source_policy.py",
+      "src/adapter_protocol/adapter.c",
+      "src/adapter_protocol/descriptor_codec.c",
+      "src/adapter_protocol/descriptor_guard.c",
+      "src/adapter_protocol/descriptor_internal.h",
+      "src/adapter_protocol/descriptor_model.c",
+      "src/adapter_protocol/descriptor_probe.c",
+      "src/adapter_protocol/envelope_json.c",
+      "src/adapter_protocol/envelope_msgpack.c",
+      "src/adapter_protocol/gateway.c",
+      "src/adapter_protocol/internal.h",
+      "src/adapter_protocol/model.c",
+      "src/adapter_protocol/noop.c",
+      "src/adapter_protocol/schema.c",
+      "src/adapter_protocol/schema.h",
+      "src/agent_session/binding.c",
+      "src/agent_session/binding_internal.h",
+      "src/agent_session/clock.c",
+      "src/agent_session/coordinator.c",
+      "src/agent_session/history.c",
+      "src/agent_session/history_incremental.c",
+      "src/agent_session/internal.h",
+      "src/agent_session/model.c",
+      "src/agent_session/record.c",
+      "src/agent_session/rejection.c",
+      "src/agent_session/storage.c",
+      "src/candidate/cohort.c",
+      "src/candidate/comparison.c",
+      "src/candidate/controller.c",
+      "src/candidate/current.c",
+      "src/candidate/diff.c",
+      "src/candidate/diff_content.c",
+      "src/candidate/evidence.c",
+      "src/candidate/internal.h",
+      "src/candidate/isolation.c",
+      "src/candidate/model.c",
+      "src/candidate/patch.c",
+      "src/candidate/store.c",
+      "src/cli/adapter.c",
+      "src/cli/adapter_descriptor.c",
+      "src/cli/agent_session.c",
+      "src/cli/approval.c",
+      "src/cli/candidate.c",
+      "src/cli/candidate_host.h",
+      "src/cli/candidate_host_cli.c",
+      "src/cli/candidate_host_config.c",
+      "src/cli/candidate_host_runtime.c",
+      "src/cli/candidate_host_transport.c",
+      "src/cli/capsule.c",
+      "src/cli/completion.c",
+      "src/cli/context.c",
+      "src/cli/context_tokenizer.c",
+      "src/cli/context_tokenizer.h",
+      "src/cli/daemon.c",
+      "src/cli/daemon_worker.c",
+      "src/cli/daemon_worker.h",
+      "src/cli/discovery.c",
+      "src/cli/doctor.c",
+      "src/cli/document.c",
+      "src/cli/error.c",
+      "src/cli/error.h",
+      "src/cli/events.c",
+      "src/cli/execution.c",
+      "src/cli/internal.h",
+      "src/cli/io.c",
+      "src/cli/journal.c",
+      "src/cli/json.c",
+      "src/cli/lineage.c",
+      "src/cli/main.c",
+      "src/cli/output.c",
+      "src/cli/output.h",
+      "src/cli/projection.c",
+      "src/cli/proof.c",
+      "src/cli/reentry.c",
+      "src/cli/research.c",
+      "src/cli/research_bundle.c",
+      "src/cli/role.c",
+      "src/cli/runtime.c",
+      "src/cli/runtime_profile.c",
+      "src/cli/work.c",
+      "src/cli/work.h",
+      "src/cli/workflow.c",
+      "src/cli/workflow_template.c",
+      "src/common/allocator.c",
+      "src/common/arena.c",
+      "src/common/diagnostic.c",
+      "src/common/error.c",
+      "src/common/json.c",
+      "src/common/json.h",
+      "src/common/record.c",
+      "src/common/record_internal.h",
+      "src/common/span.c",
+      "src/common/system_error.c",
+      "src/common/types.c",
+      "src/common/version.c",
+      "src/completion/deliverable.c",
+      "src/completion/evaluator.c",
+      "src/completion/internal.h",
+      "src/completion/model.c",
+      "src/completion/predicate_roles.c",
+      "src/completion/predicate_v1.c",
+      "src/completion/recovery.c",
+      "src/completion/renderer_v1.c",
+      "src/completion/report.c",
+      "src/completion/store.c",
+      "src/core/authorization.c",
+      "src/core/capsule.c",
+      "src/core/internal.h",
+      "src/core/loop_controller.c",
+      "src/core/memory.c",
+      "src/core/stage_graph.c",
+      "src/core/stage_run.c",
+      "src/core/work_run.c",
+      "src/cost/budget.c",
+      "src/cost/cache.c",
+      "src/cost/import.c",
+      "src/cost/inbox.c",
+      "src/cost/internal.h",
+      "src/cost/ledger.c",
+      "src/cost/usage.c",
+      "src/daemon/admission.c",
+      "src/daemon/admission_internal.h",
+      "src/daemon/admission_model.c",
+      "src/daemon/admission_storage.c",
+      "src/daemon/admission_work.c",
+      "src/daemon/cgroup_exec.c",
+      "src/daemon/cgroup_exec_internal.h",
+      "src/daemon/cgroup_internal.h",
+      "src/daemon/event_reader.c",
+      "src/daemon/event_sse.c",
+      "src/daemon/events.c",
+      "src/daemon/events_admission.c",
+      "src/daemon/events_internal.h",
+      "src/daemon/internal.h",
+      "src/daemon/queue.c",
+      "src/daemon/recovery.c",
+      "src/daemon/resource.c",
+      "src/daemon/resource_io.c",
+      "src/daemon/scheduler.c",
+      "src/daemon/storage.c",
+      "src/daemon/supervisor.c",
+      "src/daemon/worker.c",
+      "src/discovery/internal.h",
+      "src/discovery/model.c",
+      "src/discovery/report.c",
+      "src/discovery/snapshot.c",
+      "src/document/internal.h",
+      "src/document/markdown.c",
+      "src/document/record.c",
+      "src/document/record_read.c",
+      "src/document/registry.c",
+      "src/document/schema.c",
+      "src/document/storage.c",
+      "src/evidence/cas.c",
+      "src/evidence/digest.c",
+      "src/evidence/fs.c",
+      "src/evidence/internal.h",
+      "src/evidence/read.c",
+      "src/evidence/receipt.c",
+      "src/execution/bundle.c",
+      "src/execution/change.c",
+      "src/execution/command.c",
+      "src/execution/internal.h",
+      "src/execution/inventory_ref.c",
+      "src/execution/logs.c",
+      "src/execution/model.c",
+      "src/execution/proof_format.c",
+      "src/execution/proof_internal.h",
+      "src/execution/proof_pack.c",
+      "src/execution/proof_store.c",
+      "src/execution/report.c",
+      "src/execution/runner.c",
+      "src/execution/store.c",
+      "src/golem/__init__.py",
+      "src/golem/adapters/__init__.py",
+      "src/golem/adapters/base.py",
+      "src/golem/adapters/local.py",
+      "src/golem/cli.py",
+      "src/golem/core/__init__.py",
+      "src/golem/core/models.py",
+      "src/golem/core/optimization.py",
+      "src/golem/core/serialization.py",
+      "src/golem/evidence/__init__.py",
+      "src/golem/evidence/store.py",
+      "src/golem/policies/__init__.py",
+      "src/golem/policies/autonomy.py",
+      "src/golem/runtime/__init__.py",
+      "src/golem/runtime/lease.py",
+      "src/golem/runtime/loop.py",
+      "src/intent/fragment.c",
+      "src/intent/fragment.h",
+      "src/intent/inventory.c",
+      "src/intent/inventory.h",
+      "src/intent/journal.c",
+      "src/intent/journal.h",
+      "src/intent/object.c",
+      "src/intent/object.h",
+      "src/intent/object_graph.c",
+      "src/intent/object_graph.h",
+      "src/intent/object_inventory.c",
+      "src/intent/object_inventory.h",
+      "src/intent/quota.c",
+      "src/intent/quota.h",
+      "src/intent/schema.c",
+      "src/intent/schema.h",
+      "src/inventory/capture.c",
+      "src/inventory/compare.c",
+      "src/inventory/git_record.c",
+      "src/inventory/git_record.h",
+      "src/inventory/internal.h",
+      "src/inventory/matcher.c",
+      "src/inventory/model.c",
+      "src/journal/capsule_codec.c",
+      "src/journal/codec.c",
+      "src/journal/event.c",
+      "src/journal/file.c",
+      "src/journal/inspect.c",
+      "src/journal/internal.h",
+      "src/journal/replay.c",
+      "src/lineage/codec.c",
+      "src/lineage/internal.h",
+      "src/lineage/model.c",
+      "src/lineage/query.c",
+      "src/lineage/store.c",
+      "src/optimization/execution.c",
+      "src/optimization/internal.h",
+      "src/optimization/selection.c",
+      "src/policy/approval_internal.h",
+      "src/policy/approval_model.c",
+      "src/policy/approval_scope.c",
+      "src/policy/approval_store.c",
+      "src/policy/artifact.c",
+      "src/policy/autonomy.c",
+      "src/policy/fallback.c",
+      "src/reentry/internal.h",
+      "src/reentry/model.c",
+      "src/reentry/store.c",
+      "src/reentry/workflow.c",
+      "src/replay/apply.c",
+      "src/replay/engine.c",
+      "src/replay/internal.h",
+      "src/research/bundle.c",
+      "src/research/bundle_format.c",
+      "src/research/bundle_internal.h",
+      "src/research/cohort.c",
+      "src/research/compare.c",
+      "src/research/internal.h",
+      "src/research/metrics.c",
+      "src/research/metrics_report.c",
+      "src/research/model.c",
+      "src/research/observability.c",
+      "src/research/outcome.c",
+      "src/research/report.c",
+      "src/research/runtime_observability.c",
+      "src/research/store.c",
+      "src/runtime/lease.c",
+      "src/runtime/loop.c",
+      "src/runtime/prepared_cache.c",
+      "src/runtime/profile_binding.c",
+      "src/runtime/profile_cache.c",
+      "src/runtime/profile_codec.c",
+      "src/runtime/profile_internal.h",
+      "src/runtime/profile_link.c",
+      "src/runtime/profile_model.c",
+      "src/runtime/profile_store.c",
+      "src/workflow/context_internal.h",
+      "src/workflow/context_model.c",
+      "src/workflow/context_projection.c",
+      "src/workflow/context_selection.c",
+      "src/workflow/graph.c",
+      "src/workflow/internal.h",
+      "src/workflow/model.c",
+      "src/workflow/query.c",
+      "src/workflow/role_contract.c",
+      "src/workflow/role_internal.h",
+      "src/workflow/role_store.c",
+      "src/workflow/template.c",
+      "src/workflow/template_builtin.c",
+      "src/workflow/template_guard.c",
+      "src/workflow/template_internal.h",
+      "src/workspace/git.c",
+      "src/workspace/internal.h",
+      "src/workspace/lifecycle.c",
+      "src/workspace/model.c",
+      "src/workspace/store.c",
+      "tools/agent_entrypoint.py",
+      "tools/agent_io.py",
+      "tools/agent_lifecycle.py",
+      "tools/benchmark_intent_journal.py",
+      "tools/benchmark_orchestration.py",
+      "tools/benchmark_runtime.py",
+      "tools/billing_evidence.py",
+      "tools/check_guard_mutations.py",
+      "tools/classify_failures.py",
+      "tools/codex_hosted.py",
+      "tools/context_resume.py",
+      "tools/doctor_environment.py",
+      "tools/event_bridge.c",
+      "tools/event_bridge_limits.h",
+      "tools/evidence_adapters.py",
+      "tools/evidence_contract.py",
+      "tools/evidence_export.py",
+      "tools/execution_record.py",
+      "tools/github_checks.py",
+      "tools/github_context.py",
+      "tools/github_policy.py",
+      "tools/hosted_usage.py",
+      "tools/install_conan_cli.py",
+      "tools/instruction_bundle.py",
+      "tools/integration_approval_host.c",
+      "tools/integration_backend.py",
+      "tools/integration_codex_plugin.py",
+      "tools/integration_config.py",
+      "tools/integration_contract.py",
+      "tools/integration_gateway.py",
+      "tools/integration_gateway_auth.py",
+      "tools/integration_gateway_contract.py",
+      "tools/integration_hook_contract.py",
+      "tools/integration_hooks.py",
+      "tools/integration_install.py",
+      "tools/integration_launch.py",
+      "tools/integration_lifecycle.py",
+      "tools/integration_mcp.py",
+      "tools/integration_mcpb.py",
+      "tools/integration_mcpb_entry.py",
+      "tools/integration_mutation_contract.py",
+      "tools/integration_mutation_mcp.py",
+      "tools/integration_mutations.py",
+      "tools/integration_recovery.py",
+      "tools/integration_registry.py",
+      "tools/integration_reload_probe.py",
+      "tools/integration_service.py",
+      "tools/integration_transfer.py",
+      "tools/integration_update.py",
+      "tools/intent_authority.py",
+      "tools/intent_authority_host.c",
+      "tools/intent_authority_lifecycle.py",
+      "tools/isolation_canary.py",
+      "tools/judgment_record.py",
+      "tools/native_record.py",
+      "tools/provider_costs.py",
+      "tools/provider_usage.py",
+      "tools/remote_status.py",
+      "tools/retire_legacy_cli.py",
+      "tools/revision_status.py",
+      "tools/status_collector.py",
+      "tools/syscall_record.py",
+      "tools/usage_pipeline.py",
+      "tools/verify_agent.py",
+      "tools/verify_alpha.py",
+      "tools/verify_environment.py",
+      "tools/verify_gateway_schema.py",
+      "tools/verify_hook_schema.py",
+      "tools/verify_install_schema.py",
+      "tools/verify_integration_schema.py",
+      "tools/verify_isolation.py",
+      "tools/verify_mutation_schema.py",
+      "tools/verify_orchestration.py",
+      "tools/verify_preflight.py",
+      "tools/verify_resource.py",
+      "tools/verify_runtime.py",
+      "tools/verify_runtime_legacy.py",
+      "tools/verify_update_schema.py",
+      "tools/integration_reads.py",
+      "tools/integration_read_resources.py",
+      "tools/integration_read_views.py",
+      "tools/integration_preparations.py",
+      "tools/integration_prepare_builders.py",
+      "tools/integration_task_actions.py",
+      "tools/integration_quality_actions.py",
+      "tools/integration_quality_reads.py",
+      "tools/integration_helper_contract.py",
+      "tools/integration_parallel_actions.py",
+      "tools/integration_parallel_reads.py",
+      "tools/integration_parallel_hosts.py",
+      "tools/integration_parallel_preparations.py",
+      "tools/integration_feature_profiles.py",
+      "tools/integration_distribution.py",
+      "tools/integration_distribution_entry.py",
+      "tools/integration_owner_maintenance.py",
+      "plugins/golem/skills/golem-work/SKILL.md",
+      "plugins/golem/skills/golem-work/agents/openai.yaml",
+      "plugins/golem/skills/golem-work/references/profiles.md"
+    ],
+    "blockers": [],
+    "execution_verified": false
+  },
+  "reviewed_effects": {
+    "blockers": [],
+    "reviewed_capabilities": 1120,
+    "execution_verified": false
+  },
+  "boundary_contracts": {
+    "reviewed_paths": [
+      ".agents/plugins/marketplace.json",
+      ".clang-format",
+      ".github/actions/setup-json-c/action.yml",
+      ".github/workflows/c.yml",
+      ".github/workflows/conan.yml",
+      ".github/workflows/observation.yml",
+      ".gitignore",
+      "COMMERCIAL-LICENSE.md",
+      "LICENSE",
+      "NOTICE",
+      "bindings/CMakeLists.txt",
+      "bindings/native/exports.map",
+      "bindings/native/exports.txt",
+      "bindings/python/COMMERCIAL-LICENSE.md",
+      "bindings/python/LICENSE",
+      "bindings/python/NOTICE",
+      "bindings/python/pyproject.toml",
+      "bindings/python/src/golem_runtime/py.typed",
+      "bindings/typescript/COMMERCIAL-LICENSE.md",
+      "bindings/typescript/LICENSE",
+      "bindings/typescript/NOTICE",
+      "bindings/typescript/package-lock.json",
+      "bindings/typescript/package.json",
+      "cmake/GolemConfig.cmake.in",
+      "plugins/golem/LICENSE",
+      "plugins/golem/skills/golem-setup/agents/openai.yaml",
+      "tools/requirements-gateway.txt",
+      "tools/requirements-mcp.txt"
+    ],
+    "blockers": [],
+    "execution_verified": false
+  },
+  "private_publication_guard": {
+    "allowed_values": [
+      "NULL",
+      "as_publication_guard"
+    ],
+    "checked_definitions": [
+      "as_publication_guard",
+      "as_commit",
+      "publish",
+      "event_publish",
+      "dw_record_event",
+      "dw_record_event_guarded"
+    ],
+    "checked_forwarding": [
+      [
+        "as_commit",
+        "dw_record_event_guarded",
+        "as_publication_guard",
+        "l"
+      ],
+      [
+        "dw_record_event",
+        "event_publish",
+        "NULL",
+        "NULL"
+      ],
+      [
+        "dw_record_event_guarded",
+        "event_publish",
+        "guard",
+        "context"
+      ],
+      [
+        "event_publish",
+        "publish",
+        "guard",
+        "context"
+      ]
+    ],
+    "blockers": [],
+    "scope": "registered_call_sites_only",
+    "excluded_entrypoints": [
+      "dw_event_write_guarded"
+    ],
+    "receiver_identity_verified": false,
+    "callee_behavior_verified": false,
+    "policy_satisfied": false,
+    "execution_verified": false
+  }
+}

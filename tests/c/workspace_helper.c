@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 {
     CHECK(argc == 8);
     golem_document_store *store = NULL;
-    golem_status st = golem_document_store_open(argv[1], true, NULL, &store, NULL);
+    golem_status st = golem_document_store_open(argv[1], !getenv("WS_READONLY"), NULL, &store, NULL);
     if (st != GOLEM_OK) {
         fprintf(stderr, "%s\n", golem_status_string(st));
         return 1;

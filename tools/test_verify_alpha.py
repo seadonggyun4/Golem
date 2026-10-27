@@ -14,6 +14,24 @@ from source_policy import export_sources, FIXTURES
 
 
 class SourceSnapshotTests(unittest.TestCase):
+    def test_clean_export_contains_current_mcp_producer_closure(self):
+        from integration_transfer import PRODUCER_NAMES
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp).resolve()
+            exported = export_sources(root, output)
+            for name in PRODUCER_NAMES:
+                relative = "tools/" + name
+                self.assertIn(relative, exported)
+                self.assertEqual((output / relative).read_bytes(), (root / relative).read_bytes())
+            # A native fixture can import its D2/D4 dependencies in the clean tree.
+            subprocess.run([sys.executable, "-B", "-c",
+                            "import integration_service, integration_mutations"],
+                           cwd=output / "tools", check=True, timeout=30)
+        for name in ("tools/integration_local_secret.py", "tools/local_policy.json",
+                     ".codex/config.toml", "registry/approval.json"):
+            self.assertFalse(selected(name), name)
+
     def test_failed_command_emits_logs_and_preserves_failure(self):
         stdout, stderr = io.BytesIO(), io.BytesIO()
         result = subprocess.CompletedProcess(["test-command"], 7, b"test output\n", b"test error\n")

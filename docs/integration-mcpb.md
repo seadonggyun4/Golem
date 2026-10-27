@@ -1,246 +1,39 @@
-# Claude Desktop MCPB Packaging
+# Claude Desktop MCPB 설치·사용 안내
 
-## Registration Surfaces
-
-| Surface | Golem icon source | Observed scope |
-| --- | --- | --- |
-| Manual local `mcpServers` | MCP `serverInfo.icons` | Claude Desktop 3.6556.2 connected successfully but displayed its generic connector symbol |
-| Desktop extension `.mcpb` | Package `manifest.json` `icon` | The same client displayed the Golem artwork in preview and installed connector list/details, without the original white surround |
-| Hosted connector directory | Separate catalog registration | Not implemented or verified by this package |
-
-The official [Claude local MCP guide](https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop)
-documents Settings > Extensions > Advanced settings > Install Extension. Private
-MCPB installation does not require public directory publication. The
-[MCPB manifest specification](https://github.com/modelcontextprotocol/mcpb/blob/main/MANIFEST.md)
-defines the package-relative `icon` field separately from protocol metadata.
-The client adds dark padding around the preview image; the asset cannot control
-this outer layout. A preview alone is not proof of installed connector rendering.
-
-On 2026-10-23, an owner-approved temporary installation on macOS completed with
-an empty registry and no project grants. Claude Desktop 3.6556.2 reported the
-extension connected and displayed its artwork in connector details. No tools
-were available, as expected. The test extension and its configuration were then
-removed through the UI; the extension list returned to empty. The original
-manual client configuration remained byte-identical. No real Work was accessed.
-This verifies this client's MCPB display path, not Codex or Hosted directories,
-and does not promise that artwork fills Claude's outer decorative frame.
-
-## Build Without Installation
-
-```sh
-python3 tools/integration_mcpb.py --output /private/tmp/golem.mcpb
-```
-
-The builder refuses an existing output. It emits a deterministic ZIP from an
-explicit public-file allowlist: unchanged D2 producer modules, a small entry
-adapter, the hash-checked edge-to-edge PNG, manifest, dependency declaration and
-the existing license. No policy, registry, Work, evidence or credential is copied.
-It neither changes client settings nor invokes a package manager.
-
-Manifest 0.4 uses the official
-[UV runtime example](https://github.com/modelcontextprotocol/mcpb/tree/main/examples/hello-world-uv).
-The host may download Python dependencies; direct MCP versions match
-`tools/requirements-mcp.txt`. Transitive dependencies are not fully locked by
-this first packaging path. Do not claim an offline or hermetic runtime. POSIX
-support is declared; Windows is excluded because the existing registry uses
-`fcntl`. Actual client UI testing is macOS only, not Linux certification.
+최신 검증본은 [README](../README.ko.md)에서 확인한다. 검토한 기능별 MCPB를 사용하며, 이미 같은 검증본이 연결돼 있으면 재설치하지 않는다. profile은 기존 권한의 상한이다.
 
 ## Install and Configure
 
-1. Prepare the engine/runtime and explicitly enroll the intended projects and
-   Works using [D1](integration-d1.md). Review a separate
-   [D2 disclosure policy](integration-d2.md) for Claude as the model-service
-   destination. A Codex approval is not interchangeable with Claude consent.
-2. Build a new MCPB using the command above. Inspect its contents and selected
-   producer version before installation; no private approval should be bundled.
-3. In Claude Desktop, open Settings > Extensions > Advanced settings > Install
-   Extension and select that MCPB. Review and accept the local-process warning
-   explicitly. Installing the extension is not an OS sandbox or a project grant.
-4. In the extension settings, select **Reviewed disclosure policy**, enter its
-   exact **Reviewed policy SHA-256**, and turn on **Approve this policy's
-   disclosure to Claude** only after reviewing that exact scope. Save and enable
-   the extension. Never calculate a new hash merely to bypass a mismatch.
-5. Confirm the connector starts and inspect its exposed tools. Without valid
-   consent/pins, `golem_setup_status` may be the only tool: read its diagnostic
-   rather than treating connection success as project access. Native/runtime
-   failures can still prevent startup entirely.
-6. In a test conversation, list permitted projects, inspect one approved Work
-   and check context/evidence/completion within that grant. Separate transport
-   success from native acceptance. Stop on quota or stale-policy errors.
+1. **Settings → Extensions → Advanced settings → Install Extension**에서 검토한 MCPB를 선택한다. 기존 동일 identity에는 지원되는 **Update**를 사용한다. archive SHA·manifest·설치 파일을 대조하고 local-process 설치 확인을 마친다.
+2. **Configure**에서 기존 정책·정확한 SHA와 전달 동의를 지정한다. task 패키지의 필수 입력은 **Existing reviewed D4 policy**, **Exact owner-reviewed policy digest**, **Explicit consent to this existing owner policy**다. 설치나 동의 체크만으로 새 action 승인이 생기지 않는다.
+3. task의 optional **resource**는 별도 검토한 계약·SHA·동의가 있을 때만 선택한다. helper는 quality, host는 parallel 패키지의 별도 계약이며 task 설정에 추가하지 않는다. read/prepare는 해당 D2 정책을 사용한다.
+4. 저장·활성화 후 해당 연결만 reload하고 새 대화에서 **의도한 확장**의 실제 도구를 확인한다. `golem_projects_list`와 허용 Work 조회로 연결을 확인한다. `golem_setup_status`만 보이면 설정 진단 단계이므로 정책·producer pin을 임의 변경해 통과시키지 않는다.
 
-Preserve unrelated extensions, manual MCP configuration and approvals. If
-switching from a manual Golem connection, obtain approval before disabling that
-entry to avoid duplicate launches. Producer changes require fresh review; there
-is no automatic policy migration. Do not reinstall an active working connection
-merely to reproduce this guide. See the bounded version-specific observations
-below and [Codex's different plugin setup](integration-codex-plugin.md).
+기존 [프로젝트 등록](integration-d1.md)·[전달 범위](integration-d2.md)·[D4 action](integration-d4.md)을 보존한다. Codex의 전달 동의를 Claude에 재사용하지 않는다. 패키지는 owner가 고정한 외부 Python/SDK/native runtime이 필요하며, uv가 의존성을 다운로드할 수 있다. local process는 사용자 OS 권한으로 실행된다.
 
-## Approval Boundary
+## Work Flow
 
-Version 0.1.2 adds a setup-only MCP mode for missing consent, missing policy,
-changed policy digest or changed producer pins. Initialization remains available,
-but the only tool is `golem_setup_status`; it returns fixed public guidance and
-`project_access_enabled: false`. It never returns configured paths, policy
-contents, registry identifiers or Work data. Without consent it does not read
-the policy. No project tool, enrollment or approval-writing capability is
-available in this mode. It cannot transition to normal access within a running
-process: the owner must review settings and restart the extension.
+연결 후 [공통 Work 사용 흐름](integration-codex-plugin.md#work-flow)을 따른다. Claude에서도 실제 MCP 도구명은 `golem_…`이며, 노출된 도구와 현재 정책의 교집합만 사용할 수 있다.
 
-`OWNER_TRANSFER_APPROVAL_REQUIRED` means disclosure consent is off;
-`PRODUCER_CHANGED` means the policy pins different module bytes;
-`TRANSFER_POLICY_CHANGED` means the file differs from its reviewed digest.
-Do not fix these by automatically regenerating pins or enabling consent.
-Other validation failures receive generic public setup guidance, not raw
-exception details. Dependency, transport and asset-integrity failures can still
-prevent startup; this is not a claim that every failure becomes a connected UI.
-Claude controls its own connection banner; the detailed cause is available to
-the model through the setup tool and in structured local stderr.
+저장 결과는 원 ID의 `golem_execution_read(operation="stored_result")`로 조회하고 실행 요청을 재전송하지 않는다. 필요한 QA·완료 문서·finalize·보고서를 처리한 뒤 `golem_completion_check`로 현재 DONE을 확인한다. pending·stale·결과 유실·COMMIT_UNKNOWN은 보존하며 자동 재실행·repair·rollback하지 않는다. `AGENTS.md`/`CLAUDE.md`가 Desktop의 권한으로 자동 적용된다고 가정하지 않는다.
 
-The 0.1.2 packaging adapter does not change D2 producer modules, so the explicitly
-reviewed 0.1.1 policy remains compatible when its native pins and grants still
-validate. Existing settings and approvals are never migrated automatically.
+<details>
+<summary>패키지 생성이 필요한 경우</summary>
 
-Version 0.1.1 uses expanded-background artwork, without an embedded white
-surround. Claude still controls the outer icon container and its padding.
-Updates do not silently refresh existing producer approvals: changed module
-hashes require a separately reviewed disclosure policy.
+검토한 checkout에서 필요한 profile을 선택하고 새 출력 경로를 사용한다. 경로와 digest는 owner가 검토한 값으로 대체한다.
 
-Successful responses retain `state: AVAILABLE` for compatibility and add
-`state_scope: DELIVERY_ONLY` and `work_completion_inferred: false`. This means
-data is available, not that the Work is complete. Only the native completion
-result is authoritative for the queried selection; delivery never grants
-execution or ownership.
+```sh
+python3 tools/integration_distribution.py catalog
+python3 tools/integration_distribution.py build --profile task --output /absolute/private/golem-task.mcpb
+python3 tools/integration_distribution.py verify --input /absolute/private/golem-task.mcpb --reviewed-sha256 OWNER_REVIEWED_ARCHIVE_SHA256
+```
 
-For context candidates, an exact, bounded native snapshot-mismatch observation
-is surfaced as `SOURCE_SNAPSHOT_MISMATCH`, with no automatic retry. The native
-status remains `GOLEM_ERR_STALE_RESULT`. Other stale errors, malformed or
-incomplete diagnostics and recording failures remain `NATIVE_FAILURE`.
-Free-form stderr and private paths stay in local evidence, not model output.
+`read`·`prepare`는 조회/준비, `task`는 Work 수명주기, `quality`는 QA/증거, `parallel`은 기존 candidate/workspace용 상한이다. 서로의 권한을 자동 포함하지 않는다. builder는 설치·승인·Work 변경을 하지 않으며, 생성 성공만으로 client 검증이 완료되지는 않는다. 외부 runtime이 필요하고 서명된 self-contained 배포를 뜻하지 않는다.
 
-The 0.1.1 update was exercised in Claude Desktop 3.6556.2 on macOS using an
-owner-approved synthetic-only policy. Two prompts made three native read calls:
-status, completion and an intentionally mismatched context snapshot. Claude
-reported the delivery-only scope, refused to infer completion and relayed
-`SOURCE_SNAPSHOT_MISMATCH` with automatic retry disabled. This is a bounded
-client observation, not a guarantee about every model response. The expanded
-artwork was visible after installation; Claude's outer dark padding remained.
-The test connection and disclosure consent were disabled afterwards, with the
-previous configuration values restored. Existing producer approvals were not
-rewritten for the update.
+</details>
 
-Installation is separate from Golem authorization. The owner must supply an
-existing private D2 disclosure policy, its explicitly reviewed SHA-256, and
-affirmative disclosure consent (default false). Normal access uses the unchanged
-D2 Transfer, Service and MCP transport. Registry grants, producer pins, native read guards
-and output limits remain enforced. No auto-enrollment, bootstrap, Work resume,
-mutation, issuer approval or policy regeneration is provided.
+## 업데이트·정리
 
-The packaged producer bytes match the selected source revision, not necessarily
-the previously installed release. Runtime updates still require review; this is not the D1
-installer's runtime-pin transaction and does not claim its launch receipt.
-Claude's local-extension warning concerns broad OS process access: a Golem grant
-restriction is not an OS sandbox. Obtain explicit consent before installation.
-
-## Audit Capacity and Interpretation (0.1.3)
-
-Version 0.1.3 changes producer modules and requires separately reviewed pins;
-existing policies are not rewritten. For an approved project, `projects_list`
-also returns `golem.integration-audit-capacity.v1`: bounded metadata inventory,
-limits, remaining read directories/entries/bytes and explicit blocking reasons.
-The aggregate covers the shared registry, not a particular Work. It exposes no
-file names or contents and is omitted when no projects are approved. The listing
-does not consume a read directory and remains available at audit saturation.
-
-The unchanged limits are 256 read directories, 16384 entries and 128 MiB logical
-file bytes. Inventory errors, unsafe links/types and incomplete scans fail
-closed; unknown remaining capacity is null, never zero or unlimited. A complete
-observation does not reserve capacity, verify physical free space or guarantee
-admission. Byte and entry limits are rechecked at each native read; future output
-sizes are not reserved by this preflight.
-
-Before compound queries create their first read record, the service checks read
-directory headroom: context/handoff need five slots, evidence/completion three,
-status/history one. These conservative costs include before/after observations;
-early failure can consume fewer slots. Per-read checks remain in place. Stop on
-`AUDIT_QUOTA`; do not automatically retry, delete evidence, raise limits or create
-a replacement registry. Retention, rotation and durable archival policies remain
-undecided and are not implemented by this release.
-
-`AVAILABLE` still describes delivery only, including when the nested capacity
-report is `BLOCKED`. Native `RECONCILE_SESSION` is not proof that all required
-documents exist or that there is a unique cause. `EVIDENCE_NOT_REFERENCED` means
-no supported committed reference was established, not that storage lacks the
-object. A null `local_evidence_id` is not proof that no audit record was written.
-Errors do not determine the Work's outcome. These explicit fields and MCP
-instructions guide interpretation without changing native completion authority.
-
-On 2026-10-23, owner-approved 0.1.3 installation in Claude Desktop 3.6556.2
-was checked with three sequential synthetic-only calls: capacity listing,
-completion and intentional unreferenced evidence denial. Claude distinguished
-observed capacity from reservation, reconcile action from document completeness,
-and missing reference/identifier from absent bytes/audit records. Client log
-request/response intervals were 114/750/107 ms respectively (one sample each,
-excluding model inference and human approval waits; not a performance guarantee).
-The synthetic project's 84 files, prior approval records/policies and manual
-client configuration remained unchanged. The approved connection and disclosure
-consent stayed enabled. This is bounded macOS client verification, not proof that
-all model answers avoid overgeneralization. Saturation, unsafe inventory and
-compound-call headroom rejection are covered by local regression fixtures, not
-by filling the active client registry again.
-
-## Counter Interpretation (0.1.4)
-
-Version 0.1.4 adds counter-domain metadata, relevant tool descriptions and server
-instructions; see the [D2 counter contract](integration-d2.md#counter-interpretation).
-The native counters and completion/reconciliation decisions are unchanged.
-The earlier interpretation that sequence/generation differences imply different
-observation times was unsupported: these are different counters, not timestamps.
-Changed producer bytes require a separately reviewed policy; do not rewrite old pins.
-
-On 2026-10-24, a separately approved temporary 0.1.4 extension in Claude Desktop
-3.6556.2 completed exactly four actual calls: capacity listing, then the same
-synthetic Work's status, next and selection completion check. Capacity was
-OBSERVED with no blocking reasons and 237 read directories remaining. Client-log
-request/response intervals were 151/207/131/260 ms, excluding inference and human
-approval waits. These are individual samples, not performance guarantees.
-
-Claude identified session sequence 1, document generation 4 and receipt position
-0 as distinct domains and explicitly declined to infer observation-time changes,
-state changes or inconsistency from their difference. It also distinguished
-AVAILABLE delivery from native completion and execution authority. This is a
-bounded successful counter-interpretation check, not proof of perfect model
-explanations: its wording that non-atomic observations are not one snapshot was
-stronger than the contract's absence of an atomicity guarantee. Its explanation
-of other native actions was not independently certified by this test.
-
-The test extension's disclosure consent and enablement were turned off afterward;
-its package, policies and audit records were retained. The existing Golem
-connection and consent stayed enabled with their original policy. All 84
-synthetic file hashes/modes, original reviewed policy hashes and manual client
-configuration were unchanged. TRAP and real Works were not modified. Existing
-active connections were deliberately not upgraded to the new producer bytes.
-
-## Verification and Rollback
-
-Tests check deterministic contents, producer-byte preservation, false/missing
-consent blocking project access, digest syntax, and extracted-bundle modern/legacy stdio
-connections with an empty approval registry. No actual Work is needed for icon
-testing. The generated manifest was separately checked against the official
-[0.4 JSON Schema](https://github.com/modelcontextprotocol/mcpb/blob/main/schemas/mcpb-manifest-v0.4.schema.json).
-
-Version 0.1.2 was installed in Claude Desktop 3.6556.2 on 2026-10-23 with
-explicit owner approval. A real `projects_list` call returned only the approved
-synthetic project and its three synthetic Works, with six read-only native
-tools and no execution authority. Consent and the connection were left enabled
-at the owner's request; per-call client approval remains required. The synthetic
-project's 84 files and the existing manual client configuration were unchanged.
-Missing-consent, stale-producer and changed-policy setup responses were verified
-with extracted-package modern and legacy MCP stdio tests; these are protocol
-checks, not claims about every Claude error banner or other client versions.
-
-For client verification, use a disposable empty registry and no project grants.
-Inspect preview, installed extension details and connector details separately;
-record where artwork is actually shown. Do not mark UI verification successful
-from a protocol response alone. Remove only the test extension through Claude's
-extension UI after verification, and compare the existing manual configuration
-with its pre-test hash. Do not edit unrelated connector settings or preferences.
+- 새 archive SHA·설치 bytes와 필요한 client 검증을 확인한다. runtime·정책 변경은 [D5](integration-d5.md)에 따라 검토하며 기존 승인 bytes/key/pin을 자동 이전하지 않는다.
+- owner-private 복구 자료를 보존하고 **Extensions → 대상 확장 → Remove**로 확인한 구버전 Golem만 제거한다. 검증된 Golem 한 개와 의도한 연결 한 개만 남기고 실제 목록·설정을 재확인한다.
+- 기존 Work·승인·registry·evidence·CAS·journal와 다른 확장·설정은 보존한다. 설정 저장·handshake·도구 호출·현재 Work 완료는 각각 구분한다.

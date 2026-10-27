@@ -30,6 +30,17 @@ static int observability(int argc, char **argv)
 }
 int golem_cli_research(int argc, char **argv)
 {
+    if (argc == 4 && !strcmp(argv[2], "redaction-validate")) {
+        cli_blob input = {0};
+        golem_status st = cli_read(argv[3], GOLEM_RESEARCH_REDACTION_MAX_JSON, &input);
+        if (st == GOLEM_OK)
+            st = golem_research_redaction_validate((golem_bytes){input.data, input.size}, NULL);
+        free(input.data);
+        if (st == GOLEM_OK && puts("{\"structurally_valid\":true,\"acceptance_verified\":false}") < 0)
+            st = GOLEM_ERR_IO;
+        return st == GOLEM_OK ? 0 : cli_emit(st, NULL);
+    }
+
     if (argc > 2 && !strcmp(argv[2], "observability")) return observability(argc, argv);
     if (argc > 2 && (!strcmp(argv[2], "export") || !strcmp(argv[2], "bundle-verify")))
         return golem_cli_research_bundle(argc, argv);
@@ -112,6 +123,7 @@ int golem_cli_research(int argc, char **argv)
         else st = report ? golem_research_report(store, (uint32_t)seq, &reply, NULL)
                          : golem_research_inspect(store, (uint32_t)seq, &reply, NULL);
     }
+    if (st == GOLEM_OK && validate && puts("{\"structurally_valid\":true,\"acceptance_verified\":false}") < 0) st = GOLEM_ERR_IO;
     if (st == GOLEM_OK && reply.size) st = report || markdown
         ? (fwrite(reply.data, 1, reply.size, stdout) == reply.size ? GOLEM_OK : GOLEM_ERR_IO)
         : cli_output_write((golem_bytes){reply.data, reply.size});

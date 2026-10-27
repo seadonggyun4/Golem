@@ -306,7 +306,12 @@ class Coverage(unittest.TestCase):
         allowed = {("tools/execution_record.py", "git"), ("tools/execution_record.py", "capture"),
                    ("tools/execution_record.py", "run_private"),
                    ("tools/agent_entrypoint.py", "git"), ("tools/instruction_bundle.py", "boundary"),
-                   ("bench/benchmark.py", "cpu_name")}
+                   ("bench/benchmark.py", "cpu_name"),
+                   # M0's fixed metadata-only Git queries intentionally create
+                   # no execution observations. capability_files admits only
+                   # rev-parse / bounded ls-files before Popen; adversarial
+                   # command/output-limit tests live in test_capability_files.
+                   ("tools/capability_files.py", "_git_query")}
         allowed.update(self.D01_PROTOCOLS)
         found = set()
         paths = list((root / "tools").glob("*.py")) + [root / "bench/benchmark.py"]

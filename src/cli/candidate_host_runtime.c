@@ -1,4 +1,5 @@
 #include "candidate_host.h"
+#include "golem/session_binding.h"
 #include "error.h"
 #include "../runtime/profile_internal.h"
 #include <stdio.h>
@@ -34,8 +35,12 @@ static golem_status resolve_member(void *context, const char *id, golem_candidat
     if (!b)
         return GOLEM_ERR_NOT_FOUND;
     golem_status st = GOLEM_OK;
-    if (!b->member.work)
-        st = golem_document_store_open(b->member.work_root, true, NULL, &b->member.work, NULL);
+    if (!b->member.work) {
+        const char *op = dw_text(h->request, "operation");
+        bool readonly = !strcmp(op, "compare") || !strcmp(op, "review-check") ||
+                        !strcmp(op, "target-check");
+        st = golem_document_store_open(b->member.work_root, !readonly, NULL, &b->member.work, NULL);
+    }
     if (st == GOLEM_OK)
         *out = b->member;
     return st;
@@ -104,8 +109,37 @@ static golem_status authorize(void *context, golem_bytes bytes)
 static golem_status workspace_check(void *context, golem_workspace_operation op, const char *id)
 {
     ch_host *h = context;
-    (void)op;
-    return h->approved && find_binding(h, id) ? GOLEM_OK : GOLEM_ERR_APPROVAL_REQUIRED;
+    if (!h->approved || !find_binding(h, id))
+        return GOLEM_ERR_APPROVAL_REQUIRED;
+    bool terminating = op == GOLEM_WORKSPACE_SEAL || op == GOLEM_WORKSPACE_RETAIN ||
+                       op == GOLEM_WORKSPACE_REMOVE;
+    if (terminating && !h->attested)
+        return GOLEM_ERR_APPROVAL_REQUIRED;
+    /* CREATE prepares a new, absent tree; native workspace lifecycle checks
+     * still reject existing records/paths and enforce registration and Git
+     * policy. It does not move the active agent's current workspace. */
+    if (op == GOLEM_WORKSPACE_CREATE)
+        return GOLEM_OK;
+    /* Candidate enrollment/freshness uses native RESUME only to verify an
+     * already READY/ACTIVE/retained tree. Direct workspace-resume remains a
+     * separate approved action and cannot recover an active claim. Native
+     * RESUME never creates/replays a partial tree (ATTENTION stays blocked by
+     * the candidate state predicate). */
+    if (op == GOLEM_WORKSPACE_RESUME &&
+        strcmp(dw_text(h->request, "operation"), "workspace-resume"))
+        return GOLEM_OK;
+    /* Only this candidate's Work may be inspected. An unrelated binding need
+     * not exist. Attestation is not process reaping: expired/recovery claims
+     * remain active until explicitly reconciled before moving/retiring a tree. */
+    golem_candidate_member member;
+    golem_status st = resolve_member(h, id, &member);
+    as_log log = {.directory = -1};
+    if (st == GOLEM_OK)
+        st = as_load(member.work, NULL, NULL, &log);
+    if (st == GOLEM_OK && as_active(log.state))
+        st = GOLEM_ERR_LEASE_BUSY;
+    as_close(&log);
+    return st;
 }
 static golem_status pulse(void *context)
 {
@@ -238,7 +272,10 @@ static golem_status candidate_call(ch_host *h, struct json_object *request,
         return GOLEM_ERR_OUT_OF_MEMORY;
     golem_execution_reply reply = {0};
     golem_status st =
-        golem_candidate_call(h->parent, &h->capabilities, h->admission,
+        golem_candidate_call(h->parent,
+                             (!strcmp(dw_text(request, "operation"), "status") ||
+                              !strcmp(dw_text(request, "operation"), "diff")) ? NULL : &h->capabilities,
+                             h->admission,
                              (golem_bytes){(const uint8_t *)text, strlen(text)}, &reply, NULL);
     if (st == GOLEM_OK)
         st = golem_json_parse((golem_bytes){reply.data, reply.size}, GOLEM_DOCUMENT_MAX_JSON, out);
@@ -404,7 +441,10 @@ golem_status ch_call(ch_host *h, struct json_object *envelope, struct json_objec
     h->attested = st == GOLEM_OK && dw_digest(envelope, "termination_attestation", &attested) &&
                   dw_equal(&attested, &h->authorized);
     const char *op = dw_text(h->request, "operation");
-    bool readonly = !strcmp(op, "status") || !strcmp(op, "ticket") || !strcmp(op, "poll");
+    bool readonly = !strcmp(op, "status") || !strcmp(op, "ticket") || !strcmp(op, "poll") ||
+                    !strcmp(op, "host-info") || !strcmp(op, "work-record") ||
+                    !strcmp(op, "work-status") || !strcmp(op, "work-next") ||
+                    !strcmp(op, "gates") || !strcmp(op, "diff");
     if (st == GOLEM_OK && !readonly && !h->approved)
         st = GOLEM_ERR_APPROVAL_REQUIRED;
     if (st == GOLEM_OK && !readonly && !strcmp(dw_text(h->parent->spec, "permission"), "DENY"))
@@ -412,7 +452,52 @@ golem_status ch_call(ch_host *h, struct json_object *envelope, struct json_objec
     if (st == GOLEM_OK && !strcmp(op, "finish"))
         st = GOLEM_ERR_APPROVAL_REQUIRED; /* Use typed, operator-attested settle. */
     const char *only_op[] = {"operation"};
-    if (st == GOLEM_OK && (!strcmp(op, "grant") || !strcmp(op, "shutdown"))) {
+    if (st == GOLEM_OK && !strcmp(op, "host-info")) {
+        if (!dw_keys(h->request, only_op, 1))
+            st = GOLEM_ERR_PARSE;
+        else {
+            *out = json_object_new_object();
+            if (!*out || !dw_add_digest(*out, "config_digest", &h->config_digest) ||
+                !ex_text(*out, "parent_work_id", dw_text(h->parent->spec, "work_id")) ||
+                !ex_text(*out, "repository_id", dw_text(h->config, "repository_id")))
+                st = GOLEM_ERR_OUT_OF_MEMORY;
+        }
+    } else if (st == GOLEM_OK && (!strcmp(op, "work-record") ||
+               !strcmp(op, "work-status") || !strcmp(op, "work-next"))) {
+        if (!dw_keys(h->request, only_op, 1))
+            st = GOLEM_ERR_PARSE;
+        struct json_object *query = json_object_new_object();
+        bool record = !strcmp(op, "work-record");
+        if (st == GOLEM_OK && (!query || !ex_uint(query, "schema_version", 1) ||
+            !ex_text(query, "work_id", dw_text(h->parent->spec, "work_id"))))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+        if (st == GOLEM_OK && record && (!ex_uint(query, "byte_budget", GOLEM_AGENT_CONTEXT_MAX) ||
+            !ex_text(query, "document_head", "") || !ex_text(query, "agent_head", "")))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+        if (st == GOLEM_OK && !record && !ex_text(query, "operation", op + 5))
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+        const char *text = query ? json_object_to_json_string_ext(query, JSON_C_TO_STRING_PLAIN) : NULL;
+        golem_agent_reply reply = {0};
+        if (st == GOLEM_OK && !text)
+            st = GOLEM_ERR_OUT_OF_MEMORY;
+        if (st == GOLEM_OK)
+            st = record ? golem_work_record(h->parent, (golem_bytes){(const uint8_t *)text, strlen(text)}, NULL, &reply, NULL)
+                        : golem_agent_session_call(h->parent, (golem_bytes){(const uint8_t *)text, strlen(text)}, NULL, &reply, NULL);
+        if (st == GOLEM_OK)
+            st = golem_json_parse((golem_bytes){reply.data, reply.size}, GOLEM_AGENT_CONTEXT_MAX, out);
+        golem_agent_reply_free(&reply);
+        json_object_put(query);
+    } else if (st == GOLEM_OK && !strcmp(op, "gates")) {
+        const char *gk[] = {"operation", "checkpoint"};
+        golem_digest checkpoint, digest;
+        st = dw_keys(h->request, gk, 2) && dw_digest(h->request, "checkpoint", &checkpoint)
+            ? golem_candidate_gate_digest(h->parent, &checkpoint, &digest, NULL) : GOLEM_ERR_PARSE;
+        if (st == GOLEM_OK) {
+            *out = json_object_new_object();
+            if (!*out || !dw_add_digest(*out, "native_digest", &digest))
+                st = GOLEM_ERR_OUT_OF_MEMORY;
+        }
+    } else if (st == GOLEM_OK && (!strcmp(op, "grant") || !strcmp(op, "shutdown"))) {
         if (!dw_keys(h->request, only_op, 1))
             st = GOLEM_ERR_PARSE;
         else if (!strcmp(op, "shutdown")) {
@@ -436,21 +521,33 @@ golem_status ch_call(ch_host *h, struct json_object *envelope, struct json_objec
         if (st == GOLEM_OK)
             st = ticket_reply(&ticket, out);
     } else if (st == GOLEM_OK) {
-        if (st == GOLEM_OK && !strcmp(op, "workspace-create")) {
-            const char *wk[] = {"operation", "candidate", "base_commit"};
+        if (st == GOLEM_OK && (!strcmp(op, "workspace-create") || !strcmp(op, "workspace-resume") ||
+            !strcmp(op, "workspace-activate") || !strcmp(op, "workspace-seal") ||
+            !strcmp(op, "workspace-retain") || !strcmp(op, "workspace-remove"))) {
+            bool create = !strcmp(op, "workspace-create"), retain = !strcmp(op, "workspace-retain");
+            const char *wk[] = {"operation", "candidate", create ? "base_commit" : "evidence"};
+            golem_workspace_operation operation = create ? GOLEM_WORKSPACE_CREATE :
+                !strcmp(op, "workspace-resume") ? GOLEM_WORKSPACE_RESUME :
+                !strcmp(op, "workspace-activate") ? GOLEM_WORKSPACE_ACTIVATE :
+                !strcmp(op, "workspace-seal") ? GOLEM_WORKSPACE_SEAL :
+                retain ? GOLEM_WORKSPACE_RETAIN : GOLEM_WORKSPACE_REMOVE;
+            golem_digest evidence;
             golem_candidate_current_binding *b = find_binding(h, dw_text(h->request, "candidate"));
             golem_workspace_result result;
-            st = b && dw_keys(h->request, wk, 3) ? GOLEM_OK : GOLEM_ERR_PARSE;
+            st = b && dw_keys(h->request, wk, create || retain ? 3 : 2) ? GOLEM_OK : GOLEM_ERR_PARSE;
+            if (st == GOLEM_OK && retain && !dw_digest(h->request, "evidence", &evidence))
+                st = GOLEM_ERR_PARSE;
             golem_candidate_member member;
             if (st == GOLEM_OK)
                 st = resolve_member(h, b->candidate, &member);
             if (st == GOLEM_OK)
                 st = golem_workspace_call(b->member.work, b->member.workspace,
-                                          GOLEM_WORKSPACE_CREATE, b->candidate,
-                                          dw_text(h->request, "base_commit"), NULL, &result, NULL);
+                                          operation, b->candidate,
+                                          create ? dw_text(h->request, "base_commit") : NULL,
+                                          retain ? &evidence : NULL, &result, NULL);
             if (st == GOLEM_OK) {
                 *out = json_object_new_object();
-                if (!*out || !ex_text(*out, "path", result.path) ||
+                if (!*out || !ex_uint(*out, "state", result.state) || !ex_text(*out, "path", result.path) ||
                     !dw_add_digest(*out, "receipt", &result.receipt))
                     st = GOLEM_ERR_OUT_OF_MEMORY;
             }

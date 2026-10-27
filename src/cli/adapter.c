@@ -1,4 +1,5 @@
-#include "internal.h"
+#include "work.h"
+#include <stdlib.h>
 #include "golem/adapter_protocol.h"
 #include <stdio.h>
 #include <string.h>
@@ -39,7 +40,8 @@ int golem_cli_adapter(int argc, char **argv)
         packed = strcmp(argv[argc - 1], "msgpack") == 0; argc -= 2;
     }
     bool probe = argc == 4 && strcmp(argv[3], "probe") == 0;
-    bool run = argc == 5 && strcmp(argv[3], "run") == 0;
+    bool file = argc == 6 && !strcmp(argv[3], "run-file");
+    bool run = (argc == 5 && strcmp(argv[3], "run") == 0) || file;
     if (argc < 4 || strcmp(argv[2], "noop") != 0 || (!probe && !run)) {
         fputs("Usage: golem adapter noop probe | run STORE [--format json|msgpack]\n"
               "       golem adapter convert json|msgpack json|msgpack < envelope\n", stderr); return 2;
@@ -54,7 +56,14 @@ int golem_cli_adapter(int argc, char **argv)
         golem_adapter_free(adapter);
     } else {
         golem_adapter_envelope request;
-        s = read_envelope(packed, &request);
+        if (file) {
+            cli_blob input = {0};
+            s = cli_read(argv[5], GOLEM_ADAPTER_JSON_MAX, &input);
+            if (s == GOLEM_OK)
+                s = golem_adapter_envelope_decode((golem_bytes){input.data, input.size}, &request, NULL);
+            free(input.data);
+        } else
+            s = read_envelope(packed, &request);
         if (s == GOLEM_OK && request.type != GOLEM_ADAPTER_RUN_STAGE) s = GOLEM_ERR_INVALID_ARGUMENT;
         golem_evidence_store *store = NULL;
         if (s == GOLEM_OK) s = golem_evidence_open(argv[4], true, NULL, &store, NULL);

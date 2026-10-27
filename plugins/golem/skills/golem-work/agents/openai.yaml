@@ -1,0 +1,4 @@
+interface:
+  display_name: "Golem Work"
+  short_description: "Use approved Golem Work tools and review results"
+  default_prompt: "Use $golem-work to inspect my approved Work and continue within its current tool permissions."

@@ -9,6 +9,9 @@ import uuid
 import execution_record as records
 import integration_contract as c
 import integration_registry as r
+import integration_task_actions as tasks
+import integration_quality_actions as quality
+import integration_parallel_actions as parallel
 
 PHASES = ("OPEN", "FROZEN", "SWITCH_INTENT", "RELOAD_REQUIRED")
 STATE = c.obj({"schema": {"const": "golem.integration-lifecycle.v1"}, "project_id": c.ID,
@@ -142,6 +145,8 @@ def quiet(registry, project_id):
 
 
 def retired_identity(tool, request):
+    if tool in (*tasks.NAMES,*quality.NAMES,*parallel.NAMES):
+        return c.sha(c.encoded({"tool": tool, "native_request": request}))
     fields = ("operation", "key") if tool.startswith("session_") else (
         ("document_id", "revision") if tool == "document_submit" else ("operation", "attempt_id", "checkpoint", "contract"))
     return c.sha(c.encoded({"tool": tool, **{key: request[key] for key in fields if key in request}}))

@@ -187,3 +187,68 @@ known usage/time separately. Do not infer improved productivity from this suite.
 - [SLSA provenance v1.1](https://slsa.dev/spec/v1.1/provenance), builder and resolved
   dependencies: artifact digests and authenticated build provenance are different
   assurances. Local conformance hashes are not signed SLSA attestations.
+
+
+## Change-scoped GitHub CI
+
+`c.yml` is the only automatic entrypoint: pushes to `main`, pull requests and merge
+queue events. Feature branches use a PR or manual dispatch; this avoids running the
+same update through both branch-push and PR workflows. Version tags and manual
+**Run workflow** run the full qualification matrix. No CI is run by a local commit.
+
+| Change | Automatic checks |
+| --- | --- |
+| README, ordinary documentation or screenshots | Selection self-tests, current M0 boundary gate and public-guide links, then `CI Ready`; no build |
+| MCP ledger / packaged documentation / capability analysis | Python tool regression |
+| MCP implementation, plugin or requirements | Python tools and D2/D4/D5/D6 fixture contracts on Linux/macOS |
+| C source / public headers | Linux/macOS Release, Linux ASan/leaks, bindings, MCP fixtures, Linux Conan with/without CLI and parser fuzz |
+| Bindings | Python tools and both-platform binding consumers |
+| Conan recipe / installer | Python tools and Linux Conan with/without CLI |
+| Historical Python prototype | Its own regression, separately from the C engine |
+| Syscall recorder | Native/tool regression plus the Linux tracer fixture |
+| CI, shared build/export contract, unmapped paths or unavailable diff | Full qualification |
+
+The always-run M0 inventory gate and Python tool/AST analysis job are pinned to **Python 3.14**, the reviewed M0
+structural-fingerprint toolchain; native integration fixtures keep their separate
+Python 3.11 setup. Pure M2-M5 component opt-ins run against the MCP fixture build;
+they are not silently left to the Python-only job, which has no native binary. This does not relax source/fingerprint comparisons across
+interpreter versions. The metadata-only Git reader admits only fixed rev-parse
+and bounded ls-files operations and creates no execution-observation record.
+
+Selection uses the entire Git diff: PR merge-base to head, push `before` to `after`,
+and merge-group base to head. Renames include both old and new paths; deletions and
+multi-commit pushes are included. There is no changed-file API truncation. Missing
+bases, force-push history loss and new-branch zero SHAs select full checks.
+
+`conan.yml` and `observation.yml` are reusable contracts without independent push/PR
+triggers. Repeated Python discovery and prototype runs were removed from native,
+alpha and observation jobs. Normal native changes use three build combinations;
+full qualification retains all six, clean-source alpha, restricted diagnostics,
+both-platform Conan with/without CLI, and pinned D1/D3 client compatibility fixtures.
+D1/D3 compatibility also runs automatically when its installer, hook or client
+fixture changes; benchmarks remain full-only.
+It does not certify every installed Desktop version. Existing sanitizer, approval,
+COMMIT_UNKNOWN and evidence assertions remain in their selected suites.
+
+`CI Ready` always runs and requires every selected job to finish successfully;
+failed, cancelled or unexpectedly skipped selected jobs cannot pass. Skipped
+unselected jobs mean **not applicable**, not test execution. Only this aggregate
+should be made a required check. Workflow-level path filters can otherwise leave
+required checks pending ([GitHub guidance](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks)).
+Repository branch protection/rulesets are a separate setting; changing these YAML
+files does not enable protection or replace existing required-check names.
+
+Inspect the current checkout's selection before a push (Ruby's standard YAML
+library extracts the exact CI selector; `--local` includes untracked files):
+
+```sh
+ci_plan_file="$(mktemp "${TMPDIR:-/tmp}/golem-ci-plan.XXXXXX")"
+ruby -ryaml -e 'print YAML.load_file(".github/workflows/c.yml")["jobs"]["changes"]["steps"].find { |step| step["id"] == "plan" }["run"]' > "$ci_plan_file"
+python3 "$ci_plan_file" --local
+```
+
+The selector self-tests use disposable Git fixtures; they do not commit or alter
+the product checkout. `--self-test` runs only those checks; `--paths README.md`
+simulates named changes. On GitHub, the selected lanes and reason are retained in
+`ci-plan` artifacts and the job summary. No release, client installation or remote
+workflow execution is implied by a successful local selector/linter run.

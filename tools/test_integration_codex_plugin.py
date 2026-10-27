@@ -17,7 +17,9 @@ class Packaging(unittest.TestCase):
             output = root / 'package'
             plugin.build(output, launcher)
             paths = {str(p.relative_to(output)) for p in output.rglob('*') if p.is_file()}
-            self.assertEqual(len(paths), 5)
+            self.assertEqual(len(paths), 10)
+            self.assertIn("plugins/golem/skills/golem-work/SKILL.md", paths)
+            self.assertIn("plugins/golem/skills/golem-setup/SKILL.md", paths)
             server = json.loads((output / 'plugins/golem/.mcp.json').read_text())
             self.assertEqual(server['mcpServers']['golem-local'], {'type': 'stdio', **value})
             self.assertFalse(any(b'not-for-package' in p.read_bytes()
