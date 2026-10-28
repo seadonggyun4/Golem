@@ -19,7 +19,7 @@ Required README maintenance rules; preserve this format unless the user explicit
 Keep this comment during editing. Keep the rendered README concise.
 -->
 
-> Latest verified MCP builds: **Codex 0.2.5 · Claude task 0.1.8** — isolated macOS Works completed. [Verification scope](docs/mcp-m7-m8-validation.ko.md)
+> Latest verified MCP builds: **Codex 0.2.7 · Claude read 0.1.10** — approved read-only checks passed. [Verification scope](docs/mcp-m7-m8-validation.ko.md)
 
 <div align="center">
   <img width="650" alt="Golem Banner" src="assets/Golem.png" />
@@ -35,6 +35,24 @@ Keep this comment during editing. Keep the rendered README concise.
 
 Codex and Claude plan and perform tasks. Golem connects progress, deliverables and verification results to check completion conditions.
 
+**Ask in natural language.**
+
+> “Fix the login bug in this project, run the tests, and submit the results.”
+
+Codex or Claude interprets your request, selects the Golem tools, and **assembles the structured arguments each tool requires.** The local policy file defines which calls are allowed; it is not a prompt template.
+
+```text
+User: natural-language request
+    ↓
+Codex / Claude: interpret the task → build MCP arguments
+    ↓
+Golem: check scope, ownership, approval and freshness
+    ↓
+Execution or a request for missing inputs or approval
+```
+
+Set the allowed scope when first connecting a project, then use natural language. The agent asks questions when the request is unclear and requests approval when needed. **Prompt wording alone never grants authority.** The current verified connections allow only three read tools; the fix/test/submit example requires the corresponding tools and approvals to be configured.
+
 ```mermaid
 flowchart TD
     U["User<br/>Goals and authority"] --> A["Codex · Claude<br/>Planning and work"]
@@ -42,16 +60,6 @@ flowchart TD
     G -->|"Current state and next steps"| A
     G --> R["Traceable results and handoffs"]
 ```
-
-## MCP
-
-Follow your client's guide to install a reviewed package and connect it to existing approved projects, Works and actions.
-Installation itself grants no access or execution authority.
-
-- **[Codex setup and use](docs/integration-codex-plugin.md)** — connect with Golem Setup and proceed with Golem Work.
-- **[Claude Desktop setup and use](docs/integration-mcpb.md#install-and-configure)** — install the needed feature package and verify the connection.
-
-Keep **one latest verified Golem installation and one intended connection per client**.
 
 ## Work Flow
 
@@ -68,14 +76,58 @@ flowchart TD
 
 Read the current completion decision after finalization and report actions. At any stage, stop for pending approval, stale inputs or uncertain results; do not retry automatically.
 
+## MCP
+
+Follow your client's guide to install a reviewed package and connect it to existing approved projects, Works and actions.
+Installation itself grants no access or execution authority.
+
+![Golem Codex plugin](assets/Golem-codex-plugin.png)
+
+The image shows a verified synthetic test installation; installation itself grants no authority.
+
+- **[Codex setup and use](docs/integration-codex-plugin.md)** — connect with Golem Setup and proceed with Golem Work.
+- **[Claude Desktop setup and use](docs/integration-mcpb.md#install-and-configure)** — install the needed feature package and verify the connection.
+
+Keep **one latest verified Golem installation and one intended connection per client**.
+
+## Architecture
+
+The agent plans and performs the work. The MCP integration checks the allowed scope, while the native Core checks state, ownership, approvals and evidence.
+
+```mermaid
+flowchart TD
+    A["External agent: judgment, edits and tools"] -->|"Direct CLI / C API"| C["Native C17 core: state, ownership, dependencies and evidence"]
+    A --> L["Local Codex plugin / Claude MCPB"]
+    G["GitHub marketplace / Golem Setup"] --> L
+    L -->|"stdio MCP: approved reads and context"| I["Python integration layer: D1-D6"]
+    A -->|"Separately opt-in supported hooks"| I
+    O["Owner-reviewed client, project, disclosure and action policies"] --> I
+    I -->|"Pinned CLI / fixed JSON requests"| C
+    C --> E["Approved execution, QA and current completion"]
+    C --> S["Explicit Work store, commonly under .golem"]
+    E --> S
+    S --> J["Durable events and receipts / content-addressed originals"]
+    S --> M["Derived Markdown and reports"]
+```
+
 ## Documentation
 
-| Get started with | Guide |
+| Guide | Document |
 | --- | --- |
-| Project instructions and first tasks | [Agent setup](docs/agent-setup.md) |
-| CLI/library installation and builds | [Runtime guide](docs/runtime-reference.md#build-and-run) |
-| Work stages and completion | [Workflow](docs/workflow.md) · [Completion](docs/completion.md) |
-| Internals and integration contracts | [Architecture](docs/architecture.md) · [MCP integration](docs/integration-layer-design.md) |
+| Documentation index | [All documents](docs/README.md) |
+| Getting started | [Agent setup](docs/agent-setup.md) |
+| Build and CLI | [Runtime guide](docs/runtime-reference.md) |
+| Architecture | [Architecture](docs/architecture.md) |
+| MCP design | [Integration contracts](docs/integration-layer-design.md) |
+| Work and completion | [Workflow](docs/workflow.md) |
+| Work and completion | [Completion](docs/completion.md) |
+| Authority | [Approvals](docs/approvals.md) |
+| Execution and evidence | [Execution boundary](docs/execution-boundary.md) |
+| Execution and evidence | [Evidence verification](docs/evidence-verification.md) |
+| Parallel work | [Workspaces](docs/workspaces.md) |
+| Parallel work | [Candidates](docs/candidates.md) |
+| Coverage and validation | [MCP inventory](docs/mcp-capability-inventory.ko.md) |
+| Coverage and validation | [Client validation](docs/mcp-m7-m8-validation.ko.md) |
 
 ## License
 
