@@ -1066,3 +1066,6 @@ TRACKED_PATHS = (
     'tools/verify_runtime_legacy.py',
     'tools/verify_update_schema.py',
 )
+
+# Reviewed documentation navigation; no executable MCP operation.
+TRACKED_PATHS += ('docs/README.md',)
