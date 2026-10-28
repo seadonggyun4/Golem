@@ -2183,7 +2183,7 @@
     },
     {
       "path": "tools/integration_owner_maintenance.py",
-      "sha256": "1d9600d9f3953c4a350c41fa032196b2223e9cab302662984e881e3f5943eb89"
+      "sha256": "a82f7f88a2a75a35161b666ff66077f9b481bd0c2cdfa0149d088a7fe260f2ee"
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
@@ -2199,7 +2199,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "5e62615375e38e150f372f950d75990b312e08556b817b1cfd94e1e60dea3e54"
+      "sha256": "20e52d558eac7d6f5e74fcf56c2bf111c7b6d104e33bc167db3a49287cf87c93"
     },
     {
       "path": "tools/test_capability_m6.py",

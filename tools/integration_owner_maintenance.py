@@ -566,7 +566,8 @@ def management_server(service):
     import integration_mutation_mcp as existing_actions
     from integration_service import COUNTER_GUIDANCE
     async def listed(ctx,params):
-        names=await anyio.to_thread.run_sync(service.tools)
+        # Reuse the metadata-only admission wait; never retry service.call.
+        names=await existing_reads.listed_tools(service)
         return ListToolsResult(tools=[Tool(name='golem_'+n,inputSchema=service.schemas()[n],
             description=('Prepare natural-language project management using catalog IDs. Preparation grants no authority. '
                 'Only exact separately reviewed actions dispatch once; use management_result for historical lookup, never retry unknown effects.' if n in MANAGEMENT_SCHEMAS else 'Existing owner-scoped Golem Work operation; original native guards apply. '+existing_reads.COUNTER_TOOL_DESCRIPTIONS.get(n,'')+existing_reads.PREPARATION_TOOL_DESCRIPTIONS.get(n,'')+existing_actions.TASK_TOOL_DESCRIPTIONS.get(n,'')),

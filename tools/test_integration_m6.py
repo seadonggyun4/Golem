@@ -543,6 +543,24 @@ class ProjectManagement(unittest.TestCase):
         result=api.call('workspace_request',{'request_id':'original'})
         self.assertEqual(result['state'],'COMMIT_UNKNOWN');self.assertEqual(result['request_id'],'original')
         self.assertEqual(len(backend.calls),1)
+    def test_common_tool_listing_reuses_bounded_metadata_admission(self):
+        import asyncio
+        import importlib.util
+        if importlib.util.find_spec('mcp') is None:self.skipTest('Pinned MCP SDK required')
+        from unittest.mock import Mock
+        service=Mock()
+        with patch('mcp.server.Server') as factory:
+            owner.management_server(service)
+        listed=factory.call_args.kwargs['on_list_tools']
+        for error in (None,c.IntegrationError('REGISTRY_BUSY'),c.IntegrationError('COMMIT_UNKNOWN')):
+            admission=AsyncMock(return_value=[],side_effect=error)
+            with patch.object(entry.readonly,'listed_tools',admission):
+                if error:
+                    with self.assertRaises(c.IntegrationError):asyncio.run(listed(None,None))
+                else:self.assertEqual(asyncio.run(listed(None,None)).tools,[])
+            admission.assert_awaited_once_with(service)
+        service.call.assert_not_called();service.tools.assert_not_called()
+
     def test_common_entry_reuses_startup_wait_only_before_serving(self):
         import asyncio
         from contextlib import nullcontext

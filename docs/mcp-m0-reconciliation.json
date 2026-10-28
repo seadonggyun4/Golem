@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "d41aa71fe8df07388c3230dcdf12805b339dee6728b684c2c6d86059e6a0ed8e",
+  "inventory_sha256": "0b40065c287a4d9a9b2ecd681feaf866ad19ff6c7f2a21a59990b5a8a85662f5",
   "selected_source_count": 552,
   "selected_observation_count": 2305,
   "selected_capability_count": 1210,
@@ -5602,7 +5602,7 @@
     },
     {
       "path": "tools/integration_owner_maintenance.py",
-      "sha256": "1d9600d9f3953c4a350c41fa032196b2223e9cab302662984e881e3f5943eb89"
+      "sha256": "a82f7f88a2a75a35161b666ff66077f9b481bd0c2cdfa0149d088a7fe260f2ee"
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
@@ -5618,7 +5618,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "5e62615375e38e150f372f950d75990b312e08556b817b1cfd94e1e60dea3e54"
+      "sha256": "20e52d558eac7d6f5e74fcf56c2bf111c7b6d104e33bc167db3a49287cf87c93"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -57288,7 +57288,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "51ae9bcbc04a4d9cfc2588eb8736e15634e160627866624909a9dc31a6cd2869",
+      "sha256": "52631d776834d3ea5f48f71669c719bbaee6083656609c559a7bb326e2e8869d",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57432,7 +57432,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "8c2c65f52cce67317cb66352210e27f8a4e758a287c6ca249b07981be9c40b4f",
+      "sha256": "5f9bc07e08a1e7437ab0a96c601cbbb7afbd694779854af0018e8b9fc72d23d1",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57726,8 +57726,8 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "5e62615375e38e150f372f950d75990b312e08556b817b1cfd94e1e60dea3e54",
-      "shape_sha256": "f30abe6419886594a347ae4878a50c85f663e7c420ee9d8f54bdbc415478befb",
+      "sha256": "20e52d558eac7d6f5e74fcf56c2bf111c7b6d104e33bc167db3a49287cf87c93",
+      "shape_sha256": "22c2d24f3fa9085d42b0571c62ecade6205dc2a3e5d2ee04e918e1fac3f2e5d0",
       "role": "M0_FIXTURE_REGRESSION"
     }
   ],
