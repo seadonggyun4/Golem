@@ -29,6 +29,12 @@ Keep this comment during editing. Keep the rendered README concise.
 
 <p align="center"><strong>Connect AI work through state and verification evidence</strong></p>
 
+[![CI](https://github.com/seadonggyun4/Golem/actions/workflows/c.yml/badge.svg)](https://github.com/seadonggyun4/Golem/actions/workflows/c.yml)
+[![C17](https://img.shields.io/badge/core-C17-blue)](CMakeLists.txt)
+[![Alpha](https://img.shields.io/badge/status-alpha-orange)](docs/conformance.md)
+[![Agents](https://img.shields.io/badge/agents-Codex%20%7C%20Claude-327866)](docs/agent-session.md)
+[![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE)
+
 [한국어](README.ko.md) · **English** · [Setup](#mcp) · [Documentation](#documentation)
 
 ## What Does Golem Do?

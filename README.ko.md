@@ -27,6 +27,12 @@ README 편집 필수 규칙 — 사용자 명시 지시가 없는 한 이 형식
 
 <p align="center"><strong>AI가 수행한 작업을 상태와 검증 근거로 이어주는 엔진</strong></p>
 
+[![CI](https://github.com/seadonggyun4/Golem/actions/workflows/c.yml/badge.svg)](https://github.com/seadonggyun4/Golem/actions/workflows/c.yml)
+[![C17](https://img.shields.io/badge/core-C17-blue)](CMakeLists.txt)
+[![Alpha](https://img.shields.io/badge/status-alpha-orange)](docs/conformance.md)
+[![Agents](https://img.shields.io/badge/agents-Codex%20%7C%20Claude-327866)](docs/agent-session.md)
+[![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE)
+
 **한국어** · [English](README.md) · [설치](#mcp) · [문서](#문서)
 
 ## Golem은 무엇을 하나요?
