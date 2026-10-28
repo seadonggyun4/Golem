@@ -61,21 +61,6 @@ flowchart TD
     G --> R["Traceable results and handoffs"]
 ```
 
-## Work Flow
-
-```mermaid
-flowchart TD
-    S["Check current state<br/>and next steps"] --> P["Prepare inputs and plan"]
-    P --> A["Work within<br/>granted authority"]
-    A --> Q["Check results, required<br/>documents and QA"]
-    Q -->|"Requirements met"| F["Approved finalization<br/>and report actions"]
-    F --> C{"Current DONE?"}
-    C -->|"Yes"| D["Complete<br/>and hand off"]
-    C -->|"No"| B["Wait / inspect<br/>next steps"]
-```
-
-Read the current completion decision after finalization and report actions. At any stage, stop for pending approval, stale inputs or uncertain results; do not retry automatically.
-
 ## MCP
 
 Follow your client's guide to install a reviewed package and connect it to existing approved projects, Works and actions.
