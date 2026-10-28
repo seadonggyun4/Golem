@@ -1,6 +1,6 @@
 {
   "name": "golem",
-  "version": "0.2.5",
+  "version": "0.2.7",
   "description": "Owner-approved local workflow context and evidence.",
   "author": {
     "name": "Donggyun Seo",

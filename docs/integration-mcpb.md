@@ -1,12 +1,14 @@
 # Claude Desktop MCPB 설치·사용 안내
 
+프로젝트 관리도 자연어로 요청한다. 현재 검증 연결은 승인된 세 조회만 제공한다. 선택적 관리·resource·helper·host 기능은 별도 정책을 검토한 뒤 활성화하며, 설치 시 기존 승인/producer pin을 자동 이전하지 않는다. [관리 흐름과 지원 범위](mcp-m6-distribution.ko.md#현재-남은-전달-경로-3개-연결)를 참고한다.
+
 최신 검증본은 [README](../README.ko.md)에서 확인한다. 검토한 기능별 MCPB를 사용하며, 이미 같은 검증본이 연결돼 있으면 재설치하지 않는다. profile은 기존 권한의 상한이다.
 
 ## Install and Configure
 
 1. **Settings → Extensions → Advanced settings → Install Extension**에서 검토한 MCPB를 선택한다. 기존 동일 identity에는 지원되는 **Update**를 사용한다. archive SHA·manifest·설치 파일을 대조하고 local-process 설치 확인을 마친다.
-2. **Configure**에서 기존 정책·정확한 SHA와 전달 동의를 지정한다. task 패키지의 필수 입력은 **Existing reviewed D4 policy**, **Exact owner-reviewed policy digest**, **Explicit consent to this existing owner policy**다. 설치나 동의 체크만으로 새 action 승인이 생기지 않는다.
-3. task의 optional **resource**는 별도 검토한 계약·SHA·동의가 있을 때만 선택한다. helper는 quality, host는 parallel 패키지의 별도 계약이며 task 설정에 추가하지 않는다. read/prepare는 해당 D2 정책을 사용한다.
+2. **Configure**에서 기존 정책·정확한 SHA와 전달 동의를 지정한다. 현재 read 패키지는 **Existing reviewed D2 policy**를 사용한다. task·quality·parallel은 별도 D4 정책을 사용한다. 정확한 policy SHA와 **Explicit consent to this existing owner policy**도 필요하다. 설치나 동의 체크만으로 새 action 승인이 생기지 않는다.
+3. optional **resource**는 별도 검토한 계약·SHA·동의가 있을 때만 선택한다. helper는 quality, host는 parallel 패키지의 별도 계약이며 task 설정에 추가하지 않는다. read/prepare는 해당 D2 정책을 사용한다.
 4. 저장·활성화 후 해당 연결만 reload하고 새 대화에서 **의도한 확장**의 실제 도구를 확인한다. `golem_projects_list`와 허용 Work 조회로 연결을 확인한다. `golem_setup_status`만 보이면 설정 진단 단계이므로 정책·producer pin을 임의 변경해 통과시키지 않는다.
 
 기존 [프로젝트 등록](integration-d1.md)·[전달 범위](integration-d2.md)·[D4 action](integration-d4.md)을 보존한다. Codex의 전달 동의를 Claude에 재사용하지 않는다. 패키지는 owner가 고정한 외부 Python/SDK/native runtime이 필요하며, uv가 의존성을 다운로드할 수 있다. local process는 사용자 OS 권한으로 실행된다.

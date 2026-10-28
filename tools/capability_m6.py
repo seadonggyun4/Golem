@@ -54,11 +54,40 @@ def inspect_m6(sources,ledger,model,backlog):
       ('tools/integration_owner_maintenance.py','dispatch',"c.require(approve_owner is True,'OWNER_LIFECYCLE_APPROVAL_REQUIRED')"),
       ('tools/integration_owner_maintenance.py','dispatch',"manager.apply(value,reviewed_sha256,approve_installation=True,repair=False)"),
       ('tools/integration_owner_maintenance.py','dispatch',"manager.apply(value,reviewed_sha256,approve_maintenance=True)"),
+      ('tools/integration_owner_maintenance.py','ManagementPolicy.__init__',"c.require(approve_management is True,'MANAGEMENT_APPROVAL_REQUIRED')"),
+      ('tools/integration_owner_maintenance.py','ManagementPolicy.current',"c.require(value['producer']==management_producer(),'PRODUCER_CHANGED')"),
+      ('tools/integration_owner_maintenance.py','ManagementPolicy.request',"c.require(management_snapshot(path)==target['expected_sha256'],'MANAGEMENT_TARGET_STALE')"),
+      ('tools/integration_owner_maintenance.py','ManagementService.call',"c.require(self.policy is not None,'MANAGEMENT_DISABLED')"),
+      ('tools/integration_owner_maintenance.py','ManagementService._call',"c.require(set(action['effects'])==set(required),'MANAGEMENT_EFFECTS_SCOPE')"),
+      ('tools/integration_owner_maintenance.py','ManagementService.call',"life.fence(transfer.registry,args['project_id'])"),
+      ('tools/integration_owner_maintenance.py','ManagementService._call',"c.require(previous.get('state') not in ('COMMIT_UNKNOWN','PENDING_APPROVAL'),'MANAGEMENT_PROJECT_QUARANTINED')"),
+      ('tools/integration_owner_maintenance.py','ManagementPolicy.host_selection',"c.require(hasattr(self.base,'transfer'),'MANAGEMENT_HOST_REQUIRES_D4')"),
+      ('tools/integration_owner_maintenance.py','ManagementService._call',"c.require(any(a['request']==expected_stop and set(a['effects'])==set(MANAGEMENT_OPERATIONS['candidate_stop'][2]) for a in project['actions']),'MANAGEMENT_HOST_STOP_ACTION_REQUIRED')"),
+      ('tools/integration_owner_maintenance.py','ManagementService._delivery',"c.require(owned is not None and owned.descriptor==inputs[request['input_id']]['sha256'],'MANAGEMENT_HOST_NOT_OWNED')"),
+      ('tools/integration_owner_maintenance.py','management_main',"c.require(bool(path)==bool(digest)==bool(approved),'MANAGEMENT_OWNER_ARGUMENTS')"),
     )
     for path,name,expression in guards:
         node=_functions(trees[path]).get(name) if path in trees else None;expected=_shape(ast.parse(expression,mode='eval').body)
         if node is None or sum(_shape(n)==expected for n in ast.walk(node) if isinstance(n,ast.Call))!=1:errors.append(('M6_MANDATORY_GUARD_CHANGED',(path,name,expression)))
     try:
+        management=trees['tools/integration_owner_maintenance.py']
+        symbols=_functions(management)
+        tool_names=python_literal_names(files['tools/integration_owner_maintenance.py'].data.decode(),'MANAGEMENT_SCHEMAS',mapping=True)
+        if set(tool_names)!={'management_catalog','management_prepare','management_request','management_result','management_host_status'}:raise ValueError('MANAGEMENT_TOOL_DOMAIN')
+        operation_names=python_literal_names(files['tools/integration_owner_maintenance.py'].data.decode(),'MANAGEMENT_OPERATIONS',mapping=True)
+        if set(operation_names)!={'daemon_status','daemon_init','daemon_submit','daemon_run_once','daemon_drain','daemon_recover','journal_inspect','journal_verify_salvage','journal_salvage','adapter_describe','adapter_noop_probe','admission_probe','approval_describe','approval_decide','adapter_convert','adapter_probe','candidate_serve','candidate_stop'}:raise ValueError('MANAGEMENT_OPERATION_DOMAIN')
+        dispatch=symbols['ManagementService._call']
+        captures=[n for n in ast.walk(dispatch) if isinstance(n,ast.Call) and _shape(n.func)==_shape(ast.parse('records.capture',mode='eval').body)]
+        reservations=[n for n in ast.walk(dispatch) if isinstance(n,ast.Call) and _shape(n.func)==_shape(ast.parse('records.save',mode='eval').body) and n.args and isinstance(n.args[0],ast.Name) and n.args[0].id=='guard']
+        if len(captures)!=1 or len(reservations)!=1 or reservations[0].lineno>=captures[0].lineno:raise ValueError('MANAGEMENT_ONCE_BEFORE_EFFECT')
+        processes=[n for n in ast.walk(management) if isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute) and n.func.attr=='Popen']
+        if processes:raise ValueError('MANAGEMENT_UNSCOPED_PROCESS')
+        boundary=[n for n in ast.walk(symbols['delivery_process']) if isinstance(n,ast.Call) and ast.unparse(n.func)=='records.run_private']
+        if len(boundary)!=1:raise ValueError('MANAGEMENT_RECORDING_BOUNDARY')
+        calls=[ast.unparse(n.func) for n in ast.walk(symbols['ManagementService._stored']) if isinstance(n,ast.Call)]
+        if any(n in ('delivery_process','ManagedHost','subprocess.Popen') for n in calls):raise ValueError('MANAGEMENT_RESULT_REDISPATCH')
+        stored=symbols['ManagementService._stored']
+        if any(isinstance(n,ast.Call) and _shape(n.func)==_shape(ast.parse('records.capture',mode='eval').body) for n in ast.walk(stored)):raise ValueError('MANAGEMENT_RESULT_REDISPATCH')
         names=python_literal_names(files['tools/integration_feature_profiles.py'].data.decode(),'NAMES',mapping=False)
         if set(names)!={'read','prepare','task','quality','parallel'}:raise ValueError('M6_PROFILE_DOMAIN')
         declared=set(python_literal_names(files['tools/integration_service.py'].data.decode(),'SCHEMAS',mapping=True))|set(python_literal_names(files['tools/integration_mutation_contract.py'].data.decode(),'NAMES',mapping=False))
@@ -94,6 +123,8 @@ def inspect_m6(sources,ledger,model,backlog):
         for path in ('tools/integration_distribution.py','tools/integration_owner_maintenance.py'):
             for call in (n for n in ast.walk(trees[path]) if isinstance(n,ast.Call)):
                 attr=call.func.attr if isinstance(call.func,ast.Attribute) else call.func.id if isinstance(call.func,ast.Name) else None
+                # Only the separately guarded, reserved exact-action capture is admitted.
+                if path=='tools/integration_owner_maintenance.py' and call is captures[0]:continue
                 if attr in ('Popen','capture','system','execv','execve','kill','rmtree'):raise ValueError('M6_AUTOMATIC_EXECUTION_OR_DELETION')
         for field in ('INSTALL_OPS','MAINTENANCE_OPS'):
             value=next(n.value for n in trees['tools/integration_owner_maintenance.py'].body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id==field for t in n.targets))

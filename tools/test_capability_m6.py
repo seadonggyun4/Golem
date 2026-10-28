@@ -68,4 +68,24 @@ class DistributionProfile(unittest.TestCase):
             files,model=self.changed('tools/integration_distribution_entry.py',old,new,True)
             self.assertTrue(self.inspect(files,model).blockers)
 
+    def test_management_guards_and_exactly_once_reservation_survive_repin(self):
+        for old in (b"c.require(approve_management is True,'MANAGEMENT_APPROVAL_REQUIRED')",
+                    b"c.require(self.policy is not None,'MANAGEMENT_DISABLED')",
+                    b"c.require(set(action['effects'])==set(required),'MANAGEMENT_EFFECTS_SCOPE')",
+                    b"c.require(management_snapshot(path)==target['expected_sha256'],'MANAGEMENT_TARGET_STALE')",
+                    b"life.fence(transfer.registry,args['project_id'])",
+                    b"c.require(previous.get('state') not in ('COMMIT_UNKNOWN','PENDING_APPROVAL'),'MANAGEMENT_PROJECT_QUARANTINED')"):
+            files,model=self.changed('tools/integration_owner_maintenance.py',old,b'pass',True)
+            self.assertTrue(self.inspect(files,model).blockers)
+        files,model=self.changed('tools/integration_owner_maintenance.py',b"records.save(guard,c.encoded({'intent':directory.name,**binding}))",b'pass',True)
+        self.assertTrue(self.inspect(files,model).blockers)
+
+
+    def test_delivery_scope_and_explicit_stop_guards_survive_repin(self):
+        for old in (b"c.require(hasattr(self.base,'transfer'),'MANAGEMENT_HOST_REQUIRES_D4')",
+                    b"c.require(owned is not None and owned.descriptor==inputs[request['input_id']]['sha256'],'MANAGEMENT_HOST_NOT_OWNED')",
+                    b"c.require(any(a['request']==expected_stop and set(a['effects'])==set(MANAGEMENT_OPERATIONS['candidate_stop'][2]) for a in project['actions']),'MANAGEMENT_HOST_STOP_ACTION_REQUIRED')"):
+            files,model=self.changed('tools/integration_owner_maintenance.py',old,b'pass',True)
+            self.assertTrue(self.inspect(files,model).blockers)
+
 if __name__=='__main__':unittest.main()

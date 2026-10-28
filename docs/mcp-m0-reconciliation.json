@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "626511a26471e23820f52e1ac3fbec64fda836f405b5828418a4266f057e1ff9",
+  "inventory_sha256": "d41aa71fe8df07388c3230dcdf12805b339dee6728b684c2c6d86059e6a0ed8e",
   "selected_source_count": 552,
-  "selected_observation_count": 2282,
-  "selected_capability_count": 1187,
+  "selected_observation_count": 2305,
+  "selected_capability_count": 1210,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -3850,7 +3850,7 @@
     },
     {
       "path": "plugins/golem/.codex-plugin/plugin.json",
-      "sha256": "84e8bd24b1eb03a8df641e39d5e1cb2cdd1f25ab7859af8cb9b8bdcbbaef5ce4"
+      "sha256": "83a60082f5f5e957702e43fddf1566a8c831a6ef7bf47719e1c9c0dde9775fab"
     },
     {
       "path": "plugins/golem/.mcp.json",
@@ -4958,7 +4958,7 @@
     },
     {
       "path": "tools/execution_record.py",
-      "sha256": "3f7c65bf937f8d5029356c894573b8b10bc1a9807e59042fecd666dc7918dc56"
+      "sha256": "cdb59527a58abe546e5254c2a6fd03e19ec346b7d009c0a02ba60022b647656a"
     },
     {
       "path": "tools/github_checks.py",
@@ -5474,7 +5474,7 @@
     },
     {
       "path": "tools/integration_reads.py",
-      "sha256": "6ae2b66f51391aff6365fb17f89ebe2faf3131784405af6fd09cf75ca8bd87e2"
+      "sha256": "40ddc6a15fec821fd81c811666e550a0f74ff51db36826e16f2296d0469eaa34"
     },
     {
       "path": "tools/integration_read_resources.py",
@@ -5486,7 +5486,7 @@
     },
     {
       "path": "tools/test_integration_m1.py",
-      "sha256": "41fb63910aa2a6a340654806ce2a8fc298e5f7af1f37826256db0a0f8b2cdf0c"
+      "sha256": "a0aa7c52c0bdbdf171b9871578642c71986830f4f9cff2ad0bacc0edb06e4760"
     },
     {
       "path": "tools/test_integration_m1_resources.py",
@@ -5570,7 +5570,7 @@
     },
     {
       "path": "tools/integration_parallel_hosts.py",
-      "sha256": "717628f886d10ac0034f87ab8ed6aca266a680579b5a1d52f569667ae1867fc6"
+      "sha256": "c4ff6c37951f0dffc3c782a31f91c056ef517b9577927217643a5c6a6db68e83"
     },
     {
       "path": "tools/integration_parallel_preparations.py",
@@ -5594,7 +5594,7 @@
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "683f0ae1d4ab7b072a1204c135010cb216648a3fb1d47717b74a4e2c9e9b1960"
+      "sha256": "da67c9e738b2700b21302f2dc7f1a8d72b3e9901c095597d433f8eef7973819f"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -5602,11 +5602,11 @@
     },
     {
       "path": "tools/integration_owner_maintenance.py",
-      "sha256": "110843bc476e475f4b96419f368f70ead5a798c3861b298561dbb5e6cb8e0f3b"
+      "sha256": "1d9600d9f3953c4a350c41fa032196b2223e9cab302662984e881e3f5943eb89"
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
-      "sha256": "ba4515754dcd3f7a82882624922f165c688fc0f52675f1ac7c1790f892af78ef"
+      "sha256": "7a005a78634e578d768410982e105d235de053dc5fd3d11b80691c32a4cdb743"
     },
     {
       "path": "plugins/golem/skills/golem-work/agents/openai.yaml",
@@ -5614,19 +5614,19 @@
     },
     {
       "path": "plugins/golem/skills/golem-work/references/profiles.md",
-      "sha256": "318055c6c2306d7936983ee80e05b0fe9cd37789a5bb56eef6063a1e88a0a61a"
+      "sha256": "604d30b56a94785f4dcb2d8cc819d1f4126004b839835c6bcbf3db02a8db8ab9"
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "a9c10412017fc4b829439b4c57f09206f0906b0b6708f0f8f6d6343e6719ce33"
+      "sha256": "5e62615375e38e150f372f950d75990b312e08556b817b1cfd94e1e60dea3e54"
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "7a21372627d4d1f3dcc7061332b723ef929525b2538d0c65b8e85107025a0559"
+      "sha256": "90004ebc71192953fc5e0f258250d4b694ea805e9f3421cecb9e3f1b441efce4"
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "51bf65b7acb9e0adef3d102106a335ddf7e0de9a8d7984a6c91e0ef278d89feb"
+      "sha256": "7fc8251f49c1f64f79edb7a31c0b041542a85ce9ffa415af80b720ed5732a5bd"
     }
   ],
   "native_definitions": [
@@ -11290,7 +11290,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 41,
+      "checked_functions": 66,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -51330,6 +51330,10 @@
         ],
         [
           "Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "completion"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
           "document"
         ],
         [
@@ -51343,6 +51347,10 @@
         [
           "Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
           "noop_adapter"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "reentry"
         ],
         [
           "Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
@@ -52819,17 +52827,48 @@
     },
     {
       "path": "tools/integration_owner_maintenance.py",
-      "role": "M6_FEATURE_PACKAGING_OWNER_BRIDGE_OR_SKILL",
-      "rationale": "M6 finite profile ceilings intersect unchanged D2/D4 owner tools; public artifact packaging/verification/extraction, owner-local Installer/D5 delegation and separated skills. Full symbols/branches/effects/packaged instructions reviewed; mandatory M6 profile. No implicit grant/repair/real installation/embedded runtime/signature or M5 scheduler implementation.",
+      "role": "OPTIONAL_PROJECT_MANAGEMENT_MCP_AND_OWNER_BRIDGE",
+      "rationale": "Five optional typed management MCP tools, seventeen existing native CLI operations and explicit owned host stop, separate pinned effects/disclosure/action contract and existing Installer/D5 bridge. Native guards reused; no shell/raw handle/scheduler or live policy migration; service-start dispatch tested with doubles only. Whole-file shape and management mandatory guards are checked.",
       "symbols": [
+        "ManagedHost",
+        "ManagedHost.__init__",
+        "ManagedHost.active",
+        "ManagedHost.observation",
+        "ManagedHost.run",
+        "ManagedHost.start",
+        "ManagementPolicy",
+        "ManagementPolicy.__init__",
+        "ManagementPolicy.current",
+        "ManagementPolicy.host_selection",
+        "ManagementPolicy.project",
+        "ManagementPolicy.request",
+        "ManagementService",
+        "ManagementService.__init__",
+        "ManagementService._call",
+        "ManagementService._delivery",
+        "ManagementService._stored",
+        "ManagementService.call",
+        "ManagementService.close",
+        "ManagementService.schemas",
+        "ManagementService.tools",
+        "delivery_process",
         "dispatch",
-        "main"
+        "main",
+        "management_argv",
+        "management_main",
+        "management_producer",
+        "management_request_schema",
+        "management_server",
+        "management_snapshot"
       ],
       "declarations": [
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-management')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-owner')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--input')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--kind')], keywords=[keyword(arg='choices', value=Tuple(elts=[Constant(value='installation'), Constant(value='maintenance')], ctx=Load())), keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--management-policy')])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--operation')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--reviewed-management-sha256')])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--reviewed-plan-sha256')])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--root')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='command')], keywords=[keyword(arg='choices', value=Tuple(elts=[Constant(value='schema'), Constant(value='plan'), Constant(value='apply'), Constant(value='inspect')], ctx=Load()))])"
@@ -52838,6 +52877,82 @@
         [
           "Attribute(value=Name(id='args', ctx=Load()), attr='command', ctx=Load())",
           "schema"
+        ],
+        [
+          "Attribute(value=Name(id='key', ctx=Load()), attr='data', ctx=Load())",
+          "stdin"
+        ],
+        [
+          "Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='result', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='reason')])",
+          "EXIT"
+        ],
+        [
+          "Call(func=Attribute(value=Attribute(value=Name(id='self', ctx=Load()), attr='result', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='reason')])",
+          "STOP_REQUESTED"
+        ],
+        [
+          "Call(func=Attribute(value=Call(func=Attribute(value=Attribute(value=Name(id='os', ctx=Load()), attr='environ', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='GOLEM_APPROVE_MANAGEMENT'), Constant(value='')]), attr='lower', ctx=Load()))",
+          "true"
+        ],
+        [
+          "Call(func=Attribute(value=Call(func=Attribute(value=Name(id='c', ctx=Load()), attr='decode', ctx=Load()), args=[Name(id='terminal', ctx=Load())]), attr='get', ctx=Load()), args=[Constant(value='reason')])",
+          "EXIT"
+        ],
+        [
+          "Call(func=Attribute(value=Call(func=Attribute(value=Name(id='c', ctx=Load()), attr='decode', ctx=Load()), args=[Name(id='terminal', ctx=Load())]), attr='get', ctx=Load()), args=[Constant(value='reason')])",
+          "STOP_REQUESTED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='previous', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "COMMIT_UNKNOWN"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='previous', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "PENDING_APPROVAL"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "ACTION_ALREADY_DISPATCHED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "BLOCKED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "COMMIT_UNKNOWN"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "NOT_DISPATCHED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "PENDING_APPROVAL"
+        ],
+        [
+          "Call(func=Attribute(value=Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='native_result'), ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "HOST_START_DISPATCHED"
+        ],
+        [
+          "Call(func=Name(id='version', ctx=Load()), args=[Constant(value='mcp')])",
+          "2.3.0"
+        ],
+        [
+          "Call(func=Name(id='version', ctx=Load()), args=[Constant(value='mcp-types')])",
+          "2.3.0"
+        ],
+        [
+          "Constant(value='NATIVE_WRITE')",
+          "NATIVE_WRITE"
+        ],
+        [
+          "Constant(value='input_id')",
+          "input_id"
+        ],
+        [
+          "Constant(value='stopped_attestation_id')",
+          "stopped_attestation_id"
         ],
         [
           "Name(id='__name__', ctx=Load())",
@@ -52860,15 +52975,283 @@
           "schema"
         ],
         [
+          "Name(id='k', ctx=Load())",
+          "intent"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "directory"
+        ],
+        [
           "Name(id='kind', ctx=Load())",
           "installation"
         ],
         [
           "Name(id='kind', ctx=Load())",
           "maintenance"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "new_directory"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "work"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "drain"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "run_once"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "submit"
+        ],
+        [
+          "Name(id='n', ctx=Load())",
+          "management_request"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
+          "management_catalog"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
+          "management_host_status"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
+          "management_prepare"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
+          "management_result"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "adapter_convert"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "adapter_describe"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "adapter_noop_probe"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "adapter_probe"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "admission_probe"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "approval_decide"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "approval_describe"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "candidate_serve"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "candidate_stop"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "journal_inspect"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "journal_salvage"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "journal_verify_salvage"
+        ],
+        [
+          "Name(id='outcome', ctx=Load())",
+          "COMMIT_UNKNOWN"
+        ],
+        [
+          "Name(id='outcome', ctx=Load())",
+          "PENDING_APPROVAL"
+        ],
+        [
+          "Name(id='reason', ctx=Load())",
+          "EXIT"
+        ],
+        [
+          "Subscript(value=Attribute(value=Name(id='base', ctx=Load()), attr='profile', ctx=Load()), slice=Constant(value='family'), ctx=Load())",
+          "D4"
+        ],
+        [
+          "Subscript(value=Attribute(value=Name(id='sys', ctx=Load()), attr='argv', ctx=Load()), slice=Constant(value=1), ctx=Load())",
+          "mcp"
+        ],
+        [
+          "Subscript(value=Name(id='process', ctx=Load()), slice=Constant(value='reason'), ctx=Load())",
+          "EXIT"
+        ],
+        [
+          "Subscript(value=Name(id='process', ctx=Load()), slice=Constant(value='recording'), ctx=Load())",
+          "RECORDED"
+        ],
+        [
+          "Subscript(value=Name(id='request', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "adapter_probe"
+        ],
+        [
+          "Subscript(value=Name(id='request', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "approval_decide"
+        ],
+        [
+          "Subscript(value=Name(id='request', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "approval_describe"
+        ],
+        [
+          "Subscript(value=Name(id='request', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "candidate_serve"
+        ],
+        [
+          "Subscript(value=Name(id='request', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "candidate_stop"
+        ],
+        [
+          "Subscript(value=Name(id='request', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "journal_salvage"
+        ],
+        [
+          "Subscript(value=Name(id='result', ctx=Load()), slice=Constant(value='reason'), ctx=Load())",
+          "EXIT"
         ]
       ],
-      "operations": []
+      "operations": [
+        [
+          "MCP_TOOL_DECLARATION",
+          "MANAGEMENT_SCHEMAS",
+          "management_catalog"
+        ],
+        [
+          "MCP_TOOL_DECLARATION",
+          "MANAGEMENT_SCHEMAS",
+          "management_prepare"
+        ],
+        [
+          "MCP_TOOL_DECLARATION",
+          "MANAGEMENT_SCHEMAS",
+          "management_request"
+        ],
+        [
+          "MCP_TOOL_DECLARATION",
+          "MANAGEMENT_SCHEMAS",
+          "management_result"
+        ],
+        [
+          "MCP_TOOL_DECLARATION",
+          "MANAGEMENT_SCHEMAS",
+          "management_host_status"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "daemon_status"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "daemon_init"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "daemon_submit"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "daemon_run_once"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "daemon_drain"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "daemon_recover"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "journal_inspect"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "journal_verify_salvage"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "journal_salvage"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "adapter_describe"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "adapter_noop_probe"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "admission_probe"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "approval_describe"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "approval_decide"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "management_argv",
+          "adapter_convert"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "ManagementService._delivery",
+          "adapter_probe"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "ManagementService._delivery",
+          "candidate_serve"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "ManagementService._delivery",
+          "candidate_stop"
+        ]
+      ]
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
@@ -56600,6 +56983,12 @@
       "role": "M0_FIXTURE_REGRESSION",
       "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
       "contract_sha256": null
+    },
+    {
+      "path": "docs/README.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Documentation navigation index only; no executable tool registration or runtime authority.",
+      "contract_sha256": null
     }
   ],
   "development_reviews": [
@@ -56629,7 +57018,7 @@
     },
     {
       "path": "tools/capability_boundary_registry.py",
-      "sha256": "02a26f20dab17dea665190fec426c32d03a113b360f4ea9dfa839e044e5f4cf3",
+      "sha256": "ac6122ac9e9be32f97e770385478dd9121f42c153f2c9621325a22b663719454",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -56809,7 +57198,7 @@
     },
     {
       "path": "tools/capability_m1_registry.py",
-      "sha256": "4fbcf24e098514bd03295ee68f28b19e296b146f4aeac8fd83eb36155a31e86c",
+      "sha256": "1b2cb584c92cce765701767dc21ecd093133d34408042e3843d551c0c9a7e6e5",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -56827,7 +57216,7 @@
     },
     {
       "path": "tools/capability_m2_registry.py",
-      "sha256": "f729f53d488e9b5805393afaed64b0b832a79d3e94845acb778666137c0cf296",
+      "sha256": "de1fb03d8cda6ed8aa2ec195dc915868cfdfddc63fe5f65981da2a4265569cb7",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -56845,7 +57234,7 @@
     },
     {
       "path": "tools/capability_m3_registry.py",
-      "sha256": "955498f1f130d952384545d3f61f61bfe3bad7ff6cc5bcc5c16163669b2603f9",
+      "sha256": "ebb5a27d2994df770e14dbd4e73dbd0b3ef0b952fb4eafe58924181d1caac967",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -56863,7 +57252,7 @@
     },
     {
       "path": "tools/capability_m4_registry.py",
-      "sha256": "ed650157232f01d1fc459743939724796959841e4e379990fd770dbc7ca5e8f8",
+      "sha256": "c5b002e89bb6750b02039291d7f807070936de4f20a6744e01ccfd807feb4c6c",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -56881,13 +57270,13 @@
     },
     {
       "path": "tools/capability_m5_registry.py",
-      "sha256": "363f7e63e234ed5540892dd6c2451718ddc922aef963ac21da128f0bc6004227",
+      "sha256": "1e6a83e2e3a5a44e66c2570c7afcd3553220c90134e63322cb9fbd8afd06d6c6",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
     {
       "path": "tools/capability_m6.py",
-      "sha256": "a9c1d9cf3f68f1ee0eda11738aa75603fe0263ae05f76d4e8cd850c0f00c45c3",
+      "sha256": "0b16e6f30ac9fb676d6cdfed7c30413b6a095e5267a64be3912f9d503bdb6c33",
       "shape_sha256": "b55968f8239250743a915731952dc065513f132c95dd891c66f7d312f976b7dd",
       "role": "M0_STATIC_ANALYSIS"
     },
@@ -56899,7 +57288,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "2ad515484bebe258a288668d125a304d0a364f176cfbe391614e4cafe9085287",
+      "sha256": "51ae9bcbc04a4d9cfc2588eb8736e15634e160627866624909a9dc31a6cd2869",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -56977,7 +57366,7 @@
     },
     {
       "path": "tools/capability_refresh.py",
-      "sha256": "7c5e75e841ad6c3c03540b526546dc8577f1977aa5198c0728acdc4fb05f7343",
+      "sha256": "303c14dada346246e0a81ea91dd2f2ee1abdb69a9ff66484e0abc630e06c86ea",
       "shape_sha256": "03c1997a1234fe330161a110aa22bb3290f5c94fccb65565b8d5ddc2a1417c4b",
       "role": "M0_STATIC_ANALYSIS"
     },
@@ -56995,7 +57384,7 @@
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "b79d2adc37e0b3acf0b8b41e5705c320dce63c8cae7e886ee9eb4e5f856a0cc0",
+      "sha256": "aff5f35346b0d8acb0bdc33064ac4fc3975859e7a956468b6d3b8f1d98ed9dbd",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57007,7 +57396,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "e3f5bf42e2fb348bdc231bd7b2a4d635a3fc5f43193f4a9fdbb9e368f4c7def5",
+      "sha256": "16b034e0f4c1e67ca36090f38c310d5a679b1995fb8d61054dc6a848e709b015",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57043,7 +57432,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "ec9edfaa0340c4b6378377e9dc13116d485bb51230bed81726474dc70e18426d",
+      "sha256": "8c2c65f52cce67317cb66352210e27f8a4e758a287c6ca249b07981be9c40b4f",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57199,7 +57588,7 @@
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "7a21372627d4d1f3dcc7061332b723ef929525b2538d0c65b8e85107025a0559",
+      "sha256": "90004ebc71192953fc5e0f258250d4b694ea805e9f3421cecb9e3f1b441efce4",
       "shape_sha256": "f76210add26870e75f046b598aeb0642b0edc2d502ecd5077f248ee3843329dc",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -57301,7 +57690,7 @@
     },
     {
       "path": "tools/test_integration_m1.py",
-      "sha256": "41fb63910aa2a6a340654806ce2a8fc298e5f7af1f37826256db0a0f8b2cdf0c",
+      "sha256": "a0aa7c52c0bdbdf171b9871578642c71986830f4f9cff2ad0bacc0edb06e4760",
       "shape_sha256": "37a8657dd7d593e960f1651d6c11302dae1208d3c9775a5768c1f231ea980a1d",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -57337,8 +57726,8 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "a9c10412017fc4b829439b4c57f09206f0906b0b6708f0f8f6d6343e6719ce33",
-      "shape_sha256": "6930189b5138e76ba9805753de815ff1a8b9a12128b55f5df5b00f70941416ae",
+      "sha256": "5e62615375e38e150f372f950d75990b312e08556b817b1cfd94e1e60dea3e54",
+      "shape_sha256": "f30abe6419886594a347ae4878a50c85f663e7c420ee9d8f54bdbc415478befb",
       "role": "M0_FIXTURE_REGRESSION"
     }
   ],

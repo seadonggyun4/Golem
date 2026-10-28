@@ -1,5 +1,7 @@
 # Codex MCP 설치·사용 안내
 
+프로젝트 관리도 자연어로 요청한다. 현재 검증 연결은 승인된 세 조회만 제공한다. 선택적 관리·resource·helper·host 기능은 별도 정책을 검토한 뒤 활성화하며, 설치 시 기존 승인/producer pin을 자동 이전하지 않는다. [관리 흐름과 지원 범위](mcp-m6-distribution.ko.md#현재-남은-전달-경로-3개-연결)를 참고한다.
+
 최신 검증본은 [README](../README.ko.md)에서 확인한다. **Golem Setup**은 연결 관리, **Golem Work**는 작업 진행에 사용한다. 이미 검증본이 연결돼 있으면 재설치하지 않는다.
 
 ## 1. 설치·연결 확인
@@ -15,7 +17,9 @@ codex mcp list --json
 - **Launcher 직접 실행 패키지**는 기존 command/args와 runtime·정책 pin을 유지한다. adapter가 없는 설치본에서 `scripts/launcher.py`나 기본 adapter 상태를 찾지 않는다.
 - **Repository adapter 패키지**는 실제 MCP 선언이 설치된 `scripts/launcher.py`를 실행할 때만 `status` → 필요한 `configure` → `status`를 사용한다. `configure`에는 검토한 launcher 파일·정확한 SHA와 명시적 승인이 필요하다. [Adapter 명령](../plugins/golem/scripts/launcher.py)을 참고한다.
 
-Golem Setup으로 해당 연결만 reload하거나 새 대화에서 도구를 확인한다. **의도한 서버의 `golem_projects_list`와 허용 Work 조회**로 연결을 확인한다. 설치 등록·연결 표시만으로 실제 호출 성공을 대신하지 않는다. `EXISTING_APPROVAL_DIFFERS`·`PARTIAL_PUBLICATION`이면 기록을 보존하고 중단한다.
+Golem Setup으로 해당 연결만 reload하거나 새 대화에서 **Golem Work를 명시적으로 선택**한다. 해당 서버의 도구 목록이 준비된 뒤 `golem_projects_list` → 허용 Work 조회를 순서대로 호출한다. CLI에서는 `/mcp verbose`로 목록을 확인할 수 있다. 자동 검증은 [공식 상태 API](https://learn.chatgpt.com/docs/app-server#api-overview)의 `mcpServerStatus/list`에 해당 `threadId`·`serverName`을 지정해 연결과 도구 목록을 확인한 뒤 모델 호출을 시작한다. 설치 등록·연결 표시·모델의 도구 미노출 진술만으로 호출 결과를 판정하지 않는다. 실패한 기존 대화에서는 연결 상태가 남을 수 있으므로, 지원되는 대상 연결 reload 또는 대화 재열기로 새 초기화를 확인한 뒤 조회한다. 새 요청만 반복하지 않는다.
+
+패키지 갱신·서버 초기화와 Work 검증을 동시에 시작하지 않는다. 읽기 시간 초과도 원래 한도와 실패 증거를 보존하고 원인을 확인한다. 조회를 실행·QA 재호출로 대체하거나 자동 재시도하지 않는다. `EXISTING_APPROVAL_DIFFERS`·`PARTIAL_PUBLICATION`이면 기록을 보존하고 중단한다.
 
 <details>
 <summary>신규 설치가 필요한 경우</summary>

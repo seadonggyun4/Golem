@@ -399,7 +399,7 @@
     },
     {
       "path": "tools/test_integration_m1.py",
-      "sha256": "41fb63910aa2a6a340654806ce2a8fc298e5f7af1f37826256db0a0f8b2cdf0c"
+      "sha256": "a0aa7c52c0bdbdf171b9871578642c71986830f4f9cff2ad0bacc0edb06e4760"
     },
     {
       "path": "tools/test_capability_m1.py",
@@ -455,15 +455,15 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "a9c10412017fc4b829439b4c57f09206f0906b0b6708f0f8f6d6343e6719ce33"
+      "sha256": "5e62615375e38e150f372f950d75990b312e08556b817b1cfd94e1e60dea3e54"
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "7a21372627d4d1f3dcc7061332b723ef929525b2538d0c65b8e85107025a0559"
+      "sha256": "90004ebc71192953fc5e0f258250d4b694ea805e9f3421cecb9e3f1b441efce4"
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "51bf65b7acb9e0adef3d102106a335ddf7e0de9a8d7984a6c91e0ef278d89feb"
+      "sha256": "7fc8251f49c1f64f79edb7a31c0b041542a85ce9ffa415af80b720ed5732a5bd"
     }
   ],
   "observations": [

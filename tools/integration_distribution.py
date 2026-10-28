@@ -17,7 +17,7 @@ import execution_record as records
 MAX_ARCHIVE=134217728
 MAX_FILE=67108864
 MAX_FILES=256
-SCHEMAS=('schemas/d2-tools.json','schemas/d4-actions.json','schemas/installation.json','schemas/maintenance.json','schemas/feature-profiles.json')
+SCHEMAS=('schemas/d2-tools.json','schemas/d4-actions.json','schemas/installation.json','schemas/maintenance.json','schemas/feature-profiles.json','schemas/project-management.json')
 SKILLS=('plugins/golem/skills/golem-setup/SKILL.md','plugins/golem/skills/golem-setup/agents/openai.yaml',
         'plugins/golem/skills/golem-work/SKILL.md','plugins/golem/skills/golem-work/agents/openai.yaml',
         'plugins/golem/skills/golem-work/references/profiles.md')
@@ -60,23 +60,28 @@ def schema_payloads():
     import integration_mutation_contract as actions
     import integration_install as install
     import integration_update as update
+    import integration_owner_maintenance as management
     return {SCHEMAS[0]:c.encoded(reads.SCHEMAS),SCHEMAS[1]:c.encoded({'tools':actions.SCHEMAS,'action':actions.ACTION,'policy':actions.POLICY}),
         SCHEMAS[2]:c.encoded(install.SPECS),SCHEMAS[3]:c.encoded(update.SPEC),
-        SCHEMAS[4]:c.encoded([profiles.definition(name) for name in profiles.NAMES])}
+        SCHEMAS[4]:c.encoded([profiles.definition(name) for name in profiles.NAMES]),
+        SCHEMAS[5]:c.encoded({'tools':management.MANAGEMENT_SCHEMAS,'policy':management.MANAGEMENT_POLICY,'operations':management.MANAGEMENT_OPERATIONS})}
 
 
 def manifest(profile):
     value=legacy.manifest();spec=profiles.definition(profile)
-    value['version']='0.1.8'
+    value['version']='0.1.10'
     value['name']='golem-'+profile;value['display_name']='Golem '+profile
     value['description']='Owner-scoped '+profile+' feature ceiling. External pinned runtime required; no automatic grants.'
-    value['server']['entry_point']='tools/integration_distribution_entry.py'
-    value['server']['mcp_config']['args']=['run','--directory','${__dirname}','tools/integration_distribution_entry.py']
+    value['server']['entry_point']='tools/integration_owner_maintenance.py'
+    value['server']['mcp_config']['args']=['run','--directory','${__dirname}','tools/integration_owner_maintenance.py','mcp']
     fields={
       'policy':('file','Existing reviewed '+spec['family']+' policy',True),
       'policy_sha256':('string','Exact owner-reviewed policy digest',True),
       'approve_owner':('boolean','Explicit consent to this existing owner policy',True),
-      'resource_policy':('file','Optional explicit resource policy',False),'resource_sha256':('string','Optional resource digest',False),'approve_resources':('boolean','Explicit resource consent',False)}
+      'resource_policy':('file','Optional explicit resource policy',False),'resource_sha256':('string','Optional resource digest',False),'approve_resources':('boolean','Explicit resource consent',False),
+      'management_policy':('file','Optional separately reviewed project management policy',False),
+      'management_sha256':('string','Exact management policy digest',False),
+      'approve_management':('boolean','Explicit project management consent',False)}
     if profile=='quality':fields.update(helper_policy=('file','Separate exact helper-effects policy',False),helper_sha256=('string','Exact helper policy digest',False),approve_helpers=('boolean','Explicit helper effects consent',False))
     if profile=='parallel':fields.update(host_policy=('file','Separate exact native host policy',False),host_sha256=('string','Exact host policy digest',False),approve_host=('boolean','Explicit host contract consent',False))
     value['user_config']={name:{'type':kind,'title':title,'description':title+'. Selecting a value never grants additional authority.',
@@ -84,7 +89,10 @@ def manifest(profile):
     env={'GOLEM_FEATURE_PROFILE':profile,'GOLEM_PROFILE_POLICY':'${user_config.policy}',
         'GOLEM_PROFILE_POLICY_SHA256':'${user_config.policy_sha256}','GOLEM_APPROVE_PROFILE_OWNER':'${user_config.approve_owner}',
         'GOLEM_RESOURCE_POLICY':'${user_config.resource_policy}','GOLEM_RESOURCE_SHA256':'${user_config.resource_sha256}',
-        'GOLEM_APPROVE_RESOURCES':'${user_config.approve_resources}'}
+        'GOLEM_APPROVE_RESOURCES':'${user_config.approve_resources}',
+        'GOLEM_MANAGEMENT_POLICY':'${user_config.management_policy}',
+        'GOLEM_MANAGEMENT_SHA256':'${user_config.management_sha256}',
+        'GOLEM_APPROVE_MANAGEMENT':'${user_config.approve_management}'}
     if profile=='quality':env.update(GOLEM_HELPER_POLICY='${user_config.helper_policy}',GOLEM_HELPER_SHA256='${user_config.helper_sha256}',GOLEM_APPROVE_HELPERS='${user_config.approve_helpers}')
     if profile=='parallel':env.update(GOLEM_HOST_POLICY='${user_config.host_policy}',GOLEM_HOST_SHA256='${user_config.host_sha256}',GOLEM_APPROVE_HOST='${user_config.approve_host}')
     value['server']['mcp_config']['env']=env

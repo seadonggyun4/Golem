@@ -73,7 +73,7 @@ class DaemonIntegration(unittest.TestCase):
 
     def worker(self, mode):
         path = self.root / "worker.py"
-        path.write_text(f"""#!{sys.executable}
+        path.write_text(f"""#!{Path(sys.executable).resolve()}
 import os, sys, time
 from pathlib import Path
 if sys.argv[3] == 'probe':

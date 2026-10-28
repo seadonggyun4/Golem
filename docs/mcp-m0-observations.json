@@ -431,7 +431,7 @@
     },
     {
       "path": "plugins/golem/.codex-plugin/plugin.json",
-      "sha256": "84e8bd24b1eb03a8df641e39d5e1cb2cdd1f25ab7859af8cb9b8bdcbbaef5ce4"
+      "sha256": "83a60082f5f5e957702e43fddf1566a8c831a6ef7bf47719e1c9c0dde9775fab"
     },
     {
       "path": "plugins/golem/.mcp.json",
@@ -1539,7 +1539,7 @@
     },
     {
       "path": "tools/execution_record.py",
-      "sha256": "3f7c65bf937f8d5029356c894573b8b10bc1a9807e59042fecd666dc7918dc56"
+      "sha256": "cdb59527a58abe546e5254c2a6fd03e19ec346b7d009c0a02ba60022b647656a"
     },
     {
       "path": "tools/github_checks.py",
@@ -2055,7 +2055,7 @@
     },
     {
       "path": "tools/integration_reads.py",
-      "sha256": "6ae2b66f51391aff6365fb17f89ebe2faf3131784405af6fd09cf75ca8bd87e2"
+      "sha256": "40ddc6a15fec821fd81c811666e550a0f74ff51db36826e16f2296d0469eaa34"
     },
     {
       "path": "tools/integration_read_resources.py",
@@ -2067,7 +2067,7 @@
     },
     {
       "path": "tools/test_integration_m1.py",
-      "sha256": "41fb63910aa2a6a340654806ce2a8fc298e5f7af1f37826256db0a0f8b2cdf0c"
+      "sha256": "a0aa7c52c0bdbdf171b9871578642c71986830f4f9cff2ad0bacc0edb06e4760"
     },
     {
       "path": "tools/test_integration_m1_resources.py",
@@ -2151,7 +2151,7 @@
     },
     {
       "path": "tools/integration_parallel_hosts.py",
-      "sha256": "717628f886d10ac0034f87ab8ed6aca266a680579b5a1d52f569667ae1867fc6"
+      "sha256": "c4ff6c37951f0dffc3c782a31f91c056ef517b9577927217643a5c6a6db68e83"
     },
     {
       "path": "tools/integration_parallel_preparations.py",
@@ -2175,7 +2175,7 @@
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "683f0ae1d4ab7b072a1204c135010cb216648a3fb1d47717b74a4e2c9e9b1960"
+      "sha256": "da67c9e738b2700b21302f2dc7f1a8d72b3e9901c095597d433f8eef7973819f"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -2183,11 +2183,11 @@
     },
     {
       "path": "tools/integration_owner_maintenance.py",
-      "sha256": "110843bc476e475f4b96419f368f70ead5a798c3861b298561dbb5e6cb8e0f3b"
+      "sha256": "1d9600d9f3953c4a350c41fa032196b2223e9cab302662984e881e3f5943eb89"
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
-      "sha256": "ba4515754dcd3f7a82882624922f165c688fc0f52675f1ac7c1790f892af78ef"
+      "sha256": "7a005a78634e578d768410982e105d235de053dc5fd3d11b80691c32a4cdb743"
     },
     {
       "path": "plugins/golem/skills/golem-work/agents/openai.yaml",
@@ -2195,19 +2195,19 @@
     },
     {
       "path": "plugins/golem/skills/golem-work/references/profiles.md",
-      "sha256": "318055c6c2306d7936983ee80e05b0fe9cd37789a5bb56eef6063a1e88a0a61a"
+      "sha256": "604d30b56a94785f4dcb2d8cc819d1f4126004b839835c6bcbf3db02a8db8ab9"
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "a9c10412017fc4b829439b4c57f09206f0906b0b6708f0f8f6d6343e6719ce33"
+      "sha256": "5e62615375e38e150f372f950d75990b312e08556b817b1cfd94e1e60dea3e54"
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "7a21372627d4d1f3dcc7061332b723ef929525b2538d0c65b8e85107025a0559"
+      "sha256": "90004ebc71192953fc5e0f258250d4b694ea805e9f3421cecb9e3f1b441efce4"
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "51bf65b7acb9e0adef3d102106a335ddf7e0de9a8d7984a6c91e0ef278d89feb"
+      "sha256": "7fc8251f49c1f64f79edb7a31c0b041542a85ce9ffa415af80b720ed5732a5bd"
     }
   ],
   "observations": [
@@ -18184,6 +18184,167 @@
       "source_path": "plugins/golem/skills/golem-work/references/profiles.md",
       "entrypoint": "file-surface",
       "selector": null
+    },
+    {
+      "id": "obs-a363b150bf5a8188d92c526d51834e94516494df0d4c86297ba19fac1fa52505",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "MANAGEMENT_SCHEMAS",
+      "selector": "management_catalog"
+    },
+    {
+      "id": "obs-3f3e607b30dab0c4bf08b86acd4709bbd17add0a536accd65c60ecb55e0413b8",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "MANAGEMENT_SCHEMAS",
+      "selector": "management_prepare"
+    },
+    {
+      "id": "obs-aea422c80010abf9cd9a1aae9c54a2a078ae6e7076839ca81395fd388dfe9a19",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "MANAGEMENT_SCHEMAS",
+      "selector": "management_request"
+    },
+    {
+      "id": "obs-90e1f95b446b57be529ada8a414c7d44016567e9cdb9908b5e8f886d07ab344c",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "MANAGEMENT_SCHEMAS",
+      "selector": "management_result"
+    },
+    {
+      "id": "obs-2d164a88f35b3dc12001375879862d702e3cf3bbf9bfd5cf14a96da8b17b564d",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "daemon_status"
+    },
+    {
+      "id": "obs-08aea6e2c78e1ad933845792a44dbafe9a9d4dce1b2673386ac0b4237eb35f77",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "daemon_init"
+    },
+    {
+      "id": "obs-105b19c978ea6f5f39b1395eeb1479b12985250690d4f7e2044526f3d93b789f",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "daemon_submit"
+    },
+    {
+      "id": "obs-3bc131b300fef3d0a2c111947a97a3a2e8d5fa307c9dd7327f3f344e894a6462",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "daemon_run_once"
+    },
+    {
+      "id": "obs-267a190314b4ad8099f5afb2e74b726b123624298e4db384a2ebc5fffbd01e1a",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "daemon_drain"
+    },
+    {
+      "id": "obs-7058e699441629c4067d4aa439f3ef4fedcb421329e97f6336a0db83578563ef",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "daemon_recover"
+    },
+    {
+      "id": "obs-9696fcbb736ad57816bf255ccdae833452d3e643cd55bf699bd7f320303963b8",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "journal_inspect"
+    },
+    {
+      "id": "obs-e84b3afcaf877ee8c4391b532f7bac57000ac7c68e86659dcbe0885f9a7692bd",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "journal_verify_salvage"
+    },
+    {
+      "id": "obs-72b78a4926ed3fffb1e29c78bfeca2b5c9b9461b50639fe45a0167d1c0ebc2e8",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "journal_salvage"
+    },
+    {
+      "id": "obs-eda460b3a55583a77fc97a5f25bc2e6d92c780ea678b2650ec613a25877db9a1",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "adapter_describe"
+    },
+    {
+      "id": "obs-7212fd64cf96010924f2d3af3ea59d1830c660182125f3626898b11240d4da35",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "adapter_noop_probe"
+    },
+    {
+      "id": "obs-ce409a9c0681af3795992a42334b15e99777b0702e9c4e28c5edb34da02600f1",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "admission_probe"
+    },
+    {
+      "id": "obs-3a837e390c4b34b68064a54b3fc50bc0560ee9a45dd9339bf6e69681c82bb6c8",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "approval_decide"
+    },
+    {
+      "id": "obs-7b427349c92911c2365f43c402022d710cd9f3051c28470c5897291879c64bb6",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "approval_describe"
+    },
+    {
+      "id": "obs-eda07993698c5ed76c9d079bafc2222530526d00fa5c063a5b1ea9e58a79b4b1",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "MANAGEMENT_SCHEMAS",
+      "selector": "management_host_status"
+    },
+    {
+      "id": "obs-7344d816859176d0f58ab650981df525e1982d40209be7f41980bbea5165060f",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "management_argv",
+      "selector": "adapter_convert"
+    },
+    {
+      "id": "obs-7df435c253256b1daa5ac2e8692dd5d6b798da6c61ed663178f537f03306cec5",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "ManagementService._delivery",
+      "selector": "adapter_probe"
+    },
+    {
+      "id": "obs-514cac18d64af12cb6c75009a1f28fcb1c7765004ac8656498f2e6ebfc713ff7",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "ManagementService._delivery",
+      "selector": "candidate_serve"
+    },
+    {
+      "id": "obs-c65d4214edc330c50da95a7ec2b46e973079bae1fed4fa513173097210215968",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_maintenance.py",
+      "entrypoint": "ManagementService._delivery",
+      "selector": "candidate_stop"
     }
   ],
   "capabilities": [
@@ -51578,7 +51739,7 @@
         "HOST_INTERNAL"
       ],
       "authorities": [
-        "Existing core, owner, input and evidence contracts; inventory grants none"
+        "Base Work profiles still only intersect original D1/D2/D4/resource/helper/host contracts. Installer/D5 delegation preserves exact reviewed plans. The optional management facade is separately pinned and explicitly classified under mcp.management.*; it creates no automatic project or Work grants."
       ],
       "effects": [],
       "constraints": {
@@ -51588,7 +51749,7 @@
         "limits": [
           "No receiver identity, policy satisfaction or execution proof"
         ],
-        "notes": "Plugin setup instructions/manifest/transport package; owner connection setup and declared read tools only, no new Work execution."
+        "notes": "Reviewed base profile/package/skill dependency plus the explicitly listed optional management extension. Actual new Desktop installation, policy apply, service/recovery/approval effects NOT_RUN. External runtime, P7 signing and P4/P5 scheduler/merge obligations remain."
       },
       "test_refs": [
         {
@@ -51603,7 +51764,7 @@
         }
       ],
       "review_status": "REVIEWED",
-      "rationale": "Whole-file PACKAGE_CONTRACT review; declared symbols/helpers excluded as standalone tools. Concrete named command operations are separate. Target route is backlog classification only."
+      "rationale": "Whole-file review and mandatory M6 checks include the additive management contract. Independent management tool/native-route observations have their own reviewed capabilities; this dependency row is not a standalone grant or hidden product-source exclusion."
     },
     {
       "id": "surface.plugins.golem..mcp.json.internal",
@@ -74717,7 +74878,7 @@
         "HOST_INTERNAL"
       ],
       "authorities": [
-        "Existing exact owner D1/D2/D4/resource/helper/host contracts. Profiles only restrict. Owner-local Installer/D5 reuse exact original reviewed plans; no new MCP owner actions."
+        "Base Work profiles still only intersect original D1/D2/D4/resource/helper/host contracts. Installer/D5 delegation preserves exact reviewed plans. The optional management facade is separately pinned and explicitly classified under mcp.management.*; it creates no automatic project or Work grants."
       ],
       "effects": [
         "NATIVE_READ",
@@ -74731,7 +74892,7 @@
         "limits": [
           "Five finite profiles; artifact <=128MiB/256files/64MiB each; new private destination; original audit/native/owner limits retained."
         ],
-        "notes": "No actual installation/reload/client/Work E2E. External pinned runtime required; signed embedded runtime and M5 scheduler/merge obligations are not implemented."
+        "notes": "Reviewed base profile/package/skill dependency plus the explicitly listed optional management extension. Actual new Desktop installation, policy apply, service/recovery/approval effects NOT_RUN. External runtime, P7 signing and P4/P5 scheduler/merge obligations remain."
       },
       "test_refs": [
         {
@@ -74750,7 +74911,7 @@
         }
       ],
       "review_status": "REVIEWED",
-      "rationale": "M6 whole-file source/skill review and mandatory M6 profile; not a product-source exemption. Exact owner intersections and single delegation only. Package identity/integrity never implies installation, activation, QA, merge or authority."
+      "rationale": "Whole-file review and mandatory M6 checks include the additive management contract. Independent management tool/native-route observations have their own reviewed capabilities; this dependency row is not a standalone grant or hidden product-source exclusion."
     },
     {
       "id": "surface.tools.integration_distribution_entry.py.file-surface",
@@ -74818,7 +74979,7 @@
         "HOST_INTERNAL"
       ],
       "authorities": [
-        "Existing exact owner D1/D2/D4/resource/helper/host contracts. Profiles only restrict. Owner-local Installer/D5 reuse exact original reviewed plans; no new MCP owner actions."
+        "Base Work profiles still only intersect original D1/D2/D4/resource/helper/host contracts. Installer/D5 delegation preserves exact reviewed plans. The optional management facade is separately pinned and explicitly classified under mcp.management.*; it creates no automatic project or Work grants."
       ],
       "effects": [
         "NATIVE_READ",
@@ -74834,7 +74995,7 @@
         "limits": [
           "Five finite profiles; artifact <=128MiB/256files/64MiB each; new private destination; original audit/native/owner limits retained."
         ],
-        "notes": "No actual installation/reload/client/Work E2E. External pinned runtime required; signed embedded runtime and M5 scheduler/merge obligations are not implemented."
+        "notes": "Reviewed base profile/package/skill dependency plus the explicitly listed optional management extension. Actual new Desktop installation, policy apply, service/recovery/approval effects NOT_RUN. External runtime, P7 signing and P4/P5 scheduler/merge obligations remain."
       },
       "test_refs": [
         {
@@ -74853,7 +75014,7 @@
         }
       ],
       "review_status": "REVIEWED",
-      "rationale": "M6 whole-file source/skill review and mandatory M6 profile; not a product-source exemption. Exact owner intersections and single delegation only. Package identity/integrity never implies installation, activation, QA, merge or authority."
+      "rationale": "Whole-file review and mandatory M6 checks include the additive management contract. Independent management tool/native-route observations have their own reviewed capabilities; this dependency row is not a standalone grant or hidden product-source exclusion."
     },
     {
       "id": "surface.plugins.golem.skills.golem-work.SKILL.md.file-surface",
@@ -74868,7 +75029,7 @@
         "HOST_INTERNAL"
       ],
       "authorities": [
-        "Existing exact owner D1/D2/D4/resource/helper/host contracts. Profiles only restrict. Owner-local Installer/D5 reuse exact original reviewed plans; no new MCP owner actions."
+        "Base Work profiles still only intersect original D1/D2/D4/resource/helper/host contracts. Installer/D5 delegation preserves exact reviewed plans. The optional management facade is separately pinned and explicitly classified under mcp.management.*; it creates no automatic project or Work grants."
       ],
       "effects": [
         "NATIVE_READ",
@@ -74882,7 +75043,7 @@
         "limits": [
           "Five finite profiles; artifact <=128MiB/256files/64MiB each; new private destination; original audit/native/owner limits retained."
         ],
-        "notes": "No actual installation/reload/client/Work E2E. External pinned runtime required; signed embedded runtime and M5 scheduler/merge obligations are not implemented."
+        "notes": "Reviewed base profile/package/skill dependency plus the explicitly listed optional management extension. Actual new Desktop installation, policy apply, service/recovery/approval effects NOT_RUN. External runtime, P7 signing and P4/P5 scheduler/merge obligations remain."
       },
       "test_refs": [
         {
@@ -74901,7 +75062,7 @@
         }
       ],
       "review_status": "REVIEWED",
-      "rationale": "M6 whole-file source/skill review and mandatory M6 profile; not a product-source exemption. Exact owner intersections and single delegation only. Package identity/integrity never implies installation, activation, QA, merge or authority."
+      "rationale": "Whole-file review and mandatory M6 checks include the additive management contract. Independent management tool/native-route observations have their own reviewed capabilities; this dependency row is not a standalone grant or hidden product-source exclusion."
     },
     {
       "id": "surface.plugins.golem.skills.golem-work.agents.openai.yaml.file-surface",
@@ -74964,7 +75125,7 @@
         "HOST_INTERNAL"
       ],
       "authorities": [
-        "Existing exact owner D1/D2/D4/resource/helper/host contracts. Profiles only restrict. Owner-local Installer/D5 reuse exact original reviewed plans; no new MCP owner actions."
+        "Base Work profiles still only intersect original D1/D2/D4/resource/helper/host contracts. Installer/D5 delegation preserves exact reviewed plans. The optional management facade is separately pinned and explicitly classified under mcp.management.*; it creates no automatic project or Work grants."
       ],
       "effects": [
         "NATIVE_READ",
@@ -74978,7 +75139,7 @@
         "limits": [
           "Five finite profiles; artifact <=128MiB/256files/64MiB each; new private destination; original audit/native/owner limits retained."
         ],
-        "notes": "No actual installation/reload/client/Work E2E. External pinned runtime required; signed embedded runtime and M5 scheduler/merge obligations are not implemented."
+        "notes": "Reviewed base profile/package/skill dependency plus the explicitly listed optional management extension. Actual new Desktop installation, policy apply, service/recovery/approval effects NOT_RUN. External runtime, P7 signing and P4/P5 scheduler/merge obligations remain."
       },
       "test_refs": [
         {
@@ -74997,7 +75158,1149 @@
         }
       ],
       "review_status": "REVIEWED",
-      "rationale": "M6 whole-file source/skill review and mandatory M6 profile; not a product-source exemption. Exact owner intersections and single delegation only. Package identity/integrity never implies installation, activation, QA, merge or authority."
+      "rationale": "Whole-file review and mandatory M6 checks include the additive management contract. Independent management tool/native-route observations have their own reviewed capabilities; this dependency row is not a standalone grant or hidden product-source exclusion."
+    },
+    {
+      "id": "mcp.management.tool.management_catalog",
+      "observation_ids": [
+        "obs-a363b150bf5a8188d92c526d51834e94516494df0d4c86297ba19fac1fa52505"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_READ"
+      ],
+      "target_routes": [
+        "MCP_READ"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.tool.management_prepare",
+      "observation_ids": [
+        "obs-3f3e607b30dab0c4bf08b86acd4709bbd17add0a536accd65c60ecb55e0413b8"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_READ"
+      ],
+      "target_routes": [
+        "MCP_READ"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.tool.management_request",
+      "observation_ids": [
+        "obs-aea422c80010abf9cd9a1aae9c54a2a078ae6e7076839ca81395fd388dfe9a19"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.tool.management_result",
+      "observation_ids": [
+        "obs-90e1f95b446b57be529ada8a414c7d44016567e9cdb9908b5e8f886d07ab344c"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_READ"
+      ],
+      "target_routes": [
+        "MCP_READ"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.daemon_status",
+      "observation_ids": [
+        "obs-2d164a88f35b3dc12001375879862d702e3cf3bbf9bfd5cf14a96da8b17b564d"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.daemon_init",
+      "observation_ids": [
+        "obs-08aea6e2c78e1ad933845792a44dbafe9a9d4dce1b2673386ac0b4237eb35f77"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.daemon_submit",
+      "observation_ids": [
+        "obs-105b19c978ea6f5f39b1395eeb1479b12985250690d4f7e2044526f3d93b789f"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.daemon_run_once",
+      "observation_ids": [
+        "obs-3bc131b300fef3d0a2c111947a97a3a2e8d5fa307c9dd7327f3f344e894a6462"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.daemon_drain",
+      "observation_ids": [
+        "obs-267a190314b4ad8099f5afb2e74b726b123624298e4db384a2ebc5fffbd01e1a"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.daemon_recover",
+      "observation_ids": [
+        "obs-7058e699441629c4067d4aa439f3ef4fedcb421329e97f6336a0db83578563ef"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.journal_inspect",
+      "observation_ids": [
+        "obs-9696fcbb736ad57816bf255ccdae833452d3e643cd55bf699bd7f320303963b8"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.journal_verify_salvage",
+      "observation_ids": [
+        "obs-e84b3afcaf877ee8c4391b532f7bac57000ac7c68e86659dcbe0885f9a7692bd"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.journal_salvage",
+      "observation_ids": [
+        "obs-72b78a4926ed3fffb1e29c78bfeca2b5c9b9461b50639fe45a0167d1c0ebc2e8"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.adapter_describe",
+      "observation_ids": [
+        "obs-eda460b3a55583a77fc97a5f25bc2e6d92c780ea678b2650ec613a25877db9a1"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.adapter_noop_probe",
+      "observation_ids": [
+        "obs-7212fd64cf96010924f2d3af3ea59d1830c660182125f3626898b11240d4da35"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.admission_probe",
+      "observation_ids": [
+        "obs-ce409a9c0681af3795992a42334b15e99777b0702e9c4e28c5edb34da02600f1"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.approval_decide",
+      "observation_ids": [
+        "obs-3a837e390c4b34b68064a54b3fc50bc0560ee9a45dd9339bf6e69681c82bb6c8"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.approval_describe",
+      "observation_ids": [
+        "obs-7b427349c92911c2365f43c402022d710cd9f3051c28470c5897291879c64bb6"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.tool.management_host_status",
+      "observation_ids": [
+        "obs-eda07993698c5ed76c9d079bafc2222530526d00fa5c063a5b1ea9e58a79b4b1"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_READ"
+      ],
+      "target_routes": [
+        "MCP_READ"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.adapter_convert",
+      "observation_ids": [
+        "obs-7344d816859176d0f58ab650981df525e1982d40209be7f41980bbea5165060f"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.adapter_probe",
+      "observation_ids": [
+        "obs-7df435c253256b1daa5ac2e8692dd5d6b798da6c61ed663178f537f03306cec5"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.candidate_serve",
+      "observation_ids": [
+        "obs-514cac18d64af12cb6c75009a1f28fcb1c7765004ac8656498f2e6ebfc713ff7"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "mcp.management.route.candidate_stop",
+      "observation_ids": [
+        "obs-c65d4214edc330c50da95a7ec2b46e973079bae1fed4fa513173097210215968"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in project-management policy bound to original base D1/D2/D4 policy, exact reviewed native/producer/target/input/effects; existing native guards remain authoritative."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "17 native CLI routes plus exact owned host stop; bounded convert/probe; connection-owned unbounded host lifetime; fixed effects and durable once reservation; no shell/raw argv/PID adoption/restart."
+        ],
+        "notes": "Candidate code/fixture scope only. Actual policy apply, service start, recovery, approval issuance, new Desktop E2E and existing data migration NOT_RUN. Native handle APIs and scheduler/merge remain separate."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": "ProjectManagement.test_each_fixed_route_uses_native_cli_and_selected_inputs_only"
+        },
+        {
+          "path": "tools/test_capability_m6.py",
+          "selector": "DistributionProfile.test_management_guards_and_exactly_once_reservation_survive_repin"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
     }
   ]
 }

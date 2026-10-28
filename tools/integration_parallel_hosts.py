@@ -1,4 +1,4 @@
-"""Optional owner-selected native candidate host. No server startup or general execution.
+"""Optional owner-selected native candidate host bindings; launch checks do not start a server.
 
 Same-UID/config/socket observations are cooperative identity, not authenticated
 human/process identity. Native reducers own locks, admission, fences and CAS.
@@ -63,7 +63,7 @@ class Hosts:
         return next((row for row in self.current()['hosts'] if
             (row['project_id'],row['parent_work_id'])==(project_id,work_id)),None)
 
-    def check(self,row):
+    def check(self,row,*,launching=False,stop_owned=False):
         c.require(row in self.current()['hosts'],'PARALLEL_HOST_SCOPE')
         scope=self.policy.transfer.scope(row['project_id'],row['parent_work_id'],'work_inspect')
         project=None
@@ -105,11 +105,15 @@ class Hosts:
                 r.real_path(str(ancestor))
         if target is not None:
             c.require(Path(target.get('tree',''))==root,'PARALLEL_HOST_TARGET_SCOPE')
-        sock=Path(row['socket']['path']);r.real_path(str(sock));info=sock.lstat();directory=sock.parent.stat()
-        c.require(stat.S_ISSOCK(info.st_mode) and info.st_uid==os.getuid() and info.st_mode&0o077==0 and
-            directory.st_uid==os.getuid() and directory.st_mode&0o077==0 and
-            {'device':info.st_dev,'inode':info.st_ino}==row['socket']['identity'],'PARALLEL_HOST_SOCKET_CHANGED')
+        sock=Path(row['socket']['path']);r.real_path(str(sock.parent));directory=sock.parent.stat()
+        c.require(directory.st_uid==os.getuid() and directory.st_mode&0o077==0,'PARALLEL_HOST_SOCKET_OWNER_SCOPE')
         c.require(not sock.is_relative_to(root),'PARALLEL_HOST_SOCKET_OWNER_SCOPE')
+        if launching:
+            c.require(not sock.exists() and not sock.is_symlink(),'PARALLEL_HOST_SOCKET_EXISTS')
+        elif not stop_owned:
+            r.real_path(str(sock));info=sock.lstat()
+            c.require(stat.S_ISSOCK(info.st_mode) and info.st_uid==os.getuid() and info.st_mode&0o077==0 and
+                {'device':info.st_dev,'inode':info.st_ino}==row['socket']['identity'],'PARALLEL_HOST_SOCKET_CHANGED')
         return project,cfg
 
     def basis(self,project_id,work_id):

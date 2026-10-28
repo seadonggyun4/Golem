@@ -1,6 +1,6 @@
 ---
 name: golem-work
-description: Inspect approved Golem Works, prepare inputs or exact actions, and review native results using the tools currently exposed by the connected service. Use for ordinary Golem work, not installation or connection management.
+description: Inspect approved Golem Works, prepare inputs or exact actions, and review native results using the tools currently exposed by the connected service. Use for Golem Work and explicitly enabled project management, not installation or connection management.
 ---
 
 # Golem Work
@@ -44,3 +44,19 @@ target applicability, merge or Work completion. Unknown usage/cost remains unkno
 Read [feature and result boundaries](references/profiles.md) when selecting tools
 for preparation, QA/evidence or candidate/workspace work. Keep all active user
 limits, including requests to use fixtures only or avoid actual execution.
+
+For natural-language project management requests, use `golem_management_catalog`
+when exposed, then fill `golem_management_prepare` from the selected target/input
+IDs. Users do not need to write JSON or a special prompt. Ask for missing intent
+or owner-selected inputs; never invent policy, stopped-process attestations or
+approval bytes. A PREPARED proposal is not permission to dispatch.
+
+Only an exact action already selected by the separate management policy can use
+`golem_management_request`. Preserve its action/request IDs. Read historical
+results only with `golem_management_result`; missing/corrupt/unknown results block
+redispatch even with a new request ID. A daemon target is not a generic scheduler,
+a fixed native probe is not general host execution, and native approval decisions
+still use the original core parser and guards. Respect fixture-only instructions.
+
+
+Optional delivery operations use the same explicit management contract. For binary conversion select pinned input IDs and json/msgpack formats; preserve returned base64 bytes and SHA rather than treating them as text. General probe needs a separately reviewed executable/cwd/timeout descriptor and explicit host/network/credential/export effects; never infer those from read access. Candidate service requires the original D4/M5 host policy and a separately approved stop action bound to the exact launch action/request. Use management_host_status for the connection-owned process. Never adopt stored PIDs, auto-restart, copy observed socket identity into policy, infer readiness/completion, or treat host stop as worker termination attestation. Graceful disconnect performs scoped cleanup; transport/crash ambiguity remains unknown.

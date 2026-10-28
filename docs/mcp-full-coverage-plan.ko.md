@@ -1,6 +1,17 @@
 # Golem 전 기능 MCP 연결·사용성 통합 설계와 구현 계획
 
-상태: **M0~M4 및 M5 native facade 47개의 명시 범위 코드/정적/fixture 검증 완료. M6 profile·스킬·검토용 패키징·기존 owner 관리 경로의 코드/정적/fixture 검증 포함. P4/P5 7개 미구현·P7 정식 배포·M7/M8 운영/실제 client 검증은 남음**. 작성·결정 반영일: 2026-10-26.
+현재 설치·읽기 검증: Codex 0.2.7 / Claude read 0.1.10의 승인된 세 조회를 실제 client에서 확인했다. 관리 실행·전체 profile E2E와 기존 미구현 항목은 별개다. [현재 범위와 근거](mcp-m7-m8-validation.ko.md). 아래 전달 구현 기록은 이전 snapshot 기준이다.
+
+## 현재 전달 범위
+
+직전 snapshot의 실제 전달 누락 3개(adapter binary 변환·일반 probe·candidate serve)는 공통 관리 MCP에 구현했다. 별도 pinned 정책과 원래 native 검사를 유지하며 관리 5도구/18 operation(17 native 경로+host stop)을 제공한다. 새 후보의 실제 서비스·Desktop E2E는 NOT_RUN이다. 테스트 정책 제한, 하위 native host API, 신규 scheduler/merge 미구현은 별개로 유지한다. 상세: `mcp-m6-distribution.ko.md`의 현재 절.
+
+
+추가 구현(2026-10-27): 선택적 공통 프로젝트 관리 MCP 도구 4개·한정 native operation 14개를 구현하고 기존 D2/D4·D5 fence에 연결했다. 자연어 요청을 agent가 typed 호출로 준비한다. 후보 SDK/정적/fixture 검증과 실제 Desktop 활성화를 구분하며 기존 정책을 자동 이전하지 않는다. [최신 범위·남은 전달 누락](mcp-m7-m8-validation.ko.md)을 따른다.
+
+현재 판정(2026-10-27): 추가 회귀·정합성과 실제 Codex Desktop 세 조회를 완료했으나 전체 M7/M8은 미완료다. 검증 의무 묶음 기준 미검증 9·미구현 10·범위 밖 9이며, owner backlog 83·unsupported 17은 그대로다. [최신 근거와 분류](mcp-m7-m8-validation.ko.md)를 따른다. 잔여 28개 각각의 완료 조건과 기존 승인으로 수행한 보완 검사는 위 상세 기록의 첫 절을 따른다. 아래 상태·표는 작성 당시 checkpoint이며 현재 설치/검증 결과가 아니다.
+
+당시 설계 상태: **M0~M4 및 M5 native facade 47개의 명시 범위 코드/정적/fixture 검증 완료. M6 profile·스킬·검토용 패키징·기존 owner 관리 경로의 코드/정적/fixture 검증 포함. P4/P5 7개 미구현·P7 정식 배포·M7/M8 운영/실제 client 검증은 남음**. 작성·결정 반영일: 2026-10-26.
 소스 기준: `2e690091a55f366d5f99580ee375fca7610f2f77`.
 새 schema·권한·저장 형식·설치 변경의 승인이나 기능 완료 선언이 아니다.
 현재 M7/M8 요청은 별도 테스트 scope의 실제 Codex/Claude 설치·연결·Work E2E와 최소 모델 호출을 승인했다.

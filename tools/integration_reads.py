@@ -143,7 +143,9 @@ def decode_result(name,args,raw):
     if (name=='template_read' and op=='validate') or (name=='native_validate' and args['kind'] in ('template','execution','candidate_request_digest','candidate_host')):
         c.require(re.fullmatch(b'[0-9a-f]{64}\n?',raw) is not None,'NATIVE_RESPONSE')
         return {'digest':raw.strip().decode('ascii'),'role':'HASH_ONLY_NOT_SCHEMA_VALIDATION' if args.get('kind')=='candidate_request_digest' else 'NATIVE_VALIDATION_DIGEST_NOT_ACCEPTANCE'}
-    if (name=='context_read' and op=='markdown') or (name=='discovery_read' and op=='report') or (name=='report_read' and args['kind']=='execution_render'):
+    # Native completion/reentry inspect is a nonprojecting Markdown read, just
+    # like execution render. Preserve text and bytes without assigning authority.
+    if (name=='context_read' and op=='markdown') or (name=='discovery_read' and op=='report') or (name=='report_read' and args['kind'] in ('execution_render','completion','reentry')):
         try:return raw.decode('utf-8',errors='strict')
         except UnicodeError:raise c.IntegrationError('NATIVE_RESPONSE') from None
     try:

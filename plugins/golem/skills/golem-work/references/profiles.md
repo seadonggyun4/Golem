@@ -31,3 +31,14 @@ merge publication receipt are NOT_IMPLEMENTED. Do not suggest tools for these.
 If setup is actually requested, use the separate Golem Setup skill. Existing
 connections and approvals remain in force; ordinary Work failure is not permission
 to reinstall, reconnect, rewrite pins, reload or change configuration.
+
+## Optional project management
+
+The shared entry can expose management_catalog/management_prepare/management_request/
+management_result only after a separate private management policy, reviewed digest
+and explicit consent are supplied. This is independent of Work profile ceilings
+and creates no D1/D2/D4/resource/helper/host grants. Natural language is translated
+by the agent into typed catalog IDs; prompt text is never authority. Existing
+native/CLI-only handle APIs and the P4/P5 scheduler/merge obligations remain separate.
+
+Project management delivery: adapter_convert preserves raw bytes/base64; adapter_probe pins executable/cwd/timeout/effects; candidate_serve requires original D4/M5 host config and an exact candidate_stop action. management_host_status observes only the current connection’s owned process and socket; it grants no action or socket authority. No policy apply, replay, PID adoption or automatic restart.

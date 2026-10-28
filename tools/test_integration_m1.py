@@ -59,6 +59,18 @@ class NativeReads(unittest.TestCase):
     def test_historical_reports_use_only_nonprojecting_inspect(self):
         for kind in ('completion','reentry'):
             _,calls=self.invoke('report_read',{'kind':kind,'sequence':1});self.assertEqual(calls[0][0][3:],[kind,'inspect',str(self.work),'1'])
+    def test_historical_report_markdown_preserves_bytes_without_current_authority(self):
+        raw='# 완료 기록\n\nHistorical **PASS**; not current acceptance.\n'.encode()
+        before=self.inventory()
+        for kind in ('completion','reentry'):
+            value,calls=self.invoke('report_read',{'kind':kind,'sequence':1},raw)
+            self.assertEqual(value['result'],raw.decode())
+            self.assertEqual(base64.b64decode(value['native_stdout']['data']),raw)
+            self.assertFalse(value['work_completion_inferred'])
+            self.assertFalse(value['native_state_changed'])
+            self.assertEqual(calls[0][0][3:],[kind,'inspect',str(self.work),'1'])
+            self.expect('NATIVE_RESPONSE',lambda:self.invoke('report_read',{'kind':kind,'sequence':1},b'\xff'))
+        self.assertEqual(before,self.inventory())
     def test_stale_failure_and_malformed_json_do_not_deliver(self):
         self.expect('OBSERVATION_STALE',lambda:self.invoke('profile_read',{'operation':'current'},stale=True))
         self.expect('NATIVE_FAILURE',lambda:self.invoke('profile_read',{'operation':'current'},returncode=1))

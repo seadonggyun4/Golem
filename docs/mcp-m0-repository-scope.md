@@ -1193,6 +1193,29 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.plugins.golem.skills.golem-work.SKILL.md.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.plugins.golem.skills.golem-work.agents.openai.yaml.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.plugins.golem.skills.golem-work.references.profiles.md.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| mcp.management.tool.management_catalog | IMPLEMENTED | MCP_READ | MCP_READ | REVIEWED |
+| mcp.management.tool.management_prepare | IMPLEMENTED | MCP_READ | MCP_READ | REVIEWED |
+| mcp.management.tool.management_request | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.tool.management_result | IMPLEMENTED | MCP_READ | MCP_READ | REVIEWED |
+| mcp.management.route.daemon_status | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.daemon_init | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.daemon_submit | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.daemon_run_once | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.daemon_drain | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.daemon_recover | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.journal_inspect | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.journal_verify_salvage | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.journal_salvage | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.adapter_describe | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.adapter_noop_probe | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.admission_probe | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.approval_decide | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.approval_describe | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.tool.management_host_status | IMPLEMENTED | MCP_READ | MCP_READ | REVIEWED |
+| mcp.management.route.adapter_convert | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.adapter_probe | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.candidate_serve | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| mcp.management.route.candidate_stop | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3480,6 +3503,29 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | NATIVE_OPERATION | plugins/golem/skills/golem-work/SKILL.md | file-surface | None |
 | NATIVE_OPERATION | plugins/golem/skills/golem-work/agents/openai.yaml | file-surface | None |
 | NATIVE_OPERATION | plugins/golem/skills/golem-work/references/profiles.md | file-surface | None |
+| MCP_TOOL_DECLARATION | tools/integration_owner_maintenance.py | MANAGEMENT_SCHEMAS | management_catalog |
+| MCP_TOOL_DECLARATION | tools/integration_owner_maintenance.py | MANAGEMENT_SCHEMAS | management_prepare |
+| MCP_TOOL_DECLARATION | tools/integration_owner_maintenance.py | MANAGEMENT_SCHEMAS | management_request |
+| MCP_TOOL_DECLARATION | tools/integration_owner_maintenance.py | MANAGEMENT_SCHEMAS | management_result |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | daemon_status |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | daemon_init |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | daemon_submit |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | daemon_run_once |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | daemon_drain |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | daemon_recover |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | journal_inspect |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | journal_verify_salvage |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | journal_salvage |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | adapter_describe |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | adapter_noop_probe |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | admission_probe |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | approval_decide |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | approval_describe |
+| MCP_TOOL_DECLARATION | tools/integration_owner_maintenance.py | MANAGEMENT_SCHEMAS | management_host_status |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | management_argv | adapter_convert |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | ManagementService._delivery | adapter_probe |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | ManagementService._delivery | candidate_serve |
+| PYTHON_DECLARATION | tools/integration_owner_maintenance.py | ManagementService._delivery | candidate_stop |
 
 ## Blockers
 

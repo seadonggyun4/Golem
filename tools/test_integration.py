@@ -30,7 +30,7 @@ class Integration(unittest.TestCase):
         self.sdk = self.root / "sdk.md"
         self.sdk.write_text("Synthetic SDK\n")
         self.cli = self.root / "golem-fixture"
-        self.cli.write_text("#!" + sys.executable + "\n" +
+        self.cli.write_text("#!" + str(Path(sys.executable).resolve()) + "\n" +
             "import json, os, sys\n"
             "args=sys.argv[1:]\n"
             "q=json.load(open(args[-1]))\n"
@@ -76,6 +76,20 @@ class Integration(unittest.TestCase):
                 self.assertEqual(c.schema(kind)["additionalProperties"], False)
         self.assertEqual(before, self.inventory())
         self.assertEqual(list(self.registry.root.iterdir()), [])
+
+    def test_python_alias_with_spaces_keeps_fixture_reads_isolated(self):
+        alias = self.root / "python alias with spaces"
+        alias.symlink_to(Path(sys.executable).resolve())
+        nested = Integration()
+        self.addCleanup(nested.doCleanups)
+        with patch.object(sys, "executable", str(alias)):
+            nested.setUp()
+        nested.approve()
+        before = nested.inventory()
+        result = backend.read(nested.registry, nested.query())
+        self.assertEqual(result["state"], "OBSERVED")
+        self.assertFalse(result["native_state_changed"])
+        self.assertEqual(before, nested.inventory())
 
     def test_committed_schemas_match_single_source(self):
         for kind in c.CONTRACTS:
@@ -276,7 +290,7 @@ class Integration(unittest.TestCase):
             self.assertTrue(all(f.result(timeout=20)["state"] == "OBSERVED" for f in futures))
 
     def test_timeout_and_quota_fail_without_retry(self):
-        self.cli.write_text("#!" + sys.executable + "\nimport time;time.sleep(30)\n")
+        self.cli.write_text("#!" + str(Path(sys.executable).resolve()) + "\nimport time;time.sleep(30)\n")
         self.enrollment["project"]["cli"] = r.file_pin(self.cli)
         self.approve()
         with patch.object(backend, "TIMEOUT_SECONDS", .1):

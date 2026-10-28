@@ -1,5 +1,60 @@
 # M6 Setup/업무 스킬·기능 profile·패키징·설치·재로딩
 
+## 현재: 남은 전달 경로 3개 연결
+
+선택적 공통 관리 정책에 `adapter_convert`, `adapter_probe`, `candidate_serve`와 별도 승인 `candidate_stop`을 추가했다. 관리 도구는 5개이며 `management_host_status`가 연결이 소유한 프로세스 상태·관측된 socket identity를 알려준다. native 명령 연결은 17개, 중지 제어를 포함한 관리 operation은 18개다.
+
+- 변환: 고정 input ID의 원본 bytes를 stdin으로 전달하고 json/msgpack 형식만 선택한다. native codec을 재사용하며 결과는 base64·SHA로 보존한다.
+- probe: owner-private `golem.management-probe.v1` 입력에서 executable pin, cwd, timeout_ms를 고정한다. cwd는 승인된 target과 같아야 하며 실행 파일은 cwd 밖에서 hash를 재검사한다. 임의 argv/shell/env는 제공하지 않는다. 원본 native `--allow-process` 경로를 사용하고 NETWORK/CREDENTIAL/EXPORT/HOST_EXECUTION 효과를 별도로 승인한다. 이는 OS sandbox 제공을 뜻하지 않는다.
+- host: owner-private `golem.management-host.v1` 입력에서 기존 M5 host policy pin·host ID를 선택한다. 기존 D4와 M5의 등록 Work·config·root·resource 계약을 재사용하고 native `--approve-config`가 config digest를 판정한다. 시작과 특정 launch action/request에 대한 중지 action을 모두 미리 검토해야 한다. 새 process group은 시간 제한 없이 연결이 소유하며 output 한도·명시 중지·정상 연결 종료로 종료한다. 관측 socket identity는 M5 socket 승인으로 자동 이전되지 않는다.
+
+프로세스 시작과 socket 관측은 native readiness/QA/완료를 증명하지 않는다. stop/정상 종료는 모든 worker의 종료 attestation을 대신하지 않는다. 비정상 연결 유실 시 저장 PID를 채택하거나 자동 재시작하지 않으며 결과 유실은 COMMIT_UNKNOWN으로 격리한다. 실제 서비스 시작·복구·승인 발급과 새 Desktop E2E는 NOT_RUN이다. 후보 Codex 0.2.7/Claude MCPB 0.1.10은 미설치·기본 비활성이고 기존 검증 설치본은 유지한다.
+
+아래의 14-operation/0.2.6/0.1.9 기록은 직전 개발 snapshot의 당시 결과다.
+
+
+## 선택적 프로젝트 관리 MCP 확장
+
+사용자는 자연어로 요청하고 agent가 catalog의 ID와 구조화된 인자를 채운다.
+공통 stdio entry `integration_owner_maintenance.py mcp`는 기존 profile의 D2/D4
+서비스를 재사용한다. 별도 관리 정책·검토 SHA·명시적 consent가 모두 있을 때만
+`management_catalog`, `management_prepare`, `management_request`, `management_result`를
+추가한다. 기존 Work profile·권한·native 승인·소유권·완료 predicate를 변경하지 않는다.
+
+- catalog: 선택 프로젝트·target/input ID·관리 operation·이미 검토된 action 조회.
+- prepare: 정확한 입력과 target fence를 대조하고 비권한 준비안 반환. 사용자에게 JSON
+  프롬프트 작성을 요구하지 않으며 부족한 입력은 agent가 질문한다.
+- request: 관리 정책에 이미 고정된 action만 한 번 전달. 효과·native/producer/input
+  pin·project/Work·directory identity·snapshot·출력 예산을 검사한다.
+- result: 같은 action/request ID의 보존된 결과만 조회. 원래 action에 한 번 intent가
+  생기면 새 request ID로도 재실행하지 않는다. 유실·변조·partial·COMMIT_UNKNOWN 보존.
+
+14개 한정 operation: daemon_status/init/submit/run_once/drain/recover, journal_inspect/
+verify_salvage/salvage, adapter_describe/noop_probe, admission_probe, approval_describe/decide.
+승인 결정은 원본 요청 bytes를 그대로 기존 `approval call`에 전달한다. Python에서
+승인·복구·scheduler를 재구현하지 않는다. daemon은 --once/--drain만 지원하며 무기한
+서비스·임의 worker 실행 파일·shell/argv·C pointer/handle은 MCP 입력으로 받지 않는다.
+복구는 정확한 stopped-owner attestation과 원본 hash가 필요하다. attestation은 실제
+종료를 독립 인증하지 않으며 core의 lock/guard를 대체하지 않는다.
+
+관리 정책 schema는 `schemas/project-management.json`, 모든 inputSchema는 closed
+object다. data_class는 APPROVED_MANAGEMENT_CONTENT이고 기존 D2 목적지와 일치해야
+한다. 정책·audit registry는 프로젝트 밖의 owner-private 경로에 두고 기존 프로젝트
+D1 등록과 base D2/D4 정책에 결합한다. catalog/prepare는 정책을 만들거나 적용하지 않는다.
+
+후보 배포물은 Claude MCPB 0.1.9 및 Codex plugin 0.2.6이다. optional management consent는
+기본 false다. 이전에 설치·검증한 0.1.8/0.2.5와 실제 승인/producer pin은 그대로 보존한다.
+새 source를 기존 정책에 자동 적용하지 않으며 새 후보의 검토·선택 전 실제 Desktop에
+설치하지 않는다. 실제 서비스 시작·복구·승인 발급과 새 후보 Desktop E2E는 NOT_RUN이다.
+SDK stdio fixture와 실제 Desktop 검증을 구분한다. P4/P5 scheduler·merge 및 P7 signed
+self-contained runtime은 이 확장으로 구현된 것이 아니다.
+
+---
+
+아래 M6 원장과 당시 결과는 기존 명시 범위의 기록이다. owner 83개는 누락 도구 수가
+아니며 parent route·기존 facade·host API·owner 전용 경계를 포함한다. 새 관리 facade와
+남은 native/CLI 전용 경로는 별도 operation 대조 원장에 기록한다.
+
 상태: 명시 범위의 profile·패키징·스킬·기존 owner 경로 코드 구현, 정적·fixture 검증 완료 기록. 운영 검증은 별도다. 실제 설치·업데이트·연결·재로딩·client/Work E2E·외부 서비스·승인/등록/정책 적용·merge·commit/push는 NOT_RUN이다. 서명 trust root·embedded runtime의 재배포·정식 host qualification을 선택하거나 인증하지 않는다.
 
 ## 실제 제공 경로

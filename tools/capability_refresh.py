@@ -47,7 +47,7 @@ def artifacts(root):
         'mcp-m0-connection-observations.json':dict(d2_fallback=dict(source_pins=D2_PINS,observation=asdict(inspect_fallback(files))),d4_delegation=dict(source_pins=D4_PINS,observation=asdict(inspect_delegation(files)))),
         'mcp-m0-mutation-graph.json':dict(source_pins=D4_PINS,observation=asdict(inspect_mutation_graph(files)))}
     out={name:json.dumps(value,ensure_ascii=False,indent=2)+'\n' for name,value in values.items()}
-    out['mcp-m0-repository-scope.md']=markdown
+    out['mcp-m0-repository-scope.md']=markdown.rstrip('\n')+'\n'
     out['mcp-m0-observations.md']=render_markdown(ledger,audit)+render_connections(ConnectionAudit(audit,report['static_connections']))
     return report,out
 

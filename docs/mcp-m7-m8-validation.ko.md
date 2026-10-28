@@ -1,8 +1,275 @@
-# M7/M8 실제 설치·검증 기록 — 2026-10-26~27
+# M7/M8 실제 설치·검증 기록 — 2026-10-26~28
 
-**최신 r9 결과: Claude task 0.1.8 업데이트 후 별도 Work에서 QA 1회·읽기 전용 저장 결과 재조회·QA 결과/완료 문서 제출·native finalize·보고서 물질화가 실제 Claude client에서 성공했다. Codex와 새 Claude Work 모두 현재 DONE / acceptance_verified=true / generation 9 / completion_sequence 1이다. 과거 Claude COMMIT_UNKNOWN은 재실행·repair·reconcile 없이 미해결로 보존한다. 판정 범위는 선언된 macOS synthetic C Work와 현재 M8 정합성 검사이며 제품 전체 출시 완료가 아니다.**
+## 2026-10-28 최신 Codex 실사용·추가 기능 검증
 
-Codex·Claude의 개선본 실제 설치, 읽기·입력 의존 응답·미허용 Work 차단·M2 준비/확인·native claim·동일 ID 저장 결과 재조회를 관측했다. 추가 C QA는 별도 사례로 기록한다. **두 client의 선언된 synthetic C Work 완료와 모든 profile·OS·제품 전체 배포 완료를 구분한다.** r8의 Claude 보류는 후속 사용자 지시로 해제했고, 아래 r9 기록이 최신 상태다. 최신 기계 판독 결과는 [검증 행렬](mcp-m7-m8-validation.json)에 있다.
+Codex 공식 app-server에서 격리 프로젝트의 개발·공개/독립 테스트·문서 제출·native QA 1회·완료 확정·현재 완료 조회까지 통과했다. 이 결과는 해당 고정 입력의 한 사이클이며 Desktop GUI나 모든 Core 기능의 통과를 뜻하지 않는다. Claude는 추가 평가를 보류하고 기존 기록을 보존했다.
+
+추가 R3 검증은 조회·비권한 준비 13개 정상 응답과 같은 Work 병합 준비의 `MERGE_WORK_ISOLATION` 예상 거부 1개를 확인했다. R4 계약 준비는 11종이 통과했고 template/completion/plan 조회 3개는 아직 NOT_RUN이다. 기존 대화의 과거 호출 상한이 남았으며, 별도 승인한 새 대화에서는 MCP 초기 연결이 30초 시간 초과돼 실제 호출이 0회였다. 원인은 미확정이고 성공으로 집계하지 않는다.
+
+현재 원장 기준 85개 도구 중 일부 정확한 정상 호출 확인 25개, 거부 조건만 확인 1개, 과거 근거만 16개, NOT_RUN 43개다. 미검증 selector 109개와 scheduler·merge 관련 미구현 설계 7개를 별도 관리한다. 과거 QA·완료·COMMIT_UNKNOWN은 재실행하지 않았다. Codex 설치 0.2.7의 프로그램은 현재 수정 소스와 일치하지만, 정책은 검토된 조회·준비 범위로 제한돼 있다.
+
+상세 근거는 로컬 workspace의 `codex-core-qualification-20261028/validation.json`, `진행결과.md`, `미검증기능.md`와 private 호출 trace에 보존한다. 로컬 승인·Work·증거·계정 설정은 저장소에 포함하지 않는다. 아래 기록은 각 검증 당시의 결과다.
+
+## 2026-10-28 Claude 단일 session_start 실제 검증 PASS
+
+Claude task 0.1.10 한 개를 활성화하고, owner가 고정한 격리 Work/action/request로 session_start를 정확히 1회 호출했다. native committed=true, session sequence 0→1, document generation 3을 확인했으며 후속 status·next 각 1회는 CLAIM_REQUIRED를 반환했다. Work 완료·QA PASS를 뜻하지 않는다(acceptance_verified=false). claim·QA·승인 발급·서비스·복구·COMMIT_UNKNOWN 재실행은 0회다. 원본 보호 2,215파일에 예상 밖 변경이 없고, 합성 Work에는 승인된 start event/CAS 3파일만 추가됐다. Codex 모델은 계정 한도로 NOT_RUN이다. 상세 workspace `core-mcp-verification-20261028/다음기능검증.md`, `private/phase-C/validation.json`. commit/push 없음. 아래 부분 설치·차단 기록은 당시 상태다.
+
+
+## 2026-10-28 Claude task 설치 완료·정책 설정 차단
+
+사용자의 직접 설치 승인으로 task 0.1.10 한 개를 공식 설치했고 archive SHA 및 83파일 bytes 일치를 확인했다. 현재 비활성이다. 한정 D4 정책 입력은 자동 승인 검토가 별도 설정 변경 승인을 인정하지 않아 차단했다. 현재 활성 Claude 연결은 0개, session_start는 NOT_RUN이다. 보호 파일 2,215개와 두 격리 Work bytes를 재확인했다. 직접 설정 파일 수정이나 다른 경로로 우회하지 않았다. 상세 workspace `core-mcp-verification-20261028/다음기능검증.md`, `private/phase-C/current-result.json`. 아래 설치 차단/0개 기록은 직접 승인 이전 당시 상태다.
+
+
+## 2026-10-28 Claude 세션 시작 검증 — 설치 차단
+
+Claude 현재 상태를 실제 두 조회로 재확인했다(session sequence 0/document generation 3/START_REQUIRED). 새 격리 Work의 session_start 한 건을 사용자가 승인했고 D4 후보의 현재 권한·pin 검사를 통과했다. 다만 task 설치 클릭이 자동 승인 검토에서 차단되어 미실행이다. prepare는 복구 package/settings 보존 후 공식 제거했으며 현재 Claude Golem 설치는 0개인 부분 전환 상태다. 설치 확인을 우회하지 않았다. Codex 모델 검증은 계정 한도로 NOT_RUN이며 재시도하지 않는다. 현재 설치와 두 Work bytes 보존을 확인했다. 자세한 대상·action·key·정책 SHA는 workspace `core-mcp-verification-20261028/다음기능검증.md`, `private/phase-C/review.json`을 따른다. 전체 Core 검증 완료가 아니다.
+
+
+## 2026-10-28 M2 prepare 단계 추가
+
+같은 격리 Work에 비권한 준비 6도구만 추가한 owner 계획을 적용했다. 현재 설치는 Codex 동일 ID 0.2.7 prepare·Claude prepare 0.1.10 각 한 개다. Claude 실제 9회(준비 4/plan 재조회 4/의도한 merge 격리 거부 1), Codex SDK 9회를 대조했다. Codex 실제 M2 모델 검증은 계정 사용 한도로 NOT_RUN이며 SDK로 대체 인증하지 않았다. Work bytes 동일, 실행·QA·승인 발급·서비스·merge 0회. 병렬 scheduler/merge는 NOT_IMPLEMENTED로 유지한다. workspace `core-mcp-verification-20261028/M2준비검증.md`, `private/phase-B/validation.json`에 기록했다. 아래 read 설치 표는 이전 profile의 당시 결과다. commit/push 없음.
+
+## 2026-10-28 새 격리 Work 읽기 검증 — 현재 진행 범위
+
+현재 두 read 설치본은 사용자 승인으로 새 합성 Work `core-codex-20261028`/`core-claude-20261028`에 연결했다. 정책 28도구 중 resource 미선택 2개는 숨겨 실제 노출은 26개다. Codex 실제 CLI 28회는 AVAILABLE 22/BLOCKED 6이며 마지막 도구 이후 계정 한도로 모델 요약이 실패했다. Claude Desktop 27회는 관측 17/거부 10, template list 한 건은 client timeout·서버 미전송으로 재호출하지 않았다. 복잡한 JSON 인자 오류·discovery 실패는 미통과로 유지한다. 전체 Core 기능·모든 profile E2E 완료가 아니다.
+
+정적 원장 1,210 capability 중 C/Core 연결 936항목을 재대조했고 blocker 0이다. 내부 API/parent dispatcher를 독립 MCP operation으로 세지 않았다. 선택 fixture 324개는 최초 skip 8개를 native component 후속 검사로 보완해 모두 통과했다. 기존 실행·QA·승인·서비스·COMMIT_UNKNOWN 재실행은 0회, 새 Work bytes도 동일하다. 원본 정책은 보존하고 새 D1 읽기 등록/D2 전달만 별도 승인했다. 상세 workspace `core-mcp-verification-20261028/검증결과.md`, `validation.json`, `private/`를 따른다. 아래 2026-10-27 설치·읽기 결과는 당시 scope의 역사적 증거다. commit/push하지 않았다.
+
+## 현재 설치·읽기 검증 — 2026-10-27 최신 수정본
+
+**Codex 0.2.7 / Claude read 0.1.10을 설치하고, 각각 승인된 세 조회를 실제 client에서 확인했다. 전체 기능·모든 profile의 M7/M8 완료를 뜻하지 않는다.** 원본 승인을 보존하기 위해 owner가 정확한 검토 원장 `dc9fd119a15f5d4049b81261a0e8a7baae57477c7d008e205b7a7352f5979e02`의 별도 읽기 registry·D2 정책을 선택했다. 기존 native/D4 실행 승인과 관리/resource/helper/host 권한은 자동 이전하지 않았다.
+
+| Client | 현재 한 개의 설치 | 실제 확인 범위 |
+| --- | --- | --- |
+| Codex | `golem@golem-m7-finish-complete` 0.2.7, 동일 server identity | 설치 bytes 9개·SDK handshake/list·bundled Codex CLI 실제 plugin 세 조회 PASS. 새 bytes의 Desktop GUI 자동 노출은 NOT_RUN |
+| Claude Desktop | `local.mcpb.golem-contributors.golem-read` 0.1.10 | 설치 원본 83개·활성 커넥터·실제 UI의 세 조회 각 1회 PASS. 기존 task 0.1.8은 백업 후 공식 Remove |
+
+각 client는 해당 기존 테스트 Work의 projects_list → work_inspect(status) → completion_check(selection)만 조회했다. native 현재 완료는 양쪽 모두 DONE/acceptance_verified=true/generation=9/completion_sequence=1, qa-result CURRENT/PASS다. agent session sequence=0·START_REQUIRED는 별도 계약이고 runtime 권한을 부여하지 않는다. 원래 QA를 실행한 것이 아니며 새 실행·복구·승인 발급·서비스 시작·COMMIT_UNKNOWN 재실행은 0회다. Claude 도구 권한은 각 1회 허용으로 처리했다.
+
+Codex completion observation SHA는 `18cdfe11f7b0cbc363e3f1e12cefdb7e3204838f8f1ef390842c4f4488b75563`, Claude는 `e9ab1a4dcf753f3652d18cb708172c2fef2ae8a587db80345c888a0b1da7bd0f`다. Claude chat은 `Golem read 연결 검증` (`6e14c3d5-b523-4175-9edf-afc444cf6a63`)이며 실제 도구 Request/UI·서버 tools/call id 2/3/4와 새 native delivery 파일을 대조했다. 서버 로그의 RPC body는 redacted이므로 agent 진술을 raw 결과로 재구성하지 않았다.
+
+Codex SDK의 첫 읽기는 terminal sandbox의 boot identity 조회 제한으로 거부됐으며 실제 client OS 환경에서 원래 한도로 통과했다. 첫 CLI 검사는 command-local config key 문법 오류로 도구 호출 전 중단됐고 이를 수정했다. 전역 승인 검사는 변경하지 않았다. 실제 client 증거의 부정 사례 회귀도 수행했다. 전체 코드 회귀 1471 PASS는 설치 전 고정된 동일 프로그램 bytes의 개발 검증이며 실제 client 조회 증거와 구분한다.
+
+현재 읽기 3도구 제한은 owner가 선택한 연결 범위다. 구현된 관리 5도구/18 operation과 제품 전체 기능의 한도는 아니다. 관리 실행·추가 profile·OS·전체 scheduler/merge 등 기존 미구현/미검증 자격은 그대로다. 상세 적용 원장·proof·백업은 workspace `plugin-update-common-20261027/validation.json`, `업데이트결과.md`, `private/`, `backups/`에 있다. commit/push하지 않았다. 아래 기록은 해당 snapshot의 당시 결과다.
+
+---
+
+## 업데이트 전 구현 snapshot: 남은 Core 전달 누락 3개 연결
+
+adapter stdin/binary convert, 일반 executable probe, candidate serve를 선택적 공통 MCP에 연결했다. native 명령 17개와 명시적 host stop 제어(관리 operation 총 18개), 관리 도구 5개다. 기존 native codec·probe·host config 검사를 그대로 사용하며 D4/M5 host 등록·resource·action 계약을 재사용한다. 원본 Core C 구현은 변경하지 않았다.
+
+host는 연결이 소유한 process group으로 시작·조회·별도 승인 중지를 제공한다. 시간 제한 없는 service lifetime과 개별 native action 승인은 구분한다. output은 한정하고 정상 연결 종료 시 정리하지만 crash 후 PID 채택/재시작은 하지 않는다. readiness·모든 worker 종료·완료는 추론하지 않는다. socket 관측을 기존 M5 승인에 자동 반영하지 않는다.
+
+격리 codec/stdio/프로세스·socket fixture와 정적·회귀 검증 대상으로 연결했다. 실제 candidate 서비스 시작, 실제 recovery/승인 발급, 새 후보 Desktop 설치·활성화/E2E는 NOT_RUN이며 이전 client PASS를 새 bytes 결과로 재사용하지 않는다. 후보 Codex 0.2.7/Claude 0.1.10과 실제 설치 Codex 0.2.5/Claude 0.1.8을 구분한다. 상세 결과는 workspace `mcp-delivery-three-20261027/구현결과.md`와 `validation.json`에 기록한다.
+
+아래의 ‘남은 3개’는 직전 snapshot에서의 당시 상태다. 이 세 dispatcher의 구현 완료가 하위 C API 전체 E2E나 미구현 scheduler/merge 완료를 뜻하지 않는다.
+
+
+## 2026-10-27 공통 프로젝트 관리 MCP 구현
+
+사용자의 자연어 요청을 agent가 구조화된 관리 도구 호출로 변환하도록 구현했다.
+`management_catalog` → `management_prepare` → 이미 검토된 action의 `management_request`
+→ 원래 ID의 `management_result` 흐름이다. 사용자 프롬프트에 별도 JSON 형식은 필요하지 않다.
+
+- 구현: 기존 D2/D4 서비스 위의 선택적 관리 정책, 관리 도구 4개, 한정 native operation 14개.
+  daemon 상태/생성/제출/--once/--drain/복구, journal 검사/복구 검증/새 경로 salvage, adapter
+  조회·고정 noop probe, admission 진단, 승인 contract 조회·원본 결정 요청 전달이다. Python은 native
+  parser/reducer/승인/완료 predicate를 재구현하지 않는다.
+- 보존: 관리 registry는 기존 승인 registry와 분리하고 base project 등록·disclosure·native
+  pin에 결합한다. 기존 registry shared lock과 D5 fence를 유지한다. action 효과 전 durable
+  예약, project의 pending/unknown 관리 효과 격리, target/입력/producer 변조 거부, 출력/저장
+  한도, 별도 historical result 경로를 적용한다. 새 request ID로 중복 실행하지 않는다.
+- 제공 구분: 테스트 정책(Codex read3/Claude task13)은 기존 구현의 기능 한도가 아니다.
+  기존 owner83은 독립 누락 기능 83개가 아니며 parent route·이미 있는 facade·하위 C host
+  API·operator 기능이 섞여 있다. 새 대조 원장은 이들을 항목별 source 근거로 구분한다.
+- 실제 남은 전달 누락: adapter stdin/binary convert, 일반 executable adapter probe,
+  unbounded candidate host serve는 새 관리 dispatcher가 제공하지 않는다.
+  fixed noop probe를 일반 host 실행으로, validate를 describe로, 한정 daemon을 scheduler로
+  재분류하지 않았다. 수명이 있는 C handle/callback API도 개별 raw-pointer MCP 도구로
+  노출하지 않는다. P4/P5 scheduler/merge와 P7 release 의무는 그대로다.
+- 배포 구분: 새 후보는 Codex 0.2.6/Claude MCPB 0.1.9, profile 5종·schema 6종·파일 83개다.
+  관리 consent는 기본 false이며 기존 live 설정·정책·승인/producer pin은 그대로다.
+  같은 public payload를 추출해 두 launcher 형식의 실제 SDK stdio 호출을 검증했다.
+  새 후보의 실제 Desktop 설치/E2E와 정책 적용·서비스 시작·복구·승인 발급은 NOT_RUN이다.
+
+정적 원장은 기존 552개 source를 유지하고 관리 도구/route 관찰 18개를 추가했다.
+이는 Core 구현을 새로 18개 만들었다는 뜻이 아니며 기존 owner83·historical unsupported17의
+ID나 권위 경계를 지우지 않았다. 상세 source/operation 대조·패키지 SHA·회귀/보존 근거는
+owner-private workspace `mcp-project-management-20261027`의 원장을 따른다.
+
+기존 실제 Desktop 세 읽기 PASS는 아래 당시 bytes/정책의 근거로 유지한다. 새 후보의
+관리 권한이나 전 기능 실제 검증으로 확대하지 않는다. commit/push는 수행하지 않았다.
+
+---
+
+## 2026-10-27 잔여 28개 완료 조건 — 현재 판정
+
+**기존 승인으로 끝낼 수 있는 독립 검사와 항목별 조건 정리를 완료했다. 추가로 완결한 전체 검증 의무는 0개이며, 미검증 9·미구현 10·범위 밖 9를 유지한다.** 39개 검증 의무 묶음 중 앞서 확인한 11개와 기존 owner backlog 83·unsupported 17은 별도다. 부분 검증을 전체 PASS로 재분류하지 않았다.
+
+이번 추가 결과: M4/M5/M6 임시 계약 회귀 95 PASS, 기존 workflow selector 검사 6 PASS, 안내 링크 43개 확인. commit fixture 1개는 이번에 재실행하지 않았다. 현재 SDK base dependency 25개 요구조건 충족, Mach-O roots 80개/파일 89개 정적 참조 확인·미해결 0. 시스템 공유 캐시 11개와 동적 로딩·다른 target의 closure는 미검증이다.
+
+현재 권한 메타데이터: Codex read 3개, Claude task 13개. Claude의 기존 action 도구는 document_submit·completion_finalize·completion_report이며 이번 재실행 대상으로 삼지 않았다. resource/helper/host 계약은 비활성이다. 실제 client 호출·설치/프로필 변경·승인 적용은 하지 않았다. 이전 실제 Codex Desktop 세 조회 PASS는 원래 증거와 함께 보존했다.
+
+세부 JSON과 근거 원장은 owner-private workspace `m7m8-exit-conditions-20261027`의 `exit-criteria.json`, `remaining-matrix.json`, `validation.json`에 있다. 다음 표의 완료 조건은 실행 승인 자체가 아니다. 현재 금지·범위 밖 항목은 그 경계를 유지하는 것이 이번 작업의 종료 조건이다.
+
+## 미검증 9개
+
+| ID · 항목 | 완료 조건 | 이번에 확인한 범위 / 남은 조건 |
+| --- | --- | --- |
+| `U02` · 양쪽 client의 모든 profile·MCP operation 조합 | 1. client × 5 profile × 실제 MCP operation별 대상/인자/권한·효과·거부 경계를 고정한다.<br>2. 각 필수 cell에서 실제 client trace와 native/거부 결과를 확보한다. SDK discovery나 패키지 포함만으로 PASS 처리하지 않는다. | 기존 두 정책의 원래 validator·service metadata로 권한 교집합 확인. Codex read 3개, Claude task 13개. M4/M5/M6 fixture 95개 통과.<br>남음: 현재 미선택 profile용 검토된 테스트 입력과 별도 D2/D4/resource/helper/host 계약; 현재 Claude action 3종은 기존 제출·완료용이며 재실행 금지 |
+| `U03` · 실제 client가 주도하는 native prepare·finish 전체 흐름 | 1. 새 격리 Work에서 실제 client가 native prepare와 finish를 기존 parser/reducer/lock/fence를 통해 호출한다.<br>2. owner의 정확한 action/request digest·현재 입력/소유권·결과 재조회·완료 증거를 연결한다. pending/stale/COMMIT_UNKNOWN은 차단한다. | M4 fixture의 준비안·정확한 D4 action·결과 검증 경계 회귀 확인. 실제 prepare/finish를 호출하지 않음.<br>남음: 새 테스트 Work와 새로 검토한 prepare/finish action; 기존 action 재사용/재실행 불가 |
+| `U04` · Linux 실제 Desktop client E2E | 1. 지원되는 Linux 실제 client/계정/host에서 선택한 정확한 package·runtime·policy를 확인한다.<br>2. 설치·discovery·실제 도구 호출과 native/거부 결과를 client trace로 연결한다. 컨테이너나 macOS 결과는 대체 근거가 아니다. | 기존 Linux CI/native 관측은 당시 commit 근거로 보존. 이 Mac에서 Linux Desktop 성공으로 대체하지 않음.<br>남음: 사용 가능한 지원 Linux client/host와 별도 테스트 scope |
+| `U05` · 선언한 다른 architecture의 실제 host·ABI qualification | 1. 선언 대상 darwin-arm64/linux-x86_64/linux-arm64 각각의 실제 host에서 ABI·Python/SDK/native 의존성과 설치/연결을 확인한다.<br>2. 동일 artifact/manifest와 host별 테스트 로그를 결합하고 지원하지 않는 조합을 명시한다. | 현재 host가 macOS arm64임을 유지하고 다른 architecture를 인증하지 않음.<br>남음: linux-x86_64·linux-arm64의 실제 검증 host 및 host별 reviewed manifest |
+| `U06` · M4 helper의 실제 network·credential·service 효과 | 1. owner가 선택한 helper/input/producer/argv/output 및 network·credential·service 효과를 별도 pin한다.<br>2. 승인된 새 격리 호출의 효과 범위·native 결과·유실/unknown 차단을 실제 관측한다. 읽기/QA 승인을 일반 실행으로 확대하지 않는다. | helper의 별도 opt-in·고정 argv/producer/input/effects·허용 범위 거부 fixture 통과. 실제 helper 실행 없음.<br>남음: 현재 비활성인 별도 helper-effects 계약과 정확한 신규 action/effect scope |
+| `U07` · M5 owner host의 실제 client candidate/workspace 흐름 | 1. 고정 socket identity/config·parent/child/target Work·operation·D4 action/request digest·종료 attestation을 대조한다.<br>2. 실제 client candidate/workspace 흐름에서 lease/resource/fence/input/tree/target drift와 결과 재조회를 확인한다. scheduler/실제 merge 완료로 승격하지 않는다. | owner host·고정 request/operation·socket/config/Work 경계를 임시 fixture로 확인. 설치 host 시작 없음.<br>남음: 현재 비활성인 별도 owner host 계약·새 action과 operator 종료 확인 자료 |
+| `U08` · 실제 provider invoice·비용·Claude usage 검증 | 1. owner가 선택한 invoice/usage 원본의 provider·기간·account/project·통화·단가 버전을 정한다.<br>2. 누락·중복·대조 범위를 기록하며 counter와 실제 청구를 일치시키고 미확인 비용을 null로 유지한다. | 기존 client token counter 관측과 비용/청구/Claude usage unknown/null 유지. provider 또는 billing API 호출 없음.<br>남음: 선택된 billing 원본 resource 계약 또는 명시적 provider/billing 접근 권한; 현재 그런 자료 없음 |
+| `U09` · 전체 transitive dynamic/runtime dependency closure | 1. native·선택 Python/SDK·표준/외부 extension의 직접/간접 의존성을 target별로 닫는다.<br>2. OS shared-cache 및 runtime dlopen/optional import 경로까지 검증하고 허용 host에서 clean/offline launch와 ABI 근거를 확보한다. 정적 참조 검사만으로 full closure를 선언하지 않는다. | 현재 SDK dependency metadata 25개 요구조건 충족. native/Python/SDK/stdlib roots 80개에서 Mach-O 파일 89개 정적 참조 조사; 미해결 참조 0. 시스템 참조 11개 미전개.<br>남음: OS 공유 캐시 11개·동적 로딩 경로의 검증 근거; 다른 target의 동일 runtime closure |
+| `U10` · 현재 미커밋 변경 bytes의 새로운 원격 CI | 1. 현재 변경 bytes를 고정한 정확한 revision/원격 입력으로 필수 CI lane을 실행한다.<br>2. required checks 성공과 skip 사유를 artifact SHA·revision에 연결한다. 과거 commit의 성공을 현재 dirty source 인증으로 사용하지 않는다. | 현재 dirty 경로 8개에 기존 CI selector 적용: native/python_tools/integration 선택. selector 회귀 6개·guide link 43개 통과.<br>남음: 현재 bytes의 별도 승인된 원격 전달 경로; 이번 commit/push 금지로 수행하지 않음 |
+
+## 미구현 10개
+
+| ID · 항목 | 완료 조건 | 이번에 확인한 범위 / 남은 조건 |
+| --- | --- | --- |
+| `TASK_DAG_SCHEDULER` · task DAG scheduler | 1. 승인된 scheduler 저장 형식/상태 전이와 task identity·spec/source/input fence를 정의한다.<br>2. native owner/lease/자원 계약을 통해 readiness·dispatch·crash recovery를 구현하고 stale/중복/unknown을 차단하는 fixture를 통과한다. | 기존 parallel_prepare는 cycle/참조 검증과 비권한 M2 spool임을 재확인.<br>남음: 실행 scheduler·저장 형식/권한 선택; 현재는 명시적 미구현 |
+| `TYPED_EDGE_EVIDENCE_ACCEPTANCE` · typed edge evidence acceptance | 1. 선택 predecessor spec/attempt/artifact/evidence-policy/baseline을 고정한다.<br>2. ARTIFACT_OBSERVED·QA_ACCEPTED·INTEGRATION_ACCEPTED별 현재 증거와 승인 조건을 native 계약으로 판정하고 stale/잘못된 issuer/단순 hash 승격을 거부한다. | edge type/mode의 구문 검증과 실제 evidence acceptance를 구분.<br>남음: 실제 edge acceptance 구현과 선택된 evidence authority 계약 |
+| `RESOURCE_RECEIVER_BROKER` · resource receiver broker | 1. owner/lease/epoch에 결합된 slot·CPU·memory receiver grant/release를 원자적으로 구현한다.<br>2. 경쟁·중복·취소·crash·만료에서 과다 할당과 권한 이전이 없음을 검증한다. 기존 native 자원 계약을 재사용한다. | 자원 수치 준비안이 receiver 예약·소유권을 생성하지 않음을 확인.<br>남음: receiver broker 구현과 자원/소유권 정책 선택 |
+| `MERGE_QUEUE` · merge queue | 1. 후보 identity·현재 target baseline·검증 결과와 정확한 owner action에 결합된 queue/state를 구현한다.<br>2. 동시 후보·순서·취소·target drift·결과 유실·unknown을 차단하고 자동 재실행하지 않는 절차를 검증한다. | merge_prepare는 비권한 제안이며 queue/adoption/merge 실행이 아님을 확인.<br>남음: merge queue 구현·저장/순서 정책; 실제 merge 권한은 별개 |
+| `INTEGRATION_WORKSPACE_AND_FRESH_QA` · integration workspace·fresh QA broker | 1. 선택 후보와 현재 target을 결합한 격리 integration workspace를 구현한다.<br>2. 그 정확한 tree에서 별도 승인된 새 QA와 증거를 생성·검증하고 후보 또는 target drift 시 채택을 차단한다. | 후보 개별 검증을 통합 target QA PASS로 승격하지 않는 fixture 확인.<br>남음: integration workspace/QA broker 구현·새 테스트 Work·정확한 새 QA 승인; 기존 QA 재실행 금지 |
+| `TARGET_REF_CAS_BROKER` · target ref CAS broker | 1. owner 승인에 expected target ref/OID·후보 tree·정확한 update를 pin한다.<br>2. 기존 fence/target CAS를 사용해 경쟁·ABA·source/target drift를 원자적으로 거부하며 crash/unknown 결과를 보존한다. | 기존 target-check·hash 확인과 실제 ref 교체 권한을 구분.<br>남음: ref CAS broker 구현·정확한 target update 승인; 실제 merge는 이번 범위 밖 |
+| `MERGE_PUBLICATION_RECEIPT` · merge publication receipt | 1. 권위 있는 CAS 결과의 before/after target·candidate·승인·integration/QA 근거를 immutable receipt에 연결한다.<br>2. receipt와 journal의 원자성·재조회·결과 유실/COMMIT_UNKNOWN을 검증하고 관측되지 않은 merge 완료를 생성하지 않는다. | 검증/후보 hash를 실제 merge 영수증으로 만들지 않음.<br>남음: merge publication 구현 및 선행 queue/integration/CAS broker |
+| `P7_SELF_CONTAINED_RUNTIME` · P7 자체 완결 runtime | 1. 선택 target별 Python/SDK/native 및 의존 라이브러리·license/inventory를 재현 가능하게 포함한다.<br>2. 외부 개발 환경 없는 clean/offline host에서 설치/시작·owner scope 보존을 검증한다. 기존 runtime pin은 자동 이전하지 않는다. | 현재 package는 external-owner-pinned runtime이며 자체 완결품이 아님을 유지.<br>남음: runtime 공급/포함·플랫폼·license 정책 선택과 실제 구현 |
+| `P7_SIGNING_AND_TRUST_ROOT` · P7 배포 서명·선택된 trust root | 1. issuer/key custody·trust root·서명 형식·만료/폐기 정책을 선택한다.<br>2. package/manifest/target identity를 서명하고 검증기에서 변조·알 수 없는 키·만료·폐기를 fail closed로 거부한다. | ad-hoc platform 서명을 정식 배포 서명으로 승격하지 않음.<br>남음: owner의 trust/key 정책 선택·서명/검증 구현; 이 작업에서 credential 생성/선택하지 않음 |
+| `P7_FULL_HOST_QUALIFICATION_AND_UPDATE_DISTRIBUTION` · P7 정식 host qualification·서명된 유통 연계 | 1. 선택 target별 ABI·dependency closure·signed manifest·실제 설치/reload/호환성을 검증한다.<br>2. 기존 D5의 freeze/fence/probe/ready/partial/unknown 보존을 사용해 선택된 유통 채널·trust/migration을 연결한다. 공개 게시 권한은 별도다. | 기존 D5 owner updater는 구현됨을 보존하고 P7 release 체계와 구분.<br>남음: 앞선 P7 runtime/서명·host qualification 구현 및 release/channel 정책 |
+
+## 현재 범위 밖 9개
+
+| ID · 항목 | 완료 조건 | 이번에 확인한 범위 / 남은 조건 |
+| --- | --- | --- |
+| `O01` · Windows native/desktop 대상 | 1. 이번 작업에서는 범위 밖 유지가 종료 조건이다.<br>2. Windows를 목표로 추가할 경우 native POSIX 의존·runtime/installer/host 계약을 설계·구현하고 실제 Windows client/ABI 검증을 별도로 승인한다. | Windows는 현재 package target에 없으며 성공 대상으로 표시하지 않음.<br>남음: 별도 Windows 지원 목표·구현·검증 scope |
+| `O02` · Hosted/remote·새 외부 서비스·credential 접근 | 1. 현재 범위 밖 상태와 권한 비확대를 유지한다.<br>2. 향후 필요하면 정확한 서비스·계정·데이터·전송/credential 효과·보존 정책의 별도 승인을 확보한 후 해당 범위만 검증한다. | Hosted/새 외부 서비스·credential/network 접근을 수행하지 않음.<br>남음: 별도 Hosted/remote/service/credential 권한 선택 |
+| `O03` · 실제 target merge | 1. 이번에는 금지/NOT_RUN 유지가 종료 조건이다.<br>2. 향후 별도 실제 merge 승인과 구현된 queue/integration-QA/CAS/receipt 경로가 모두 있어야 정확한 target에서 검증한다. | 실제 target merge를 수행하지 않음.<br>남음: 사용자의 실제 merge 승인과 미구현 broker 선행조건 |
+| `O04` · 공개 배포·자동 업데이트 게시·채널 선택 | 1. 이번에는 공개 게시 금지와 private 검토본 범위를 유지한다.<br>2. 향후 release issuer/trust/channel/배포물·update/migration을 명시 승인하고 P7 선행조건을 충족한다. | 공개 배포·자동 업데이트 게시·채널 선택을 하지 않음.<br>남음: 별도 공개 배포/게시 승인과 P7 구현 |
+| `O05` · commit/push·PR·출시 | 1. 이번에는 변경을 미커밋 상태로 보존하고 commit/push/PR/출시를 수행하지 않는 것이 종료 조건이다.<br>2. 향후 사용자 명시 지시 없이는 재개하지 않는다. | 개발/원본 저장소의 commit/push/PR/출시를 수행하지 않음.<br>남음: 이번 사용자 금지. 완료를 위해 해제할 항목이 아님 |
+| `O06` · 기존 실행·QA·COMMIT_UNKNOWN 재실행/repair/reconcile | 1. 기존 실행·QA·COMMIT_UNKNOWN을 replay/repair/reconcile/자동 rollback하지 않는다.<br>2. 원래 불확실 결과·승인·증거를 미해결로 보존한다. 새 Work 성공도 기존 unknown의 해소가 아니다. | 보호 manifest와 기존 승인·native 결과를 해시 대조하고 unknown 상태를 보존.<br>남음: 이번 금지/보존 의무. 정상 완료로 바꾸기 위한 재실행 대상이 아님 |
+| `O07` · 생산 Work·전체 사용자 자료 전수 스캔·변경 | 1. 이번에는 범위 제한을 유지한다.<br>2. 향후 정확한 프로젝트·Work·데이터·읽기/쓰기·보존 범위의 별도 승인이 있을 때만 해당 범위에서 검증한다. | 승인된 명시 manifest·정책 경로만 대조하고 생산 Work/전체 호스트를 스캔·변경하지 않음.<br>남음: 현재 미선택인 생산 데이터 권한; 플러그인 설치에서 추론 금지 |
+| `O08` · Claude Native Skills 자동 설치·자동 발견 확장 | 1. 지원하는 MCP 안내의 범위만 정확히 안내한다.<br>2. 별도 native Skills 전달을 원하면 공식 지원 설치 형식·skill identity/버전/권한·실제 Claude 발견/실행 근거를 별도로 검토한다. | 현재 MCPB guidance와 Codex SKILL layout을 Claude native Skills 자동 발견으로 주장하지 않음.<br>남음: 별도의 Claude native Skills 전달 목표와 지원 경로 선택 |
+| `O09` · hash로 내용 진실성·모델 이해·독립 issuer 신원 인증 | 1. 이번에는 hash가 내용 진실성·모델 이해·인간 issuer 신원을 보장한다는 주장을 하지 않는다.<br>2. 추가 보증을 요구한다면 검증 가능한 threat model·독립 issuer/서명/수신 증거를 별도로 정의한다. hash 일치만으로는 이 보증을 완결할 수 없다. | hash 무결성·agent 진술·LOCAL_COOPERATIVE·현재 native 판정을 구분.<br>남음: 기존 보증 경계 밖의 별도 assurance 목표; 미실행 테스트 한 번으로 해소 불가 |
+
+## 실제 근거와 후속 순서
+
+1. 현재 승인 범위의 검사는 위 결과로 종료한다. 기존 실제 실행·QA·COMMIT_UNKNOWN과 owner pin을 재사용하거나 자동 재실행하지 않는다.
+2. U02/U03/U06/U07을 실제 검증하려면 각각 필요한 새 synthetic 입력·정확한 action/effects/host 계약을 구체적으로 검토해야 한다. 기존 M2 준비안과 native 승인 action은 다른 권위다.
+3. U04/U05/U09는 지원되는 다른 host와 runtime closure 근거가 필요하다. 현재 macOS 정적 의존성 검사는 OS shared-cache·optional/dlopen 경로와 다른 target 인증을 대체하지 않는다.
+4. U08은 선택된 billing 원본/권한이 필요하다. 확인되지 않은 비용·Claude usage는 unknown/null로 유지한다. U10의 원격 CI는 현재 미커밋 bytes를 전달할 별도 허용 경로가 없으므로 NOT_RUN이다.
+5. P4/P5 일곱 항목과 P7 세 항목은 선행 설계·권한·저장/trust 선택 및 구현이 필요하다. 단순 실행 허가만으로 완료되지 않는다. 기존 D5 owner 관리가 미구현이라는 뜻은 아니다.
+6. 범위 밖 아홉 항목은 이번에 반드시 실행해서 없앨 backlog가 아니다. 금지·지원 대상·보증 경계로 유지하며 별도 목표가 정해질 때만 재검토한다.
+
+근거: `m7m8-exit-conditions-20261027/private/grant-matrix.json`, `private/contracts-regression.log`, `private/python-runtime-dependencies.json`, `private/macho-dependency-graph.json`, `private/local-ci-selection.json`. SDK 메타데이터 검사는 현재 환경의 base requirements에 한정하고 optional extras나 임의 동적 import까지 인증하지 않았다. 의존성 진단에 사용한 pip vendored packaging은 기존 도구를 읽어 썼으며 새 패키지를 설치하지 않았다.
+
+원본 소스·기존 변경·승인·Work·evidence·CAS·journal·registry·기존 COMMIT_UNKNOWN 보존과 설치 한 개/연결 한 개 대조는 최종 보존 원장에 기록한다. commit/push·실제 외부 서비스·새 client/Work 실행·승인 적용은 수행하지 않았다.
+
+
+---
+
+## 2026-10-27 Codex Desktop 세 조회 복구 — 보존된 실제 PASS
+
+**실제 Codex Desktop 대화에서 지정 세 조회를 각 1회 완료했다. 전체 M7/M8 출시 검증 완료는 아니다.** 검증 의무 묶음 기준 확인 11개, 미검증 9개·미구현 10개·현재 범위 밖 9개다. 고정 owner backlog 83개·unsupported 17개는 그대로다.
+
+설정에서 Golem 0.2.5 한 개가 활성이고 launcher·정책 pin은 정상이었다. 실제 실패 대화의 엔진 로그는 initialize handshake 종료 뒤 `omitting MCP server without an exact ready client`를 기록했다. 같은 설치 bytes의 직접 initialize는 성공했지만, 재요청과 공식 동일본 재설치만으로는 해당 대화의 실패한 client가 갱신되지 않았다. 지정 테스트 대화만 공식 보관·복원 후 Desktop에서 다시 열자 새 `thread/resume`의 Golem client 초기화가 성공했고 실제 도구가 노출됐다. 최초 handshake 종료의 더 깊은 OS/process 원인은 확인하지 못했으므로 단정하지 않는다. 앱 전체 재시작·내부 DB 편집·cache 직접 수정은 하지 않았다.
+
+| 실제 Desktop 호출 | 횟수 | 시간 | 반환 근거 |
+| --- | --- | --- | --- |
+| projects_list | 1 | 88ms | AVAILABLE, 기존 read 세 도구의 교집합 |
+| work_inspect / status | 1 | 234ms | AVAILABLE, agent session sequence=0, session acceptance_verified=false |
+| completion_check / selection | 1 | 2,695ms | AVAILABLE, native action=DONE, acceptance_verified=true, generation=9, completion_sequence=1 |
+
+status의 session 판정과 native 현재 selection의 완료 판정은 다른 계약이다. completion boundary.session_sequence=0이며 이를 generation=9와 비교해 drift나 실패로 판정하지 않는다. development-result freshness=CURRENT/status는 빈 문자열, qa-result freshness=CURRENT/status=PASS를 그대로 기록했다. 세 응답 모두 native_state_changed=false, execution_authorized=false다. native 읽기는 원래 15초 한도에서 2.482399초에 종료했고 observation hash는 앞선 검증과 같았다. 기존 QA를 실행한 것이 아니다.
+
+설치 파일 9개와 global config bytes는 동일하며 launcher·policy·native engine·producer pin을 바꾸지 않았다. Claude와 기존 승인·Work·evidence·CAS·journal·COMMIT_UNKNOWN은 그대로다. 검증 대화의 스킬 파일 읽기 1회는 기존 filesystem allowlist에 의해 거부됐으며 권한을 확대하지 않았다. 명시된 읽기 지시와 실제 도구 설명으로 검증했다. 잘못된 서버·Work·중복/누락/순서·실패·결과 대체를 거부하는 증거 대조 회귀 8개가 통과했다. 실행·QA·승인 적용·실제 merge·commit/push는 하지 않았다.
+
+실제 대화: `Golem M7 승인 읽기 최종 검증 2026-10-27` (`01a17c6a-3b2f-7703-83d2-23f6dc1c360d`), 성공 turn `01a17c99-0424-78d2-9faa-9a86ccc087d1`. 상세 원장과 raw trace는 owner-private workspace `codex-desktop-discovery-20261027/validation.json`, `remaining-matrix.json`, `검증결과.md`에 있다. 아래 0회 차단은 복구 전 당시 결과이며 삭제하거나 PASS로 덮어쓰지 않는다.
+
+---
+
+## 2026-10-27 잔여 감사 당시 판정 — 복구 전
+
+**M7·M8 전체 완료는 아니다.** 기존 승인으로 가능한 정적·fixture·회귀와 설치 보존 확인을 마쳤다. 39개 검증 의무 묶음 중 10개를 확인했고, **미검증 10 · 미구현 10 · 현재 범위 밖 9**를 구분했다. 이는 operation 수가 아니다. 고정 원장의 owner backlog 83개와 unsupported 17개는 ID·권한 경계를 그대로 유지한다.
+
+현재 Codex 0.2.5는 `golem@golem-m7-finish-complete`의 read profile 세 조회만 허용한다. Claude task 0.1.8은 기존 검토본 한 개와 정책을 보존했다. 설치·launcher·producer pin·권한은 변경하지 않았다.
+
+이전 공식 bundled app-server 모델 세션의 세 조회와 native DONE 관측은 그 범위의 PASS다. 이번에 명시 승인으로 생성한 실제 Codex Desktop 대화는 **도구 미노출, 세 도구 각 0회, BLOCKED / NOT_RUN**이다. 사용자가 전달한 후속 답변도 같은 0회 결과이며 새로고침 성공 근거가 아니다. 새 결과의 delivery·session sequence·native generation·completion_sequence·action·acceptance_verified·evidence freshness/status는 모두 미확인이다. Computer Use의 Codex 앱 접근 차단 때문에 GUI 선택·재로딩을 대신 수행하지 못했고, SDK/CLI 결과로 이 공백을 대체하지 않았다. 후속 호출·재시도는 하지 않았다.
+
+### 이번 검증과 수정
+
+| 검사 | 결과와 한계 |
+| --- | --- |
+| macOS Debug native·CLI·Python/Node bindings·event bridge 등 CTest 413개 | 첫 전체 실행 412 PASS / daemon_cli 1 FAIL. 공백 포함 Python 경로의 임시 worker shebang을 canonical 경로로 수정한 후 해당 1개 PASS. 전체 413개에 통과 근거가 있으며 단일 전체 green 실행을 주장하지 않는다. |
+| Python 전체 회귀 1,423개 | fixture shebang 두 곳 수정·공백 경로 회귀 추가 후 전체 1,422 PASS / export 진단 1 timeout. 부하가 끝난 뒤 해당 1개가 원래 60초 한도로 23.101초 PASS. 최초 실패와 재검증을 보존했다. |
+| capability 회귀 | 368 PASS. 전체 Python 회귀의 부분집합이므로 합산하지 않는다. |
+| 고정 산출물 | 8개 byte 동일. 생성기의 불필요한 EOF 빈 줄만 수정하고 development-source digest를 갱신했다. 비교기를 완화하거나 owner/runtime pin을 바꾸지 않았다. |
+| 5개 profile | 각 archive 이중 재생성·엄격 verify·schema 확인, SDK stdio discovery·권한 교집합·미허용 Work 거부 PASS. Desktop/실제 native Work E2E는 아니다. Claude 설치 task archive bytes 동일. |
+| 원격 CI 관측 | f7d5d89는 5 jobs 성공/8 skipped. c253944는 전체 실패이며 native/bindings의 개별 성공만 별도 근거다. 현재 미커밋 bytes의 CI는 NOT_RUN. |
+| 보존 | 기존 495개 파일 사전 일치, 설치 원장 한 파일의 계획된 갱신을 제외한 494개와 Claude 86개 byte 동일. 승인·Work·evidence·CAS·journal·설정·기존 COMMIT_UNKNOWN 보존. |
+
+제품 runtime·native core·승인 검사는 수정하지 않았다. 수정 파일은 `tools/test_integration.py`, `tests/c/daemon_integration.py`, `tools/capability_refresh.py`와 그 development review digest·생성 원장 및 설명 문서다. 기존 실행·QA·COMMIT_UNKNOWN 재실행, 승인 적용, 실제 merge, commit/push는 하지 않았다. 직접 의존성/ad-hoc 서명 관측은 정식 release 서명이나 전체 transitive closure 검증이 아니다. Client token counter는 관측값으로만 보존하며 실제 비용·청구 합계·Claude usage는 unknown/null이다.
+
+### 항목별 분류
+
+각 항목의 source 근거·후속 조건·과거 NOT_RUN/미구현 ID 매핑은 workspace 검증 원장 `m7m8-remaining-audit-20261027/remaining-matrix.json`에 있다. 과거 두 목록의 모든 ID를 매핑했고 원본 결과 JSON은 수정하지 않았다.
+
+| ID | 항목 | 현재 결과 |
+| --- | --- | --- |
+| V01 | 현재 source의 macOS native·CLI·bindings fixture 전체 | PASS_WITH_RETEST |
+| V02 | 현재 Python 도구·MCP·승인·격리 회귀 | PASS_WITH_RETEST |
+| V03 | 수정된 정적 생성기·원장·권한 경계 회귀 | PASS |
+| V04 | 다섯 profile의 실제 SDK stdio discovery·교집합·거부 | PASS |
+| V05 | 다섯 profile package 재생성·allowlist·schema 검증 | PASS |
+| V06 | 고정 원장 산출물 여덟 개의 엄격한 byte 재현 | PASS |
+| V07 | 두 client 설치본·정책·producer·Work 보존 | PASS |
+| V08 | 이미 실행된 원격 CI의 revision·lane별 근거 | PASS_RECORDED_REVISIONS_ONLY |
+| V09 | 기존 Codex 다섯 세션의 client token counter 관측 | PASS_CLIENT_COUNTER_OBSERVATION |
+| V10 | 현재 macOS native 직접 의존성·platform 서명 관측 | PASS_LIMITED_INSPECTION |
+| U01 | 현재 실제 Codex 대화의 도구 노출·세 조회 | 미검증 / BLOCKED_NOT_RUN |
+| U02 | 양쪽 client의 모든 profile·MCP operation 조합 | 미검증 / NOT_RUN |
+| U03 | 실제 client가 주도하는 native prepare·finish 전체 흐름 | 미검증 / NOT_RUN |
+| U04 | Linux 실제 Desktop client E2E | 미검증 / NOT_RUN |
+| U05 | 선언한 다른 architecture의 실제 host·ABI qualification | 미검증 / NOT_RUN |
+| U06 | M4 helper의 실제 network·credential·service 효과 | 미검증 / NOT_RUN |
+| U07 | M5 owner host의 실제 client candidate/workspace 흐름 | 미검증 / NOT_RUN |
+| U08 | 실제 provider invoice·비용·Claude usage 검증 | 미검증 / UNKNOWN_NULL |
+| U09 | 전체 transitive dynamic/runtime dependency closure | 미검증 / NOT_RUN |
+| U10 | 현재 미커밋 변경 bytes의 새로운 원격 CI | 미검증 / NOT_RUN |
+| TASK_DAG_SCHEDULER | task DAG scheduler | 미구현 / NOT_IMPLEMENTED |
+| TYPED_EDGE_EVIDENCE_ACCEPTANCE | typed edge evidence acceptance | 미구현 / NOT_IMPLEMENTED |
+| RESOURCE_RECEIVER_BROKER | resource receiver broker | 미구현 / NOT_IMPLEMENTED |
+| MERGE_QUEUE | merge queue | 미구현 / NOT_IMPLEMENTED |
+| INTEGRATION_WORKSPACE_AND_FRESH_QA | integration workspace·fresh QA broker | 미구현 / NOT_IMPLEMENTED |
+| TARGET_REF_CAS_BROKER | target ref CAS broker | 미구현 / NOT_IMPLEMENTED |
+| MERGE_PUBLICATION_RECEIPT | merge publication receipt | 미구현 / NOT_IMPLEMENTED |
+| P7_SELF_CONTAINED_RUNTIME | P7 자체 완결 runtime | 미구현 / NOT_IMPLEMENTED |
+| P7_SIGNING_AND_TRUST_ROOT | P7 배포 서명·선택된 trust root | 미구현 / NOT_IMPLEMENTED |
+| P7_FULL_HOST_QUALIFICATION_AND_UPDATE_DISTRIBUTION | P7 정식 host qualification·서명된 유통 연계 | 미구현 / NOT_IMPLEMENTED |
+| O01 | Windows native/desktop 대상 | 범위 밖 / OUT_OF_SCOPE |
+| O02 | Hosted/remote·새 외부 서비스·credential 접근 | 범위 밖 / OUT_OF_SCOPE |
+| O03 | 실제 target merge | 범위 밖 / PROHIBITED_NOT_RUN |
+| O04 | 공개 배포·자동 업데이트 게시·채널 선택 | 범위 밖 / PROHIBITED_NOT_RUN |
+| O05 | commit/push·PR·출시 | 범위 밖 / PROHIBITED_NOT_RUN |
+| O06 | 기존 실행·QA·COMMIT_UNKNOWN 재실행/repair/reconcile | 범위 밖 / PROHIBITED_PRESERVED_UNRESOLVED |
+| O07 | 생산 Work·전체 사용자 자료 전수 스캔·변경 | 범위 밖 / OUT_OF_SCOPE |
+| O08 | Claude Native Skills 자동 설치·자동 발견 확장 | 범위 밖 / NOT_CLAIMED |
+| O09 | hash로 내용 진실성·모델 이해·독립 issuer 신원 인증 | 범위 밖 / NOT_CLAIMED |
+
+상세 raw log·재검증·해시·설치 대조는 owner-private workspace의 `m7m8-remaining-audit-20261027/validation.json`과 `검증결과.md`에 기록한다. 문서/로컬 검사 완료를 제품 전체 출시나 남은 Desktop 검증 완료로 승격하지 않는다.
+
+---
+
+## 아래는 당시 r9 검증 기록
+
+아래 버전·설치 경로·PASS는 당시 source/artifact/승인/Work에 한정한다. 현재 설치 및 잔여 판정은 위 기록을 따른다.
+
+**당시 r9 결과: Claude task 0.1.8 업데이트 후 별도 Work에서 QA 1회·읽기 전용 저장 결과 재조회·QA 결과/완료 문서 제출·native finalize·보고서 물질화가 실제 Claude client에서 성공했다. Codex와 새 Claude Work 모두 현재 DONE / acceptance_verified=true / generation 9 / completion_sequence 1이다. 과거 Claude COMMIT_UNKNOWN은 재실행·repair·reconcile 없이 미해결로 보존한다. 판정 범위는 선언된 macOS synthetic C Work와 현재 M8 정합성 검사이며 제품 전체 출시 완료가 아니다.**
+
+Codex·Claude의 개선본 실제 설치, 읽기·입력 의존 응답·미허용 Work 차단·M2 준비/확인·native claim·동일 ID 저장 결과 재조회를 관측했다. 추가 C QA는 별도 사례로 기록한다. **두 client의 선언된 synthetic C Work 완료와 모든 profile·OS·제품 전체 배포 완료를 구분한다.** r8의 Claude 보류는 후속 사용자 지시로 해제했고, 아래 r9 기록은 당시 상태다. 당시 기계 판독 결과는 [검증 행렬](mcp-m7-m8-validation.json)에 있다.
 
 ## 범위와 판정 기준
 

@@ -130,13 +130,16 @@ def metadata(path):
 
 
 def run_private(argv, *, destination, timeout, env=None, cwd=None, source=None,
-                capture_output=False, output_limit=8192, protocol=None):
+                capture_output=False, output_limit=8192, protocol=None, owned_stop=None, protocol_stderr=False):
     """Metadata-only interactive child: never persist prompt-bearing argv or streams."""
     command = list(map(str, argv))
-    if not command or any("\0" in s for s in command) or not math.isfinite(timeout) or timeout <= 0:
+    owned_service = timeout is None and owned_stop is not None and callable(getattr(owned_stop,"is_set",None)) and protocol is not None
+    if not command or any("\0" in s for s in command) or not (owned_service or isinstance(timeout,(int,float)) and math.isfinite(timeout) and timeout > 0):
         raise ValueError("invalid private process parameters")
     if type(capture_output) is not bool or type(output_limit) is not int or not 0 < output_limit <= LIMIT:
         raise ValueError("invalid private output parameters")
+    if type(protocol_stderr) is not bool or (protocol_stderr and protocol is None) or (owned_stop is not None and not owned_service):
+        raise ValueError("invalid owned protocol parameters")
     if protocol is not None and (not callable(protocol) or capture_output):
         raise ValueError("invalid private protocol parameters")
     directory = private_directory(destination)
@@ -155,13 +158,13 @@ def run_private(argv, *, destination, timeout, env=None, cwd=None, source=None,
         child = subprocess.Popen(command, cwd=cwd, env=environment, start_new_session=True,
             stdin=subprocess.PIPE if protocol else subprocess.DEVNULL if capture_output else None,
             stdout=subprocess.PIPE if capture_output or protocol else None,
-            stderr=subprocess.DEVNULL if protocol else subprocess.PIPE if capture_output else None)
+            stderr=subprocess.PIPE if protocol_stderr else subprocess.DEVNULL if protocol else subprocess.PIPE if capture_output else None)
         reason = "EXIT"
         try:
             if protocol is not None:
                 # The adapter owns bounded framing and the deadline; this layer
                 # owns source/executable identity, process cleanup and redaction.
-                value = protocol(child, started + timeout)
+                value = protocol(child, None if owned_service else started + timeout)
                 reason = "PROTOCOL_COMPLETE"
                 return value
             if capture_output:
@@ -197,6 +200,15 @@ def run_private(argv, *, destination, timeout, env=None, cwd=None, source=None,
         raise
     finally:
         if child is not None:
+            if owned_service and child.poll() is None:
+                try:
+                    os.killpg(child.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+                try:
+                    child.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    pass
             try:
                 os.killpg(child.pid, signal.SIGKILL)
             except ProcessLookupError:
@@ -209,6 +221,7 @@ def run_private(argv, *, destination, timeout, env=None, cwd=None, source=None,
             if protocol:
                 child.stdin.close()
                 child.stdout.close()
+                if protocol_stderr:child.stderr.close()
             elif capture_output:
                 child.stdout.close()
                 child.stderr.close()
