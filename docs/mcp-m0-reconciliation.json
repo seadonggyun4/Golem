@@ -507,7 +507,9 @@
       "tools/integration_mutation_contract.py",
       "tools/integration_mutation_mcp.py",
       "tools/integration_mutations.py",
+      "tools/integration_owner_desktop.py",
       "tools/integration_owner_maintenance.py",
+      "tools/integration_owner_review.py",
       "tools/integration_parallel_actions.py",
       "tools/integration_parallel_hosts.py",
       "tools/integration_parallel_preparations.py",
@@ -556,9 +558,7 @@
       "tools/verify_runtime_legacy.py",
       "tools/verify_update_schema.py",
       "plugins/golem/skills/golem-work/agents/openai.yaml",
-      "plugins/golem/skills/golem-work/references/profiles.md",
-      "tools/integration_owner_review.py",
-      "tools/integration_owner_desktop.py"
+      "plugins/golem/skills/golem-work/references/profiles.md"
     ],
     "selected_required_sources": [
       "CMakeLists.txt",
@@ -955,7 +955,9 @@
       "tools/integration_mutation_contract.py",
       "tools/integration_mutation_mcp.py",
       "tools/integration_mutations.py",
+      "tools/integration_owner_desktop.py",
       "tools/integration_owner_maintenance.py",
+      "tools/integration_owner_review.py",
       "tools/integration_parallel_actions.py",
       "tools/integration_parallel_hosts.py",
       "tools/integration_parallel_preparations.py",
@@ -1004,9 +1006,7 @@
       "tools/verify_runtime_legacy.py",
       "tools/verify_update_schema.py",
       "plugins/golem/skills/golem-work/agents/openai.yaml",
-      "plugins/golem/skills/golem-work/references/profiles.md",
-      "tools/integration_owner_review.py",
-      "tools/integration_owner_desktop.py"
+      "plugins/golem/skills/golem-work/references/profiles.md"
     ],
     "public_observations": [
       {
@@ -57535,7 +57535,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "16b034e0f4c1e67ca36090f38c310d5a679b1995fb8d61054dc6a848e709b015",
+      "sha256": "da4d5f0ff35d6fd22990dbeca8be176ef8c93ba51691a6a5d154f57f18515d8b",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },

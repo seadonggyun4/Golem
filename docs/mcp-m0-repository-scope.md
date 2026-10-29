@@ -4021,7 +4021,9 @@ This is static inventory reconciliation, never native execution, authority or pr
 | tools/integration_mutation_contract.py | YES |
 | tools/integration_mutation_mcp.py | YES |
 | tools/integration_mutations.py | YES |
+| tools/integration_owner_desktop.py | YES |
 | tools/integration_owner_maintenance.py | YES |
+| tools/integration_owner_review.py | YES |
 | tools/integration_parallel_actions.py | YES |
 | tools/integration_parallel_hosts.py | YES |
 | tools/integration_parallel_preparations.py | YES |
@@ -4071,7 +4073,5 @@ This is static inventory reconciliation, never native execution, authority or pr
 | tools/verify_update_schema.py | YES |
 | plugins/golem/skills/golem-work/agents/openai.yaml | YES |
 | plugins/golem/skills/golem-work/references/profiles.md | YES |
-| tools/integration_owner_review.py | YES |
-| tools/integration_owner_desktop.py | YES |
 
 ## Blockers
