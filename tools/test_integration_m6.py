@@ -28,6 +28,45 @@ class FakeService:
     def call(self,name,args):self.calls.append((name,args));return {'state':'COMMIT_UNKNOWN','request_id':args.get('request_id'),'automatic_retry_allowed':False}
 
 class ProfileBoundaries(unittest.TestCase):
+    def test_workflow_diagnostic_distinguishes_ceiling_owner_and_client(self):
+        names=['document_submit','execution_request','completion_finalize','completion_report','completion_check']
+        task=profiles.diagnose('task',names,names[:-1])
+        flow=task['workflows']['document_qa_completion']
+        self.assertTrue(flow['server_tools_present'])
+        self.assertEqual(flow['client_missing'],['completion_check'])
+        self.assertFalse(flow['execution_authorized'])
+        self.assertEqual(flow['client_e2e'],'NOT_RUN')
+        prepare=profiles.diagnose('prepare',names)['workflows']['document_qa_completion']
+        self.assertIn('execution_request',prepare['profile_excluded'])
+        self.assertEqual(prepare['owner_service_unavailable'],[])
+        revoked=profiles.diagnose('task',[])['workflows']['document_qa_completion']
+        self.assertEqual(revoked['profile_excluded'],[])
+        self.assertEqual(set(revoked['owner_service_unavailable']),set(names))
+        self.assertIsNone(revoked['client_missing'])
+
+    def test_workflow_diagnostic_never_promotes_client_claim_to_authority(self):
+        result=profiles.diagnose('prepare',[],['execution_request','completion_finalize'])
+        self.assertEqual(result['available_tools'],[])
+        self.assertEqual(result['client_observation'],'CALLER_SUPPLIED_NOT_AUTHENTICATED')
+        self.assertFalse(result['grants_created'])
+        for value in ('execution_request',[None],['x']*257):
+            with self.assertRaises(c.IntegrationError):profiles.diagnose('task',value)
+
+    def test_discovery_diagnostics_preserve_budget_and_work_isolation(self):
+        from types import SimpleNamespace
+        backend=FakeService();backend.names=['projects_list']
+        backend.transfer=SimpleNamespace(current=lambda:{'max_result_bytes':128})
+        original={'projects':[{'project_id':'p','work_id':'a','tools':['work_inspect']},
+                              {'project_id':'p','work_id':'b','tools':['completion_check']}]}
+        with patch.object(backend,'call',return_value=original):
+            with self.assertRaises(c.IntegrationError) as caught:profiles.Scoped(backend,'task').call('projects_list',{})
+            self.assertEqual(caught.exception.code,'RESULT_BUDGET_EXCEEDED')
+            backend.transfer.current=lambda:{'max_result_bytes':65536}
+            result=profiles.Scoped(backend,'task').call('projects_list',{})
+        self.assertEqual(result['projects'][0]['workflow_capabilities']['available_tools'],['work_inspect'])
+        self.assertEqual(result['projects'][1]['workflow_capabilities']['available_tools'],['completion_check'])
+        self.assertNotIn('workflow_capabilities',original['projects'][0])
+
     def test_unset_client_templates_never_select_optional_authority(self):
         values={'GOLEM_FEATURE_PROFILE':'quality','GOLEM_PROFILE_POLICY':'/never-read','GOLEM_PROFILE_POLICY_SHA256':'a'*64,'GOLEM_APPROVE_PROFILE_OWNER':'true'}
         for name in ('resource','helper','host'):

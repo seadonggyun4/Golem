@@ -2217,7 +2217,7 @@
       "task"
     ],
     "owner_backlog_count": 83,
-    "checked_functions": 66,
+    "checked_functions": 88,
     "blockers": [],
     "owner_backlog_discharged": false,
     "actual_installation": "NOT_RUN",
@@ -4827,14 +4827,16 @@
       "tools/integration_owner_maintenance.py",
       "plugins/golem/skills/golem-work/SKILL.md",
       "plugins/golem/skills/golem-work/agents/openai.yaml",
-      "plugins/golem/skills/golem-work/references/profiles.md"
+      "plugins/golem/skills/golem-work/references/profiles.md",
+      "tools/integration_owner_review.py",
+      "tools/integration_owner_desktop.py"
     ],
     "blockers": [],
     "execution_verified": false
   },
   "reviewed_effects": {
     "blockers": [],
-    "reviewed_capabilities": 1120,
+    "reviewed_capabilities": 1122,
     "execution_verified": false
   },
   "boundary_contracts": {

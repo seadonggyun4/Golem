@@ -33,6 +33,16 @@ def inspect_m6(sources,ledger,model,backlog):
         if node is None or fingerprint(_shape(node))!=shape:errors.append(('M6_FUNCTION_CHANGED',(path,name)))
         else:checked+=1
     guards=(
+      ('tools/integration_owner_desktop.py','Controller.__init__',"c.require(approve_ui is True,'OWNER_DESKTOP_CONSENT_REQUIRED')"),
+      ('tools/integration_owner_desktop.py','Controller.__init__',"c.require(scoped.profile['profile'] in ('prepare','task','quality','parallel'),'OWNER_DESKTOP_PREPARATION_REQUIRED')"),
+      ('tools/integration_owner_review.py','FirstActionDraft.__init__',"c.require(isinstance(selected_transfer,transfer.Transfer),'OWNER_REVIEW_D2_REQUIRED')"),
+      ('tools/integration_owner_review.py','FirstActionDraft.authorize',"actions.Policy.authorize(self,entry)"),
+      ('tools/integration_owner_desktop.py','Controller.inspect',"self.scoped.call('plan_read',args)"),
+      ('tools/integration_owner_desktop.py','Controller.export',"c.require(confirmed is True,'OWNER_REVIEW_REQUIRED')"),
+      ('tools/integration_owner_desktop.py','Controller.export',"c.require(self.selection is not None and not self.attempted,'OWNER_DESKTOP_REVIEW_REQUIRED')"),
+      ('tools/integration_owner_desktop.py','Controller.export',"c.require(c.sha(raw)==attachment_sha256,'OWNER_ATTACHMENT_CHANGED')"),
+      ('tools/integration_owner_review.py','export_candidate',"c.require(approve_review is True,'OWNER_REVIEW_REQUIRED')"),
+      ('tools/integration_owner_review.py','export_candidate',"c.require(policy.current()==baseline,'MUTATION_POLICY_CHANGED')"),
       ('tools/integration_feature_profiles.py','Scoped.tools',"sorted(set(self.service.tools()) & set(self.profile['tools']))"),
       ('tools/integration_feature_profiles.py','Scoped.call',"c.require(name in self.profile['tools'],'FEATURE_PROFILE_SCOPE')"),
       ('tools/integration_feature_profiles.py','Scoped.call',"c.require(name in self.service.tools(),'FEATURE_OWNER_SCOPE')"),
@@ -100,6 +110,19 @@ def inspect_m6(sources,ledger,model,backlog):
         flags={key.value:value for key,value in zip(returned.keys,returned.values) if isinstance(key,ast.Constant)}
         for key in ('grants_created','resources_enabled_by_default','helper_enabled_by_default','parallel_host_enabled_by_default','work_completion_verified'):
             if _shape(flags.get(key))!=_shape(ast.Constant(value=False)):raise ValueError('M6_PROFILE_AUTHORITY_PROMOTION')
+        diagnostic=_functions(tree)['diagnose']
+        assurance={'grants_created':False,'execution_authorized':False,
+                   'automatic_retry_allowed':False,'native_preconditions':'NOT_CHECKED',
+                   'client_e2e':'NOT_RUN','identity_assurance':'NOT_ESTABLISHED'}
+        found=set()
+        for node in ast.walk(diagnostic):
+            if isinstance(node,ast.Dict):
+                for key,value in zip(node.keys,node.values):
+                    if isinstance(key,ast.Constant) and key.value in assurance:
+                        found.add(key.value)
+                        if _shape(value)!=_shape(ast.Constant(value=assurance[key.value])):
+                            raise ValueError('M6_DIAGNOSTIC_AUTHORITY_PROMOTION')
+        if found!=set(assurance):raise ValueError('M6_DIAGNOSTIC_ASSURANCE_MISSING')
         wrapper=_functions(tree)['Scoped.call']
         delegated=_shape(ast.parse('self.service.call(name,args)',mode='eval').body)
         if sum(_shape(n)==delegated for n in ast.walk(wrapper) if isinstance(n,ast.Call))!=1 or _shape(wrapper.body[-1])!=_shape(ast.parse('return result').body[0]):raise ValueError('M6_PROFILE_HANDOFF')

@@ -2171,11 +2171,11 @@
     },
     {
       "path": "tools/integration_feature_profiles.py",
-      "sha256": "d78130ee6a302bbe93d949c8acfe18ca6d54b778a62b8dbfb5847feaa1790f12"
+      "sha256": "653540bcb5b9586d24b64fcc324ffb4d379ee11dfbf10da3e9b15b66f3e1c66f"
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "da67c9e738b2700b21302f2dc7f1a8d72b3e9901c095597d433f8eef7973819f"
+      "sha256": "91b2ae678af21e037a820e5c756c14f4c86722124f5086b5668ffb8f7bd3eb2c"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -2187,7 +2187,7 @@
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
-      "sha256": "7a005a78634e578d768410982e105d235de053dc5fd3d11b80691c32a4cdb743"
+      "sha256": "a0a9bb1e912ff70900184105e604fce4c6ba4f8ffd239a9ce2741efffa2f5d54"
     },
     {
       "path": "plugins/golem/skills/golem-work/agents/openai.yaml",
@@ -2199,7 +2199,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "20e52d558eac7d6f5e74fcf56c2bf111c7b6d104e33bc167db3a49287cf87c93"
+      "sha256": "a33a9c89cae7f02b1aa05d114fdab8daded39583b40863b76f6d5c9fce34585f"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -2207,7 +2207,23 @@
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "7fc8251f49c1f64f79edb7a31c0b041542a85ce9ffa415af80b720ed5732a5bd"
+      "sha256": "297d9924ba0805cc7231ee7a9447609e8a2d53ad4d52aac5cf258a8f02533ab7"
+    },
+    {
+      "path": "tools/integration_owner_review.py",
+      "sha256": "8e0513a1beef97ed42ee6b2b060f6a17c09aa976100791450f1c6d57dc5b2e25"
+    },
+    {
+      "path": "tools/test_integration_owner_review.py",
+      "sha256": "14a78d22d771bb8badb1e4fed5f6677a1ce16e6714d35b1a2764ef2ccc9078e4"
+    },
+    {
+      "path": "tools/integration_owner_desktop.py",
+      "sha256": "7a2a5df82aafd7e158e457d5a30dd3f1ff382fbcdd50de06e68182012183aff1"
+    },
+    {
+      "path": "tools/test_integration_owner_desktop.py",
+      "sha256": "8e783955dee2dbd84ddeb9defe42347e715ec695b919f4199df90fc722106fb5"
     }
   ],
   "observations": [
@@ -18345,6 +18361,20 @@
       "source_path": "tools/integration_owner_maintenance.py",
       "entrypoint": "ManagementService._delivery",
       "selector": "candidate_stop"
+    },
+    {
+      "id": "obs-0fb4ee1923720a470f527fb4fd1285ec60814d990886175520fa0ce049cef4a1",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_review.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-7b1f3860adea2927eea36b1007e4c72b384ad46a4d6fb87732dea9e0d32fe6b9",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_desktop.py",
+      "entrypoint": "file-surface",
+      "selector": null
     }
   ],
   "capabilities": [
@@ -76301,6 +76331,95 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Explicit optional management facade; preparation/disclosure and exact native effects separated. No existing owner capability is reclassified or removed."
+    },
+    {
+      "id": "surface.tools.integration_owner_review.py.file-surface",
+      "observation_ids": [
+        "obs-0fb4ee1923720a470f527fb4fd1285ec60814d990886175520fa0ce049cef4a1"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Existing exact owner D1/D2/D4/resource/helper/host contracts. Profiles only restrict. Owner-local Installer/D5 reuse exact original reviewed plans; no new MCP owner actions."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Five finite profiles; artifact <=128MiB/256files/64MiB each; new private destination; original audit/native/owner limits retained."
+        ],
+        "notes": "No actual installation/reload/client/Work E2E. External pinned runtime required; signed embedded runtime and M5 scheduler/merge obligations are not implemented."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_owner_review.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Owner-local immutable candidate export reuses live M2 load/observe and D4 exact shape/pins. No MCP route or policy activation. Opt-in native Desktop owner UI is implemented separately; installation and actual-client qualification remain NOT_RUN."
+    },
+    {
+      "id": "surface.tools.integration_owner_desktop.py.file-surface",
+      "observation_ids": [
+        "obs-7b1f3860adea2927eea36b1007e4c72b384ad46a4d6fb87732dea9e0d32fe6b9"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Existing exact owner D1/D2/D4/resource/helper/host contracts. Profiles only restrict. Owner-local Installer/D5 reuse exact original reviewed plans; no new MCP owner actions."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Five finite profiles; artifact <=128MiB/256files/64MiB each; new private destination; original audit/native/owner limits retained."
+        ],
+        "notes": "No actual installation/reload/client/Work E2E. External pinned runtime required; signed embedded runtime and M5 scheduler/merge obligations are not implemented."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_owner_desktop.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Native Desktop owner review shares live M2 service; explicit UI consent and one-attempt candidate export. No listener, automatic approval/activation or installed-client E2E claim."
     }
   ]
 }

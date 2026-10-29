@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "0b40065c287a4d9a9b2ecd681feaf866ad19ff6c7f2a21a59990b5a8a85662f5",
-  "selected_source_count": 552,
-  "selected_observation_count": 2305,
-  "selected_capability_count": 1210,
+  "inventory_sha256": "ed839b49977cc40f63d1e564fb320651455e75a863d9b461dfaffb849fc9d984",
+  "selected_source_count": 556,
+  "selected_observation_count": 2307,
+  "selected_capability_count": 1212,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -556,7 +556,9 @@
       "tools/verify_runtime_legacy.py",
       "tools/verify_update_schema.py",
       "plugins/golem/skills/golem-work/agents/openai.yaml",
-      "plugins/golem/skills/golem-work/references/profiles.md"
+      "plugins/golem/skills/golem-work/references/profiles.md",
+      "tools/integration_owner_review.py",
+      "tools/integration_owner_desktop.py"
     ],
     "selected_required_sources": [
       "CMakeLists.txt",
@@ -1002,7 +1004,9 @@
       "tools/verify_runtime_legacy.py",
       "tools/verify_update_schema.py",
       "plugins/golem/skills/golem-work/agents/openai.yaml",
-      "plugins/golem/skills/golem-work/references/profiles.md"
+      "plugins/golem/skills/golem-work/references/profiles.md",
+      "tools/integration_owner_review.py",
+      "tools/integration_owner_desktop.py"
     ],
     "public_observations": [
       {
@@ -5590,11 +5594,11 @@
     },
     {
       "path": "tools/integration_feature_profiles.py",
-      "sha256": "d78130ee6a302bbe93d949c8acfe18ca6d54b778a62b8dbfb5847feaa1790f12"
+      "sha256": "653540bcb5b9586d24b64fcc324ffb4d379ee11dfbf10da3e9b15b66f3e1c66f"
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "da67c9e738b2700b21302f2dc7f1a8d72b3e9901c095597d433f8eef7973819f"
+      "sha256": "91b2ae678af21e037a820e5c756c14f4c86722124f5086b5668ffb8f7bd3eb2c"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -5606,7 +5610,7 @@
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
-      "sha256": "7a005a78634e578d768410982e105d235de053dc5fd3d11b80691c32a4cdb743"
+      "sha256": "a0a9bb1e912ff70900184105e604fce4c6ba4f8ffd239a9ce2741efffa2f5d54"
     },
     {
       "path": "plugins/golem/skills/golem-work/agents/openai.yaml",
@@ -5618,7 +5622,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "20e52d558eac7d6f5e74fcf56c2bf111c7b6d104e33bc167db3a49287cf87c93"
+      "sha256": "a33a9c89cae7f02b1aa05d114fdab8daded39583b40863b76f6d5c9fce34585f"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -5626,7 +5630,23 @@
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "7fc8251f49c1f64f79edb7a31c0b041542a85ce9ffa415af80b720ed5732a5bd"
+      "sha256": "297d9924ba0805cc7231ee7a9447609e8a2d53ad4d52aac5cf258a8f02533ab7"
+    },
+    {
+      "path": "tools/integration_owner_review.py",
+      "sha256": "8e0513a1beef97ed42ee6b2b060f6a17c09aa976100791450f1c6d57dc5b2e25"
+    },
+    {
+      "path": "tools/test_integration_owner_review.py",
+      "sha256": "14a78d22d771bb8badb1e4fed5f6677a1ce16e6714d35b1a2764ef2ccc9078e4"
+    },
+    {
+      "path": "tools/integration_owner_desktop.py",
+      "sha256": "7a2a5df82aafd7e158e457d5a30dd3f1ff382fbcdd50de06e68182012183aff1"
+    },
+    {
+      "path": "tools/test_integration_owner_desktop.py",
+      "sha256": "8e783955dee2dbd84ddeb9defe42347e715ec695b919f4199df90fc722106fb5"
     }
   ],
   "native_definitions": [
@@ -11290,7 +11310,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 66,
+      "checked_functions": 88,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -13900,14 +13920,16 @@
         "tools/integration_owner_maintenance.py",
         "plugins/golem/skills/golem-work/SKILL.md",
         "plugins/golem/skills/golem-work/agents/openai.yaml",
-        "plugins/golem/skills/golem-work/references/profiles.md"
+        "plugins/golem/skills/golem-work/references/profiles.md",
+        "tools/integration_owner_review.py",
+        "tools/integration_owner_desktop.py"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1120,
+      "reviewed_capabilities": 1122,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -52579,7 +52601,8 @@
         "Scoped.__init__",
         "Scoped.call",
         "Scoped.tools",
-        "definition"
+        "definition",
+        "diagnose"
       ],
       "declarations": [],
       "literal_branches": [
@@ -53278,6 +53301,122 @@
       "symbols": [],
       "declarations": [],
       "literal_branches": [],
+      "operations": []
+    },
+    {
+      "path": "tools/integration_owner_review.py",
+      "role": "OWNER_LOCAL_REVIEW",
+      "rationale": "Live-instance owner-host candidate API only; no MCP endpoint, activation or execution. Standalone Desktop UI not implemented.",
+      "symbols": [
+        "FirstActionDraft",
+        "FirstActionDraft.__init__",
+        "FirstActionDraft.authorize",
+        "FirstActionDraft.current",
+        "export_candidate"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "DRAFT_ACTION"
+        ],
+        [
+          "Subscript(value=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='entry_review'), ctx=Load()), slice=Constant(value='tool'), ctx=Load())",
+          "candidate_request"
+        ],
+        [
+          "Subscript(value=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='entry_review'), ctx=Load()), slice=Constant(value='tool'), ctx=Load())",
+          "helper_execute"
+        ],
+        [
+          "Subscript(value=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='entry_review'), ctx=Load()), slice=Constant(value='tool'), ctx=Load())",
+          "workspace_request"
+        ]
+      ],
+      "operations": []
+    },
+    {
+      "path": "tools/integration_owner_desktop.py",
+      "role": "OWNER_LOCAL_DESKTOP",
+      "rationale": "Opt-in local Tk owner UI sharing the MCP service; live-instance reference catalog with existing scope/lock/TTL checks, explicit native reinspection and owner-confirmed candidate export. No new MCP endpoint, execution, approval issuance, or policy activation.",
+      "symbols": [
+        "Controller",
+        "Controller.__init__",
+        "Controller.drafts",
+        "Controller.export",
+        "Controller.inspect",
+        "Window",
+        "Window.__init__",
+        "Window.choose_attachment",
+        "Window.choose_draft",
+        "Window.close",
+        "Window.export",
+        "Window.inspect",
+        "Window.invalidate",
+        "Window.poll",
+        "Window.refresh",
+        "Window.show",
+        "Window.submit",
+        "main",
+        "run"
+      ],
+      "declarations": [
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-owner')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-owner-review-ui')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--policy')], keywords=[keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--profile')], keywords=[keyword(arg='choices', value=Tuple(elts=[Constant(value='prepare'), Constant(value='task'), Constant(value='quality'), Constant(value='parallel')], ctx=Load())), keyword(arg='default', value=Constant(value='prepare'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--reviewed-policy-sha256')], keywords=[keyword(arg='dest', value=Constant(value='digest')), keyword(arg='required', value=Constant(value=True))])"
+      ],
+      "literal_branches": [
+        [
+          "Attribute(value=Name(id='error', ctx=Load()), attr='code', ctx=Load())",
+          "PREPARATION_EXPIRED"
+        ],
+        [
+          "Constant(value='plan_read')",
+          "plan_read"
+        ],
+        [
+          "Name(id='__name__', ctx=Load())",
+          "__main__"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "catalog"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "inspect"
+        ],
+        [
+          "Subscript(value=Attribute(value=Name(id='scoped', ctx=Load()), attr='profile', ctx=Load()), slice=Constant(value='family'), ctx=Load())",
+          "D2"
+        ],
+        [
+          "Subscript(value=Attribute(value=Name(id='scoped', ctx=Load()), attr='profile', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "parallel"
+        ],
+        [
+          "Subscript(value=Attribute(value=Name(id='scoped', ctx=Load()), attr='profile', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "prepare"
+        ],
+        [
+          "Subscript(value=Attribute(value=Name(id='scoped', ctx=Load()), attr='profile', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "quality"
+        ],
+        [
+          "Subscript(value=Attribute(value=Name(id='scoped', ctx=Load()), attr='profile', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "task"
+        ],
+        [
+          "Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "DRAFT_ACTION"
+        ],
+        [
+          "Subscript(value=Subscript(value=Name(id='plan', ctx=Load()), slice=Constant(value='payload'), ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "DRAFT_ACTION"
+        ]
+      ],
       "operations": []
     }
   ],
@@ -57126,7 +57265,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "5bff815d41ee57444e75c372bf9e47083e4f61099d01fbdd72641740da0a7545",
+      "sha256": "f7d4358d4676213462431915ffec2589c39c7e0a6d3272cda0149e96ec1b73ec",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57276,7 +57415,7 @@
     },
     {
       "path": "tools/capability_m6.py",
-      "sha256": "0b16e6f30ac9fb676d6cdfed7c30413b6a095e5267a64be3912f9d503bdb6c33",
+      "sha256": "b091443b58e5943649a006f848b4bd230775e9bc8f0d68aa53dc41007874b08b",
       "shape_sha256": "b55968f8239250743a915731952dc065513f132c95dd891c66f7d312f976b7dd",
       "role": "M0_STATIC_ANALYSIS"
     },
@@ -57288,7 +57427,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "52631d776834d3ea5f48f71669c719bbaee6083656609c559a7bb326e2e8869d",
+      "sha256": "d8feb74c8676c4253739966d03e3c6de80ebfe74a0d63065194769dcefa33dea",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57378,13 +57517,13 @@
     },
     {
       "path": "tools/capability_repository.py",
-      "sha256": "3db123d5e0558d17ffdc27b2694511229d1a2187d60afa6bececde96a2493b14",
+      "sha256": "20152f8cdffd02acc8d9ee55dbc320ab867ee5e5fbe11df9db4c7ef14d9647c0",
       "shape_sha256": "6d9af9283d17b17d9b3a95815343435f861de9c53cb32ba70bf944c54b761947",
       "role": "M0_STATIC_ANALYSIS"
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "aff5f35346b0d8acb0bdc33064ac4fc3975859e7a956468b6d3b8f1d98ed9dbd",
+      "sha256": "c2a193dba59cede813518fff23e7957352549976912c6b333addd9b973130ded",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57432,7 +57571,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "5f9bc07e08a1e7437ab0a96c601cbbb7afbd694779854af0018e8b9fc72d23d1",
+      "sha256": "69804a6edd15808134c344a6f75e0c47e287f31438d7cab21f79e090d1a289a7",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57726,8 +57865,20 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "20e52d558eac7d6f5e74fcf56c2bf111c7b6d104e33bc167db3a49287cf87c93",
-      "shape_sha256": "22c2d24f3fa9085d42b0571c62ecade6205dc2a3e5d2ee04e918e1fac3f2e5d0",
+      "sha256": "a33a9c89cae7f02b1aa05d114fdab8daded39583b40863b76f6d5c9fce34585f",
+      "shape_sha256": "229f03b8755734b621536982445ca6330de50865d2787da1f1aaa7b01abba5f7",
+      "role": "M0_FIXTURE_REGRESSION"
+    },
+    {
+      "path": "tools/test_integration_owner_review.py",
+      "sha256": "14a78d22d771bb8badb1e4fed5f6677a1ce16e6714d35b1a2764ef2ccc9078e4",
+      "shape_sha256": "a015592ac29e1db835170b87d0344bdde51781d8d761e27875737e45bce8a979",
+      "role": "M0_FIXTURE_REGRESSION"
+    },
+    {
+      "path": "tools/test_integration_owner_desktop.py",
+      "sha256": "8e783955dee2dbd84ddeb9defe42347e715ec695b919f4199df90fc722106fb5",
+      "shape_sha256": "f4f8d13811df5e92d633974079f09d055e7de1fb7d22ddc0410262991be7e253",
       "role": "M0_FIXTURE_REGRESSION"
     }
   ],

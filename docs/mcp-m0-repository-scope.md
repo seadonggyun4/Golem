@@ -1216,6 +1216,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | mcp.management.route.adapter_probe | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | mcp.management.route.candidate_serve | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | mcp.management.route.candidate_stop | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| surface.tools.integration_owner_review.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_owner_desktop.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3526,6 +3528,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | PYTHON_DECLARATION | tools/integration_owner_maintenance.py | ManagementService._delivery | adapter_probe |
 | PYTHON_DECLARATION | tools/integration_owner_maintenance.py | ManagementService._delivery | candidate_serve |
 | PYTHON_DECLARATION | tools/integration_owner_maintenance.py | ManagementService._delivery | candidate_stop |
+| PYTHON_DECLARATION | tools/integration_owner_review.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_owner_desktop.py | file-surface | None |
 
 ## Blockers
 
@@ -3615,7 +3619,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 444; explicitly selected: 444. Other tracked paths still require explicit boundary review.
+Candidate source surfaces: 446; explicitly selected: 446. Other tracked paths still require explicit boundary review.
 Public declarations observed in selected headers: 344.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
@@ -4067,5 +4071,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | tools/verify_update_schema.py | YES |
 | plugins/golem/skills/golem-work/agents/openai.yaml | YES |
 | plugins/golem/skills/golem-work/references/profiles.md | YES |
+| tools/integration_owner_review.py | YES |
+| tools/integration_owner_desktop.py | YES |
 
 ## Blockers

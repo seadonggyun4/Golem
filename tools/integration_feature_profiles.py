@@ -19,6 +19,47 @@ PARALLEL_ACTIONS=('inventory_capture','candidate_request','workspace_request')
 UNIMPLEMENTED=('TASK_DAG_SCHEDULER','TYPED_EDGE_EVIDENCE_ACCEPTANCE','RESOURCE_RECEIVER_BROKER','MERGE_QUEUE',
  'INTEGRATION_WORKSPACE_AND_FRESH_QA','TARGET_REF_CAS_BROKER','MERGE_PUBLICATION_RECEIPT')
 
+# Tool availability is only a transport/configuration observation. In particular,
+# an execution_request tool says nothing about a run action or its native receipt.
+WORKFLOWS={
+    'inspect':('work_inspect','workflow_read','completion_check'),
+    'prepare':('inputs_prepare','action_prepare','plan_read'),
+    'review_existing_action':('approved_action_prepare','action_confirm'),
+    'document_qa_completion':('document_submit','execution_request','completion_finalize','completion_report','completion_check'),
+    'create_and_bind':('work_create','binding_attach','binding_read'),
+    'verify_execution':('execution_verify','execution_read'),
+}
+
+
+def diagnose(profile,owner_tools,client_tools=None):
+    """Explain missing tools without executing, authorizing, or scanning a host.
+
+    owner_tools must be the current service/project observation. Optional client
+    evidence is caller supplied, never authenticated Desktop identity or readiness.
+    """
+    spec=definition(profile);ceiling=set(spec['tools'])
+    c.require(isinstance(owner_tools,(list,tuple)),'FEATURE_DIAGNOSTIC_INPUT')
+    for value in (owner_tools,client_tools):
+        if value is not None:
+            c.require(isinstance(value,(list,tuple)) and len(value)<=256 and
+                      all(isinstance(v,str) and len(v)<=128 for v in value),'FEATURE_DIAGNOSTIC_INPUT')
+    owner=set(owner_tools);exposed=owner&ceiling
+    client=None if client_tools is None else set(client_tools)
+    flows={}
+    for name,required in WORKFLOWS.items():
+        needed=set(required)
+        flows[name]={'required_tools':list(required),'profile_excluded':sorted(needed-ceiling),
+            'owner_service_unavailable':sorted((needed&ceiling)-owner),
+            'client_missing':None if client is None else sorted((needed&exposed)-client),
+            'server_tools_present':needed<=exposed,'execution_authorized':False,
+            'native_preconditions':'NOT_CHECKED','client_e2e':'NOT_RUN'}
+    return {'schema':'golem.integration-workflow-capabilities.v1','profile':profile,
+        'available_tools':sorted(exposed),'workflows':flows,
+        'scope':'CURRENT_TOOL_OBSERVATION_NOT_ACTION_OR_NATIVE_ADMISSION',
+        'client_observation':'NOT_PROVIDED' if client is None else 'CALLER_SUPPLIED_NOT_AUTHENTICATED',
+        'implementation_required':list(UNIMPLEMENTED),'grants_created':False,
+        'identity_assurance':'NOT_ESTABLISHED','automatic_retry_allowed':False}
+
 
 def definition(name):
     c.require(name in NAMES,'FEATURE_PROFILE_UNKNOWN')
@@ -54,6 +95,7 @@ class Scoped:
             c.require(isinstance(result,dict) and isinstance(result.get('projects'),list),'FEATURE_DISCOVERY_CONTRACT')
             result=copy.deepcopy(result)
             for project in result['projects']:
+                project['workflow_capabilities']=diagnose(self.profile['profile'],project['tools'])
                 project['tools']=[tool for tool in project['tools'] if tool in self.profile['tools']]
                 for resource in project.get('read_resources',[]):
                     for file in resource['files']:
@@ -63,4 +105,10 @@ class Scoped:
             if 'audit_read_directory_cost' in result:
                 result['audit_read_directory_cost']={tool:cost for tool,cost in result['audit_read_directory_cost'].items() if tool in self.profile['tools']}
             result['feature_profile']={'profile':self.profile['profile'],'authority':'CURRENT_OWNER_SCOPE_INTERSECTION'}
+            # The facade adds diagnostics after the underlying service wraps its
+            # response. Recheck the same disclosure budget, never truncate facts.
+            reader=getattr(self.service,'reads',self.service)
+            transfer=getattr(reader,'transfer',None)
+            limit=transfer.current()['max_result_bytes'] if transfer is not None else c.LIMIT
+            c.require(len(c.encoded(result))<=limit,'RESULT_BUDGET_EXCEEDED')
         return result

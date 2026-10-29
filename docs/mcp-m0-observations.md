@@ -1216,6 +1216,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | mcp.management.route.adapter_probe | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | mcp.management.route.candidate_serve | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | mcp.management.route.candidate_stop | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| surface.tools.integration_owner_review.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_owner_desktop.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3526,6 +3528,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | PYTHON_DECLARATION | tools/integration_owner_maintenance.py | ManagementService._delivery | adapter_probe |
 | PYTHON_DECLARATION | tools/integration_owner_maintenance.py | ManagementService._delivery | candidate_serve |
 | PYTHON_DECLARATION | tools/integration_owner_maintenance.py | ManagementService._delivery | candidate_stop |
+| PYTHON_DECLARATION | tools/integration_owner_review.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_owner_desktop.py | file-surface | None |
 
 ## Blockers
 
