@@ -2203,11 +2203,11 @@
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "90004ebc71192953fc5e0f258250d4b694ea805e9f3421cecb9e3f1b441efce4"
+      "sha256": "04c336247391b4b025c27fedfa29fefbb3f64d34bc97f7095187f3179221dd45"
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "297d9924ba0805cc7231ee7a9447609e8a2d53ad4d52aac5cf258a8f02533ab7"
+      "sha256": "e5fb7340b10f84e7d7b7bacb4156819cdcc7c126b61e246245d4d1330ac5d9d0"
     },
     {
       "path": "tools/integration_owner_review.py",
@@ -2219,11 +2219,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "7a2a5df82aafd7e158e457d5a30dd3f1ff382fbcdd50de06e68182012183aff1"
+      "sha256": "8395c7591194a4ca2941c69fa9373bed023b652fca3d0c84935ae675cced23ed"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "8e783955dee2dbd84ddeb9defe42347e715ec695b919f4199df90fc722106fb5"
+      "sha256": "c67f447df79ee65064e05647c2fcd6e91e6cdf9f743812bb8935243cfc7795e7"
     }
   ],
   "observations": [
@@ -76389,22 +76389,23 @@
         "HOST_INTERNAL"
       ],
       "authorities": [
-        "Existing exact owner D1/D2/D4/resource/helper/host contracts. Profiles only restrict. Owner-local Installer/D5 reuse exact original reviewed plans; no new MCP owner actions."
+        "Existing exact D1/D2/D4 and native checks; additional explicit owner-private review-directory selection; UI candidate confirmation is not execution approval."
       ],
       "effects": [
         "NATIVE_READ",
         "AUDIT_WRITE",
         "PROCESS",
-        "DISCLOSURE"
+        "DISCLOSURE",
+        "CLEANUP"
       ],
       "constraints": {
         "platforms": [
           "POSIX"
         ],
         "limits": [
-          "Five finite profiles; artifact <=128MiB/256files/64MiB each; new private destination; original audit/native/owner limits retained."
+          "Unix IPC only; 1MiB frames; 30s receive deadline; 1024 requests/endpoint; 128 descriptor catalog bound; service-instance 30 minute M2 lifetime; one export attempt per exact plan."
         ],
-        "notes": "No actual installation/reload/client/Work E2E. External pinned runtime required; signed embedded runtime and M5 scheduler/merge obligations are not implemented."
+        "notes": "POSIX only. Endpoint cleanup affects its own generated socket/descriptor, never Work/approval/evidence. Same-user code remains in trust boundary. Actual redesigned client activation/E2E NOT_RUN."
       },
       "test_refs": [
         {
@@ -76419,7 +76420,7 @@
         }
       ],
       "review_status": "REVIEWED",
-      "rationale": "Native Desktop owner review shares live M2 service; explicit UI consent and one-attempt candidate export. No listener, automatic approval/activation or installed-client E2E claim."
+      "rationale": "Headless MCP; optional owner-private Unix IPC catalog/inspect/unapplied candidate export and explicit singleton presentation. No automatic window, native execution, approval issuance, policy activation or same-user human authentication."
     }
   ]
 }

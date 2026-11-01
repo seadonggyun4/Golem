@@ -88,4 +88,13 @@ class DistributionProfile(unittest.TestCase):
             files,model=self.changed('tools/integration_owner_maintenance.py',old,b'pass',True)
             self.assertTrue(self.inspect(files,model).blockers)
 
+    def test_owner_ipc_fence_and_no_automatic_window_survive_repin(self):
+        for old,new in ((b"c.require(request not in self.seen,'OWNER_IPC_REPLAY')",b'pass'),
+                        (b"c.require(key not in self.exports,'OWNER_EXPORT_ALREADY_ATTEMPTED')",b'pass'),
+                        (b"c.require(args['confirmed'] is True,'OWNER_REVIEW_REQUIRED')",b'pass'),
+                        (b'socket.AF_UNIX',b'socket.AF_INET'),
+                        (b'    endpoint=None',b'    import tkinter\n    endpoint=None')):
+            files,model=self.changed('tools/integration_owner_desktop.py',old,new,True)
+            self.assertTrue(self.inspect(files,model).blockers)
+
 if __name__=='__main__':unittest.main()

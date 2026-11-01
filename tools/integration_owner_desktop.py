@@ -1,7 +1,8 @@
-"""Opt-in native Desktop owner review sharing the MCP service's live M2 plans.
+"""Headless MCP plus an explicitly launched, separate local owner presentation.
 
-No listener, browser, approval issuer, or policy activation. Start only as the
-explicitly selected stdio launcher; this does not modify a client installation.
+Default stdio startup never imports Tk or opens a window. Optional private Unix
+IPC retains live-instance validation; it grants no native action or approval.
+Same-user IPC is not proof of human identity. No TCP, shell, or policy activation.
 """
 import argparse
 import asyncio
@@ -218,36 +219,359 @@ class Window:
         self.root.after(100,self.poll)
 
     def close(self):
-        from tkinter import messagebox
-        if self.finished and not self.busy:self.root.destroy()
-        else:messagebox.showinfo('연결 유지','MCP 연결이 살아 있어 검토 창을 종료하지 않습니다. 창을 최소화하거나 client에서 이 연결을 정상 종료하세요. 진행 중 작업을 강제 종료하지 않습니다.')
+        # Closing presentation never closes the service. An in-flight export
+        # finishes in its worker; losing the view is not permission to retry.
+        self.finished=True
+        if not self.busy:self.root.destroy()
+        else:
+            self.root.withdraw()
 
 
-def run(scoped,owner,*,approve_ui=False):
-    controller=Controller(scoped,owner,approve_ui=approve_ui)
-    import tkinter as tk
-    root=tk.Tk();window=Window(root,controller);outcome=[]
-    def transport():
-        try:asyncio.run(entry.serve(scoped,owner));outcome.append(0)
-        except Exception:outcome.append(1);sys.stderr.write('Golem Desktop transport stopped; no automatic restart.\n')
-        finally:window.finished=True
-    worker=threading.Thread(target=transport,daemon=False);worker.start()
-    root.mainloop();worker.join()
-    return outcome[0] if outcome else 1
+def run(scoped,owner,*,approve_ui=False,review_directory=None,review_label="Golem"):
+    """Legacy launcher-compatible headless entry; IPC is separately opt-in."""
+    endpoint=None
+    if review_directory is not None:
+        controller=Controller(scoped,owner,approve_ui=approve_ui)
+        try:
+            endpoint=ReviewEndpoint(review_directory,controller,label=review_label)
+            endpoint.start()
+        except Exception:
+            # An optional presentation failure must not take down MCP. Do not
+            # retry, repair directories, or expose endpoint tokens in stderr.
+            if endpoint is not None:endpoint.close()
+            endpoint=None
+            sys.stderr.write('OWNER_REVIEW_UNAVAILABLE; MCP remains headless.\n')
+    try:
+        asyncio.run(entry.serve(scoped,owner))
+        return 0
+    except Exception:
+        sys.stderr.write('Golem transport stopped; no automatic restart.\n')
+        return 1
+    finally:
+        if endpoint is not None:endpoint.close()
+
 
 
 def main(argv=None):
+    argv=list(sys.argv[1:] if argv is None else argv)
+    if argv and argv[0]=='owner-app':return owner_app(argv[1:])
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--profile',choices=('prepare','task','quality','parallel'),default='prepare')
     parser.add_argument('--policy',required=True);parser.add_argument('--reviewed-policy-sha256',dest='digest',required=True)
     parser.add_argument('--approve-owner',action='store_true');parser.add_argument('--approve-owner-review-ui',action='store_true')
-    args=vars(parser.parse_args(argv));approved=args.pop('approve_owner_review_ui')
+    parser.add_argument('--review-directory',help='Existing owner-private Unix IPC directory; explicit opt-in only')
+    parser.add_argument('--review-label',default='Golem',help='Display label only; never authenticated client identity')
+    args=vars(parser.parse_args(argv));approved=args.pop('approve_owner_review_ui');directory=args.pop('review_directory');label=args.pop('review_label')
     try:
         c.require(approved is True,'OWNER_DESKTOP_CONSENT_REQUIRED')
         scoped,owner=entry._configure_startup(args)
-        return run(scoped,owner,approve_ui=approved)
+        return run(scoped,owner,approve_ui=approved,review_directory=directory,review_label=label)
     except Exception as error:
         sys.stderr.write(c.encoded({'code':getattr(error,'code','OWNER_DESKTOP_UNAVAILABLE'),'execution_authorized':False,'automatic_retry_allowed':False}).decode()+'\n');return 1
+
+
+
+# IPC is owner-host presentation only, never registered as an MCP tool. File
+# ownership/private modes and a per-instance random capability exclude other OS
+# users, not malicious code already running as this owner. Human intent remains
+# an explicit UI review, not an identity attestation by this protocol.
+IPC_LIMIT=1048576
+IPC_TIMEOUT=30
+IPC_REQUEST_LIMIT=1024
+
+
+def private_directory(value):
+    import os,stat
+    path=Path(value)
+    c.require(path.is_absolute() and path.resolve()==path,'OWNER_IPC_DIRECTORY')
+    info=path.lstat()
+    c.require(stat.S_ISDIR(info.st_mode) and info.st_uid==os.getuid() and
+              stat.S_IMODE(info.st_mode)==0o700,'OWNER_IPC_DIRECTORY')
+    return path
+
+
+def identity(value):
+    import re
+    c.require(isinstance(value,str) and re.fullmatch('[0-9a-f]{32}',value) is not None,'OWNER_IPC_ID')
+    return value
+
+
+def receive_frame(conn):
+    import time
+    deadline=time.monotonic()+IPC_TIMEOUT
+    def exact(count):
+        result=bytearray()
+        while len(result)<count:
+            left=deadline-time.monotonic()
+            if left<=0:raise TimeoutError('OWNER_IPC_TIMEOUT')
+            conn.settimeout(left)
+            part=conn.recv(count-len(result))
+            if not part:raise EOFError('OWNER_IPC_CLOSED')
+            result.extend(part)
+        return bytes(result)
+    size=int.from_bytes(exact(4),'big')
+    c.require(0<size<=IPC_LIMIT,'OWNER_IPC_SIZE')
+    return c.decode(exact(size),IPC_LIMIT)
+
+
+def send_frame(conn,value):
+    raw=c.encoded(value);c.require(len(raw)<=IPC_LIMIT,'OWNER_IPC_SIZE')
+    conn.settimeout(IPC_TIMEOUT);conn.sendall(len(raw).to_bytes(4,'big')+raw)
+
+
+def descriptor(directory,instance):
+    import os,stat
+    directory=private_directory(directory);identity(instance)
+    path=directory/(instance+'.json')
+    info=path.lstat()
+    c.require(stat.S_ISREG(info.st_mode) and info.st_uid==os.getuid() and stat.S_IMODE(info.st_mode)==0o600,'OWNER_IPC_DESCRIPTOR')
+    value=c.decode(r.regular(path,4096,private=True),4096)
+    c.require(set(value)=={'instance','token','kind','label'} and value['instance']==instance and
+              value['kind'] in ('review','activation'),'OWNER_IPC_DESCRIPTOR')
+    c.require(isinstance(value['label'],str) and 0<len(value['label'])<=80 and all(ch.isprintable() for ch in value['label']),'OWNER_IPC_LABEL')
+    c._validate(value['token'],c.DIGEST)
+    return value
+
+
+class LocalEndpoint:
+    """Single bounded request worker; no retry or takeover of existing paths."""
+    def __init__(self,directory,handler,kind='review',label='Golem'):
+        import secrets
+        self.directory=private_directory(directory);self.handler=handler
+        c.require(isinstance(label,str) and 0<len(label)<=80 and all(ch.isprintable() for ch in label),'OWNER_IPC_LABEL')
+        self.instance=uuid.uuid4().hex;self.token=secrets.token_hex(32);self.kind=kind;self.label=label
+        self.path=self.directory/(self.instance+'.sock')
+        c.require(len(str(self.path).encode())<100,'OWNER_IPC_PATH_LENGTH')
+        self.record=self.directory/(self.instance+'.json')
+        self.stop=threading.Event();self.worker=None;self.socket=None;self.seen=set()
+        self.created_socket=False;self.created_record=False
+
+    def start(self):
+        import os,socket
+        c.require(self.socket is None,'OWNER_IPC_ALREADY_STARTED')
+        private_directory(self.directory)
+        self.socket=socket.socket(socket.AF_UNIX,socket.SOCK_STREAM)
+        try:
+            self.socket.bind(str(self.path));self.created_socket=True;os.chmod(self.path,0o600)
+            self.socket.listen(4);self.socket.settimeout(.2)
+            from execution_record import save
+            save(self.record,c.encoded({'instance':self.instance,'token':self.token,'kind':self.kind,'label':self.label}));self.created_record=True
+            self.worker=threading.Thread(target=self.serve,daemon=False);self.worker.start()
+        except Exception:
+            self.close();raise
+        return self
+
+    def dispatch(self,message):
+        import hmac
+        c.require(isinstance(message,dict) and set(message)=={'instance','token','request_id','operation','arguments'},'OWNER_IPC_ENVELOPE')
+        c.require(message['instance']==self.instance and isinstance(message['token'],str) and
+                  hmac.compare_digest(message['token'],self.token),'OWNER_IPC_AUTH')
+        request=identity(message['request_id'])
+        c.require(request not in self.seen,'OWNER_IPC_REPLAY')
+        c.require(len(self.seen)<IPC_REQUEST_LIMIT,'OWNER_IPC_QUOTA')
+        c.require(type(message['operation']) is str and type(message['arguments']) is dict,'OWNER_IPC_ENVELOPE')
+        self.seen.add(request)
+        return self.handler(message['operation'],message['arguments'])
+
+    def serve(self):
+        import socket
+        while not self.stop.is_set():
+            try:conn,_=self.socket.accept()
+            except socket.timeout:continue
+            except OSError:break
+            with conn:
+                try:
+                    message=receive_frame(conn)
+                    c.require(not self.stop.is_set(),'OWNER_IPC_CLOSED')
+                    value=self.dispatch(message)
+                    send_frame(conn,{'ok':True,'value':value})
+                except Exception as error:
+                    try:send_frame(conn,{'ok':False,'code':getattr(error,'code','OWNER_IPC_FAILED'),
+                        'candidate_directory':getattr(error,'evidence_path',None),'automatic_retry_allowed':False})
+                    except (OSError,EOFError):pass
+
+    def close(self):
+        self.stop.set()
+        if self.socket is not None:self.socket.close()
+        if self.worker is not None:
+            # Never kill an in-flight candidate export. It uses bounded native
+            # calls; preserve partial evidence if the OS terminates the process.
+            self.worker.join()
+        for path,created in ((self.record,self.created_record),(self.path,self.created_socket)):
+            if created:
+                try:path.unlink()
+                except FileNotFoundError:pass
+        self.created_record=False;self.created_socket=False
+
+
+class ReviewEndpoint(LocalEndpoint):
+    def __init__(self,directory,controller,*,label='Golem'):
+        self.controller=controller;self.exports=set()
+        super().__init__(directory,self.handle,label=label+' / '+controller.scoped.profile['profile'])
+
+    def handle(self,operation,args):
+        if operation=='catalog':
+            c.require(not args,'OWNER_IPC_ARGUMENTS')
+            return self.controller.drafts()
+        if operation=='inspect':
+            return self.controller.inspect(args)
+        if operation=='export':
+            c.require(set(args)=={'plan','action_id','parent','confirmed','attachment_path','attachment_sha256'},'OWNER_IPC_ARGUMENTS')
+            c.require(args['confirmed'] is True,'OWNER_REVIEW_REQUIRED')
+            c._validate(args['plan'],preparations.SCHEMAS['plan_read'])
+            # One export attempt per exact plan per service, even when a second
+            # owner client reconnects or a reply is lost. Reinspection cannot
+            # clear this publication fence. No policy/action is executed here.
+            key=(args['plan']['plan_id'],args['plan']['plan_sha256'])
+            c.require(key not in self.exports,'OWNER_EXPORT_ALREADY_ATTEMPTED')
+            self.exports.add(key)
+            self.controller.inspect(args['plan'])
+            return self.controller.export(args['action_id'],args['parent'],confirmed=True,
+                attachment_path=args['attachment_path'],attachment_sha256=args['attachment_sha256'])
+        raise c.IntegrationError('OWNER_IPC_OPERATION')
+
+
+class RemoteController:
+    def __init__(self,directory,instance):
+        self.directory=private_directory(directory);self.instance=identity(instance)
+        self.pinned=descriptor(self.directory,instance)
+        c.require(self.pinned['kind']=='review','OWNER_IPC_KIND')
+        self.selection=None;self.attempted=False
+
+    def call(self,operation,args):
+        import socket
+        c.require(descriptor(self.directory,self.instance)==self.pinned,'OWNER_IPC_CHANGED')
+        with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as conn:
+            conn.settimeout(IPC_TIMEOUT)
+            try:
+                conn.connect(str(self.directory/(self.instance+'.sock')))
+                send_frame(conn,{'instance':self.instance,'token':self.pinned['token'],
+                    'request_id':uuid.uuid4().hex,'operation':operation,'arguments':args})
+                reply=receive_frame(conn)
+            except (OSError,EOFError,ValueError):
+                raise c.IntegrationError('OWNER_EXPORT_UNKNOWN' if operation=='export' else 'OWNER_CONNECTION_UNAVAILABLE') from None
+        c.require(isinstance(reply,dict) and type(reply.get('ok')) is bool,'OWNER_IPC_RESPONSE')
+        if not reply['ok']:
+            error=c.IntegrationError(reply.get('code','OWNER_IPC_FAILED'))
+            error.evidence_path=reply.get('candidate_directory')
+            raise error
+        return reply['value']
+
+    def drafts(self):return self.call('catalog',{})
+
+    def inspect(self,args):
+        self.selection=None;self.attempted=False
+        value=self.call('inspect',args);self.selection=copy.deepcopy(args);return value
+
+    def export(self,action_id,parent,*,confirmed=False,attachment_path=None,attachment_sha256=None):
+        c.require(confirmed is True and self.selection is not None and not self.attempted,'OWNER_DESKTOP_REVIEW_REQUIRED')
+        self.attempted=True
+        return self.call('export',{'plan':self.selection,'action_id':action_id,'parent':str(parent),
+            'confirmed':True,'attachment_path':attachment_path,'attachment_sha256':attachment_sha256})
+
+
+def connections(directory):
+    directory=private_directory(directory)
+    names=list(directory.glob('*.json'))
+    c.require(len(names)<=128,'OWNER_IPC_CATALOG_LIMIT')
+    rows=[]
+    for path in sorted(names):
+        if path.stem=='owner-app':continue
+        value=descriptor(directory,path.stem)
+        if value['kind']=='review':rows.append(value['instance'])
+    return rows
+
+
+class OwnerInstance:
+    """OS lock, not PID guessing. Stale files never authorize a new service."""
+    def __init__(self,directory):
+        import os,stat,fcntl
+        self.directory=private_directory(directory);self.endpoint=None;self.primary=False
+        path=self.directory/'owner-app.lock'
+        self.fd=os.open(path,os.O_RDWR|os.O_CREAT|os.O_NOFOLLOW,0o600)
+        info=os.fstat(self.fd)
+        if not (stat.S_ISREG(info.st_mode) and info.st_uid==os.getuid() and stat.S_IMODE(info.st_mode)==0o600):
+            os.close(self.fd);raise c.IntegrationError('OWNER_APP_LOCK')
+        try:fcntl.flock(self.fd,fcntl.LOCK_EX|fcntl.LOCK_NB);self.primary=True
+        except BlockingIOError:pass
+        self.events=queue.Queue()
+
+    def activate(self):
+        import socket
+        raw=r.regular(self.directory/'owner-app.json',4096,private=True)
+        instance=c.decode(raw,4096)['instance'];value=descriptor(self.directory,instance)
+        c.require(value['kind']=='activation','OWNER_IPC_KIND')
+        with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as conn:
+            conn.settimeout(IPC_TIMEOUT);conn.connect(str(self.directory/(instance+'.sock')))
+            send_frame(conn,{**{k:value[k] for k in ('instance','token')},'request_id':uuid.uuid4().hex,'operation':'activate','arguments':{}})
+            c.require(receive_frame(conn)=={'ok':True,'value':True},'OWNER_APP_ACTIVATION')
+
+    def start(self):
+        import os
+        c.require(self.primary,'OWNER_APP_ALREADY_RUNNING')
+        def handle(operation,args):
+            c.require(operation=='activate' and not args,'OWNER_IPC_OPERATION')
+            self.events.put(True);return True
+        self.endpoint=LocalEndpoint(self.directory,handle,'activation').start()
+        from execution_record import save
+        temporary=self.directory/(uuid.uuid4().hex+'.tmp')
+        save(temporary,c.encoded({'instance':self.endpoint.instance}))
+        os.replace(temporary,self.directory/'owner-app.json')
+
+    def close(self):
+        import os
+        if self.endpoint is not None:
+            self.endpoint.close()
+            try:(self.directory/'owner-app.json').unlink()
+            except FileNotFoundError:pass
+        os.close(self.fd)
+
+
+def owner_app(argv):
+    parser=argparse.ArgumentParser(description='Explicit local Owner app; no MCP or native execution')
+    parser.add_argument('--review-directory',required=True)
+    args=parser.parse_args(argv);instance=OwnerInstance(args.review_directory)
+    try:
+        if not instance.primary:
+            instance.activate();return 0
+        instance.start()
+        import tkinter as tk
+        from tkinter import ttk
+        root=tk.Tk();root.title('Golem · Owner 연결 선택');root.geometry('760x260')
+        pane=ttk.Frame(root,padding=16);pane.pack(fill='both',expand=True)
+        ttk.Label(pane,text='검토할 현재 연결을 선택하세요. 실행 승인·정책 적용은 제공하지 않습니다.').pack(anchor='w')
+        selected=tk.StringVar();choice=ttk.Combobox(pane,textvariable=selected,state='readonly',width=65);choice.pack(fill='x',pady=12)
+        status=tk.StringVar(value='연결 목록은 로컬 참조이며 연결 성공·권한을 보증하지 않습니다.')
+        ttk.Label(pane,textvariable=status,wraplength=720).pack(anchor='w')
+        windows={};connection_rows={}
+        def refresh():
+            try:
+                connection_rows.clear()
+                for key in connections(instance.directory):
+                    value=descriptor(instance.directory,key)
+                    connection_rows[value['label']+' / '+key]=key
+                choice.configure(values=list(connection_rows));selected.set('')
+            except Exception as error:status.set(getattr(error,'code','OWNER_CONNECTION_UNAVAILABLE'))
+        def open_review():
+            key=connection_rows.get(selected.get())
+            if not key:return
+            old=windows.get(key)
+            if old is not None and old.winfo_exists():old.deiconify();old.lift();return
+            try:
+                controller=RemoteController(instance.directory,key)
+                child=tk.Toplevel(root);windows[key]=child
+                Window(child,controller);child.title('Golem · Owner 검토 · '+key[:12])
+            except Exception as error:status.set(getattr(error,'code','OWNER_CONNECTION_UNAVAILABLE'))
+        ttk.Button(pane,text='연결 목록 새로고침',command=refresh).pack(side='left',pady=12)
+        ttk.Button(pane,text='선택한 연결 검토',command=open_review).pack(side='left',padx=12)
+        def poll():
+            try:
+                while True:instance.events.get_nowait();root.deiconify();root.lift()
+            except queue.Empty:pass
+            root.after(100,poll)
+        refresh();root.after(100,poll);root.mainloop()
+        return 0
+    finally:instance.close()
 
 
 if __name__=='__main__':sys.exit(main())

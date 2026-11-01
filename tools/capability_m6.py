@@ -33,6 +33,12 @@ def inspect_m6(sources,ledger,model,backlog):
         if node is None or fingerprint(_shape(node))!=shape:errors.append(('M6_FUNCTION_CHANGED',(path,name)))
         else:checked+=1
     guards=(
+      ('tools/integration_owner_desktop.py','LocalEndpoint.dispatch',"c.require(message['instance']==self.instance and isinstance(message['token'],str) and hmac.compare_digest(message['token'],self.token),'OWNER_IPC_AUTH')"),
+      ('tools/integration_owner_desktop.py','LocalEndpoint.dispatch',"c.require(request not in self.seen,'OWNER_IPC_REPLAY')"),
+      ('tools/integration_owner_desktop.py','LocalEndpoint.dispatch',"c.require(len(self.seen)<IPC_REQUEST_LIMIT,'OWNER_IPC_QUOTA')"),
+      ('tools/integration_owner_desktop.py','ReviewEndpoint.handle',"c.require(key not in self.exports,'OWNER_EXPORT_ALREADY_ATTEMPTED')"),
+      ('tools/integration_owner_desktop.py','ReviewEndpoint.handle',"c.require(args['confirmed'] is True,'OWNER_REVIEW_REQUIRED')"),
+      ('tools/integration_owner_desktop.py','RemoteController.call',"c.require(descriptor(self.directory,self.instance)==self.pinned,'OWNER_IPC_CHANGED')"),
       ('tools/integration_owner_desktop.py','Controller.__init__',"c.require(approve_ui is True,'OWNER_DESKTOP_CONSENT_REQUIRED')"),
       ('tools/integration_owner_desktop.py','Controller.__init__',"c.require(scoped.profile['profile'] in ('prepare','task','quality','parallel'),'OWNER_DESKTOP_PREPARATION_REQUIRED')"),
       ('tools/integration_owner_review.py','FirstActionDraft.__init__',"c.require(isinstance(selected_transfer,transfer.Transfer),'OWNER_REVIEW_D2_REQUIRED')"),
@@ -79,6 +85,14 @@ def inspect_m6(sources,ledger,model,backlog):
     for path,name,expression in guards:
         node=_functions(trees[path]).get(name) if path in trees else None;expected=_shape(ast.parse(expression,mode='eval').body)
         if node is None or sum(_shape(n)==expected for n in ast.walk(node) if isinstance(n,ast.Call))!=1:errors.append(('M6_MANDATORY_GUARD_CHANGED',(path,name,expression)))
+    try:
+        ui=trees['tools/integration_owner_desktop.py'];ui_functions=_functions(ui)
+        start=ui_functions['run']
+        if any(isinstance(n,(ast.Import,ast.ImportFrom)) and 'tkinter' in ast.unparse(n) for n in ast.walk(start)):raise ValueError('OWNER_BACKGROUND_TK')
+        if any(isinstance(n,ast.Call) and ast.unparse(n.func) in ('Window','tk.Tk','owner_app') for n in ast.walk(start)):raise ValueError('OWNER_BACKGROUND_WINDOW')
+        sockets=[n for n in ast.walk(ui) if isinstance(n,ast.Call) and ast.unparse(n.func)=='socket.socket']
+        if not sockets or any(not n.args or ast.unparse(n.args[0])!='socket.AF_UNIX' for n in sockets):raise ValueError('OWNER_NONLOCAL_SOCKET')
+    except (KeyError,ValueError) as error:errors.append(('M6_OWNER_LIFECYCLE_CHANGED',str(error)))
     try:
         management=trees['tools/integration_owner_maintenance.py']
         symbols=_functions(management)

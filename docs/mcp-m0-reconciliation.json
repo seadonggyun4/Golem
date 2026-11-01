@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "ed839b49977cc40f63d1e564fb320651455e75a863d9b461dfaffb849fc9d984",
+  "inventory_sha256": "be5b68ede85675a5d1927a24903e4d55bcddf5689769f373ab89d9cd755dfb5b",
   "selected_source_count": 556,
   "selected_observation_count": 2307,
   "selected_capability_count": 1212,
@@ -5626,11 +5626,11 @@
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "90004ebc71192953fc5e0f258250d4b694ea805e9f3421cecb9e3f1b441efce4"
+      "sha256": "04c336247391b4b025c27fedfa29fefbb3f64d34bc97f7095187f3179221dd45"
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "297d9924ba0805cc7231ee7a9447609e8a2d53ad4d52aac5cf258a8f02533ab7"
+      "sha256": "e5fb7340b10f84e7d7b7bacb4156819cdcc7c126b61e246245d4d1330ac5d9d0"
     },
     {
       "path": "tools/integration_owner_review.py",
@@ -5642,11 +5642,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "7a2a5df82aafd7e158e457d5a30dd3f1ff382fbcdd50de06e68182012183aff1"
+      "sha256": "8395c7591194a4ca2941c69fa9373bed023b652fca3d0c84935ae675cced23ed"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "8e783955dee2dbd84ddeb9defe42347e715ec695b919f4199df90fc722106fb5"
+      "sha256": "c67f447df79ee65064e05647c2fcd6e91e6cdf9f743812bb8935243cfc7795e7"
     }
   ],
   "native_definitions": [
@@ -11310,7 +11310,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 88,
+      "checked_functions": 111,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -53338,13 +53338,33 @@
     {
       "path": "tools/integration_owner_desktop.py",
       "role": "OWNER_LOCAL_DESKTOP",
-      "rationale": "Opt-in local Tk owner UI sharing the MCP service; live-instance reference catalog with existing scope/lock/TTL checks, explicit native reinspection and owner-confirmed candidate export. No new MCP endpoint, execution, approval issuance, or policy activation.",
+      "rationale": "Headless per-connection MCP with optional owner-private Unix IPC and separate singleton Owner app. Instance/TTL/native policy checks reused; catalog/inspect/unapplied candidate only; export replay fenced. No TCP, native action, approval issuance or policy activation. Same-user IPC is not human authentication.",
       "symbols": [
         "Controller",
         "Controller.__init__",
         "Controller.drafts",
         "Controller.export",
         "Controller.inspect",
+        "LocalEndpoint",
+        "LocalEndpoint.__init__",
+        "LocalEndpoint.close",
+        "LocalEndpoint.dispatch",
+        "LocalEndpoint.serve",
+        "LocalEndpoint.start",
+        "OwnerInstance",
+        "OwnerInstance.__init__",
+        "OwnerInstance.activate",
+        "OwnerInstance.close",
+        "OwnerInstance.start",
+        "RemoteController",
+        "RemoteController.__init__",
+        "RemoteController.call",
+        "RemoteController.drafts",
+        "RemoteController.export",
+        "RemoteController.inspect",
+        "ReviewEndpoint",
+        "ReviewEndpoint.__init__",
+        "ReviewEndpoint.handle",
         "Window",
         "Window.__init__",
         "Window.choose_attachment",
@@ -53357,20 +53377,94 @@
         "Window.refresh",
         "Window.show",
         "Window.submit",
+        "connections",
+        "descriptor",
+        "identity",
         "main",
-        "run"
+        "owner_app",
+        "private_directory",
+        "receive_frame",
+        "run",
+        "send_frame"
       ],
       "declarations": [
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-owner')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-owner-review-ui')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--policy')], keywords=[keyword(arg='required', value=Constant(value=True))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--profile')], keywords=[keyword(arg='choices', value=Tuple(elts=[Constant(value='prepare'), Constant(value='task'), Constant(value='quality'), Constant(value='parallel')], ctx=Load())), keyword(arg='default', value=Constant(value='prepare'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--review-directory')], keywords=[keyword(arg='help', value=Constant(value='Existing owner-private Unix IPC directory; explicit opt-in only'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--review-directory')], keywords=[keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--review-label')], keywords=[keyword(arg='default', value=Constant(value='Golem')), keyword(arg='help', value=Constant(value='Display label only; never authenticated client identity'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--reviewed-policy-sha256')], keywords=[keyword(arg='dest', value=Constant(value='digest')), keyword(arg='required', value=Constant(value=True))])"
       ],
       "literal_branches": [
         [
           "Attribute(value=Name(id='error', ctx=Load()), attr='code', ctx=Load())",
           "PREPARATION_EXPIRED"
+        ],
+        [
+          "Attribute(value=Name(id='path', ctx=Load()), attr='stem', ctx=Load())",
+          "owner-app"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='args', ctx=Load())])",
+          "action_id"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='args', ctx=Load())])",
+          "attachment_path"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='args', ctx=Load())])",
+          "attachment_sha256"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='args', ctx=Load())])",
+          "confirmed"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='args', ctx=Load())])",
+          "parent"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='args', ctx=Load())])",
+          "plan"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='message', ctx=Load())])",
+          "arguments"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='message', ctx=Load())])",
+          "instance"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='message', ctx=Load())])",
+          "operation"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='message', ctx=Load())])",
+          "request_id"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='message', ctx=Load())])",
+          "token"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "instance"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "kind"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "label"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "token"
         ],
         [
           "Constant(value='plan_read')",
@@ -53386,6 +53480,22 @@
         ],
         [
           "Name(id='kind', ctx=Load())",
+          "inspect"
+        ],
+        [
+          "Name(id='operation', ctx=Load())",
+          "activate"
+        ],
+        [
+          "Name(id='operation', ctx=Load())",
+          "catalog"
+        ],
+        [
+          "Name(id='operation', ctx=Load())",
+          "export"
+        ],
+        [
+          "Name(id='operation', ctx=Load())",
           "inspect"
         ],
         [
@@ -53409,8 +53519,24 @@
           "task"
         ],
         [
+          "Subscript(value=Attribute(value=Name(id='self', ctx=Load()), attr='pinned', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "review"
+        ],
+        [
+          "Subscript(value=Name(id='argv', ctx=Load()), slice=Constant(value=0), ctx=Load())",
+          "owner-app"
+        ],
+        [
           "Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
           "DRAFT_ACTION"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "activation"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "review"
         ],
         [
           "Subscript(value=Subscript(value=Name(id='plan', ctx=Load()), slice=Constant(value='payload'), ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
@@ -57265,7 +57391,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "f7d4358d4676213462431915ffec2589c39c7e0a6d3272cda0149e96ec1b73ec",
+      "sha256": "f3ae219735d48b873fc69b4a7b165198b17ae4f5960b5d5aa75fc7ef6d244a14",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57415,7 +57541,7 @@
     },
     {
       "path": "tools/capability_m6.py",
-      "sha256": "b091443b58e5943649a006f848b4bd230775e9bc8f0d68aa53dc41007874b08b",
+      "sha256": "09a8b9582606b167f0536fb57ea8ae703d2c95f62ab7d6bf252ee6db15b89ab1",
       "shape_sha256": "b55968f8239250743a915731952dc065513f132c95dd891c66f7d312f976b7dd",
       "role": "M0_STATIC_ANALYSIS"
     },
@@ -57427,7 +57553,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "d8feb74c8676c4253739966d03e3c6de80ebfe74a0d63065194769dcefa33dea",
+      "sha256": "19ca920cf4f9127166a24358e749a5d140b60fb0eda091ed6627250ada8e4a29",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57571,7 +57697,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "69804a6edd15808134c344a6f75e0c47e287f31438d7cab21f79e090d1a289a7",
+      "sha256": "a5a18e9fd64c4968eb14b2fb9a65c1e6995d25e171ca71c1c644a319ba26e5f7",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57727,7 +57853,7 @@
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "90004ebc71192953fc5e0f258250d4b694ea805e9f3421cecb9e3f1b441efce4",
+      "sha256": "04c336247391b4b025c27fedfa29fefbb3f64d34bc97f7095187f3179221dd45",
       "shape_sha256": "f76210add26870e75f046b598aeb0642b0edc2d502ecd5077f248ee3843329dc",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -57877,8 +58003,8 @@
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "8e783955dee2dbd84ddeb9defe42347e715ec695b919f4199df90fc722106fb5",
-      "shape_sha256": "f4f8d13811df5e92d633974079f09d055e7de1fb7d22ddc0410262991be7e253",
+      "sha256": "c67f447df79ee65064e05647c2fcd6e91e6cdf9f743812bb8935243cfc7795e7",
+      "shape_sha256": "0055cb66f6f7636708dd3ffcde9ccc1e43d0b4d0384074c8938ab9e227c7823d",
       "role": "M0_FIXTURE_REGRESSION"
     }
   ],

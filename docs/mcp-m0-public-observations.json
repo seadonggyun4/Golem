@@ -459,11 +459,11 @@
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "90004ebc71192953fc5e0f258250d4b694ea805e9f3421cecb9e3f1b441efce4"
+      "sha256": "04c336247391b4b025c27fedfa29fefbb3f64d34bc97f7095187f3179221dd45"
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "297d9924ba0805cc7231ee7a9447609e8a2d53ad4d52aac5cf258a8f02533ab7"
+      "sha256": "e5fb7340b10f84e7d7b7bacb4156819cdcc7c126b61e246245d4d1330ac5d9d0"
     }
   ],
   "observations": [
