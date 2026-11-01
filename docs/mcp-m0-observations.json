@@ -2207,7 +2207,7 @@
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "e5fb7340b10f84e7d7b7bacb4156819cdcc7c126b61e246245d4d1330ac5d9d0"
+      "sha256": "0463dd24337abeb33db5fe3cc02d4819e79b8830f440233d647958a79fa61579"
     },
     {
       "path": "tools/integration_owner_review.py",
@@ -2219,11 +2219,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "8395c7591194a4ca2941c69fa9373bed023b652fca3d0c84935ae675cced23ed"
+      "sha256": "c7d3a29221db252f4e0d66c1b9715ee1766864e8854af9e936432fe8a5a6bebd"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "c67f447df79ee65064e05647c2fcd6e91e6cdf9f743812bb8935243cfc7795e7"
+      "sha256": "738695c1f725eb2ca732aa8fd257fedba152f0f9d0d879a7db0ad576970a64b1"
     }
   ],
   "observations": [

@@ -482,6 +482,130 @@ def connections(directory):
     return rows
 
 
+CONNECTION_STATES = {'record': '연결 기록 · 생존 미확인', 'closed': '종료/사용 불가',
+                     'invalid': '검증 불가'}
+
+
+class ConnectionCatalog:
+    """Presentation-only cache. Never probe Work, delete records or infer authority."""
+    def __init__(self,directory):
+        self.directory=private_directory(directory);self.rows={}
+
+    def refresh(self):
+        import os,stat
+        names=list(self.directory.glob('*.json'))
+        c.require(len(names)<=128,'OWNER_IPC_CATALOG_LIMIT')
+        current={}
+        for path in sorted(names):
+            if path.stem=='owner-app':continue
+            key=path.stem;label=self.rows.get(key,{}).get('label',key)
+            try:
+                value=descriptor(self.directory,key)
+                if value['kind']!='review':continue
+                label=value['label']
+                info=(self.directory/(key+'.sock')).lstat()
+                valid=stat.S_ISSOCK(info.st_mode) and info.st_uid==os.getuid() and stat.S_IMODE(info.st_mode)==0o600
+                state='record' if valid else 'invalid'
+                label=value['label']
+            except FileNotFoundError:
+                state='closed'
+            except (OSError,c.IntegrationError):
+                state='invalid'
+            current[key]={'instance':key,'label':label,'state':state}
+        # Retain only bounded in-memory history, not a second persistent registry.
+        for key,row in self.rows.items():
+            if key not in current and len(current)<128:
+                current[key]={**row,'state':'closed'}
+        self.rows=current
+
+    def visible(self,query='',show_closed=False,order='name'):
+        words=query.casefold().split()
+        rows=[row for row in self.rows.values()
+              if (show_closed or row['state']!='closed') and
+              all(word in (row['label']+' '+row['instance']).casefold() for word in words)]
+        key=(lambda row:row['instance']) if order=='id' else (lambda row:(row['label'].casefold(),row['instance']))
+        return sorted(rows,key=key,reverse=order=='name_desc')
+
+
+class ConnectionBrowser:
+    """Search/sort preserves exact instance selection; no automatic first-row pick."""
+    def __init__(self,root,directory,open_callback):
+        import tkinter as tk
+        from tkinter import ttk
+        self.catalog=ConnectionCatalog(directory);self.open_callback=open_callback
+        pane=ttk.Frame(root,padding=16);pane.pack(fill='both',expand=True)
+        ttk.Label(pane,text='Owner 연결 선택 — 실행 승인·정책 적용 없음').pack(anchor='w')
+        controls=ttk.Frame(pane);controls.pack(fill='x',pady=8)
+        ttk.Label(controls,text='이름 / 연결 ID 검색').pack(side='left')
+        self.query=tk.StringVar();self.search=ttk.Entry(controls,textvariable=self.query,width=30)
+        self.search.pack(side='left',fill='x',expand=True,padx=8)
+        self.order=tk.StringVar(value='이름순');sort=ttk.Combobox(controls,textvariable=self.order,
+            values=['이름순','이름 역순','연결 ID순'],state='readonly',width=12);sort.pack(side='left')
+        self.show_closed=tk.BooleanVar(value=False)
+        ttk.Checkbutton(pane,text='종료/사용 불가 연결 표시 (기록 삭제 없음)',variable=self.show_closed,command=self.render).pack(anchor='w')
+        table=ttk.Frame(pane);table.pack(fill='both',expand=True,pady=8)
+        self.tree=ttk.Treeview(table,columns=('name','state','id'),show='headings',selectmode='browse',height=10)
+        for column,title,width in [('name','연결 이름',280),('state','상태',190),('id','정확한 연결 ID',280)]:
+            self.tree.heading(column,text=title);self.tree.column(column,width=width,minwidth=100)
+        scrollbar=ttk.Scrollbar(table,orient='vertical',command=self.tree.yview)
+        self.tree.configure(yscrollcommand=scrollbar.set);scrollbar.pack(side='right',fill='y');self.tree.pack(fill='both',expand=True)
+        self.status=tk.StringVar();ttk.Label(pane,textvariable=self.status,wraplength=800).pack(anchor='w')
+        buttons=ttk.Frame(pane);buttons.pack(fill='x',pady=8)
+        ttk.Button(buttons,text='연결 목록 새로고침',command=self.refresh).pack(side='left')
+        self.open_button=ttk.Button(buttons,text='선택한 연결 검토',command=self.open_selected,state='disabled')
+        self.open_button.pack(side='left',padx=12)
+        ttk.Label(pane,text='소켓 기록은 생존·권한 보증이 아닙니다. 실제 조회 시 원래 연결을 다시 검사합니다.').pack(anchor='w')
+        self.query.trace_add('write',lambda *_:self.render());sort.bind('<<ComboboxSelected>>',lambda _:self.render())
+        self.tree.bind('<<TreeviewSelect>>',lambda _:self.selection_changed())
+        self.tree.bind('<Return>',lambda _:self.open_selected())
+        self.tree.bind('<Down>',lambda _:self.navigate(1))
+        self.tree.bind('<Up>',lambda _:self.navigate(-1))
+        self.refresh()
+
+    def navigate(self,direction):
+        # An explicit arrow key selects; refresh/filter alone never does.
+        rows=self.tree.get_children()
+        if not rows:return 'break'
+        selected=self.tree.selection()
+        index=rows.index(selected[0]) if selected and selected[0] in rows else (-1 if direction>0 else len(rows))
+        key=rows[max(0,min(len(rows)-1,index+direction))]
+        self.tree.selection_set(key);self.tree.focus(key);self.tree.see(key)
+        self.selection_changed()
+        return 'break'
+
+    def selection_changed(self):
+        selected=self.tree.selection();row=self.catalog.rows.get(selected[0]) if selected else None
+        self.open_button.configure(state='normal' if row and row['state']=='record' else 'disabled')
+
+    def render(self):
+        selected=self.tree.selection()
+        rows=self.catalog.visible(self.query.get(),self.show_closed.get(),
+            {'이름순':'name','이름 역순':'name_desc','연결 ID순':'id'}[self.order.get()])
+        self.tree.delete(*self.tree.get_children())
+        for row in rows:self.tree.insert('', 'end',iid=row['instance'],values=(row['label'],CONNECTION_STATES[row['state']],row['instance']))
+        if selected and self.tree.exists(selected[0]):self.tree.selection_set(selected[0]);self.tree.focus(selected[0]);self.tree.see(selected[0])
+        self.selection_changed()
+        closed=sum(row['state']=='closed' for row in self.catalog.rows.values())
+        self.status.set(f'표시 {len(rows)} / 전체 {len(self.catalog.rows)} · 종료/사용 불가 {closed} · 자동 선택 없음')
+
+    def refresh(self):
+        try:self.catalog.refresh();self.render()
+        except Exception as error:
+            self.tree.delete(*self.tree.get_children());self.selection_changed()
+            self.status.set(getattr(error,'code','OWNER_CONNECTION_UNAVAILABLE'))
+
+    def open_selected(self):
+        selected=self.tree.selection()
+        if not selected:return
+        key=selected[0];row=self.catalog.rows.get(key)
+        if not row or row['state']!='record':return
+        try:self.open_callback(key)
+        except Exception as error:
+            state='closed' if isinstance(error,FileNotFoundError) or getattr(error,'code','')=='OWNER_CONNECTION_UNAVAILABLE' else 'invalid'
+            self.catalog.rows[key]={**row,'state':state};self.render()
+            self.status.set(getattr(error,'code','OWNER_CONNECTION_UNAVAILABLE')+' · 재실행 없음')
+
+
 class OwnerInstance:
     """OS lock, not PID guessing. Stale files never authorize a new service."""
     def __init__(self,directory):
@@ -537,39 +661,22 @@ def owner_app(argv):
         instance.start()
         import tkinter as tk
         from tkinter import ttk
-        root=tk.Tk();root.title('Golem · Owner 연결 선택');root.geometry('760x260')
-        pane=ttk.Frame(root,padding=16);pane.pack(fill='both',expand=True)
-        ttk.Label(pane,text='검토할 현재 연결을 선택하세요. 실행 승인·정책 적용은 제공하지 않습니다.').pack(anchor='w')
-        selected=tk.StringVar();choice=ttk.Combobox(pane,textvariable=selected,state='readonly',width=65);choice.pack(fill='x',pady=12)
-        status=tk.StringVar(value='연결 목록은 로컬 참조이며 연결 성공·권한을 보증하지 않습니다.')
-        ttk.Label(pane,textvariable=status,wraplength=720).pack(anchor='w')
-        windows={};connection_rows={}
-        def refresh():
-            try:
-                connection_rows.clear()
-                for key in connections(instance.directory):
-                    value=descriptor(instance.directory,key)
-                    connection_rows[value['label']+' / '+key]=key
-                choice.configure(values=list(connection_rows));selected.set('')
-            except Exception as error:status.set(getattr(error,'code','OWNER_CONNECTION_UNAVAILABLE'))
-        def open_review():
-            key=connection_rows.get(selected.get())
-            if not key:return
+        root=tk.Tk();root.title('Golem · Owner 연결 선택');root.geometry('900x480')
+        windows={}
+        def open_review(key):
+            # Recheck descriptor even when a previous child window exists.
+            controller=RemoteController(instance.directory,key)
             old=windows.get(key)
             if old is not None and old.winfo_exists():old.deiconify();old.lift();return
-            try:
-                controller=RemoteController(instance.directory,key)
-                child=tk.Toplevel(root);windows[key]=child
-                Window(child,controller);child.title('Golem · Owner 검토 · '+key[:12])
-            except Exception as error:status.set(getattr(error,'code','OWNER_CONNECTION_UNAVAILABLE'))
-        ttk.Button(pane,text='연결 목록 새로고침',command=refresh).pack(side='left',pady=12)
-        ttk.Button(pane,text='선택한 연결 검토',command=open_review).pack(side='left',padx=12)
+            child=tk.Toplevel(root);windows[key]=child
+            Window(child,controller);child.title('Golem · Owner 검토 · '+key[:12])
+        browser=ConnectionBrowser(root,instance.directory,open_review)
         def poll():
             try:
                 while True:instance.events.get_nowait();root.deiconify();root.lift()
             except queue.Empty:pass
             root.after(100,poll)
-        refresh();root.after(100,poll);root.mainloop()
+        root.after(100,poll);root.mainloop()
         return 0
     finally:instance.close()
 

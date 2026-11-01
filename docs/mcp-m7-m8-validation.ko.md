@@ -507,3 +507,44 @@ Linux/Windows/remote CI/Hosted, 실제 target merge, public distribution, 실제
 제거 전 프로그램/설정 복구 자료를 owner-private `m7m8-validation-20261026/cleanup-latest-20261027/private`에 보존했다. 기존 COMMIT_UNKNOWN evidence 100개·Work 44개·승인 policy/action/decision, Codex DONE Work 69개·새 Claude DONE Work 71개의 원파일 hash가 모두 동일하다. 권한·정책 범위는 이전하지 않았고 Work 실행/모델 호출/commit/push도 하지 않았다. 공식 Codex CLI가 무관한 `node_repl.args=[]`를 기본 빈 인자 목록의 생략 형태로 직렬화한 한 건을 별도 기록했으며 다른 유효 설정은 동일하다.
 
 후속 사용자 지시에 따라 workspace 공통 `AGENTS.md`와 `CLAUDE.md`에 개발 시작·설치 변경·종료 시 최신 검증본 한 개 유지, 중복 정리, 실제 bytes/권한/보존 검사와 원장 갱신을 필수 규칙으로 추가했다. 설정·원본·승인·evidence 삭제로 검증/정리를 성공 처리하거나 미검증 버전을 최신본으로 승격하지 않는다. 자세한 정리 결과는 `m7m8-validation-20261026/cleanup-latest-20261027/summary.json`에 있다.
+
+
+## Owner 연결 목록 UI 검증 — 2026-11-01
+
+## 변경과 범위
+
+연결 이름·ID 검색, 이름 정순/역순·ID 정렬, 종료 연결 숨김/표시를 제공한다. 정렬·새로고침 시 정확한 연결 ID의 선택과 포커스를 유지한다. 최초 방향키 입력은 명시적으로 행을 선택하며, 검색·갱신 자체는 다른 행을 자동 선택하지 않는다. 종료되거나 검증할 수 없는 연결은 검토 버튼과 Enter 경로를 차단한다.
+
+목록은 로컬 표시용 참조다. 소켓 존재는 생존·권한을 보증하지 않으며 실제 검토는 기존 연결 검사를 다시 거친다. 기존 MCP 수명주기·정책·승인 계약은 변경하지 않았다.
+
+## 검증 결과
+
+| 검사 | 결과 |
+| --- | --- |
+| Owner 회귀 (`GOLEM_TEST_TK=1`, `test_integration_owner*.py`) | 36 통과, skip 0 |
+| 정적 operation·repository 대조 | selected_complete / repository_complete 통과 |
+| 실제 설치 Owner 앱: 방향키 행 선택 | PASS |
+| 실제 UI: 역순 정렬 후 동일 ID 선택 유지 | PASS |
+| 실제 UI: 새로고침·선택 연결 종료 후 동일 행 유지 | PASS |
+| 실제 UI: 종료 행 검토 버튼 비활성화·Enter 차단 | PASS |
+| 실제 UI: 종료 행 숨김 시 선택 해제, 다른 행 자동 선택 없음 | PASS |
+| 합성 endpoint 정상 종료·자체 socket/descriptor 정리 | PASS |
+| 기존 client 설치·설정·정책·Work·registry·MCP runtime inventory | 변경 없음 |
+| 이번 변경의 Codex·Claude 모델/Work E2E | NOT_RUN |
+
+실제 UI 검증은 합성 연결 두 개만 사용했다. Work 호출·후보 저장·승인 발급·QA·완료는 모두 0회다. 기존 Codex 0.2.7·Claude 0.1.14 Golem 설치 각각 한 개를 활성 상태로 유지했고, 별도 Owner 앱만 개선본을 유지했다. 이 결과는 모든 Core 기능의 E2E 또는 CI의 GUI 실행을 뜻하지 않는다.
+
+## 근거 identity
+
+로컬 원본 검증 자료와 복구본은 비공개로 보존한다. 공개 기록에는 정책 내용·사용자 경로 대신 무결성 digest만 포함한다.
+
+- 검토 원장 SHA-256: `24d5724983984ef8dff7291aae50bd9f8942f52435802a1b96f82eca6c017c1c`
+- 적용 Owner launcher SHA-256: `c4fc76cfd58d8287966ab13b55e24b3d39e7ed56c8f549e1def2f836df3ecf37`
+- 로컬 validation.json SHA-256: `185362c420bd78f0efa144363bbff096c0c83fde3564f3457a2edd0d47d0de51`
+
+| 실제 화면 근거 | SHA-256 |
+| --- | --- |
+| ui-closed-blocked.png | `726c62d0fd55edc4fc1465bd9e03bf55383af85f5cc74b22bb78ad3072c0884f` |
+| ui-hidden-no-selection.png | `dbf79b855fbca033383b06337d5dd2e12c93f235c886941cd7a7d391fd775e21` |
+| ui-selected.png | `ff85a20a3db9cad9ec143db2ac28fc21768f48f4246c88541513a4c4af427372` |
+| ui-sorted.png | `02c4066cb36e3e58e5e829ffb937b14a5022b7e432b56b4adff69b963ff237dd` |

@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "be5b68ede85675a5d1927a24903e4d55bcddf5689769f373ab89d9cd755dfb5b",
+  "inventory_sha256": "47fe9fb98a179e8adaf0c423404cb31ef5cafd1dc6f3fb144d718abde6cad50e",
   "selected_source_count": 556,
   "selected_observation_count": 2307,
   "selected_capability_count": 1212,
@@ -5630,7 +5630,7 @@
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "e5fb7340b10f84e7d7b7bacb4156819cdcc7c126b61e246245d4d1330ac5d9d0"
+      "sha256": "0463dd24337abeb33db5fe3cc02d4819e79b8830f440233d647958a79fa61579"
     },
     {
       "path": "tools/integration_owner_review.py",
@@ -5642,11 +5642,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "8395c7591194a4ca2941c69fa9373bed023b652fca3d0c84935ae675cced23ed"
+      "sha256": "c7d3a29221db252f4e0d66c1b9715ee1766864e8854af9e936432fe8a5a6bebd"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "c67f447df79ee65064e05647c2fcd6e91e6cdf9f743812bb8935243cfc7795e7"
+      "sha256": "738695c1f725eb2ca732aa8fd257fedba152f0f9d0d879a7db0ad576970a64b1"
     }
   ],
   "native_definitions": [
@@ -11310,7 +11310,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 111,
+      "checked_functions": 120,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -53340,6 +53340,17 @@
       "role": "OWNER_LOCAL_DESKTOP",
       "rationale": "Headless per-connection MCP with optional owner-private Unix IPC and separate singleton Owner app. Instance/TTL/native policy checks reused; catalog/inspect/unapplied candidate only; export replay fenced. No TCP, native action, approval issuance or policy activation. Same-user IPC is not human authentication.",
       "symbols": [
+        "ConnectionBrowser",
+        "ConnectionBrowser.__init__",
+        "ConnectionBrowser.navigate",
+        "ConnectionBrowser.open_selected",
+        "ConnectionBrowser.refresh",
+        "ConnectionBrowser.render",
+        "ConnectionBrowser.selection_changed",
+        "ConnectionCatalog",
+        "ConnectionCatalog.__init__",
+        "ConnectionCatalog.refresh",
+        "ConnectionCatalog.visible",
         "Controller",
         "Controller.__init__",
         "Controller.drafts",
@@ -53405,6 +53416,10 @@
         [
           "Attribute(value=Name(id='path', ctx=Load()), attr='stem', ctx=Load())",
           "owner-app"
+        ],
+        [
+          "Call(func=Name(id='getattr', ctx=Load()), args=[Name(id='error', ctx=Load()), Constant(value='code'), Constant(value='')])",
+          "OWNER_CONNECTION_UNAVAILABLE"
         ],
         [
           "Call(func=Name(id='set', ctx=Load()), args=[Name(id='args', ctx=Load())])",
@@ -53499,6 +53514,14 @@
           "inspect"
         ],
         [
+          "Name(id='order', ctx=Load())",
+          "id"
+        ],
+        [
+          "Name(id='order', ctx=Load())",
+          "name_desc"
+        ],
+        [
           "Subscript(value=Attribute(value=Name(id='scoped', ctx=Load()), attr='profile', ctx=Load()), slice=Constant(value='family'), ctx=Load())",
           "D2"
         ],
@@ -53529,6 +53552,14 @@
         [
           "Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
           "DRAFT_ACTION"
+        ],
+        [
+          "Subscript(value=Name(id='row', ctx=Load()), slice=Constant(value='state'), ctx=Load())",
+          "closed"
+        ],
+        [
+          "Subscript(value=Name(id='row', ctx=Load()), slice=Constant(value='state'), ctx=Load())",
+          "record"
         ],
         [
           "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
@@ -57553,7 +57584,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "19ca920cf4f9127166a24358e749a5d140b60fb0eda091ed6627250ada8e4a29",
+      "sha256": "04e25f3b0442401f4befd892f9bfe4f935eb66d6db070c0cd36a2cab3007e10d",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57697,7 +57728,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "a5a18e9fd64c4968eb14b2fb9a65c1e6995d25e171ca71c1c644a319ba26e5f7",
+      "sha256": "f17dd823a94f8c9f670dc839691f3be5af14d6ae8ea3b1555e067503cc0bd1f8",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58003,8 +58034,8 @@
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "c67f447df79ee65064e05647c2fcd6e91e6cdf9f743812bb8935243cfc7795e7",
-      "shape_sha256": "0055cb66f6f7636708dd3ffcde9ccc1e43d0b4d0384074c8938ab9e227c7823d",
+      "sha256": "738695c1f725eb2ca732aa8fd257fedba152f0f9d0d879a7db0ad576970a64b1",
+      "shape_sha256": "fefa8b7941eaeb9024b84ae5979ac48ceed85b6ba213356928b0d602ad6f4b49",
       "role": "M0_FIXTURE_REGRESSION"
     }
   ],

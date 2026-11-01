@@ -378,3 +378,71 @@ finally:fixture.doCleanups()
                     await asyncio.gather(*(client.list_tools() for client in clients))
                 self.assertEqual(desktop.connections(directory),[])
             asyncio.run(exercise())
+
+class ConnectionList(unittest.TestCase):
+    def test_search_sort_closed_history_and_no_requests_or_deletion(self):
+        import tempfile
+        with tempfile.TemporaryDirectory(dir='/tmp') as tmp:
+            directory=Path(tmp).resolve();directory.chmod(0o700)
+            calls=[]
+            a=desktop.LocalEndpoint(directory,lambda op,args:calls.append(op),label='Zulu Codex').start()
+            b=desktop.LocalEndpoint(directory,lambda op,args:calls.append(op),label='alpha Claude').start()
+            try:
+                model=desktop.ConnectionCatalog(directory);model.refresh()
+                self.assertEqual([r['label'] for r in model.visible()],['alpha Claude','Zulu Codex'])
+                self.assertEqual([r['label'] for r in model.visible(order='name_desc')],['Zulu Codex','alpha Claude'])
+                self.assertEqual(model.visible('CLAUDE alpha')[0]['instance'],b.instance)
+                self.assertEqual(model.visible(a.instance[:12])[0]['instance'],a.instance)
+                self.assertEqual(model.visible('no such connection'),[])
+                before=a.record.read_bytes();b.close();model.refresh()
+                self.assertEqual([r['instance'] for r in model.visible()],[a.instance])
+                self.assertEqual(model.rows[b.instance]['state'],'closed')
+                self.assertEqual(len(model.visible(show_closed=True)),2)
+                self.assertEqual(a.record.read_bytes(),before);self.assertEqual(calls,[])
+            finally:a.close();b.close()
+
+    def test_unsafe_socket_and_stale_record_not_reported_live(self):
+        import tempfile,socket
+        with tempfile.TemporaryDirectory(dir='/tmp') as tmp:
+            directory=Path(tmp).resolve();directory.chmod(0o700)
+            endpoint=desktop.LocalEndpoint(directory,lambda *_:None).start()
+            try:
+                model=desktop.ConnectionCatalog(directory)
+                endpoint.path.chmod(0o666);model.refresh()
+                self.assertEqual(model.rows[endpoint.instance]['state'],'invalid')
+                endpoint.path.chmod(0o600)
+                endpoint.socket.close();model.refresh()
+                # A stale socket file cannot establish process liveness.
+                self.assertEqual(model.rows[endpoint.instance]['state'],'record')
+                self.assertIn('미확인',desktop.CONNECTION_STATES['record'])
+            finally:endpoint.close()
+
+    def test_native_browser_selection_filter_refresh_and_closed_disable(self):
+        import os,tempfile
+        if os.environ.get('GOLEM_TEST_TK')!='1':self.skipTest('native display fixture requires GOLEM_TEST_TK=1')
+        import tkinter as tk
+        with tempfile.TemporaryDirectory(dir='/tmp') as tmp:
+            directory=Path(tmp).resolve();directory.chmod(0o700)
+            a=desktop.LocalEndpoint(directory,lambda *_:None,label='same label').start()
+            b=desktop.LocalEndpoint(directory,lambda *_:None,label='same label').start()
+            root=tk.Tk();opened=[]
+            try:
+                view=desktop.ConnectionBrowser(root,directory,opened.append);root.update()
+                self.assertEqual(view.tree.selection(),())
+                view.tree.focus_force();view.tree.event_generate('<Down>');root.update()
+                first=view.tree.get_children()[0]
+                self.assertEqual(view.tree.selection(),(first,))
+                self.assertEqual(view.tree.focus(),first)
+                view.tree.selection_set(a.instance);root.update()
+                view.order.set('이름 역순');view.render();root.update()
+                self.assertEqual(view.tree.selection(),(a.instance,))
+                self.assertEqual(view.tree.focus(),a.instance)
+                view.open_selected();self.assertEqual(opened,[a.instance])
+                view.query.set(b.instance);root.update()
+                self.assertEqual(view.tree.selection(),());view.open_selected();self.assertEqual(opened,[a.instance])
+                view.query.set('');view.tree.selection_set(a.instance);a.close();view.refresh();root.update()
+                self.assertFalse(view.tree.exists(a.instance));self.assertEqual(view.tree.selection(),())
+                view.show_closed.set(True);view.render();view.tree.selection_set(a.instance);root.update()
+                self.assertIn('disabled',view.open_button.state());view.open_selected();self.assertEqual(opened,[a.instance])
+                self.assertEqual(desktop.connections(directory),[b.instance])
+            finally:root.destroy();a.close();b.close()
