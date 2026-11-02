@@ -19,7 +19,7 @@
     },
     {
       "path": "src/cli/main.c",
-      "sha256": "fab255e621ddcd0f9c7eb222946cec5948ae8d18a777860c509f03739dfbf4c8"
+      "sha256": "7de203232ae901f79d12a6d07957e2ae4bc6df219a4168a612002a43293d4e36"
     },
     {
       "path": "tools/integration_service.py",
@@ -2227,11 +2227,11 @@
     },
     {
       "path": "include/golem/workpack.h",
-      "sha256": "90b00b7987f4b3eae3caca8958294a941ff735918a7ad629ef454a4898566c44"
+      "sha256": "1ea582fdb41a62cb420c7188d39144cf4a3ae5f973320d13d60b2b2235593889"
     },
     {
       "path": "src/workpack/model.c",
-      "sha256": "c1f7cfeaeb2c06308e6ef3666379071881b7f6c5c9439899556a9a6c431d28e5"
+      "sha256": "aa24f9004dfe1f7a370a942a48c71ea834e9c020d6a05da7c5bdac2c0df23e15"
     },
     {
       "path": "tests/c/test_workpack.c",
@@ -2243,19 +2243,31 @@
     },
     {
       "path": "src/workpack/read.c",
-      "sha256": "cbfafc392ffd55cc9996206ad1b562110d0549a07b162bfefd4faf725486b7fe"
+      "sha256": "e0e37483f6a6d5c693334ce91c6a9012cf39c027e3f2874098fcb1723912699d"
     },
     {
       "path": "src/cli/workpack.c",
-      "sha256": "efd663badfcdc94a4f3d9bbade5a4050d10f681569ba53fd567170d9401eb7d0"
+      "sha256": "8435c7173f67acc3cdef8c3296f88ff89717fd01ae73cf3b8ab028a6916028eb"
     },
     {
       "path": "tests/c/test_workpack_read.c",
-      "sha256": "fe1e8ff640b93a968678c50b7675aeda73985e7a6c4cd4e0aaa383ade79fe1d0"
+      "sha256": "bf34d7b8e54046d3865b2db49d64cd0480f7248c89e36ab4d9de278dd9d51cd5"
     },
     {
       "path": "tests/c/workpack_cli.py",
       "sha256": "6981b141d1a56d265218d78784fd6b0c18f6cee2b388303163d3cc1843a26e36"
+    },
+    {
+      "path": "src/workpack/internal.h",
+      "sha256": "c0c6a5cfec189984e1ade821f3481df1a954bcff2ffcbf72578a63b30325fee5"
+    },
+    {
+      "path": "tests/c/workpack_catalog.py",
+      "sha256": "e76349e1abb1f15b0ead204b3998c8d7c3a181987c907cf945fcd95005923b86"
+    },
+    {
+      "path": "docs/workpacks/delivery.md",
+      "sha256": "8f6c28bcabcd41da8e50312007839fc0078db6187b66a8fee5712f04af39b697"
     }
   ],
   "observations": [
@@ -18491,6 +18503,34 @@
       "source_path": "src/cli/workpack.c",
       "entrypoint": "golem_cli_workpack",
       "selector": "compatibility"
+    },
+    {
+      "id": "obs-6efff88cc06ff7ab4e4de2e3c3f95dd6da5996ad219fde43c6dfc020b3be711d",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_catalog",
+      "selector": null
+    },
+    {
+      "id": "obs-ec9623b55b761dffec01ed364e75f0b27a9cfb3bb4e3f29e7bfa798679452fb7",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/workpack/internal.h",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-28f178f4e52cc6bc2e346f35eb2ddeb32dccafb6811f57e31414cc03a51de3de",
+      "kind": "CLI_ROUTE",
+      "source_path": "src/cli/workpack.c",
+      "entrypoint": "golem_cli_workpack",
+      "selector": "list"
+    },
+    {
+      "id": "obs-468f1a654764847732f7263f8a772476c2a2eb555b0bb1de1b1883b7916944a0",
+      "kind": "CLI_ROUTE",
+      "source_path": "src/cli/workpack.c",
+      "entrypoint": "golem_cli_workpack",
+      "selector": "search"
     }
   ],
   "capabilities": [
@@ -76582,7 +76622,8 @@
       "id": "native.workpack.file-surfaces",
       "observation_ids": [
         "obs-f7c0c419dbc44a625df4b8648c4f2ce3cac0ccd752cd834121fc793fe5ce12d5",
-        "obs-8f4355a5bbbacf7cda5d57e3c6e8e5c8626b9b5dbbed6954a5ba9b0d058e416c"
+        "obs-8f4355a5bbbacf7cda5d57e3c6e8e5c8626b9b5dbbed6954a5ba9b0d058e416c",
+        "obs-ec9623b55b761dffec01ed364e75f0b27a9cfb3bb4e3f29e7bfa798679452fb7"
       ],
       "implementation": "IMPLEMENTED",
       "current_routes": [
@@ -76594,7 +76635,9 @@
       "authorities": [
         "None: pure borrowed bytes and caller-owned output; no grants"
       ],
-      "effects": [],
+      "effects": [
+        "NATIVE_READ"
+      ],
       "constraints": {
         "platforms": [
           "Supported native C library platforms"
@@ -76617,7 +76660,7 @@
         }
       ],
       "review_status": "REVIEWED",
-      "rationale": "Additive pure validator reuses strict native JSON parser and SHA-256; no dispatch, filesystem IO or state mutation. Separate from prior MCP parity scope."
+      "rationale": "M1/M2 pure operations and M3 catalog native reads coexist in the model. No Work or MCP execution."
     },
     {
       "id": "native.golem_workpack_read",
@@ -76790,7 +76833,9 @@
         "obs-f9a239dc03eaf9dca8bbf9095a250896780a567795ecdcf6a3745979c5ed606a",
         "obs-0970c77240d6643a4149aa53ae3057f551b3f7c855d9fc0de86e934976ac0f14",
         "obs-a716af05662849b6bf6615d6e537502bad7ce395526e2fbe08589977efc7c6d4",
-        "obs-8e40e3ef3ef7b3c5e53a236417ce85d5b72a5dafdae35219ead2b56f5f9819f9"
+        "obs-8e40e3ef3ef7b3c5e53a236417ce85d5b72a5dafdae35219ead2b56f5f9819f9",
+        "obs-28f178f4e52cc6bc2e346f35eb2ddeb32dccafb6811f57e31414cc03a51de3de",
+        "obs-468f1a654764847732f7263f8a772476c2a2eb555b0bb1de1b1883b7916944a0"
       ],
       "implementation": "IMPLEMENTED",
       "current_routes": [
@@ -76812,13 +76857,17 @@
           "Supported POSIX native runtime"
         ],
         "limits": [
-          "64KiB manifest; 4095-byte no-follow input path; nonblocking shared file lock"
+          "64KiB manifests;1MiB catalog;256 entries;no-follow paths;bounded nonblocking reads"
         ],
         "notes": "Native C and local CLI only; MCP and language bindings NOT_IMPLEMENTED. Declaration compatibility is not readiness. Optional existing CLI recording can write audit records."
       },
       "test_refs": [
         {
           "path": "tests/c/workpack_cli.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_catalog.py",
           "selector": null
         }
       ],
@@ -76830,6 +76879,48 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Reuses M1 strict native validation/version grammar, existing no-follow path traversal and CLI error envelope. No Work calls, policy change or execution dispatch."
+    },
+    {
+      "id": "native.golem_workpack_catalog",
+      "observation_ids": [
+        "obs-6efff88cc06ff7ab4e4de2e3c3f95dd6da5996ad219fde43c6dfc020b3be711d"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit local input path / borrowed immutable bytes; no Work authority"
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "Supported POSIX native runtime"
+        ],
+        "limits": [
+          "1MiB index,256 entries,64KiB manifest,256-byte query,2MiB report"
+        ],
+        "notes": "Snapshot observations, not cross-file atomicity. NO_MATCH/AMBIGUOUS never grant authority. MCP NOT_IMPLEMENTED."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/workpack_catalog.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/delivery.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit bounded native-only catalog/search, every manifest validated by existing M1/M2 contracts; no binding or execution."
     }
   ]
 }

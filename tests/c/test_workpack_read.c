@@ -38,5 +38,18 @@ int main(void)
     }
     CHECK(golem_workpack_read(path,bytes,1,&n,&d)==GOLEM_ERR_BUFFER_TOO_SMALL);
     CHECK(golem_workpack_read(NULL,bytes,sizeof(bytes),&n,&d)==GOLEM_ERR_INVALID_ARGUMENT);
+    const char *catalog="{\"schema\":\"golem.workpack.catalog.v0\",\"entries\":[]}";
+    int fd=open(path,O_WRONLY|O_TRUNC);CHECK(fd>=0);CHECK(write(fd,catalog,strlen(catalog))==(ssize_t)strlen(catalog));CHECK(close(fd)==0);
+    size_t required=777;char output[1024];memset(output,'!',sizeof(output));
+    CHECK(golem_workpack_catalog(path,(golem_string_view){NULL,0},NULL,0,&required,&d)==GOLEM_ERR_BUFFER_TOO_SMALL);
+    CHECK(required>1 && required<sizeof(output));
+    CHECK(golem_workpack_catalog(path,(golem_string_view){NULL,0},output,sizeof(output),&required,&d)==GOLEM_OK);
+    CHECK(strstr(output,"LISTED"));
+    required=777;memset(output,'!',sizeof(output));
+    CHECK(golem_workpack_catalog(path,(golem_string_view){"\xff",1},output,sizeof(output),&required,&d)!=GOLEM_OK);
+    CHECK(required==777 && output[0]=='!');
+    change=1;
+    CHECK(golem_workpack_catalog(path,(golem_string_view){NULL,0},output,sizeof(output),&required,&d)==GOLEM_ERR_STALE_RESULT);
+    CHECK(required==777 && output[0]=='!');
     CHECK(unlink(path)==0);CHECK(rmdir(dir)==0);return 0;
 }

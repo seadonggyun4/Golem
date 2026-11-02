@@ -952,3 +952,9 @@ if(GOLEM_BUILD_CLI AND Python3_Interpreter_FOUND)
         $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR}/samples/workpacks/dataset-release-gate.json)
     set_tests_properties(workpack_cli PROPERTIES TIMEOUT 90)
 endif()
+
+if(Python3_Interpreter_FOUND)
+    add_test(NAME workpack_catalog COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/workpack_catalog.py
+        $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR}/samples/workpacks/dataset-release-gate.json)
+    set_tests_properties(workpack_catalog PROPERTIES TIMEOUT 90)
+endif()

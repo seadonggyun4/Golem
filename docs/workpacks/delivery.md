@@ -1,14 +1,14 @@
 # CLI/API, discovery and distribution boundary
 
-## Commands (M2 first three implemented; remaining commands NOT_IMPLEMENTED)
+## Commands (M2/M3 first five implemented; remaining commands NOT_IMPLEMENTED)
 
 | Command | Input → output | Effects, gates and errors |
 | --- | --- | --- |
 | `golem pack validate PACK` | bounded file → structural report/digest | M2 read only; native validator; no Work lock |
 | `golem pack inspect PACK` | bounded file → inert metadata | M2 read only; escape untrusted text |
 | `golem pack compatibility PACK` | manifest + fixed core version → declared compatibility | M2 no runtime readiness/authority |
-| `golem pack list` | explicit catalog → bounded ordered entries | M3 read only, no recursive host scan |
-| `golem pack search QUERY` | catalog + ≤256-byte query → scored refs | M3 no provider/embedding/network |
+| `golem pack list --catalog INDEX` | explicit catalog → bounded ordered entries | M3 read only, no recursive host scan |
+| `golem pack search QUERY --catalog INDEX` | catalog + ≤256-byte query → scored refs | M3 no provider/embedding/network |
 | `golem pack resolve WORK PACK` | exact references/current role → proposed intersection | M4 read-only native Work lock as required; no implicit binding |
 | `golem pack bind WORK PACK` | owner-reviewed reference + expected generation/key → binding receipt | M4 mutation; Work lock/CAS/native gate; exact idempotency |
 | `golem pack explain WORK` | immutable binding + live state → blockers | M4 read only; historical vs live explicit |
@@ -18,14 +18,14 @@
 
 M2 uses the existing CLI exit taxonomy described below. Later commands must separately
 review their status mapping without changing existing command semantics. Input is
-64 KiB for manifests; M3 catalog proposed 256 entries/1 MiB; M6 bounds are in
+64 KiB for manifests; M3 catalog 256 entries/1 MiB; M6 bounds are in
 roles-and-evidence.md.
 Reads are repeatable but not automatically retried on failure; mutation retries must
 use native exact-request lookup and preserve uncertainty. Reads do not require new
 Work audit; future integration may append its existing scoped read audit. M1 has no
 CLI audit or file access. Work changes need existing durable native records.
 
-M2 adds bounded snapshot reading, metadata inspection and declared-version comparison. Python/TypeScript bindings and MCP exposure
+M2 adds bounded snapshot reading, metadata inspection and declared-version comparison. M3 adds local catalog discovery. Python/TypeScript bindings and MCP exposure
 are NOT implemented. CLI remains a thin public C API façade, never a Python reducer.
 API version must be advertised separately from catalog schema and native core version.
 New API symbols must not imply complete language binding parity.
@@ -35,9 +35,9 @@ New API symbols must not imply complete language binding parity.
 Explicit owner-selected static JSON index contains pack ID/version, schema, digest,
 relative local manifest reference, status, intent terms, aliases, category, capability
 names and negative intent. No install implies review. Read through M2 no-follow root;
-reject duplicate ID/version with differing digest. Validate every referenced manifest,
-never trust index metadata over exact bytes. At most 256 entries, 16 aliases/terms per
-field, 256 bytes per term. No mutable latest authority or hidden network requirements.
+reject every duplicate ID/version, including identical duplicates. Validate every referenced manifest,
+never trust index metadata over exact bytes. At most 256 entries, 1–16 aliases/intent/negative-intent terms per
+field, 1–32 native capability names, 256 bytes per text term. No mutable latest authority or hidden network requirements.
 
 Initial lexical ranking: ASCII casefold, split whitespace; Unicode display text uses
 exact UTF-8 matching until normalization rules are specified. Positive score is number
@@ -50,8 +50,8 @@ No vector database or remote search. This is Golem runtime discovery, not extern
 
 ## Machine-readable source contract for styxis-plugin
 
-M1 adds a source metadata record with schema/API versions, public native entrypoint,
-the three read-only CLI routes and no MCP claims, reference inventory and security boundary. Build/release automation
+M1–M3 maintain a source metadata record with schema/API versions, five public native entrypoints,
+the five read-only CLI routes and no MCP claims, reference inventory and security boundary. Build/release automation
 must attach the actual source commit/archive digest separately; never put a self-referential
 commit hash in the source record or use mutable latest. A branch name is not provenance.
 Packaged files need independent artifact inventory and compatibility checks.
@@ -109,3 +109,57 @@ with global compact/output-store options. Existing explicitly configured top-lev
 `GOLEM_RECORD_ROOT` recording still applies and may write command records; M2 neither
 turns it on nor bypasses it. No policy changes, approvals, Work writes, subprocesses
 or network are introduced by the pack handlers. Clients and MCP exposure are unchanged.
+
+## M3 implemented catalog and search
+
+```sh
+golem pack list --catalog /reviewed/catalog.json
+golem pack search '데이터 검증' --catalog /reviewed/catalog.json
+```
+
+`golem_workpack_catalog` is the common native implementation. CLI does no independent
+parsing or ranking. The closed index is `{ "schema":"golem.workpack.catalog.v0",
+"entries":[...] }`. Each entry has exactly these eleven fields:
+
+| Fields | Contract |
+| --- | --- |
+| `id`, `version`, `schema`, `status`, `intent`, `negative_intent`, `capabilities` | Must equal the referenced validated manifest values (array order included) |
+| `digest` | 64 lowercase hexadecimal SHA-256 characters over exact manifest bytes |
+| `manifest` | Nonempty relative path <=1024 bytes, resolved relative to index directory |
+| `aliases` | 1–16 distinct nonempty text strings, each <=256 bytes |
+| `category` | Nonempty text <=256 bytes |
+
+No extra keys, duplicate JSON keys, embedded NUL, invalid UTF-8 or duplicate ID/version
+pairs are accepted. Empty catalogs are valid. Paths cannot contain absolute references,
+URLs, backslashes, `.`/`..` or empty components. The M2 native no-follow/regular-file/
+single-link/lock/drift checks apply to both index and manifests. Every entry is validated
+before matching, even when the query would exclude it. Stale digests or copied metadata
+fail the entire operation with no success stdout. Aliases/category are index-owned
+search hints; they are not authenticated pack claims or approval.
+
+The index is checked again after loading all references. This is bounded snapshot
+observation, **not a cross-file atomic transaction**: manifests are validated at their
+individual read times. A subsequent use must revalidate exact bytes. There is no scan,
+watcher, persistent cache, network, embedding, subprocess, auto-install or binding.
+
+Queries are strict UTF-8, 1–256 bytes, nonblank; ASCII whitespace is collapsed and ASCII
+letters lowercased. Other Unicode is matched exactly without normalization, stemming
+or language segmentation. Distinct query tokens score once across intent, aliases,
+category and capability tokens. Negative phrases match contiguous normalized tokens
+and exclude the entry. Substrings inside a token do not match. Search includes all
+positive non-excluded results, sorted by score descending, ID byte order, numeric version
+ascending, then digest. All highest-score ties remain visible as `AMBIGUOUS`; `MATCH`
+means one highest-scoring candidate, never automatic selection or compatibility.
+
+JSON `golem.workpack.discovery.v0` contains `entries` (ID/version/digest/relative
+manifest/status/score), `result` (`LISTED`, `MATCH`, `AMBIGUOUS`, `NO_MATCH`),
+`authorized:false`, `bound:false`, `runtime_availability:"NOT_EVALUATED"`.
+Zero matches and ambiguity are successful observations (exit 0). Native errors exit 1;
+usage errors exit 2. Full JSON goes to stdout without automatic output-cache writes.
+The existing explicit command-recording option is preserved. No current Work is read.
+
+Native output capacity is capped by the 2 MiB report bound. `required` includes NUL and
+changes only on success/BUFFER_TOO_SMALL; output bytes remain unchanged on errors.
+A NULL/zero output size query still reads files; its next call is a fresh observation.
+CLI allocates the bounded output once and performs one catalog operation. M4 binding,
+MCP/language delivery and client package updates remain NOT_IMPLEMENTED/unchanged.

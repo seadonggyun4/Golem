@@ -1225,6 +1225,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | native.golem_workpack_compatibility | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.workpack.read-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | cli.workpack.local | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_catalog | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3549,6 +3550,10 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | validate |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | inspect |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | compatibility |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_catalog | None |
+| NATIVE_OPERATION | src/workpack/internal.h | file-surface | None |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | list |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | search |
 
 ## Blockers
 

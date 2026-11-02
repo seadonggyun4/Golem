@@ -467,7 +467,7 @@
     },
     {
       "path": "include/golem/workpack.h",
-      "sha256": "90b00b7987f4b3eae3caca8958294a941ff735918a7ad629ef454a4898566c44"
+      "sha256": "1ea582fdb41a62cb420c7188d39144cf4a3ae5f973320d13d60b2b2235593889"
     },
     {
       "path": "tests/c/test_workpack.c",
@@ -479,7 +479,15 @@
     },
     {
       "path": "tests/c/test_workpack_read.c",
-      "sha256": "fe1e8ff640b93a968678c50b7675aeda73985e7a6c4cd4e0aaa383ade79fe1d0"
+      "sha256": "bf34d7b8e54046d3865b2db49d64cd0480f7248c89e36ab4d9de278dd9d51cd5"
+    },
+    {
+      "path": "tests/c/workpack_catalog.py",
+      "sha256": "e76349e1abb1f15b0ead204b3998c8d7c3a181987c907cf945fcd95005923b86"
+    },
+    {
+      "path": "docs/workpacks/delivery.md",
+      "sha256": "8f6c28bcabcd41da8e50312007839fc0078db6187b66a8fee5712f04af39b697"
     }
   ],
   "observations": [
@@ -3127,6 +3135,13 @@
       "kind": "C_PUBLIC_DECLARATION",
       "source_path": "include/golem/workpack.h",
       "entrypoint": "golem_workpack_compatibility",
+      "selector": null
+    },
+    {
+      "id": "obs-6efff88cc06ff7ab4e4de2e3c3f95dd6da5996ad219fde43c6dfc020b3be711d",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_catalog",
       "selector": null
     }
   ],
@@ -20738,6 +20753,48 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Reuses M1 strict native validation/version grammar, existing no-follow path traversal and CLI error envelope. No Work calls, policy change or execution dispatch."
+    },
+    {
+      "id": "native.golem_workpack_catalog",
+      "observation_ids": [
+        "obs-6efff88cc06ff7ab4e4de2e3c3f95dd6da5996ad219fde43c6dfc020b3be711d"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit local input path / borrowed immutable bytes; no Work authority"
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "Supported POSIX native runtime"
+        ],
+        "limits": [
+          "1MiB index,256 entries,64KiB manifest,256-byte query,2MiB report"
+        ],
+        "notes": "Snapshot observations, not cross-file atomicity. NO_MATCH/AMBIGUOUS never grant authority. MCP NOT_IMPLEMENTED."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/workpack_catalog.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/delivery.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit bounded native-only catalog/search, every manifest validated by existing M1/M2 contracts; no binding or execution."
     }
   ]
 }

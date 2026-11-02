@@ -68,7 +68,7 @@ static int evidence_read(int argc, char **argv)
 static int usage(void)
 {
     fputs("Usage:\n"
-        "  golem pack validate|inspect FILE | compatibility FILE [--core-version X.Y.Z]\n"
+        "  golem pack validate|inspect FILE | compatibility FILE [--core-version X.Y.Z]\n  golem pack list --catalog INDEX | search QUERY --catalog INDEX\n"
         "  golem [--output-mode compact|full] [--output-store ABSOLUTE_DIR] COMMAND ...\n"
         "  golem output read SHA256\n"
         "  golem evidence read STORE SHA256 MAX_BYTES (1..1048576, verified base64)\n"

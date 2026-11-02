@@ -6,12 +6,15 @@
     "golem_workpack_validate",
     "golem_workpack_read",
     "golem_workpack_inspect",
-    "golem_workpack_compatibility"
+    "golem_workpack_compatibility",
+    "golem_workpack_catalog"
   ],
   "public_cli": [
     "golem pack validate FILE",
     "golem pack inspect FILE",
-    "golem pack compatibility FILE [--core-version X.Y.Z]"
+    "golem pack compatibility FILE [--core-version X.Y.Z]",
+    "golem pack list --catalog INDEX",
+    "golem pack search QUERY --catalog INDEX"
   ],
   "mcp_tools": [],
   "binding_support": [],
@@ -41,7 +44,9 @@
       "exact-bytes.sha256",
       "snapshot.read",
       "manifest.inspect",
-      "declared-version.compatibility"
+      "declared-version.compatibility",
+      "catalog.list",
+      "catalog.lexical-search"
     ],
     "mcp": []
   },
@@ -50,5 +55,7 @@
     "success": 0,
     "native_error_or_declared_incompatibility": 1,
     "usage_error": 2
-  }
+  },
+  "catalog_schema": "golem.workpack.catalog.v0",
+  "catalog_report_schema": "golem.workpack.discovery.v0"
 }

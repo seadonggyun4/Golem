@@ -23,7 +23,7 @@ an explicit design gate first. No broad delegated approval is introduced.
 | M0 | docs/workpacks; source audit and terminology | Documentation only. Gate A consistency reviewed; revert docs only |
 | M1 | include/golem/workpack.h, src/workpack, samples/workpacks, tests/c, fuzz | Pure bounded byte validator, additive API; no migration. Valid/invalid fixtures, failure output invariance, installed C consumer and mutation smoke must pass. Revert additive code before any binding exists |
 | M2 | src/cli/workpack.c, src/workpack/read.c and native inspect/compatibility API | Implemented: bounded no-follow snapshot, deterministic JSON; no Work writes or migration. Path/race/lock/CLI/numeric-version tests; remove additive CLI/API before any binding exists |
-| M3 | native static catalog/search | No central service. Deterministic ranking, ambiguity/duplicate/version tests; owner-selected catalog only. Not implemented |
+| M3 | native static catalog/search | No central service. Deterministic ranking, ambiguity/duplicate/version tests; owner-selected catalog only. Implemented; results below |
 | M4 | native binding/resolve, immutable reference and receipt schema | New persisted state; review compatibility with old readers, migration refusal, exact key/generation/owner/fence and policy intersection before coding. No automatic rollback or existing Work migration |
 | M5 | role mapping and proposal parser | Separate typed claims/assessments; stale/cross-owner/self-approval/disagreement tests; preserve failed/unknown outputs. No model truth |
 | M6 | Evidence manifest/export/verify | Explicit output publication and disclosure; truncation/corruption/missing object/unsigned origin/current-vs-historical tests; retain partial exports, no auto retry |
@@ -130,7 +130,7 @@ was issued. Local logs and preservation details live outside the source checkout
 `../workpack-m1-validation-20261102/` and are not public package contents.
 
 
-## M2 current implementation
+## M2 implementation record (before M3)
 
 `pack validate`, `pack inspect`, `pack compatibility` are implemented as thin native C
 CLI handlers. The existing M1 validator and numeric version parser are reused; the
@@ -181,3 +181,64 @@ review. The installed runtime remains f2563f5; this native CLI change is not ins
 in either client. No TopSolar/Work action or approval issuance was performed. Detailed
 local logs, including initial failures, are retained outside the checkout in
 `../workpack-m2-validation-20261102/`.
+
+## M3 current implementation (2026-11-02)
+
+Native `golem_workpack_catalog` and CLI `pack list --catalog INDEX` /
+`pack search QUERY --catalog INDEX` implement explicit local discovery. They reuse M1
+manifest/version validation and the M2 snapshot reader; the reader's bounded internal
+helper now accepts the index's 1 MiB ceiling while the public manifest reader retains
+its 64 KiB contract. No Python runtime/reducer or client configuration is introduced.
+
+Fixtures cover Korean/English positive/negative queries, deduplicated tokens, ties,
+no-match, numeric version sorting, order independence, metadata/digest drift, duplicate
+index entries, unknown keys, query/entry/byte bounds, invalid UTF-8, locking, symlinks,
+traversal and no output-store publication. Native tests cover output sizing/invariance
+and injected index mutation. Results are observations only; M4–M7 remain NOT_IMPLEMENTED.
+
+### M3 verification results
+
+| Check | Result |
+| --- | --- |
+| Debug build with warnings as errors | PASS |
+| Work Pack native/CLI fixtures and mutation smoke | 14/14 PASS |
+| ASan/UBSan same subset (including 1 MiB/256-entry boundaries) | 14/14 PASS |
+| Installed public API consumer | 1/1 PASS |
+| Full native/CLI regression | Initially 416/418 PASS; both interrupted tests passed isolated recheck |
+| Capability regression | Initially 370/371 PASS; corrected native registry module 5/5 PASS |
+| Strict static inventory | 451 source surfaces, 349 public declarations, zero blockers |
+| Current source pins, documentation links and whitespace | PASS |
+
+The initial full regression hit `candidate_diff_integration`'s unchanged 180-second
+limit while several checks ran concurrently. Isolated recheck passed in 97.79 seconds.
+`orchestration_benchmark` correctly rejected an input binary changed by the diagnostic
+message rebuild during measurement; after freezing source/binaries it passed in
+58.01 seconds. No timeout, input-change guard or test assertion was relaxed.
+The first capability run detected incorrectly edited existing native registry hashes;
+those original pins were restored, the affected five tests passed, and the final
+repository-wide static reconciliation has no blockers. An earlier artifact refresh
+also rejected concurrent inventory edits; final artifacts use stable verified bytes.
+Initial failure logs are retained, not replaced with only successful runs.
+
+Representative verification commands:
+
+```sh
+cmake --build build/workpack-m1 -j6
+ctest --test-dir build/workpack-m1 -R 'workpack|fuzz_seeds' --output-on-failure
+ctest --test-dir build/workpack-m1 -j4 --output-on-failure
+ctest --test-dir build/workpack-m1 -j1 -R '^(candidate_diff_integration|orchestration_benchmark)$' --output-on-failure
+cmake --build build/workpack-m1-asan -j6
+ctest --test-dir build/workpack-m1-asan -R 'workpack|fuzz_seeds' --output-on-failure
+python3 -m unittest discover -s tools -p 'test_capability_*.py'
+python3 -m unittest discover -s tools -p 'test_capability_native.py'
+python3 tools/capability_refresh.py --root "$PWD"
+```
+
+NOT_RUN: real Codex/Claude/Work E2E, provider/Truthound calls, coverage-guided libFuzzer,
+Linux/Windows builds, Conan distribution and client package updates. M4–M7 and Work Pack
+MCP/language delivery remain NOT_IMPLEMENTED, not merely untested. Existing Codex 0.2.7
+(9 package files), Claude prepare 0.1.15 (85 files), shared runtime (85 files), launchers
+and TopSolar D2 pins match the installed f2563f5 review; each client retains its one
+active Golem installation. No actual Work action, approval issuance, evidence update
+or COMMIT_UNKNOWN retry occurred. Private detailed logs and the installation check
+are in `../workpack-m3-validation-20261102/`, outside the source repository.

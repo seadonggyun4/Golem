@@ -94,3 +94,6 @@ bundle, proof pack, MCP package, native receipt and role enrollment. Their exist
 linked contracts stay canonical. New pack schema is canonical in [schema](schema.md),
 future authority in [roles/evidence](roles-and-evidence.md), planned commands in
 [delivery](delivery.md), and stage gates in [development](development-plan.md).
+
+M3 additionally implements explicit local catalog listing and deterministic lexical search.
+See [delivery](delivery.md) for exact input limits, ambiguity and no-authority semantics.

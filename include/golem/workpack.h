@@ -5,6 +5,9 @@
 extern "C" {
 #endif
 #define GOLEM_WORKPACK_MAX_JSON 65536u
+#define GOLEM_WORKPACK_CATALOG_MAX_JSON 1048576u
+#define GOLEM_WORKPACK_CATALOG_MAX_ENTRIES 256u
+#define GOLEM_WORKPACK_CATALOG_REPORT_MAX 2097152u
 #define GOLEM_WORKPACK_SCHEMA "golem.workpack.v0"
 /* Experimental pure manifest validator. Borrowed immutable bytes, required
  * caller-owned digest, optional diagnostic; outputs must not alias input or each
@@ -32,6 +35,17 @@ golem_status golem_workpack_inspect(golem_bytes input, char *buffer, size_t capa
  * compatible unchanged on failure. */
 golem_status golem_workpack_compatibility(golem_bytes input, golem_string_view core_version,
                                          bool *compatible, golem_diagnostic *diagnostic);
+/* Explicit local catalog discovery. NULL/zero query lists all validated entries;
+ * otherwise strict UTF-8 query <=256 bytes. No grants, binding or Work access.
+ * Every relative manifest is read and exact digest/metadata checked, including
+ * excluded results. No scan/network/cache. Duplicate ID/version is an error.
+ * JSON report is deterministic; ties never choose a winner. required includes NUL
+ * and changes only on OK/BUFFER_TOO_SMALL; buffer unchanged on error. A size query
+ * performs filesystem reads; a later call is a fresh observation, not a snapshot
+ * handle. Output/input must not alias. See docs/workpacks/delivery.md. */
+golem_status golem_workpack_catalog(const char *path, golem_string_view query,
+                                   char *buffer, size_t capacity, size_t *required,
+                                   golem_diagnostic *diagnostic);
 #ifdef __cplusplus
 }
 #endif
