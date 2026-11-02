@@ -1,7 +1,9 @@
 # Truthound Dataset Release Gate reference specification
 
 Identity `io.styxis.golem.dataset-release-gate`, version `0.1.0`, experimental.
-The manifest is a structurally valid contract fixture, NOT a working binding or release.
+The manifest is a structurally valid contract fixture, NOT a working release binding.
+M7 implements the [bounded capture adapter and separate native document scenario](reference-adapter.md);
+the general external role mapping and authoritative release predicate remain unsupported.
 Golem does not import/copy Truthound implementation. Truthound is external Evidence.
 
 Tool declarations inspected in the connected Truthound Local inventory on 2026-11-02:
@@ -14,7 +16,9 @@ Tool declarations inspected in the connected Truthound Local inventory on 2026-1
 
 All return `{data: object|null,error:object|null,ok:boolean,operation:string,
 schema_version:1,truncated:boolean}`. Current grants/tool delivery remain client-specific.
-No calls, raw data reads or Truthound configuration changes were performed in this audit.
+The initial inventory audit made no calls. M7 later ran six owner-approved calls on
+two isolated synthetic CSVs; see the [execution record](development-plan.md). No
+production data, global Truthound permissions or client connections were changed.
 These tools do not promise release, full PII absence, source snapshot signing, owner
 approval, or durable Golem evidence ingestion. Adapter capture must bind exact dataset
 bytes/config and preserve truncation, unknown quality, sample coverage and failure.
@@ -34,7 +38,8 @@ execution authority. Release is outside this pack: completion intent READY_FOR_R
 requires exact source, current required evidence, checked result identity, review present,
 blocking findings resolved or explicitly rejected by owner, recorded owner decision,
 no unresolved foreign owner or uncertain effects, and explicit release not-executed.
-This is not a currently installed native predicate; M4–M7 must connect and test it.
+This is not an implemented native predicate. M7 explicitly tests refusal to bind
+this external-role Pack; its supported document bridge does not substitute for that predicate.
 
 ```
 Agent dataset proposal → exact source/pack binding (planned)
@@ -45,7 +50,8 @@ Agent dataset proposal → exact source/pack binding (planned)
 
 Tool success ≠ Evidence accepted ≠ semantic review passed ≠ owner approved
 ≠ release authorized ≠ Work completed. Mock data is never advertised as an actual
-Truthound integration run. Portable receipt remains planned under M6.
+Truthound integration run. M6 supports selected native document receipts; M7 can export a quoted external
+observation inside such a document, without authenticating the external result.
 
 The serialized M1 sample uses hyphenated role/evidence identifiers (for example
 `data-validator`); conceptual underscore names above are prose, not accepted IDs.

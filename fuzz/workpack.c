@@ -23,5 +23,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         REQUIRE(golem_digest_bytes((golem_bytes){data,size}, &repeated) == GOLEM_OK);
         REQUIRE(!memcmp(&result, &repeated, sizeof(result)));
     }
+    golem_digest pin = {{0}};
+    uint8_t sentinel = 42;
+    golem_execution_reply reply = {&sentinel,1};
+    status = golem_workpack_reference_observe((golem_bytes){data,size},&pin,&pin,&pin,&reply,NULL);
+    if(status!=GOLEM_OK) REQUIRE(reply.data==&sentinel && reply.size==1);
+    else golem_execution_reply_free(&reply);
     return 0;
 }

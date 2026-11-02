@@ -27,7 +27,7 @@ an explicit design gate first. No broad delegated approval is introduced.
 | M4 | native binding/resolve, immutable reference and receipt schema | Implemented native-documents-v1 after owner design selection; immutable CAS/event binding, old-reader rejection, exact approval and generation. Session/custom/external mappings block; no automatic rollback or existing Work migration |
 | M5 | native document role evaluation and proposal parser | Implemented within existing native-documents-v1 binding; separate untrusted claims and native evaluation, exact current evidence; no new identity, persisted event or model truth. General/independent mappings remain unsupported |
 | M6 | Evidence manifest/export/verify | Implemented native-documents-v1 closure only; separate exact private export approval, bounded typed inventory, unsigned anchored verification; retained partial exports, no auto retry. General evidence adapters remain unsupported |
-| M7 | reference adapters and local scenario | Mock/native/real Truthound tests reported separately; no automatic release, provider grants or project changes |
+| M7 | Truthound Local capture adapter and native document scenario | Implemented limited non-authoritative observation bridge; mock/native/actual stdio tests separate. No general external-role binding, authoritative release predicate or MCP route |
 
 Non-goals at every milestone: scheduler, merge broker, hosted service, model/provider
 configuration, billing, license change, repository split and client marketplace migration.
@@ -445,3 +445,81 @@ is not installed-client Work Pack delivery. No production Work/action, approval,
 QA/completion, COMMIT_UNKNOWN or Owner UI is invoked, retried or modified.
 Private original approval proposal, installation comparisons, source identities and
 logs are retained in `../workpack-m6-validation-20261102/` outside the repository.
+
+## M7 current implementation — reference observation bridge
+
+See [reference adapter](reference-adapter.md). One native pure API and one thin CLI
+route validate pinned Truthound Local 3.3.1 captures. Existing native document
+contracts, M4 exact binding, M5 role observation and M6 export/verify implement the
+local scenario; no Python reducer, new approval authority or Work event is added.
+The external release Pack remains unsupported by native binding. A distinct
+native-observation-review Pack is used; structural satisfaction never grants release.
+
+Actual external execution was separately approved under exact private plan SHA-256
+`b9233dd30f20371fc097c42cf1e2603da9b5779b74caa67ce894bbff870c0216`.
+The plan pins installed server/permission/MCP source and interpreter bytes plus two
+synthetic files. Its isolated consent file does not replace global Truthound consent.
+
+### M7 verification results (2026-11-02)
+
+| Layer / check | Result |
+| --- | --- |
+| Mock adapter fixtures | PASS: declared successful/failed checks, tool failure, truncation, unknowns, contradictions, schema/pin/size failures, inert injected strings |
+| Native local scenario | PASS: external release binding rejected; distinct document Pack bound; planning observation submitted; M5 native role SATISFIED only; M6 export/verify integrity only |
+| Actual Truthound Local 3.3.1 | 6/6 calls completed, one isolated installed stdio session; zero retries |
+| Actual clean CSV | check: 3 rows, 2 columns, null/duplicate satisfied; profile returned; sampled scan 0 findings (not proof of PII absence) |
+| Actual issues CSV | check transport succeeded but quality false, 2 issues; profile returned; sampled email finding count 3, one finding (estimated, not unique-person count) |
+| Saved actual responses through final native adapter/document scenario | PASS; no repeated Truthound calls |
+| Debug and ASan/UBSan relevant Work Pack/fuzz/native recording subset | 22/22 PASS each |
+| Installed public C SDK consumer | 1/1 PASS |
+| Capability regression | 371/371 PASS |
+| Final strict inventory | 460 surfaces, 358 public declarations, 589 source hashes; zero blockers |
+| Source contract/document links/whitespace | 14 API/14 CLI routes, no MCP claims; PASS |
+| Golem installations, policies and launchers | Start/end exact bytes match; one enabled Golem per client |
+
+The native scenario initially proposed a new completion literal not accepted by the
+existing v0 Pack validator. The fixture was corrected to the original schema rather
+than changing that validator: its READY_FOR_RELEASE literal remains unevaluated;
+its distinct document Pack ID and restricted mapping are explicit. Review then added
+known row/column consistency and untruncated cardinality checks. Existing response
+captures were revalidated without another external call. Initial static reference
+selection and structure-model mismatches were corrected against final bytes; the
+actual Python/native scenario is the selected capability test reference, while fuzz
+and SDK consumer remain separate existing verification boundaries. The final strict
+scan and full capability regression pass without weakening checks or timeouts.
+
+Actual clean CSV SHA-256: `4c0610aa92b75ca794ceec30068934fc6bc3d2fbff87969a15977f8fcf96f13f`.
+Actual issues CSV SHA-256: `0223321919a3ead69f38b58cd8f0c85845411ec4299876b110bbaec28192f8d0`.
+All approved input/program pins still match after the six calls. Raw MCP envelopes,
+tool catalog, exact plan, isolated consent, assembled captures and logs are private
+under `../workpack-m7-validation-20261102/`. Calls use the installed Python/runtime
+directly, without dependency downloads, global consent replacement or client restart.
+The original global Truthound permissions file was absent and remains absent.
+
+Representative local validation:
+
+```sh
+cmake --build build/workpack-m1 -j3
+ctest --test-dir build/workpack-m1 -R 'workpack|fuzz_seeds|native_api_(inventory|recording)' --output-on-failure
+cmake --build build/workpack-m1-asan -j3
+ctest --test-dir build/workpack-m1-asan -R 'workpack|fuzz_seeds|native_api_(inventory|recording)' --output-on-failure
+python3 -m unittest discover -s tools -p 'test_capability_*.py'
+python3 tools/capability_refresh.py --root "$PWD"
+```
+
+NOT_RUN: full 424-case native suite, Codex/Claude Desktop model/UI E2E, production
+dataset/Work/export, client package updates, remote services, Linux/Windows/Conan,
+coverage-guided fuzzing and remote CI confirmation. Earlier M6 full workflow/role/
+completion regressions are historical, not new M7 runs. Mock and retained-response
+processing are not counted as additional actual Truthound executions. No claim of
+full Core/Truthound/MCP parity or independent source authentication is made.
+
+NOT_IMPLEMENTED: general external/custom role binding, independent principal proof,
+authoritative READY_FOR_RELEASE predicate, external typed M6 object acceptance,
+new Work Pack MCP routes and automatic release. M7's implemented bridge stays within
+existing native document and export contracts; these omissions are not mere skips.
+
+Codex 0.2.7 and Claude prepare 0.1.15 still use the reviewed f2563f5 snapshot, with
+unchanged installed inventory, runtime/producer, TopSolar policies and launchers.
+Production approvals, Work/evidence and COMMIT_UNKNOWN were not invoked, retried or
+modified. New local fixtures and the approved isolated Truthound consent are separate.

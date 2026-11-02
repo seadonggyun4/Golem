@@ -1238,6 +1238,9 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | native.golem_workpack_receipt_verify | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.workpack.receipt-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | cli.workpack.receipt | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_reference_observe | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.workpack.reference-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| cli.workpack.reference | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3591,6 +3594,9 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | CLI_ROUTE | src/cli/workpack_receipt.c | golem_cli_workpack_receipt | verify |
 | CLI_ROUTE | src/cli/main.c | dispatch | receipt |
 | NATIVE_OPERATION | src/cli/workpack_receipt.c | file-surface | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_reference_observe | None |
+| NATIVE_OPERATION | src/workpack/reference.c | file-surface | None |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | reference-observe |
 
 ## Blockers
 

@@ -10,6 +10,17 @@
 int golem_cli_workpack(int argc, char **argv)
 {
     if (argc < 4) return 2;
+    if (!strcmp(argv[2], "reference-observe")) {
+        if(argc!=10||strcmp(argv[4],"--expect-source")||strcmp(argv[6],"--expect-config")||strcmp(argv[8],"--expect-pack"))return 2;
+        golem_digest source,config,pack;cli_blob input={0};golem_execution_reply reply={0};
+        golem_status st=golem_digest_parse((golem_string_view){argv[5],strlen(argv[5])},&source);
+        if(st==GOLEM_OK)st=golem_digest_parse((golem_string_view){argv[7],strlen(argv[7])},&config);
+        if(st==GOLEM_OK)st=golem_digest_parse((golem_string_view){argv[9],strlen(argv[9])},&pack);
+        if(st==GOLEM_OK)st=cli_read(argv[3],262144,&input);
+        if(st==GOLEM_OK)st=golem_workpack_reference_observe((golem_bytes){input.data,input.size},&source,&config,&pack,&reply,NULL);
+        if(st==GOLEM_OK&&(fwrite(reply.data,1,reply.size,stdout)!=reply.size||puts("")==EOF||fflush(stdout)))st=GOLEM_ERR_IO;
+        free(input.data);golem_execution_reply_free(&reply);cli_error_note(st,"pack.reference",NULL);return st==GOLEM_OK?0:1;
+    }
     if (!strcmp(argv[2], "proposal-validate")) {
         if (argc != 4) return 2;
         uint8_t input[GOLEM_WORKPACK_PROPOSAL_MAX_JSON]; size_t size = 0, required = 0;

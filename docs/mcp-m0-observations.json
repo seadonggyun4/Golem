@@ -19,7 +19,7 @@
     },
     {
       "path": "src/cli/main.c",
-      "sha256": "ec2b0a18957cac52ad30177ce271457b4d4ccc59a1285d2d74dd25eb28012666"
+      "sha256": "96878515be0ef276b05b86c4ab2adf455343649cdd6e59b3da9f15a21a04c9f8"
     },
     {
       "path": "tools/integration_service.py",
@@ -215,7 +215,7 @@
     },
     {
       "path": "CMakeLists.txt",
-      "sha256": "81e1c176cfd768b4481c7757433d9a377068cbb7f02cea7d157265f5d8353131"
+      "sha256": "5c1155e0323478e0b2cef2f4d71cd541deba59263ce5b2cef61f9bd848a4feae"
     },
     {
       "path": "CMakePresets.json",
@@ -2227,7 +2227,7 @@
     },
     {
       "path": "include/golem/workpack.h",
-      "sha256": "3e47ce2ac4692faf3e22c432c2ca0973ebf32d8318344c71d140fbb818ca88e7"
+      "sha256": "5151d75fdfbee33ba04b3b0dac745b7fb9eae9e81f4bb549e3c2e702b4028d3b"
     },
     {
       "path": "src/workpack/model.c",
@@ -2247,7 +2247,7 @@
     },
     {
       "path": "src/cli/workpack.c",
-      "sha256": "293aa7968b0e62904aabcebf32b1143fe3293dac1a4ea3b9d1e3331723780a7d"
+      "sha256": "86dace8f84645803ea67eb5171913e76d0ba8537c5c4348afdf7d6e9583a3c5f"
     },
     {
       "path": "tests/c/test_workpack_read.c",
@@ -2267,7 +2267,7 @@
     },
     {
       "path": "docs/workpacks/delivery.md",
-      "sha256": "ed071b7bad005bc3ab3083f91d01e987f34de969f0cced7d72854885d6602eca"
+      "sha256": "3695f6fd24957d548b4ed673c10752fcf3eaa7f765fd5cc0fd1e59c61ed63233"
     },
     {
       "path": "src/workpack/binding.c",
@@ -2344,6 +2344,18 @@
     {
       "path": "docs/workpacks/receipts.md",
       "sha256": "31717ceedc5caa83ea7b66a8ba1fa523908d01521b5066d9b7579c91a670f80d"
+    },
+    {
+      "path": "src/workpack/reference.c",
+      "sha256": "fbfab70b6ed72be036ddbb1ef8f3bfc873ea6a8e83452387b8134353ec110ba9"
+    },
+    {
+      "path": "tests/c/workpack_reference.py",
+      "sha256": "4a983625fea3c12b1d96e116a55fbba00d36fc7ff81191740d865a2f1fad24ec"
+    },
+    {
+      "path": "docs/workpacks/reference-adapter.md",
+      "sha256": "4535208631c1659c4f6d48442ef02c7db21dd707774f987d0dbcc835007d5da8"
     }
   ],
   "observations": [
@@ -18782,6 +18794,27 @@
       "source_path": "src/cli/workpack_receipt.c",
       "entrypoint": "file-surface",
       "selector": null
+    },
+    {
+      "id": "obs-31012e9b7244fd86e4cafaf3b7f948630d5fd152140ad63064bcc9b7d1a82b81",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_reference_observe",
+      "selector": null
+    },
+    {
+      "id": "obs-ef01c7c6464da41f2a2c5fd291effc546728937cf9c5b11c974bd063c1f5a6bc",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/workpack/reference.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-6132a9e5b499de9ae1ed6c47c0f3c09f9fa2a9aeacd99237f3b93a1248ff5633",
+      "kind": "CLI_ROUTE",
+      "source_path": "src/cli/workpack.c",
+      "entrypoint": "golem_cli_workpack",
+      "selector": "reference-observe"
     }
   ],
   "capabilities": [
@@ -77775,6 +77808,129 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Shared native validators and document closure, CAS hashes, Work locks, exact private export digest and immutable publication. Partial output preserved; no automatic retry or Work mutation."
+    },
+    {
+      "id": "native.golem_workpack_reference_observe",
+      "observation_ids": [
+        "obs-31012e9b7244fd86e4cafaf3b7f948630d5fd152140ad63064bcc9b7d1a82b81"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit capture bytes and caller source/config/Pack pins; no execution/identity/Work authority"
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "Native C API and local CLI"
+        ],
+        "limits": [
+          "256KiB capture;three 64KiB responses;Truthound Local3.3.1 legacy envelope only"
+        ],
+        "notes": "Pure untrusted observation. Unknown/truncated/failure not quality pass. No source authentication, general external-role binding, release predicate or MCP route."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/workpack_reference.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/reference-adapter.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reuses strict native parser/digests and Pack validator; native scenario uses separate existing document contracts and exact publication approvals. Mock and retained actual outputs are distinguished."
+    },
+    {
+      "id": "native.workpack.reference-surfaces",
+      "observation_ids": [
+        "obs-ef01c7c6464da41f2a2c5fd291effc546728937cf9c5b11c974bd063c1f5a6bc"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit capture bytes and caller source/config/Pack pins; no execution/identity/Work authority"
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "Native C API and local CLI"
+        ],
+        "limits": [
+          "256KiB capture;three 64KiB responses;Truthound Local3.3.1 legacy envelope only"
+        ],
+        "notes": "Pure untrusted observation. Unknown/truncated/failure not quality pass. No source authentication, general external-role binding, release predicate or MCP route."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/workpack_reference.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/reference-adapter.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reuses strict native parser/digests and Pack validator; native scenario uses separate existing document contracts and exact publication approvals. Mock and retained actual outputs are distinguished."
+    },
+    {
+      "id": "cli.workpack.reference",
+      "observation_ids": [
+        "obs-6132a9e5b499de9ae1ed6c47c0f3c09f9fa2a9aeacd99237f3b93a1248ff5633"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit capture bytes and caller source/config/Pack pins; no execution/identity/Work authority"
+      ],
+      "effects": [
+        "DISCLOSURE",
+        "AUDIT_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "Native C API and local CLI"
+        ],
+        "limits": [
+          "256KiB capture;three 64KiB responses;Truthound Local3.3.1 legacy envelope only"
+        ],
+        "notes": "Pure untrusted observation. Unknown/truncated/failure not quality pass. No source authentication, general external-role binding, release predicate or MCP route."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/workpack_reference.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/reference-adapter.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reuses strict native parser/digests and Pack validator; native scenario uses separate existing document contracts and exact publication approvals. Mock and retained actual outputs are distinguished."
     }
   ]
 }

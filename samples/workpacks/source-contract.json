@@ -15,7 +15,8 @@
     "golem_workpack_assess",
     "golem_workpack_receipt_manifest",
     "golem_workpack_receipt_export",
-    "golem_workpack_receipt_verify"
+    "golem_workpack_receipt_verify",
+    "golem_workpack_reference_observe"
   ],
   "public_cli": [
     "golem pack validate FILE",
@@ -30,7 +31,8 @@
     "golem pack assess WORK FILE [FILE...]",
     "golem receipt manifest WORK REQUEST PARENT [--format json|markdown]",
     "golem receipt export WORK REQUEST PARENT --approve-export DIGEST [--format json|markdown]",
-    "golem receipt verify DIRECTORY --expect-manifest DIGEST"
+    "golem receipt verify DIRECTORY --expect-manifest DIGEST",
+    "golem pack reference-observe CAPTURE --expect-source SHA --expect-config SHA --expect-pack SHA"
   ],
   "mcp_tools": [],
   "binding_support": [
@@ -72,7 +74,8 @@
       "proposal.native-role-assess",
       "receipt.manifest",
       "receipt.exact-private-export",
-      "receipt.anchored-integrity-verify"
+      "receipt.anchored-integrity-verify",
+      "reference.truthound-observation"
     ],
     "mcp": []
   },
@@ -91,5 +94,12 @@
   "receipt_verification_schema": "golem.workpack.receipt-verification.v0",
   "receipt_support": [
     "native-documents-v1"
-  ]
+  ],
+  "reference_adapter": {
+    "schema": "golem.workpack.truthound-capture.v0",
+    "report": "golem.workpack.reference-observation.v0",
+    "producer": "Truthound Local 3.3.1 legacy envelope",
+    "authority": "UNAUTHENTICATED_CAPTURE_ATTESTATION",
+    "release_readiness": "NOT_EVALUATED"
+  }
 }

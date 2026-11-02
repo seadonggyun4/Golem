@@ -218,6 +218,7 @@ int main(void)
     if (golem_workpack_catalog(NULL, (golem_string_view){NULL,0}, NULL, 0, NULL, NULL) != GOLEM_ERR_INVALID_ARGUMENT) return 1;
     if (golem_workpack_proposal_validate((golem_bytes){NULL,0}, NULL, NULL) != GOLEM_ERR_INVALID_ARGUMENT ||
         golem_workpack_assess(NULL,NULL,0,NULL,NULL) != GOLEM_ERR_INVALID_ARGUMENT) return 96;
+    if (golem_workpack_reference_observe((golem_bytes){NULL,0},NULL,NULL,NULL,NULL,NULL)!=GOLEM_ERR_INVALID_ARGUMENT) return 1;
     if (golem_workpack_receipt_manifest(NULL,(golem_bytes){NULL,0},NULL,NULL,NULL,NULL)!=GOLEM_ERR_INVALID_ARGUMENT ||
         golem_workpack_receipt_export(NULL,(golem_bytes){NULL,0},NULL,NULL,NULL,NULL,NULL)!=GOLEM_ERR_INVALID_ARGUMENT ||
         golem_workpack_receipt_verify(NULL,NULL,NULL,NULL)!=GOLEM_ERR_INVALID_ARGUMENT) return 97;

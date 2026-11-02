@@ -69,7 +69,7 @@ static int evidence_read(int argc, char **argv)
 static int usage(void)
 {
     fputs("Usage:\n"
-        "  golem pack validate|inspect FILE | compatibility FILE [--core-version X.Y.Z]\n  golem pack list --catalog INDEX | search QUERY --catalog INDEX\n  golem pack resolve WORK REQUEST | bind WORK REQUEST --approve-binding DIGEST | explain WORK\n  golem pack proposal-validate FILE | assess WORK FILE [FILE...]\n  golem receipt manifest|export WORK REQUEST PARENT [--approve-export DIGEST] [--format json|markdown]\n  golem receipt verify DIRECTORY --expect-manifest DIGEST\n"
+        "  golem pack validate|inspect FILE | compatibility FILE [--core-version X.Y.Z]\n  golem pack list --catalog INDEX | search QUERY --catalog INDEX\n  golem pack resolve WORK REQUEST | bind WORK REQUEST --approve-binding DIGEST | explain WORK\n  golem pack proposal-validate FILE | assess WORK FILE [FILE...]\n  golem pack reference-observe CAPTURE --expect-source SHA --expect-config SHA --expect-pack SHA\n  golem receipt manifest|export WORK REQUEST PARENT [--approve-export DIGEST] [--format json|markdown]\n  golem receipt verify DIRECTORY --expect-manifest DIGEST\n"
         "  golem [--output-mode compact|full] [--output-store ABSOLUTE_DIR] COMMAND ...\n"
         "  golem output read SHA256\n"
         "  golem evidence read STORE SHA256 MAX_BYTES (1..1048576, verified base64)\n"

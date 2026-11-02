@@ -75,6 +75,7 @@ add_library(golem STATIC
     src/workpack/read.c
     src/workpack/binding.c
     src/workpack/proposal.c
+    src/workpack/reference.c
     src/workpack/receipt_model.c
     src/workpack/receipt_verify.c
     src/workpack/receipt_store.c

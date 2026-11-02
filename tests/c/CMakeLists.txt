@@ -983,4 +983,11 @@ if(Python3_Interpreter_FOUND)
         $<TARGET_FILE:golem_test_workpack_binding_fault> ${GOLEM_WORKPACK_BASELINE_CLI})
     set_tests_properties(workpack_receipts PROPERTIES TIMEOUT 180)
 
+    foreach(mode fixture native)
+        add_test(NAME workpack_reference_${mode} COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/workpack_reference.py
+            $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR} ${mode} $<TARGET_FILE:golem_test_workpack_receipt_fault>
+            $<TARGET_FILE:golem_test_workpack_binding_fault> ${GOLEM_WORKPACK_BASELINE_CLI})
+        set_tests_properties(workpack_reference_${mode} PROPERTIES TIMEOUT 180)
+    endforeach()
+
 endif()

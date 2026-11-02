@@ -143,3 +143,5 @@ M2/M3 add read-only validation, inspection, compatibility and local catalog/sear
 Work Pack M5: [verifier proposals and native role evaluation](workpacks/proposals.md).
 
 Work Pack M6: [private evidence packages and integrity verification](workpacks/receipts.md).
+
+Work Pack M7: [Truthound reference adapter and local scenario](workpacks/reference-adapter.md).

@@ -94,6 +94,13 @@ golem_status golem_workpack_receipt_export(golem_document_store *store, golem_by
     golem_digest *manifest, golem_diagnostic *diagnostic);
 golem_status golem_workpack_receipt_verify(const char *directory, const golem_digest *expected_manifest,
     golem_execution_reply *out, golem_diagnostic *diagnostic);
+/* M7 bounded Truthound 3.3.1 capture adapter; no file/tool/Work operations.
+ * Exact source/config/Pack pins are caller attestations, not authenticated origin.
+ * <=256KiB capture, three <=64KiB responses. Unknown/truncated/failed observations
+ * never authorize release or native completion. Replies freed by existing API. */
+golem_status golem_workpack_reference_observe(golem_bytes input, const golem_digest *source,
+    const golem_digest *config, const golem_digest *pack, golem_execution_reply *out,
+    golem_diagnostic *diagnostic);
 #ifdef __cplusplus
 }
 #endif
