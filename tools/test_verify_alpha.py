@@ -24,6 +24,10 @@ class SourceSnapshotTests(unittest.TestCase):
                 relative = "tools/" + name
                 self.assertIn(relative, exported)
                 self.assertEqual((output / relative).read_bytes(), (root / relative).read_bytes())
+            for name in ("verifier-proposal.json", "native-observation-review.json"):
+                relative = "samples/workpacks/" + name
+                self.assertIn(relative, exported)
+                self.assertEqual((output / relative).read_bytes(), (root / relative).read_bytes())
             # A native fixture can import its D2/D4 dependencies in the clean tree.
             subprocess.run([sys.executable, "-B", "-c",
                             "import integration_service, integration_mutations"],

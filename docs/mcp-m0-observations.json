@@ -451,7 +451,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "cd00564ef4b6cca9d7f0813fc7715e9186bd4915441560b4007b25dd606152d4"
+      "sha256": "23027ecd50fa2d49248b200327c272773bb8c8510d26e88048d0940809ffc74c"
     },
     {
       "path": "src/adapter_protocol/adapter.c",

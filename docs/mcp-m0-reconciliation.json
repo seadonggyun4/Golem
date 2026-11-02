@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "434b2b41f1d87d64433591a67f1283d36450703b7d5a54870b13c2a164d17ee0",
+  "inventory_sha256": "2711863a7b66b5a259491a6a54811138ad0623923b2f324197e8178e34954578",
   "selected_source_count": 596,
   "selected_observation_count": 2359,
   "selected_capability_count": 1242,
@@ -4004,7 +4004,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "cd00564ef4b6cca9d7f0813fc7715e9186bd4915441560b4007b25dd606152d4"
+      "sha256": "23027ecd50fa2d49248b200327c272773bb8c8510d26e88048d0940809ffc74c"
     },
     {
       "path": "src/adapter_protocol/adapter.c",
@@ -59921,7 +59921,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "6b7a1be271960e76a8f816b26a924e3a3915818ba4cdfe585bbf74616a4081c4",
+      "sha256": "606a799a246353d840678c77ab71b0f2051d5ef90330f74cf522612a7ab8f7d5",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
