@@ -240,6 +240,11 @@ static void workpack(const char *source)
     uint8_t bytes[65537]; size_t count = fread(bytes, 1, sizeof(bytes), f);
     REQUIRE(!ferror(f) && feof(f) && fclose(f) == 0);
     save("workpack", "reference.json", bytes, count);
+    n = snprintf(path, sizeof(path), "%s/samples/workpacks/verifier-proposal.json", source);
+    REQUIRE(n > 0 && (size_t)n < sizeof(path));
+    f = fopen(path, "rb"); REQUIRE(f); count = fread(bytes, 1, sizeof(bytes), f);
+    REQUIRE(!ferror(f) && feof(f) && fclose(f) == 0);
+    save("workpack", "proposal.json", bytes, count);
 }
 int main(int argc, char **argv)
 {

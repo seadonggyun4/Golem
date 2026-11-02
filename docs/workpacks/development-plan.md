@@ -25,7 +25,7 @@ an explicit design gate first. No broad delegated approval is introduced.
 | M2 | src/cli/workpack.c, src/workpack/read.c and native inspect/compatibility API | Implemented: bounded no-follow snapshot, deterministic JSON; no Work writes or migration. Path/race/lock/CLI/numeric-version tests; remove additive CLI/API before any binding exists |
 | M3 | native static catalog/search | No central service. Deterministic ranking, ambiguity/duplicate/version tests; owner-selected catalog only. Implemented; results below |
 | M4 | native binding/resolve, immutable reference and receipt schema | Implemented native-documents-v1 after owner design selection; immutable CAS/event binding, old-reader rejection, exact approval and generation. Session/custom/external mappings block; no automatic rollback or existing Work migration |
-| M5 | role mapping and proposal parser | Separate typed claims/assessments; stale/cross-owner/self-approval/disagreement tests; preserve failed/unknown outputs. No model truth |
+| M5 | native document role evaluation and proposal parser | Implemented within existing native-documents-v1 binding; separate untrusted claims and native evaluation, exact current evidence; no new identity, persisted event or model truth. General/independent mappings remain unsupported |
 | M6 | Evidence manifest/export/verify | Explicit output publication and disclosure; truncation/corruption/missing object/unsigned origin/current-vs-historical tests; retain partial exports, no auto retry |
 | M7 | reference adapters and local scenario | Mock/native/real Truthound tests reported separately; no automatic release, provider grants or project changes |
 
@@ -315,3 +315,65 @@ ctest --test-dir build/workpack-m1-asan -R 'native_api_(inventory|recording)' --
 python3 -m unittest discover -s tools -p 'test_capability_*.py'
 python3 tools/capability_refresh.py --root "$PWD"
 ```
+
+
+## M5 current implementation — untrusted proposals and native role observation
+
+See [proposal contract](proposals.md). Two additive public native APIs and two thin CLI
+routes reuse the native strict parser, M2 snapshot reader, M4 binding, Work lock,
+workflow closure/CAS checks and existing role `evaluate`. There is no new approval
+mechanism, persisted schema, role enrollment, identity authority or client update.
+Self-declared principal/model/provider tokens cannot become owner identity. M4's
+unsupported general/external/development/session mappings remain unsupported; M5 does
+not label them merely untested or claim a full semantic verification system.
+
+
+### M5 verification results (2026-11-02)
+
+| Check | Result |
+| --- | --- |
+| Debug build, warnings as errors | PASS |
+| Work Pack native/CLI/fixture and mutation smoke | 17/17 PASS |
+| ASan/UBSan same Work Pack subset | 17/17 PASS |
+| Existing golden workflow, completion, role contract, automatic API recording/inventory, installed-header regression | 6/6 PASS |
+| Installed public C API consumer | 1/1 PASS |
+| Capability regression | 371/371 PASS |
+| Final strict static inventory | 454 source surfaces, 354 public declarations, zero blockers |
+| Current inspected source pins | 577/577 match |
+| Source-contract 10 API/10 CLI entries, document links and whitespace | PASS |
+
+The first static inventory mistakenly selected the inert proposal JSON sample as an
+executable source; adding a test-reference was not sufficient because that source
+scanner does not treat JSON examples as test entrypoints. It is now classified like
+the existing Pack JSON sample: tracked inert fixture, exercised by the C consumer,
+CLI and mutation seed. The code/test files remain source-reviewed and the exact sample
+bytes are preserved in Git and the private verification record. The resulting registry
+change also required refreshing its development hash. Initial blocker logs remain;
+no scanner rule, test assertion, authority gate or timeout was weakened.
+
+Representative verification commands:
+
+```sh
+cmake --build build/workpack-m1 -j3
+ctest --test-dir build/workpack-m1 -R 'workpack|fuzz_seeds' --output-on-failure
+cmake --build build/workpack-m1-asan -j3
+ctest --test-dir build/workpack-m1-asan -R 'workpack|fuzz_seeds' --output-on-failure
+ctest --test-dir build/workpack-m1 -j2 -R '^(role_contract_cli|native_api_recording|native_api_inventory|completion_cli|golden_workflow|header_workpack)$' --output-on-failure
+python3 -m unittest discover -s tools -p 'test_capability_*.py'
+python3 tools/capability_refresh.py --root "$PWD"
+```
+
+NOT_RUN in M5: full 421-case native suite (the affected Work Pack and existing native
+contracts above were run), real Codex/Claude/Work E2E, client package updates, external
+provider/Truthound calls, Linux/Windows builds, Conan distribution, coverage-guided
+libFuzzer and remote CI confirmation. Earlier M4 full-suite results are historical,
+not presented as a new M5 run. General external/development/session/independent
+identity mappings and Work Pack MCP delivery remain NOT_IMPLEMENTED.
+
+Installed Codex 0.2.7 and Claude prepare 0.1.15, their existing launchers and TopSolar
+policies remain the reviewed f2563f5 snapshot. Each client retains one enabled Golem
+installation; no new direct connection or Owner UI is created. Production approval,
+Work/evidence and COMMIT_UNKNOWN are not modified or retried. No new operational
+permission was needed for this source-only non-authoritative addition. Private logs,
+source/fixture identities and start/end installation comparisons are retained in
+`../workpack-m5-validation-20261102/` outside the source repository.

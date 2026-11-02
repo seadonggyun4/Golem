@@ -74,6 +74,7 @@ add_library(golem STATIC
     src/workpack/model.c
     src/workpack/read.c
     src/workpack/binding.c
+    src/workpack/proposal.c
     src/intent/schema.c
     src/intent/object.c
     src/intent/quota.c

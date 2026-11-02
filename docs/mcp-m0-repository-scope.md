@@ -1230,6 +1230,9 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | native.golem_workpack_bind | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.golem_workpack_explain | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.workpack.binding-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_proposal_validate | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_assess | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.workpack.proposal-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3566,6 +3569,11 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | resolve |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | bind |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | explain |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_proposal_validate | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_assess | None |
+| NATIVE_OPERATION | src/workpack/proposal.c | file-surface | None |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | proposal-validate |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | assess |
 
 ## Blockers
 
@@ -3655,8 +3663,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 453; explicitly selected: 453. Other tracked paths still require explicit boundary review.
-Public declarations observed in selected headers: 352.
+Candidate source surfaces: 454; explicitly selected: 454. Other tracked paths still require explicit boundary review.
+Public declarations observed in selected headers: 354.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
 ## Required sources
@@ -4011,6 +4019,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | src/workpack/binding_internal.h | YES |
 | src/workpack/internal.h | YES |
 | src/workpack/model.c | YES |
+| src/workpack/proposal.c | YES |
 | src/workpack/read.c | YES |
 | src/workspace/git.c | YES |
 | src/workspace/internal.h | YES |

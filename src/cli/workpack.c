@@ -10,6 +10,34 @@
 int golem_cli_workpack(int argc, char **argv)
 {
     if (argc < 4) return 2;
+    if (!strcmp(argv[2], "proposal-validate")) {
+        if (argc != 4) return 2;
+        uint8_t input[GOLEM_WORKPACK_PROPOSAL_MAX_JSON]; size_t size = 0, required = 0;
+        golem_digest digest; char hex[GOLEM_DIGEST_HEX_CAPACITY];
+        golem_status st = golem_workpack_read(argv[3], input, sizeof(input), &size, NULL);
+        if (st == GOLEM_OK) st = golem_workpack_proposal_validate((golem_bytes){input,size}, &digest, NULL);
+        if (st == GOLEM_OK) st = golem_digest_format(&digest, hex, sizeof(hex), &required);
+        if (st == GOLEM_OK && (printf("{\"schema\":\"golem.workpack.proposal-report.v0\",\"exact_digest\":\"%s\",\"structurally_valid\":true,\"authorized\":false,\"identity_verified\":false}\n", hex) < 0 || fflush(stdout))) st = GOLEM_ERR_IO;
+        cli_error_note(st, "pack.proposal", NULL); return st == GOLEM_OK ? 0 : 1;
+    }
+    if (!strcmp(argv[2], "assess")) {
+        if (argc < 5 || argc > 4 + (int)GOLEM_WORKPACK_MAX_PROPOSALS) return 2;
+        cli_blob blobs[GOLEM_WORKPACK_MAX_PROPOSALS] = {0};
+        golem_bytes inputs[GOLEM_WORKPACK_MAX_PROPOSALS] = {0};
+        golem_document_store *store = NULL; golem_execution_reply reply = {0};
+        golem_status st = GOLEM_OK;
+        for (int i = 4; st == GOLEM_OK && i < argc; ++i) {
+            blobs[i-4].data = malloc(GOLEM_WORKPACK_PROPOSAL_MAX_JSON);
+            st = blobs[i-4].data ? golem_workpack_read(argv[i], blobs[i-4].data, GOLEM_WORKPACK_PROPOSAL_MAX_JSON, &blobs[i-4].size, NULL) : GOLEM_ERR_OUT_OF_MEMORY;
+            inputs[i-4] = (golem_bytes){blobs[i-4].data,blobs[i-4].size};
+        }
+        if (st == GOLEM_OK) st = golem_document_store_open(argv[3], false, NULL, &store, NULL);
+        if (st == GOLEM_OK) st = golem_workpack_assess(store, inputs, (size_t)(argc-4), &reply, NULL);
+        golem_status closed = golem_document_store_close(store); if (st == GOLEM_OK) st = closed;
+        if (st == GOLEM_OK && (fwrite(reply.data, 1, reply.size, stdout) != reply.size || puts("") == EOF || fflush(stdout))) st = GOLEM_ERR_IO;
+        for (int i = 4; i < argc; ++i) free(blobs[i-4].data);
+        golem_execution_reply_free(&reply); cli_error_note(st, "pack.assess", NULL); return st == GOLEM_OK ? 0 : 1;
+    }
     if (!strcmp(argv[2], "resolve") || !strcmp(argv[2], "bind") || !strcmp(argv[2], "explain")) {
         bool bind = !strcmp(argv[2], "bind"), explain = !strcmp(argv[2], "explain");
         if ((explain && argc != 4) || (!explain && argc != 5 && !(bind && argc == 7 && !strcmp(argv[5], "--approve-binding")))) return 2;

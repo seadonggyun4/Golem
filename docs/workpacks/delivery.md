@@ -1,6 +1,6 @@
 # CLI/API, discovery and distribution boundary
 
-## Commands (M2–M4 native commands implemented with limits; receipt commands NOT_IMPLEMENTED)
+## Commands (M2–M5 native commands implemented with limits; receipt commands NOT_IMPLEMENTED)
 
 | Command | Input → output | Effects, gates and errors |
 | --- | --- | --- |
@@ -12,6 +12,8 @@
 | `golem pack resolve WORK REQUEST` | exact references/current role → proposed intersection | M4 read-only native Work lock as required; no implicit binding |
 | `golem pack bind WORK REQUEST --approve-binding DIGEST` | owner-reviewed reference + expected generation/key → binding receipt | M4 mutation; Work lock/CAS/native gate; exact idempotency |
 | `golem pack explain WORK` | immutable binding + live state → blockers | M4 read only; historical vs live explicit |
+| `golem pack proposal-validate FILE` | bounded proposal → exact digest | M5 pure structural validation; no authenticated identity |
+| `golem pack assess WORK FILE [FILE...]` | 1..8 claims + current binding → separate native role evaluation | M5 read-only Work; no approval/assessment publication |
 | `golem receipt export WORK --format json` | reviewed native refs → manifest | M6 explicit output write/disclosure gate |
 | `golem receipt export WORK --format markdown` | same native refs → projection | M6 derived write, never receipt authority |
 | `golem receipt verify PATH` | bounded inventory → integrity result | M6 read only, no implicit downloads |
@@ -50,8 +52,8 @@ No vector database or remote search. This is Golem runtime discovery, not extern
 
 ## Machine-readable source contract for styxis-plugin
 
-M1–M3 maintain a source metadata record with schema/API versions, five public native entrypoints,
-the five read-only CLI routes and no MCP claims, reference inventory and security boundary. Build/release automation
+M1–M5 maintain a source metadata record with schema/API versions, ten public native entrypoints,
+the ten CLI routes (only exact M4 bind mutates Work) and no MCP claims, reference inventory and security boundary. Build/release automation
 must attach the actual source commit/archive digest separately; never put a self-referential
 commit hash in the source record or use mutable latest. A branch name is not provenance.
 Packaged files need independent artifact inventory and compatibility checks.
@@ -166,3 +168,5 @@ MCP/language delivery and client package updates remain NOT_IMPLEMENTED/unchange
 
 M4 resolve/bind/explain use the [separate exact binding contract](binding.md). Unsupported
 external/development/identity mappings block; binding is not execution or semantic release approval.
+
+M5 proposal-validate/assess use the [bounded untrusted proposal contract](proposals.md).

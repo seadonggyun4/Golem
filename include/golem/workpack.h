@@ -60,6 +60,22 @@ golem_status golem_workpack_bind(golem_document_store *store, golem_bytes reques
                                 golem_execution_reply *out, golem_diagnostic *diagnostic);
 golem_status golem_workpack_explain(golem_document_store *store,
                                    golem_execution_reply *out, golem_diagnostic *diagnostic);
+/* M5 untrusted proposals: pure closed-schema validation <=64 KiB. Exact digest
+ * unchanged on failure. No identity authentication or authority from claims. */
+#define GOLEM_WORKPACK_PROPOSAL_MAX_JSON 65536u
+#define GOLEM_WORKPACK_MAX_PROPOSALS 8u
+golem_status golem_workpack_proposal_validate(golem_bytes input, golem_digest *digest,
+                                             golem_diagnostic *diagnostic);
+/* Read-only native-documents-v1 binding/role assessment plus 1..8 proposals.
+ * Shared native Work lock; current generation, exact binding/contract and native
+ * document closure/CAS required. Self-declared principals never authenticate.
+ * Duplicate proposal/principal declarations fail. Failed/unknown claims retained;
+ * disagreement never resolves to PASS. No stored assessment, approval or completion.
+ * Existing explicitly configured native recording may write its own audit.
+ * Reply <=256 KiB, unchanged on error; free via golem_execution_reply_free. */
+golem_status golem_workpack_assess(golem_document_store *store, const golem_bytes *proposals,
+                                  size_t count, golem_execution_reply *out,
+                                  golem_diagnostic *diagnostic);
 #ifdef __cplusplus
 }
 #endif

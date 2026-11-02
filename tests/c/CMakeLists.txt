@@ -967,4 +967,13 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME workpack_binding COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/workpack_binding.py
         $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_test_workpack_binding_fault> ${GOLEM_WORKPACK_BASELINE_CLI})
     set_tests_properties(workpack_binding PROPERTIES TIMEOUT 180)
+    add_executable(golem_test_workpack_proposal test_workpack_proposal.c)
+    target_link_libraries(golem_test_workpack_proposal PRIVATE Golem::golem)
+    golem_configure_target(golem_test_workpack_proposal)
+    add_test(NAME workpack_proposal_native COMMAND golem_test_workpack_proposal ${PROJECT_SOURCE_DIR}/samples/workpacks/verifier-proposal.json)
+    add_test(NAME workpack_proposals COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/workpack_proposal.py
+        $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_test_workpack_proposal>
+        $<TARGET_FILE:golem_test_workpack_binding_fault> ${GOLEM_WORKPACK_BASELINE_CLI})
+    set_tests_properties(workpack_proposals PROPERTIES TIMEOUT 180)
+
 endif()

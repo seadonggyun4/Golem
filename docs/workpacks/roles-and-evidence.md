@@ -1,7 +1,9 @@
 # Roles, verifier proposals and Evidence Package design
 
-M4 implements only [native document binding](binding.md). General role mapping,
-semantic proposals and receipt aggregation below remain PLANNED.
+M4 implements [native document binding](binding.md); M5 implements the bounded
+[untrusted proposal parser and native role evaluation](proposals.md). General role
+mapping and receipt aggregation below remain PLANNED. M5 does not authenticate
+principals or evaluate semantic truth.
 Existing [role contracts](../role-contracts.md), [completion](../completion.md),
 [evidence export](../evidence-export.md) and [proof packs](../proof-packs.md) remain canonical.
 
@@ -34,7 +36,7 @@ against owner policy, current Work state, role and runtime availability. Missing
 prohibited effect, unsupported mapping, stale generation or policy conflict = blocked.
 M1 only validates names; it does NOT implement intersection or enforce effect policy.
 
-## Semantic verifier proposal v0 (future separate schema)
+## Semantic verifier proposal design (historical; implemented limits in proposals.md)
 
 A bounded typed proposal needs: schema; proposal ID; Work/generation; pack digest;
 inspected artifact `{digest,size}` references; verifier principal and model/provider
@@ -81,7 +83,9 @@ not establish current source/target applicability. M1 has no exporter or verifie
 
 ## Planned wire examples and failure rules
 
-These are design examples, not schemas accepted by M1. All digest/identity placeholders
+These are historical design examples, not schemas accepted by M1 or exact M5 input.
+For the implemented M5 fields (including binding receipt and declared verifier status),
+use [the current proposal contract](proposals.md) and its sample. All digest/identity placeholders
 must be replaced by exact native references before M4–M6 can accept them. New identity
 formats and persisted events require the later design gate; a string cannot authenticate
 a principal.

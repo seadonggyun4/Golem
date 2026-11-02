@@ -15,5 +15,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         REQUIRE(golem_digest_bytes((golem_bytes){data,size}, &repeated) == GOLEM_OK);
         REQUIRE(!memcmp(&result, &repeated, sizeof(result)));
     }
+    result = saved;
+    status = golem_workpack_proposal_validate((golem_bytes){data,size}, &result, NULL);
+    if (status != GOLEM_OK) REQUIRE(!memcmp(&result, &saved, sizeof(result)));
+    else {
+        REQUIRE(size <= GOLEM_WORKPACK_PROPOSAL_MAX_JSON);
+        REQUIRE(golem_digest_bytes((golem_bytes){data,size}, &repeated) == GOLEM_OK);
+        REQUIRE(!memcmp(&result, &repeated, sizeof(result)));
+    }
     return 0;
 }

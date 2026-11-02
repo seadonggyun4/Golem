@@ -216,6 +216,8 @@ int main(void)
     if (golem_workpack_inspect((golem_bytes){(const uint8_t *)"{}",2},NULL,0,&pack_required,NULL)!=GOLEM_ERR_PARSE) return 92;
     if (golem_workpack_compatibility((golem_bytes){(const uint8_t *)"{}",2},(golem_string_view){"0.1.0",5},&pack_compatible,NULL)!=GOLEM_ERR_PARSE) return 93;
     if (golem_workpack_catalog(NULL, (golem_string_view){NULL,0}, NULL, 0, NULL, NULL) != GOLEM_ERR_INVALID_ARGUMENT) return 1;
+    if (golem_workpack_proposal_validate((golem_bytes){NULL,0}, NULL, NULL) != GOLEM_ERR_INVALID_ARGUMENT ||
+        golem_workpack_assess(NULL,NULL,0,NULL,NULL) != GOLEM_ERR_INVALID_ARGUMENT) return 96;
     if (golem_workpack_read(NULL,NULL,0,NULL,NULL)!=GOLEM_ERR_INVALID_ARGUMENT) return 94;
     if (golem_workpack_resolve(NULL, (golem_bytes){NULL,0}, NULL, NULL) != GOLEM_ERR_INVALID_ARGUMENT ||
         golem_workpack_bind(NULL, (golem_bytes){NULL,0}, NULL, NULL, NULL) != GOLEM_ERR_INVALID_ARGUMENT ||

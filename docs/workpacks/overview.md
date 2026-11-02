@@ -100,3 +100,6 @@ See [delivery](delivery.md) for exact input limits, ambiguity and no-authority s
 
 M4 implements limited [native document resolve/bind/explain](binding.md), with a separately
 selected exact digest. General role mappings, semantic release validation and MCP delivery remain unsupported.
+
+M5 adds [proposal validation and separate native role evaluation](proposals.md) for
+existing document bindings; claims never grant authority or prove semantic correctness.

@@ -19,7 +19,7 @@
     },
     {
       "path": "src/cli/main.c",
-      "sha256": "1794214d44c9f2337fd3e72d78d9d309c741a0c7b69d3f442d2bafc2597f0e4e"
+      "sha256": "0ca448ed6413b9db7315ec76ec3c5cd9e7476e5c34c845f43c1ed7545a8e5520"
     },
     {
       "path": "tools/integration_service.py",
@@ -215,7 +215,7 @@
     },
     {
       "path": "CMakeLists.txt",
-      "sha256": "081f438d4ebbf52ca34eb9ec36d78fa27779d5add24bcc84a5ca93de10c99078"
+      "sha256": "c7cc886bb9db5aeecaa4ec78b90b352c52860809bac9517a7c013405676456ae"
     },
     {
       "path": "CMakePresets.json",
@@ -2227,7 +2227,7 @@
     },
     {
       "path": "include/golem/workpack.h",
-      "sha256": "167f1c307e1ddffe2e519cf98df812752f378712718e8d6308bea5be35414f79"
+      "sha256": "ce6bc378a2db3e76f49b9162f25fac28f4ebbbce7a055be1a3e910381d01113c"
     },
     {
       "path": "src/workpack/model.c",
@@ -2247,7 +2247,7 @@
     },
     {
       "path": "src/cli/workpack.c",
-      "sha256": "ee96528f6f9d4202c09bf87ab21db5c4234e6ba3b4f65e85eef95c6826a89f84"
+      "sha256": "293aa7968b0e62904aabcebf32b1143fe3293dac1a4ea3b9d1e3331723780a7d"
     },
     {
       "path": "tests/c/test_workpack_read.c",
@@ -2267,7 +2267,7 @@
     },
     {
       "path": "docs/workpacks/delivery.md",
-      "sha256": "c7b461f7ac650f296886a46ec1bdc95ab41ba0fae6e220edb1915fc9f67b3e04"
+      "sha256": "a45e9c16e5e163209c470498f2b766dd40a7e6a8107225d699379e9179a10e38"
     },
     {
       "path": "src/workpack/binding.c",
@@ -2292,6 +2292,22 @@
     {
       "path": "docs/workpacks/binding.md",
       "sha256": "8a07d260196b266f3235f4079369fefa5484b0e01571df8951856cb2e422d60b"
+    },
+    {
+      "path": "src/workpack/proposal.c",
+      "sha256": "47da661054745204b6ad882101eb49966a054023a2d2e5dc0c3df6b2f8dec470"
+    },
+    {
+      "path": "tests/c/test_workpack_proposal.c",
+      "sha256": "6e6ad14accf7fea35eb4ce3561cc327260c76212c23e1bd64db56569e032d5c7"
+    },
+    {
+      "path": "tests/c/workpack_proposal.py",
+      "sha256": "3770251a38f326a763819a1d35188f9816a7f071144850540471ae86601240fa"
+    },
+    {
+      "path": "docs/workpacks/proposals.md",
+      "sha256": "7d3f31ff2c68bc6996a08de717b2150f6be7cdde10818fca4d0e02a2d2c671c0"
     }
   ],
   "observations": [
@@ -18611,6 +18627,41 @@
       "source_path": "src/cli/workpack.c",
       "entrypoint": "golem_cli_workpack",
       "selector": "explain"
+    },
+    {
+      "id": "obs-5f18f455e91f3ac175792c618b96f1e282d478cd7060ba62fb5c07ec1b421f35",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_proposal_validate",
+      "selector": null
+    },
+    {
+      "id": "obs-2c0c7187e1135c611d39118e30ba620dc7814be15a26218fca7149992869c550",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_assess",
+      "selector": null
+    },
+    {
+      "id": "obs-16e2663ffa962b09313eb4b9ec833ac91b03bb3eec47bf78dd2eee959ad2d284",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/workpack/proposal.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-25c0ce7fd7daa94412bee38986af6c549470e7080d5d91a3a70ab8134119e1ea",
+      "kind": "CLI_ROUTE",
+      "source_path": "src/cli/workpack.c",
+      "entrypoint": "golem_cli_workpack",
+      "selector": "proposal-validate"
+    },
+    {
+      "id": "obs-4b77e24f33c5e7848f35f9847f0132519c3e7becde43d36b012aea1ee11232d1",
+      "kind": "CLI_ROUTE",
+      "source_path": "src/cli/workpack.c",
+      "entrypoint": "golem_cli_workpack",
+      "selector": "assess"
     }
   ],
   "capabilities": [
@@ -76918,7 +76969,9 @@
         "obs-468f1a654764847732f7263f8a772476c2a2eb555b0bb1de1b1883b7916944a0",
         "obs-42315f1e234a0f05b04f8c4de7478dfaca4e14d668bea7e6ba1eb6e25d43950b",
         "obs-12aae2bf063ca54df18cbc0709bbc1f0fc6f5658da0ab11bd5b1ba5158007d93",
-        "obs-42d6ea5f61b2025d517e891c59ae0d562a09f8d96747189f12982e7121d47478"
+        "obs-42d6ea5f61b2025d517e891c59ae0d562a09f8d96747189f12982e7121d47478",
+        "obs-25c0ce7fd7daa94412bee38986af6c549470e7080d5d91a3a70ab8134119e1ea",
+        "obs-4b77e24f33c5e7848f35f9847f0132519c3e7becde43d36b012aea1ee11232d1"
       ],
       "implementation": "IMPLEMENTED",
       "current_routes": [
@@ -76928,7 +76981,7 @@
         "HOST_INTERNAL"
       ],
       "authorities": [
-        "Explicit local input path / borrowed immutable bytes; no Work authority"
+        "Explicit local input paths; native Work locks/policy; separately approved M4 bind only"
       ],
       "effects": [
         "NATIVE_READ",
@@ -76943,7 +76996,7 @@
         "limits": [
           "64KiB manifests;1MiB catalog;256 entries;no-follow paths;bounded nonblocking reads"
         ],
-        "notes": "Read-only M2/M3 routes and exact approved M4 binding. No MCP delivery. Binding does not grant execution."
+        "notes": "M2/M3 reads, exact approved M4 binding and non-authoritative M5 observations. No MCP delivery or semantic truth."
       },
       "test_refs": [
         {
@@ -76957,16 +77010,28 @@
         {
           "path": "tests/c/workpack_binding.py",
           "selector": null
+        },
+        {
+          "path": "tests/c/test_workpack_proposal.c",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_proposal.py",
+          "selector": null
         }
       ],
       "doc_refs": [
         {
           "path": "docs/workpacks/schema.md",
           "anchor": null
+        },
+        {
+          "path": "docs/workpacks/proposals.md",
+          "anchor": null
         }
       ],
       "review_status": "REVIEWED",
-      "rationale": "Reuses M1 strict native validation/version grammar, existing no-follow path traversal and CLI error envelope. No Work calls, policy change or execution dispatch."
+      "rationale": "Thin native API facade; shared parser/snapshot/Work contracts, full bounded stdout. M5 never publishes Work or grants authority."
     },
     {
       "id": "native.golem_workpack_catalog",
@@ -77202,6 +77267,144 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Native mapping, current selection, policy, exact approval, CAS identity and replay; I/O poisoning and no automatic retry. Old readers reject opt-in event."
+    },
+    {
+      "id": "native.golem_workpack_proposal_validate",
+      "observation_ids": [
+        "obs-5f18f455e91f3ac175792c618b96f1e282d478cd7060ba62fb5c07ec1b421f35"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Existing native read-only Work binding and role evaluation; untrusted declarations never grant authority"
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "Supported native C library; Work observation requires native POSIX store"
+        ],
+        "limits": [
+          "64KiB per proposal;1..8 proposals;32 artifacts/findings;256KiB reply;native-documents-v1 only"
+        ],
+        "notes": "No independent identity, owner/self-approval, execution, persisted assessment, completion or semantic truth. Optional existing recording remains. No MCP delivery."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/test_workpack_proposal.c",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_proposal.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/proposals.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Shared native strict parser, exact digests, graph/closure/CAS/binding checks and role evaluate. Typed claims remain separate; failed/unknown/disagreement preserved."
+    },
+    {
+      "id": "native.golem_workpack_assess",
+      "observation_ids": [
+        "obs-2c0c7187e1135c611d39118e30ba620dc7814be15a26218fca7149992869c550"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Existing native read-only Work binding and role evaluation; untrusted declarations never grant authority"
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "Supported native C library; Work observation requires native POSIX store"
+        ],
+        "limits": [
+          "64KiB per proposal;1..8 proposals;32 artifacts/findings;256KiB reply;native-documents-v1 only"
+        ],
+        "notes": "No independent identity, owner/self-approval, execution, persisted assessment, completion or semantic truth. Optional existing recording remains. No MCP delivery."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/test_workpack_proposal.c",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_proposal.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/proposals.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Shared native strict parser, exact digests, graph/closure/CAS/binding checks and role evaluate. Typed claims remain separate; failed/unknown/disagreement preserved."
+    },
+    {
+      "id": "native.workpack.proposal-surfaces",
+      "observation_ids": [
+        "obs-16e2663ffa962b09313eb4b9ec833ac91b03bb3eec47bf78dd2eee959ad2d284"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Existing native read-only Work binding and role evaluation; untrusted declarations never grant authority"
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "Supported native C library; Work observation requires native POSIX store"
+        ],
+        "limits": [
+          "64KiB per proposal;1..8 proposals;32 artifacts/findings;256KiB reply;native-documents-v1 only"
+        ],
+        "notes": "No independent identity, owner/self-approval, execution, persisted assessment, completion or semantic truth. Optional existing recording remains. No MCP delivery."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/test_workpack_proposal.c",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_proposal.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/proposals.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Shared native strict parser, exact digests, graph/closure/CAS/binding checks and role evaluate. Typed claims remain separate; failed/unknown/disagreement preserved."
     }
   ]
 }

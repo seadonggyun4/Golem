@@ -10,7 +10,9 @@
     "golem_workpack_catalog",
     "golem_workpack_resolve",
     "golem_workpack_bind",
-    "golem_workpack_explain"
+    "golem_workpack_explain",
+    "golem_workpack_proposal_validate",
+    "golem_workpack_assess"
   ],
   "public_cli": [
     "golem pack validate FILE",
@@ -20,7 +22,9 @@
     "golem pack search QUERY --catalog INDEX",
     "golem pack resolve WORK REQUEST",
     "golem pack bind WORK REQUEST --approve-binding DIGEST",
-    "golem pack explain WORK"
+    "golem pack explain WORK",
+    "golem pack proposal-validate FILE",
+    "golem pack assess WORK FILE [FILE...]"
   ],
   "mcp_tools": [],
   "binding_support": [
@@ -57,7 +61,9 @@
       "catalog.lexical-search",
       "binding.resolve",
       "binding.exact-owner-bind",
-      "binding.explain"
+      "binding.explain",
+      "proposal.structural-validate",
+      "proposal.native-role-assess"
     ],
     "mcp": []
   },
@@ -68,5 +74,7 @@
     "usage_error": 2
   },
   "catalog_schema": "golem.workpack.catalog.v0",
-  "catalog_report_schema": "golem.workpack.discovery.v0"
+  "catalog_report_schema": "golem.workpack.discovery.v0",
+  "proposal_schema": "golem.workpack.verifier-proposal.v0",
+  "assessment_schema": "golem.workpack.assessment.v0"
 }

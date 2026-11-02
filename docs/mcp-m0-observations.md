@@ -1230,6 +1230,9 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | native.golem_workpack_bind | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.golem_workpack_explain | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.workpack.binding-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_proposal_validate | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_assess | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.workpack.proposal-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3566,6 +3569,11 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | resolve |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | bind |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | explain |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_proposal_validate | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_assess | None |
+| NATIVE_OPERATION | src/workpack/proposal.c | file-surface | None |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | proposal-validate |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | assess |
 
 ## Blockers
 
