@@ -17,7 +17,7 @@ README 편집 필수 규칙 — 사용자 명시 지시가 없는 한 이 형식
 이 주석을 편집 과정에서 삭제하지 않는다. 사용자에게 보이는 README는 간결하게 유지한다.
 -->
 
-> 최신 MCP 검증본: **Codex 0.2.7 · Claude read 0.1.10** — 승인된 읽기 조회 검증 완료. [검증 범위](docs/mcp-m7-m8-validation.ko.md)
+> **Work Pack native·공통 MCP 구현 및 CI 검증 완료.** [지원·실제 검증 범위](docs/workpacks/mcp.md#verification-status)
 
 <div align="center">
   <img width="650" alt="Golem Banner" src="assets/Golem.png" />
@@ -55,7 +55,7 @@ Golem: 허용 범위·소유권·승인·최신성 검사
 실행 또는 부족한 입력·승인 안내
 ```
 
-처음 프로젝트를 연결할 때 허용 범위를 설정하고, 이후에는 자연어로 사용합니다. 요청이 모호하면 agent가 질문하고, 추가 승인이 필요하면 승인을 요청합니다. **프롬프트 문구만으로 권한이 추가되지는 않습니다.** 현재 검증 연결은 세 조회만 허용하며, 위 수정·테스트·제출 예시는 해당 도구와 승인이 설정된 경우의 사용 방식입니다.
+처음 프로젝트를 연결할 때 허용 범위를 설정하고, 이후에는 자연어로 사용합니다. 요청이 모호하면 agent가 질문하고, 추가 승인이 필요하면 승인을 요청합니다. **프롬프트 문구만으로 권한이 추가되지는 않습니다.** 사용 가능한 기능은 현재 연결의 도구와 승인 범위에 따라 달라집니다.
 
 ```mermaid
 flowchart TD
@@ -78,6 +78,19 @@ flowchart TD
 - **[Claude Desktop 설치·사용](docs/integration-mcpb.md#install-and-configure)** — 필요한 기능 패키지를 설치하고 연결을 확인합니다.
 
 각 client에는 **검증된 Golem 최신본 한 개와 의도한 연결 한 개만** 유지합니다.
+
+### Work Pack
+
+업무에 필요한 역할·입력·증거·완료 조건을 하나의 버전 계약으로 묶습니다. 프로젝트 개발 대화에서 Codex·Claude에 자연어로 요청하면, 연결된 Golem MCP를 통해 준비하고 검토합니다.
+
+```text
+Pack 찾기·검증
+    → 정확한 binding 승인 → Work 연결
+    → 작업·증거 검토
+    → 별도 export 승인 → 증거 패키지 검증
+```
+
+Pack 설치·검증만으로 실행 권한이나 완료 판정이 생기지는 않습니다. [Work Pack 안내](docs/workpacks/overview.md) · [MCP 사용·지원 범위](docs/workpacks/mcp.md)
 
 ## 아키텍처
 
@@ -107,6 +120,7 @@ flowchart TD
 | 작업 시작 | [Agent 설정](docs/agent-setup.ko.md) |
 | 빌드·CLI | [런타임 안내](docs/runtime-reference.md) |
 | 내부 구조 | [아키텍처](docs/architecture.md) |
+| Work Pack | [업무 계약·사용 흐름](docs/workpacks/overview.md) · [MCP](docs/workpacks/mcp.md) |
 | MCP 설계 | [연동 계약](docs/integration-layer-design.md) |
 | 작업·완료 | [워크플로우](docs/workflow.md) |
 | 작업·완료 | [완료 조건](docs/completion.md) |

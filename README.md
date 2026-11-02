@@ -19,7 +19,7 @@ Required README maintenance rules; preserve this format unless the user explicit
 Keep this comment during editing. Keep the rendered README concise.
 -->
 
-> Latest verified MCP builds: **Codex 0.2.7 · Claude read 0.1.10** — approved read-only checks passed. [Verification scope](docs/mcp-m7-m8-validation.ko.md)
+> **Work Pack native and common MCP implementation passed CI.** [Support and actual validation scope](docs/workpacks/mcp.md#verification-status)
 
 <div align="center">
   <img width="650" alt="Golem Banner" src="assets/Golem.png" />
@@ -57,7 +57,7 @@ Golem: check scope, ownership, approval and freshness
 Execution or a request for missing inputs or approval
 ```
 
-Set the allowed scope when first connecting a project, then use natural language. The agent asks questions when the request is unclear and requests approval when needed. **Prompt wording alone never grants authority.** The current verified connections allow only three read tools; the fix/test/submit example requires the corresponding tools and approvals to be configured.
+Set the allowed scope when first connecting a project, then use natural language. The agent asks questions when the request is unclear and requests approval when needed. **Prompt wording alone never grants authority.** Available features depend on the current connection’s tools and approved scope.
 
 ```mermaid
 flowchart TD
@@ -80,6 +80,19 @@ The image shows a verified synthetic test installation; installation itself gran
 - **[Claude Desktop setup and use](docs/integration-mcpb.md#install-and-configure)** — install the needed feature package and verify the connection.
 
 Keep **one latest verified Golem installation and one intended connection per client**.
+
+### Work Pack
+
+A versioned contract groups a job’s roles, inputs, evidence and completion requirements. Ask Codex or Claude in your project’s development chat; the connected Golem MCP tools prepare and inspect the Pack.
+
+```text
+Find and validate Pack
+    → approve binding → attach to Work
+    → review work and evidence
+    → approve export → verify package
+```
+
+Installing or validating a Pack grants neither execution nor completion. [Work Pack guide](docs/workpacks/overview.md) · [MCP usage and support](docs/workpacks/mcp.md)
 
 ## Architecture
 
@@ -109,6 +122,7 @@ flowchart TD
 | Getting started | [Agent setup](docs/agent-setup.md) |
 | Build and CLI | [Runtime guide](docs/runtime-reference.md) |
 | Architecture | [Architecture](docs/architecture.md) |
+| Work Pack | [Job contracts and workflow](docs/workpacks/overview.md) · [MCP](docs/workpacks/mcp.md) |
 | MCP design | [Integration contracts](docs/integration-layer-design.md) |
 | Work and completion | [Workflow](docs/workflow.md) |
 | Work and completion | [Completion](docs/completion.md) |

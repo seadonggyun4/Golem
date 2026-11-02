@@ -25,11 +25,13 @@ review their status mapping without changing existing command semantics. Input i
 [receipts.md](receipts.md).
 Reads are repeatable but not automatically retried on failure; mutation retries must
 use native exact-request lookup and preserve uncertainty. Reads do not require new
-Work audit; future integration may append its existing scoped read audit. M1 has no
+Work audit; MCP delivery appends its existing scoped read audit. M1 has no
 CLI audit or file access. Work changes need existing durable native records.
 
-M2 adds bounded snapshot reading, metadata inspection and declared-version comparison. M3 adds local catalog discovery. Python/TypeScript bindings and MCP exposure
-are NOT implemented. CLI remains a thin public C API façade, never a Python reducer.
+M2 adds bounded snapshot reading, metadata inspection and declared-version comparison.
+M3 adds local catalog discovery. All fourteen CLI operations now have [common MCP
+routes](mcp.md); dedicated Python/TypeScript Work Pack SDK bindings remain unimplemented.
+CLI remains a thin public C API façade, never a Python reducer.
 API version must be advertised separately from catalog schema and native core version.
 New API symbols must not imply complete language binding parity.
 
@@ -54,7 +56,9 @@ No vector database or remote search. This is Golem runtime discovery, not extern
 ## Machine-readable source contract for styxis-plugin
 
 M1–M7 maintain a source metadata record with schema/API versions, fourteen public native entrypoints,
-the fourteen CLI routes (only exact M4 bind mutates Work; M6 separately exports private files) and no MCP claims, reference inventory and security boundary. Build/release automation
+the fourteen CLI routes, five common MCP tools, reference inventory and security boundary.
+Only exact M4 bind mutates Work; M6 separately exports private files. Source metadata
+is not proof that a particular installed client exposes or may call those tools. Build/release automation
 must attach the actual source commit/archive digest separately; never put a self-referential
 commit hash in the source record or use mutable latest. A branch name is not provenance.
 Packaged files need independent artifact inventory and compatibility checks.
@@ -111,7 +115,8 @@ No automatic output-cache publication: these commands write directly to stdout e
 with global compact/output-store options. Existing explicitly configured top-level
 `GOLEM_RECORD_ROOT` recording still applies and may write command records; M2 neither
 turns it on nor bypasses it. No policy changes, approvals, Work writes, subprocesses
-or network are introduced by the pack handlers. Clients and MCP exposure are unchanged.
+or network are introduced by the native pack handlers. MCP delivery adds only its
+existing scoped transport/recording; installation and policy selection are separate.
 
 ## M3 implemented catalog and search
 
@@ -165,7 +170,8 @@ Native output capacity is capped by the 2 MiB report bound. `required` includes 
 changes only on success/BUFFER_TOO_SMALL; output bytes remain unchanged on errors.
 A NULL/zero output size query still reads files; its next call is a fresh observation.
 CLI allocates the bounded output once and performs one catalog operation. M4 binding is limited to [native document contracts](binding.md).
-See [common MCP delivery](mcp.md) for the read routes now implemented. Installed client packages remain unchanged.
+See [common MCP delivery](mcp.md) for the read and exact-action routes, client
+verification and current installation limits.
 
 M4 resolve/bind/explain use the [separate exact binding contract](binding.md). Unsupported
 external/development/identity mappings block; binding is not execution or semantic release approval.

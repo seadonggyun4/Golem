@@ -1,5 +1,10 @@
 # Gate review, security and conformance plan
 
+> Historical milestone record. Each result, NOT_RUN, NOT_IMPLEMENTED and installed
+> version below describes that milestone, not today’s aggregate state. Later
+> milestones do not retroactively verify earlier runs. For current implemented
+> routes, client results and remaining work see [common MCP](mcp.md#verification-status).
+
 ## Gate A review
 
 Reviewed baseline f2563f5 in the user-selected Golem checkout. Initial worktree clean;
@@ -530,5 +535,7 @@ The existing 14 Work Pack CLI operations now have five shared MCP tools; see
 [MCP scope, exact-action fields and verification](mcp.md). Earlier milestone
 statements that MCP was NOT_IMPLEMENTED describe those milestones. Native
 semantics were reused without a new Core parser/reducer or implicit authority.
-The installed Codex/Claude packages and TopSolar policy pins are unchanged;
-implementation/fixture qualification must not be presented as installed E2E.
+At the common-MCP implementation milestone, installed packages and TopSolar policy
+pins were unchanged. Subsequent package synchronization and isolated client tests are
+summarized in [current verification](mcp.md#verification-status); they do not turn all
+operation fixtures into Desktop E2E or authorize production Work actions.

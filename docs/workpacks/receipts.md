@@ -2,7 +2,9 @@
 
 `receipt manifest`, `receipt export` and `receipt verify` are native C APIs and thin
 local CLI commands. They support the existing **native-documents-v1** binding only.
-They do not add MCP routes, client permissions, a new Work event or migration.
+The [common MCP layer](mcp.md) exposes these operations through separate exact owner
+actions and an explicit resource read. Neither layer grants client permissions or
+adds a new Work event or migration.
 The [owner-selected design](m6-export-design.md) is implementation authorization,
 not permission to export an existing project.
 

@@ -3,11 +3,39 @@
 All 14 existing Work Pack CLI operations have common MCP routes. The separate
 exact-action contract was explicitly selected from the [review proposal](mcp-design.md)
 (SHA-256 `9ec6ba68ccd10cda5e40bade7037709337a69afc1d1a87cc4230d8149c013053`).
-This is source/fixture delivery, not installation in Codex or Claude. Existing
-client packages and TopSolar policies remain unchanged.
+Implementation, installed bytes, tool exposure and actual model calls are separate
+verification levels. Both client packages contain the common implementation; current
+policy selection can still exclude these tools. See [verification status](#verification-status).
 
 Ask the agent naturally to inspect a Pack, find a matching Pack, or check evidence.
 The agent builds tool arguments; a prompt does not grant filesystem or action rights.
+
+## Use in Codex or Claude
+
+Use the project’s existing development chat with its reviewed Golem connection.
+No special prompt syntax or separate Golem chat is required. Local CLI commands
+are an alternative; opening a directory alone does not grant MCP access.
+
+1. Confirm the intended launcher and the current chat’s actual tools. A server’s
+   `ready` state is not proof that it loaded a newly installed launcher. Follow the
+   [Codex reload guide](../integration-codex-plugin.md#업데이트정리) for client-specific checks.
+2. Ask, for example: “Find a Work Pack for this job and inspect its requirements.”
+   The catalog and every referenced Pack must be in an explicit resource contract.
+   For a known Pack, request validate/inspect and compatibility with the selected version.
+3. Request resolve for the exact Work and mapping; inspect blockers. Have the owner
+   select the separate binding digest and exact D4 action before calling bind.
+   Read explain afterward; a recorded binding is not permission to execute work.
+4. Develop and test with the client’s separately authorized tools. Use proposal_validate
+   and assess to compare claims with current native document obligations.
+5. Have the owner select an exact manifest action, review its inventory/destination,
+   then select the corresponding export digest/action. Verify the resulting package
+   against its exact manifest through an explicitly allowed resource or native CLI.
+
+Missing tools or scope must be resolved through review; do not rewrite policy pins,
+substitute execution/QA approvals, or retry uncertain actions. A successful export
+or integrity check does not finalize the Work.
+
+## Tool and permission mapping
 
 | Common tool | Operations | Required scope |
 |---|---|---|
@@ -83,4 +111,54 @@ Reference observation uses MOCK responses and never calls Truthound. Prior M7 re
 Truthound captures remain historical evidence, not a new external execution.
 Boundary tests cover absent scope, foreign resource IDs, input/byte limits,
 Work drift, output identity/mode/scope, separate digests and uncertain dispatch.
-Actual client installation, model-driven action E2E and TopSolar execution: NOT_RUN.
+
+## Verification status
+
+Snapshot: **2026-11-02**, common runtime source **f522de6**; subsequent **0339013**
+changes only the Codex startup metadata generator, its packaging assertion, guide
+and static review fingerprints. This is a bounded validation snapshot, not an
+assertion that every Core feature is available or tested in every client.
+
+| Level | Confirmed result | Remaining boundary |
+| --- | --- | --- |
+| Native/common MCP | All 14 CLI operations mapped to five tools; static, fixture and regression checks pass | Native semantics and existing authority remain mandatory |
+| Installed-runtime fixtures | Both packaged runtimes: three concurrent connections, one reconnect and nine isolated reads per client passed; automatic Owner windows: zero | Local protocol checks, not model-driven Desktop E2E for every operation |
+| Codex Desktop | Actual projects_list → work_inspect → bind → explain passed once each on a synthetic Work | Manifest/export/verify NOT_RUN: Desktop kept the earlier bind launcher and old tool catalog after the package metadata changed |
+| Claude Desktop | Actual bind, manifest and export passed on a separate synthetic Work; native read-only verify reported VERIFIED | Verification establishes anchored integrity, not authenticated origin, semantic truth or current completion |
+| Production Work | Existing TopSolar data, policies, approvals and evidence preserved | No production binding/export, QA or completion executed in this campaign |
+| CI at 0339013 | Python regression and macOS/Ubuntu MCP contract jobs passed; CI Ready passed | Conditional jobs outside the changed scope were skipped; CI is not Desktop E2E |
+
+The installation snapshot is **Codex 0.2.7**, one enabled identity, and **Claude
+prepare 0.1.19**, one restored TopSolar identity. Codex’s disk metadata selects the
+isolated export launcher while the running Desktop still uses the earlier bind
+launcher: **effective TopSolar restoration is pending**, not complete. Claude’s
+TopSolar connection is restored. Package version alone does not identify effective
+launcher, policy or permission scope. Neither production connection should be
+assumed to expose all Work Pack tools automatically.
+
+Public source/CI evidence: [common source contract](../../samples/workpacks/source-contract.json),
+[native/MCP fixture](../../tests/c/workpack_mcp.py),
+[exact-action fixture](../../tests/c/workpack_mcp_actions.py),
+[CI 0339013](https://github.com/seadonggyun4/Golem/actions/runs/41445243903).
+Owner-private client traces and file inventories are retained in the workspace’s
+`workpack-client-sync-20261102`, `workpack-client-e2e-20261102` and
+`workpack-codex-discovery-20261102` records, referenced by `.golem-plugin-installations.json`.
+They are not embedded in public docs or represented by CI results. Milestone-only
+NOT_RUN/NOT_IMPLEMENTED statements in [development history](development-plan.md)
+remain evidence of those earlier stages.
+
+## Remaining work
+
+- **Unverified:** load and confirm the export launcher in the owning Codex Desktop,
+  perform the unused exact manifest/export actions only within a valid reviewed
+  window, verify the result, and confirm effective TopSolar restoration. Preserve
+  the successful bind and all uncertain results; do not reexecute bind or QA.
+- **Unverified:** model-driven Desktop coverage of the other read/catalog/proposal/
+  reference operations on both clients. Existing protocol fixtures do not cover
+  this interaction layer. Arbitrary real projects and production exports are not certified.
+- **Unimplemented:** general external/custom/session role bindings, independent
+  principal proof, authoritative READY_FOR_RELEASE, general external typed evidence
+  acceptance/QA receipt aggregation, dedicated Python/TypeScript Work Pack SDK APIs,
+  automatic release and scheduler/merge broker.
+- **Outside this validation:** production data/export, external network/credential
+  grants and public marketplace migration. None is authorized by a Pack or by this guide.

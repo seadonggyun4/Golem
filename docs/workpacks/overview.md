@@ -1,4 +1,4 @@
-# Golem Work Pack (experimental design)
+# Golem Work Pack (experimental)
 
 A Golem Work Pack is a local package defining the roles, inputs, capability ceiling,
 prohibited effects, Evidence, approval and completion conditions for a particular
@@ -41,10 +41,31 @@ flowchart TD
  R --> D[Derived JSON inventory / Markdown projection]
 ```
 
-The diagram describes the target architecture, not an implemented automatic pipeline.
-M2 implements bounded manifest validation, local snapshot reads, inspect and declared-version comparison. General role mappings, receipt aggregation and
-pack-specific completion are not implemented. In particular READY_FOR_RELEASE is
-an intent label, not native DONE or permission to publish.
+The diagram shows responsibility boundaries, not an automatic release pipeline.
+The implemented scope is native document contracts: validate/inspect/compatibility,
+local catalog/search, exact resolve/bind/explain, proposal evaluation, selected
+native evidence manifest/export/verify, and a bounded Truthound capture adapter.
+All 14 CLI operations have [five common MCP routes](mcp.md). General role mappings,
+general receipt aggregation and pack-specific completion remain unimplemented.
+READY_FOR_RELEASE is an intent label, not native DONE or permission to publish.
+
+## Use in a development project
+
+1. Connect the project’s approved Golem installation to Codex or Claude. Use the
+   project’s normal development chat; a separate “Golem chat” is not required.
+2. Ask for a suitable Pack, inspection or binding preparation in natural language.
+   The agent constructs MCP arguments. Catalog/resource access must already be selected.
+3. Review the exact Pack, current Work and role mapping. Binding requires its own
+   owner-approved digest/action; installing or validating the Pack does not bind it.
+4. Perform authorized work using the client’s editing/testing tools and existing
+   native Work contracts. A Pack does not supply a general executor or scheduler.
+5. Review proposals and native evidence separately. Export requires its own exact
+   destination/inventory approval; verification checks integrity, not truth or DONE.
+
+The CLI is an alternative local interface using explicit paths; being in a project
+folder alone does not register it or grant MCP access. See [MCP usage](mcp.md) and
+[CLI commands](delivery.md). Current client results and limitations are recorded
+[separately](mcp.md#verification-status).
 
 ```
 effective capability = pack ceiling ∩ owner policy ∩ current Work state
@@ -61,7 +82,8 @@ is not thereby OSI open source; no license change is part of this work.
 
 ## Audit at source baseline f2563f5
 
-These are reuse boundaries, not a claim that all existing paths received new E2E tests.
+This retained pre-implementation audit describes baseline f2563f5. Its future-tense
+notes are historical reuse decisions, not current delivery status or new E2E evidence.
 
 | Existing contract / code | Work Pack attachment point and constraint |
 | --- | --- |
@@ -81,10 +103,11 @@ These are reuse boundaries, not a claim that all existing paths received new E2E
 | `samples/`, `tests/c/`, `tests/consumer/`, `fuzz/` | Follow existing strict JSON, CTest, installed consumer and seeded mutation conventions |
 | `plugins/golem/`, `tools/integration_distribution.py`, `tools/integration_mcpb.py` | Existing distribution remains functional; external packaging migration is planned only |
 
-Current installed prepare connection exposes ten policy-filtered tools (projects_list,
+At that baseline, the installed prepare connection exposed ten policy-filtered tools (projects_list,
 work_inspect, workflow_read, document_read, history_read, template_read,
 contract_prepare, action_prepare, plan_read, completion_check), not the complete core.
-Its installed runtime is pinned to f2563f5; development here does not update it.
+Its runtime was pinned to f2563f5. Later installations and client results are
+recorded in [current verification](mcp.md#verification-status).
 Current Work schemas and journal/event versions are not migrated. M1 has no persisted
 Work state. A future incompatible binding must fail closed on older readers and have
 an explicit compatibility/migration procedure, never implicit `latest` replacement.
@@ -92,7 +115,7 @@ an explicit compatibility/migration procedure, never implicit `latest` replaceme
 Terminology: Work Pack is distinct from workflow template, runtime profile, instruction
 bundle, proof pack, MCP package, native receipt and role enrollment. Their existing
 linked contracts stay canonical. New pack schema is canonical in [schema](schema.md),
-future authority in [roles/evidence](roles-and-evidence.md), planned commands in
+authority boundaries in [roles/evidence](roles-and-evidence.md), implemented commands in
 [delivery](delivery.md), and stage gates in [development](development-plan.md).
 
 M3 additionally implements explicit local catalog listing and deterministic lexical search.
@@ -104,6 +127,6 @@ selected exact digest. General role mappings and semantic release validation rem
 M5 adds [proposal validation and separate native role evaluation](proposals.md) for
 existing document bindings; claims never grant authority or prove semantic correctness.
 
-M6 adds [private evidence manifest/export/verify](receipts.md) for selected native document closures. Integrity is not authenticated origin, QA PASS or current completion. The common MCP read routes and remaining action integration are described in [MCP delivery](mcp.md).
+M6 adds [private evidence manifest/export/verify](receipts.md) for selected native document closures. Integrity is not authenticated origin, QA PASS or current completion. The common MCP read and exact-action routes are described in [MCP delivery](mcp.md).
 
 M7 adds a [Truthound capture adapter and native document scenario](reference-adapter.md), with mock/native/actual external runs distinguished; no release authority.

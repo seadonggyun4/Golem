@@ -2267,7 +2267,7 @@
     },
     {
       "path": "docs/workpacks/delivery.md",
-      "sha256": "56bf8c4736267b8ce4e355d1a995121e1ab6b2d35038be39961598d01a2b0853"
+      "sha256": "33d613c1265cea2cd23cc5afef742ce48c83cd8fcac59d3c57169a09552777cb"
     },
     {
       "path": "src/workpack/binding.c",
@@ -2291,7 +2291,7 @@
     },
     {
       "path": "docs/workpacks/binding.md",
-      "sha256": "8a07d260196b266f3235f4079369fefa5484b0e01571df8951856cb2e422d60b"
+      "sha256": "80ae2ef93ed55fe85773dbcde26476f26b84742c94b0f5d9360dada425048643"
     },
     {
       "path": "src/workpack/proposal.c",
@@ -2307,7 +2307,7 @@
     },
     {
       "path": "docs/workpacks/proposals.md",
-      "sha256": "7d3f31ff2c68bc6996a08de717b2150f6be7cdde10818fca4d0e02a2d2c671c0"
+      "sha256": "b0f6772a473c29733864a08804aba517e80cc45822f070c960942c7c61939857"
     },
     {
       "path": "src/workpack/receipt_store.c",
@@ -2343,7 +2343,7 @@
     },
     {
       "path": "docs/workpacks/receipts.md",
-      "sha256": "31717ceedc5caa83ea7b66a8ba1fa523908d01521b5066d9b7579c91a670f80d"
+      "sha256": "7158368b240963f4fee240ab43b9cdf59085eec592a6e78e0c8e5d9d39793ea3"
     },
     {
       "path": "src/workpack/reference.c",
@@ -2355,7 +2355,7 @@
     },
     {
       "path": "docs/workpacks/reference-adapter.md",
-      "sha256": "4535208631c1659c4f6d48442ef02c7db21dd707774f987d0dbcc835007d5da8"
+      "sha256": "cf29e5dce4d3f76d3ff6a2ed7a95decfc13e2f27b9e025a307a535acbf7a3f0e"
     },
     {
       "path": "tools/integration_workpack_reads.py",
@@ -2371,11 +2371,11 @@
     },
     {
       "path": "docs/workpacks/mcp-design.md",
-      "sha256": "9ec6ba68ccd10cda5e40bade7037709337a69afc1d1a87cc4230d8149c013053"
+      "sha256": "483c8d4d696a0eb4e2e015b89fe7eb4a3dda70d9d893c6ff4e8b7b5e01a53934"
     },
     {
       "path": "docs/workpacks/mcp.md",
-      "sha256": "c34860798ca7698aa4508cc497d73ef953c263cc8a41caf373d50691e52f4c5f"
+      "sha256": "7bc27d265235c385935c657e61d51b0cc2dc52d71dde59893922d315dd4632cb"
     },
     {
       "path": "tools/integration_workpack_actions.py",

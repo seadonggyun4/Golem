@@ -1,6 +1,8 @@
 # Work Pack common MCP delivery contract
 
-Status: proposed implementation contract; no live policy or installation changes.
+Status: selected contract, implemented in the common MCP layer. This document is the
+retained design decision, not an installation or permission grant. See [usage and
+current verification](mcp.md) for subsequent client results.
 
 - D2 `workpack_read` accepts bounded caller-supplied JSON for validate, inspect,
   compatibility, resolve, explain, proposal validation, assess and reference

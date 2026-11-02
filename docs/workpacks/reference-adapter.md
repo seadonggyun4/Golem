@@ -119,6 +119,7 @@ time/effects and isolated permission scope before executing any external tools.
 No existing global consent or client connection is inferred or changed.
 
 General external-role binding, independent principal verification, authoritative
-READY_FOR_RELEASE, automatic publication, new MCP delivery and production deployment
-remain NOT_IMPLEMENTED/outside this limited M7 contract. See
+READY_FOR_RELEASE, automatic publication and production deployment remain
+NOT_IMPLEMENTED/outside this limited M7 contract. The implemented [MCP
+reference_observe route](mcp.md) processes captures; it does not invoke Truthound. See
 [the execution record](development-plan.md) for exact results and NOT_RUN scopes.

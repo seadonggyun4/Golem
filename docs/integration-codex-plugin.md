@@ -1,8 +1,8 @@
 # Codex MCP 설치·사용 안내
 
-프로젝트 관리도 자연어로 요청한다. 현재 검증 연결은 승인된 세 조회만 제공한다. 선택적 관리·resource·helper·host 기능은 별도 정책을 검토한 뒤 활성화하며, 설치 시 기존 승인/producer pin을 자동 이전하지 않는다. [관리 흐름과 지원 범위](mcp-m6-distribution.ko.md#현재-남은-전달-경로-3개-연결)를 참고한다.
+프로젝트 관리도 자연어로 요청한다. 사용 가능한 기능은 현재 설치본·profile·승인된 정책의 교집합으로 결정한다. 선택적 관리·resource·helper·host 기능은 별도 정책을 검토한 뒤 활성화하며, 설치 시 기존 승인/producer pin을 자동 이전하지 않는다. [관리 흐름과 지원 범위](mcp-m6-distribution.ko.md#현재-남은-전달-경로-3개-연결)를 참고한다.
 
-최신 검증본은 [README](../README.ko.md)에서 확인한다. **Golem Setup**은 연결 관리, **Golem Work**는 작업 진행에 사용한다. 이미 검증본이 연결돼 있으면 재설치하지 않는다.
+설치 버전과 실제 검증 범위는 [현재 검증 기록](workpacks/mcp.md#verification-status)에서 구분해 확인한다. **Golem Setup**은 연결 관리, **Golem Work**는 작업 진행에 사용한다. 이미 검증본이 연결돼 있으면 재설치하지 않는다.
 
 ## 1. 설치·연결 확인
 
@@ -47,6 +47,10 @@ codex plugin add golem@golem-reviewed --json
 5. 요구되는 QA 결과·완료 문서를 제출하고, 승인된 `golem_completion_finalize`·`golem_completion_report`를 각각 처리한다. 마지막에 `golem_completion_check`로 **현재 DONE**을 확인한다. QA PASS나 finalize의 RECORDED만으로 완료 처리하지 않는다.
 
 승인 대기·권한 부족·stale·quota·결과 유실·COMMIT_UNKNOWN이면 원 ID와 증거를 보존하고 허용된 읽기로 상태를 확인한다. 자동 재실행·repair·rollback은 하지 않는다. 없는 도구는 재설치나 권한 확대 대신 필요한 계약을 확인한다. [완료 계약](completion.md)
+
+## Work Pack
+
+프로젝트 개발 대화에서 “이 업무에 맞는 Work Pack을 찾아 검증하고 연결 준비해줘”처럼 요청한다. Pack·catalog는 별도 허용 범위 안에서 조회하며, bind와 증거 export는 정확한 owner action 승인이 필요하다. [공통 MCP 도구·사용 순서](workpacks/mcp.md)를 따른다. 설치본에 코드가 포함돼 있어도 현재 정책에 없는 도구는 사용할 수 없다.
 
 ## 업데이트·정리
 

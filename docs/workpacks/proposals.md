@@ -110,5 +110,7 @@ forged authority fields, unknown fields, UTF-8 byte/count/size boundaries, outpu
 limits, locks, CAS tampering and unchanged Work/output on failure. The existing M4
 suite separately covers unknown session ownership, policy denial and binding drift.
 Public API consumer and Work Pack mutation smoke include the new parser. Native
-contracts remain canonical. Real client/MCP delivery, semantic truth and independent
-identity are not certified by these tests. See [results](development-plan.md).
+contracts remain canonical. Common MCP proposal_validate/assess delivery is implemented
+and covered by protocol/native fixtures; these operations have not received their own
+Desktop model E2E. Semantic truth and independent identity are not certified. See
+[current verification](mcp.md#verification-status) and [historical results](development-plan.md).

@@ -2,7 +2,8 @@
 
 Implemented, experimental **native-documents-v1 only**. This is an opt-in immutable
 reference to an existing native document-role obligation. It is not a general Pack
-executor, semantic release verifier, new owner identity protocol or MCP tool.
+executor, semantic release verifier or new owner identity protocol. The native contract
+is now exposed through [common MCP resolve/bind/explain routes](mcp.md).
 
 ```sh
 golem pack resolve WORK REQUEST.json

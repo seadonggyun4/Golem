@@ -1,13 +1,13 @@
 # Claude Desktop MCPB 설치·사용 안내
 
-프로젝트 관리도 자연어로 요청한다. 현재 검증 연결은 승인된 세 조회만 제공한다. 선택적 관리·resource·helper·host 기능은 별도 정책을 검토한 뒤 활성화하며, 설치 시 기존 승인/producer pin을 자동 이전하지 않는다. [관리 흐름과 지원 범위](mcp-m6-distribution.ko.md#현재-남은-전달-경로-3개-연결)를 참고한다.
+프로젝트 관리도 자연어로 요청한다. 사용 가능한 기능은 현재 설치본·profile·승인된 정책의 교집합으로 결정한다. 선택적 관리·resource·helper·host 기능은 별도 정책을 검토한 뒤 활성화하며, 설치 시 기존 승인/producer pin을 자동 이전하지 않는다. [관리 흐름과 지원 범위](mcp-m6-distribution.ko.md#현재-남은-전달-경로-3개-연결)를 참고한다.
 
-최신 검증본은 [README](../README.ko.md)에서 확인한다. 검토한 기능별 MCPB를 사용하며, 이미 같은 검증본이 연결돼 있으면 재설치하지 않는다. profile은 기존 권한의 상한이다.
+설치 버전과 실제 검증 범위는 [현재 검증 기록](workpacks/mcp.md#verification-status)에서 구분해 확인한다. 검토한 기능별 MCPB를 사용하며, 이미 같은 검증본이 연결돼 있으면 재설치하지 않는다. profile은 기존 권한의 상한이다.
 
 ## Install and Configure
 
 1. **Settings → Extensions → Advanced settings → Install Extension**에서 검토한 MCPB를 선택한다. 기존 동일 identity에는 지원되는 **Update**를 사용한다. archive SHA·manifest·설치 파일을 대조하고 local-process 설치 확인을 마친다.
-2. **Configure**에서 기존 정책·정확한 SHA와 전달 동의를 지정한다. 현재 read 패키지는 **Existing reviewed D2 policy**를 사용한다. task·quality·parallel은 별도 D4 정책을 사용한다. 정확한 policy SHA와 **Explicit consent to this existing owner policy**도 필요하다. 설치나 동의 체크만으로 새 action 승인이 생기지 않는다.
+2. **Configure**에서 기존 정책·정확한 SHA와 전달 동의를 지정한다. read·prepare 패키지는 **Existing reviewed D2 policy**를 사용한다. task·quality·parallel은 별도 D4 정책을 사용한다. 정확한 policy SHA와 **Explicit consent to this existing owner policy**도 필요하다. 설치나 동의 체크만으로 새 action 승인이 생기지 않는다.
 3. optional **resource**는 별도 검토한 계약·SHA·동의가 있을 때만 선택한다. helper는 quality, host는 parallel 패키지의 별도 계약이며 task 설정에 추가하지 않는다. read/prepare는 해당 D2 정책을 사용한다.
 4. 저장·활성화 후 해당 연결만 reload하고 새 대화에서 **의도한 확장**의 실제 도구를 확인한다. `golem_projects_list`와 허용 Work 조회로 연결을 확인한다. `golem_setup_status`만 보이면 설정 진단 단계이므로 정책·producer pin을 임의 변경해 통과시키지 않는다.
 
@@ -33,6 +33,10 @@ python3 tools/integration_distribution.py verify --input /absolute/private/golem
 `read`·`prepare`는 조회/준비, `task`는 Work 수명주기, `quality`는 QA/증거, `parallel`은 기존 candidate/workspace용 상한이다. 서로의 권한을 자동 포함하지 않는다. builder는 설치·승인·Work 변경을 하지 않으며, 생성 성공만으로 client 검증이 완료되지는 않는다. 외부 runtime이 필요하고 서명된 self-contained 배포를 뜻하지 않는다.
 
 </details>
+
+## Work Pack
+
+프로젝트 개발 대화에서 “이 업무에 맞는 Work Pack을 찾아 검증하고 연결 준비해줘”처럼 요청한다. Pack·catalog는 별도 허용 범위 안에서 조회하며, bind와 증거 export는 정확한 owner action 승인이 필요하다. [공통 MCP 도구·사용 순서](workpacks/mcp.md)를 따른다. 설치본에 코드가 포함돼 있어도 현재 정책에 없는 도구는 사용할 수 없다.
 
 ## 업데이트·정리
 

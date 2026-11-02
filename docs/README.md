@@ -136,12 +136,16 @@
 
 ## Work Pack (experimental)
 
-[Architecture and audit](workpacks/overview.md) · [M1 schema/API](workpacks/schema.md) · [Roles and evidence](workpacks/roles-and-evidence.md) · [CLI/catalog plan](workpacks/delivery.md) · [Reference pack](workpacks/reference.md) · [Development and validation](workpacks/development-plan.md).
+Native validation, catalog/search, limited document binding, proposals, evidence export/verify and the reference adapter are implemented. All 14 CLI operations have five common MCP routes; installation and actual client verification remain distinct.
 
-M2/M3 add read-only validation, inspection, compatibility and local catalog/search CLI. M4 adds limited [native document binding](workpacks/binding.md); MCP delivery is not implemented.
-
-Work Pack M5: [verifier proposals and native role evaluation](workpacks/proposals.md).
-
-Work Pack M6: [private evidence packages and integrity verification](workpacks/receipts.md).
-
-Work Pack M7: [Truthound reference adapter and local scenario](workpacks/reference-adapter.md).
+| Guide | Document |
+| --- | --- |
+| Overview and workflow | [Work Pack](workpacks/overview.md) |
+| MCP tools, usage and current verification | [Common MCP](workpacks/mcp.md) |
+| Schema and authority | [Schema/API](workpacks/schema.md) · [Roles and evidence](workpacks/roles-and-evidence.md) |
+| CLI and local catalog | [Commands](workpacks/delivery.md) |
+| Exact binding | [Resolve/bind/explain](workpacks/binding.md) |
+| Proposals and native role evaluation | [Proposals](workpacks/proposals.md) |
+| Evidence packages | [Manifest/export/verify](workpacks/receipts.md) |
+| Reference scenario | [Pack](workpacks/reference.md) · [Truthound adapter](workpacks/reference-adapter.md) |
+| Historical milestone results | [Development and validation record](workpacks/development-plan.md) |
