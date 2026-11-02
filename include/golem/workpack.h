@@ -76,6 +76,24 @@ golem_status golem_workpack_proposal_validate(golem_bytes input, golem_digest *d
 golem_status golem_workpack_assess(golem_document_store *store, const golem_bytes *proposals,
                                   size_t count, golem_execution_reply *out,
                                   golem_diagnostic *diagnostic);
+/* M6 private native document receipt package. Request <=64 KiB; closed typed
+ * inventory <=256 objects /16 MiB, manifest <=64 KiB. Work remains read-only.
+ * Plan pins the current native source, exact inventory/format and canonical
+ * private output parent identity. Separate export approval is local caller
+ * attestation, never identity authentication, execution or release permission.
+ * Export creates a NEW immutable child; an existing/partial child is rejected.
+ * Any failure may leave partial or durable-but-unconfirmed files; preserve them,
+ * never automatically retry/repair. Output arguments stay unchanged on error.
+ * Verify requires an independently retained manifest digest; it proves bounded
+ * structural integrity only, never source truth, current QA/completion or origin.
+ * Replies use golem_execution_reply_free. See docs/workpacks/receipts.md. */
+golem_status golem_workpack_receipt_manifest(golem_document_store *store, golem_bytes request,
+    const char *parent, const char *format, golem_execution_reply *out, golem_diagnostic *diagnostic);
+golem_status golem_workpack_receipt_export(golem_document_store *store, golem_bytes request,
+    const char *parent, const char *format, const golem_digest *approved_export,
+    golem_digest *manifest, golem_diagnostic *diagnostic);
+golem_status golem_workpack_receipt_verify(const char *directory, const golem_digest *expected_manifest,
+    golem_execution_reply *out, golem_diagnostic *diagnostic);
 #ifdef __cplusplus
 }
 #endif

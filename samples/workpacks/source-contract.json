@@ -12,7 +12,10 @@
     "golem_workpack_bind",
     "golem_workpack_explain",
     "golem_workpack_proposal_validate",
-    "golem_workpack_assess"
+    "golem_workpack_assess",
+    "golem_workpack_receipt_manifest",
+    "golem_workpack_receipt_export",
+    "golem_workpack_receipt_verify"
   ],
   "public_cli": [
     "golem pack validate FILE",
@@ -24,7 +27,10 @@
     "golem pack bind WORK REQUEST --approve-binding DIGEST",
     "golem pack explain WORK",
     "golem pack proposal-validate FILE",
-    "golem pack assess WORK FILE [FILE...]"
+    "golem pack assess WORK FILE [FILE...]",
+    "golem receipt manifest WORK REQUEST PARENT [--format json|markdown]",
+    "golem receipt export WORK REQUEST PARENT --approve-export DIGEST [--format json|markdown]",
+    "golem receipt verify DIRECTORY --expect-manifest DIGEST"
   ],
   "mcp_tools": [],
   "binding_support": [
@@ -33,7 +39,7 @@
   "status": "experimental",
   "runtime": "Golem native C library; json-c strict UTF-8; OpenSSL 3",
   "source_provenance": "release assembler must attach exact source commit and artifact digest; no mutable latest",
-  "security_boundary": "local exact reviewed document binding only; no execution grant, semantic release verdict or MCP delivery",
+  "security_boundary": "exact local binding and separately approved private document-closure export; unsigned integrity only; no execution, public release, semantic truth, current completion or MCP delivery",
   "reference_packs": [
     {
       "path": "samples/workpacks/dataset-release-gate.json",
@@ -63,7 +69,10 @@
       "binding.exact-owner-bind",
       "binding.explain",
       "proposal.structural-validate",
-      "proposal.native-role-assess"
+      "proposal.native-role-assess",
+      "receipt.manifest",
+      "receipt.exact-private-export",
+      "receipt.anchored-integrity-verify"
     ],
     "mcp": []
   },
@@ -76,5 +85,11 @@
   "catalog_schema": "golem.workpack.catalog.v0",
   "catalog_report_schema": "golem.workpack.discovery.v0",
   "proposal_schema": "golem.workpack.verifier-proposal.v0",
-  "assessment_schema": "golem.workpack.assessment.v0"
+  "assessment_schema": "golem.workpack.assessment.v0",
+  "receipt_manifest_schema": "golem.workpack.receipt-manifest.v0",
+  "receipt_request_schema": "golem.workpack.receipt-request.v0",
+  "receipt_verification_schema": "golem.workpack.receipt-verification.v0",
+  "receipt_support": [
+    "native-documents-v1"
+  ]
 }

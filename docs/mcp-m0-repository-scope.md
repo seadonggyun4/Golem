@@ -1233,6 +1233,11 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | native.golem_workpack_proposal_validate | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.golem_workpack_assess | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.workpack.proposal-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_receipt_manifest | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_receipt_export | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_receipt_verify | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.workpack.receipt-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| cli.workpack.receipt | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3574,6 +3579,18 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | NATIVE_OPERATION | src/workpack/proposal.c | file-surface | None |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | proposal-validate |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | assess |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_receipt_manifest | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_receipt_export | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_receipt_verify | None |
+| NATIVE_OPERATION | src/workpack/receipt_store.c | file-surface | None |
+| NATIVE_OPERATION | src/workpack/receipt_internal.h | file-surface | None |
+| NATIVE_OPERATION | src/workpack/receipt_model.c | file-surface | None |
+| NATIVE_OPERATION | src/workpack/receipt_verify.c | file-surface | None |
+| CLI_ROUTE | src/cli/workpack_receipt.c | golem_cli_workpack_receipt | manifest |
+| CLI_ROUTE | src/cli/workpack_receipt.c | golem_cli_workpack_receipt | export |
+| CLI_ROUTE | src/cli/workpack_receipt.c | golem_cli_workpack_receipt | verify |
+| CLI_ROUTE | src/cli/main.c | dispatch | receipt |
+| NATIVE_OPERATION | src/cli/workpack_receipt.c | file-surface | None |
 
 ## Blockers
 
@@ -3663,8 +3680,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 454; explicitly selected: 454. Other tracked paths still require explicit boundary review.
-Public declarations observed in selected headers: 354.
+Candidate source surfaces: 459; explicitly selected: 459. Other tracked paths still require explicit boundary review.
+Public declarations observed in selected headers: 357.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
 ## Required sources
@@ -3818,6 +3835,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | src/cli/workflow.c | YES |
 | src/cli/workflow_template.c | YES |
 | src/cli/workpack.c | YES |
+| src/cli/workpack_receipt.c | YES |
 | src/common/allocator.c | YES |
 | src/common/arena.c | YES |
 | src/common/diagnostic.c | YES |
@@ -4021,6 +4039,10 @@ This is static inventory reconciliation, never native execution, authority or pr
 | src/workpack/model.c | YES |
 | src/workpack/proposal.c | YES |
 | src/workpack/read.c | YES |
+| src/workpack/receipt_internal.h | YES |
+| src/workpack/receipt_model.c | YES |
+| src/workpack/receipt_store.c | YES |
+| src/workpack/receipt_verify.c | YES |
 | src/workspace/git.c | YES |
 | src/workspace/internal.h | YES |
 | src/workspace/lifecycle.c | YES |

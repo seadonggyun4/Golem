@@ -1,6 +1,6 @@
 # CLI/API, discovery and distribution boundary
 
-## Commands (M2–M5 native commands implemented with limits; receipt commands NOT_IMPLEMENTED)
+## Commands (M2–M6 native commands implemented with limits)
 
 | Command | Input → output | Effects, gates and errors |
 | --- | --- | --- |
@@ -14,14 +14,14 @@
 | `golem pack explain WORK` | immutable binding + live state → blockers | M4 read only; historical vs live explicit |
 | `golem pack proposal-validate FILE` | bounded proposal → exact digest | M5 pure structural validation; no authenticated identity |
 | `golem pack assess WORK FILE [FILE...]` | 1..8 claims + current binding → separate native role evaluation | M5 read-only Work; no approval/assessment publication |
-| `golem receipt export WORK --format json` | reviewed native refs → manifest | M6 explicit output write/disclosure gate |
-| `golem receipt export WORK --format markdown` | same native refs → projection | M6 derived write, never receipt authority |
-| `golem receipt verify PATH` | bounded inventory → integrity result | M6 read only, no implicit downloads |
+| `golem receipt manifest WORK REQUEST PARENT [--format json\|markdown]` | exact current refs → inventory/approval digest | M6 read-only review; no export |
+| `golem receipt export WORK REQUEST PARENT --approve-export DIGEST [--format json\|markdown]` | reviewed inventory → private package | M6 separate exact disclosure gate; no Work writes |
+| `golem receipt verify DIRECTORY --expect-manifest DIGEST` | bounded package → anchored integrity | M6 unsigned origin; no current completion verdict |
 
 M2 uses the existing CLI exit taxonomy described below. Later commands must separately
 review their status mapping without changing existing command semantics. Input is
 64 KiB for manifests; M3 catalog 256 entries/1 MiB; M6 bounds are in
-roles-and-evidence.md.
+[receipts.md](receipts.md).
 Reads are repeatable but not automatically retried on failure; mutation retries must
 use native exact-request lookup and preserve uncertainty. Reads do not require new
 Work audit; future integration may append its existing scoped read audit. M1 has no
@@ -52,8 +52,8 @@ No vector database or remote search. This is Golem runtime discovery, not extern
 
 ## Machine-readable source contract for styxis-plugin
 
-M1–M5 maintain a source metadata record with schema/API versions, ten public native entrypoints,
-the ten CLI routes (only exact M4 bind mutates Work) and no MCP claims, reference inventory and security boundary. Build/release automation
+M1–M6 maintain a source metadata record with schema/API versions, thirteen public native entrypoints,
+the thirteen CLI routes (only exact M4 bind mutates Work; M6 separately exports private files) and no MCP claims, reference inventory and security boundary. Build/release automation
 must attach the actual source commit/archive digest separately; never put a self-referential
 commit hash in the source record or use mutable latest. A branch name is not provenance.
 Packaged files need independent artifact inventory and compatibility checks.
@@ -170,3 +170,5 @@ M4 resolve/bind/explain use the [separate exact binding contract](binding.md). U
 external/development/identity mappings block; binding is not execution or semantic release approval.
 
 M5 proposal-validate/assess use the [bounded untrusted proposal contract](proposals.md).
+
+M6 manifest/export/verify use the [bounded private evidence package contract](receipts.md).

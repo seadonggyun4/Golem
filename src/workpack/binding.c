@@ -20,7 +20,7 @@ static bool contains(struct json_object *a, const char *value)
         if (!strcmp(json_object_get_string(json_object_array_get_idx(a, i)), value)) return true;
     return false;
 }
-static golem_status parse(golem_bytes input, struct json_object **out, struct json_object **pack,
+golem_status wp_binding_request(golem_bytes input, struct json_object **out, struct json_object **pack,
                           golem_digest *manifest)
 {
     struct json_object *r = NULL, *p = NULL;
@@ -135,7 +135,7 @@ golem_status wp_apply(golem_document_store *s, struct json_object *event, const 
         strcmp(dw_text(event, "type"), "workpack-binding") || !json_object_is_type(dw_get(event, "request_json"), json_type_string)) return GOLEM_ERR_CORRUPT_JOURNAL;
     golem_bytes input = bytes(dw_text(event, "request_json"));
     struct json_object *r = NULL, *p = NULL, *o = NULL; golem_digest manifest, approved, actual;
-    golem_status st = parse(input, &r, &p, &manifest);
+    golem_status st = wp_binding_request(input, &r, &p, &manifest);
     if (st == GOLEM_OK) st = mapping(s, r, p, true, dw_text(dw_get(event, "scope"), "native_core_version"));
     if (st == GOLEM_OK) st = scope(s, input, &manifest, dw_text(dw_get(event, "scope"), "native_core_version"), &o, &actual);
     if (st == GOLEM_OK && (!dw_digest(event, "approved_binding", &approved) || !dw_equal(&actual, &approved) ||
@@ -150,7 +150,7 @@ golem_status golem_workpack_resolve(golem_document_store *s, golem_bytes input, 
 {
     if (!s || !out || s->poisoned) return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, "PACK_STORE");
     struct json_object *r = NULL, *p = NULL, *o = NULL; golem_digest manifest, digest;
-    golem_status st = parse(input, &r, &p, &manifest);
+    golem_status st = wp_binding_request(input, &r, &p, &manifest);
     if (st == GOLEM_OK) st = mapping(s, r, p, true, GOLEM_VERSION_STRING);
     if (st == GOLEM_OK) st = live(s);
     if (st == GOLEM_OK && s->workpack_binding) st = GOLEM_ERR_IDENTITY_MISMATCH;
@@ -167,7 +167,7 @@ GOLEM_RECORDED_API(golem_workpack_bind,
     if (!s || !out || s->poisoned) return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, "PACK_STORE");
     struct json_object *r = NULL, *p = NULL, *o = NULL, *event = NULL;
     golem_digest manifest, digest, payload, frame; golem_execution_reply response = {0};
-    golem_status st = parse(input, &r, &p, &manifest);
+    golem_status st = wp_binding_request(input, &r, &p, &manifest);
     if (st == GOLEM_OK && s->workpack_binding) {
         golem_digest saved;
         const char *raw = dw_text(s->workpack_binding, "request_json");
@@ -203,7 +203,7 @@ golem_status golem_workpack_explain(golem_document_store *s, golem_execution_rep
     if (!s || !out || s->poisoned) return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, "PACK_STORE");
     if (!s->workpack_binding) return dw_report(d, GOLEM_ERR_NOT_FOUND, "PACK_NOT_BOUND");
     struct json_object *r = NULL, *p = NULL, *o = json_object_new_object(); golem_digest manifest;
-    golem_status st = parse(bytes(dw_text(s->workpack_binding, "request_json")), &r, &p, &manifest);
+    golem_status st = wp_binding_request(bytes(dw_text(s->workpack_binding, "request_json")), &r, &p, &manifest);
     golem_status current = st;
     if (current == GOLEM_OK) current = mapping(s, r, p, false, GOLEM_VERSION_STRING);
     if (current == GOLEM_OK) current = live(s);

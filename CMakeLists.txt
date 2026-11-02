@@ -75,6 +75,9 @@ add_library(golem STATIC
     src/workpack/read.c
     src/workpack/binding.c
     src/workpack/proposal.c
+    src/workpack/receipt_model.c
+    src/workpack/receipt_verify.c
+    src/workpack/receipt_store.c
     src/intent/schema.c
     src/intent/object.c
     src/intent/quota.c
@@ -305,7 +308,7 @@ if(GOLEM_BUILD_CLI)
         golem_configure_target(golem_cgroup_exec)
         install(TARGETS golem_cgroup_exec RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
     endif()
-    add_executable(golem_cli src/cli/main.c src/cli/workpack.c src/cli/lineage.c src/cli/adapter.c src/cli/adapter_descriptor.c src/cli/research.c src/cli/research_bundle.c
+    add_executable(golem_cli src/cli/main.c src/cli/workpack.c src/cli/workpack_receipt.c src/cli/lineage.c src/cli/adapter.c src/cli/adapter_descriptor.c src/cli/research.c src/cli/research_bundle.c
         src/cli/io.c src/cli/json.c src/cli/capsule.c src/cli/projection.c src/cli/runtime.c src/cli/work.c src/cli/journal.c
         src/cli/daemon.c src/cli/daemon_worker.c src/cli/document.c src/cli/discovery.c src/cli/workflow.c src/cli/workflow_template.c src/cli/context.c src/cli/context_tokenizer.c src/cli/events.c src/cli/agent_session.c src/cli/runtime_profile.c src/cli/execution.c src/cli/proof.c src/cli/candidate.c src/cli/reentry.c src/cli/completion.c src/cli/role.c src/cli/approval.c)
     target_sources(golem_cli PRIVATE src/cli/doctor.c src/cli/output.c src/cli/error.c)

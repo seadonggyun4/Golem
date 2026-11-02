@@ -1,5 +1,5 @@
 #include "golem/workpack.h"
-#include "../workflow/role_internal.h"
+#include "receipt_internal.h"
 #include <string.h>
 
 static bool number(struct json_object *o, const char *key, uint64_t lo, uint64_t hi)
@@ -95,7 +95,7 @@ golem_status golem_workpack_proposal_validate(golem_bytes input, golem_digest *d
 }
 /* Only current document bodies in the bound selection's native role closure.
  * This is not a general CAS reader or a caller-supplied evidence allowlist. */
-static golem_status artifacts(golem_document_store *s, struct json_object *binding, struct json_object **out)
+golem_status wp_document_closure(golem_document_store *s, struct json_object *binding, bool *selected)
 {
     dw_entry *selection = dw_find(s, dw_text(binding, "selection_id"), 0);
     if (!selection) return GOLEM_ERR_NOT_FOUND;
@@ -109,13 +109,22 @@ static golem_status artifacts(golem_document_store *s, struct json_object *bindi
         if (st == GOLEM_ERR_NOT_FOUND) st = GOLEM_OK;
         else if (st == GOLEM_OK) roots[count++] = (size_t)(entry - s->entries);
     }
-    bool selected[GOLEM_DOCUMENT_MAX_REVISIONS];
     if (st == GOLEM_OK) st = wf_closure(s, &g, roots, count, selected);
+    for (size_t i = 0; st == GOLEM_OK && i < s->count; ++i) if (selected[i]) {
+        uint64_t size;
+        st = g.states[i] == GOLEM_DOCUMENT_CURRENT ? wf_integrity(s, i, &size) : GOLEM_ERR_STALE_RESULT;
+    }
+    wf_graph_free(s, &g); return st;
+}
+static golem_status artifacts(golem_document_store *s, struct json_object *binding, struct json_object **out)
+{
+    bool selected[GOLEM_DOCUMENT_MAX_REVISIONS];
+    golem_status st = wp_document_closure(s, binding, selected);
     struct json_object *a = json_object_new_array();
     if (!a && st == GOLEM_OK) st = GOLEM_ERR_OUT_OF_MEMORY;
     for (size_t i = 0; st == GOLEM_OK && i < s->count; ++i) if (selected[i]) {
         uint64_t size = 0;
-        st = g.states[i] == GOLEM_DOCUMENT_CURRENT ? wf_integrity(s, i, &size) : GOLEM_ERR_STALE_RESULT;
+        st = wf_integrity(s, i, &size);
         if (st == GOLEM_OK) {
             struct json_object *x = json_object_new_object();
             if (!dw_add_digest(x, "digest", &s->entries[i].result.body_digest) || !ex_uint(x, "size", size)) {
@@ -123,7 +132,6 @@ static golem_status artifacts(golem_document_store *s, struct json_object *bindi
             } else if (!wf_append(a, x)) st = GOLEM_ERR_OUT_OF_MEMORY;
         }
     }
-    wf_graph_free(s, &g);
     if (st == GOLEM_OK) *out = a; else json_object_put(a);
     return st;
 }

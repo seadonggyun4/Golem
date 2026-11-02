@@ -2,7 +2,8 @@
 
 M4 implements [native document binding](binding.md); M5 implements the bounded
 [untrusted proposal parser and native role evaluation](proposals.md). General role
-mapping and receipt aggregation below remain PLANNED. M5 does not authenticate
+mapping remains PLANNED. M6 implements only the [native document receipt scope](receipts.md);
+the broader aggregation below is historical design. M5 does not authenticate
 principals or evaluate semantic truth.
 Existing [role contracts](../role-contracts.md), [completion](../completion.md),
 [evidence export](../evidence-export.md) and [proof packs](../proof-packs.md) remain canonical.
@@ -69,7 +70,7 @@ exact pack reference, source snapshot, role submission refs, tool inventory, Evi
 inventory `(digest,size,media_type)`, owner decision refs, native completion receipt
 ref, unresolved blockers, declared timestamps, missing-object list. No arbitrary
 filesystem paths or automatic retrieval. Proposed total 16 MiB/256 objects; manifest
-64 KiB. These limits require review before M6 implementation.
+64 KiB. M6 selected these bounds; its narrower implemented schema is in [receipts.md](receipts.md).
 
 CAS / manifest / native receipt = authority under their original local trust contracts.
 Markdown and future HTML = derived projection. JSON export must identify which fields
@@ -136,5 +137,5 @@ successful empty findings. No raw chain-of-thought field is permitted.
 
 This example deliberately represents incomplete evidence. Empty decisions and null
 completion never become success. JSON export is byte-bounded and preserves these
-unknowns; Markdown/HTML render them without changing authority. M6 must define exact
-receipt/media/schema allowlists and cross-object identity checks before implementation.
+unknowns; Markdown/HTML render them without changing authority. The implemented M6 allowlists and cross-object checks are documented in
+[receipts.md](receipts.md); this broad example is not accepted input.

@@ -4150,10 +4150,14 @@
       [
         "src/cli/workflow_template.c",
         "golem_cli_workflow_template"
+      ],
+      [
+        "src/cli/workpack_receipt.c",
+        "golem_cli_workpack_receipt"
       ]
     ],
-    "checked_nodes": 292,
-    "checked_calls": 4676,
+    "checked_nodes": 293,
+    "checked_calls": 4704,
     "public_endpoints": [
       "golem_adapter_descriptor_current",
       "golem_adapter_descriptor_decode",
@@ -4344,6 +4348,9 @@
       "golem_workpack_inspect",
       "golem_workpack_proposal_validate",
       "golem_workpack_read",
+      "golem_workpack_receipt_export",
+      "golem_workpack_receipt_manifest",
+      "golem_workpack_receipt_verify",
       "golem_workpack_resolve",
       "golem_workpack_validate",
       "golem_workspace_call"
@@ -4847,14 +4854,19 @@
       "src/workpack/internal.h",
       "src/workpack/binding.c",
       "src/workpack/binding_internal.h",
-      "src/workpack/proposal.c"
+      "src/workpack/proposal.c",
+      "src/workpack/receipt_store.c",
+      "src/workpack/receipt_internal.h",
+      "src/workpack/receipt_model.c",
+      "src/workpack/receipt_verify.c",
+      "src/cli/workpack_receipt.c"
     ],
     "blockers": [],
     "execution_verified": false
   },
   "reviewed_effects": {
     "blockers": [],
-    "reviewed_capabilities": 1137,
+    "reviewed_capabilities": 1142,
     "execution_verified": false
   },
   "boundary_contracts": {

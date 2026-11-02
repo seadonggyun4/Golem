@@ -19,7 +19,7 @@
     },
     {
       "path": "src/cli/main.c",
-      "sha256": "0ca448ed6413b9db7315ec76ec3c5cd9e7476e5c34c845f43c1ed7545a8e5520"
+      "sha256": "ec2b0a18957cac52ad30177ce271457b4d4ccc59a1285d2d74dd25eb28012666"
     },
     {
       "path": "tools/integration_service.py",
@@ -215,7 +215,7 @@
     },
     {
       "path": "CMakeLists.txt",
-      "sha256": "c7cc886bb9db5aeecaa4ec78b90b352c52860809bac9517a7c013405676456ae"
+      "sha256": "81e1c176cfd768b4481c7757433d9a377068cbb7f02cea7d157265f5d8353131"
     },
     {
       "path": "CMakePresets.json",
@@ -2227,7 +2227,7 @@
     },
     {
       "path": "include/golem/workpack.h",
-      "sha256": "ce6bc378a2db3e76f49b9162f25fac28f4ebbbce7a055be1a3e910381d01113c"
+      "sha256": "3e47ce2ac4692faf3e22c432c2ca0973ebf32d8318344c71d140fbb818ca88e7"
     },
     {
       "path": "src/workpack/model.c",
@@ -2267,15 +2267,15 @@
     },
     {
       "path": "docs/workpacks/delivery.md",
-      "sha256": "a45e9c16e5e163209c470498f2b766dd40a7e6a8107225d699379e9179a10e38"
+      "sha256": "ed071b7bad005bc3ab3083f91d01e987f34de969f0cced7d72854885d6602eca"
     },
     {
       "path": "src/workpack/binding.c",
-      "sha256": "c7737f3ec5d5a6c545b8d02e007f6448bf05c794416b4aa1cacf6cfb32374e07"
+      "sha256": "78d31fe206578971291f4dc896526906293a29bb7115442a916a77a7a7138641"
     },
     {
       "path": "src/workpack/binding_internal.h",
-      "sha256": "b69042d041d0e6fbc4c75fda7c592524a022dc14cff1c26cf22bb6edd766ac52"
+      "sha256": "9d3f9bffc09cd654cd5dbea4a5b881eeaf3cd80e56cd262ebc0093c613dbd428"
     },
     {
       "path": "tests/c/test_workpack_binding_fault.c",
@@ -2295,7 +2295,7 @@
     },
     {
       "path": "src/workpack/proposal.c",
-      "sha256": "47da661054745204b6ad882101eb49966a054023a2d2e5dc0c3df6b2f8dec470"
+      "sha256": "99fb146ffde55ae4221ca418ad47afda92686192f3d026f78875847d0057a847"
     },
     {
       "path": "tests/c/test_workpack_proposal.c",
@@ -2308,6 +2308,42 @@
     {
       "path": "docs/workpacks/proposals.md",
       "sha256": "7d3f31ff2c68bc6996a08de717b2150f6be7cdde10818fca4d0e02a2d2c671c0"
+    },
+    {
+      "path": "src/workpack/receipt_store.c",
+      "sha256": "2b5056410cba54fc2e7f9c554fe30d7cbb73f4de7995d28aa33662eaed467139"
+    },
+    {
+      "path": "src/workpack/receipt_internal.h",
+      "sha256": "61449cb55bc191a46fc583ddf60b0365c8d7e5d15b16404514126c257f2dcc95"
+    },
+    {
+      "path": "src/workpack/receipt_model.c",
+      "sha256": "74b5bc1b5342d5e5c64a68ce17373ea4e788a26f712bbff6744bc2eec9902b2c"
+    },
+    {
+      "path": "src/workpack/receipt_verify.c",
+      "sha256": "476b28fa38b3dd5ccc1da3e5568b956488d152036f9da36c8d9fff60fc008ff5"
+    },
+    {
+      "path": "src/cli/workpack_receipt.c",
+      "sha256": "3327c9738e1949033b73bc0f9be080859e8db28a04bf3adbe55ececd2b89ae1b"
+    },
+    {
+      "path": "tests/c/test_workpack_receipt_fault.c",
+      "sha256": "6d355e0efaa07b065cfdd8f021c008b686b04a1d0759346729e497ce1d1e6b14"
+    },
+    {
+      "path": "tests/c/workpack_receipt.py",
+      "sha256": "9ac23353a9bcd235d91a1f2842c74df1df8c71853dd1579b72fbe4eb28b1a0ce"
+    },
+    {
+      "path": "docs/workpacks/m6-export-design.md",
+      "sha256": "471746e46f2aeb358b89f0e36ec5242b035e29c19e97e6402072528b2733e28b"
+    },
+    {
+      "path": "docs/workpacks/receipts.md",
+      "sha256": "31717ceedc5caa83ea7b66a8ba1fa523908d01521b5066d9b7579c91a670f80d"
     }
   ],
   "observations": [
@@ -18662,6 +18698,90 @@
       "source_path": "src/cli/workpack.c",
       "entrypoint": "golem_cli_workpack",
       "selector": "assess"
+    },
+    {
+      "id": "obs-32bcd38c734b5797292b1e72015c84396e531648554e83777c1b9646e328325e",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_receipt_manifest",
+      "selector": null
+    },
+    {
+      "id": "obs-8f619dcde7210a228854c8079543e42d92441a64691e68f1cd1cf1ea7263bcb3",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_receipt_export",
+      "selector": null
+    },
+    {
+      "id": "obs-f7d2d3374651158f608065b094363cdb3ef893cabd965a257af072e045dabc9f",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_receipt_verify",
+      "selector": null
+    },
+    {
+      "id": "obs-fc8df118328564674c7ef6276ca2c50be95288674fc838108e06b46273ea188f",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/workpack/receipt_store.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-8a6f3de6bed069b00b493f01bfb882cd5fbe8adf890cd46c23fdaa93121c5fb0",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/workpack/receipt_internal.h",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-6570eb1c1ae239f1f0dbe3a3164a0eaf5336d39dff82c7fa0a995b0becf48f1c",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/workpack/receipt_model.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-b9f5ee6ff33bbe3f894703d226c5f74b08c1852153d50293030f9893c2f21214",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/workpack/receipt_verify.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-fdb67dd9530abeb7b81220cd0f0b4331c506166b8d0aa0f153e57aea5acce0c7",
+      "kind": "CLI_ROUTE",
+      "source_path": "src/cli/workpack_receipt.c",
+      "entrypoint": "golem_cli_workpack_receipt",
+      "selector": "manifest"
+    },
+    {
+      "id": "obs-6b6ef20f209feec103424b056fb41d81c35ed92c8aa6c7c1fbfc27c4ffc95e61",
+      "kind": "CLI_ROUTE",
+      "source_path": "src/cli/workpack_receipt.c",
+      "entrypoint": "golem_cli_workpack_receipt",
+      "selector": "export"
+    },
+    {
+      "id": "obs-88b25abc5645ff39167b7d17f9938486c91d7348eedd9cda11b0f81fb79d11d7",
+      "kind": "CLI_ROUTE",
+      "source_path": "src/cli/workpack_receipt.c",
+      "entrypoint": "golem_cli_workpack_receipt",
+      "selector": "verify"
+    },
+    {
+      "id": "obs-b10c6011c33a9b9b68a1f2b3993aec53dd7dcc371bf32ea96d44eaff9696ffd3",
+      "kind": "CLI_ROUTE",
+      "source_path": "src/cli/main.c",
+      "entrypoint": "dispatch",
+      "selector": "receipt"
+    },
+    {
+      "id": "obs-e203f213c5084326b1faaf1375e04629762a2bcdfa50befc32f4fddb8d49e521",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/cli/workpack_receipt.c",
+      "entrypoint": "file-surface",
+      "selector": null
     }
   ],
   "capabilities": [
@@ -77405,6 +77525,256 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Shared native strict parser, exact digests, graph/closure/CAS/binding checks and role evaluate. Typed claims remain separate; failed/unknown/disagreement preserved."
+    },
+    {
+      "id": "native.golem_workpack_receipt_manifest",
+      "observation_ids": [
+        "obs-32bcd38c734b5797292b1e72015c84396e531648554e83777c1b9646e328325e"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit local source; existing native lock/CAS/validators; separate exact private export digest for publication"
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "Supported POSIX native runtime"
+        ],
+        "limits": [
+          "64KiB request/manifest;256 objects;16MiB payload;native-document closure only"
+        ],
+        "notes": "native-documents-v1 only; private export requires exact inventory/source/format/destination digest; verify is unsigned integrity, not truth or current completion. No MCP delivery."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/workpack_receipt.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/test_workpack_receipt_fault.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/receipts.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Shared native validators and document closure, CAS hashes, Work locks, exact private export digest and immutable publication. Partial output preserved; no automatic retry or Work mutation."
+    },
+    {
+      "id": "native.golem_workpack_receipt_export",
+      "observation_ids": [
+        "obs-8f619dcde7210a228854c8079543e42d92441a64691e68f1cd1cf1ea7263bcb3"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit local source; existing native lock/CAS/validators; separate exact private export digest for publication"
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE",
+        "AUDIT_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "Supported POSIX native runtime"
+        ],
+        "limits": [
+          "64KiB request/manifest;256 objects;16MiB payload;native-document closure only"
+        ],
+        "notes": "native-documents-v1 only; private export requires exact inventory/source/format/destination digest; verify is unsigned integrity, not truth or current completion. No MCP delivery."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/workpack_receipt.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/test_workpack_receipt_fault.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/receipts.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Shared native validators and document closure, CAS hashes, Work locks, exact private export digest and immutable publication. Partial output preserved; no automatic retry or Work mutation."
+    },
+    {
+      "id": "native.golem_workpack_receipt_verify",
+      "observation_ids": [
+        "obs-f7d2d3374651158f608065b094363cdb3ef893cabd965a257af072e045dabc9f"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit local source; existing native lock/CAS/validators; separate exact private export digest for publication"
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "Supported POSIX native runtime"
+        ],
+        "limits": [
+          "64KiB request/manifest;256 objects;16MiB payload;native-document closure only"
+        ],
+        "notes": "native-documents-v1 only; private export requires exact inventory/source/format/destination digest; verify is unsigned integrity, not truth or current completion. No MCP delivery."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/workpack_receipt.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/test_workpack_receipt_fault.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/receipts.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Shared native validators and document closure, CAS hashes, Work locks, exact private export digest and immutable publication. Partial output preserved; no automatic retry or Work mutation."
+    },
+    {
+      "id": "native.workpack.receipt-surfaces",
+      "observation_ids": [
+        "obs-fc8df118328564674c7ef6276ca2c50be95288674fc838108e06b46273ea188f",
+        "obs-8a6f3de6bed069b00b493f01bfb882cd5fbe8adf890cd46c23fdaa93121c5fb0",
+        "obs-6570eb1c1ae239f1f0dbe3a3164a0eaf5336d39dff82c7fa0a995b0becf48f1c",
+        "obs-b9f5ee6ff33bbe3f894703d226c5f74b08c1852153d50293030f9893c2f21214"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit local source; existing native lock/CAS/validators; separate exact private export digest for publication"
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE",
+        "AUDIT_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "Supported POSIX native runtime"
+        ],
+        "limits": [
+          "64KiB request/manifest;256 objects;16MiB payload;native-document closure only"
+        ],
+        "notes": "native-documents-v1 only; private export requires exact inventory/source/format/destination digest; verify is unsigned integrity, not truth or current completion. No MCP delivery."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/workpack_receipt.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/test_workpack_receipt_fault.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/receipts.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Shared native validators and document closure, CAS hashes, Work locks, exact private export digest and immutable publication. Partial output preserved; no automatic retry or Work mutation."
+    },
+    {
+      "id": "cli.workpack.receipt",
+      "observation_ids": [
+        "obs-fdb67dd9530abeb7b81220cd0f0b4331c506166b8d0aa0f153e57aea5acce0c7",
+        "obs-6b6ef20f209feec103424b056fb41d81c35ed92c8aa6c7c1fbfc27c4ffc95e61",
+        "obs-88b25abc5645ff39167b7d17f9938486c91d7348eedd9cda11b0f81fb79d11d7",
+        "obs-b10c6011c33a9b9b68a1f2b3993aec53dd7dcc371bf32ea96d44eaff9696ffd3",
+        "obs-e203f213c5084326b1faaf1375e04629762a2bcdfa50befc32f4fddb8d49e521"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit local source; existing native lock/CAS/validators; separate exact private export digest for publication"
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE",
+        "AUDIT_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "Supported POSIX native runtime"
+        ],
+        "limits": [
+          "64KiB request/manifest;256 objects;16MiB payload;native-document closure only"
+        ],
+        "notes": "native-documents-v1 only; private export requires exact inventory/source/format/destination digest; verify is unsigned integrity, not truth or current completion. No MCP delivery."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/workpack_receipt.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/test_workpack_receipt_fault.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/receipts.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/workpacks/m6-export-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Shared native validators and document closure, CAS hashes, Work locks, exact private export digest and immutable publication. Partial output preserved; no automatic retry or Work mutation."
     }
   ]
 }

@@ -7,6 +7,7 @@
 #include <openssl/evp.h>
 #include <stdlib.h>
 int golem_cli_workpack(int argc, char **argv);
+int golem_cli_workpack_receipt(int argc, char **argv);
 int golem_cli_work(int argc, char **argv);
 int golem_cli_doctor(int argc, char **argv);
 #include <inttypes.h>
@@ -68,7 +69,7 @@ static int evidence_read(int argc, char **argv)
 static int usage(void)
 {
     fputs("Usage:\n"
-        "  golem pack validate|inspect FILE | compatibility FILE [--core-version X.Y.Z]\n  golem pack list --catalog INDEX | search QUERY --catalog INDEX\n  golem pack resolve WORK REQUEST | bind WORK REQUEST --approve-binding DIGEST | explain WORK\n  golem pack proposal-validate FILE | assess WORK FILE [FILE...]\n"
+        "  golem pack validate|inspect FILE | compatibility FILE [--core-version X.Y.Z]\n  golem pack list --catalog INDEX | search QUERY --catalog INDEX\n  golem pack resolve WORK REQUEST | bind WORK REQUEST --approve-binding DIGEST | explain WORK\n  golem pack proposal-validate FILE | assess WORK FILE [FILE...]\n  golem receipt manifest|export WORK REQUEST PARENT [--approve-export DIGEST] [--format json|markdown]\n  golem receipt verify DIRECTORY --expect-manifest DIGEST\n"
         "  golem [--output-mode compact|full] [--output-store ABSOLUTE_DIR] COMMAND ...\n"
         "  golem output read SHA256\n"
         "  golem evidence read STORE SHA256 MAX_BYTES (1..1048576, verified base64)\n"
@@ -171,6 +172,7 @@ static int dispatch(int argc, char **argv)
         return 2;
     }
     cli_error_command(argc >= 2 ? argv[1] : NULL);
+    if (argc >= 2 && !strcmp(argv[1], "receipt")) return golem_cli_workpack_receipt(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "pack")) return golem_cli_workpack(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "output")) return golem_cli_output(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "doctor")) return golem_cli_doctor(argc, argv);

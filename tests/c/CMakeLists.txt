@@ -975,5 +975,12 @@ if(Python3_Interpreter_FOUND)
         $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_test_workpack_proposal>
         $<TARGET_FILE:golem_test_workpack_binding_fault> ${GOLEM_WORKPACK_BASELINE_CLI})
     set_tests_properties(workpack_proposals PROPERTIES TIMEOUT 180)
+    add_executable(golem_test_workpack_receipt_fault test_workpack_receipt_fault.c)
+    target_link_libraries(golem_test_workpack_receipt_fault PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
+    golem_configure_target(golem_test_workpack_receipt_fault)
+    add_test(NAME workpack_receipts COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/workpack_receipt.py
+        $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_test_workpack_receipt_fault>
+        $<TARGET_FILE:golem_test_workpack_binding_fault> ${GOLEM_WORKPACK_BASELINE_CLI})
+    set_tests_properties(workpack_receipts PROPERTIES TIMEOUT 180)
 
 endif()

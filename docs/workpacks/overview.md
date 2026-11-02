@@ -103,3 +103,5 @@ selected exact digest. General role mappings, semantic release validation and MC
 
 M5 adds [proposal validation and separate native role evaluation](proposals.md) for
 existing document bindings; claims never grant authority or prove semantic correctness.
+
+M6 adds [private evidence manifest/export/verify](receipts.md) for selected native document closures. Integrity is not authenticated origin, QA PASS or current completion. Work Pack MCP delivery remains unimplemented.

@@ -26,7 +26,7 @@ an explicit design gate first. No broad delegated approval is introduced.
 | M3 | native static catalog/search | No central service. Deterministic ranking, ambiguity/duplicate/version tests; owner-selected catalog only. Implemented; results below |
 | M4 | native binding/resolve, immutable reference and receipt schema | Implemented native-documents-v1 after owner design selection; immutable CAS/event binding, old-reader rejection, exact approval and generation. Session/custom/external mappings block; no automatic rollback or existing Work migration |
 | M5 | native document role evaluation and proposal parser | Implemented within existing native-documents-v1 binding; separate untrusted claims and native evaluation, exact current evidence; no new identity, persisted event or model truth. General/independent mappings remain unsupported |
-| M6 | Evidence manifest/export/verify | Explicit output publication and disclosure; truncation/corruption/missing object/unsigned origin/current-vs-historical tests; retain partial exports, no auto retry |
+| M6 | Evidence manifest/export/verify | Implemented native-documents-v1 closure only; separate exact private export approval, bounded typed inventory, unsigned anchored verification; retained partial exports, no auto retry. General evidence adapters remain unsupported |
 | M7 | reference adapters and local scenario | Mock/native/real Truthound tests reported separately; no automatic release, provider grants or project changes |
 
 Non-goals at every milestone: scheduler, merge broker, hosted service, model/provider
@@ -377,3 +377,71 @@ Work/evidence and COMMIT_UNKNOWN are not modified or retried. No new operational
 permission was needed for this source-only non-authoritative addition. Private logs,
 source/fixture identities and start/end installation comparisons are retained in
 `../workpack-m5-validation-20261102/` outside the source repository.
+
+## M6 current implementation — bounded private evidence packages
+
+See [receipts](receipts.md) and [owner-selected design](m6-export-design.md).
+Three additive public APIs and CLI commands reuse native strict parsing, M4 binding,
+M5 document closure, native role/document/Pack validation, Work lock, verified CAS
+reads and immutable no-replace/fsync publication. No Work event, reducer change,
+new native approval receipt or client permission is introduced. Export is a separate
+exact disclosure decision; inspect/verify cannot grant it. This selected design
+only covers implementation and isolated fixtures, not an existing project's export.
+
+Original proposal SHA-256: `24cfd1e66949a7daa937af843ec7bf468e83ad5e3748793057b18aa9691c817f`.
+A private retained copy preserves those original bytes. Full model-agent/external
+QA receipt aggregation, source authentication, replay/import and Work Pack MCP
+routing remain NOT_IMPLEMENTED, not merely untested.
+
+### M6 verification results (2026-11-02)
+
+| Check | Result |
+| --- | --- |
+| Debug and ASan/UBSan builds, warnings as errors | PASS |
+| Work Pack/CLI/fuzz smoke/native API recording and inventory subset | 20/20 PASS in each build |
+| Final M6 eight-scenario fixture, including strict error exits/sanitizer checks | PASS in debug and ASan/UBSan |
+| Existing evidence, publication faults, role/completion API regression | 14/14 PASS |
+| Existing golden workflow, completion/role CLI, installed header and M6 fixture | 5/5 PASS |
+| Installed public C SDK consumer | 1/1 PASS |
+| Capability regression | 371/371 PASS |
+| Strict static inventory | 459 source surfaces, 357 public declarations; zero blockers |
+| Source pins and source-contract metadata | 586 exact source hashes; 13 native APIs/13 CLI routes; no MCP claim |
+| Work Pack document links and whitespace | PASS |
+| Existing installed clients/runtime/policy/launcher preservation | PASS; exact start/end inventory comparison |
+
+The first M6 fixture used `work` as a mutation-copy directory, colliding with its
+existing synthetic Work; it was corrected to a distinct fixture-only path. Initial
+static passes identified the new receipt dispatch/file/selector/graph-root and design
+document references missing from the model. These were registered against actual
+source and exact hashes, and the existing CLI inventory document was updated. No
+checker condition, native approval/lock/CAS rule, test timeout or permission was
+weakened. Negative CLI cases additionally require native error exit 1, never a
+process crash or sanitizer failure. Initial failure logs are retained privately.
+
+Representative commands:
+
+```sh
+cmake --build build/workpack-m1 -j3
+ctest --test-dir build/workpack-m1 -R 'workpack|fuzz_seeds|native_api_(inventory|recording)' --output-on-failure
+cmake --build build/workpack-m1-asan -j3
+ctest --test-dir build/workpack-m1-asan -R 'workpack|fuzz_seeds|native_api_(inventory|recording)' --output-on-failure
+python3 -m unittest discover -s tools -p 'test_capability_*.py'
+python3 tools/capability_refresh.py --root "$PWD"
+```
+
+NOT_RUN: full 422-case native suite, real client/production export, client updates,
+network/provider/Truthound calls, Linux/Windows/Conan builds, coverage-guided fuzzing,
+and remote CI confirmation. Tests use disposable native Works only. The selected
+inventory limits are enforced; this is not a claim of exhaustive memory-fault or
+hostile concurrent-writer coverage. Offline verification is unsigned structural
+integrity, not authenticated origin, semantic evidence truth, replay of all events,
+current QA PASS or current Work completion.
+
+Codex 0.2.7 and Claude prepare 0.1.15 remain the reviewed f2563f5 installation
+snapshot, one enabled Golem per client. Installed Codex 9 files, Claude 85 files and
+shared runtime 85 files match the original inventory; both TopSolar policy bytes,
+producer references, launchers and Claude settings match. This native source update
+is not installed-client Work Pack delivery. No production Work/action, approval,
+QA/completion, COMMIT_UNKNOWN or Owner UI is invoked, retried or modified.
+Private original approval proposal, installation comparisons, source identities and
+logs are retained in `../workpack-m6-validation-20261102/` outside the repository.

@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "7e6047074a2c2238c7b0160155aa0f659ec8221eb048b097e283144d7cb32f4d",
-  "selected_source_count": 577,
-  "selected_observation_count": 2336,
-  "selected_capability_count": 1227,
+  "inventory_sha256": "97a2953ce58209ef50e5a8d99f1023444ff9305e5741a47a629cb328dc809cf8",
+  "selected_source_count": 586,
+  "selected_observation_count": 2348,
+  "selected_capability_count": 1232,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -260,6 +260,7 @@
       "src/cli/workflow.c",
       "src/cli/workflow_template.c",
       "src/cli/workpack.c",
+      "src/cli/workpack_receipt.c",
       "src/common/allocator.c",
       "src/common/arena.c",
       "src/common/diagnostic.c",
@@ -463,6 +464,10 @@
       "src/workpack/model.c",
       "src/workpack/proposal.c",
       "src/workpack/read.c",
+      "src/workpack/receipt_internal.h",
+      "src/workpack/receipt_model.c",
+      "src/workpack/receipt_store.c",
+      "src/workpack/receipt_verify.c",
       "src/workspace/git.c",
       "src/workspace/internal.h",
       "src/workspace/lifecycle.c",
@@ -716,6 +721,7 @@
       "src/cli/workflow.c",
       "src/cli/workflow_template.c",
       "src/cli/workpack.c",
+      "src/cli/workpack_receipt.c",
       "src/common/allocator.c",
       "src/common/arena.c",
       "src/common/diagnostic.c",
@@ -919,6 +925,10 @@
       "src/workpack/model.c",
       "src/workpack/proposal.c",
       "src/workpack/read.c",
+      "src/workpack/receipt_internal.h",
+      "src/workpack/receipt_model.c",
+      "src/workpack/receipt_store.c",
+      "src/workpack/receipt_verify.c",
       "src/workspace/git.c",
       "src/workspace/internal.h",
       "src/workspace/lifecycle.c",
@@ -3502,6 +3512,27 @@
         "source_path": "include/golem/workpack.h",
         "entrypoint": "golem_workpack_assess",
         "selector": null
+      },
+      {
+        "id": "obs-32bcd38c734b5797292b1e72015c84396e531648554e83777c1b9646e328325e",
+        "kind": "C_PUBLIC_DECLARATION",
+        "source_path": "include/golem/workpack.h",
+        "entrypoint": "golem_workpack_receipt_manifest",
+        "selector": null
+      },
+      {
+        "id": "obs-8f619dcde7210a228854c8079543e42d92441a64691e68f1cd1cf1ea7263bcb3",
+        "kind": "C_PUBLIC_DECLARATION",
+        "source_path": "include/golem/workpack.h",
+        "entrypoint": "golem_workpack_receipt_export",
+        "selector": null
+      },
+      {
+        "id": "obs-f7d2d3374651158f608065b094363cdb3ef893cabd965a257af072e045dabc9f",
+        "kind": "C_PUBLIC_DECLARATION",
+        "source_path": "include/golem/workpack.h",
+        "entrypoint": "golem_workpack_receipt_verify",
+        "selector": null
       }
     ],
     "blockers": [],
@@ -3528,7 +3559,7 @@
     },
     {
       "path": "src/cli/main.c",
-      "sha256": "0ca448ed6413b9db7315ec76ec3c5cd9e7476e5c34c845f43c1ed7545a8e5520"
+      "sha256": "ec2b0a18957cac52ad30177ce271457b4d4ccc59a1285d2d74dd25eb28012666"
     },
     {
       "path": "tools/integration_service.py",
@@ -3724,7 +3755,7 @@
     },
     {
       "path": "CMakeLists.txt",
-      "sha256": "c7cc886bb9db5aeecaa4ec78b90b352c52860809bac9517a7c013405676456ae"
+      "sha256": "81e1c176cfd768b4481c7757433d9a377068cbb7f02cea7d157265f5d8353131"
     },
     {
       "path": "CMakePresets.json",
@@ -5736,7 +5767,7 @@
     },
     {
       "path": "include/golem/workpack.h",
-      "sha256": "ce6bc378a2db3e76f49b9162f25fac28f4ebbbce7a055be1a3e910381d01113c"
+      "sha256": "3e47ce2ac4692faf3e22c432c2ca0973ebf32d8318344c71d140fbb818ca88e7"
     },
     {
       "path": "src/workpack/model.c",
@@ -5776,15 +5807,15 @@
     },
     {
       "path": "docs/workpacks/delivery.md",
-      "sha256": "a45e9c16e5e163209c470498f2b766dd40a7e6a8107225d699379e9179a10e38"
+      "sha256": "ed071b7bad005bc3ab3083f91d01e987f34de969f0cced7d72854885d6602eca"
     },
     {
       "path": "src/workpack/binding.c",
-      "sha256": "c7737f3ec5d5a6c545b8d02e007f6448bf05c794416b4aa1cacf6cfb32374e07"
+      "sha256": "78d31fe206578971291f4dc896526906293a29bb7115442a916a77a7a7138641"
     },
     {
       "path": "src/workpack/binding_internal.h",
-      "sha256": "b69042d041d0e6fbc4c75fda7c592524a022dc14cff1c26cf22bb6edd766ac52"
+      "sha256": "9d3f9bffc09cd654cd5dbea4a5b881eeaf3cd80e56cd262ebc0093c613dbd428"
     },
     {
       "path": "tests/c/test_workpack_binding_fault.c",
@@ -5804,7 +5835,7 @@
     },
     {
       "path": "src/workpack/proposal.c",
-      "sha256": "47da661054745204b6ad882101eb49966a054023a2d2e5dc0c3df6b2f8dec470"
+      "sha256": "99fb146ffde55ae4221ca418ad47afda92686192f3d026f78875847d0057a847"
     },
     {
       "path": "tests/c/test_workpack_proposal.c",
@@ -5817,6 +5848,42 @@
     {
       "path": "docs/workpacks/proposals.md",
       "sha256": "7d3f31ff2c68bc6996a08de717b2150f6be7cdde10818fca4d0e02a2d2c671c0"
+    },
+    {
+      "path": "src/workpack/receipt_store.c",
+      "sha256": "2b5056410cba54fc2e7f9c554fe30d7cbb73f4de7995d28aa33662eaed467139"
+    },
+    {
+      "path": "src/workpack/receipt_internal.h",
+      "sha256": "61449cb55bc191a46fc583ddf60b0365c8d7e5d15b16404514126c257f2dcc95"
+    },
+    {
+      "path": "src/workpack/receipt_model.c",
+      "sha256": "74b5bc1b5342d5e5c64a68ce17373ea4e788a26f712bbff6744bc2eec9902b2c"
+    },
+    {
+      "path": "src/workpack/receipt_verify.c",
+      "sha256": "476b28fa38b3dd5ccc1da3e5568b956488d152036f9da36c8d9fff60fc008ff5"
+    },
+    {
+      "path": "src/cli/workpack_receipt.c",
+      "sha256": "3327c9738e1949033b73bc0f9be080859e8db28a04bf3adbe55ececd2b89ae1b"
+    },
+    {
+      "path": "tests/c/test_workpack_receipt_fault.c",
+      "sha256": "6d355e0efaa07b065cfdd8f021c008b686b04a1d0759346729e497ce1d1e6b14"
+    },
+    {
+      "path": "tests/c/workpack_receipt.py",
+      "sha256": "9ac23353a9bcd235d91a1f2842c74df1df8c71853dd1579b72fbe4eb28b1a0ce"
+    },
+    {
+      "path": "docs/workpacks/m6-export-design.md",
+      "sha256": "471746e46f2aeb358b89f0e36ec5242b035e29c19e97e6402072528b2733e28b"
+    },
+    {
+      "path": "docs/workpacks/receipts.md",
+      "sha256": "31717ceedc5caa83ea7b66a8ba1fa523908d01521b5066d9b7579c91a670f80d"
     }
   ],
   "native_definitions": [
@@ -9355,6 +9422,36 @@
       "declaration_path": "include/golem/workpack.h",
       "definition_path": "src/workpack/proposal.c",
       "wrapper": null,
+      "blockers": [],
+      "behavior_verified": false,
+      "callback_receiver_verified": false,
+      "execution_verified": false
+    },
+    {
+      "name": "golem_workpack_receipt_manifest",
+      "declaration_path": "include/golem/workpack.h",
+      "definition_path": "src/workpack/receipt_store.c",
+      "wrapper": null,
+      "blockers": [],
+      "behavior_verified": false,
+      "callback_receiver_verified": false,
+      "execution_verified": false
+    },
+    {
+      "name": "golem_workpack_receipt_verify",
+      "declaration_path": "include/golem/workpack.h",
+      "definition_path": "src/workpack/receipt_store.c",
+      "wrapper": null,
+      "blockers": [],
+      "behavior_verified": false,
+      "callback_receiver_verified": false,
+      "execution_verified": false
+    },
+    {
+      "name": "golem_workpack_receipt_export",
+      "declaration_path": "include/golem/workpack.h",
+      "definition_path": "src/workpack/receipt_store.c",
+      "wrapper": "GOLEM_RECORDED_API",
       "blockers": [],
       "behavior_verified": false,
       "callback_receiver_verified": false,
@@ -13513,10 +13610,14 @@
         [
           "src/cli/workflow_template.c",
           "golem_cli_workflow_template"
+        ],
+        [
+          "src/cli/workpack_receipt.c",
+          "golem_cli_workpack_receipt"
         ]
       ],
-      "checked_nodes": 292,
-      "checked_calls": 4676,
+      "checked_nodes": 293,
+      "checked_calls": 4704,
       "public_endpoints": [
         "golem_adapter_descriptor_current",
         "golem_adapter_descriptor_decode",
@@ -13707,6 +13808,9 @@
         "golem_workpack_inspect",
         "golem_workpack_proposal_validate",
         "golem_workpack_read",
+        "golem_workpack_receipt_export",
+        "golem_workpack_receipt_manifest",
+        "golem_workpack_receipt_verify",
         "golem_workpack_resolve",
         "golem_workpack_validate",
         "golem_workspace_call"
@@ -14210,14 +14314,19 @@
         "src/workpack/internal.h",
         "src/workpack/binding.c",
         "src/workpack/binding_internal.h",
-        "src/workpack/proposal.c"
+        "src/workpack/proposal.c",
+        "src/workpack/receipt_store.c",
+        "src/workpack/receipt_internal.h",
+        "src/workpack/receipt_model.c",
+        "src/workpack/receipt_verify.c",
+        "src/cli/workpack_receipt.c"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1137,
+      "reviewed_capabilities": 1142,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -27019,6 +27128,21 @@
           ]
         ],
         [
+          "golem_cli_workpack_receipt",
+          [
+            "int"
+          ],
+          [
+            "int",
+            "argc",
+            ",",
+            "char",
+            "*",
+            "*",
+            "argv"
+          ]
+        ],
+        [
           "golem_cli_work",
           [
             "int"
@@ -27389,6 +27513,10 @@
         [
           "argv [ 1 ]",
           "proof"
+        ],
+        [
+          "argv [ 1 ]",
+          "receipt"
         ],
         [
           "argv [ 1 ]",
@@ -54126,6 +54254,100 @@
             "*",
             "diagnostic"
           ]
+        ],
+        [
+          "golem_workpack_receipt_manifest",
+          [
+            "golem_status"
+          ],
+          [
+            "golem_document_store",
+            "*",
+            "store",
+            ",",
+            "golem_bytes",
+            "request",
+            ",",
+            "const",
+            "char",
+            "*",
+            "parent",
+            ",",
+            "const",
+            "char",
+            "*",
+            "format",
+            ",",
+            "golem_execution_reply",
+            "*",
+            "out",
+            ",",
+            "golem_diagnostic",
+            "*",
+            "diagnostic"
+          ]
+        ],
+        [
+          "golem_workpack_receipt_export",
+          [
+            "golem_status"
+          ],
+          [
+            "golem_document_store",
+            "*",
+            "store",
+            ",",
+            "golem_bytes",
+            "request",
+            ",",
+            "const",
+            "char",
+            "*",
+            "parent",
+            ",",
+            "const",
+            "char",
+            "*",
+            "format",
+            ",",
+            "const",
+            "golem_digest",
+            "*",
+            "approved_export",
+            ",",
+            "golem_digest",
+            "*",
+            "manifest",
+            ",",
+            "golem_diagnostic",
+            "*",
+            "diagnostic"
+          ]
+        ],
+        [
+          "golem_workpack_receipt_verify",
+          [
+            "golem_status"
+          ],
+          [
+            "const",
+            "char",
+            "*",
+            "directory",
+            ",",
+            "const",
+            "golem_digest",
+            "*",
+            "expected_manifest",
+            ",",
+            "golem_execution_reply",
+            "*",
+            "out",
+            ",",
+            "golem_diagnostic",
+            "*",
+            "diagnostic"
+          ]
         ]
       ],
       "literal_branches": [],
@@ -54345,10 +54567,10 @@
         "live",
         "mapping",
         "one",
-        "parse",
         "receipt",
         "scope",
-        "wp_apply"
+        "wp_apply",
+        "wp_binding_request"
       ],
       "declarations": [],
       "literal_branches": [
@@ -54442,6 +54664,32 @@
             "*",
             "frame"
           ]
+        ],
+        [
+          "wp_binding_request",
+          [
+            "golem_status"
+          ],
+          [
+            "golem_bytes",
+            "input",
+            ",",
+            "struct",
+            "json_object",
+            "*",
+            "*",
+            "request",
+            ",",
+            "struct",
+            "json_object",
+            "*",
+            "*",
+            "pack",
+            ",",
+            "golem_digest",
+            "*",
+            "manifest"
+          ]
         ]
       ],
       "literal_branches": [],
@@ -54460,7 +54708,8 @@
         "narrative",
         "narratives",
         "number",
-        "proposal"
+        "proposal",
+        "wp_document_closure"
       ],
       "declarations": [],
       "literal_branches": [
@@ -54482,6 +54731,330 @@
         ]
       ],
       "operations": []
+    },
+    {
+      "path": "src/workpack/receipt_store.c",
+      "role": "NATIVE_INTERNAL",
+      "rationale": "M6 bounded document evidence, exact private export gate and unsigned verification. Existing native parser/lock/CAS/publication; no Work mutation or MCP grant.",
+      "symbols": [
+        "ancestor",
+        "closed",
+        "golem_workpack_receipt_export",
+        "golem_workpack_receipt_manifest",
+        "golem_workpack_receipt_verify",
+        "inventory",
+        "parent_open",
+        "pending",
+        "plan",
+        "read_file"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "dw_text ( b - > manifest , \"format\" )",
+          "markdown"
+        ],
+        [
+          "dw_text ( b . manifest , \"format\" )",
+          "markdown"
+        ],
+        [
+          "dw_text ( marker , \"schema\" )",
+          "golem.workpack.receipt-commit.v0"
+        ],
+        [
+          "n",
+          "."
+        ],
+        [
+          "n",
+          ".."
+        ],
+        [
+          "n",
+          ".pending-"
+        ],
+        [
+          "n",
+          "COMMIT.json"
+        ],
+        [
+          "n",
+          "manifest.json"
+        ],
+        [
+          "n",
+          "summary.md"
+        ]
+      ],
+      "operations": []
+    },
+    {
+      "path": "src/workpack/receipt_internal.h",
+      "role": "NATIVE_INTERNAL",
+      "rationale": "M6 bounded document evidence, exact private export gate and unsigned verification. Existing native parser/lock/CAS/publication; no Work mutation or MCP grant.",
+      "symbols": [],
+      "declarations": [
+        [
+          "wp_document_closure",
+          [
+            "golem_status"
+          ],
+          [
+            "golem_document_store",
+            "*",
+            "store",
+            ",",
+            "struct",
+            "json_object",
+            "*",
+            "binding",
+            ",",
+            "bool",
+            "*",
+            "selected"
+          ]
+        ],
+        [
+          "wp_receipt_build",
+          [
+            "golem_status"
+          ],
+          [
+            "golem_document_store",
+            "*",
+            "store",
+            ",",
+            "golem_bytes",
+            "request",
+            ",",
+            "const",
+            "char",
+            "*",
+            "format",
+            ",",
+            "wp_bundle",
+            "*",
+            "out"
+          ]
+        ],
+        [
+          "wp_receipt_validate",
+          [
+            "golem_status"
+          ],
+          [
+            "wp_bundle",
+            "*",
+            "bundle",
+            ",",
+            "const",
+            "golem_digest",
+            "*",
+            "expected"
+          ]
+        ],
+        [
+          "wp_receipt_markdown",
+          [
+            "golem_status"
+          ],
+          [
+            "struct",
+            "json_object",
+            "*",
+            "manifest",
+            ",",
+            "golem_execution_reply",
+            "*",
+            "out"
+          ]
+        ],
+        [
+          "wp_receipt_free",
+          [
+            "void"
+          ],
+          [
+            "wp_bundle",
+            "*",
+            "bundle"
+          ]
+        ]
+      ],
+      "literal_branches": [],
+      "operations": []
+    },
+    {
+      "path": "src/workpack/receipt_model.c",
+      "role": "NATIVE_INTERNAL",
+      "rationale": "M6 bounded document evidence, exact private export gate and unsigned verification. Existing native parser/lock/CAS/publication; no Work mutation or MCP grant.",
+      "symbols": [
+        "add",
+        "add_bytes",
+        "add_cas",
+        "add_json",
+        "wp_receipt_build",
+        "wp_receipt_free",
+        "wp_receipt_markdown"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "dw_text ( r , \"schema\" )",
+          "golem.workpack.receipt-request.v0"
+        ],
+        [
+          "dw_text ( view , \"current_mapping\" )",
+          "APPLICABLE"
+        ],
+        [
+          "format",
+          "json"
+        ],
+        [
+          "format",
+          "markdown"
+        ],
+        [
+          "o - > type",
+          "document-body"
+        ]
+      ],
+      "operations": []
+    },
+    {
+      "path": "src/workpack/receipt_verify.c",
+      "role": "NATIVE_INTERNAL",
+      "rationale": "M6 bounded document evidence, exact private export gate and unsigned verification. Existing native parser/lock/CAS/publication; no Work mutation or MCP grant.",
+      "symbols": [
+        "digest_equal",
+        "history_digest",
+        "integer",
+        "known_type",
+        "object",
+        "wp_receipt_validate"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "dw_text ( be , \"type\" )",
+          "workpack-binding"
+        ],
+        [
+          "dw_text ( br , \"mapping\" )",
+          "native-documents-v1"
+        ],
+        [
+          "dw_text ( ev , \"type\" )",
+          "document"
+        ],
+        [
+          "dw_text ( m , \"current_applicability\" )",
+          "NOT_EVALUATED_OFFLINE"
+        ],
+        [
+          "dw_text ( m , \"format\" )",
+          "json"
+        ],
+        [
+          "dw_text ( m , \"format\" )",
+          "markdown"
+        ],
+        [
+          "dw_text ( m , \"limitations\" )",
+          "UNSIGNED_ORIGIN;NON_DOCUMENT_DEPENDENCIES_NOT_EXPORTED;CURRENT_COMPLETION_NOT_EVALUATED"
+        ],
+        [
+          "dw_text ( m , \"schema\" )",
+          "golem.workpack.receipt-manifest.v0"
+        ],
+        [
+          "dw_text ( m , \"scope\" )",
+          "NATIVE_DOCUMENT_CLOSURE_ONLY"
+        ],
+        [
+          "dw_text ( md , \"kind\" )",
+          "stage-selection"
+        ],
+        [
+          "dw_text ( ob , \"schema\" )",
+          "golem.workpack.history-observation.v0"
+        ],
+        [
+          "dw_text ( ob , \"semantics\" )",
+          "HISTORICAL_REFERENCES_ONLY_NOT_EXPORTED"
+        ],
+        [
+          "dw_text ( scope , \"domain\" )",
+          "golem.workpack.binding-approval.v1"
+        ],
+        [
+          "o - > type",
+          "document-body"
+        ]
+      ],
+      "operations": []
+    },
+    {
+      "path": "src/cli/workpack_receipt.c",
+      "role": "NATIVE_INTERNAL",
+      "rationale": "M6 bounded document evidence, exact private export gate and unsigned verification. Existing native parser/lock/CAS/publication; no Work mutation or MCP grant.",
+      "symbols": [
+        "golem_cli_workpack_receipt"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "argv [ 2 ]",
+          "export"
+        ],
+        [
+          "argv [ 2 ]",
+          "manifest"
+        ],
+        [
+          "argv [ 2 ]",
+          "verify"
+        ],
+        [
+          "argv [ 4 ]",
+          "--expect-manifest"
+        ],
+        [
+          "argv [ i ]",
+          "--approve-export"
+        ],
+        [
+          "argv [ i ]",
+          "--format"
+        ],
+        [
+          "format",
+          "json"
+        ],
+        [
+          "format",
+          "markdown"
+        ]
+      ],
+      "operations": [
+        [
+          "CLI_ROUTE",
+          "golem_cli_workpack_receipt",
+          "manifest"
+        ],
+        [
+          "CLI_ROUTE",
+          "golem_cli_workpack_receipt",
+          "export"
+        ],
+        [
+          "CLI_ROUTE",
+          "golem_cli_workpack_receipt",
+          "verify"
+        ]
+      ]
     }
   ],
   "repository_boundary_reviews": [
@@ -55596,6 +56169,12 @@
       "contract_sha256": null
     },
     {
+      "path": "docs/workpacks/m6-export-design.md",
+      "role": "DOCUMENTATION",
+      "rationale": "M6 owner-selected bounded private publication contract or isolated fixture; no production/client authority.",
+      "contract_sha256": null
+    },
+    {
       "path": "docs/workpacks/overview.md",
       "role": "DOCUMENTATION",
       "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
@@ -55605,6 +56184,12 @@
       "path": "docs/workpacks/proposals.md",
       "role": "DOCUMENTATION",
       "rationale": "M5 inert proposal contract/sample or disposable native validation fixture; no production authority or client access.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/workpacks/receipts.md",
+      "role": "DOCUMENTATION",
+      "rationale": "M6 owner-selected bounded private publication contract or isolated fixture; no production/client authority.",
       "contract_sha256": null
     },
     {
@@ -57168,6 +57753,12 @@
       "contract_sha256": null
     },
     {
+      "path": "tests/c/test_workpack_receipt_fault.c",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "M6 owner-selected bounded private publication contract or isolated fixture; no production/client authority.",
+      "contract_sha256": null
+    },
+    {
       "path": "tests/c/traversal_diagnostics.c",
       "role": "VERIFICATION_FIXTURE",
       "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
@@ -57267,6 +57858,12 @@
       "path": "tests/c/workpack_proposal.py",
       "role": "VERIFICATION_FIXTURE",
       "rationale": "M5 inert proposal contract/sample or disposable native validation fixture; no production authority or client access.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/c/workpack_receipt.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "M6 owner-selected bounded private publication contract or isolated fixture; no production/client authority.",
       "contract_sha256": null
     },
     {
@@ -58395,7 +58992,7 @@
     },
     {
       "path": "tools/capability_boundary_registry.py",
-      "sha256": "bc514416795c383cfb27e5f9deca5c08fb785a06c80c24c53ab3f52e531ec463",
+      "sha256": "5f5dd2d5ae8595381423af5e257044c80f286ec7be6ddb41e48544f90a21c8f5",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58413,7 +59010,7 @@
     },
     {
       "path": "tools/capability_c_edge_registry.py",
-      "sha256": "6ba9bdfb41c0525ce4435ef6e52fe8e73098c4e1b7d1b27c5f731e4612e63c90",
+      "sha256": "aaf4a6a616e29a09d584a15a5294dd1915c4c02b18ad4b99f87f30d635d37106",
       "shape_sha256": "75403bdc4871af0049d714109d2f3a3e4b068028effc7899d34b01e187e2c708",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58431,7 +59028,7 @@
     },
     {
       "path": "tools/capability_c_graph_registry.py",
-      "sha256": "1316c18435b16022970dd3f7d74154f0b1e163255d1b441523e767dba3635051",
+      "sha256": "99004c52afd78d651f8df73afb0f460b3179ea63d7e4bb928fbba413084d6d3e",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58503,7 +59100,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "3c992c79bd34f72ae46375e117f1dd4a7660f2a21e2ddbe78079057c8624df21",
+      "sha256": "665d1a8950956c9fc194115c993ecbd769428dd70c780d63a9d86bf2cc533ea5",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58611,7 +59208,7 @@
     },
     {
       "path": "tools/capability_m3_registry.py",
-      "sha256": "730841c99f9fdce0def43fb80d9f158804bad2254db01fb67e7abcdc2a0666ff",
+      "sha256": "f4fd6a639d47b7cac9f4a63d825a918fbce4c92a1598f0ba48b86508172a3ee3",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58629,7 +59226,7 @@
     },
     {
       "path": "tools/capability_m4_registry.py",
-      "sha256": "aa51f4097d15960a42922ccc0687f0eb39697dee131b7a7935955f20438874f4",
+      "sha256": "384ec6850b837c45e0e96e8c3f89d67c081b3bf801d218e2f379628982b5f76c",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58647,7 +59244,7 @@
     },
     {
       "path": "tools/capability_m5_registry.py",
-      "sha256": "ed63a599edefbd7795b89c2436a608fa1acb4e22cf13159ef299c145c5e93ed4",
+      "sha256": "e38fbed5891ba4da77013c7de5e7897bc2c39dd5d58322f4b610051515ac205f",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58689,7 +59286,7 @@
     },
     {
       "path": "tools/capability_native_registry.py",
-      "sha256": "db5695e6eb9ff05e306c0eacdbd14af86f3a7841d025402667f577f7f5823d49",
+      "sha256": "ada769be7ccee9a2bcaf3b1f0adaf36f96ce00461c0ecf17e7ef291c6e9f0008",
       "shape_sha256": "2ebad2aa2187d7758c167ade4dcb2c5893dde0b1822fe46c7c4af1dde8aeba1a",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58713,7 +59310,7 @@
     },
     {
       "path": "tools/capability_public_registry.py",
-      "sha256": "0eebd2914fe6f9a77a8611ec8c5444993214e36f43d37c1c7e7c0c4fc5bf3a7c",
+      "sha256": "f23c965625bcfdf2ca998f07bbc712477e701c482faa026d857c3b0a855a9e95",
       "shape_sha256": "2b1069695f989b1565564643346a52726d5e7cabf9ef541464f1d969743bb507",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58761,7 +59358,7 @@
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "94ad2502534e488f0b7f1b985ddc95181ec7d781744360ee74650ad694655cbb",
+      "sha256": "bc282f98eb93689806a0a74bc346ce7711ec7714afc8c3dab5f9613f59d5f796",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58773,7 +59370,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "1c30a25b8d6078e3b038080332595206b7db799e8be1672de3510557e6c81bd2",
+      "sha256": "8878401ee41806cf1eb19b387c6820d21984f51b4e3277eb2e6864f0d609dc63",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58809,7 +59406,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "352c0c6c61765eed2a839d0128e3f560b5dd2cbad10e549f1d481be1af21b569",
+      "sha256": "e4f082ef428bcd1538c6961c37644dd8bdc4118db86ef394b9a0e96fcc83d042",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58977,7 +59574,7 @@
     },
     {
       "path": "tools/test_capability_native.py",
-      "sha256": "a67775ef9dc2b8eedca01be56c5bbcf890a69eb5656057cf5b18bc2f3bedfaad",
+      "sha256": "31821f1fbcaa7f394f1c3fd87147790db2b30ccd65ed75c95f838263d968dcbf",
       "shape_sha256": "9917794974b6c667a8c3db2d53d9c6af8bc8f10b5955a32286794a197a290b08",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -58995,7 +59592,7 @@
     },
     {
       "path": "tools/test_capability_public.py",
-      "sha256": "218e200560872f6bba5a34b17b02fa700bb0bd15909ab94955ea3ac411a5b761",
+      "sha256": "142724876db7ea9c34247d958863c879c6516907020b584ddccabdff80565b5f",
       "shape_sha256": "e9c1f01ad9fcb23c0ac0cdd3d37daccb04d0cdba7d98c21be6a40829afb487c7",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -59025,7 +59622,7 @@
     },
     {
       "path": "tools/test_capability_repository.py",
-      "sha256": "8199bb3781ad5a85ef025b3a9ef0e77c60b3728b0449fe6cfe225827b41e705f",
+      "sha256": "53459666144d1f9ace689789f0d646589b4189e725eae2bf436921e815b2ee0b",
       "shape_sha256": "561329d0bdb00fee53002923a28f3b72de134462733b5406029485047d3e0f7a",
       "role": "M0_FIXTURE_REGRESSION"
     },
