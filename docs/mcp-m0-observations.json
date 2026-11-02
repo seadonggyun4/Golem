@@ -2311,7 +2311,7 @@
     },
     {
       "path": "src/workpack/receipt_store.c",
-      "sha256": "2b5056410cba54fc2e7f9c554fe30d7cbb73f4de7995d28aa33662eaed467139"
+      "sha256": "2b6bf3cceb4060f4cd9cb2753e542a8010662b09a1a67acd656992ed4e7078ae"
     },
     {
       "path": "src/workpack/receipt_internal.h",

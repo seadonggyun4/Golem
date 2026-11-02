@@ -14,6 +14,7 @@ allowed = {
     "execution/proof_store.c": 1,  # Explicit proof export.
     "reentry/store.c": 1,  # Explicit report projection.
     "completion/report.c": 1,  # Required completion projection.
+    "workpack/receipt_store.c": 4,  # Approved external receipt payloads, projection, manifest and commit marker.
     "workspace/lifecycle.c": 2,  # Ownership markers, not event streams.
 }
 observed = {}
@@ -27,7 +28,7 @@ events = {
     "document/registry.c": 2, "policy/approval_store.c": 1,
     "research/store.c": 1, "completion/store.c": 1, "workflow/role_store.c": 1,
     "reentry/store.c": 1, "runtime/profile_link.c": 1, "runtime/profile_store.c": 1,
-    "daemon/admission_work.c": 1,
+    "daemon/admission_work.c": 1, "workpack/binding.c": 1,
 }
 for name, count in events.items():
     source = (root / name).read_text()

@@ -14,7 +14,8 @@
 #include <unistd.h>
 
 static golem_status closed(int fd,golem_status st)
-{ if(fd>=0&&close(fd)&&st==GOLEM_OK)st=GOLEM_ERR_IO;return st; }
+{ if(fd>=0&&close(fd)&&st==GOLEM_OK)st=GOLEM_ERR_IO;
+    return st; }
 static golem_status ancestor(int fd,const struct stat *target,bool *found)
 {
     int at=dup(fd);if(at<0)return GOLEM_ERR_IO;golem_status st=GOLEM_ERR_OVERFLOW;*found=false;
@@ -100,7 +101,8 @@ static golem_status inventory(int fd,wp_bundle *b)
         for(size_t i=0;!known&&i<b->count;++i){char hex[65];size_t len;st=golem_digest_format(&b->objects[i].digest,hex,sizeof(hex),&len);known=st==GOLEM_OK&&!strcmp(n,hex);}
         if(!known){st=GOLEM_ERR_PARSE;break;}
     }
-    if(closedir(directory)&&st==GOLEM_OK)st=GOLEM_ERR_IO;return st;
+    if(closedir(directory)&&st==GOLEM_OK)st=GOLEM_ERR_IO;
+    return st;
 }
 static golem_status read_file(int fd,const char *name,size_t limit,uint8_t **out,size_t *size)
 {
@@ -123,7 +125,8 @@ golem_status golem_workpack_receipt_verify(const char *path,const golem_digest *
     for(size_t i=0;st==GOLEM_OK&&i<json_object_array_length(a);++i){struct json_object *row=json_object_array_get_idx(a,i);wp_object *obj=&b.objects[b.count++];char hex[65];size_t len;
         if(!dw_digest(row,"digest",&obj->digest)||!json_object_is_type(dw_get(row,"size"),json_type_int)||dw_uint(row,"size")>GOLEM_DOCUMENT_MAX_BODY||dw_uint(row,"size")>16777216u-b.total){st=GOLEM_ERR_PARSE;break;}
         obj->type=dw_text(row,"type");st=golem_digest_format(&obj->digest,hex,sizeof(hex),&len);
-        if(st==GOLEM_OK)st=read_file(fd,hex,(size_t)dw_uint(row,"size"),&obj->data,&obj->size);b.total+=obj->size;
+        if(st==GOLEM_OK)st=read_file(fd,hex,(size_t)dw_uint(row,"size"),&obj->data,&obj->size);
+        b.total+=obj->size;
     }
     if(st==GOLEM_OK&&!strcmp(dw_text(b.manifest,"format"),"markdown"))st=read_file(fd,"summary.md",768,&b.markdown.data,&b.markdown.size);
     if(st==GOLEM_OK)st=inventory(fd,&b);
