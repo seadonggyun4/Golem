@@ -65,8 +65,66 @@ is canonical, schema text is a discovery aid and cannot grant authority.
 
 ## Current execution record
 
-Gate A documentation committed before implementation. M1 implementation/test outcomes
-will be appended after running them. M2–M7 remain NOT_IMPLEMENTED, not merely NOT_RUN.
+Gate A documentation committed before implementation as `c156576`. M1 now implements
+`golem_workpack_validate` in `src/workpack/model.c`, with the additive installed header,
+closed JSON Schema discovery aid, reference sample, seven invalid fixture files,
+source-contract metadata, CTest cases and a public-API mutation/fuzz target. No existing
+parser, reducer or persisted format changed. M2–M7 remain NOT_IMPLEMENTED, not merely NOT_RUN.
 No unresolved policy choice blocks the pure validator. Before M4, decide binding event
 schema/version compatibility, trusted role mapping, precise ceiling vocabulary and
 independent identity evidence. No default owner policy is invented here.
+
+
+### M1 verification, 2026-11-02 (macOS local)
+
+| Check | Observed result |
+| --- | --- |
+| Debug native build, warnings as errors | PASS |
+| Work Pack CTest subset, standalone header and seed/mutation prerequisite | 11/11 PASS |
+| ASan + UBSan same subset | 11/11 PASS; initially header target was not built, then built and checked |
+| Installed public C consumer | 1/1 PASS; exported header/library only |
+| Full native/CLI/fixture regression | 414/415 PASS initially; existing diagnostic_tools exceeded its 120s limit. Unchanged binary/test/limit passed standalone in 60.32s; no unresolved failing test. Timeout cause is not established |
+| M0 capability unit regression | 371 tests: 369 initially passed, two found missing new effect-review records; records added, both affected modules (25 tests) PASS |
+| Full static inventory | PASS: 448 source surfaces, 345 public declarations, zero blockers. This is inventory, not execution/MCP delivery certification |
+| Relative document links and source-contract sample digest | PASS |
+| diff whitespace | PASS |
+
+The first full attempt under the workspace sandbox encountered sysctl/Unix-socket
+permission denials and was stopped. The host run uses temporary fixtures, not real
+client Works. Initial failure/timeout logs are retained in the local validation record;
+no test condition, authority check or timeout was weakened. Work Pack validation has
+no MCP/CLI route, even though the existing delivery backlog remains reconciled. Its
+new native-only capabilities are explicitly recorded separately in the M0 ledger.
+
+Commands (from repository root):
+```sh
+cmake -S . -B build/workpack-m1 -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGOLEM_WARNINGS_AS_ERRORS=ON
+cmake --build build/workpack-m1 -j6
+ctest --test-dir build/workpack-m1 -j6 --output-on-failure
+ctest --test-dir build/workpack-m1 -R '^diagnostic_tools$' --output-on-failure
+cmake -S . -B build/workpack-m1-asan -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGOLEM_ENABLE_SANITIZERS=ON
+cmake --build build/workpack-m1-asan --target golem_test_workpack golem_header_workpack golem_mutate_workpack golem_fuzz_seeds
+ctest --test-dir build/workpack-m1-asan -R 'workpack|fuzz_seeds' --output-on-failure
+cmake --install build/workpack-m1 --prefix "$PWD/build/workpack-m1-install"
+cmake -S tests/consumer -B build/workpack-m1-consumer -G Ninja -DCMAKE_PREFIX_PATH="$PWD/build/workpack-m1-install"
+cmake --build build/workpack-m1-consumer
+ctest --test-dir build/workpack-m1-consumer --output-on-failure
+python3 -m unittest discover -s tools -p 'test_capability_*.py'
+(cd tools && python3 -m unittest test_capability_boundaries test_capability_inventory)
+python3 tools/capability_check.py --root "$PWD" --repository-sources
+```
+
+NOT_RUN: real Codex/Claude Work calls, Truthound dataset calls, remote services,
+coverage-guided libFuzzer campaign, Linux/Windows builds, Conan distribution and client
+installation updates. The implemented fuzz target was exercised by deterministic
+mutation smoke and sanitizers; this is not exhaustive fuzz coverage. M2–M7 are
+NOT_IMPLEMENTED, including CLI inspect/compatibility, catalog, binding, semantic role
+processing and portable receipt validation. They are not merely untested features.
+
+Client preservation was checked against the existing installation review: Codex 0.2.7
+(9 package files), Claude prepare 0.1.15 (85 package files), shared runtime (85 files),
+launcher and D2 hashes match. One Golem installation per client remains enabled.
+The installed runtime stays at its reviewed f2563f5 source identity. No new Work Pack
+code is installed in either client; no TopSolar policy/approval/Work/evidence operation
+was issued. Local logs and preservation details live outside the source checkout in
+`../workpack-m1-validation-20261102/` and are not public package contents.

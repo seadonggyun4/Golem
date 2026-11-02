@@ -133,3 +133,9 @@
 | [workflow-templates.md](workflow-templates.md) | Workflow selection templates |
 | [workflow.md](workflow.md) | Conditional Markdown Workflow |
 | [workspaces.md](workspaces.md) | Isolated candidate workspaces |
+
+## Work Pack (experimental)
+
+[Architecture and audit](workpacks/overview.md) · [M1 schema/API](workpacks/schema.md) · [Roles and evidence](workpacks/roles-and-evidence.md) · [CLI/catalog plan](workpacks/delivery.md) · [Reference pack](workpacks/reference.md) · [Development and validation](workpacks/development-plan.md).
+
+M1 is native byte validation only; CLI, MCP delivery and Work binding are not implemented.

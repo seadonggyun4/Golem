@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "47fe9fb98a179e8adaf0c423404cb31ef5cafd1dc6f3fb144d718abde6cad50e",
-  "selected_source_count": 556,
-  "selected_observation_count": 2307,
-  "selected_capability_count": 1212,
+  "inventory_sha256": "6986ecdb1e059b853e848c7bfc4fe0f7991e678137ab0efa96b69efd15675603",
+  "selected_source_count": 560,
+  "selected_observation_count": 2310,
+  "selected_capability_count": 1214,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -168,6 +168,7 @@
       "include/golem/worker.h",
       "include/golem/workflow.h",
       "include/golem/workflow_template.h",
+      "include/golem/workpack.h",
       "include/golem/workspace.h",
       "plugins/golem/.codex-plugin/plugin.json",
       "plugins/golem/.mcp.json",
@@ -455,6 +456,7 @@
       "src/workflow/template_builtin.c",
       "src/workflow/template_guard.c",
       "src/workflow/template_internal.h",
+      "src/workpack/model.c",
       "src/workspace/git.c",
       "src/workspace/internal.h",
       "src/workspace/lifecycle.c",
@@ -616,6 +618,7 @@
       "include/golem/worker.h",
       "include/golem/workflow.h",
       "include/golem/workflow_template.h",
+      "include/golem/workpack.h",
       "include/golem/workspace.h",
       "plugins/golem/.codex-plugin/plugin.json",
       "plugins/golem/.mcp.json",
@@ -903,6 +906,7 @@
       "src/workflow/template_builtin.c",
       "src/workflow/template_guard.c",
       "src/workflow/template_internal.h",
+      "src/workpack/model.c",
       "src/workspace/git.c",
       "src/workspace/internal.h",
       "src/workspace/lifecycle.c",
@@ -3416,6 +3420,13 @@
         "source_path": "include/golem/workspace.h",
         "entrypoint": "golem_workspace_call",
         "selector": null
+      },
+      {
+        "id": "obs-cbafa1c8d2238952b0a0c561995b9898cba83026f8fa7dd3d3cce1962e06dac6",
+        "kind": "C_PUBLIC_DECLARATION",
+        "source_path": "include/golem/workpack.h",
+        "entrypoint": "golem_workpack_validate",
+        "selector": null
       }
     ],
     "blockers": [],
@@ -3638,7 +3649,7 @@
     },
     {
       "path": "CMakeLists.txt",
-      "sha256": "4092ec49ff22a5ed37f3eb54414f65fcc73b061931e050874fb6b7d1aa1e97fe"
+      "sha256": "c187173aea044354621a1fc57ecdd56a307f3e844042d6226034f17b492d35be"
     },
     {
       "path": "CMakePresets.json",
@@ -3874,7 +3885,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "2c3325e640beeadc40e339d27ea293cbcc0201b34cf3e33b6ef076ea141a1563"
+      "sha256": "fa827586c2fbc285c0d6b9a89b78660cd633a066015f6623e74455802ec161ae"
     },
     {
       "path": "src/adapter_protocol/adapter.c",
@@ -5647,6 +5658,22 @@
     {
       "path": "tools/test_integration_owner_desktop.py",
       "sha256": "738695c1f725eb2ca732aa8fd257fedba152f0f9d0d879a7db0ad576970a64b1"
+    },
+    {
+      "path": "include/golem/workpack.h",
+      "sha256": "0b0441e3c5bb2df8ceee571935bdf7b4ebeceb173ba2ddc09c700757b591ce95"
+    },
+    {
+      "path": "src/workpack/model.c",
+      "sha256": "8b713036de4e67c2f8f8313b8cf5753248b210f08478e34fc4d362a1b871865f"
+    },
+    {
+      "path": "tests/c/test_workpack.c",
+      "sha256": "a89445cbbb4caa4252ca717c212783382a1e08ccf3ba4f5d30012da1e702769c"
+    },
+    {
+      "path": "docs/workpacks/schema.md",
+      "sha256": "65110c2c51bd0b6b1dee9f9c9111406df6dc334fc9ba11a53cf43a133e85f356"
     }
   ],
   "native_definitions": [
@@ -13922,14 +13949,16 @@
         "plugins/golem/skills/golem-work/agents/openai.yaml",
         "plugins/golem/skills/golem-work/references/profiles.md",
         "tools/integration_owner_review.py",
-        "tools/integration_owner_desktop.py"
+        "tools/integration_owner_desktop.py",
+        "include/golem/workpack.h",
+        "src/workpack/model.c"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1122,
+      "reviewed_capabilities": 1124,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -53575,6 +53604,52 @@
         ]
       ],
       "operations": []
+    },
+    {
+      "path": "include/golem/workpack.h",
+      "role": "PUBLIC_CONTRACT",
+      "rationale": "M1 pure Work Pack byte validation and exact digest only; no file, Work, authority or MCP operation. Public C API is additive; CLI and MCP delivery remain unimplemented.",
+      "symbols": [],
+      "declarations": [
+        [
+          "golem_workpack_validate",
+          [
+            "golem_status"
+          ],
+          [
+            "golem_bytes",
+            "input",
+            ",",
+            "golem_digest",
+            "*",
+            "digest",
+            ",",
+            "golem_diagnostic",
+            "*",
+            "diagnostic"
+          ]
+        ]
+      ],
+      "literal_branches": [],
+      "operations": []
+    },
+    {
+      "path": "src/workpack/model.c",
+      "role": "NATIVE_INTERNAL",
+      "rationale": "M1 pure Work Pack byte validation and exact digest only; no file, Work, authority or MCP operation. Public C API is additive; CLI and MCP delivery remain unimplemented.",
+      "symbols": [
+        "equals",
+        "golem_workpack_validate",
+        "identifier",
+        "list",
+        "report",
+        "string",
+        "text",
+        "version"
+      ],
+      "declarations": [],
+      "literal_branches": [],
+      "operations": []
     }
   ],
   "repository_boundary_reviews": [
@@ -53853,6 +53928,12 @@
       "role": "BUILD_PACKAGE_LICENSE",
       "rationale": "Build/export/package/dependency/license/CI metadata; production FFI sources and plugin contracts reviewed separately. Does not create a daily Work operation.",
       "contract_sha256": "f468e6743e8a7e882956655e0ce8e86be59f010284daaa2351a5128a57c850d4"
+    },
+    {
+      "path": "docs/README.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Documentation navigation index only; no executable tool registration or runtime authority.",
+      "contract_sha256": null
     },
     {
       "path": "docs/adapter-descriptor.md",
@@ -54275,6 +54356,132 @@
       "contract_sha256": null
     },
     {
+      "path": "docs/mcp-capability-inventory.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-full-coverage-plan.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-connection-observations.json",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-handler-observations.json",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-integrated-connections.json",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-ledger.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-mutation-graph.json",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-observations.json",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-observations.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-public-observations.json",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-reconciliation.json",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-repository-scope.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m0-review-2026-10-26.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m1-read-coverage.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m2-preparation.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m3-task-actions.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m4-quality-evidence.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m5-parallel-candidates.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m6-distribution.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m7-m8-validation.json",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/mcp-m7-m8-validation.ko.md",
+      "role": "M0_REVIEW_METADATA",
+      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
       "path": "docs/metrics.ko.md",
       "role": "DOCUMENTATION",
       "rationale": "Design/user/development documentation; referenced contracts are separate pinned evidence. No executable tool registration from prose.",
@@ -54533,6 +54740,42 @@
       "contract_sha256": null
     },
     {
+      "path": "docs/workpacks/delivery.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/workpacks/development-plan.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/workpacks/overview.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/workpacks/reference.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/workpacks/roles-and-evidence.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/workpacks/schema.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
       "path": "docs/workspaces.md",
       "role": "DOCUMENTATION",
       "rationale": "Design/user/development documentation; referenced contracts are separate pinned evidence. No executable tool registration from prose.",
@@ -54614,6 +54857,12 @@
       "path": "fuzz/smoke.c",
       "role": "SAMPLE_OR_FUZZ_FIXTURE",
       "rationale": "Example request/schema/corpus or fuzz harness, not an installed operation. Native schema operations are inventoried from production definitions.",
+      "contract_sha256": null
+    },
+    {
+      "path": "fuzz/workpack.c",
+      "role": "SAMPLE_OR_FUZZ_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
       "contract_sha256": null
     },
     {
@@ -54908,6 +55157,24 @@
       "path": "samples/work-capsules/basic.json",
       "role": "SAMPLE_OR_FUZZ_FIXTURE",
       "rationale": "Example request/schema/corpus or fuzz harness, not an installed operation. Native schema operations are inventoried from production definitions.",
+      "contract_sha256": null
+    },
+    {
+      "path": "samples/workpacks/dataset-release-gate.json",
+      "role": "SAMPLE_OR_FUZZ_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "samples/workpacks/source-contract.json",
+      "role": "SAMPLE_OR_FUZZ_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "samples/workpacks/workpack-v0.schema.json",
+      "role": "SAMPLE_OR_FUZZ_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
       "contract_sha256": null
     },
     {
@@ -55226,6 +55493,48 @@
       "path": "tests/c/fixtures/session/wrong-kind-v1.json",
       "role": "VERIFICATION_FIXTURE",
       "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/c/fixtures/workpack/duplicate-key.json",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/c/fixtures/workpack/duplicate-role.json",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/c/fixtures/workpack/invalid-id.json",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/c/fixtures/workpack/latest.json",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/c/fixtures/workpack/self-approved.json",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/c/fixtures/workpack/unknown-field.json",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/c/fixtures/workpack/unknown-schema.json",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
       "contract_sha256": null
     },
     {
@@ -55979,6 +56288,12 @@
       "contract_sha256": null
     },
     {
+      "path": "tests/c/test_workpack.c",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
       "path": "tests/c/traversal_diagnostics.c",
       "role": "VERIFICATION_FIXTURE",
       "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
@@ -56090,456 +56405,6 @@
       "path": "tests/test_package_entrypoints.py",
       "role": "VERIFICATION_FIXTURE",
       "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/requirements-gateway.txt",
-      "role": "BUILD_PACKAGE_LICENSE",
-      "rationale": "Build/export/package/dependency/license/CI metadata; production FFI sources and plugin contracts reviewed separately. Does not create a daily Work operation.",
-      "contract_sha256": "64364ac1ac2e8e4ee8d1c0e5aa8dba3a345dab5c32b89e00924aa5f924232e58"
-    },
-    {
-      "path": "tools/requirements-mcp.txt",
-      "role": "BUILD_PACKAGE_LICENSE",
-      "rationale": "Build/export/package/dependency/license/CI metadata; production FFI sources and plugin contracts reviewed separately. Does not create a daily Work operation.",
-      "contract_sha256": "f27afd0ac7fa0dc575bc6c9286c10fa22f70ac5bc88e1eca7492b21ec3b26504"
-    },
-    {
-      "path": "tools/test_agent_entrypoint.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_agent_io.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_agent_lifecycle.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_benchmark_intent_journal.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_benchmark_runtime.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_classify_failures.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_codex_hosted.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_context_resume.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_doctor_environment.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_evidence_contract.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_evidence_export.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_execution_record.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_github_context.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_github_policy.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_guard_mutations.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_install_conan_cli.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_instruction_bundle.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_capacity.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_codex_marketplace.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_codex_plugin.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_d2.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_gateway.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_hooks.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_icon.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_install.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_mcpb.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_mutations.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_integration_update.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_intent_authority.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_judgment_record.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_licensing.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_procedure.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_provider_costs.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_provider_usage.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_remote_status.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_retire_legacy_cli.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_revision_status.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_status_collector.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_syscall_record.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_usage_integrations.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_usage_pipeline.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_usage_pipeline_host.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_verify_agent.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_verify_alpha.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_verify_environment.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_verify_isolation.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_verify_orchestration.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_verify_preflight.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_verify_resource.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_verify_runtime.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "tools/test_verify_runtime_legacy.py",
-      "role": "VERIFICATION_FIXTURE",
-      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-capability-inventory.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-full-coverage-plan.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-connection-observations.json",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-handler-observations.json",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-integrated-connections.json",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-ledger.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-mutation-graph.json",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-observations.json",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-observations.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-public-observations.json",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-reconciliation.json",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-repository-scope.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m0-review-2026-10-26.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m1-read-coverage.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m2-preparation.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m3-task-actions.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m4-quality-evidence.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m5-parallel-candidates.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m6-distribution.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m7-m8-validation.json",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
-      "contract_sha256": null
-    },
-    {
-      "path": "docs/mcp-m7-m8-validation.ko.md",
-      "role": "M0_REVIEW_METADATA",
-      "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
       "contract_sha256": null
     },
     {
@@ -56996,6 +56861,48 @@
       "path": "tools/capability_wrapper.py",
       "role": "M0_STATIC_ANALYSIS",
       "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/requirements-gateway.txt",
+      "role": "BUILD_PACKAGE_LICENSE",
+      "rationale": "Build/export/package/dependency/license/CI metadata; production FFI sources and plugin contracts reviewed separately. Does not create a daily Work operation.",
+      "contract_sha256": "64364ac1ac2e8e4ee8d1c0e5aa8dba3a345dab5c32b89e00924aa5f924232e58"
+    },
+    {
+      "path": "tools/requirements-mcp.txt",
+      "role": "BUILD_PACKAGE_LICENSE",
+      "rationale": "Build/export/package/dependency/license/CI metadata; production FFI sources and plugin contracts reviewed separately. Does not create a daily Work operation.",
+      "contract_sha256": "f27afd0ac7fa0dc575bc6c9286c10fa22f70ac5bc88e1eca7492b21ec3b26504"
+    },
+    {
+      "path": "tools/test_agent_entrypoint.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_agent_io.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_agent_lifecycle.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_benchmark_intent_journal.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_benchmark_runtime.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
       "contract_sha256": null
     },
     {
@@ -57239,6 +57146,132 @@
       "contract_sha256": null
     },
     {
+      "path": "tools/test_classify_failures.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_codex_hosted.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_context_resume.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_doctor_environment.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_evidence_contract.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_evidence_export.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_execution_record.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_github_context.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_github_policy.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_guard_mutations.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_install_conan_cli.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_instruction_bundle.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration_capacity.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration_codex_marketplace.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration_codex_plugin.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration_d2.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration_gateway.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration_hooks.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration_icon.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration_install.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
       "path": "tools/test_integration_m1.py",
       "role": "M0_FIXTURE_REGRESSION",
       "rationale": "Explicit existing M0 analysis/fixture/review metadata, now tracked; pinned development inspection remains mandatory. No standalone runtime Work operation or grant.",
@@ -57281,9 +57314,159 @@
       "contract_sha256": null
     },
     {
-      "path": "docs/README.md",
-      "role": "DOCUMENTATION",
-      "rationale": "Documentation navigation index only; no executable tool registration or runtime authority.",
+      "path": "tools/test_integration_mcpb.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration_mutations.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_integration_update.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_intent_authority.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_judgment_record.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_licensing.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_procedure.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_provider_costs.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_provider_usage.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_remote_status.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_retire_legacy_cli.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_revision_status.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_status_collector.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_syscall_record.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_usage_integrations.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_usage_pipeline.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_usage_pipeline_host.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_verify_agent.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_verify_alpha.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_verify_environment.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_verify_isolation.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_verify_orchestration.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_verify_preflight.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_verify_resource.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_verify_runtime.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tools/test_verify_runtime_legacy.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
       "contract_sha256": null
     }
   ],
@@ -57314,7 +57497,7 @@
     },
     {
       "path": "tools/capability_boundary_registry.py",
-      "sha256": "ac6122ac9e9be32f97e770385478dd9121f42c153f2c9621325a22b663719454",
+      "sha256": "0c78746d17fc55f5956e42cf4d39d567b4b2587dff211226080e85e4e96d7301",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57422,7 +57605,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "f3ae219735d48b873fc69b4a7b165198b17ae4f5960b5d5aa75fc7ef6d244a14",
+      "sha256": "8fc9f60387a6da0a86edb6736aac170beb626d2975d2877044a65777321d2f89",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57632,7 +57815,7 @@
     },
     {
       "path": "tools/capability_public_registry.py",
-      "sha256": "b5ecbe976e9dbbdcb159e71a5f8f650ebfaf2a0f6fd698b68eb67adf94db1f96",
+      "sha256": "1d83eaacb1a864d80e9ae0b1957c8ee4c0954414fb2eeba503cc7330e882759c",
       "shape_sha256": "2b1069695f989b1565564643346a52726d5e7cabf9ef541464f1d969743bb507",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57680,7 +57863,7 @@
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "c2a193dba59cede813518fff23e7957352549976912c6b333addd9b973130ded",
+      "sha256": "3c17ae38c4a59e8cf03ad6a07ad9bb043b21268ef16d76292a9e6cb0a492bc8d",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57692,7 +57875,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "da4d5f0ff35d6fd22990dbeca8be176ef8c93ba51691a6a5d154f57f18515d8b",
+      "sha256": "07bc298452ca0cf0cf726e2b6f104dcf29c0eabedee8c0dec262260d541de263",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57728,7 +57911,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "f17dd823a94f8c9f670dc839691f3be5af14d6ae8ea3b1555e067503cc0bd1f8",
+      "sha256": "ce98b2ff184099dbe48d8819f5c3d1bc97cb55ba125a7a24ec11449c843f5cdd",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57914,7 +58097,7 @@
     },
     {
       "path": "tools/test_capability_public.py",
-      "sha256": "6b0fed0fb44375cffebbeb7cbd91a2bea3d7c52c2de9d1bdddea8cefcbacc2c2",
+      "sha256": "6ec242a68a9c4483ee78feaed3853bbbbd194ba4099719d5a00a6c7a7e7aa20c",
       "shape_sha256": "e9c1f01ad9fcb23c0ac0cdd3d37daccb04d0cdba7d98c21be6a40829afb487c7",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -57944,7 +58127,7 @@
     },
     {
       "path": "tools/test_capability_repository.py",
-      "sha256": "c1639436d4d8eb348a0dd9218bc94800789e833fe9274942ecf08e3695f75b92",
+      "sha256": "a5eac1a4b1e5c9204f210498c174b558f318c0f8bf73d8c24ecdf991adafe4aa",
       "shape_sha256": "561329d0bdb00fee53002923a28f3b72de134462733b5406029485047d3e0f7a",
       "role": "M0_FIXTURE_REGRESSION"
     },

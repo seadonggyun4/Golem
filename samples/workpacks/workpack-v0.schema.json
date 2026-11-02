@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:golem:workpack:v0",
+  "title": "Experimental Work Pack v0",
+  "description": "Native validator is canonical: UTF-8 byte bounds, duplicate JSON keys, text controls, version component maxima and range order add constraints beyond this schema. No authorization.",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "version",
+    "status",
+    "core_min",
+    "core_max",
+    "publisher",
+    "provenance",
+    "intent",
+    "negative_intent",
+    "roles",
+    "capabilities",
+    "prohibited_effects",
+    "inputs",
+    "evidence",
+    "completion",
+    "freshness",
+    "recovery"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "golem.workpack.v0"
+    },
+    "status": {
+      "const": "experimental"
+    },
+    "completion": {
+      "const": "READY_FOR_RELEASE"
+    },
+    "freshness": {
+      "const": "EXACT_SOURCE_AND_CURRENT_EVIDENCE"
+    },
+    "recovery": {
+      "const": "STOP_ON_UNKNOWN"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)*$"
+    },
+    "publisher": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)*$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,4})\\.(0|[1-9][0-9]{0,4})\\.(0|[1-9][0-9]{0,4})$",
+      "description": "Each component <=65535; no leading zero; native validator checks inclusive range order."
+    },
+    "core_min": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,4})\\.(0|[1-9][0-9]{0,4})\\.(0|[1-9][0-9]{0,4})$",
+      "description": "Each component <=65535; no leading zero; native validator checks inclusive range order."
+    },
+    "core_max": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,4})\\.(0|[1-9][0-9]{0,4})\\.(0|[1-9][0-9]{0,4})$",
+      "description": "Each component <=65535; no leading zero; native validator checks inclusive range order."
+    },
+    "provenance": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "intent": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      }
+    },
+    "negative_intent": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      }
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)*$"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)*$"
+      }
+    },
+    "prohibited_effects": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)*$"
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)*$"
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)*$"
+      }
+    }
+  }
+}

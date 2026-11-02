@@ -215,7 +215,7 @@
     },
     {
       "path": "CMakeLists.txt",
-      "sha256": "4092ec49ff22a5ed37f3eb54414f65fcc73b061931e050874fb6b7d1aa1e97fe"
+      "sha256": "c187173aea044354621a1fc57ecdd56a307f3e844042d6226034f17b492d35be"
     },
     {
       "path": "CMakePresets.json",
@@ -451,7 +451,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "2c3325e640beeadc40e339d27ea293cbcc0201b34cf3e33b6ef076ea141a1563"
+      "sha256": "fa827586c2fbc285c0d6b9a89b78660cd633a066015f6623e74455802ec161ae"
     },
     {
       "path": "src/adapter_protocol/adapter.c",
@@ -2224,6 +2224,22 @@
     {
       "path": "tools/test_integration_owner_desktop.py",
       "sha256": "738695c1f725eb2ca732aa8fd257fedba152f0f9d0d879a7db0ad576970a64b1"
+    },
+    {
+      "path": "include/golem/workpack.h",
+      "sha256": "0b0441e3c5bb2df8ceee571935bdf7b4ebeceb173ba2ddc09c700757b591ce95"
+    },
+    {
+      "path": "src/workpack/model.c",
+      "sha256": "8b713036de4e67c2f8f8313b8cf5753248b210f08478e34fc4d362a1b871865f"
+    },
+    {
+      "path": "tests/c/test_workpack.c",
+      "sha256": "a89445cbbb4caa4252ca717c212783382a1e08ccf3ba4f5d30012da1e702769c"
+    },
+    {
+      "path": "docs/workpacks/schema.md",
+      "sha256": "65110c2c51bd0b6b1dee9f9c9111406df6dc334fc9ba11a53cf43a133e85f356"
     }
   ],
   "observations": [
@@ -18373,6 +18389,27 @@
       "id": "obs-7b1f3860adea2927eea36b1007e4c72b384ad46a4d6fb87732dea9e0d32fe6b9",
       "kind": "PYTHON_DECLARATION",
       "source_path": "tools/integration_owner_desktop.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-cbafa1c8d2238952b0a0c561995b9898cba83026f8fa7dd3d3cce1962e06dac6",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_validate",
+      "selector": null
+    },
+    {
+      "id": "obs-f7c0c419dbc44a625df4b8648c4f2ce3cac0ccd752cd834121fc793fe5ce12d5",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-8f4355a5bbbacf7cda5d57e3c6e8e5c8626b9b5dbbed6954a5ba9b0d058e416c",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/workpack/model.c",
       "entrypoint": "file-surface",
       "selector": null
     }
@@ -76421,6 +76458,87 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Headless MCP; optional owner-private Unix IPC catalog/inspect/unapplied candidate export and explicit singleton presentation. No automatic window, native execution, approval issuance, policy activation or same-user human authentication."
+    },
+    {
+      "id": "native.workpack.validate",
+      "observation_ids": [
+        "obs-cbafa1c8d2238952b0a0c561995b9898cba83026f8fa7dd3d3cce1962e06dac6"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "None: pure borrowed bytes and caller-owned output; no grants"
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "Supported native C library platforms"
+        ],
+        "limits": [
+          "65536 input bytes; depth16; closed golem.workpack.v0 schema"
+        ],
+        "notes": "HOST_INTERNAL inventory category denotes native library API only. CLI, MCP, language wrappers, bindings and runtime pack enforcement are NOT_IMPLEMENTED. Digest is integrity, not provenance or approval."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/test_workpack.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/schema.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Additive pure validator reuses strict native JSON parser and SHA-256; no dispatch, filesystem IO or state mutation. Separate from prior MCP parity scope."
+    },
+    {
+      "id": "native.workpack.file-surfaces",
+      "observation_ids": [
+        "obs-f7c0c419dbc44a625df4b8648c4f2ce3cac0ccd752cd834121fc793fe5ce12d5",
+        "obs-8f4355a5bbbacf7cda5d57e3c6e8e5c8626b9b5dbbed6954a5ba9b0d058e416c"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "None: pure borrowed bytes and caller-owned output; no grants"
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "Supported native C library platforms"
+        ],
+        "limits": [
+          "65536 input bytes; depth16; closed golem.workpack.v0 schema"
+        ],
+        "notes": "HOST_INTERNAL inventory category denotes native library API only. CLI, MCP, language wrappers, bindings and runtime pack enforcement are NOT_IMPLEMENTED. Digest is integrity, not provenance or approval."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/test_workpack.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/schema.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Additive pure validator reuses strict native JSON parser and SHA-256; no dispatch, filesystem IO or state mutation. Separate from prior MCP parity scope."
     }
   ]
 }

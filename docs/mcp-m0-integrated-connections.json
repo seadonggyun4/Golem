@@ -4829,14 +4829,16 @@
       "plugins/golem/skills/golem-work/agents/openai.yaml",
       "plugins/golem/skills/golem-work/references/profiles.md",
       "tools/integration_owner_review.py",
-      "tools/integration_owner_desktop.py"
+      "tools/integration_owner_desktop.py",
+      "include/golem/workpack.h",
+      "src/workpack/model.c"
     ],
     "blockers": [],
     "execution_verified": false
   },
   "reviewed_effects": {
     "blockers": [],
-    "reviewed_capabilities": 1122,
+    "reviewed_capabilities": 1124,
     "execution_verified": false
   },
   "boundary_contracts": {

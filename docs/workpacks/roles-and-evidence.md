@@ -77,3 +77,59 @@ prove trusted order. Tampering/truncation/missing object/unknown schema must fai
 integrity verification. Re-rendered Markdown may differ without altering authoritative
 bytes; Markdown must never be accepted instead of a receipt. Historical success does
 not establish current source/target applicability. M1 has no exporter or verifier.
+
+## Planned wire examples and failure rules
+
+These are design examples, not schemas accepted by M1. All digest/identity placeholders
+must be replaced by exact native references before M4–M6 can accept them. New identity
+formats and persisted events require the later design gate; a string cannot authenticate
+a principal.
+
+```json
+{
+  "schema": "golem.workpack.verifier-proposal.v0",
+  "proposal_id": "review-01",
+  "work": {"identity": "<native Work identity>", "generation": 1},
+  "pack_digest": "<exact manifest SHA-256>",
+  "artifacts": [{"digest": "<source SHA-256>", "size": 123}],
+  "verifier": {"principal_ref": "<owner-reviewed role mapping>", "model_declared": "external", "provider_declared": "external"},
+  "contract_digest": "<review contract SHA-256>",
+  "findings": [{"id": "finding-01", "severity": "BLOCKING", "summary": "PII finding needs owner review", "evidence_refs": ["<evidence SHA-256>"]}],
+  "confidence": "UNCERTAIN",
+  "limitations": ["Sampled PII results are not exhaustive"],
+  "recommendation": "NEEDS_OWNER_REVIEW",
+  "unresolved_questions": ["Is the detected data permitted for this release?"]
+}
+```
+
+Proposed enums: severity `INFO|WARNING|BLOCKING`, confidence `UNCERTAIN|LIMITED|SUPPORTED`,
+recommendation `NEEDS_OWNER_REVIEW|REJECT_PROPOSAL|NO_BLOCKING_FINDING_OBSERVED`.
+None maps to QA PASS. At most 32 limitations/questions and 32 evidence refs per finding;
+all refs must resolve inside the inspected snapshot's allowed evidence set. Duplicate
+finding IDs, unresolved/foreign refs and generation changes fail validation. Proposals
+from failed or unavailable verifiers are retained as failed observations, not fabricated
+successful empty findings. No raw chain-of-thought field is permitted.
+
+```json
+{
+  "schema": "golem.workpack.receipt-manifest.v0",
+  "work": {"identity": "<native Work identity>", "generation": 1},
+  "pack": {"id": "io.styxis.golem.dataset-release-gate", "version": "0.1.0", "digest": "<exact SHA-256>"},
+  "source_snapshot": "<source SHA-256>",
+  "role_submissions": [],
+  "tool_inventory": [],
+  "evidence_inventory": [{"digest": "<object SHA-256>", "size": 123, "media_type": "application/json"}],
+  "owner_decisions": [],
+  "native_completion_receipt": null,
+  "unresolved_blockers": ["NATIVE_COMPLETION_NOT_OBSERVED"],
+  "declared_timestamps": [],
+  "missing_objects": [],
+  "signature": null,
+  "current_applicability": "NOT_EVALUATED"
+}
+```
+
+This example deliberately represents incomplete evidence. Empty decisions and null
+completion never become success. JSON export is byte-bounded and preserves these
+unknowns; Markdown/HTML render them without changing authority. M6 must define exact
+receipt/media/schema allowlists and cross-object identity checks before implementation.

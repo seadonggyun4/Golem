@@ -46,3 +46,8 @@ Agent dataset proposal → exact source/pack binding (planned)
 Tool success ≠ Evidence accepted ≠ semantic review passed ≠ owner approved
 ≠ release authorized ≠ Work completed. Mock data is never advertised as an actual
 Truthound integration run. Portable receipt remains planned under M6.
+
+The serialized M1 sample uses hyphenated role/evidence identifiers (for example
+`data-validator`); conceptual underscore names above are prose, not accepted IDs.
+Its all-zero provenance digest is an explicitly synthetic declaration, not an
+authenticated release source. Production packaging must supply reviewed provenance.

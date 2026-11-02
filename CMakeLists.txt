@@ -71,6 +71,7 @@ endif()
 pkg_check_modules(MD4C REQUIRED IMPORTED_TARGET md4c>=0.4.8)
 
 add_library(golem STATIC
+    src/workpack/model.c
     src/intent/schema.c
     src/intent/object.c
     src/intent/quota.c

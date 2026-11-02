@@ -1,0 +1,38 @@
+{
+  "schema": "golem.workpack.source-contract.v0",
+  "core_version": "0.1.0",
+  "workpack_schema": "golem.workpack.v0",
+  "public_c_api": [
+    "golem_workpack_validate"
+  ],
+  "public_cli": [],
+  "mcp_tools": [],
+  "binding_support": [],
+  "status": "experimental",
+  "runtime": "Golem native C library; json-c strict UTF-8; OpenSSL 3",
+  "source_provenance": "release assembler must attach exact source commit and artifact digest; no mutable latest",
+  "security_boundary": "validation only; no grant, binding, execution or completion",
+  "reference_packs": [
+    {
+      "path": "samples/workpacks/dataset-release-gate.json",
+      "sha256": "45a80524e290dccb23c681da8aabdd35fa4f5b8bdd15e217da181827dcd50d0c",
+      "id": "io.styxis.golem.dataset-release-gate",
+      "version": "0.1.0"
+    }
+  ],
+  "distribution_owner": "styxis-plugin",
+  "schema_path": "samples/workpacks/workpack-v0.schema.json",
+  "core_compatibility": {
+    "min": "0.1.0",
+    "max": "0.1.0",
+    "runtime_evaluation": "NOT_IMPLEMENTED"
+  },
+  "tool_exposure_ceiling": [],
+  "public_capabilities": {
+    "native": [
+      "manifest.validate",
+      "exact-bytes.sha256"
+    ],
+    "mcp": []
+  }
+}

@@ -1218,6 +1218,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | mcp.management.route.candidate_stop | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | surface.tools.integration_owner_review.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.tools.integration_owner_desktop.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.workpack.validate | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.workpack.file-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3530,6 +3532,9 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | PYTHON_DECLARATION | tools/integration_owner_maintenance.py | ManagementService._delivery | candidate_stop |
 | PYTHON_DECLARATION | tools/integration_owner_review.py | file-surface | None |
 | PYTHON_DECLARATION | tools/integration_owner_desktop.py | file-surface | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_validate | None |
+| NATIVE_OPERATION | include/golem/workpack.h | file-surface | None |
+| NATIVE_OPERATION | src/workpack/model.c | file-surface | None |
 
 ## Blockers
 
@@ -3619,8 +3624,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 446; explicitly selected: 446. Other tracked paths still require explicit boundary review.
-Public declarations observed in selected headers: 344.
+Candidate source surfaces: 448; explicitly selected: 448. Other tracked paths still require explicit boundary review.
+Public declarations observed in selected headers: 345.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
 ## Required sources
@@ -3682,6 +3687,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | include/golem/worker.h | YES |
 | include/golem/workflow.h | YES |
 | include/golem/workflow_template.h | YES |
+| include/golem/workpack.h | YES |
 | include/golem/workspace.h | YES |
 | plugins/golem/.codex-plugin/plugin.json | YES |
 | plugins/golem/.mcp.json | YES |
@@ -3969,6 +3975,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | src/workflow/template_builtin.c | YES |
 | src/workflow/template_guard.c | YES |
 | src/workflow/template_internal.h | YES |
+| src/workpack/model.c | YES |
 | src/workspace/git.c | YES |
 | src/workspace/internal.h | YES |
 | src/workspace/lifecycle.c | YES |

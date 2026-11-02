@@ -1,5 +1,6 @@
 #include <string.h>
 #include "golem/core.h"
+#include "golem/workpack.h"
 #include "golem/document.h"
 #include "golem/discovery.h"
 #include "golem/workflow.h"
@@ -211,6 +212,9 @@ static golem_status optimized_start(golem_work_run *run,
 
 int main(void)
 {
+    golem_digest pack_digest = {{0}};
+    if (golem_workpack_validate((golem_bytes){(const uint8_t *)"{}", 2}, &pack_digest, NULL) != GOLEM_ERR_PARSE) return 91;
+
     golem_digest candidate_digest;
     if (golem_candidate_validate((golem_bytes){NULL, 0}, &candidate_digest, NULL) != GOLEM_ERR_PARSE ||
         golem_inventory_policy_validate((golem_bytes){NULL, 0}, NULL) != GOLEM_ERR_PARSE ||

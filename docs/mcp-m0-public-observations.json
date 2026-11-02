@@ -464,6 +464,18 @@
     {
       "path": "docs/mcp-m6-distribution.ko.md",
       "sha256": "0463dd24337abeb33db5fe3cc02d4819e79b8830f440233d647958a79fa61579"
+    },
+    {
+      "path": "include/golem/workpack.h",
+      "sha256": "0b0441e3c5bb2df8ceee571935bdf7b4ebeceb173ba2ddc09c700757b591ce95"
+    },
+    {
+      "path": "tests/c/test_workpack.c",
+      "sha256": "a89445cbbb4caa4252ca717c212783382a1e08ccf3ba4f5d30012da1e702769c"
+    },
+    {
+      "path": "docs/workpacks/schema.md",
+      "sha256": "65110c2c51bd0b6b1dee9f9c9111406df6dc334fc9ba11a53cf43a133e85f356"
     }
   ],
   "observations": [
@@ -3083,6 +3095,13 @@
       "kind": "C_PUBLIC_DECLARATION",
       "source_path": "include/golem/workspace.h",
       "entrypoint": "golem_workspace_host.pulse",
+      "selector": null
+    },
+    {
+      "id": "obs-cbafa1c8d2238952b0a0c561995b9898cba83026f8fa7dd3d3cce1962e06dac6",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_validate",
       "selector": null
     }
   ],
@@ -20532,6 +20551,46 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Public golem_workspace_host.pulse extension contract. The existing containing API owns its effect/approval envelope; no arbitrary indirect target is inferred."
+    },
+    {
+      "id": "native.workpack.validate",
+      "observation_ids": [
+        "obs-cbafa1c8d2238952b0a0c561995b9898cba83026f8fa7dd3d3cce1962e06dac6"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "None: pure borrowed bytes and caller-owned output; no grants"
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "Supported native C library platforms"
+        ],
+        "limits": [
+          "65536 input bytes; depth16; closed golem.workpack.v0 schema"
+        ],
+        "notes": "HOST_INTERNAL inventory category denotes native library API only. CLI, MCP, language wrappers, bindings and runtime pack enforcement are NOT_IMPLEMENTED. Digest is integrity, not provenance or approval."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/test_workpack.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/schema.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Additive pure validator reuses strict native JSON parser and SHA-256; no dispatch, filesystem IO or state mutation. Separate from prior MCP parity scope."
     }
   ]
 }

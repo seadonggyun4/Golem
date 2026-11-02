@@ -231,9 +231,19 @@ static void bundles(void)
     golem_execution_reply_free(&reply);
     REQUIRE(golem_document_store_close(s) == GOLEM_OK);
 }
+static void workpack(const char *source)
+{
+    char path[4096];
+    int n = snprintf(path, sizeof(path), "%s/samples/workpacks/dataset-release-gate.json", source);
+    REQUIRE(n > 0 && (size_t)n < sizeof(path));
+    FILE *f = fopen(path, "rb"); REQUIRE(f);
+    uint8_t bytes[65537]; size_t count = fread(bytes, 1, sizeof(bytes), f);
+    REQUIRE(!ferror(f) && feof(f) && fclose(f) == 0);
+    save("workpack", "reference.json", bytes, count);
+}
 int main(int argc, char **argv)
 {
     REQUIRE(argc == 3); root = argv[1]; directory(root);
-    envelopes(argv[2]); journals(argv[2]); parsers(); documents(argv[2]); bundles(); proof_seed();
+    workpack(argv[2]); envelopes(argv[2]); journals(argv[2]); parsers(); documents(argv[2]); bundles(); proof_seed();
     return 0;
 }

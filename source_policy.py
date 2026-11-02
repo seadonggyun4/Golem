@@ -108,6 +108,16 @@ samples/research/redaction-minimal.json
 samples/research/request.json
 samples/runtime-profile.json
 samples/work-capsules/basic.json
+tests/c/fixtures/workpack/duplicate-key.json
+tests/c/fixtures/workpack/duplicate-role.json
+tests/c/fixtures/workpack/invalid-id.json
+tests/c/fixtures/workpack/latest.json
+tests/c/fixtures/workpack/self-approved.json
+tests/c/fixtures/workpack/unknown-field.json
+tests/c/fixtures/workpack/unknown-schema.json
+samples/workpacks/dataset-release-gate.json
+samples/workpacks/source-contract.json
+samples/workpacks/workpack-v0.schema.json
 tests/c/fixtures/completion/v1-store.json
 tests/c/fixtures/session/wrong-kind-v1.json
 tests/c/fixtures/intent/source-v1.json

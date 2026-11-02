@@ -64,7 +64,7 @@ before returning. No such filesystem security claim is made for M1 callers.
 
 ## Public M1 API and report
 
-Planned additive `golem_workpack_validate(golem_bytes, golem_digest*, golem_diagnostic*)`:
+Implemented additive `golem_workpack_validate(golem_bytes, golem_digest*, golem_diagnostic*)`:
 borrowed bounded input, required digest output unchanged on any failure, optional
 caller-owned diagnostic containing only static error codes, no input text. No Work
 handle, lock, file access, network, scripts, dynamic imports, callbacks or grants.
@@ -73,9 +73,11 @@ INVALID_ARGUMENT (missing output), PARSE (JSON/shape/field/bound violation),
 UNSUPPORTED_VERSION (recognized schema key with other string), OUT_OF_MEMORY, CRYPTO.
 Successful result is structural validation only. Detailed static diagnostic tags:
 `PACK_JSON`, `PACK_SCHEMA`, `PACK_FIELDS`, `PACK_ID`, `PACK_VERSION`, `PACK_TEXT`,
-`PACK_LIST`, `PACK_DECLARATION`. No semantic authorization report is emitted in M1.
+`PACK_LIST`, `PACK_DECLARATION`, `PACK_OUTPUT`, `PACK_DIGEST`; success uses
+`PACK_VALIDATED_NO_AUTHORITY`. No semantic authorization report is emitted in M1.
 
-Future report JSON (NOT implemented):
-`{schema:"golem.workpack.validation.v1", structurally_valid:true,
-exact_digest:"…", authorized:false, bound:false, work_done:false, blockers:[]}`.
+Future report JSON shape (NOT implemented; digest placeholder is explanatory):
+```json
+{"schema":"golem.workpack.validation.v1","structurally_valid":true,"exact_digest":"<64 lowercase hex characters>","authorized":false,"bound":false,"work_done":false,"blockers":[]}
+```
 No unknown property becomes authorized because the structural validator succeeded.
