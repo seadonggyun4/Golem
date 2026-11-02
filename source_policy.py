@@ -28,6 +28,7 @@ TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.
     # Keep this explicit; discovering a local tool never makes it exportable.
     "integration_reads.py", "integration_read_resources.py", "integration_read_views.py",
     "integration_preparations.py", "integration_prepare_builders.py", "integration_task_actions.py",
+    "integration_workpack_actions.py", "integration_workpack_reads.py",
     "integration_quality_actions.py", "integration_quality_reads.py", "integration_helper_contract.py",
     "integration_parallel_actions.py", "integration_parallel_reads.py", "integration_parallel_hosts.py",
     "integration_parallel_preparations.py", "integration_feature_profiles.py", "integration_distribution.py",

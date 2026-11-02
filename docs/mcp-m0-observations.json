@@ -451,7 +451,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "fa827586c2fbc285c0d6b9a89b78660cd633a066015f6623e74455802ec161ae"
+      "sha256": "cd00564ef4b6cca9d7f0813fc7715e9186bd4915441560b4007b25dd606152d4"
     },
     {
       "path": "src/adapter_protocol/adapter.c",
@@ -2243,7 +2243,7 @@
     },
     {
       "path": "src/workpack/read.c",
-      "sha256": "e0e37483f6a6d5c693334ce91c6a9012cf39c027e3f2874098fcb1723912699d"
+      "sha256": "f0878f9d710c67bff2db5caebac13a5320469c3ffe1c45486a245a4a5ea84c56"
     },
     {
       "path": "src/cli/workpack.c",
@@ -2323,7 +2323,7 @@
     },
     {
       "path": "src/workpack/receipt_verify.c",
-      "sha256": "476b28fa38b3dd5ccc1da3e5568b956488d152036f9da36c8d9fff60fc008ff5"
+      "sha256": "9c9f2af651a4528161c42d1ca6aaf003c9c3c824ee99ab8d93ae6a65ab31de44"
     },
     {
       "path": "src/cli/workpack_receipt.c",
@@ -2347,7 +2347,7 @@
     },
     {
       "path": "src/workpack/reference.c",
-      "sha256": "fbfab70b6ed72be036ddbb1ef8f3bfc873ea6a8e83452387b8134353ec110ba9"
+      "sha256": "bce4e47a48193a7bf1b4e8f6e7f0b062653cf4fc9db4fb61380f82814dfa0ed2"
     },
     {
       "path": "tests/c/workpack_reference.py",

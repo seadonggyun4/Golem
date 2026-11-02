@@ -24,7 +24,8 @@ golem_status wp_receipt_validate(wp_bundle *b,const golem_digest *expected)
 {
     if(!expected||!b||!b->encoded.data||b->encoded.size>65536||!b->count||b->count>256)return GOLEM_ERR_INVALID_ARGUMENT;
     golem_digest actual;golem_status st=golem_digest_bytes((golem_bytes){b->encoded.data,b->encoded.size},&actual);
-    if(st!=GOLEM_OK)return st;if(!dw_equal(&actual,expected))return GOLEM_ERR_DIGEST_MISMATCH;
+    if(st!=GOLEM_OK)return st;
+    if(!dw_equal(&actual,expected))return GOLEM_ERR_DIGEST_MISMATCH;
     struct json_object *m=b->manifest,*parsed[256]={0};bool used[256]={false};
     const char *keys[]={"schema","renderer_version","format","work","pack","binding_receipt","refs","documents","inventory","scope","current_applicability","missing_objects","signature","projection","limitations"};
     const char *wk[]={"identity","generation","head"},*pk[]={"id","version","digest"},*rk[]={"work_spec","role_contract","observation"};
@@ -43,7 +44,8 @@ golem_status wp_receipt_validate(wp_bundle *b,const golem_digest *expected)
             !dw_digest(row,"digest",&actual)||!dw_equal(&actual,&o->digest)||strcmp(dw_text(row,"media_type"),!strcmp(o->type,"document-body")?"text/markdown":"application/json")||o->size>16777216u-total)goto done;
         for(size_t j=0;j<i;++j)if(dw_equal(&o->digest,&b->objects[j].digest))goto done;
         total+=o->size;st=golem_digest_bytes((golem_bytes){o->data,o->size},&actual);
-        if(st!=GOLEM_OK)goto done;if(!dw_equal(&actual,&o->digest)){st=GOLEM_ERR_DIGEST_MISMATCH;goto done;}
+        if(st!=GOLEM_OK)goto done;
+        if(!dw_equal(&actual,&o->digest)){st=GOLEM_ERR_DIGEST_MISMATCH;goto done;}
         if(strcmp(o->type,"document-body")){st=golem_json_parse((golem_bytes){o->data,o->size},GOLEM_DOCUMENT_MAX_JSON,&parsed[i]);if(st!=GOLEM_OK)goto done;}
         st=GOLEM_ERR_PARSE;
     }
@@ -106,5 +108,6 @@ golem_status wp_receipt_validate(wp_bundle *b,const golem_digest *expected)
     }
     st=GOLEM_OK;
 done:
-    for(size_t i=0;i<256;++i)json_object_put(parsed[i]);return st;
+    for(size_t i=0;i<256;++i)json_object_put(parsed[i]);
+    return st;
 }

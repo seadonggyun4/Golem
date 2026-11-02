@@ -56,7 +56,8 @@ static const char *quality(struct json_object *response)
         if(!strcmp(name,"null"))null=true;else if(!strcmp(name,"duplicate"))duplicate=true;else return "UNKNOWN";
         if(!dw_get(r,"success")||!dw_get(r,"issue_count"))return "UNKNOWN";
         bool success=json_object_get_boolean(dw_get(r,"success"));if(success!=(dw_uint(r,"issue_count")==0))return "UNKNOWN";
-        if(dw_uint(r,"issue_count")>UINT64_MAX-issues)return "UNKNOWN";issues+=dw_uint(r,"issue_count");all=all&&success;
+        if(dw_uint(r,"issue_count")>UINT64_MAX-issues)return "UNKNOWN";
+        issues+=dw_uint(r,"issue_count");all=all&&success;
     }
     if(!null||!duplicate||issues!=dw_uint(d,"issue_count")||all!=json_object_get_boolean(dw_get(d,"success")))return "UNKNOWN";
     return all?"DECLARED_CHECKS_SATISFIED":"DECLARED_CHECKS_FAILED";
@@ -103,5 +104,6 @@ golem_status golem_workpack_reference_observe(golem_bytes input,const golem_dige
     if(st==GOLEM_OK)st=golem_digest_bytes(input,&exact);
     if(st==GOLEM_OK){o=json_object_new_object();if(!ex_text(o,"schema","golem.workpack.reference-observation.v0")||!dw_add_digest(o,"capture_digest",&exact)||!dw_add_digest(o,"pack_digest",pack)||!dw_add_digest(o,"config_digest",config)||!dw_add(o,"source",json_object_get(dw_get(r,"source")))||!ex_text(o,"mode_declared",dw_text(r,"mode"))||!ex_text(o,"source_binding","UNAUTHENTICATED_CAPTURE_ATTESTATION")||!ex_text(o,"quality",quality(responses[0]))||!ex_text(o,"pii_scope","SAMPLED_ESTIMATES_NOT_ABSENCE_PROOF")||!dw_add(o,"complete_untruncated_delivery",json_object_new_boolean(complete))||!dw_add(o,"observations",json_object_get(observations))||!ex_text(o,"release_readiness","NOT_EVALUATED")||!dw_add(o,"authorized",json_object_new_boolean(false))||!dw_add(o,"identity_verified",json_object_new_boolean(false))||!dw_add(o,"completion_verified",json_object_new_boolean(false)))st=GOLEM_ERR_OUT_OF_MEMORY;}
     if(st==GOLEM_OK)st=ex_emit(o,out);
-    for(size_t i=0;i<3;++i)json_object_put(responses[i]);json_object_put(observations);json_object_put(r);json_object_put(p);json_object_put(c);json_object_put(o);return dw_report(diagnostic,st,"REFERENCE_OBSERVATION_NOT_AUTHORITY");
+    for(size_t i=0;i<3;++i)json_object_put(responses[i]);
+    json_object_put(observations);json_object_put(r);json_object_put(p);json_object_put(c);json_object_put(o);return dw_report(diagnostic,st,"REFERENCE_OBSERVATION_NOT_AUTHORITY");
 }
