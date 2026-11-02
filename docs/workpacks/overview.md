@@ -42,7 +42,7 @@ flowchart TD
 ```
 
 The diagram describes the target architecture, not an implemented automatic pipeline.
-M1 implements only bounded manifest validation. Binding, receipt aggregation and
+M2 implements bounded manifest validation, local snapshot reads, inspect and declared-version comparison. Binding, receipt aggregation and
 pack-specific completion are not implemented. In particular READY_FOR_RELEASE is
 an intent label, not native DONE or permission to publish.
 
@@ -77,7 +77,7 @@ These are reuse boundaries, not a claim that all existing paths received new E2E
 | [Candidates](../candidates.md), [workspaces](../workspaces.md), `src/candidate/`, `src/workspace/` | Candidate validation is not current-target merge authority; no scheduler/merge queue is added |
 | [Proof packs](../proof-packs.md), [export](../evidence-export.md), `include/golem/proof.h` | Existing integrity/projection contracts are reused, not renamed to Work Pack |
 | [D1](../integration-d1.md)–[D6](../integration-d6.md), `tools/integration_*.py` | D1 registration; D2 disclosure; D3 hooks; D4 exact actions; D5 update/recovery; D6 remote auth are distinct gates |
-| `src/cli/main.c`, `include/golem/*.h`, `bindings/{native,python,typescript}` | Native C is authority; CLI and bindings are façades, M1 has no binding/MCP route |
+| `src/cli/main.c`, `include/golem/*.h`, `bindings/{native,python,typescript}` | Native C is authority; CLI and bindings are façades, M2 has no binding/MCP route |
 | `samples/`, `tests/c/`, `tests/consumer/`, `fuzz/` | Follow existing strict JSON, CTest, installed consumer and seeded mutation conventions |
 | `plugins/golem/`, `tools/integration_distribution.py`, `tools/integration_mcpb.py` | Existing distribution remains functional; external packaging migration is planned only |
 

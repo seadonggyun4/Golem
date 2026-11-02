@@ -98,6 +98,7 @@ M0에서 각각 operation 단위로 분해·분류해야 하며 이 문서만으
 - `journal`
 - `lineage`
 - `output`
+- `pack`
 - `profile`
 - `proof`
 - `reentry`
@@ -110,6 +111,9 @@ M0에서 각각 operation 단위로 분해·분류해야 하며 이 문서만으
 - `workflow`
 
 - `inventory`
+
+`pack validate|inspect|compatibility`는 Work Pack M2의 로컬 읽기 CLI다.
+MCP·Work binding 제공 경로는 없으며 구조 검증·선언 버전 비교가 권한이나 완료를 뜻하지 않는다.
 
 ## Python 모듈 범위
 

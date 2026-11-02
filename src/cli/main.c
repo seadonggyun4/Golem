@@ -6,6 +6,7 @@
 #include "golem/allocator.h"
 #include <openssl/evp.h>
 #include <stdlib.h>
+int golem_cli_workpack(int argc, char **argv);
 int golem_cli_work(int argc, char **argv);
 int golem_cli_doctor(int argc, char **argv);
 #include <inttypes.h>
@@ -67,6 +68,7 @@ static int evidence_read(int argc, char **argv)
 static int usage(void)
 {
     fputs("Usage:\n"
+        "  golem pack validate|inspect FILE | compatibility FILE [--core-version X.Y.Z]\n"
         "  golem [--output-mode compact|full] [--output-store ABSOLUTE_DIR] COMMAND ...\n"
         "  golem output read SHA256\n"
         "  golem evidence read STORE SHA256 MAX_BYTES (1..1048576, verified base64)\n"
@@ -169,6 +171,7 @@ static int dispatch(int argc, char **argv)
         return 2;
     }
     cli_error_command(argc >= 2 ? argv[1] : NULL);
+    if (argc >= 2 && !strcmp(argv[1], "pack")) return golem_cli_workpack(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "output")) return golem_cli_output(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "doctor")) return golem_cli_doctor(argc, argv);
     if (argc >= 2 && !strcmp(argv[1], "approval")) return golem_cli_approval(argc, argv);

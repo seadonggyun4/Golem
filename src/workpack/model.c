@@ -114,3 +114,48 @@ done:
     json_object_put(o);
     return report(diagnostic, status, tag);
 }
+
+
+golem_status golem_workpack_inspect(golem_bytes input, char *buffer, size_t capacity,
+                                   size_t *required, golem_diagnostic *diagnostic)
+{
+    if (!required || (!buffer && capacity)) return report(diagnostic, GOLEM_ERR_INVALID_ARGUMENT, "PACK_OUTPUT");
+    golem_digest digest;
+    golem_status status = golem_workpack_validate(input, &digest, diagnostic);
+    if (status != GOLEM_OK) return status;
+    struct json_object *o = NULL;
+    status = golem_json_parse(input, GOLEM_WORKPACK_MAX_JSON, &o);
+    if (status != GOLEM_OK) return report(diagnostic, status, "PACK_JSON");
+    const char *encoded = json_object_to_json_string_ext(o, JSON_C_TO_STRING_PLAIN);
+    if (!encoded) status = GOLEM_ERR_OUT_OF_MEMORY;
+    else {
+        size_t needed = strlen(encoded) + 1;
+        *required = needed;
+        if (capacity < needed) status = GOLEM_ERR_BUFFER_TOO_SMALL;
+        else memcpy(buffer, encoded, needed);
+    }
+    json_object_put(o);
+    return report(diagnostic, status, "PACK_METADATA_NO_AUTHORITY");
+}
+
+golem_status golem_workpack_compatibility(golem_bytes input, golem_string_view core_version,
+                                         bool *compatible, golem_diagnostic *diagnostic)
+{
+    if (!compatible || !core_version.data || !core_version.size || core_version.size > 17 ||
+        memchr(core_version.data, 0, core_version.size))
+        return report(diagnostic, GOLEM_ERR_INVALID_ARGUMENT, "PACK_CORE_VERSION");
+    char core[18]; memcpy(core, core_version.data, core_version.size); core[core_version.size] = 0;
+    uint64_t value;
+    if (!version(core, &value)) return report(diagnostic, GOLEM_ERR_INVALID_ARGUMENT, "PACK_CORE_VERSION");
+    golem_digest digest;
+    golem_status status = golem_workpack_validate(input, &digest, diagnostic);
+    if (status != GOLEM_OK) return status;
+    struct json_object *o = NULL;
+    status = golem_json_parse(input, GOLEM_WORKPACK_MAX_JSON, &o);
+    if (status != GOLEM_OK) return report(diagnostic, status, "PACK_JSON");
+    uint64_t min, max;
+    if (!version(string(o, "core_min"), &min) || !version(string(o, "core_max"), &max)) status = GOLEM_ERR_PARSE;
+    else *compatible = value >= min && value <= max;
+    json_object_put(o);
+    return report(diagnostic, status, "PACK_DECLARED_COMPATIBILITY_ONLY");
+}

@@ -59,7 +59,7 @@ class RepositoryScope(unittest.TestCase):
         root=Path(__file__).resolve().parents[1]
         files=tuple(SourceFile(r.path,r.sha256,(root/r.path).read_bytes()) for r in PUBLIC_HEADERS)
         result=audit_repository(self.ledger(),files,Audit((),()),TRACKED_PATHS)
-        self.assertEqual(sum(c=='PUBLIC_API_NOT_LISTED' for c,_ in result.blockers),345)
+        self.assertEqual(sum(c=='PUBLIC_API_NOT_LISTED' for c,_ in result.blockers),348)
         self.assertFalse(any(c=='SOURCE_OPERATION_REVIEW_MISSING' for c,_ in result.blockers))
         self.assertFalse(result.inventory_complete)
 

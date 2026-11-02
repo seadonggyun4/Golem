@@ -3,9 +3,16 @@
   "core_version": "0.1.0",
   "workpack_schema": "golem.workpack.v0",
   "public_c_api": [
-    "golem_workpack_validate"
+    "golem_workpack_validate",
+    "golem_workpack_read",
+    "golem_workpack_inspect",
+    "golem_workpack_compatibility"
   ],
-  "public_cli": [],
+  "public_cli": [
+    "golem pack validate FILE",
+    "golem pack inspect FILE",
+    "golem pack compatibility FILE [--core-version X.Y.Z]"
+  ],
   "mcp_tools": [],
   "binding_support": [],
   "status": "experimental",
@@ -25,14 +32,23 @@
   "core_compatibility": {
     "min": "0.1.0",
     "max": "0.1.0",
-    "runtime_evaluation": "NOT_IMPLEMENTED"
+    "runtime_evaluation": "DECLARED_INTERVAL_ONLY"
   },
   "tool_exposure_ceiling": [],
   "public_capabilities": {
     "native": [
       "manifest.validate",
-      "exact-bytes.sha256"
+      "exact-bytes.sha256",
+      "snapshot.read",
+      "manifest.inspect",
+      "declared-version.compatibility"
     ],
     "mcp": []
+  },
+  "cli_report_schema": "golem.workpack.report.v0",
+  "cli_exit_codes": {
+    "success": 0,
+    "native_error_or_declared_incompatibility": 1,
+    "usage_error": 2
   }
 }

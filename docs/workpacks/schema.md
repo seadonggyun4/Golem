@@ -81,3 +81,28 @@ Future report JSON shape (NOT implemented; digest placeholder is explanatory):
 {"schema":"golem.workpack.validation.v1","structurally_valid":true,"exact_digest":"<64 lowercase hex characters>","authorized":false,"bound":false,"work_done":false,"blockers":[]}
 ```
 No unknown property becomes authorized because the structural validator succeeded.
+
+
+## M2 additive native API
+
+`golem_workpack_read(path, buffer, capacity, size, diagnostic)` returns <=65536 raw
+snapshot bytes without a terminator. Capacity must be at least 65536; all data/size
+outputs remain unchanged on error. It does not validate the manifest; CLI always
+validates the returned snapshot. Path policy is documented in delivery.md.
+
+`golem_workpack_inspect(input, buffer, capacity, required, diagnostic)` reuses M1
+validation and returns reserialized manifest JSON. `required` includes NUL and changes
+only on success or BUFFER_TOO_SMALL. NULL/zero buffer is a size query. Buffer remains
+unchanged on error. There is no serialization identity change: digest stays raw bytes.
+
+`golem_workpack_compatibility(input, core_version, compatible, diagnostic)` reuses M1
+validation and its exact version grammar. Core version is length-delimited, max17 bytes;
+embedded NUL, aliases, prerelease/build and overflow are rejected. Boolean output is
+unchanged on failure; false with GOLEM_OK is a valid incompatible comparison.
+
+Inputs are borrowed immutable memory, outputs are caller-owned and must not alias.
+No Python parser/reducer/compatibility implementation is added. Native errors also
+include NOT_FOUND, IO, OVERFLOW, JOURNAL_BUSY, STALE_RESULT and BUFFER_TOO_SMALL.
+Static diagnostics include PACK_PATH, PACK_FILE, PACK_FILE_CHANGED,
+PACK_SNAPSHOT_ONLY, PACK_METADATA_NO_AUTHORITY, PACK_CORE_VERSION and
+PACK_DECLARED_COMPATIBILITY_ONLY. No path/input content is copied into diagnostics.

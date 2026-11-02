@@ -4152,8 +4152,8 @@
         "golem_cli_workflow_template"
       ]
     ],
-    "checked_nodes": 291,
-    "checked_calls": 4597,
+    "checked_nodes": 292,
+    "checked_calls": 4622,
     "public_endpoints": [
       "golem_adapter_descriptor_current",
       "golem_adapter_descriptor_decode",
@@ -4336,6 +4336,10 @@
       "golem_workflow_template_instantiate",
       "golem_workflow_template_validate",
       "golem_workflow_trace",
+      "golem_workpack_compatibility",
+      "golem_workpack_inspect",
+      "golem_workpack_read",
+      "golem_workpack_validate",
       "golem_workspace_call"
     ],
     "callback_endpoints": [
@@ -4831,14 +4835,16 @@
       "tools/integration_owner_review.py",
       "tools/integration_owner_desktop.py",
       "include/golem/workpack.h",
-      "src/workpack/model.c"
+      "src/workpack/model.c",
+      "src/workpack/read.c",
+      "src/cli/workpack.c"
     ],
     "blockers": [],
     "execution_verified": false
   },
   "reviewed_effects": {
     "blockers": [],
-    "reviewed_capabilities": 1124,
+    "reviewed_capabilities": 1129,
     "execution_verified": false
   },
   "boundary_contracts": {

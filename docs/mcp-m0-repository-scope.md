@@ -1218,8 +1218,13 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | mcp.management.route.candidate_stop | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | surface.tools.integration_owner_review.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.tools.integration_owner_desktop.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
-| native.workpack.validate | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_validate | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.workpack.file-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_read | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_inspect | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_compatibility | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.workpack.read-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| cli.workpack.local | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3535,6 +3540,15 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_validate | None |
 | NATIVE_OPERATION | include/golem/workpack.h | file-surface | None |
 | NATIVE_OPERATION | src/workpack/model.c | file-surface | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_read | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_inspect | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_compatibility | None |
+| NATIVE_OPERATION | src/workpack/read.c | file-surface | None |
+| CLI_ROUTE | src/cli/main.c | dispatch | pack |
+| NATIVE_OPERATION | src/cli/workpack.c | file-surface | None |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | validate |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | inspect |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | compatibility |
 
 ## Blockers
 
@@ -3624,8 +3638,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 448; explicitly selected: 448. Other tracked paths still require explicit boundary review.
-Public declarations observed in selected headers: 345.
+Candidate source surfaces: 450; explicitly selected: 450. Other tracked paths still require explicit boundary review.
+Public declarations observed in selected headers: 348.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
 ## Required sources
@@ -3778,6 +3792,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | src/cli/work.h | YES |
 | src/cli/workflow.c | YES |
 | src/cli/workflow_template.c | YES |
+| src/cli/workpack.c | YES |
 | src/common/allocator.c | YES |
 | src/common/arena.c | YES |
 | src/common/diagnostic.c | YES |
@@ -3976,6 +3991,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | src/workflow/template_guard.c | YES |
 | src/workflow/template_internal.h | YES |
 | src/workpack/model.c | YES |
+| src/workpack/read.c | YES |
 | src/workspace/git.c | YES |
 | src/workspace/internal.h | YES |
 | src/workspace/lifecycle.c | YES |

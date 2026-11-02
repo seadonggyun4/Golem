@@ -212,6 +212,10 @@ static golem_status optimized_start(golem_work_run *run,
 
 int main(void)
 {
+    size_t pack_required=0; bool pack_compatible=false;
+    if (golem_workpack_inspect((golem_bytes){(const uint8_t *)"{}",2},NULL,0,&pack_required,NULL)!=GOLEM_ERR_PARSE) return 92;
+    if (golem_workpack_compatibility((golem_bytes){(const uint8_t *)"{}",2},(golem_string_view){"0.1.0",5},&pack_compatible,NULL)!=GOLEM_ERR_PARSE) return 93;
+    if (golem_workpack_read(NULL,NULL,0,NULL,NULL)!=GOLEM_ERR_INVALID_ARGUMENT) return 94;
     golem_digest pack_digest = {{0}};
     if (golem_workpack_validate((golem_bytes){(const uint8_t *)"{}", 2}, &pack_digest, NULL) != GOLEM_ERR_PARSE) return 91;
 

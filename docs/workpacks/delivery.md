@@ -1,6 +1,6 @@
 # CLI/API, discovery and distribution boundary
 
-## Command plan (all CLI commands below are NOT IMPLEMENTED in M1)
+## Commands (M2 first three implemented; remaining commands NOT_IMPLEMENTED)
 
 | Command | Input → output | Effects, gates and errors |
 | --- | --- | --- |
@@ -16,18 +16,17 @@
 | `golem receipt export WORK --format markdown` | same native refs → projection | M6 derived write, never receipt authority |
 | `golem receipt verify PATH` | bounded inventory → integrity result | M6 read only, no implicit downloads |
 
-Proposed common CLI exit codes: 0 structural/read success (never grants), 2 invalid
-input/schema, 3 incompatible/unsupported, 4 denied/stale/missing requirement,
-5 I/O/uncertain publication. Exact mapping to existing CLI errors must be reviewed
-before M2; do not change existing command exit semantics. Input is 64 KiB for manifests;
-M3 catalog proposed 256 entries/1 MiB; M6 bounds in roles-and-evidence.md.
+M2 uses the existing CLI exit taxonomy described below. Later commands must separately
+review their status mapping without changing existing command semantics. Input is
+64 KiB for manifests; M3 catalog proposed 256 entries/1 MiB; M6 bounds are in
+roles-and-evidence.md.
 Reads are repeatable but not automatically retried on failure; mutation retries must
 use native exact-request lookup and preserve uncertainty. Reads do not require new
 Work audit; future integration may append its existing scoped read audit. M1 has no
 CLI audit or file access. Work changes need existing durable native records.
 
-Only the additive native validator is in M1. Python/TypeScript bindings and MCP exposure
-are NOT implemented. CLI will remain a thin public C API façade, never a Python reducer.
+M2 adds bounded snapshot reading, metadata inspection and declared-version comparison. Python/TypeScript bindings and MCP exposure
+are NOT implemented. CLI remains a thin public C API façade, never a Python reducer.
 API version must be advertised separately from catalog schema and native core version.
 New API symbols must not imply complete language binding parity.
 
@@ -52,7 +51,7 @@ No vector database or remote search. This is Golem runtime discovery, not extern
 ## Machine-readable source contract for styxis-plugin
 
 M1 adds a source metadata record with schema/API versions, public native entrypoint,
-no CLI/MCP claims, reference inventory and security boundary. Build/release automation
+the three read-only CLI routes and no MCP claims, reference inventory and security boundary. Build/release automation
 must attach the actual source commit/archive digest separately; never put a self-referential
 commit hash in the source record or use mutable latest. A branch name is not provenance.
 Packaged files need independent artifact inventory and compatibility checks.
@@ -65,3 +64,48 @@ Migration plan: inventory existing identities/pins → define release metadata �
 byte-equivalent packages in styxis-plugin → owner-reviewed client update → separately
 review retirement of redundant packaging. No destructive moves, public Alpha catalog
 registration or installation updates in this task. `styxis-io` content is untouched.
+
+
+## M2 implemented behavior
+
+```sh
+golem pack validate samples/workpacks/dataset-release-gate.json
+golem pack inspect samples/workpacks/dataset-release-gate.json
+golem pack compatibility samples/workpacks/dataset-release-gate.json
+golem pack compatibility samples/workpacks/dataset-release-gate.json --core-version 0.1.0
+```
+
+The default comparison version is the compiled `GOLEM_VERSION_STRING`, never a remote
+or mutable latest version. This compares the numeric inclusive declared interval only;
+it does not check tools, ABI support, role mappings, policy or current Work readiness.
+M2 uses existing CLI conventions: **0 success, 1 native/read/output failure or declared
+incompatibility, 2 usage error**. Existing commands retain their exit semantics. Incompatibility emits a successful
+comparison report with `declared_compatible:false` on stdout and the existing
+`golem.cli-error.v1` UNSUPPORTED_VERSION diagnostic on stderr, then exits 1.
+Malformed input emits no success report. Errors never authorize retries.
+
+Success stdout is full bounded JSON `golem.workpack.report.v0`, including `operation`,
+`exact_digest`, original byte `size`, `structurally_valid:true`, `authorized:false`,
+`bound:false`, `work_done:false`. Inspect adds the full validated `manifest` as JSON
+data (reserialized, not the digest's original byte representation). Compatibility adds
+`core_version`, `declared_compatible`, `runtime_availability:"NOT_EVALUATED"`.
+Output order is deterministic for identical bytes and inputs. No timestamp/path is
+included. Descriptions are inert JSON strings, never terminal instructions or commands.
+Output is bounded by twice the 64KiB input plus 1KiB envelope. Stdout failure may leave
+partial output; nonzero status forbids interpreting it as a successful report.
+
+Paths are explicit local CLI input authority, not an MCP grant. Relative paths start
+at cwd; absolute paths start at `/`. Paths are <=4095 bytes; native component traversal
+rejects `..` and symlinks, including parents. Regular single-link files only; no FIFO,
+socket, directory, stdin, URLs, recursive scan or auxiliary file loading. Advisory
+shared nonblocking lock plus two bounded reads, nanosecond mtime/ctime, inode/device,
+size/mode/link count and final pathname reopen are compared. Observed drift fails;
+there is no retry. Atime may change. This is a checked snapshot, not a guarantee that
+a hostile same-user writer can never change or restore a file between observations.
+The caller must keep cwd/input memory stable. There is no lock on or access to Work.
+
+No automatic output-cache publication: these commands write directly to stdout even
+with global compact/output-store options. Existing explicitly configured top-level
+`GOLEM_RECORD_ROOT` recording still applies and may write command records; M2 neither
+turns it on nor bypasses it. No policy changes, approvals, Work writes, subprocesses
+or network are introduced by the pack handlers. Clients and MCP exposure are unchanged.

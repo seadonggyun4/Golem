@@ -20,8 +20,8 @@ class PublicInventory(unittest.TestCase):
         self.assertFalse(scan.unresolved)
         self.assertEqual(len(sources), 49)
         self.assertEqual(sum(o.entrypoint == "golem_workpack_validate" for o in scan.observations), 1)
-        self.assertEqual(len(scan.observations), 345)
-        self.assertEqual(len({o.id for o in scan.observations}), 345)
+        self.assertEqual(len(scan.observations), 348)
+        self.assertEqual(len({o.id for o in scan.observations}), 348)
 
     def test_no_inputs_are_implicitly_selected(self):
         self.assertEqual(scan_public_headers((), PUBLIC_HEADERS).observations, ())

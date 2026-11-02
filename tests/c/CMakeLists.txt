@@ -941,3 +941,14 @@ foreach(case unknown-field invalid-id latest unknown-schema self-approved duplic
     add_test(NAME workpack_${case} COMMAND golem_test_workpack ${CMAKE_CURRENT_SOURCE_DIR}/fixtures/workpack/${case}.json invalid)
     set_tests_properties(workpack_${case} PROPERTIES TIMEOUT 30)
 endforeach()
+
+add_executable(golem_test_workpack_read test_workpack_read.c)
+target_link_libraries(golem_test_workpack_read PRIVATE Golem::golem OpenSSL::Crypto)
+golem_configure_target(golem_test_workpack_read)
+add_test(NAME workpack_read COMMAND golem_test_workpack_read)
+set_tests_properties(workpack_read PROPERTIES TIMEOUT 30)
+if(GOLEM_BUILD_CLI AND Python3_Interpreter_FOUND)
+    add_test(NAME workpack_cli COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/workpack_cli.py
+        $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR}/samples/workpacks/dataset-release-gate.json)
+    set_tests_properties(workpack_cli PROPERTIES TIMEOUT 90)
+endif()

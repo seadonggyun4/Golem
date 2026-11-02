@@ -467,15 +467,19 @@
     },
     {
       "path": "include/golem/workpack.h",
-      "sha256": "0b0441e3c5bb2df8ceee571935bdf7b4ebeceb173ba2ddc09c700757b591ce95"
+      "sha256": "90b00b7987f4b3eae3caca8958294a941ff735918a7ad629ef454a4898566c44"
     },
     {
       "path": "tests/c/test_workpack.c",
-      "sha256": "a89445cbbb4caa4252ca717c212783382a1e08ccf3ba4f5d30012da1e702769c"
+      "sha256": "edd05f62715c2fb00a62a88f26197903b57201a243ba55d69ed809370cc5a346"
     },
     {
       "path": "docs/workpacks/schema.md",
-      "sha256": "65110c2c51bd0b6b1dee9f9c9111406df6dc334fc9ba11a53cf43a133e85f356"
+      "sha256": "91134ac6594969ec5d7193fa94ef3e8e4d5451b912a82c508a8456b243fc2872"
+    },
+    {
+      "path": "tests/c/test_workpack_read.c",
+      "sha256": "fe1e8ff640b93a968678c50b7675aeda73985e7a6c4cd4e0aaa383ade79fe1d0"
     }
   ],
   "observations": [
@@ -3102,6 +3106,27 @@
       "kind": "C_PUBLIC_DECLARATION",
       "source_path": "include/golem/workpack.h",
       "entrypoint": "golem_workpack_validate",
+      "selector": null
+    },
+    {
+      "id": "obs-bc9619de585abbbc129d31e5874fcf2ba440b57b27bb64f64ce8e7bfdbe446c1",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_read",
+      "selector": null
+    },
+    {
+      "id": "obs-a942ef4bce00d4db48bf78efa3b5e966e8229b51b061e53ef2b7ca5d83c5ec3f",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_inspect",
+      "selector": null
+    },
+    {
+      "id": "obs-f2eafdd0bc4eabfa2c8fa5671cac372815ba761d34ff00ea0bc2b00bdc8fc4c6",
+      "kind": "C_PUBLIC_DECLARATION",
+      "source_path": "include/golem/workpack.h",
+      "entrypoint": "golem_workpack_compatibility",
       "selector": null
     }
   ],
@@ -20553,7 +20578,7 @@
       "rationale": "Public golem_workspace_host.pulse extension contract. The existing containing API owns its effect/approval envelope; no arbitrary indirect target is inferred."
     },
     {
-      "id": "native.workpack.validate",
+      "id": "native.golem_workpack_validate",
       "observation_ids": [
         "obs-cbafa1c8d2238952b0a0c561995b9898cba83026f8fa7dd3d3cce1962e06dac6"
       ],
@@ -20591,6 +20616,128 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Additive pure validator reuses strict native JSON parser and SHA-256; no dispatch, filesystem IO or state mutation. Separate from prior MCP parity scope."
+    },
+    {
+      "id": "native.golem_workpack_read",
+      "observation_ids": [
+        "obs-bc9619de585abbbc129d31e5874fcf2ba440b57b27bb64f64ce8e7bfdbe446c1"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit local input path / borrowed immutable bytes; no Work authority"
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "Supported POSIX native runtime"
+        ],
+        "limits": [
+          "64KiB manifest; 4095-byte no-follow input path; nonblocking shared file lock"
+        ],
+        "notes": "Native C and local CLI only; MCP and language bindings NOT_IMPLEMENTED. Declaration compatibility is not readiness. Optional existing CLI recording can write audit records."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/test_workpack_read.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/schema.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reuses M1 strict native validation/version grammar, existing no-follow path traversal and CLI error envelope. No Work calls, policy change or execution dispatch."
+    },
+    {
+      "id": "native.golem_workpack_inspect",
+      "observation_ids": [
+        "obs-a942ef4bce00d4db48bf78efa3b5e966e8229b51b061e53ef2b7ca5d83c5ec3f"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit local input path / borrowed immutable bytes; no Work authority"
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "Supported POSIX native runtime"
+        ],
+        "limits": [
+          "64KiB manifest; 4095-byte no-follow input path; nonblocking shared file lock"
+        ],
+        "notes": "Native C and local CLI only; MCP and language bindings NOT_IMPLEMENTED. Declaration compatibility is not readiness. Optional existing CLI recording can write audit records."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/test_workpack.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/schema.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reuses M1 strict native validation/version grammar, existing no-follow path traversal and CLI error envelope. No Work calls, policy change or execution dispatch."
+    },
+    {
+      "id": "native.golem_workpack_compatibility",
+      "observation_ids": [
+        "obs-f2eafdd0bc4eabfa2c8fa5671cac372815ba761d34ff00ea0bc2b00bdc8fc4c6"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit local input path / borrowed immutable bytes; no Work authority"
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "Supported POSIX native runtime"
+        ],
+        "limits": [
+          "64KiB manifest; 4095-byte no-follow input path; nonblocking shared file lock"
+        ],
+        "notes": "Native C and local CLI only; MCP and language bindings NOT_IMPLEMENTED. Declaration compatibility is not readiness. Optional existing CLI recording can write audit records."
+      },
+      "test_refs": [
+        {
+          "path": "tests/c/test_workpack.c",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/schema.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reuses M1 strict native validation/version grammar, existing no-follow path traversal and CLI error envelope. No Work calls, policy change or execution dispatch."
     }
   ]
 }

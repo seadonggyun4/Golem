@@ -1,4 +1,4 @@
-"""Reviewed direct definition locations for the 344 public API declarations."""
+"""Reviewed direct definition locations for the 348 public API declarations."""
 from capability_native import NativeDefinitionRule
 
 WRAPPER_SHA256 = '22aa12f77ed58dec055d0e516cd1bf03b5070e24141ec4d0c27a4390f399d73a'
@@ -348,4 +348,8 @@ NATIVE_DEFINITIONS = (
     NativeDefinitionRule('golem_workflow_template_expand', 'src/workflow/template.c', 'bb5f46f2c8ab6d8d883c956090a1c0b3e61ef1087da9464934f82449a4c5c980', 'include/golem/workflow_template.h', '8e4793fd917fd20b9e3dd10249978147b281343778fd711f5b2028cb7fc92d89', None, 'd2c7627b704ba12f092a5555fab209546d3842e1f7fe685092579d2122a2b863'),
     NativeDefinitionRule('golem_workflow_template_instantiate', 'src/workflow/template.c', 'bb5f46f2c8ab6d8d883c956090a1c0b3e61ef1087da9464934f82449a4c5c980', 'include/golem/workflow_template.h', '8e4793fd917fd20b9e3dd10249978147b281343778fd711f5b2028cb7fc92d89', None, 'f7ff7ca488b0166d828fbc6091bc1089bb8f216e77f18e7b5b3665fdbe624a21'),
     NativeDefinitionRule('golem_workspace_call', 'src/workspace/lifecycle.c', 'c4513572151cd8d1253e7526a26d742c28535adcdea6ef3b7fab836ee3f270a6', 'include/golem/workspace.h', 'f1980eaeadd828ac292ad918b003db4980a74bbf93e27fa7a382f6fdaf79a14a', 'GOLEM_RECORDED_API', '29bed5f8e651ca724ee732618065947bcf8c188587e0d978d2d547334f8918c3'),
+    NativeDefinitionRule('golem_workpack_validate', 'src/workpack/model.c', 'c1f7cfeaeb2c06308e6ef3666379071881b7f6c5c9439899556a9a6c431d28e5', 'include/golem/workpack.h', '90b00b7987f4b3eae3caca8958294a941ff735918a7ad629ef454a4898566c44', None, '38e2666812a59dafd69aa7b90b6278bc4022f7d291085b60d5bd5be0f01e2867'),
+    NativeDefinitionRule('golem_workpack_inspect', 'src/workpack/model.c', 'c1f7cfeaeb2c06308e6ef3666379071881b7f6c5c9439899556a9a6c431d28e5', 'include/golem/workpack.h', '90b00b7987f4b3eae3caca8958294a941ff735918a7ad629ef454a4898566c44', None, '5caa86adfa968e25d35af5f484911a9e60582cf4aeb525a7d378b209c9986b1a'),
+    NativeDefinitionRule('golem_workpack_compatibility', 'src/workpack/model.c', 'c1f7cfeaeb2c06308e6ef3666379071881b7f6c5c9439899556a9a6c431d28e5', 'include/golem/workpack.h', '90b00b7987f4b3eae3caca8958294a941ff735918a7ad629ef454a4898566c44', None, 'b31e4980d3dcfb95208faf518729b3832bcb984b76c80f0635d15cd4901bae21'),
+    NativeDefinitionRule('golem_workpack_read', 'src/workpack/read.c', 'cbfafc392ffd55cc9996206ad1b562110d0549a07b162bfefd4faf725486b7fe', 'include/golem/workpack.h', '90b00b7987f4b3eae3caca8958294a941ff735918a7ad629ef454a4898566c44', None, '5b001af8fa6194d360a22f29cd125c6d436aed3df56cf4b28fb1f03a96ead7f9'),
 )

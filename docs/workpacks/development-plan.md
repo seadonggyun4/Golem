@@ -22,7 +22,7 @@ an explicit design gate first. No broad delegated approval is introduced.
 | --- | --- | --- |
 | M0 | docs/workpacks; source audit and terminology | Documentation only. Gate A consistency reviewed; revert docs only |
 | M1 | include/golem/workpack.h, src/workpack, samples/workpacks, tests/c, fuzz | Pure bounded byte validator, additive API; no migration. Valid/invalid fixtures, failure output invariance, installed C consumer and mutation smoke must pass. Revert additive code before any binding exists |
-| M2 | src/cli/workpack.c + native file reader/inspect/compatibility API | Fixed bounded no-follow input, deterministic reports; no Work writes. Symlink/race/CLI/compatibility tests required. Not implemented |
+| M2 | src/cli/workpack.c, src/workpack/read.c and native inspect/compatibility API | Implemented: bounded no-follow snapshot, deterministic JSON; no Work writes or migration. Path/race/lock/CLI/numeric-version tests; remove additive CLI/API before any binding exists |
 | M3 | native static catalog/search | No central service. Deterministic ranking, ambiguity/duplicate/version tests; owner-selected catalog only. Not implemented |
 | M4 | native binding/resolve, immutable reference and receipt schema | New persisted state; review compatibility with old readers, migration refusal, exact key/generation/owner/fence and policy intersection before coding. No automatic rollback or existing Work migration |
 | M5 | role mapping and proposal parser | Separate typed claims/assessments; stale/cross-owner/self-approval/disagreement tests; preserve failed/unknown outputs. No model truth |
@@ -63,7 +63,7 @@ must link only the exported C header/library. Existing native regressions remain
 M1's schema draft has extra semantic constraints beyond JSON Schema; native validator
 is canonical, schema text is a discovery aid and cannot grant authority.
 
-## Current execution record
+## M1 execution record (historical, d3fc00b)
 
 Gate A documentation committed before implementation as `c156576`. M1 now implements
 `golem_workpack_validate` in `src/workpack/model.c`, with the additive installed header,
@@ -128,3 +128,56 @@ The installed runtime stays at its reviewed f2563f5 source identity. No new Work
 code is installed in either client; no TopSolar policy/approval/Work/evidence operation
 was issued. Local logs and preservation details live outside the source checkout in
 `../workpack-m1-validation-20261102/` and are not public package contents.
+
+
+## M2 current implementation
+
+`pack validate`, `pack inspect`, `pack compatibility` are implemented as thin native C
+CLI handlers. The existing M1 validator and numeric version parser are reused; the
+new public read API reuses `golem_evidence_path_open`. Source-contract metadata now
+lists these three local CLI routes and all four native APIs. MCP and language bindings
+remain empty/NOT_IMPLEMENTED, with no installed producer/policy changes.
+
+New tests cover full manifests and exact raw digest, deterministic JSON, explicit and
+compiled Core version, inclusive/numeric interval endpoints, invalid versions, malformed
+input, 64KiB boundary, symlink parents/leaf, traversal, hardlinks, FIFO, directory,
+missing input, lock contention and no automatic output-store writes. Native injected
+read fixtures deterministically modify and replace the file mid-read; both fail stale
+without changing caller outputs. Inspect buffer sizing and failure output invariance
+are checked. The fuzz target additionally exercises inspect and compatibility.
+
+M2 retains the existing 0/1/2 exit taxonomy. Incompatibility is a completed false
+comparison, not parser failure or runtime availability. Optional pre-existing command
+recording is preserved; Work state is never touched by these handlers. No client
+installation, policy pin, role binding, owner action, provider or service is changed.
+M3–M7 remain NOT_IMPLEMENTED, not merely NOT_RUN. No new policy choice is required
+for this explicit local read-only CLI; future binding still requires M4 review.
+
+### M2 verification (2026-11-02)
+
+| Check | Result |
+| --- | --- |
+| Debug build, warnings as errors | PASS |
+| Full native/CLI regression (`ctest --test-dir build/workpack-m1 -j4 --output-on-failure`) | 417/417 PASS |
+| Work Pack targeted fixtures | 13/13 PASS |
+| ASan/UBSan Work Pack fixtures and mutation smoke | 13/13 PASS |
+| Installed public API consumer | 1/1 PASS |
+| Capability regression | Initial 370/371; missing `pack` documentation entry corrected, affected 16/16 PASS |
+| Strict repository capability inventory | 450 source surfaces, 348 public declarations, zero blockers |
+| Diff whitespace, source-contract and documentation links | PASS |
+
+No checker, approval rule or regression timeout was weakened. The capability test's
+initial failure exposed an outdated root CLI documentation list, which now includes
+`pack`; the test itself is unchanged.
+
+NOT_RUN: real client/Work E2E, provider/Truthound calls, coverage-guided libFuzzer
+campaign, Linux/Windows builds, Conan distribution and client installation updates.
+Compatibility checks only the declared numeric interval, not installed MCP delivery
+or runtime availability. M3–M7 remain NOT_IMPLEMENTED.
+
+The existing Codex 0.2.7 package (9 files), Claude prepare 0.1.15 package (85 files),
+shared runtime (85 files), policy and launcher pins are checked against the installation
+review. The installed runtime remains f2563f5; this native CLI change is not installed
+in either client. No TopSolar/Work action or approval issuance was performed. Detailed
+local logs, including initial failures, are retained outside the checkout in
+`../workpack-m2-validation-20261102/`.
