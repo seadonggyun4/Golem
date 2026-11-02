@@ -1571,7 +1571,7 @@
     },
     {
       "path": "tools/integration_codex_plugin.py",
-      "sha256": "827f633237266052a887ce1f642a6bb7945894d2dfde14f48cc186609581e5a3"
+      "sha256": "b01523d6775ecafb362407002b2c314daf4b44a923c33d14fb0a2a951cb040eb"
     },
     {
       "path": "tools/integration_config.py",

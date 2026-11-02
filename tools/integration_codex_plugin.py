@@ -44,7 +44,10 @@ def build(output, launcher, marketplace='golem-local', server='golem-local'):
                 'policy': {'installation': 'AVAILABLE', 'authentication': 'ON_INSTALL'},
                 'category': 'Developer Tools'}]}),
         'plugins/golem/.codex-plugin/plugin.json': encoded(manifest),
-        'plugins/golem/.mcp.json': encoded({'mcpServers': {server: {'type': 'stdio', **command}}}),
+        # Cold external-volume/runtime startup can exceed the client default.
+        # This bounds initialization only; it grants no tools or action retries.
+        'plugins/golem/.mcp.json': encoded({'mcpServers': {server: {
+            'type': 'stdio', **command, 'startup_timeout_sec': 60}}}),
         'plugins/golem/assets/icon.png': branding.icon_bytes(),
         'plugins/golem/LICENSE': regular(root / 'LICENSE')}
     from integration_distribution import SKILLS

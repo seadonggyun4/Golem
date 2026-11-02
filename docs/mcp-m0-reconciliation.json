@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "2711863a7b66b5a259491a6a54811138ad0623923b2f324197e8178e34954578",
+  "inventory_sha256": "dda65c7b2104b99bef46cda084a10fdf681124790f81b6f60231449166c1d056",
   "selected_source_count": 596,
   "selected_observation_count": 2359,
   "selected_capability_count": 1242,
@@ -5124,7 +5124,7 @@
     },
     {
       "path": "tools/integration_codex_plugin.py",
-      "sha256": "827f633237266052a887ce1f642a6bb7945894d2dfde14f48cc186609581e5a3"
+      "sha256": "b01523d6775ecafb362407002b2c314daf4b44a923c33d14fb0a2a951cb040eb"
     },
     {
       "path": "tools/integration_config.py",
@@ -59777,7 +59777,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "f25647bb5d3d02cabc083ad668585ec8da8e763d943cff60b10d35bd2ffaf437",
+      "sha256": "9ab077f5d6c2bb1b6f9ae0778e76b2a0ffd2b8ced78353de6fff636859feab3d",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59921,7 +59921,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "606a799a246353d840678c77ab71b0f2051d5ef90330f74cf522612a7ab8f7d5",
+      "sha256": "12d7a032a5f58fce5999174e375376f836e29ca58cf3f9c496730af8e547166a",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },

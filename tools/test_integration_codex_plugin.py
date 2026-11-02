@@ -21,7 +21,8 @@ class Packaging(unittest.TestCase):
             self.assertIn("plugins/golem/skills/golem-work/SKILL.md", paths)
             self.assertIn("plugins/golem/skills/golem-setup/SKILL.md", paths)
             server = json.loads((output / 'plugins/golem/.mcp.json').read_text())
-            self.assertEqual(server['mcpServers']['golem-local'], {'type': 'stdio', **value})
+            self.assertEqual(server['mcpServers']['golem-local'], {
+                'type': 'stdio', **value, 'startup_timeout_sec': 60})
             self.assertFalse(any(b'not-for-package' in p.read_bytes()
                                  for p in output.rglob('*') if p.is_file()))
             with self.assertRaises(FileExistsError):

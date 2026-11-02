@@ -50,6 +50,18 @@ codex plugin add golem@golem-reviewed --json
 
 ## 업데이트·정리
 
+도구 미노출은 설치와 대화의 시작 로그를 함께 확인한다. 로컬 marketplace 생성기는
+초기화 제한을 60초로 명시하지만, 제한 연장만으로 모델의 도구 전달을 보장하지 않는다.
+자동 검증은 같은 대화의 `mcpServerStatus/list`에서 필요한 도구가 준비된 것을 확인한 뒤
+모델 turn을 시작한다. 준비 실패·미노출이면 Work 호출 없이 중단한다. 다른 연결의
+목록이나 이전 대화 결과로 대신하지 않으며, 초기화 대기와 action 재시도를 구분한다.
+
+같은 ID·버전의 launcher를 CLI로 교체했더라도 실행 중인 Desktop이 이전 설정을
+유지할 수 있다. `ready`만으로 새 설치본이라고 판정하지 않는다. Desktop의 지원되는
+연결 새로고침 후 실제 실행 command와 해당 대화의 도구 목록을 함께 대조한다.
+새 대화 생성이나 CLI `mcp list`만으로 Desktop 갱신을 대신하지 않는다. 이전 서버나
+대화는 강제 종료하지 않으며, 복원도 같은 방식으로 실제 적용 여부를 확인한다.
+
 - 새 artifact·설치 bytes와 검증 범위를 확인하고 기존 identity의 지원되는 update 절차를 사용한다. runtime·정책 변경은 [D5](integration-d5.md)를 따르며 기존 승인 bytes/key/pin을 자동 이전하지 않는다.
 - 복구 자료를 owner-private 위치에 보존한 뒤 **검증된 Golem 한 개와 의도한 연결 한 개만** 유지한다. 확인한 구버전 plugin·marketplace·중복 direct MCP만 지원되는 remove 명령/UI로 정리하고 재확인한다.
 - 기존 Work·승인·registry·evidence·CAS·journal와 다른 플러그인·진행 중 대화를 보존한다. 설치 과정에서 앱 전체를 임의 재시작하지 않는다. local process는 사용자 OS 권한으로 실행된다.
