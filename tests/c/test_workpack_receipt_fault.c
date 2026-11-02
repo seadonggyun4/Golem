@@ -1,3 +1,6 @@
+#define _POSIX_C_SOURCE 200809L
+#define _DARWIN_C_SOURCE
+#define _DEFAULT_SOURCE
 #include "../../src/workpack/receipt_internal.h"
 #include "test.h"
 #include <stdio.h>

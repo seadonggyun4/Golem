@@ -2311,7 +2311,7 @@
     },
     {
       "path": "src/workpack/receipt_store.c",
-      "sha256": "2b6bf3cceb4060f4cd9cb2753e542a8010662b09a1a67acd656992ed4e7078ae"
+      "sha256": "cf1d84235208880d060bc95f6a79b241aa28e06a1c695eeb3bb831b2075f0411"
     },
     {
       "path": "src/workpack/receipt_internal.h",
@@ -2331,7 +2331,7 @@
     },
     {
       "path": "tests/c/test_workpack_receipt_fault.c",
-      "sha256": "6d355e0efaa07b065cfdd8f021c008b686b04a1d0759346729e497ce1d1e6b14"
+      "sha256": "16110cbd511b7de3836c38586302dc2caf9a70419bf049d016ef61d0c851333a"
     },
     {
       "path": "tests/c/workpack_receipt.py",

@@ -519,7 +519,7 @@
     },
     {
       "path": "tests/c/test_workpack_receipt_fault.c",
-      "sha256": "6d355e0efaa07b065cfdd8f021c008b686b04a1d0759346729e497ce1d1e6b14"
+      "sha256": "16110cbd511b7de3836c38586302dc2caf9a70419bf049d016ef61d0c851333a"
     },
     {
       "path": "tests/c/workpack_receipt.py",
