@@ -958,3 +958,13 @@ if(Python3_Interpreter_FOUND)
         $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR}/samples/workpacks/dataset-release-gate.json)
     set_tests_properties(workpack_catalog PROPERTIES TIMEOUT 90)
 endif()
+
+if(Python3_Interpreter_FOUND)
+    set(GOLEM_WORKPACK_BASELINE_CLI "" CACHE FILEPATH "Optional pre-M4 CLI for old-reader rejection fixture")
+    add_executable(golem_test_workpack_binding_fault test_workpack_binding_fault.c)
+    target_link_libraries(golem_test_workpack_binding_fault PRIVATE Golem::golem PkgConfig::JSONC OpenSSL::Crypto)
+    golem_configure_target(golem_test_workpack_binding_fault)
+    add_test(NAME workpack_binding COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/workpack_binding.py
+        $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR} $<TARGET_FILE:golem_test_workpack_binding_fault> ${GOLEM_WORKPACK_BASELINE_CLI})
+    set_tests_properties(workpack_binding PROPERTIES TIMEOUT 180)
+endif()

@@ -9,7 +9,7 @@ CORE_APIS = {
     "golem_session_binding_call", "golem_approval_call", "golem_execution_call_receipted",
     "golem_execution_call", "golem_execution_call_authorized", "golem_role_call",
     "golem_research_call", "golem_completion_call", "golem_reentry_call",
-    "golem_workspace_call", "golem_candidate_call", "golem_runtime_profile_register",
+    "golem_workpack_bind", "golem_workspace_call", "golem_candidate_call", "golem_runtime_profile_register",
     "golem_runtime_link_run", "golem_context_publish", "golem_proof_publish",
     "golem_admission_publish_work",
 }

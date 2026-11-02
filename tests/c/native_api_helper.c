@@ -15,6 +15,7 @@
 #include "golem/session_binding.h"
 #include "golem/supervisor.h"
 #include "golem/workspace.h"
+#include "golem/workpack.h"
 #include "golem/worker.h"
 #include "golem/daemon.h"
 #include "golem/resource.h"
@@ -86,6 +87,7 @@ static int rejected(void)
     REJECT(golem_execution_call(NULL, bytes, &key, &reply, &d));
     REJECT(golem_execution_call_authorized(NULL, bytes, NULL, &reply, &d));
     REJECT(golem_role_call(NULL, bytes, &key, &reply, &d));
+    REJECT(golem_workpack_bind(NULL, bytes, &key, &reply, &d));
     REJECT(golem_research_call(NULL, bytes, &reply, &d));
     REJECT(golem_completion_call(NULL, bytes, &reply, &d));
     REJECT(golem_reentry_call(NULL, bytes, &reply, &d));

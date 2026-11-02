@@ -138,4 +138,4 @@
 
 [Architecture and audit](workpacks/overview.md) · [M1 schema/API](workpacks/schema.md) · [Roles and evidence](workpacks/roles-and-evidence.md) · [CLI/catalog plan](workpacks/delivery.md) · [Reference pack](workpacks/reference.md) · [Development and validation](workpacks/development-plan.md).
 
-M2/M3 add read-only validation, inspection, compatibility and local catalog/search CLI. MCP delivery and Work binding are not implemented.
+M2/M3 add read-only validation, inspection, compatibility and local catalog/search CLI. M4 adds limited [native document binding](workpacks/binding.md); MCP delivery is not implemented.

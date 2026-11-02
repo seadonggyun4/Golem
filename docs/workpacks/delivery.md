@@ -1,6 +1,6 @@
 # CLI/API, discovery and distribution boundary
 
-## Commands (M2/M3 first five implemented; remaining commands NOT_IMPLEMENTED)
+## Commands (M2–M4 native commands implemented with limits; receipt commands NOT_IMPLEMENTED)
 
 | Command | Input → output | Effects, gates and errors |
 | --- | --- | --- |
@@ -9,8 +9,8 @@
 | `golem pack compatibility PACK` | manifest + fixed core version → declared compatibility | M2 no runtime readiness/authority |
 | `golem pack list --catalog INDEX` | explicit catalog → bounded ordered entries | M3 read only, no recursive host scan |
 | `golem pack search QUERY --catalog INDEX` | catalog + ≤256-byte query → scored refs | M3 no provider/embedding/network |
-| `golem pack resolve WORK PACK` | exact references/current role → proposed intersection | M4 read-only native Work lock as required; no implicit binding |
-| `golem pack bind WORK PACK` | owner-reviewed reference + expected generation/key → binding receipt | M4 mutation; Work lock/CAS/native gate; exact idempotency |
+| `golem pack resolve WORK REQUEST` | exact references/current role → proposed intersection | M4 read-only native Work lock as required; no implicit binding |
+| `golem pack bind WORK REQUEST --approve-binding DIGEST` | owner-reviewed reference + expected generation/key → binding receipt | M4 mutation; Work lock/CAS/native gate; exact idempotency |
 | `golem pack explain WORK` | immutable binding + live state → blockers | M4 read only; historical vs live explicit |
 | `golem receipt export WORK --format json` | reviewed native refs → manifest | M6 explicit output write/disclosure gate |
 | `golem receipt export WORK --format markdown` | same native refs → projection | M6 derived write, never receipt authority |
@@ -161,5 +161,8 @@ The existing explicit command-recording option is preserved. No current Work is 
 Native output capacity is capped by the 2 MiB report bound. `required` includes NUL and
 changes only on success/BUFFER_TOO_SMALL; output bytes remain unchanged on errors.
 A NULL/zero output size query still reads files; its next call is a fresh observation.
-CLI allocates the bounded output once and performs one catalog operation. M4 binding,
+CLI allocates the bounded output once and performs one catalog operation. M4 binding is limited to [native document contracts](binding.md).
 MCP/language delivery and client package updates remain NOT_IMPLEMENTED/unchanged.
+
+M4 resolve/bind/explain use the [separate exact binding contract](binding.md). Unsupported
+external/development/identity mappings block; binding is not execution or semantic release approval.

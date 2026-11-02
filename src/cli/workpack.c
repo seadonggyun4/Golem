@@ -1,4 +1,4 @@
-#include "internal.h"
+#include "work.h"
 #include "golem/workpack.h"
 #include "golem/version.h"
 #include <stdio.h>
@@ -10,6 +10,24 @@
 int golem_cli_workpack(int argc, char **argv)
 {
     if (argc < 4) return 2;
+    if (!strcmp(argv[2], "resolve") || !strcmp(argv[2], "bind") || !strcmp(argv[2], "explain")) {
+        bool bind = !strcmp(argv[2], "bind"), explain = !strcmp(argv[2], "explain");
+        if ((explain && argc != 4) || (!explain && argc != 5 && !(bind && argc == 7 && !strcmp(argv[5], "--approve-binding")))) return 2;
+        cli_blob input = {0}; golem_document_store *store = NULL;
+        golem_execution_reply reply = {0}; golem_digest approval;
+        golem_status status = explain ? GOLEM_OK : cli_read(argv[4], 131072, &input);
+        if (status == GOLEM_OK && argc == 7) status = golem_digest_parse((golem_string_view){argv[6], strlen(argv[6])}, &approval);
+        if (status == GOLEM_OK) status = golem_document_store_open(argv[3], bind, NULL, &store, NULL);
+        if (status == GOLEM_OK && explain) status = golem_workpack_explain(store, &reply, NULL);
+        if (status == GOLEM_OK && !explain && bind) status = golem_workpack_bind(store, (golem_bytes){input.data,input.size}, argc == 7 ? &approval : NULL, &reply, NULL);
+        if (status == GOLEM_OK && !explain && !bind) status = golem_workpack_resolve(store, (golem_bytes){input.data,input.size}, &reply, NULL);
+        golem_status closed = golem_document_store_close(store);
+        if (status == GOLEM_OK) status = closed;
+        if (status == GOLEM_OK && (fwrite(reply.data, 1, reply.size, stdout) != reply.size || puts("") == EOF || fflush(stdout))) status = GOLEM_ERR_IO;
+        free(input.data); golem_execution_reply_free(&reply);
+        cli_error_note(status, "pack.binding", NULL);
+        return status == GOLEM_OK ? 0 : 1;
+    }
     if (!strcmp(argv[2], "list") || !strcmp(argv[2], "search")) {
         bool search = !strcmp(argv[2], "search");
         if ((!search && (argc != 5 || strcmp(argv[3], "--catalog"))) ||

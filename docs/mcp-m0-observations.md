@@ -1226,6 +1226,10 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | native.workpack.read-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | cli.workpack.local | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.golem_workpack_catalog | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_resolve | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_bind | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.golem_workpack_explain | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| native.workpack.binding-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3554,6 +3558,14 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | NATIVE_OPERATION | src/workpack/internal.h | file-surface | None |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | list |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | search |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_resolve | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_bind | None |
+| C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_explain | None |
+| NATIVE_OPERATION | src/workpack/binding.c | file-surface | None |
+| NATIVE_OPERATION | src/workpack/binding_internal.h | file-surface | None |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | resolve |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | bind |
+| CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | explain |
 
 ## Blockers
 

@@ -19,12 +19,12 @@ class NativeDefinitionLinks(unittest.TestCase):
         rule=NativeDefinitionRule('api',c.path,c.sha256,h.path,h.sha256,None,parameter_digest(('int','value')))
         return (h,c),rule
 
-    def test_actual_349_unique_definition_links_have_no_behavior_claim(self):
+    def test_actual_352_unique_definition_links_have_no_behavior_claim(self):
         root=Path(__file__).resolve().parents[1]
         paths=sorted({p for r in NATIVE_DEFINITIONS for p in (r.path,r.header_path)}|{'src/common/record_internal.h'})
         files=tuple(source(p,(root/p).read_bytes()) for p in paths)
         values=inspect_native_definitions(files,NATIVE_DEFINITIONS,WRAPPER_SHA256)
-        self.assertEqual(len(values),349)
+        self.assertEqual(len(values),352)
         self.assertFalse([v for v in values if v.blockers])
         self.assertTrue(all(not v.behavior_verified and not v.callback_receiver_verified and not v.execution_verified for v in values))
 

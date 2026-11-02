@@ -42,6 +42,8 @@ struct golem_document_store {
     struct json_object *admission_links[256];
     golem_digest admission_link_digests[256];
     golem_digest last;
+    struct json_object *workpack_binding;
+    golem_digest workpack_binding_digest;
     size_t role_count;
     struct json_object *roles[64];
     golem_digest role_digests[64];

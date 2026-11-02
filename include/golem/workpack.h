@@ -1,6 +1,6 @@
 #ifndef GOLEM_WORKPACK_H
 #define GOLEM_WORKPACK_H
-#include "golem/evidence.h"
+#include "golem/execution.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -46,6 +46,20 @@ golem_status golem_workpack_compatibility(golem_bytes input, golem_string_view c
 golem_status golem_workpack_catalog(const char *path, golem_string_view query,
                                    char *buffer, size_t capacity, size_t *required,
                                    golem_diagnostic *diagnostic);
+/* M4 opt-in native documents binding. Requests <=128 KiB, exact bytes, no
+ * output aliasing. resolve/explain need a read-only store; bind requires native
+ * writable lock, policy/CAS and a separately reviewed domain-specific digest.
+ * No grants, role enrollment, execution or release. Unsupported mappings block.
+ * Replies owned by caller via golem_execution_reply_free; unchanged on error.
+ * Same raw request/key plus approved digest returns historical receipt only.
+ * Publication I/O poisons writer; never automatically retry. See M4 design. */
+golem_status golem_workpack_resolve(golem_document_store *store, golem_bytes request,
+                                   golem_execution_reply *out, golem_diagnostic *diagnostic);
+golem_status golem_workpack_bind(golem_document_store *store, golem_bytes request,
+                                const golem_digest *approved_binding,
+                                golem_execution_reply *out, golem_diagnostic *diagnostic);
+golem_status golem_workpack_explain(golem_document_store *store,
+                                   golem_execution_reply *out, golem_diagnostic *diagnostic);
 #ifdef __cplusplus
 }
 #endif

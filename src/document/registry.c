@@ -13,6 +13,7 @@
 #include "../reentry/internal.h"
 #include "../completion/internal.h"
 #include "../workflow/role_internal.h"
+#include "../workpack/binding_internal.h"
 #include "../policy/approval_internal.h"
 #include "../research/internal.h"
 #include "../runtime/profile_internal.h"
@@ -123,6 +124,8 @@ golem_status dw_apply(golem_document_store *s, struct json_object *event,
         return re_apply(s, event, payload, frame);
     if (strcmp(dw_text(event, "type"), "completion") == 0)
         return co_apply(s, event, payload, frame);
+    if (strcmp(dw_text(event, "type"), "workpack-binding") == 0)
+        return wp_apply(s, event, payload, frame);
     if (strcmp(dw_text(event, "type"), "roles") == 0)
         return rc_apply(s, event, payload, frame);
     if (strcmp(dw_text(event, "type"), "approval") == 0)
@@ -327,6 +330,7 @@ GOLEM_RECORDED_REQUIRED_API(golem_document_store_close, (golem_document_store *s
         json_object_put(s->runtime_links[i]);
     for (size_t i = 0; i < s->admission_link_count; ++i)
         json_object_put(s->admission_links[i]);
+    json_object_put(s->workpack_binding);
     json_object_put(s->spec);
     golem_status st = golem_evidence_close(s->cas);
     if (s->events >= 0 && close(s->events) < 0)

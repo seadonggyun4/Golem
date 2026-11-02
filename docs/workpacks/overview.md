@@ -32,7 +32,7 @@ non-destructive migration; do not list Golem Alpha in the public Styxis catalog.
 ```mermaid
 flowchart TD
  A[External agent] --> P[Discover and validate exact pack]
- P --> O[Owner review: planned binding]
+ P --> O[Owner review: exact binding (limited)]
  O --> W[Existing native Work contracts]
  E[External Evidence provider] --> W
  V[Semantic verifier proposal] --> W
@@ -42,7 +42,7 @@ flowchart TD
 ```
 
 The diagram describes the target architecture, not an implemented automatic pipeline.
-M2 implements bounded manifest validation, local snapshot reads, inspect and declared-version comparison. Binding, receipt aggregation and
+M2 implements bounded manifest validation, local snapshot reads, inspect and declared-version comparison. General role mappings, receipt aggregation and
 pack-specific completion are not implemented. In particular READY_FOR_RELEASE is
 an intent label, not native DONE or permission to publish.
 
@@ -97,3 +97,6 @@ future authority in [roles/evidence](roles-and-evidence.md), planned commands in
 
 M3 additionally implements explicit local catalog listing and deterministic lexical search.
 See [delivery](delivery.md) for exact input limits, ambiguity and no-authority semantics.
+
+M4 implements limited [native document resolve/bind/explain](binding.md), with a separately
+selected exact digest. General role mappings, semantic release validation and MCP delivery remain unsupported.

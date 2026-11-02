@@ -7,21 +7,29 @@
     "golem_workpack_read",
     "golem_workpack_inspect",
     "golem_workpack_compatibility",
-    "golem_workpack_catalog"
+    "golem_workpack_catalog",
+    "golem_workpack_resolve",
+    "golem_workpack_bind",
+    "golem_workpack_explain"
   ],
   "public_cli": [
     "golem pack validate FILE",
     "golem pack inspect FILE",
     "golem pack compatibility FILE [--core-version X.Y.Z]",
     "golem pack list --catalog INDEX",
-    "golem pack search QUERY --catalog INDEX"
+    "golem pack search QUERY --catalog INDEX",
+    "golem pack resolve WORK REQUEST",
+    "golem pack bind WORK REQUEST --approve-binding DIGEST",
+    "golem pack explain WORK"
   ],
   "mcp_tools": [],
-  "binding_support": [],
+  "binding_support": [
+    "native-documents-v1"
+  ],
   "status": "experimental",
   "runtime": "Golem native C library; json-c strict UTF-8; OpenSSL 3",
   "source_provenance": "release assembler must attach exact source commit and artifact digest; no mutable latest",
-  "security_boundary": "validation only; no grant, binding, execution or completion",
+  "security_boundary": "local exact reviewed document binding only; no execution grant, semantic release verdict or MCP delivery",
   "reference_packs": [
     {
       "path": "samples/workpacks/dataset-release-gate.json",
@@ -46,7 +54,10 @@
       "manifest.inspect",
       "declared-version.compatibility",
       "catalog.list",
-      "catalog.lexical-search"
+      "catalog.lexical-search",
+      "binding.resolve",
+      "binding.exact-owner-bind",
+      "binding.explain"
     ],
     "mcp": []
   },

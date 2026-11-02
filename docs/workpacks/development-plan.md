@@ -24,7 +24,7 @@ an explicit design gate first. No broad delegated approval is introduced.
 | M1 | include/golem/workpack.h, src/workpack, samples/workpacks, tests/c, fuzz | Pure bounded byte validator, additive API; no migration. Valid/invalid fixtures, failure output invariance, installed C consumer and mutation smoke must pass. Revert additive code before any binding exists |
 | M2 | src/cli/workpack.c, src/workpack/read.c and native inspect/compatibility API | Implemented: bounded no-follow snapshot, deterministic JSON; no Work writes or migration. Path/race/lock/CLI/numeric-version tests; remove additive CLI/API before any binding exists |
 | M3 | native static catalog/search | No central service. Deterministic ranking, ambiguity/duplicate/version tests; owner-selected catalog only. Implemented; results below |
-| M4 | native binding/resolve, immutable reference and receipt schema | New persisted state; review compatibility with old readers, migration refusal, exact key/generation/owner/fence and policy intersection before coding. No automatic rollback or existing Work migration |
+| M4 | native binding/resolve, immutable reference and receipt schema | Implemented native-documents-v1 after owner design selection; immutable CAS/event binding, old-reader rejection, exact approval and generation. Session/custom/external mappings block; no automatic rollback or existing Work migration |
 | M5 | role mapping and proposal parser | Separate typed claims/assessments; stale/cross-owner/self-approval/disagreement tests; preserve failed/unknown outputs. No model truth |
 | M6 | Evidence manifest/export/verify | Explicit output publication and disclosure; truncation/corruption/missing object/unsigned origin/current-vs-historical tests; retain partial exports, no auto retry |
 | M7 | reference adapters and local scenario | Mock/native/real Truthound tests reported separately; no automatic release, provider grants or project changes |
@@ -182,7 +182,7 @@ in either client. No TopSolar/Work action or approval issuance was performed. De
 local logs, including initial failures, are retained outside the checkout in
 `../workpack-m2-validation-20261102/`.
 
-## M3 current implementation (2026-11-02)
+## M3 implementation record (before M4) (2026-11-02)
 
 Native `golem_workpack_catalog` and CLI `pack list --catalog INDEX` /
 `pack search QUERY --catalog INDEX` implement explicit local discovery. They reuse M1
@@ -242,3 +242,76 @@ and TopSolar D2 pins match the installed f2563f5 review; each client retains its
 active Golem installation. No actual Work action, approval issuance, evidence update
 or COMMIT_UNKNOWN retry occurred. Private detailed logs and the installation check
 are in `../workpack-m3-validation-20261102/`, outside the source repository.
+
+## M4 current implementation — native-documents-v1
+
+Owner selected the separate exact binding design on 2026-11-02 (proposal SHA-256
+81be10a3fb1f468c51a52a278cf9de2a4488733341c94da30a21854133e2e665).
+See [selected design](m4-binding-design.md) and [implemented limits](binding.md).
+Resolve/bind/explain reuse native Work locks, generation, role enrollment, CAS, event
+chain/replay, deadline checks and optional API recording. No production binding, client
+policy update or native approval issuance occurs. Unsupported mappings remain BLOCKED.
+
+
+M4 remains a deliberately limited native implementation. General external-tool,
+development/QA, session-owner/fence, independent identity and semantic release mappings
+are NOT_IMPLEMENTED; Work Pack MCP/language delivery is still a later stage. These
+are explicit blockers, not skipped tests promoted to support. The reference Truthound
+Pack cannot be bound by `native-documents-v1`.
+
+Verification uses fresh disposable Works, including synthetic local exact approvals.
+Existing TopSolar Works and production approval bytes are never used as mutation
+fixtures. Installed Codex 0.2.7 and Claude prepare 0.1.15 remain at their reviewed
+f2563f5 runtime; this source commit is not an installation update. The inventory check
+matches all 9 Codex, 85 Claude and 85 shared runtime files, policy/launcher hashes and
+Claude settings, with one enabled Golem installation per client and no direct duplicate.
+
+NOT_RUN: actual Codex/Claude/Work E2E, client package updates, external provider or
+Truthound calls, Linux/Windows builds, Conan distribution, coverage-guided libFuzzer.
+No production binding, approval issuance, policy application, existing QA/completion
+rerun or COMMIT_UNKNOWN recovery is performed. Detailed initial and final logs are
+retained in `../workpack-m4-validation-20261102/`, outside the source repository.
+
+
+### M4 verification results
+
+| Check | Result |
+| --- | --- |
+| Final Debug build with warnings as errors | PASS |
+| Final Work Pack, mutation smoke and automatic recording checks | 17/17 PASS |
+| ASan/UBSan Work Pack subset | Initial 15/15 PASS; final version-drift addition 14/15, corrected fixture expectation recheck 1/1 PASS |
+| ASan/UBSan added recording boundary | 2/2 PASS |
+| Installed public API consumer | 1/1 PASS |
+| Full native/CLI regression | 418/419 initially; missing new recording API inventory entry corrected, affected inventory/recording recheck 2/2 PASS |
+| Capability regression | 371/371 PASS |
+| Strict static inventory | 453 source surfaces, 352 public declarations, zero blockers |
+| Exact inspected source pins | 573/573 match |
+| Old pre-M4 reader | Reads legacy Work; rejects opt-in binding with CORRUPT_JOURNAL |
+| Documentation links and whitespace | PASS |
+
+The full run kept the measured Debug binary fixed throughout. After it completed,
+the historical Core-version replay refinement was rebuilt and tested in the final
+17-test subset; no existing native path or test limit was relaxed. A future-incompatible
+reader fixture preserves the historical receipt but reports current mapping BLOCKED.
+The initial sanitizer fixture used an enum identifier where the existing public API
+returns a descriptive status string; the assertion now compares the native string
+contract. The full regression's inventory tripwire correctly detected the new
+`golem_workpack_bind` recording wrapper. Both the explicit inventory and the actual
+C recording helper were extended; rejection, private-input omission, nested/thread
+recording and failure behavior are tested through the existing recording suite.
+The first sandbox-only session fixture failed on denied boot-ID access; the host
+fixture passed with the native boot-ID checks unchanged. All initial logs remain.
+
+Representative final commands:
+
+```sh
+cmake --build build/workpack-m1 -j3
+ctest --test-dir build/workpack-m1 -j3 --output-on-failure
+ctest --test-dir build/workpack-m1 -R 'workpack|fuzz_seeds|native_api_(inventory|recording)' --output-on-failure
+cmake --build build/workpack-m1-asan -j3
+ctest --test-dir build/workpack-m1-asan -R 'workpack|fuzz_seeds' --output-on-failure
+ctest --test-dir build/workpack-m1-asan -R '^workpack_binding$' --output-on-failure
+ctest --test-dir build/workpack-m1-asan -R 'native_api_(inventory|recording)' --output-on-failure
+python3 -m unittest discover -s tools -p 'test_capability_*.py'
+python3 tools/capability_refresh.py --root "$PWD"
+```

@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "8b3303a19af8bd2e8a724515aa04bd1e9f5d27bfceae92447f83b5c1e8396e44",
-  "selected_source_count": 567,
-  "selected_observation_count": 2323,
-  "selected_capability_count": 1220,
+  "inventory_sha256": "1515c906dce0846805dcbe08748a6e92c5b3035015174a8d9c5b8be1ad349633",
+  "selected_source_count": 573,
+  "selected_observation_count": 2331,
+  "selected_capability_count": 1224,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -457,6 +457,8 @@
       "src/workflow/template_builtin.c",
       "src/workflow/template_guard.c",
       "src/workflow/template_internal.h",
+      "src/workpack/binding.c",
+      "src/workpack/binding_internal.h",
       "src/workpack/internal.h",
       "src/workpack/model.c",
       "src/workpack/read.c",
@@ -910,6 +912,8 @@
       "src/workflow/template_builtin.c",
       "src/workflow/template_guard.c",
       "src/workflow/template_internal.h",
+      "src/workpack/binding.c",
+      "src/workpack/binding_internal.h",
       "src/workpack/internal.h",
       "src/workpack/model.c",
       "src/workpack/read.c",
@@ -3461,6 +3465,27 @@
         "source_path": "include/golem/workpack.h",
         "entrypoint": "golem_workpack_catalog",
         "selector": null
+      },
+      {
+        "id": "obs-17de74676c77eb11cb3e1b18ba9deda86759272581dce36c8a5d8218590d40ea",
+        "kind": "C_PUBLIC_DECLARATION",
+        "source_path": "include/golem/workpack.h",
+        "entrypoint": "golem_workpack_resolve",
+        "selector": null
+      },
+      {
+        "id": "obs-f0415ec9ab4d5952cc7192060ac537e2a703394899895075a4fd1288a564f763",
+        "kind": "C_PUBLIC_DECLARATION",
+        "source_path": "include/golem/workpack.h",
+        "entrypoint": "golem_workpack_bind",
+        "selector": null
+      },
+      {
+        "id": "obs-f022699ed680f2a5261f605990dc4e281c6e083a4ae0e66b2938aac63aa37001",
+        "kind": "C_PUBLIC_DECLARATION",
+        "source_path": "include/golem/workpack.h",
+        "entrypoint": "golem_workpack_explain",
+        "selector": null
       }
     ],
     "blockers": [],
@@ -3487,7 +3512,7 @@
     },
     {
       "path": "src/cli/main.c",
-      "sha256": "7de203232ae901f79d12a6d07957e2ae4bc6df219a4168a612002a43293d4e36"
+      "sha256": "1794214d44c9f2337fd3e72d78d9d309c741a0c7b69d3f442d2bafc2597f0e4e"
     },
     {
       "path": "tools/integration_service.py",
@@ -3683,7 +3708,7 @@
     },
     {
       "path": "CMakeLists.txt",
-      "sha256": "4897262874dd370190532d72cf20e85b3e7fc2efd95b3f8bad371e27b514000d"
+      "sha256": "081f438d4ebbf52ca34eb9ec36d78fa27779d5add24bcc84a5ca93de10c99078"
     },
     {
       "path": "CMakePresets.json",
@@ -4383,7 +4408,7 @@
     },
     {
       "path": "src/document/internal.h",
-      "sha256": "c1f9d7a414c95540e1632ff6d211d064c85dd0e154d3ce0c204f08c8aa72a2a7"
+      "sha256": "f6c9950f09b162a30188555db8768b954c5d78b6ba62f27845a85745c7a6e2fb"
     },
     {
       "path": "src/document/markdown.c",
@@ -4399,7 +4424,7 @@
     },
     {
       "path": "src/document/registry.c",
-      "sha256": "9177234a69870bb57220701e91f2e6863a3cde7d0927be2d3b9d8535485441fa"
+      "sha256": "06e3ac0316fbfdcac2356bc568dc8c7b8c2bd2ecd72164793f71f8f1c30ecd53"
     },
     {
       "path": "src/document/schema.c",
@@ -5695,7 +5720,7 @@
     },
     {
       "path": "include/golem/workpack.h",
-      "sha256": "1ea582fdb41a62cb420c7188d39144cf4a3ae5f973320d13d60b2b2235593889"
+      "sha256": "167f1c307e1ddffe2e519cf98df812752f378712718e8d6308bea5be35414f79"
     },
     {
       "path": "src/workpack/model.c",
@@ -5715,7 +5740,7 @@
     },
     {
       "path": "src/cli/workpack.c",
-      "sha256": "8435c7173f67acc3cdef8c3296f88ff89717fd01ae73cf3b8ab028a6916028eb"
+      "sha256": "ee96528f6f9d4202c09bf87ab21db5c4234e6ba3b4f65e85eef95c6826a89f84"
     },
     {
       "path": "tests/c/test_workpack_read.c",
@@ -5735,7 +5760,31 @@
     },
     {
       "path": "docs/workpacks/delivery.md",
-      "sha256": "8f6c28bcabcd41da8e50312007839fc0078db6187b66a8fee5712f04af39b697"
+      "sha256": "c7b461f7ac650f296886a46ec1bdc95ab41ba0fae6e220edb1915fc9f67b3e04"
+    },
+    {
+      "path": "src/workpack/binding.c",
+      "sha256": "c7737f3ec5d5a6c545b8d02e007f6448bf05c794416b4aa1cacf6cfb32374e07"
+    },
+    {
+      "path": "src/workpack/binding_internal.h",
+      "sha256": "b69042d041d0e6fbc4c75fda7c592524a022dc14cff1c26cf22bb6edd766ac52"
+    },
+    {
+      "path": "tests/c/test_workpack_binding_fault.c",
+      "sha256": "692348e0a2905abeafcebe31a1a91360d81aaa39a2081915e1b27ccab10674ab"
+    },
+    {
+      "path": "tests/c/workpack_binding.py",
+      "sha256": "f5e83a184d22c54f5bb569bc7c0ad0326ff81a86e13848121fd8c1138baa408f"
+    },
+    {
+      "path": "docs/workpacks/m4-binding-design.md",
+      "sha256": "ad80f4eb64cb08ada1d06a97627396d54bab44e3cc480774fd903d157eeb8b0a"
+    },
+    {
+      "path": "docs/workpacks/binding.md",
+      "sha256": "8a07d260196b266f3235f4079369fefa5484b0e01571df8951856cb2e422d60b"
     }
   ],
   "native_definitions": [
@@ -9224,6 +9273,36 @@
       "declaration_path": "include/golem/workpack.h",
       "definition_path": "src/workpack/model.c",
       "wrapper": null,
+      "blockers": [],
+      "behavior_verified": false,
+      "callback_receiver_verified": false,
+      "execution_verified": false
+    },
+    {
+      "name": "golem_workpack_resolve",
+      "declaration_path": "include/golem/workpack.h",
+      "definition_path": "src/workpack/binding.c",
+      "wrapper": null,
+      "blockers": [],
+      "behavior_verified": false,
+      "callback_receiver_verified": false,
+      "execution_verified": false
+    },
+    {
+      "name": "golem_workpack_explain",
+      "declaration_path": "include/golem/workpack.h",
+      "definition_path": "src/workpack/binding.c",
+      "wrapper": null,
+      "blockers": [],
+      "behavior_verified": false,
+      "callback_receiver_verified": false,
+      "execution_verified": false
+    },
+    {
+      "name": "golem_workpack_bind",
+      "declaration_path": "include/golem/workpack.h",
+      "definition_path": "src/workpack/binding.c",
+      "wrapper": "GOLEM_RECORDED_API",
       "blockers": [],
       "behavior_verified": false,
       "callback_receiver_verified": false,
@@ -13385,7 +13464,7 @@
         ]
       ],
       "checked_nodes": 292,
-      "checked_calls": 4637,
+      "checked_calls": 4657,
       "public_endpoints": [
         "golem_adapter_descriptor_current",
         "golem_adapter_descriptor_decode",
@@ -13568,10 +13647,13 @@
         "golem_workflow_template_instantiate",
         "golem_workflow_template_validate",
         "golem_workflow_trace",
+        "golem_workpack_bind",
         "golem_workpack_catalog",
         "golem_workpack_compatibility",
+        "golem_workpack_explain",
         "golem_workpack_inspect",
         "golem_workpack_read",
+        "golem_workpack_resolve",
         "golem_workpack_validate",
         "golem_workspace_call"
       ],
@@ -14071,14 +14153,16 @@
         "src/workpack/model.c",
         "src/workpack/read.c",
         "src/cli/workpack.c",
-        "src/workpack/internal.h"
+        "src/workpack/internal.h",
+        "src/workpack/binding.c",
+        "src/workpack/binding_internal.h"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1130,
+      "reviewed_capabilities": 1134,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -32660,6 +32744,10 @@
         [
           "dw_text ( event , \"type\" )",
           "work"
+        ],
+        [
+          "dw_text ( event , \"type\" )",
+          "workpack-binding"
         ],
         [
           "e - > d_name",
@@ -53870,6 +53958,74 @@
             "*",
             "diagnostic"
           ]
+        ],
+        [
+          "golem_workpack_resolve",
+          [
+            "golem_status"
+          ],
+          [
+            "golem_document_store",
+            "*",
+            "store",
+            ",",
+            "golem_bytes",
+            "request",
+            ",",
+            "golem_execution_reply",
+            "*",
+            "out",
+            ",",
+            "golem_diagnostic",
+            "*",
+            "diagnostic"
+          ]
+        ],
+        [
+          "golem_workpack_bind",
+          [
+            "golem_status"
+          ],
+          [
+            "golem_document_store",
+            "*",
+            "store",
+            ",",
+            "golem_bytes",
+            "request",
+            ",",
+            "const",
+            "golem_digest",
+            "*",
+            "approved_binding",
+            ",",
+            "golem_execution_reply",
+            "*",
+            "out",
+            ",",
+            "golem_diagnostic",
+            "*",
+            "diagnostic"
+          ]
+        ],
+        [
+          "golem_workpack_explain",
+          [
+            "golem_status"
+          ],
+          [
+            "golem_document_store",
+            "*",
+            "store",
+            ",",
+            "golem_execution_reply",
+            "*",
+            "out",
+            ",",
+            "golem_diagnostic",
+            "*",
+            "diagnostic"
+          ]
         ]
       ],
       "literal_branches": [],
@@ -53927,7 +54083,15 @@
       "literal_branches": [
         [
           "argv [ 2 ]",
+          "bind"
+        ],
+        [
+          "argv [ 2 ]",
           "compatibility"
+        ],
+        [
+          "argv [ 2 ]",
+          "explain"
         ],
         [
           "argv [ 2 ]",
@@ -53936,6 +54100,10 @@
         [
           "argv [ 2 ]",
           "list"
+        ],
+        [
+          "argv [ 2 ]",
+          "resolve"
         ],
         [
           "argv [ 2 ]",
@@ -53956,6 +54124,10 @@
         [
           "argv [ 4 ]",
           "--core-version"
+        ],
+        [
+          "argv [ 5 ]",
+          "--approve-binding"
         ]
       ],
       "operations": [
@@ -53983,6 +54155,21 @@
           "CLI_ROUTE",
           "golem_cli_workpack",
           "search"
+        ],
+        [
+          "CLI_ROUTE",
+          "golem_cli_workpack",
+          "resolve"
+        ],
+        [
+          "CLI_ROUTE",
+          "golem_cli_workpack",
+          "bind"
+        ],
+        [
+          "CLI_ROUTE",
+          "golem_cli_workpack",
+          "explain"
         ]
       ]
     },
@@ -54020,6 +54207,122 @@
             "golem_diagnostic",
             "*",
             "diagnostic"
+          ]
+        ]
+      ],
+      "literal_branches": [],
+      "operations": []
+    },
+    {
+      "path": "src/workpack/binding.c",
+      "role": "NATIVE_INTERNAL",
+      "rationale": "M4 opt-in native document binding, exact local approval, existing Work lock/CAS/replay. No MCP or execution grant.",
+      "symbols": [
+        "adopt",
+        "bytes",
+        "contains",
+        "golem_workpack_bind",
+        "golem_workpack_explain",
+        "golem_workpack_resolve",
+        "live",
+        "mapping",
+        "one",
+        "parse",
+        "receipt",
+        "scope",
+        "wp_apply"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "cap",
+          "document.read"
+        ],
+        [
+          "cap",
+          "role.evaluate"
+        ],
+        [
+          "dw_text ( contract , \"allowed_effects\" )",
+          "NONE"
+        ],
+        [
+          "dw_text ( contract , \"mode\" )",
+          "documents"
+        ],
+        [
+          "dw_text ( dw_get ( selection - > meta , \"selection\" ) , \"mode\" )",
+          "documents"
+        ],
+        [
+          "dw_text ( event , \"type\" )",
+          "workpack-binding"
+        ],
+        [
+          "dw_text ( r , \"mapping\" )",
+          "native-documents-v1"
+        ],
+        [
+          "dw_text ( rule , \"predicate\" )",
+          "MARKDOWN"
+        ],
+        [
+          "dw_text ( s - > spec , \"permission\" )",
+          "ASK_ALWAYS"
+        ],
+        [
+          "dw_text ( s - > spec , \"permission\" )",
+          "DENY"
+        ],
+        [
+          "dw_text ( selection - > meta , \"kind\" )",
+          "stage-selection"
+        ],
+        [
+          "effect",
+          "execution.run"
+        ],
+        [
+          "effect",
+          "network.upload"
+        ],
+        [
+          "effect",
+          "release.publish"
+        ]
+      ],
+      "operations": []
+    },
+    {
+      "path": "src/workpack/binding_internal.h",
+      "role": "NATIVE_INTERNAL",
+      "rationale": "M4 opt-in native document binding, exact local approval, existing Work lock/CAS/replay. No MCP or execution grant.",
+      "symbols": [],
+      "declarations": [
+        [
+          "wp_apply",
+          [
+            "golem_status"
+          ],
+          [
+            "golem_document_store",
+            "*",
+            "store",
+            ",",
+            "struct",
+            "json_object",
+            "*",
+            "event",
+            ",",
+            "const",
+            "golem_digest",
+            "*",
+            "payload",
+            ",",
+            "const",
+            "golem_digest",
+            "*",
+            "frame"
           ]
         ]
       ],
@@ -55115,6 +55418,12 @@
       "contract_sha256": null
     },
     {
+      "path": "docs/workpacks/binding.md",
+      "role": "DOCUMENTATION",
+      "rationale": "M4 selected design/limited native contract or isolated mutation fixture; no production Work/client authority.",
+      "contract_sha256": null
+    },
+    {
       "path": "docs/workpacks/delivery.md",
       "role": "DOCUMENTATION",
       "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
@@ -55124,6 +55433,12 @@
       "path": "docs/workpacks/development-plan.md",
       "role": "DOCUMENTATION",
       "rationale": "Work Pack M1 design or inert fixture/public API test, not a runtime delivery route; no approval or Work mutation.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/workpacks/m4-binding-design.md",
+      "role": "DOCUMENTATION",
+      "rationale": "M4 selected design/limited native contract or isolated mutation fixture; no production Work/client authority.",
       "contract_sha256": null
     },
     {
@@ -56669,6 +56984,12 @@
       "contract_sha256": null
     },
     {
+      "path": "tests/c/test_workpack_binding_fault.c",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "M4 selected design/limited native contract or isolated mutation fixture; no production Work/client authority.",
+      "contract_sha256": null
+    },
+    {
       "path": "tests/c/test_workpack_read.c",
       "role": "VERIFICATION_FIXTURE",
       "rationale": "Isolated CLI/native Work Pack fixture, including injected read races. No client or production Work access.",
@@ -56750,6 +57071,12 @@
       "path": "tests/c/workflow_template_integration.py",
       "role": "VERIFICATION_FIXTURE",
       "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/c/workpack_binding.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "M4 selected design/limited native contract or isolated mutation fixture; no production Work/client authority.",
       "contract_sha256": null
     },
     {
@@ -57890,7 +58217,7 @@
     },
     {
       "path": "tools/capability_boundary_registry.py",
-      "sha256": "afbcb58d4488349188bc0a641a364bcc55186a19ee6cc9867c63f9fc4cca283c",
+      "sha256": "a91e01ffcb2359fa10d08d925a029212572653022de7128a510f1154972eca33",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57908,7 +58235,7 @@
     },
     {
       "path": "tools/capability_c_edge_registry.py",
-      "sha256": "b2f57f8f7a2e8fad895a9f17effa78f880289d18a55d888668d6d1d046cf0def",
+      "sha256": "a5515a9a619aedf0b4e66ef03de2d782ad0fa8fbd79933fc005fe4efad69ac30",
       "shape_sha256": "75403bdc4871af0049d714109d2f3a3e4b068028effc7899d34b01e187e2c708",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57926,7 +58253,7 @@
     },
     {
       "path": "tools/capability_c_graph_registry.py",
-      "sha256": "5e9ae305601f64fb711e748bc2dee050b88e7ccc46fd7127e60018cc950d1ba0",
+      "sha256": "42296a49c15fb07fcf859e693baca24cbf12c01f9cf681dd8b12310858919d5c",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -57998,7 +58325,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "d7a731019877799ecac5dcb1ad7160c6afe7237dc2838c5e6c8efb3233cbbb58",
+      "sha256": "52cff5aa25a36b1d05f739e3b6e823875461f6e303406a4f846430fd065865bc",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58106,7 +58433,7 @@
     },
     {
       "path": "tools/capability_m3_registry.py",
-      "sha256": "9790df1f40e17c0d78f9af2a2813efe6d9b4057d541bb96f8b509b5e042e272d",
+      "sha256": "71f9c27545c492617e95fc580ea35161228af9ff218c50272945dee87a00241f",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58124,7 +58451,7 @@
     },
     {
       "path": "tools/capability_m4_registry.py",
-      "sha256": "a0be0c856ec22dbddc0f282e79a88a38b947379df3183b6f68de87113962587a",
+      "sha256": "89fc43ef03c4a74fadb0a9d792095ff61c10041a3b7f6114df1a462359750fc0",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58142,7 +58469,7 @@
     },
     {
       "path": "tools/capability_m5_registry.py",
-      "sha256": "a803e5e6925e1b27ad8d5198663ea47d5a29e6a90293021c578087089308cd58",
+      "sha256": "c46a403c6271f22b2e71baa25b8fdc8c5f1a58b831978385d8ced161766c71d6",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58184,7 +58511,7 @@
     },
     {
       "path": "tools/capability_native_registry.py",
-      "sha256": "44b058eb1c0017a00dd36ce7a49f235ee2b9d27871ee69f2574f43fcb3143140",
+      "sha256": "af597e90204dc14ca923eaa827a9c7144bfa2fcdd805f32ae8f47e3128f4d2a1",
       "shape_sha256": "2ebad2aa2187d7758c167ade4dcb2c5893dde0b1822fe46c7c4af1dde8aeba1a",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58208,7 +58535,7 @@
     },
     {
       "path": "tools/capability_public_registry.py",
-      "sha256": "deab03edfacfe2fa64122388475d050517e00018d838c004db79388ce4d892c9",
+      "sha256": "8516fc1366416eeb4f8ce2862f73488c56741016e3c6ff430cb931a344d9047b",
       "shape_sha256": "2b1069695f989b1565564643346a52726d5e7cabf9ef541464f1d969743bb507",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58220,7 +58547,7 @@
     },
     {
       "path": "tools/capability_publication_registry.py",
-      "sha256": "c5befafd17cbf82c2b01ce23524e4f935ff56f372fc799b4b0abb87442fec7e9",
+      "sha256": "38b6bc52db97fd5606e153b5c22798d67d56f600478478f23740a67e6e730996",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58256,7 +58583,7 @@
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "0cd7513dc53b89972899c76f1b2bebe60782967fceadbd73ac4ab7978e4d94f5",
+      "sha256": "82fb308213881ac9fad46ff66b510797ce51a7e46b7ea3efca25f1017cd67d3f",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58268,7 +58595,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "80ff5c764645ebf4042e1bc28fba24d3560060c8c4e7022da50ce1abc6cd6578",
+      "sha256": "351dc7de5d317741f97a5ec584caff0b12d7ef47cae0a0610381271c88fa0bbc",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58304,7 +58631,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "0c4e628eeafebc1935e3772d2c8dd71d2ae5f15f118313d4e576d133c40b7d65",
+      "sha256": "6dfc439fae0a0a61b48812fe95eaf916410242996a6aab66bd8d1811f8d3b186",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -58472,7 +58799,7 @@
     },
     {
       "path": "tools/test_capability_native.py",
-      "sha256": "6e42426fb1a56dc172dba2b894826302cacd65fde7ddddf998ddbe8c202c57db",
+      "sha256": "98b0cdea6ce4ceb45474451b39c906c2f8ecbf5111b24a3072419dd162b958a1",
       "shape_sha256": "9917794974b6c667a8c3db2d53d9c6af8bc8f10b5955a32286794a197a290b08",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -58490,7 +58817,7 @@
     },
     {
       "path": "tools/test_capability_public.py",
-      "sha256": "2f417b65a900c349aeacfd9a225e853ea3b7e18439958f2148269f29a7f08951",
+      "sha256": "2e00a1e2279aa2870fbf71b5f8c3fe5f17d25970dd8c6c06b676547908e9b112",
       "shape_sha256": "e9c1f01ad9fcb23c0ac0cdd3d37daccb04d0cdba7d98c21be6a40829afb487c7",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -58520,7 +58847,7 @@
     },
     {
       "path": "tools/test_capability_repository.py",
-      "sha256": "866ea6eee4fc205a178a5a821522cf254c26af7ba1ceb518ae2a770770b6f910",
+      "sha256": "4685b2204ea2712dfbda3e80f84108277c3cbd8ca201b300a8f300ba764b5694",
       "shape_sha256": "561329d0bdb00fee53002923a28f3b72de134462733b5406029485047d3e0f7a",
       "role": "M0_FIXTURE_REGRESSION"
     },

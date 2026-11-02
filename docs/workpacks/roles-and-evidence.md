@@ -1,6 +1,7 @@
 # Roles, verifier proposals and Evidence Package design
 
-All binding/proposal/receipt aggregation in this document is PLANNED, not M1 API.
+M4 implements only [native document binding](binding.md). General role mapping,
+semantic proposals and receipt aggregation below remain PLANNED.
 Existing [role contracts](../role-contracts.md), [completion](../completion.md),
 [evidence export](../evidence-export.md) and [proof packs](../proof-packs.md) remain canonical.
 

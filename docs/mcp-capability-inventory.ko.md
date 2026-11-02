@@ -113,7 +113,7 @@ M0에서 각각 operation 단위로 분해·분류해야 하며 이 문서만으
 - `inventory`
 
 `pack validate|inspect|compatibility`와 `pack list|search --catalog`는 Work Pack M2/M3의 로컬 읽기 CLI다.
-MCP·Work binding 제공 경로는 없으며 구조 검증·선언 버전 비교·검색 일치가 권한이나 완료를 뜻하지 않는다.
+M4의 `pack resolve|bind|explain`은 별도 exact 승인과 기존 native lock·CAS를 사용하는 제한된 문서 binding CLI다. Work Pack MCP 제공 경로는 없으며 구조 검증·검색 일치·binding receipt가 실행 권한이나 완료를 뜻하지 않는다.
 
 ## Python 모듈 범위
 
