@@ -403,7 +403,7 @@
     },
     {
       "path": "tools/test_capability_m1.py",
-      "sha256": "4ff27cbef901ca2c292f99958979258d889176f6de8c03bcb82b149aae205d5d"
+      "sha256": "6b26660c993e5794bb3f29ea8834bba5f90c564cc8cfaecd89b1e38486395ea8"
     },
     {
       "path": "docs/mcp-m1-read-coverage.ko.md",
@@ -487,7 +487,7 @@
     },
     {
       "path": "docs/workpacks/delivery.md",
-      "sha256": "3695f6fd24957d548b4ed673c10752fcf3eaa7f765fd5cc0fd1e59c61ed63233"
+      "sha256": "56bf8c4736267b8ce4e355d1a995121e1ab6b2d35038be39961598d01a2b0853"
     },
     {
       "path": "tests/c/test_workpack_binding_fault.c",

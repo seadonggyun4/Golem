@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "5841954bad796323299af45627e12fdf9337af932bc187fee0f002fae3f7fa13",
-  "selected_source_count": 589,
-  "selected_observation_count": 2351,
-  "selected_capability_count": 1235,
+  "inventory_sha256": "c0fd04817b78d16319c0a44c834ab04f3c8a9df4250d99c99fbfd481f220eed3",
+  "selected_source_count": 596,
+  "selected_observation_count": 2359,
+  "selected_capability_count": 1242,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -542,6 +542,8 @@
       "tools/integration_task_actions.py",
       "tools/integration_transfer.py",
       "tools/integration_update.py",
+      "tools/integration_workpack_actions.py",
+      "tools/integration_workpack_reads.py",
       "tools/intent_authority.py",
       "tools/intent_authority_host.c",
       "tools/intent_authority_lifecycle.py",
@@ -1004,6 +1006,8 @@
       "tools/integration_task_actions.py",
       "tools/integration_transfer.py",
       "tools/integration_update.py",
+      "tools/integration_workpack_actions.py",
+      "tools/integration_workpack_reads.py",
       "tools/intent_authority.py",
       "tools/intent_authority_host.c",
       "tools/intent_authority_lifecycle.py",
@@ -3572,19 +3576,19 @@
     },
     {
       "path": "tools/integration_service.py",
-      "sha256": "c068fd6f888868e311568f4e82c93b7cf5a6107f68cac75059f520bb58e7a7c5"
+      "sha256": "f82d9963a2152e14c10eeb2805c66eaa82beea9b1c50805b6333a51500102a44"
     },
     {
       "path": "tools/integration_mutation_contract.py",
-      "sha256": "6c3b342b1a7859fa863979dc9ca41585084c716597e5159f17176c6c024f9410"
+      "sha256": "586501b124e655e328861dccd821c752743ccface1fbe1396514fb066cde3335"
     },
     {
       "path": "tools/integration_mutations.py",
-      "sha256": "93fbe43fee8d26acde873bd7d41b8edbd099e61dd0e904e58fbc3fa2278731dc"
+      "sha256": "e9232924c824bf5eaef8be7683bdd480c74ba338d04b8a7fd26ac25f96987cb8"
     },
     {
       "path": "tools/integration_mutation_mcp.py",
-      "sha256": "68c9a26a967797eafd4d1e1158f786b80d087a6c2311394bbfe0017d963e3d1e"
+      "sha256": "6334721d13d2faf8debe19e9666d3bd0ec20ac5abe031ac7486da36a33824a69"
     },
     {
       "path": "tools/integration_backend.py",
@@ -3740,7 +3744,7 @@
     },
     {
       "path": "tools/integration_transfer.py",
-      "sha256": "3f022eab8ddf364a3e7c5f2d895eaebdb280ac7b31f3204d673358f40d9be68c"
+      "sha256": "79995b31cea23fd8208010417299cc1f40d1de4192040253b5793f209f5e1b05"
     },
     {
       "path": "docs/runtime-events.md",
@@ -5160,7 +5164,7 @@
     },
     {
       "path": "tools/integration_mcp.py",
-      "sha256": "14a5ffc28d2dbb97b6044230afb4481fd898ec952407055065f858f11d851661"
+      "sha256": "7e4ae98d534e96f22079c8d7b021c0f654a0460987d2f46b13af2c65ebd141db"
     },
     {
       "path": "tools/integration_mcpb.py",
@@ -5508,7 +5512,7 @@
     },
     {
       "path": ".github/workflows/observation.yml",
-      "sha256": "22339ab13f0567cc1024ab4741cb1fd3148d31491df40f9400079665754c766f"
+      "sha256": "f32a2a5cb45e07a853d4308209b596f09a15c9f8311156628093aa48c5189af7"
     },
     {
       "path": ".gitignore",
@@ -5608,7 +5612,7 @@
     },
     {
       "path": "tools/integration_read_resources.py",
-      "sha256": "3e79c9503c1a85a5a56c132364e53b722d7c176ed3887747b6b7294552feb392"
+      "sha256": "aeaf3a1577a1a74135846ada4dcd58577d469402b9f3bbd41130b69036f02b17"
     },
     {
       "path": "tools/integration_read_views.py",
@@ -5624,7 +5628,7 @@
     },
     {
       "path": "tools/test_capability_m1.py",
-      "sha256": "4ff27cbef901ca2c292f99958979258d889176f6de8c03bcb82b149aae205d5d"
+      "sha256": "6b26660c993e5794bb3f29ea8834bba5f90c564cc8cfaecd89b1e38486395ea8"
     },
     {
       "path": "docs/mcp-m1-read-coverage.ko.md",
@@ -5636,7 +5640,7 @@
     },
     {
       "path": "tools/integration_prepare_builders.py",
-      "sha256": "19b648cca11e07e2965815312c052b61776671e380f1ddb12b95e4f021ad8684"
+      "sha256": "767d8fa8919e437932dd8576c178cfefdc3b1f6a314caffe305bf6b7772f3d92"
     },
     {
       "path": "tools/test_integration_m2.py",
@@ -5672,7 +5676,7 @@
     },
     {
       "path": "tools/integration_quality_reads.py",
-      "sha256": "7dbeb37594120ca415543b81a05369b9728fc4f554e66a710b7c6636ea2a3367"
+      "sha256": "a12157a685c821399b31b3a807e450a5ae52dfe71b52801c79fb727f408206da"
     },
     {
       "path": "tools/integration_helper_contract.py",
@@ -5720,11 +5724,11 @@
     },
     {
       "path": "tools/integration_feature_profiles.py",
-      "sha256": "653540bcb5b9586d24b64fcc324ffb4d379ee11dfbf10da3e9b15b66f3e1c66f"
+      "sha256": "94d152a375ecc243c5eed71bf24f2a1d369eef2fa52a009d098734d6c7fc1b8a"
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "91b2ae678af21e037a820e5c756c14f4c86722124f5086b5668ffb8f7bd3eb2c"
+      "sha256": "199fb9872e7a19ab5341f9d6fff24bfed2774c9f612886c58cdfa4abe105d1e7"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -5816,7 +5820,7 @@
     },
     {
       "path": "docs/workpacks/delivery.md",
-      "sha256": "3695f6fd24957d548b4ed673c10752fcf3eaa7f765fd5cc0fd1e59c61ed63233"
+      "sha256": "56bf8c4736267b8ce4e355d1a995121e1ab6b2d35038be39961598d01a2b0853"
     },
     {
       "path": "src/workpack/binding.c",
@@ -5905,6 +5909,34 @@
     {
       "path": "docs/workpacks/reference-adapter.md",
       "sha256": "4535208631c1659c4f6d48442ef02c7db21dd707774f987d0dbcc835007d5da8"
+    },
+    {
+      "path": "tools/integration_workpack_reads.py",
+      "sha256": "fffa28fa58e8f173b57cbcb91b3cbdc34f468789d79f6635ab421f8361ca7bf5"
+    },
+    {
+      "path": "tools/test_integration_workpack.py",
+      "sha256": "cbfa35dcfd254471d00aa92630efa5e3a0ff45ec18cb665d3a5f4fabcef50b9c"
+    },
+    {
+      "path": "tests/c/workpack_mcp.py",
+      "sha256": "a6baf9e0b1d7d1d8ec7e7404c19d5ac8020582759c6dc33c13d6802ac86ebd86"
+    },
+    {
+      "path": "docs/workpacks/mcp-design.md",
+      "sha256": "9ec6ba68ccd10cda5e40bade7037709337a69afc1d1a87cc4230d8149c013053"
+    },
+    {
+      "path": "docs/workpacks/mcp.md",
+      "sha256": "c34860798ca7698aa4508cc497d73ef953c263cc8a41caf373d50691e52f4c5f"
+    },
+    {
+      "path": "tools/integration_workpack_actions.py",
+      "sha256": "41cd2aa5ce14e9e93982a85e434591c11a44ca65e894e00c48bc21aa35927539"
+    },
+    {
+      "path": "tests/c/workpack_mcp_actions.py",
+      "sha256": "dc9f14df360d7c3877a1385b18702fc861dcdcb4b8aacc03f8e8a996e8564f6a"
     }
   ],
   "native_definitions": [
@@ -9496,19 +9528,19 @@
           "action_confirm",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "literal"
             ]
           ]
@@ -9517,19 +9549,19 @@
           "action_prepare",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "literal"
             ]
           ]
@@ -9538,39 +9570,43 @@
           "approval_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -9579,19 +9615,19 @@
           "approved_action_prepare",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "literal"
             ]
           ]
@@ -9600,35 +9636,39 @@
           "artifact_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
+              "remainder"
+            ],
+            [
+              263,
               "literal"
             ]
           ]
@@ -9637,39 +9677,43 @@
           "binding_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -9678,35 +9722,39 @@
           "bundle_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
+              "remainder"
+            ],
+            [
+              263,
               "literal"
             ]
           ]
@@ -9715,27 +9763,27 @@
           "candidate_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "literal"
             ]
           ]
@@ -9744,19 +9792,19 @@
           "completion_check",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "literal"
             ],
             [
-              246,
+              249,
               "literal"
             ]
           ]
@@ -9765,35 +9813,39 @@
           "configuration_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
+              "remainder"
+            ],
+            [
+              263,
               "literal"
             ]
           ]
@@ -9802,11 +9854,11 @@
           "context_get",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "literal"
             ]
           ]
@@ -9815,39 +9867,43 @@
           "context_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -9856,19 +9912,19 @@
           "contract_prepare",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "literal"
             ]
           ]
@@ -9877,31 +9933,31 @@
           "cost_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "literal"
             ]
           ]
@@ -9910,39 +9966,43 @@
           "diagnostic_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -9951,39 +10011,43 @@
           "discovery_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -9992,39 +10056,43 @@
           "document_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -10033,35 +10101,39 @@
           "events_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
+              "remainder"
+            ],
+            [
+              263,
               "literal"
             ]
           ]
@@ -10070,19 +10142,19 @@
           "evidence_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "literal"
             ],
             [
-              246,
+              249,
               "remainder"
             ]
           ]
@@ -10091,31 +10163,31 @@
           "execution_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "literal"
             ]
           ]
@@ -10124,11 +10196,11 @@
           "handoff_prepare",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "literal"
             ]
           ]
@@ -10137,43 +10209,47 @@
           "history_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
-              "remainder"
-            ],
-            [
-              260,
+              261,
               "remainder"
             ],
             [
               263,
+              "remainder"
+            ],
+            [
+              265,
+              "remainder"
+            ],
+            [
+              268,
               "remainder"
             ]
           ]
@@ -10182,19 +10258,19 @@
           "inputs_prepare",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "literal"
             ]
           ]
@@ -10203,27 +10279,27 @@
           "inventory_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "literal"
             ]
           ]
@@ -10232,39 +10308,43 @@
           "journal_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -10273,23 +10353,23 @@
           "merge_prepare",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "literal"
             ]
           ]
@@ -10298,39 +10378,43 @@
           "native_validate",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -10339,23 +10423,23 @@
           "parallel_prepare",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "literal"
             ]
           ]
@@ -10364,19 +10448,19 @@
           "plan_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "literal"
             ]
           ]
@@ -10385,39 +10469,43 @@
           "profile_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -10426,7 +10514,7 @@
           "projects_list",
           [
             [
-              230,
+              233,
               "literal"
             ]
           ]
@@ -10435,31 +10523,31 @@
           "proof_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "literal"
             ]
           ]
@@ -10468,39 +10556,43 @@
           "reentry_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -10509,39 +10601,43 @@
           "report_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
               "literal"
             ]
           ]
@@ -10550,31 +10646,31 @@
           "research_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "literal"
             ]
           ]
@@ -10583,236 +10679,35 @@
           "revision_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
-              "literal"
-            ]
-          ]
-        ],
-        [
-          "role_read",
-          [
-            [
-              230,
-              "remainder"
-            ],
-            [
-              240,
-              "remainder"
-            ],
-            [
-              245,
-              "remainder"
-            ],
-            [
-              250,
-              "remainder"
-            ],
-            [
-              252,
-              "remainder"
-            ],
-            [
-              254,
-              "remainder"
-            ],
-            [
-              256,
-              "remainder"
-            ],
-            [
-              258,
-              "remainder"
-            ],
-            [
-              260,
-              "literal"
-            ]
-          ]
-        ],
-        [
-          "session_read",
-          [
-            [
-              230,
-              "remainder"
-            ],
-            [
-              240,
-              "remainder"
-            ],
-            [
-              245,
-              "remainder"
-            ],
-            [
-              250,
-              "remainder"
-            ],
-            [
-              252,
-              "remainder"
-            ],
-            [
-              254,
-              "remainder"
-            ],
-            [
-              256,
-              "remainder"
-            ],
-            [
-              258,
-              "remainder"
-            ],
-            [
-              260,
-              "literal"
-            ]
-          ]
-        ],
-        [
-          "template_read",
-          [
-            [
-              230,
-              "remainder"
-            ],
-            [
-              240,
-              "remainder"
-            ],
-            [
-              245,
-              "remainder"
-            ],
-            [
-              250,
-              "remainder"
-            ],
-            [
-              252,
-              "remainder"
-            ],
-            [
-              254,
-              "remainder"
-            ],
-            [
-              256,
-              "remainder"
-            ],
-            [
-              258,
-              "remainder"
-            ],
-            [
-              260,
-              "literal"
-            ]
-          ]
-        ],
-        [
-          "usage_read",
-          [
-            [
-              230,
-              "remainder"
-            ],
-            [
-              240,
-              "remainder"
-            ],
-            [
-              245,
-              "remainder"
-            ],
-            [
-              250,
-              "remainder"
-            ],
-            [
-              252,
-              "remainder"
-            ],
-            [
-              254,
-              "remainder"
-            ],
-            [
-              256,
-              "remainder"
-            ],
-            [
-              258,
-              "literal"
-            ]
-          ]
-        ],
-        [
-          "work_inspect",
-          [
-            [
-              230,
-              "remainder"
-            ],
-            [
-              240,
-              "remainder"
-            ],
-            [
-              245,
-              "remainder"
-            ],
-            [
-              250,
-              "remainder"
-            ],
-            [
-              252,
-              "remainder"
-            ],
-            [
-              254,
-              "remainder"
-            ],
-            [
-              256,
-              "remainder"
-            ],
-            [
-              258,
-              "remainder"
-            ],
-            [
-              260,
+              261,
               "remainder"
             ],
             [
@@ -10822,42 +10717,349 @@
           ]
         ],
         [
+          "role_read",
+          [
+            [
+              233,
+              "remainder"
+            ],
+            [
+              243,
+              "remainder"
+            ],
+            [
+              248,
+              "remainder"
+            ],
+            [
+              253,
+              "remainder"
+            ],
+            [
+              255,
+              "remainder"
+            ],
+            [
+              257,
+              "remainder"
+            ],
+            [
+              259,
+              "remainder"
+            ],
+            [
+              261,
+              "remainder"
+            ],
+            [
+              263,
+              "remainder"
+            ],
+            [
+              265,
+              "literal"
+            ]
+          ]
+        ],
+        [
+          "session_read",
+          [
+            [
+              233,
+              "remainder"
+            ],
+            [
+              243,
+              "remainder"
+            ],
+            [
+              248,
+              "remainder"
+            ],
+            [
+              253,
+              "remainder"
+            ],
+            [
+              255,
+              "remainder"
+            ],
+            [
+              257,
+              "remainder"
+            ],
+            [
+              259,
+              "remainder"
+            ],
+            [
+              261,
+              "remainder"
+            ],
+            [
+              263,
+              "remainder"
+            ],
+            [
+              265,
+              "literal"
+            ]
+          ]
+        ],
+        [
+          "template_read",
+          [
+            [
+              233,
+              "remainder"
+            ],
+            [
+              243,
+              "remainder"
+            ],
+            [
+              248,
+              "remainder"
+            ],
+            [
+              253,
+              "remainder"
+            ],
+            [
+              255,
+              "remainder"
+            ],
+            [
+              257,
+              "remainder"
+            ],
+            [
+              259,
+              "remainder"
+            ],
+            [
+              261,
+              "remainder"
+            ],
+            [
+              263,
+              "remainder"
+            ],
+            [
+              265,
+              "literal"
+            ]
+          ]
+        ],
+        [
+          "usage_read",
+          [
+            [
+              233,
+              "remainder"
+            ],
+            [
+              243,
+              "remainder"
+            ],
+            [
+              248,
+              "remainder"
+            ],
+            [
+              253,
+              "remainder"
+            ],
+            [
+              255,
+              "remainder"
+            ],
+            [
+              257,
+              "remainder"
+            ],
+            [
+              259,
+              "remainder"
+            ],
+            [
+              261,
+              "remainder"
+            ],
+            [
+              263,
+              "literal"
+            ]
+          ]
+        ],
+        [
+          "work_inspect",
+          [
+            [
+              233,
+              "remainder"
+            ],
+            [
+              243,
+              "remainder"
+            ],
+            [
+              248,
+              "remainder"
+            ],
+            [
+              253,
+              "remainder"
+            ],
+            [
+              255,
+              "remainder"
+            ],
+            [
+              257,
+              "remainder"
+            ],
+            [
+              259,
+              "remainder"
+            ],
+            [
+              261,
+              "remainder"
+            ],
+            [
+              263,
+              "remainder"
+            ],
+            [
+              265,
+              "remainder"
+            ],
+            [
+              268,
+              "literal"
+            ]
+          ]
+        ],
+        [
           "workflow_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "remainder"
             ],
             [
-              256,
+              259,
               "remainder"
             ],
             [
-              258,
+              261,
               "remainder"
             ],
             [
-              260,
+              263,
+              "remainder"
+            ],
+            [
+              265,
+              "literal"
+            ]
+          ]
+        ],
+        [
+          "workpack_read",
+          [
+            [
+              233,
+              "remainder"
+            ],
+            [
+              243,
+              "remainder"
+            ],
+            [
+              248,
+              "remainder"
+            ],
+            [
+              253,
+              "remainder"
+            ],
+            [
+              255,
+              "remainder"
+            ],
+            [
+              257,
+              "remainder"
+            ],
+            [
+              259,
+              "remainder"
+            ],
+            [
+              261,
+              "literal"
+            ]
+          ]
+        ],
+        [
+          "workpack_resource_read",
+          [
+            [
+              233,
+              "remainder"
+            ],
+            [
+              243,
+              "remainder"
+            ],
+            [
+              248,
+              "remainder"
+            ],
+            [
+              253,
+              "remainder"
+            ],
+            [
+              255,
+              "remainder"
+            ],
+            [
+              257,
+              "remainder"
+            ],
+            [
+              259,
+              "remainder"
+            ],
+            [
+              261,
+              "remainder"
+            ],
+            [
+              263,
               "literal"
             ]
           ]
@@ -10866,27 +11068,27 @@
           "workspace_read",
           [
             [
-              230,
+              233,
               "remainder"
             ],
             [
-              240,
+              243,
               "remainder"
             ],
             [
-              245,
+              248,
               "remainder"
             ],
             [
-              250,
+              253,
               "remainder"
             ],
             [
-              252,
+              255,
               "remainder"
             ],
             [
-              254,
+              257,
               "literal"
             ]
           ]
@@ -10941,6 +11143,8 @@
         "usage_read",
         "work_inspect",
         "workflow_read",
+        "workpack_read",
+        "workpack_resource_read",
         "workspace_read"
       ],
       "delegated": [
@@ -10980,6 +11184,9 @@
         "session_submit",
         "work_create",
         "work_noop_run",
+        "workpack_bind",
+        "workpack_receipt_export",
+        "workpack_receipt_manifest",
         "workspace_request"
       ],
       "helper": "Service._mutate",
@@ -10996,7 +11203,7 @@
           "CONFIRMED",
           [
             [
-              274,
+              277,
               [
                 [
                   "FunctionDef",
@@ -11028,7 +11235,7 @@
           "CONFIRMED",
           [
             [
-              283,
+              286,
               [
                 [
                   "FunctionDef",
@@ -11060,7 +11267,7 @@
           "CONFIRMED",
           [
             [
-              287,
+              290,
               [
                 [
                   "FunctionDef",
@@ -11092,7 +11299,7 @@
           "CONFIRMED",
           [
             [
-              290,
+              293,
               [
                 [
                   "FunctionDef",
@@ -11125,7 +11332,7 @@
               ]
             ],
             [
-              301,
+              304,
               [
                 [
                   "FunctionDef",
@@ -11164,7 +11371,7 @@
               ]
             ],
             [
-              326,
+              329,
               [
                 [
                   "FunctionDef",
@@ -11204,7 +11411,7 @@
           "CONFIRMED",
           [
             [
-              291,
+              294,
               [
                 [
                   "FunctionDef",
@@ -11262,7 +11469,7 @@
           "CONFIRMED",
           [
             [
-              306,
+              309,
               [
                 [
                   "FunctionDef",
@@ -11308,7 +11515,7 @@
           "CONFIRMED",
           [
             [
-              117,
+              118,
               [
                 [
                   "FunctionDef",
@@ -11332,7 +11539,7 @@
           "CONFIRMED",
           [
             [
-              120,
+              121,
               [
                 [
                   "FunctionDef",
@@ -11356,7 +11563,7 @@
           "CONFIRMED",
           [
             [
-              180,
+              183,
               [
                 [
                   "FunctionDef",
@@ -11380,7 +11587,7 @@
           "CONFIRMED",
           [
             [
-              193,
+              196,
               [
                 [
                   "FunctionDef",
@@ -11502,7 +11709,8 @@
         "configuration_read",
         "events_read",
         "revision_read",
-        "usage_read"
+        "usage_read",
+        "workpack_resource_read"
       ],
       "checked_functions": 37,
       "blockers": [],
@@ -11834,6 +12042,11 @@
         "golem_work_inspect",
         "golem_work_noop_run",
         "golem_workflow_read",
+        "golem_workpack_bind",
+        "golem_workpack_read",
+        "golem_workpack_receipt_export",
+        "golem_workpack_receipt_manifest",
+        "golem_workpack_resource_read",
         "golem_workspace_read",
         "golem_workspace_request"
       ],
@@ -14352,14 +14565,16 @@
         "src/workpack/receipt_model.c",
         "src/workpack/receipt_verify.c",
         "src/cli/workpack_receipt.c",
-        "src/workpack/reference.c"
+        "src/workpack/reference.c",
+        "tools/integration_workpack_reads.py",
+        "tools/integration_workpack_actions.py"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1145,
+      "reviewed_capabilities": 1152,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -47597,6 +47812,14 @@
         ],
         [
           "Name(id='name', ctx=Load())",
+          "workpack_read"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
+          "workpack_resource_read"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
           "workspace_read"
         ],
         [
@@ -51936,6 +52159,10 @@
           "events_read"
         ],
         [
+          "Name(id='name', ctx=Load())",
+          "workpack_resource_read"
+        ],
+        [
           "Name(id='op', ctx=Load())",
           "adapter"
         ],
@@ -51990,6 +52217,18 @@
         [
           "Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
           "bytes"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "list"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "receipt_verify"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "search"
         ],
         [
           "Subscript(value=Name(id='process', ctx=Load()), slice=Constant(value='reason'), ctx=Load())",
@@ -55202,6 +55441,87 @@
         ]
       ],
       "operations": []
+    },
+    {
+      "path": "tools/integration_workpack_reads.py",
+      "role": "HOST_TOOL",
+      "rationale": "Finite Work Pack native read argv and supplied bytes; D2 and separate pinned resource gates are retained. No action authority.",
+      "symbols": [
+        "command",
+        "query",
+        "resource_command"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Name(id='op', ctx=Load())",
+          "assess"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "compatibility"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "explain"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "inspect"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "proposal_validate"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "receipt_verify"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "resolve"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "search"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "validate"
+        ]
+      ],
+      "operations": []
+    },
+    {
+      "path": "tools/integration_workpack_actions.py",
+      "role": "HOST_TOOL",
+      "rationale": "Exact D4 owner-pinned Work Pack requests and separate native binding/export digests. Protected output parent and immutable intent; no approval issuance or arbitrary argv.",
+      "symbols": [
+        "authorize",
+        "command",
+        "draft",
+        "shape"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Name(id='name', ctx=Load())",
+          "workpack_bind"
+        ],
+        [
+          "Name(id='op', ctx=Load())",
+          "export"
+        ],
+        [
+          "Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='tool'), ctx=Load())",
+          "workpack_bind"
+        ],
+        [
+          "Subscript(value=Name(id='entry', ctx=Load()), slice=Constant(value='tool'), ctx=Load())",
+          "workpack_receipt_manifest"
+        ]
+      ],
+      "operations": []
     }
   ],
   "repository_boundary_reviews": [
@@ -55239,7 +55559,7 @@
       "path": ".github/workflows/observation.yml",
       "role": "BUILD_PACKAGE_LICENSE",
       "rationale": "Build/export/package/dependency/license/CI metadata; production FFI sources and plugin contracts reviewed separately. Does not create a daily Work operation.",
-      "contract_sha256": "22339ab13f0567cc1024ab4741cb1fd3148d31491df40f9400079665754c766f"
+      "contract_sha256": "f32a2a5cb45e07a853d4308209b596f09a15c9f8311156628093aa48c5189af7"
     },
     {
       "path": ".gitignore",
@@ -56319,6 +56639,18 @@
       "path": "docs/workpacks/m6-export-design.md",
       "role": "DOCUMENTATION",
       "rationale": "M6 owner-selected bounded private publication contract or isolated fixture; no production/client authority.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/workpacks/mcp-design.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Work Pack MCP design or isolated native/policy boundary verification. No live client authority.",
+      "contract_sha256": null
+    },
+    {
+      "path": "docs/workpacks/mcp.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Work Pack MCP design or isolated native/policy boundary verification. No live client authority.",
       "contract_sha256": null
     },
     {
@@ -58014,6 +58346,18 @@
       "contract_sha256": null
     },
     {
+      "path": "tests/c/workpack_mcp.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack MCP design or isolated native/policy boundary verification. No live client authority.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/c/workpack_mcp_actions.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack MCP design or isolated native/policy boundary verification. No live client authority.",
+      "contract_sha256": null
+    },
+    {
       "path": "tests/c/workpack_proposal.py",
       "role": "VERIFICATION_FIXTURE",
       "rationale": "M5 inert proposal contract/sample or disposable native validation fixture; no production authority or client access.",
@@ -58992,6 +59336,12 @@
       "contract_sha256": null
     },
     {
+      "path": "tools/test_integration_workpack.py",
+      "role": "VERIFICATION_FIXTURE",
+      "rationale": "Work Pack MCP design or isolated native/policy boundary verification. No live client authority.",
+      "contract_sha256": null
+    },
+    {
       "path": "tools/test_intent_authority.py",
       "role": "VERIFICATION_FIXTURE",
       "rationale": "Test/consumer/packaging fixture, not a production entrypoint or authority. Referenced tests are byte-checked separately; this is not an execution result.",
@@ -59157,7 +59507,7 @@
     },
     {
       "path": "tools/capability_boundary_registry.py",
-      "sha256": "fda6ab05e0e8fe788573f34c83c089919574417d38ac93a57cebfc3c04771dc9",
+      "sha256": "1b1f32096ead129ff5911ff29acc338b3e46889ff9b5a5c7f3c32fed1bad8009",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59229,7 +59579,7 @@
     },
     {
       "path": "tools/capability_delegation.py",
-      "sha256": "82190db529b6831e7d9c287e0c2378b2eac06d2dee2156165d735c68876f2717",
+      "sha256": "3badfc7577854840ac63783ca1d9839f7a6f8cf38cbb41f6c5c4e3d00dc3cd37",
       "shape_sha256": "29576e4b58af57bb27c232827f037c7f8728a18ae1b787d5a20b1a27141ab6c9",
       "role": "M0_STATIC_ANALYSIS"
     },
@@ -59265,7 +59615,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "eb663b6700e4c2636983bdef3d6b87dcb6c0af945809d7de464746af8aa2f917",
+      "sha256": "7df5e3094c7f18f9c2325b3441cc072d24714ef7c07e5592a86d4fbd208b1130",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59289,7 +59639,7 @@
     },
     {
       "path": "tools/capability_fallback.py",
-      "sha256": "7ce69d7f1bd6fb6dae73fca72a882ee2def626fe203957cb819d8cc5075c376a",
+      "sha256": "f1d218085dfac44955772ba757b10efd0450393175f5f2082b05fefbc8869237",
       "shape_sha256": "a6ea2f0bb4ecee9ed3e595822c40a85d12d1d47a99c160518691900471965637",
       "role": "M0_STATIC_ANALYSIS"
     },
@@ -59307,7 +59657,7 @@
     },
     {
       "path": "tools/capability_handler_registry.py",
-      "sha256": "70fdea158d18df7647d90a4951d6ae393f3449fcd74579975054d156afb8bb92",
+      "sha256": "0f3973ba7b9f8c91fb18697ce2eab08cb839c97e087441a5c4bb42f7bf853816",
       "shape_sha256": "43f3115d2622e1776b900f6f5a094cf92bc24609bb3389b956ace15fad77e462",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59337,7 +59687,7 @@
     },
     {
       "path": "tools/capability_m1_registry.py",
-      "sha256": "1b2cb584c92cce765701767dc21ecd093133d34408042e3843d551c0c9a7e6e5",
+      "sha256": "ed541e82aec06ac32e3b72689d13a4cb13b3fd5c293b894e9c8fc6aa7121e9bc",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59355,7 +59705,7 @@
     },
     {
       "path": "tools/capability_m2_registry.py",
-      "sha256": "de1fb03d8cda6ed8aa2ec195dc915868cfdfddc63fe5f65981da2a4265569cb7",
+      "sha256": "f3a66bbd00bf8c569b6426a5bb2f0738701a792551c95d9b1b8e3c652150f4de",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59373,7 +59723,7 @@
     },
     {
       "path": "tools/capability_m3_registry.py",
-      "sha256": "5543b32b657fba4a88723c91bd64706b5c69015ac71095359037d1a49f7b3f9a",
+      "sha256": "2b76b6537570bb371d32788ae07184297cd73e286bd249c2988ed6f816673942",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59391,7 +59741,7 @@
     },
     {
       "path": "tools/capability_m4_registry.py",
-      "sha256": "5eb84edcf11a4c2db42cb93b5d7dd16054a945f65f0a5ab28461c576cd75d6a8",
+      "sha256": "339fd133f25c832d0d9165157b8379af0431fc93126088fa90276f980c611104",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59409,7 +59759,7 @@
     },
     {
       "path": "tools/capability_m5_registry.py",
-      "sha256": "198d15d01de6447767f84b9028c827014c1844b61d89de4b47deb2ae869c9053",
+      "sha256": "2d3919d32aadc1ba01d0f35905a70d545b91a387e690b47dff56e22cc38adbfa",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59427,13 +59777,13 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "04e25f3b0442401f4befd892f9bfe4f935eb66d6db070c0cd36a2cab3007e10d",
+      "sha256": "f25647bb5d3d02cabc083ad668585ec8da8e763d943cff60b10d35bd2ffaf437",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
     {
       "path": "tools/capability_mutation_graph.py",
-      "sha256": "e4cdfcc2e407c0c511ad228cf3bd885130536f8ddbcc73bfe1994e0d78599910",
+      "sha256": "19360018043adf663d7923f4b79b93a2bafb494e988848bc415b6ded43a94a23",
       "shape_sha256": "c071b5171b7f5115f01cbccd34225ff0d555bd7ad13556eab52b27a13863980c",
       "role": "M0_STATIC_ANALYSIS"
     },
@@ -59523,7 +59873,7 @@
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "ae009a148f588c04670da94323793cf2733de7ef551da4b6cf70e00934fa65e8",
+      "sha256": "7aa0e4b7212d3c593b6b2710abc5f3840531f229baf4ea054c07020c0993a791",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59535,7 +59885,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "146fc0dcba130aeb7ca6bbd0836bda692d843fb5ec44bf94a6de29c214e38a93",
+      "sha256": "df83642043390d47c91454958601d2298d2b8840b52cdd797b437ce42d71c8ed",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59553,7 +59903,7 @@
     },
     {
       "path": "tools/capability_source_role_registry.py",
-      "sha256": "eb90d8eba6b7716bcf69692532a9616e2a0274ca92ad65c35790431a28fad172",
+      "sha256": "0788799516d1452deeb88251773031bd7efa98dac15a1767d92b14e68aa9d177",
       "shape_sha256": "f259a8e7cb62145570c4b44cf1567dbf9da61ee4f84567383cb816dc5fe0a8b0",
       "role": "M0_REVIEW_METADATA"
     },
@@ -59571,13 +59921,13 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "07298447c8bc32c56fad825b615a050e237282382bb82606462b9ecdad778e01",
+      "sha256": "4cded120e6ee0bd6c098aaac5626607a43d28313089845249e10f79c46d511ea",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
     {
       "path": "tools/capability_transport.py",
-      "sha256": "379561fda280f1bf9f424f9475501221d976dfd35bb9567973671ef2fe780422",
+      "sha256": "a4a9461d1f10884c7e466c3eefe11cb3081d7bb681a2553fbb4b167d464e4dd3",
       "shape_sha256": "fde51cdad3ece95b53f5dc77b7d32fe176af5a353fc39a762565ea1bde5d6b4f",
       "role": "M0_STATIC_ANALYSIS"
     },
@@ -59601,7 +59951,7 @@
     },
     {
       "path": "tools/test_capability_backend_transport.py",
-      "sha256": "5ac6e92b0775fda07d3490b6bb6ad222a7ff070ce07cd2bf45118703afe12006",
+      "sha256": "fd72cb5fac1428b4c3c7c70163d2a41452cca528b611cbb6b5d87347a3267f75",
       "shape_sha256": "d520134d48913abed97bdeec48fc9cb117841dfd9fdd3f26f93cb37775cd364a",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -59643,7 +59993,7 @@
     },
     {
       "path": "tools/test_capability_connections.py",
-      "sha256": "2c697abdaefa798c06d6492652ee380aa3f06212ce5af12d012fe8281aadbcd9",
+      "sha256": "88b30255255fc8efc91e48cbfbb7086b571b2ea7046e743a0a10b8e33182cc4f",
       "shape_sha256": "eef46645d4dcffe98e23272faeef4fc01ff1a4c84e6796339ecfda93e86ae4a1",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -59697,7 +60047,7 @@
     },
     {
       "path": "tools/test_capability_m1.py",
-      "sha256": "4ff27cbef901ca2c292f99958979258d889176f6de8c03bcb82b149aae205d5d",
+      "sha256": "6b26660c993e5794bb3f29ea8834bba5f90c564cc8cfaecd89b1e38486395ea8",
       "shape_sha256": "e2326a1dd4e732b04b0dd1d8863148cfb9fa289b09211a125302b0608d6e9d3b",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -59733,7 +60083,7 @@
     },
     {
       "path": "tools/test_capability_mutation_graph.py",
-      "sha256": "d3ea1f89a455bf422ca8b09512d55dcfa3a1a5fb83f8d0e162bad181e2fa3016",
+      "sha256": "b66584ebef66364badd6fba4ee4b45094a412476e0302b33967322731912d1b7",
       "shape_sha256": "fdcec6a10c0856706d43f7e7045bcdac4f186d586424b1b25507cef0838bf936",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -59811,7 +60161,7 @@
     },
     {
       "path": "tools/test_capability_source.py",
-      "sha256": "d76fd9e318e82dc74b8198d03df47f41d4f24651e6b3e0bd6e745969a9f94175",
+      "sha256": "90c952647be14f77c51f9bed3a602e585662a955b222899a6ef834cecbe03859",
       "shape_sha256": "3825b5e0d40ccf7b06356078ba8b7ec3b389061da9ff4828c334dfff0d90f3fb",
       "role": "M0_FIXTURE_REGRESSION"
     },

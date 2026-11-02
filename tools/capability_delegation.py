@@ -5,13 +5,14 @@ from capability_profile import scan_sources
 from capability_source import python_literal_names
 from capability_fallback import _shape, _method
 
-PINS={'tools/integration_parallel_actions.py':'fba94f6a466bdf9b013ab8ad939ed80d5232bb2dd7ea64da3d2912ff2eb02dc3',
+PINS={'tools/integration_workpack_actions.py':'41cd2aa5ce14e9e93982a85e434591c11a44ca65e894e00c48bc21aa35927539',
+'tools/integration_parallel_actions.py':'fba94f6a466bdf9b013ab8ad939ed80d5232bb2dd7ea64da3d2912ff2eb02dc3',
 'tools/integration_quality_actions.py':'9952c0b371fdbcccb13e1ae2872690c541e16c0e076e19588483f5cbd14e02a0',
 'tools/integration_task_actions.py':'070b6c35d8ea0e6f0cbd53706c56c579b7bfe6a43a93406f7e6894a7f2924002',
 
- 'tools/integration_mutations.py':'93fbe43fee8d26acde873bd7d41b8edbd099e61dd0e904e58fbc3fa2278731dc',
- 'tools/integration_mutation_contract.py':'6c3b342b1a7859fa863979dc9ca41585084c716597e5159f17176c6c024f9410',
- 'tools/integration_service.py':'c068fd6f888868e311568f4e82c93b7cf5a6107f68cac75059f520bb58e7a7c5',
+ 'tools/integration_mutations.py':'e9232924c824bf5eaef8be7683bdd480c74ba338d04b8a7fd26ac25f96987cb8',
+ 'tools/integration_mutation_contract.py':'586501b124e655e328861dccd821c752743ccface1fbe1396514fb066cde3335',
+ 'tools/integration_service.py':'f82d9963a2152e14c10eeb2805c66eaa82beea9b1c50805b6333a51500102a44',
  'tools/integration_contract.py':'e2c5e3ec5142f888fd4fcf6f2bd1193fd77ff52f4f4234e54df7ec997aac6fdb',
 }
 @dataclass(frozen=True)

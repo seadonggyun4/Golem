@@ -10,15 +10,16 @@ import integration_transfer as transfer
 import integration_task_actions as tasks
 import integration_quality_actions as quality
 import integration_parallel_actions as parallel
+import integration_workpack_actions as workpack
 
-NAMES = ("session_claim", "session_begin", "session_resume", "session_reconcile",
+NAMES = ("workpack_bind", "workpack_receipt_manifest", "workpack_receipt_export", "session_claim", "session_begin", "session_resume", "session_reconcile",
          "session_submit", "document_submit", "execution_request",
     "session_start", "session_heartbeat", "session_reject_output", "binding_attach",
     "role_enroll", "role_assess", "completion_finalize", "completion_report", "reentry_decide",
     "reentry_report", "document_project", "work_create", "context_publish", "discovery_snapshot",
     "profile_register", "run_link", "work_noop_run", "adapter_noop_run", "lineage_store", "approval_request",
     "evidence_import", "proof_publish", "research_request", "research_export", "cost_inbox_reconcile", "helper_execute", "execution_verify", "inventory_capture", "candidate_request", "workspace_request")
-MODULES = ("integration_mutation_contract.py", "integration_mutations.py", "integration_mutation_mcp.py",
+MODULES = ("integration_workpack_actions.py", "integration_mutation_contract.py", "integration_mutations.py", "integration_mutation_mcp.py",
            "integration_parallel_hosts.py", "integration_parallel_actions.py", "integration_quality_actions.py", "integration_quality_reads.py", "integration_helper_contract.py", "integration_task_actions.py", "integration_lifecycle.py", "integration_recovery.py", "integration_update.py", "integration_reload_probe.py")
 TEXT = {"type": "string", "maxLength": c.LIMIT}
 LABEL = {"type": "string", "maxLength": 64, "pattern": "^[A-Za-z0-9_-]*$"}
@@ -66,6 +67,8 @@ def action_shape(entry, value, *, allow_missing_approval=False):
     request = c.decode(value["native_json"].encode())
     c.require(isinstance(request, dict), "NATIVE_ACTION")
     name, owner = entry["tool"], entry["session_id"]
+    if name in workpack.NAMES:
+        return workpack.shape(entry, value)
     if name in parallel.NAMES:
         return parallel.shape(entry, value)
     if name in quality.NAMES:
@@ -194,6 +197,9 @@ class Policy:
         if entry["tool"] in tasks.NAMES:
             project, _ = self.authorize(entry)
             tasks.authorize(entry, request, project)
+        if entry["tool"] in workpack.NAMES:
+            project, _ = self.authorize(entry)
+            workpack.authorize(entry, request, project, self)
         return value, request
 
 

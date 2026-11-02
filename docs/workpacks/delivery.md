@@ -165,7 +165,7 @@ Native output capacity is capped by the 2 MiB report bound. `required` includes 
 changes only on success/BUFFER_TOO_SMALL; output bytes remain unchanged on errors.
 A NULL/zero output size query still reads files; its next call is a fresh observation.
 CLI allocates the bounded output once and performs one catalog operation. M4 binding is limited to [native document contracts](binding.md).
-MCP/language delivery and client package updates remain NOT_IMPLEMENTED/unchanged.
+See [common MCP delivery](mcp.md) for the read routes now implemented. Installed client packages remain unchanged.
 
 M4 resolve/bind/explain use the [separate exact binding contract](binding.md). Unsupported
 external/development/identity mappings block; binding is not execution or semantic release approval.

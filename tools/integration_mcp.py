@@ -25,6 +25,8 @@ COUNTER_TOOL_DESCRIPTIONS = {
 
 
 PREPARATION_TOOL_DESCRIPTIONS = {
+    'workpack_read': ' Native Work Pack validate/inspect/compatibility/resolve/explain/proposal_validate/assess/reference_observe on supplied bytes and scoped Work. No bind, export, external tool execution or release/completion authority.',
+    'workpack_resource_read': ' Native catalog list/search or receipt verification over separately owner-pinned resource files only. Snapshot integrity is not current acceptance or authenticated origin.',
     'inputs_prepare': ' Observe complete required Work inputs and retain an immutable basis-bound plan; no model receipt or execution authority.',
     'action_prepare': ' Derive D4 common fences, native key, document revisions and parent references. Missing semantic inputs remain questions; owner approval is separate.',
     'contract_prepare': ' Validate supplied JSON/body through fixed core validators only. Structural validity is not native state admission or approval.',

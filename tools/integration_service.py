@@ -9,6 +9,7 @@ import execution_record as records
 import integration_backend as backend
 import integration_preparations as preparations
 import integration_quality_reads as quality_reads
+import integration_workpack_reads as workpack_reads
 import integration_parallel_reads as parallel_reads
 import integration_parallel_preparations as parallel_preparations
 import integration_reads as extended_reads
@@ -21,6 +22,8 @@ WORK_ARGS = {"project_id": c.ID, "work_id": c.ID}
 CONTEXT_ARGS = {**WORK_ARGS, "selection_id": c.ID, "source_snapshot": c.DIGEST,
                 "target_kind": c.ID, "recipe": c.enum("current-v1", "original-v1")}
 SCHEMAS = {
+    "workpack_read": workpack_reads.SCHEMAS["workpack_read"],
+    "workpack_resource_read": read_resources.SCHEMAS["workpack_resource_read"],
     "parallel_prepare": parallel_preparations.SCHEMAS["parallel_prepare"],
     "merge_prepare": parallel_preparations.SCHEMAS["merge_prepare"],
     "workspace_read": parallel_reads.SCHEMAS["workspace_read"],
@@ -67,7 +70,7 @@ SCHEMAS = {
     "configuration_read": read_resources.SCHEMAS["configuration_read"],
     "bundle_read": read_resources.SCHEMAS["bundle_read"],
 }
-AUDIT_READ_COST = {"workspace_read":3,"candidate_read":3,"inventory_read":3,"proof_read":3,"research_read":3,"cost_read":3,"execution_read":3,"work_inspect": 1, "history_read": 1, "context_get": 5,
+AUDIT_READ_COST = {"workpack_read":3,"workpack_resource_read":1,"workspace_read":3,"candidate_read":3,"inventory_read":3,"proof_read":3,"research_read":3,"cost_read":3,"execution_read":3,"work_inspect": 1, "history_read": 1, "context_get": 5,
                    "handoff_prepare": 5, "evidence_read": 3, "completion_check": 3,
                    'workflow_read': 3, 'template_read': 3, 'role_read': 3, 'session_read': 3, 'binding_read': 3, 'document_read': 3, 'context_read': 3, 'discovery_read': 3, 'events_read': 1, 'journal_read': 3, 'profile_read': 3, 'diagnostic_read': 3, 'native_validate': 3, 'report_read': 3, 'approval_read': 3, 'reentry_read': 3, 'artifact_read': 1, 'usage_read': 1, 'revision_read': 1, 'configuration_read': 1, 'bundle_read': 1}
 COUNTER_GUIDANCE = (
@@ -255,7 +258,9 @@ class Service:
                 result = parallel_reads.read(self, scope, name, args)
             elif name in ('proof_read','research_read','cost_read','execution_read'):
                 result = quality_reads.read(self, scope, name, args)
-            elif name in ('artifact_read', 'usage_read', 'revision_read', 'configuration_read', 'bundle_read', 'events_read'):
+            elif name == 'workpack_read':
+                result = quality_reads.read(self, scope, name, args)
+            elif name in ('workpack_resource_read', 'artifact_read', 'usage_read', 'revision_read', 'configuration_read', 'bundle_read', 'events_read'):
                 result = read_resources.read(self, scope, name, args)
             elif name in ('workflow_read', 'template_read', 'role_read', 'session_read', 'binding_read', 'document_read', 'context_read', 'discovery_read', 'journal_read', 'profile_read', 'diagnostic_read', 'native_validate', 'report_read', 'approval_read', 'reentry_read'):
                 result = extended_reads.read(self, scope, name, args)

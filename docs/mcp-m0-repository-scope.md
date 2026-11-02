@@ -1241,6 +1241,13 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | native.golem_workpack_reference_observe | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | native.workpack.reference-surfaces | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | cli.workpack.reference | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| workpack.mcp.workpack_read | IMPLEMENTED | MCP_READ | MCP_READ | REVIEWED |
+| workpack.mcp.workpack_resource_read | IMPLEMENTED | MCP_READ | MCP_READ | REVIEWED |
+| surface.tools.integration_workpack_reads.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| workpack.mcp.workpack_bind | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| workpack.mcp.workpack_receipt_manifest | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| workpack.mcp.workpack_receipt_export | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| surface.tools.integration_workpack_actions.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3597,6 +3604,14 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | C_PUBLIC_DECLARATION | include/golem/workpack.h | golem_workpack_reference_observe | None |
 | NATIVE_OPERATION | src/workpack/reference.c | file-surface | None |
 | CLI_ROUTE | src/cli/workpack.c | golem_cli_workpack | reference-observe |
+| MCP_TOOL_DECLARATION | tools/integration_service.py | SCHEMAS | workpack_read |
+| MCP_TOOL_DECLARATION | tools/integration_service.py | SCHEMAS | workpack_resource_read |
+| MCP_TOOL_DECLARATION | tools/integration_read_resources.py | SCHEMAS | workpack_resource_read |
+| PYTHON_DECLARATION | tools/integration_workpack_reads.py | file-surface | None |
+| MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | workpack_bind |
+| MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | workpack_receipt_manifest |
+| MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | workpack_receipt_export |
+| PYTHON_DECLARATION | tools/integration_workpack_actions.py | file-surface | None |
 
 ## Blockers
 
@@ -3686,7 +3701,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 460; explicitly selected: 460. Other tracked paths still require explicit boundary review.
+Candidate source surfaces: 462; explicitly selected: 462. Other tracked paths still require explicit boundary review.
 Public declarations observed in selected headers: 358.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
@@ -4123,6 +4138,8 @@ This is static inventory reconciliation, never native execution, authority or pr
 | tools/integration_task_actions.py | YES |
 | tools/integration_transfer.py | YES |
 | tools/integration_update.py | YES |
+| tools/integration_workpack_actions.py | YES |
+| tools/integration_workpack_reads.py | YES |
 | tools/intent_authority.py | YES |
 | tools/intent_authority_host.c | YES |
 | tools/intent_authority_lifecycle.py | YES |

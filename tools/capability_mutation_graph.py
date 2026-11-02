@@ -100,6 +100,16 @@ def inspect_mutation_graph(sources,pins=PINS):
         branches=[n for n in native.body if isinstance(n,ast.If)]
         quality_names=set(python_literal_names(files['tools/integration_quality_actions.py'].data.decode(),'NAMES',mapping=False)) if 'tools/integration_quality_actions.py' in files else set()
         parallel_names=set(python_literal_names(files['tools/integration_parallel_actions.py'].data.decode(),'NAMES',mapping=False)) if 'tools/integration_parallel_actions.py' in files else set()
+        workpack_names=set(python_literal_names(files['tools/integration_workpack_actions.py'].data.decode(),'NAMES',mapping=False))
+        if workpack_names!={'workpack_bind','workpack_receipt_manifest','workpack_receipt_export'} or not workpack_names<=names or workpack_names & (task_names|quality_names|parallel_names):raise ValueError('WORKPACK_DOMAIN')
+        expected_import=_shape(ast.parse('import integration_workpack_actions as workpack').body[0])
+        for source in (tree,contract):
+            if sum(_shape(n)==expected_import for n in source.body)!=1:raise ValueError('WORKPACK_IMPORT')
+        if _shape(branches[0])!=_shape(ast.parse('if name in workpack.NAMES:\n    return workpack.shape(entry, value)').body[0]):raise ValueError('WORKPACK_SHAPE_HANDOFF')
+        names-=workpack_names;branches=branches[1:]
+        action=_function(contract,'Policy','action')
+        expected=ast.parse('if entry["tool"] in workpack.NAMES:\n    project, _ = self.authorize(entry)\n    workpack.authorize(entry, request, project, self)').body[0]
+        if sum(_shape(n)==_shape(expected) for n in action.body)!=1:raise ValueError('WORKPACK_OUTPUT_AUTHORIZATION')
         if parallel_names:
             if _shape(branches[0])!=_shape(ast.parse('if name in parallel.NAMES:\n    return parallel.shape(entry, value)').body[0]):raise ValueError('M5_SHAPE_HANDOFF')
             if not parallel_names<=names or parallel_names & (task_names|quality_names):raise ValueError('M5_DOMAIN')
@@ -120,6 +130,9 @@ def inspect_mutation_graph(sources,pins=PINS):
         if len(mapping)!=5 or any(not v for _,v in mapping) or len({v for _,v in mapping})!=len(mapping): raise ValueError('PREFIX_DOMAIN')
         if names-{n for n,_ in mapping}!={'document_submit','execution_request'}: raise ValueError('REMAINDER_DOMAIN')
         argv=_function(tree,'Service','_argv'); branches=[n for n in argv.body if isinstance(n,ast.If)]
+        expected=ast.parse('if tool in workpack.NAMES:\n    return [*argv, *workpack.command(entry, project, work, value, output)]').body[0]
+        if not branches or _shape(branches[0])!=_shape(expected):raise ValueError('WORKPACK_ARGV_HANDOFF')
+        branches=branches[1:]
         if quality_names:
             first=ast.parse('if tool == "helper_execute":\n    c.require(self.helpers is not None, "OWNER_HELPER_EFFECTS_APPROVAL_REQUIRED")\n    return self.helpers.command(entry, value)').body[0]
             second=ast.parse('if tool in quality.NAMES:\n    return [*argv, *quality.command(entry, project, work, value, output)]').body[0]

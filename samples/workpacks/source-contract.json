@@ -34,14 +34,20 @@
     "golem receipt verify DIRECTORY --expect-manifest DIGEST",
     "golem pack reference-observe CAPTURE --expect-source SHA --expect-config SHA --expect-pack SHA"
   ],
-  "mcp_tools": [],
+  "mcp_tools": [
+    "golem_workpack_read",
+    "golem_workpack_resource_read",
+    "golem_workpack_bind",
+    "golem_workpack_receipt_manifest",
+    "golem_workpack_receipt_export"
+  ],
   "binding_support": [
     "native-documents-v1"
   ],
   "status": "experimental",
   "runtime": "Golem native C library; json-c strict UTF-8; OpenSSL 3",
   "source_provenance": "release assembler must attach exact source commit and artifact digest; no mutable latest",
-  "security_boundary": "exact local binding and separately approved private document-closure export; unsigned integrity only; no execution, public release, semantic truth, current completion or MCP delivery",
+  "security_boundary": "exact local binding and separately approved private document-closure export; unsigned integrity only; no execution, public release, semantic truth, current completion; common MCP read delivery requires explicit D1/D2/resource scope; binding/manifest/export require exact D4 actions and separate native digests",
   "reference_packs": [
     {
       "path": "samples/workpacks/dataset-release-gate.json",

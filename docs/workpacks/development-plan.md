@@ -523,3 +523,12 @@ Codex 0.2.7 and Claude prepare 0.1.15 still use the reviewed f2563f5 snapshot, w
 unchanged installed inventory, runtime/producer, TopSolar policies and launchers.
 Production approvals, Work/evidence and COMMIT_UNKNOWN were not invoked, retried or
 modified. New local fixtures and the approved isolated Truthound consent are separate.
+
+## Common MCP delivery after M7
+
+The existing 14 Work Pack CLI operations now have five shared MCP tools; see
+[MCP scope, exact-action fields and verification](mcp.md). Earlier milestone
+statements that MCP was NOT_IMPLEMENTED describe those milestones. Native
+semantics were reused without a new Core parser/reducer or implicit authority.
+The installed Codex/Claude packages and TopSolar policy pins are unchanged;
+implementation/fixture qualification must not be presented as installed E2E.

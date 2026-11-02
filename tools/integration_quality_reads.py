@@ -3,6 +3,7 @@ import base64
 from pathlib import Path
 import tempfile
 import integration_contract as c
+import integration_workpack_reads as workpack
 import integration_registry as r
 import integration_backend as backend
 import integration_read_resources as resources
@@ -63,8 +64,8 @@ def command(name,args,work,output):
 
 def read(service,scope,name,args):
     import integration_parallel_reads as parallel
-    c.require(name in (*NAMES,*parallel.NAMES),'UNSUPPORTED_QUALITY_READ')
-    c._validate(args,(parallel.SCHEMAS if name in parallel.NAMES else SCHEMAS)[name])
+    c.require(name in (*NAMES,*parallel.NAMES,*workpack.NAMES),'UNSUPPORTED_QUALITY_READ')
+    c._validate(args,(workpack.SCHEMAS if name in workpack.NAMES else parallel.SCHEMAS if name in parallel.NAMES else SCHEMAS)[name])
     project=service._authorize(scope,args['work_id'],'record')
     if name=='execution_read' and args['operation']=='stored_result':
         c.require(getattr(service,'execution_result',None) is not None,'OWNER_EXECUTION_RESULT_REQUIRED')
@@ -75,7 +76,7 @@ def read(service,scope,name,args):
     try:
         host_raw=parallel.host_read(service,scope,name,args) if name in parallel.NAMES else None
         if host_raw is None:
-            argv=(parallel.command if name in parallel.NAMES else command)(name,args,work['path'],output)
+            argv=(workpack.command if name in workpack.NAMES else parallel.command if name in parallel.NAMES else command)(name,args,work['path'],output)
             process=records.capture([project['cli']['path'],'--output-mode','full',*argv],output,backend.TIMEOUT_SECONDS,cwd=output,observe_source=False,env=backend.ENVIRONMENT,limit=c.MAX_NATIVE)
             c.require(type(process.get('returncode')) is int and process['returncode']==0 and process['reason']=='EXIT' and process['recording']=='RECORDED','NATIVE_FAILURE')
         else:records.save(output/'stdout.log',host_raw)

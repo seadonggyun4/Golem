@@ -44,6 +44,8 @@
       "usage_read",
       "work_inspect",
       "workflow_read",
+      "workpack_read",
+      "workpack_resource_read",
       "workspace_read"
     ],
     "compared": [
@@ -88,6 +90,8 @@
       "usage_read",
       "work_inspect",
       "workflow_read",
+      "workpack_read",
+      "workpack_resource_read",
       "workspace_read"
     ],
     "missing": [
@@ -97,83 +101,79 @@
     "blockers": [
       [
         "COMPUTED_COMPARISON",
-        231
+        234
       ],
       [
         "ELSE_FALLBACK",
-        230
+        233
       ],
       [
         "ELSE_FALLBACK",
+        265
+      ],
+      [
+        "SUBJECT_ASSIGNMENT_OR_ALIAS",
+        234
+      ],
+      [
+        "SUBJECT_ASSIGNMENT_OR_ALIAS",
+        242
+      ],
+      [
+        "SUBJECT_ASSIGNMENT_OR_ALIAS",
+        247
+      ],
+      [
+        "SUBJECT_ASSIGNMENT_OR_ALIAS",
+        252
+      ],
+      [
+        "SUBJECT_ASSIGNMENT_OR_ALIAS",
+        254
+      ],
+      [
+        "SUBJECT_ASSIGNMENT_OR_ALIAS",
+        256
+      ],
+      [
+        "SUBJECT_ASSIGNMENT_OR_ALIAS",
+        258
+      ],
+      [
+        "SUBJECT_ASSIGNMENT_OR_ALIAS",
         260
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        231
+        262
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        239
+        264
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        244
+        266
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        249
+        268
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        251
-      ],
-      [
-        "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        253
-      ],
-      [
-        "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        255
-      ],
-      [
-        "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        257
-      ],
-      [
-        "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        259
-      ],
-      [
-        "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        261
-      ],
-      [
-        "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        263
-      ],
-      [
-        "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        277
+        282
       ],
       [
         "UNREGISTERED_HELPER",
-        239
+        242
       ],
       [
         "UNREGISTERED_HELPER",
-        243
+        246
       ],
       [
         "UNREGISTERED_HELPER",
-        244
-      ],
-      [
-        "UNREGISTERED_HELPER",
-        248
-      ],
-      [
-        "UNREGISTERED_HELPER",
-        249
+        247
       ],
       [
         "UNREGISTERED_HELPER",
@@ -181,27 +181,39 @@
       ],
       [
         "UNREGISTERED_HELPER",
-        253
+        252
       ],
       [
         "UNREGISTERED_HELPER",
-        255
+        254
       ],
       [
         "UNREGISTERED_HELPER",
-        257
+        256
       ],
       [
         "UNREGISTERED_HELPER",
-        259
+        258
       ],
       [
         "UNREGISTERED_HELPER",
-        261
+        260
       ],
       [
         "UNREGISTERED_HELPER",
-        277
+        262
+      ],
+      [
+        "UNREGISTERED_HELPER",
+        264
+      ],
+      [
+        "UNREGISTERED_HELPER",
+        266
+      ],
+      [
+        "UNREGISTERED_HELPER",
+        282
       ]
     ],
     "linked": false
@@ -245,6 +257,9 @@
       "session_submit",
       "work_create",
       "work_noop_run",
+      "workpack_bind",
+      "workpack_receipt_export",
+      "workpack_receipt_manifest",
       "workspace_request"
     ],
     "compared": [],
@@ -285,33 +300,36 @@
       "session_submit",
       "work_create",
       "work_noop_run",
+      "workpack_bind",
+      "workpack_receipt_export",
+      "workpack_receipt_manifest",
       "workspace_request"
     ],
     "extra": [],
     "blockers": [
       [
         "COMPUTED_COMPARISON",
-        66
-      ],
-      [
-        "COMPUTED_COMPARISON",
-        68
-      ],
-      [
-        "UNREGISTERED_HELPER",
         67
       ],
       [
+        "COMPUTED_COMPARISON",
+        69
+      ],
+      [
         "UNREGISTERED_HELPER",
         68
       ],
       [
         "UNREGISTERED_HELPER",
-        71
+        69
       ],
       [
         "UNREGISTERED_HELPER",
-        74
+        72
+      ],
+      [
+        "UNREGISTERED_HELPER",
+        75
       ]
     ],
     "linked": false

@@ -23,19 +23,19 @@
     },
     {
       "path": "tools/integration_service.py",
-      "sha256": "c068fd6f888868e311568f4e82c93b7cf5a6107f68cac75059f520bb58e7a7c5"
+      "sha256": "f82d9963a2152e14c10eeb2805c66eaa82beea9b1c50805b6333a51500102a44"
     },
     {
       "path": "tools/integration_mutation_contract.py",
-      "sha256": "6c3b342b1a7859fa863979dc9ca41585084c716597e5159f17176c6c024f9410"
+      "sha256": "586501b124e655e328861dccd821c752743ccface1fbe1396514fb066cde3335"
     },
     {
       "path": "tools/integration_mutations.py",
-      "sha256": "93fbe43fee8d26acde873bd7d41b8edbd099e61dd0e904e58fbc3fa2278731dc"
+      "sha256": "e9232924c824bf5eaef8be7683bdd480c74ba338d04b8a7fd26ac25f96987cb8"
     },
     {
       "path": "tools/integration_mutation_mcp.py",
-      "sha256": "68c9a26a967797eafd4d1e1158f786b80d087a6c2311394bbfe0017d963e3d1e"
+      "sha256": "6334721d13d2faf8debe19e9666d3bd0ec20ac5abe031ac7486da36a33824a69"
     },
     {
       "path": "tools/integration_backend.py",
@@ -191,7 +191,7 @@
     },
     {
       "path": "tools/integration_transfer.py",
-      "sha256": "3f022eab8ddf364a3e7c5f2d895eaebdb280ac7b31f3204d673358f40d9be68c"
+      "sha256": "79995b31cea23fd8208010417299cc1f40d1de4192040253b5793f209f5e1b05"
     },
     {
       "path": "docs/runtime-events.md",
@@ -1611,7 +1611,7 @@
     },
     {
       "path": "tools/integration_mcp.py",
-      "sha256": "14a5ffc28d2dbb97b6044230afb4481fd898ec952407055065f858f11d851661"
+      "sha256": "7e4ae98d534e96f22079c8d7b021c0f654a0460987d2f46b13af2c65ebd141db"
     },
     {
       "path": "tools/integration_mcpb.py",
@@ -1959,7 +1959,7 @@
     },
     {
       "path": ".github/workflows/observation.yml",
-      "sha256": "22339ab13f0567cc1024ab4741cb1fd3148d31491df40f9400079665754c766f"
+      "sha256": "f32a2a5cb45e07a853d4308209b596f09a15c9f8311156628093aa48c5189af7"
     },
     {
       "path": ".gitignore",
@@ -2059,7 +2059,7 @@
     },
     {
       "path": "tools/integration_read_resources.py",
-      "sha256": "3e79c9503c1a85a5a56c132364e53b722d7c176ed3887747b6b7294552feb392"
+      "sha256": "aeaf3a1577a1a74135846ada4dcd58577d469402b9f3bbd41130b69036f02b17"
     },
     {
       "path": "tools/integration_read_views.py",
@@ -2075,7 +2075,7 @@
     },
     {
       "path": "tools/test_capability_m1.py",
-      "sha256": "4ff27cbef901ca2c292f99958979258d889176f6de8c03bcb82b149aae205d5d"
+      "sha256": "6b26660c993e5794bb3f29ea8834bba5f90c564cc8cfaecd89b1e38486395ea8"
     },
     {
       "path": "docs/mcp-m1-read-coverage.ko.md",
@@ -2087,7 +2087,7 @@
     },
     {
       "path": "tools/integration_prepare_builders.py",
-      "sha256": "19b648cca11e07e2965815312c052b61776671e380f1ddb12b95e4f021ad8684"
+      "sha256": "767d8fa8919e437932dd8576c178cfefdc3b1f6a314caffe305bf6b7772f3d92"
     },
     {
       "path": "tools/test_integration_m2.py",
@@ -2123,7 +2123,7 @@
     },
     {
       "path": "tools/integration_quality_reads.py",
-      "sha256": "7dbeb37594120ca415543b81a05369b9728fc4f554e66a710b7c6636ea2a3367"
+      "sha256": "a12157a685c821399b31b3a807e450a5ae52dfe71b52801c79fb727f408206da"
     },
     {
       "path": "tools/integration_helper_contract.py",
@@ -2171,11 +2171,11 @@
     },
     {
       "path": "tools/integration_feature_profiles.py",
-      "sha256": "653540bcb5b9586d24b64fcc324ffb4d379ee11dfbf10da3e9b15b66f3e1c66f"
+      "sha256": "94d152a375ecc243c5eed71bf24f2a1d369eef2fa52a009d098734d6c7fc1b8a"
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "91b2ae678af21e037a820e5c756c14f4c86722124f5086b5668ffb8f7bd3eb2c"
+      "sha256": "199fb9872e7a19ab5341f9d6fff24bfed2774c9f612886c58cdfa4abe105d1e7"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -2267,7 +2267,7 @@
     },
     {
       "path": "docs/workpacks/delivery.md",
-      "sha256": "3695f6fd24957d548b4ed673c10752fcf3eaa7f765fd5cc0fd1e59c61ed63233"
+      "sha256": "56bf8c4736267b8ce4e355d1a995121e1ab6b2d35038be39961598d01a2b0853"
     },
     {
       "path": "src/workpack/binding.c",
@@ -2356,6 +2356,34 @@
     {
       "path": "docs/workpacks/reference-adapter.md",
       "sha256": "4535208631c1659c4f6d48442ef02c7db21dd707774f987d0dbcc835007d5da8"
+    },
+    {
+      "path": "tools/integration_workpack_reads.py",
+      "sha256": "fffa28fa58e8f173b57cbcb91b3cbdc34f468789d79f6635ab421f8361ca7bf5"
+    },
+    {
+      "path": "tools/test_integration_workpack.py",
+      "sha256": "cbfa35dcfd254471d00aa92630efa5e3a0ff45ec18cb665d3a5f4fabcef50b9c"
+    },
+    {
+      "path": "tests/c/workpack_mcp.py",
+      "sha256": "a6baf9e0b1d7d1d8ec7e7404c19d5ac8020582759c6dc33c13d6802ac86ebd86"
+    },
+    {
+      "path": "docs/workpacks/mcp-design.md",
+      "sha256": "9ec6ba68ccd10cda5e40bade7037709337a69afc1d1a87cc4230d8149c013053"
+    },
+    {
+      "path": "docs/workpacks/mcp.md",
+      "sha256": "c34860798ca7698aa4508cc497d73ef953c263cc8a41caf373d50691e52f4c5f"
+    },
+    {
+      "path": "tools/integration_workpack_actions.py",
+      "sha256": "41cd2aa5ce14e9e93982a85e434591c11a44ca65e894e00c48bc21aa35927539"
+    },
+    {
+      "path": "tests/c/workpack_mcp_actions.py",
+      "sha256": "dc9f14df360d7c3877a1385b18702fc861dcdcb4b8aacc03f8e8a996e8564f6a"
     }
   ],
   "observations": [
@@ -18815,6 +18843,62 @@
       "source_path": "src/cli/workpack.c",
       "entrypoint": "golem_cli_workpack",
       "selector": "reference-observe"
+    },
+    {
+      "id": "obs-d8cbfd00902fab1d603c3356ffd8e6e8ccdd322b7019912a93b0fc9509fe79bf",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_service.py",
+      "entrypoint": "SCHEMAS",
+      "selector": "workpack_read"
+    },
+    {
+      "id": "obs-220509608ae240f29e45278d494e4543c9224c2a8e8c7deedda92904eeba6c62",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_service.py",
+      "entrypoint": "SCHEMAS",
+      "selector": "workpack_resource_read"
+    },
+    {
+      "id": "obs-3b312eeb480b6f5bf6c6fad9eb2d2e328f16314be0b926ce7b4ca4da83f00c05",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_read_resources.py",
+      "entrypoint": "SCHEMAS",
+      "selector": "workpack_resource_read"
+    },
+    {
+      "id": "obs-f98f1293f6a7292668dac0651803641ab0d18305c35b1b04360f0a5e4f035ba6",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_workpack_reads.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-83df2139852030597b8383c06d8d925cd166ea760abc205e55396dda806962a0",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_mutation_contract.py",
+      "entrypoint": "NAMES",
+      "selector": "workpack_bind"
+    },
+    {
+      "id": "obs-91f197464dcb41728a6084f0d1229c603c404067c73fe09ba4e2db2ab6651541",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_mutation_contract.py",
+      "entrypoint": "NAMES",
+      "selector": "workpack_receipt_manifest"
+    },
+    {
+      "id": "obs-39c4132aa1451b7834af66fb9403756672633f4c7a0b376edaefdff34a3e9143",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_mutation_contract.py",
+      "entrypoint": "NAMES",
+      "selector": "workpack_receipt_export"
+    },
+    {
+      "id": "obs-f23bb07169467ae27f5288d219db15b8a77d83b4b9c9415a74fd6e49d1ff632c",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_workpack_actions.py",
+      "entrypoint": "file-surface",
+      "selector": null
     }
   ],
   "capabilities": [
@@ -77931,6 +78015,394 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Reuses strict native parser/digests and Pack validator; native scenario uses separate existing document contracts and exact publication approvals. Mock and retained actual outputs are distinguished."
+    },
+    {
+      "id": "workpack.mcp.workpack_read",
+      "observation_ids": [
+        "obs-d8cbfd00902fab1d603c3356ffd8e6e8ccdd322b7019912a93b0fc9509fe79bf"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_READ"
+      ],
+      "target_routes": [
+        "MCP_READ"
+      ],
+      "authorities": [
+        "Exact D1/D2 disclosure and optional resource selection; mutations require separate exact owner D4 action plus existing native binding/export digest. No QA/execution approval substitution."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX common MCP"
+        ],
+        "limits": [
+          "D2 256KiB total input; resource64files/8MiB; native limits also apply"
+        ],
+        "notes": "Native parser/lock/CAS/publication retained. Runtime scope never inferred from profile. Static delivery is not Desktop E2E or semantic release truth."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_workpack.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp_actions.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/mcp-design.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/workpacks/mcp.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Bounded native calls under existing scope/quota/producer and immutable audit guards. Unknown/error never retried."
+    },
+    {
+      "id": "workpack.mcp.workpack_resource_read",
+      "observation_ids": [
+        "obs-220509608ae240f29e45278d494e4543c9224c2a8e8c7deedda92904eeba6c62",
+        "obs-3b312eeb480b6f5bf6c6fad9eb2d2e328f16314be0b926ce7b4ca4da83f00c05"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_READ"
+      ],
+      "target_routes": [
+        "MCP_READ"
+      ],
+      "authorities": [
+        "Exact D1/D2 disclosure and optional resource selection; mutations require separate exact owner D4 action plus existing native binding/export digest. No QA/execution approval substitution."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX common MCP"
+        ],
+        "limits": [
+          "D2 256KiB total input; resource64files/8MiB; native limits also apply"
+        ],
+        "notes": "Native parser/lock/CAS/publication retained. Runtime scope never inferred from profile. Static delivery is not Desktop E2E or semantic release truth."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_workpack.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp_actions.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/mcp-design.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/workpacks/mcp.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Bounded native calls under existing scope/quota/producer and immutable audit guards. Unknown/error never retried."
+    },
+    {
+      "id": "surface.tools.integration_workpack_reads.py.file-surface",
+      "observation_ids": [
+        "obs-f98f1293f6a7292668dac0651803641ab0d18305c35b1b04360f0a5e4f035ba6"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit D1/D2 and separately selected resource files; native CLI validates all semantic input."
+      ],
+      "effects": [
+        "AUDIT_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX common MCP"
+        ],
+        "limits": [
+          "D2 256KiB total input; resource64files/8MiB; native limits also apply"
+        ],
+        "notes": "Transport routes only; no Desktop E2E, bind/export/QA/release approval inferred."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_workpack.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/mcp-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Bounded native calls under existing scope/quota/producer and immutable audit guards. Unknown/error never retried."
+    },
+    {
+      "id": "workpack.mcp.workpack_bind",
+      "observation_ids": [
+        "obs-83df2139852030597b8383c06d8d925cd166ea760abc205e55396dda806962a0"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Exact D1/D2 disclosure and optional resource selection; mutations require separate exact owner D4 action plus existing native binding/export digest. No QA/execution approval substitution."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX common MCP"
+        ],
+        "limits": [
+          "D2 256KiB total input; resource64files/8MiB; native limits also apply"
+        ],
+        "notes": "Native parser/lock/CAS/publication retained. Runtime scope never inferred from profile. Static delivery is not Desktop E2E or semantic release truth."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_workpack.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp_actions.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/mcp-design.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/workpacks/mcp.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Bounded native calls under existing scope/quota/producer and immutable audit guards. Unknown/error never retried."
+    },
+    {
+      "id": "workpack.mcp.workpack_receipt_manifest",
+      "observation_ids": [
+        "obs-91f197464dcb41728a6084f0d1229c603c404067c73fe09ba4e2db2ab6651541"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Exact D1/D2 disclosure and optional resource selection; mutations require separate exact owner D4 action plus existing native binding/export digest. No QA/execution approval substitution."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX common MCP"
+        ],
+        "limits": [
+          "D2 256KiB total input; resource64files/8MiB; native limits also apply"
+        ],
+        "notes": "Native parser/lock/CAS/publication retained. Runtime scope never inferred from profile. Static delivery is not Desktop E2E or semantic release truth."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_workpack.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp_actions.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/mcp-design.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/workpacks/mcp.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Bounded native calls under existing scope/quota/producer and immutable audit guards. Unknown/error never retried."
+    },
+    {
+      "id": "workpack.mcp.workpack_receipt_export",
+      "observation_ids": [
+        "obs-39c4132aa1451b7834af66fb9403756672633f4c7a0b376edaefdff34a3e9143"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Exact D1/D2 disclosure and optional resource selection; mutations require separate exact owner D4 action plus existing native binding/export digest. No QA/execution approval substitution."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX common MCP"
+        ],
+        "limits": [
+          "D2 256KiB total input; resource64files/8MiB; native limits also apply"
+        ],
+        "notes": "Native parser/lock/CAS/publication retained. Runtime scope never inferred from profile. Static delivery is not Desktop E2E or semantic release truth."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_workpack.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp_actions.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/mcp-design.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/workpacks/mcp.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Bounded native calls under existing scope/quota/producer and immutable audit guards. Unknown/error never retried."
+    },
+    {
+      "id": "surface.tools.integration_workpack_actions.py.file-surface",
+      "observation_ids": [
+        "obs-f23bb07169467ae27f5288d219db15b8a77d83b4b9c9415a74fd6e49d1ff632c"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact D1/D2 disclosure and optional resource selection; mutations require separate exact owner D4 action plus existing native binding/export digest. No QA/execution approval substitution."
+      ],
+      "effects": [
+        "AUDIT_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX common MCP"
+        ],
+        "limits": [
+          "D2 256KiB total input; resource64files/8MiB; native limits also apply"
+        ],
+        "notes": "Native parser/lock/CAS/publication retained. Runtime scope never inferred from profile. Static delivery is not Desktop E2E or semantic release truth."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_workpack.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp.py",
+          "selector": null
+        },
+        {
+          "path": "tests/c/workpack_mcp_actions.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/workpacks/mcp-design.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/workpacks/mcp.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Bounded native calls under existing scope/quota/producer and immutable audit guards. Unknown/error never retried."
     }
   ]
 }

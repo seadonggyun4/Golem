@@ -32,7 +32,7 @@ class M1Profiles(unittest.TestCase):
         return tuple(files),model
     def test_actual_closed_read_profiles_have_no_runtime_claims(self):
         value=inspect_m1(self.files,M1)
-        self.assertFalse(value.blockers);self.assertEqual(len(value.native_tools),15);self.assertEqual(len(value.resource_tools),6)
+        self.assertFalse(value.blockers);self.assertEqual(len(value.native_tools),15);self.assertEqual(len(value.resource_tools),7)
         self.assertFalse(value.client_delivery_verified);self.assertFalse(value.native_execution_verified);self.assertFalse(value.policy_satisfied)
     def test_missing_or_drifted_sources_block(self):
         self.assertTrue(inspect_m1((),M1).blockers)

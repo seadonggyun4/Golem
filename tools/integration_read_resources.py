@@ -13,8 +13,8 @@ import integration_registry as r
 import integration_backend as backend
 import execution_record as records
 
-NAMES=('artifact_read','usage_read','revision_read','configuration_read','bundle_read','events_read')
-MODULES=('integration_feature_profiles.py', 'integration_distribution_entry.py', 'integration_distribution.py', 'integration_owner_maintenance.py', 'integration_install.py', 'integration_config.py', 'integration_launch.py', 'integration_hook_contract.py', 'integration_hooks.py', 'integration_recovery.py', 'integration_update.py', 'integration_reload_probe.py', 'integration_mutation_contract.py', 'integration_mutations.py', 'integration_mutation_mcp.py', 'integration_lifecycle.py', 'integration_mcpb.py', 'integration_mcpb_entry.py', 'integration_parallel_hosts.py', 'integration_parallel_preparations.py', 'integration_parallel_reads.py', 'integration_parallel_actions.py', 'integration_quality_actions.py', 'integration_quality_reads.py', 'integration_helper_contract.py', 'usage_pipeline.py', 'integration_task_actions.py', 'integration_preparations.py', 'integration_prepare_builders.py', 'integration_read_resources.py', 'integration_read_views.py', 'agent_io.py', 'agent_lifecycle.py', 'provider_usage.py', 'provider_costs.py', 'billing_evidence.py', 'judgment_record.py', 'evidence_contract.py', 'evidence_adapters.py', 'evidence_export.py', 'revision_status.py', 'remote_status.py', 'github_checks.py', 'github_policy.py', 'github_context.py', 'status_collector.py', 'hosted_usage.py', 'context_resume.py', 'agent_entrypoint.py', 'instruction_bundle.py', 'integration_gateway_contract.py', 'verify_agent.py', 'verify_environment.py', 'verify_runtime.py')
+NAMES=('workpack_resource_read','artifact_read','usage_read','revision_read','configuration_read','bundle_read','events_read')
+MODULES=('integration_workpack_actions.py','integration_workpack_reads.py','integration_feature_profiles.py', 'integration_distribution_entry.py', 'integration_distribution.py', 'integration_owner_maintenance.py', 'integration_install.py', 'integration_config.py', 'integration_launch.py', 'integration_hook_contract.py', 'integration_hooks.py', 'integration_recovery.py', 'integration_update.py', 'integration_reload_probe.py', 'integration_mutation_contract.py', 'integration_mutations.py', 'integration_mutation_mcp.py', 'integration_lifecycle.py', 'integration_mcpb.py', 'integration_mcpb_entry.py', 'integration_parallel_hosts.py', 'integration_parallel_preparations.py', 'integration_parallel_reads.py', 'integration_parallel_actions.py', 'integration_quality_actions.py', 'integration_quality_reads.py', 'integration_helper_contract.py', 'usage_pipeline.py', 'integration_task_actions.py', 'integration_preparations.py', 'integration_prepare_builders.py', 'integration_read_resources.py', 'integration_read_views.py', 'agent_io.py', 'agent_lifecycle.py', 'provider_usage.py', 'provider_costs.py', 'billing_evidence.py', 'judgment_record.py', 'evidence_contract.py', 'evidence_adapters.py', 'evidence_export.py', 'revision_status.py', 'remote_status.py', 'github_checks.py', 'github_policy.py', 'github_context.py', 'status_collector.py', 'hosted_usage.py', 'context_resume.py', 'agent_entrypoint.py', 'instruction_bundle.py', 'integration_gateway_contract.py', 'verify_agent.py', 'verify_environment.py', 'verify_runtime.py')
 MAX_FILE=1048576
 MAX_TOTAL=8*1048576
 FILE=c.obj({'file_id':c.ID,'name':{'type':'string','minLength':1,'maxLength':256},'path':c.PATH,'sha256':c.DIGEST,'tools':c.array(c.enum(*NAMES),len(NAMES))})
@@ -24,7 +24,8 @@ POLICY=c.obj({'schema':{'const':'golem.integration-read-resources.v1'},'transfer
  'resources':c.array(RESOURCE,64),'producer':c.obj({name:c.DIGEST for name in MODULES})})
 ARGS={'project_id':c.ID,'work_id':c.ID,'resource_id':c.ID}
 OPTIONS={'type':'string','minLength':2,'maxLength':c.LIMIT}
-SCHEMAS={
+from integration_workpack_reads import RESOURCE_SCHEMA
+SCHEMAS={'workpack_resource_read':RESOURCE_SCHEMA,
  'artifact_read':c.obj({**ARGS,'operation':c.enum('bytes','view','report','raw','record','procedure','measure','judgment','facts','lifecycle','export','provider_cost','conformance','declaration','review','research_outcome'),'options_json':OPTIONS}),
  'usage_read':c.obj({**ARGS,'operation':c.enum('totals','provider_cost','billing_view'),'options_json':OPTIONS}),
  'revision_read':c.obj({**ARGS,'operation':c.enum('relations','saved_status'),'options_json':OPTIONS}),
@@ -122,8 +123,8 @@ def read(service,scope,name,args):
     payloads=[];size=0
     for f in selected:
         data=pinned_bytes(f['path'],f['sha256']);size+=len(data);c.require(size<=MAX_TOTAL,'READ_RESOURCE_TOTAL_LIMIT');payloads.append((f,data))
-    needed_entries=(16 if name in ('bundle_read','events_read') else 6)+sum(len(f['name'].split('/')) for f in selected)
-    needed_bytes=size+service.transfer.value['max_result_bytes']+c.LIMIT+(2*c.MAX_NATIVE if name in ('bundle_read','events_read') else 0)
+    needed_entries=(16 if name in ('workpack_resource_read','bundle_read','events_read') else 6)+sum(len(f['name'].split('/')) for f in selected)
+    needed_bytes=size+service.transfer.value['max_result_bytes']+c.LIMIT+(2*c.MAX_NATIVE if name in ('workpack_resource_read','bundle_read','events_read') else 0)
     c.require(capacity['remaining']['bytes']>=needed_bytes and capacity['remaining']['entries']>=needed_entries,'AUDIT_QUOTA')
     output=Path(tempfile.mkdtemp(prefix='read-resource-',dir=service.registry.root))
     records.save(output/'request.json',c.encoded(args))
@@ -142,7 +143,7 @@ def read(service,scope,name,args):
             import base64
             result={'file_id':f['file_id'],'sha256':f['sha256'],'offset':start,'bytes':len(window),'data_base64':base64.b64encode(window).decode(),
                 'next_offset':min(start+len(window),len(data)),'eof':start+len(window)>=len(data),'source_bytes':len(data)}
-        elif name in ('bundle_read','events_read'):
+        elif name in ('workpack_resource_read','bundle_read','events_read'):
             result=bundle_read(project,args,snapshot,output)
         else:
             result=view(name,args['operation'],snapshot,options,{'project_id':args['project_id'],'work_id':args['work_id']})
@@ -168,7 +169,10 @@ def read(service,scope,name,args):
 def bundle_read(project,args,snapshot,output):
     import base64
     op=args['operation']
-    if op=='export':
+    if args.get('resource_id') and args['operation'] in ('list','search','receipt_verify'):
+        import integration_workpack_reads as workpack
+        argv=workpack.resource_command(args,snapshot)
+    elif op=='export':
         c.require(not args['after'] or all(ch in '0123456789abcdefABCDEF:.-_' for ch in args['after']),'EVENT_CURSOR')
         argv=['events',str(snapshot),'--'+args['format'],*(['--after',args['after']] if args['after'] else [])]
     elif op=='lineage_verify':argv=['lineage','verify',str(snapshot/'cas'),args['graph_digest']]

@@ -22,7 +22,7 @@ SKILLS=('plugins/golem/skills/golem-setup/SKILL.md','plugins/golem/skills/golem-
         'plugins/golem/skills/golem-work/SKILL.md','plugins/golem/skills/golem-work/agents/openai.yaml',
         'plugins/golem/skills/golem-work/references/profiles.md')
 OWNER_DESKTOP_FILES=('tools/integration_owner_review.py','tools/integration_owner_desktop.py')
-DOCUMENTS=('tools/requirements-mcp.txt','docs/mcp-m6-distribution.ko.md','docs/integration-install.md','docs/integration-d5.md',
+DOCUMENTS=('docs/workpacks/mcp.md','tools/requirements-mcp.txt','docs/mcp-m6-distribution.ko.md','docs/integration-install.md','docs/integration-d5.md',
            'docs/mcp-m5-parallel-candidates.ko.md')
 
 

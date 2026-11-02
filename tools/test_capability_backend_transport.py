@@ -55,7 +55,7 @@ class StaticAdapters(unittest.TestCase):
     def test_transport_closed_declared_names_are_not_client_delivery(self):
         result=inspect_transport(self.files)
         self.assertFalse(result.blockers)
-        self.assertEqual(len(result.declared_tool_names),80)
+        self.assertEqual(len(result.declared_tool_names),85)
         self.assertIn('golem_workflow_read',result.declared_tool_names)
         self.assertIn('golem_action_prepare',result.declared_tool_names)
         self.assertFalse(result.client_delivery_verified)

@@ -15,6 +15,7 @@ import integration_lifecycle as lifecycle
 import integration_task_actions as tasks
 import integration_quality_actions as quality
 import integration_parallel_actions as parallel
+import integration_workpack_actions as workpack
 
 
 def blocked(error, *, uncertain=False, evidence_id=None):
@@ -209,6 +210,8 @@ class Service:
         argv = [project["cli"]["path"], "--output-mode", "full"]
         request = str(output / "request.json")
         tool = entry["tool"]
+        if tool in workpack.NAMES:
+            return [*argv, *workpack.command(entry, project, work, value, output)]
         if tool == "helper_execute":
             c.require(self.helpers is not None, "OWNER_HELPER_EFFECTS_APPROVAL_REQUIRED")
             return self.helpers.command(entry, value)

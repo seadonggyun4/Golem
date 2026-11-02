@@ -236,7 +236,7 @@ class D2(fixture.ReadBackend):
                                          c.sha(branding.server_icons()[0].src.encode()))
                         # This fixture supplies D1/D2 only. M1 external files,
                         # M2 owner actions and M5 host results need separate contracts.
-                        conditional = {"artifact_read", "configuration_read", "events_read",
+                        conditional = {"workpack_resource_read", "artifact_read", "configuration_read", "events_read",
                             "revision_read", "usage_read", "bundle_read", "workspace_read",
                             "approved_action_prepare", "action_confirm"}
                         self.assertEqual({t.name for t in listed.tools},

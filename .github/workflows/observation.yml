@@ -51,6 +51,13 @@ jobs:
         env:
           ASAN_OPTIONS: "halt_on_error=1"
           UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+      - name: "Work Pack common MCP native reads and exact private actions"
+        run: |
+          python3 tests/c/workpack_mcp.py build/events/golem .
+          python3 tests/c/workpack_mcp_actions.py build/events/golem . build/events/tests/c/golem_test_workpack_binding_fault
+        env:
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
       - name: "D4 real MCP typed mutations and owner-approved native QA"
         run: "python3 tests/c/integration_d4_mutations.py build/events/golem . \"$(command -v cc)\" build/events/golem-integration-host --mcp"
         env:

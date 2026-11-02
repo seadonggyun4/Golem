@@ -31,3 +31,12 @@ class Graph(unittest.TestCase):
     def test_lock_expression_changed(self):
         files,pins=self.changed(delegation,'tools/integration_mutations.py',b'with self.registry.locked(exclusive=True):',b'with self.registry.locked(exclusive=False):')
         self.assertTrue(inspect_mutation_graph(files,pins).blockers)
+
+    def test_workpack_closed_handoffs_and_output_authorization(self):
+        for path,old,new in (
+            ('tools/integration_mutation_contract.py',b'return workpack.shape(entry, value)',b'return tasks.shape(entry, value)'),
+            ('tools/integration_mutations.py',b'workpack.command(entry, project, work, value, output)',b'workpack.command(entry, project, other, value, output)'),
+            ('tools/integration_mutation_contract.py',b'workpack.authorize(entry, request, project, self)',b'workpack.authorize(entry, request, project, other)'),
+            ('tools/integration_workpack_actions.py',b"'workpack_bind','workpack_receipt_manifest'",b"'arbitrary_run','workpack_receipt_manifest'")):
+            files,pins=self.changed(delegation,path,old,new)
+            self.assertTrue(inspect_mutation_graph(files,pins).blockers)

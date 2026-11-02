@@ -99,11 +99,11 @@ M3 additionally implements explicit local catalog listing and deterministic lexi
 See [delivery](delivery.md) for exact input limits, ambiguity and no-authority semantics.
 
 M4 implements limited [native document resolve/bind/explain](binding.md), with a separately
-selected exact digest. General role mappings, semantic release validation and MCP delivery remain unsupported.
+selected exact digest. General role mappings and semantic release validation remain unsupported. See [common MCP delivery](mcp.md) for current transport scope.
 
 M5 adds [proposal validation and separate native role evaluation](proposals.md) for
 existing document bindings; claims never grant authority or prove semantic correctness.
 
-M6 adds [private evidence manifest/export/verify](receipts.md) for selected native document closures. Integrity is not authenticated origin, QA PASS or current completion. Work Pack MCP delivery remains unimplemented.
+M6 adds [private evidence manifest/export/verify](receipts.md) for selected native document closures. Integrity is not authenticated origin, QA PASS or current completion. The common MCP read routes and remaining action integration are described in [MCP delivery](mcp.md).
 
 M7 adds a [Truthound capture adapter and native document scenario](reference-adapter.md), with mock/native/actual external runs distinguished; no release authority.
