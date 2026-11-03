@@ -234,15 +234,18 @@ static golem_status dispatch(cf_context *c, const char *op, size_t i, struct jso
 }
 
 GOLEM_RECORDED_API(golem_candidate_call,
-    (golem_document_store *s, const golem_candidate_host *host, golem_admission *admission,
-     golem_bytes bytes, golem_execution_reply *out, golem_diagnostic *d),
-    (s, host, admission, bytes, out, d), d)
+                   (golem_document_store * s, const golem_candidate_host *host,
+                    golem_admission *admission, golem_bytes bytes, golem_execution_reply *out,
+                    golem_diagnostic *d),
+                   (s, host, admission, bytes, out, d), d)
 {
     if (!s || s->poisoned || !out)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
-    if (dw_uint(s->spec, "schema_version") == 3) return GOLEM_ERR_UNSUPPORTED_VERSION;
+    if (dw_uint(s->spec, "schema_version") == 3)
+        return GOLEM_ERR_UNSUPPORTED_VERSION;
     golem_status gate = gi_product_check(s, GI_PRODUCT_DEVELOPMENT);
-    if (gate != GOLEM_OK) return dw_report(d, gate, "intent candidate path unsupported");
+    if (gate != GOLEM_OK)
+        return dw_report(d, gate, "intent candidate path unsupported");
     cf_context c = {
         .parent = s, .host = host, .admission = admission, .request_bytes = bytes, .dir = -1};
     golem_status st = golem_json_parse(bytes, GOLEM_DOCUMENT_MAX_JSON, &c.request);

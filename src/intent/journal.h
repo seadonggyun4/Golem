@@ -38,25 +38,28 @@ void gi_journal_close(gi_journal *journal);
 /* Exact committed publication only, read-only and failure-atomic. Dispose the
  * owned graph on success. No ACTIVE/adoption/execution authorization. */
 golem_status gi_journal_read_baseline(gi_journal *, const golem_digest *operation,
-    const golem_digest *request, const golem_digest *baseline, gi_baseline_read *out);
+                                      const golem_digest *request, const golem_digest *baseline,
+                                      gi_baseline_read *out);
 /* Validates committed object history and reports attributed staging read-only.
  * Pending object publication is never a D01 recovery authorization. */
 golem_status gi_journal_inspect(gi_journal *journal, gi_journal_status *out);
 /* Read-only ordered metadata replay after full journal validation. The visitor
  * must not reenter or close this handle. Pending records are included. */
 typedef golem_status (*gi_journal_visitor)(void *context, const golem_digest *operation,
-    const golem_digest *request, const gi_journal_operation *record);
+                                           const golem_digest *request,
+                                           const gi_journal_operation *record);
 golem_status gi_journal_visit(gi_journal *journal, gi_journal_visitor visitor, void *context);
 /* Read-only committed payload visitor after full validation. Borrowed payload
  * is valid only during callback; no journal reentry. Pending state is rejected. */
 typedef golem_status (*gi_journal_payload_visitor)(void *, const golem_digest *,
-    const golem_digest *, const gi_journal_operation *, golem_bytes);
+                                                   const golem_digest *,
+                                                   const gi_journal_operation *, golem_bytes);
 golem_status gi_journal_visit_payloads(gi_journal *, gi_journal_payload_visitor, void *);
 
 /* Read-only operation lookup, including prepared/uncommitted operations.
  * Does not clear poison or retry publication. Requires exact request identity. */
 golem_status gi_journal_lookup(gi_journal *journal, const golem_digest *operation,
-    const golem_digest *request, gi_journal_operation *out);
+                               const golem_digest *request, gi_journal_operation *out);
 /* Trusted host callback, NOT model-supplied authorization. Runs under owner
  * lock, before preparation and again before commit. Must not reenter/close
  * this handle. It retains all semantic/issuer/owner/binding/protection checks. */
@@ -69,7 +72,8 @@ typedef struct gi_journal_pending_plan {
  * transfer. Trusted D01 host must independently restrict operation semantics. */
 golem_status gi_journal_pending_plan_get(gi_journal *journal, gi_journal_pending_plan *out);
 golem_status gi_journal_pending_finish(gi_journal *journal, const golem_digest *snapshot,
-    gi_journal_guard guard, void *context, gi_journal_receipt *out);
+                                       gi_journal_guard guard, void *context,
+                                       gi_journal_receipt *out);
 typedef struct gi_journal_alias_plan {
     uint64_t sequence, kind, device, inode, bytes;
     bool present;
@@ -79,9 +83,11 @@ typedef struct gi_journal_alias_plan {
 /* kind: 0=prep, 1=payload, 2=event. Observe one final file and optional exact
  * staging hardlink on the final intake sequence; no independent staging files.
  * Removal requires explicit trusted-host approval and never changes final bytes. */
-golem_status gi_journal_alias_observe(gi_journal *journal, unsigned kind, gi_journal_alias_plan *out);
-golem_status gi_journal_alias_remove(gi_journal *journal, unsigned kind, const golem_digest *snapshot,
-    gi_journal_guard guard, void *context, gi_journal_alias_plan *out);
+golem_status gi_journal_alias_observe(gi_journal *journal, unsigned kind,
+                                      gi_journal_alias_plan *out);
+golem_status gi_journal_alias_remove(gi_journal *journal, unsigned kind,
+                                     const golem_digest *snapshot, gi_journal_guard guard,
+                                     void *context, gi_journal_alias_plan *out);
 typedef struct gi_journal_partial_plan {
     gi_journal_alias_plan source;
     bool archived, payload_ready, directory_present;
@@ -95,10 +101,13 @@ typedef struct gi_journal_partial_plan {
 golem_status gi_journal_partial_observe(gi_journal *, unsigned kind, gi_journal_partial_plan *);
 /* Pure peak check used again on freshly restored state under the owner lock. */
 golem_status gi_journal_partial_check_quota(const gi_journal_partial_plan *, bool replace);
-golem_status gi_journal_partial_quarantine(gi_journal *, unsigned kind, const golem_digest *snapshot,
-    const golem_digest *approval, gi_journal_guard, void *, gi_journal_partial_plan *);
+golem_status gi_journal_partial_quarantine(gi_journal *, unsigned kind,
+                                           const golem_digest *snapshot,
+                                           const golem_digest *approval, gi_journal_guard, void *,
+                                           gi_journal_partial_plan *);
 golem_status gi_journal_payload_replace(gi_journal *, const golem_digest *snapshot,
-    golem_bytes payload, gi_journal_guard, void *, gi_journal_partial_plan *);
+                                        golem_bytes payload, gi_journal_guard, void *,
+                                        gi_journal_partial_plan *);
 typedef struct gi_journal_envelope_plan {
     gi_journal_partial_plan partial;
     bool final_present, pending_present;
@@ -111,7 +120,8 @@ golem_status gi_journal_envelope_observe(gi_journal *, unsigned kind, gi_journal
 golem_status gi_journal_envelope_visit(gi_journal *, unsigned kind, gi_journal_visitor, void *);
 golem_status gi_journal_envelope_check_quota(const gi_journal_envelope_plan *);
 golem_status gi_journal_envelope_finish(gi_journal *, unsigned kind, const golem_digest *snapshot,
-    const golem_digest *original_approval, gi_journal_guard, void *, gi_journal_envelope_plan *);
+                                        const golem_digest *original_approval, gi_journal_guard,
+                                        void *, gi_journal_envelope_plan *);
 typedef struct gi_journal_fragment_plan {
     gi_journal_partial_plan original;
     bool truncated_present, final_present, pending_present;
@@ -126,23 +136,27 @@ golem_status gi_journal_fragment_visit(gi_journal *, unsigned kind, gi_journal_v
 /* Separate explicit operations: 0=preserve, 1=finish preservation publication,
  * 2=detach original truncated envelope. Never advances the underlying Work. */
 golem_status gi_journal_fragment_apply(gi_journal *, unsigned kind, unsigned action,
-    const golem_digest *snapshot, const golem_digest *original_approval,
-    const golem_digest *preservation_approval, gi_journal_guard, void *, gi_journal_fragment_plan *);
+                                       const golem_digest *snapshot,
+                                       const golem_digest *original_approval,
+                                       const golem_digest *preservation_approval, gi_journal_guard,
+                                       void *, gi_journal_fragment_plan *);
 golem_status gi_journal_damage_observe(gi_journal *, unsigned, gi_journal_fragment_plan *);
 golem_status gi_journal_damage_visit(gi_journal *, unsigned, gi_journal_visitor, void *);
-golem_status gi_journal_damage_apply(gi_journal *, unsigned, unsigned,
-    const golem_digest *, const golem_digest *, const golem_digest *,
-    gi_journal_guard, void *, gi_journal_fragment_plan *);
+golem_status gi_journal_damage_apply(gi_journal *, unsigned, unsigned, const golem_digest *,
+                                     const golem_digest *, const golem_digest *, gi_journal_guard,
+                                     void *, gi_journal_fragment_plan *);
 golem_status gi_journal_append(gi_journal *journal, gi_quota_lane lane,
-    const golem_digest *operation, const golem_digest *request,
-    uint64_t expected_sequence, const golem_digest *expected_head,
-    golem_bytes payload, gi_journal_guard guard, void *context,
-    gi_journal_receipt *out);
+                               const golem_digest *operation, const golem_digest *request,
+                               uint64_t expected_sequence, const golem_digest *expected_head,
+                               golem_bytes payload, gi_journal_guard guard, void *context,
+                               gi_journal_receipt *out);
 struct gi_source_input;
 /* Internal intake-only proposal storage, never adoption/ACTIVE. Inputs must
  * remain alive and immutable through the call. A trusted D01 host guard is
  * mandatory. Prepared failures are preserved and block subsequent writes. */
-golem_status gi_journal_store_objects(gi_journal *, const golem_digest *operation, const golem_digest *request,
-    uint64_t expected_sequence, const golem_digest *expected_head, golem_bytes baseline,
-    const struct gi_source_input *, size_t source_count, gi_journal_guard, void *, gi_journal_receipt *);
+golem_status gi_journal_store_objects(gi_journal *, const golem_digest *operation,
+                                      const golem_digest *request, uint64_t expected_sequence,
+                                      const golem_digest *expected_head, golem_bytes baseline,
+                                      const struct gi_source_input *, size_t source_count,
+                                      gi_journal_guard, void *, gi_journal_receipt *);
 #endif

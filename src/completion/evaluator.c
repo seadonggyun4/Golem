@@ -6,7 +6,8 @@
 golem_status co_markdown(struct json_object *record, golem_execution_reply *out)
 {
     struct json_object *policy = dw_get(dw_get(record, "assessment"), "policy");
-    if(!strcmp(dw_text(policy,"predicate"),CO_INTENT_V1))return co_intent_markdown(record,out);
+    if (!strcmp(dw_text(policy, "predicate"), CO_INTENT_V1))
+        return co_intent_markdown(record, out);
     if (dw_uint(record, "schema_version") == 1 && dw_uint(policy, "schema_version") == 1 &&
         !strcmp(dw_text(policy, "predicate"), RC_PREDICATE))
         return rc_markdown(record, out);
@@ -18,7 +19,8 @@ golem_status co_markdown(struct json_object *record, golem_execution_reply *out)
 
 golem_status co_validate(struct json_object *request)
 {
-    if (dw_uint(request,"schema_version")==3)return co_intent_validate(request);
+    if (dw_uint(request, "schema_version") == 3)
+        return co_intent_validate(request);
     if (dw_uint(request, "schema_version") == 2) {
         if (strcmp(dw_text(request, "operation"), "finalize"))
             return GOLEM_ERR_PARSE;
@@ -39,7 +41,8 @@ golem_status co_evaluate(golem_document_store *store, struct json_object *reques
     golem_status guard = wt_guard(store, dw_text(request, "selection_id"));
     if (guard != GOLEM_OK)
         return guard;
-    if(dw_uint(store->spec,"schema_version")==3)return co_intent_evaluate(store,request,live,out);
+    if (dw_uint(store->spec, "schema_version") == 3)
+        return co_intent_evaluate(store, request, live, out);
     if (store->role_count)
         return rc_completion(store, request, live, out);
     if (dw_uint(request, "schema_version") != 1)
@@ -54,8 +57,10 @@ golem_status co_evaluate_record(golem_document_store *store, struct json_object 
      * schema 1. Dispatch from that historical identifier, not today's policy. */
     struct json_object *policy = dw_get(dw_get(record, "assessment"), "policy");
     const char *predicate = dw_text(policy, "predicate");
-    if(!strcmp(predicate,CO_INTENT_V1)&&dw_uint(policy,"schema_version")==1)return co_intent_evaluate(store,request,false,out);
-    if(dw_uint(store->spec,"schema_version")==3)return GOLEM_ERR_UNSUPPORTED_VERSION;
+    if (!strcmp(predicate, CO_INTENT_V1) && dw_uint(policy, "schema_version") == 1)
+        return co_intent_evaluate(store, request, false, out);
+    if (dw_uint(store->spec, "schema_version") == 3)
+        return GOLEM_ERR_UNSUPPORTED_VERSION;
     if (!strcmp(predicate, RC_PREDICATE) && dw_uint(policy, "schema_version") == 1)
         return rc_completion(store, request, false, out);
     if (store && store->role_count)

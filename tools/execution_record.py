@@ -130,7 +130,8 @@ def metadata(path):
 
 
 def run_private(argv, *, destination, timeout, env=None, cwd=None, source=None,
-                capture_output=False, output_limit=8192, protocol=None, owned_stop=None, protocol_stderr=False):
+                capture_output=False, output_limit=8192, protocol=None, owned_stop=None, protocol_stderr=False,
+                pass_fds=()):
     """Metadata-only interactive child: never persist prompt-bearing argv or streams."""
     command = list(map(str, argv))
     owned_service = timeout is None and owned_stop is not None and callable(getattr(owned_stop,"is_set",None)) and protocol is not None
@@ -142,6 +143,11 @@ def run_private(argv, *, destination, timeout, env=None, cwd=None, source=None,
         raise ValueError("invalid owned protocol parameters")
     if protocol is not None and (not callable(protocol) or capture_output):
         raise ValueError("invalid private protocol parameters")
+    if (type(pass_fds) is not tuple or any(type(fd) is not int or fd < 3 for fd in pass_fds)
+            or len(set(pass_fds)) != len(pass_fds) or (pass_fds and protocol is None)):
+        raise ValueError("invalid private protocol descriptors")
+    for fd in pass_fds:
+        os.fstat(fd)
     directory = private_directory(destination)
     cwd = Path(cwd or Path.cwd()).resolve()
     environment = dict(os.environ if env is None else env)
@@ -155,7 +161,7 @@ def run_private(argv, *, destination, timeout, env=None, cwd=None, source=None,
     child, reason = None, "LAUNCH_ERROR"
     started = time.monotonic()
     try:
-        child = subprocess.Popen(command, cwd=cwd, env=environment, start_new_session=True,
+        child = subprocess.Popen(command, cwd=cwd, env=environment, start_new_session=True, pass_fds=pass_fds,
             stdin=subprocess.PIPE if protocol else subprocess.DEVNULL if capture_output else None,
             stdout=subprocess.PIPE if capture_output or protocol else None,
             stderr=subprocess.PIPE if protocol_stderr else subprocess.DEVNULL if protocol else subprocess.PIPE if capture_output else None)

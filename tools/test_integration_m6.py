@@ -124,7 +124,7 @@ class ProfileBoundaries(unittest.TestCase):
             transfer.assert_called_once_with(Path('/owner/policy'),'a'*64,approve_data_transfer=True);self.assertIs(scoped.service,service.return_value)
         with patch.object(entry.actions,'Policy') as policy,patch.object(entry.mutations,'Service') as service:
             scoped,selected=entry.configure('task','/owner/policy','b'*64,approve_owner=True)
-            policy.assert_called_once_with(Path('/owner/policy'),'b'*64,approve_mutations=True);service.assert_called_once_with(policy.return_value,None,None,None)
+            policy.assert_called_once_with(Path('/owner/policy'),'b'*64,approve_mutations=True);service.assert_called_once_with(policy.return_value,None,None,None,None)
     def test_optional_contract_arguments_require_all_flags_and_exact_family(self):
         with patch.object(entry.actions,'Policy') as policy,patch.object(entry.mutations,'Service'),patch.object(entry.helpers,'Helpers') as helper:
             entry.configure('quality','/owner/policy','a'*64,approve_owner=True,helper='/helper',helper_digest='b'*64,approve_helpers=True)

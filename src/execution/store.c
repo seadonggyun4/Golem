@@ -20,7 +20,8 @@ golem_status ex_authorize(golem_document_store *s, struct json_object *token,
                           struct json_object *manifest)
 {
     golem_status gate = gi_product_check(s, GI_PRODUCT_PUBLICATION);
-    if (gate != GOLEM_OK) return gate;
+    if (gate != GOLEM_OK)
+        return gate;
     as_log log = {.directory = -1};
     golem_status st = as_load(s, NULL, NULL, &log);
     if (st == GOLEM_OK && log.state) {
@@ -36,9 +37,10 @@ golem_status ex_authorize(golem_document_store *s, struct json_object *token,
         if (st == GOLEM_OK && !json_object_equal(pinned, manifest))
             st = GOLEM_ERR_STALE_RESULT;
         json_object_put(pinned);
-    /* v3 requires a profile even for document-based execution. Its exact
-     * product scope was checked above; an existing session still requires its token. */
-    } else if (st == GOLEM_OK && (token || (s->runtime_profile_count && dw_uint(s->spec,"schema_version") != 3)))
+        /* v3 requires a profile even for document-based execution. Its exact
+         * product scope was checked above; an existing session still requires its token. */
+    } else if (st == GOLEM_OK &&
+               (token || (s->runtime_profile_count && dw_uint(s->spec, "schema_version") != 3)))
         st = GOLEM_ERR_IDENTITY_MISMATCH;
     as_close(&log);
     return st;
@@ -354,8 +356,10 @@ static golem_status call(golem_document_store *s, golem_bytes bytes, const golem
     const char *failure = NULL;
     golem_status st = golem_json_parse(bytes, GOLEM_DOCUMENT_MAX_JSON, &req);
     const char *op = dw_text(req, "operation");
-    if (st == GOLEM_OK && (!strcmp(op,"prepare") || !strcmp(op,"finish") || !strcmp(op,"run")))
-        st = gi_product_request(s, !strcmp(op,"run") ? GI_PRODUCT_QA_DISPATCH : GI_PRODUCT_DEVELOPMENT, bytes, "EXECUTION");
+    if (st == GOLEM_OK && (!strcmp(op, "prepare") || !strcmp(op, "finish") || !strcmp(op, "run")))
+        st = gi_product_request(
+            s, !strcmp(op, "run") ? GI_PRODUCT_QA_DISPATCH : GI_PRODUCT_DEVELOPMENT, bytes,
+            "EXECUTION");
     bool is_prepare = strcmp(op, "prepare") == 0, is_run = strcmp(op, "run") == 0,
          is_verify = strcmp(op, "verify") == 0;
     bool has_token = dw_get(req, "token") != NULL;
@@ -434,17 +438,18 @@ static golem_status call(golem_document_store *s, golem_bytes bytes, const golem
 }
 
 GOLEM_RECORDED_API(golem_execution_call,
-    (golem_document_store *s, golem_bytes bytes, const golem_digest *approval,
-     golem_execution_reply *out, golem_diagnostic *d),
-    (s, bytes, approval, out, d), d)
+                   (golem_document_store * s, golem_bytes bytes, const golem_digest *approval,
+                    golem_execution_reply *out, golem_diagnostic *d),
+                   (s, bytes, approval, out, d), d)
 {
     return call(s, bytes, approval, NULL, NULL, out, d);
 }
 
 GOLEM_RECORDED_API(golem_execution_call_authorized,
-    (golem_document_store *s, golem_bytes bytes, const golem_execution_approval *approval,
-     golem_execution_reply *out, golem_diagnostic *d),
-    (s, bytes, approval, out, d), d)
+                   (golem_document_store * s, golem_bytes bytes,
+                    const golem_execution_approval *approval, golem_execution_reply *out,
+                    golem_diagnostic *d),
+                   (s, bytes, approval, out, d), d)
 {
     if (approval && (approval->struct_size != sizeof(*approval) || approval->version != 1))
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);

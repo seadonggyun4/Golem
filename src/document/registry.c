@@ -94,10 +94,10 @@ golem_status dw_preconditions(golem_document_store *s, struct json_object *m)
 golem_status dw_apply(golem_document_store *s, struct json_object *event,
                       const golem_digest *payload, const golem_digest *frame)
 {
-    if (dw_uint(event, "schema_version") != 1 &&
-        !(dw_uint(event, "schema_version") == 2 &&
-          (!strcmp(dw_text(event, "type"), "research") || !strcmp(dw_text(event, "type"), "reentry")) &&
-          s->spec))
+    if (dw_uint(event, "schema_version") != 1 && !(dw_uint(event, "schema_version") == 2 &&
+                                                   (!strcmp(dw_text(event, "type"), "research") ||
+                                                    !strcmp(dw_text(event, "type"), "reentry")) &&
+                                                   s->spec))
         return GOLEM_ERR_UNSUPPORTED_VERSION;
     golem_status st = GOLEM_OK;
     golem_digest key;
@@ -127,7 +127,8 @@ golem_status dw_apply(golem_document_store *s, struct json_object *event,
         return gi_qa_observation_apply(s, event, frame);
     if (strcmp(dw_text(event, "type"), "intent-enrollment") == 0)
         return gi_product_apply(s, event, frame);
-    if (dw_uint(s->spec, "schema_version") == 3 && strcmp(dw_text(event, "type"), "document") && strcmp(dw_text(event, "type"), "completion"))
+    if (dw_uint(s->spec, "schema_version") == 3 && strcmp(dw_text(event, "type"), "document") &&
+        strcmp(dw_text(event, "type"), "completion"))
         return GOLEM_ERR_UNSUPPORTED_VERSION;
     if (strcmp(dw_text(event, "type"), "reentry") == 0)
         return re_apply(s, event, payload, frame);
@@ -197,7 +198,8 @@ static golem_status empty_root(int root)
         return golem_system_error_note(GOLEM_ERR_IO, "document.scan", "openat", errno);
     DIR *d = fdopendir(scan);
     if (!d) {
-        golem_status st = golem_system_error_note(GOLEM_ERR_IO, "document.scan", "fdopendir", errno);
+        golem_status st =
+            golem_system_error_note(GOLEM_ERR_IO, "document.scan", "fdopendir", errno);
         if (close(scan) < 0)
             (void)golem_system_error_note(GOLEM_ERR_IO, "document.scan", "close", errno);
         return st;
@@ -214,7 +216,8 @@ static golem_status empty_root(int root)
         st = golem_system_error_note(GOLEM_ERR_IO, "document.scan", "readdir", errno);
     if (closedir(d) < 0) {
         (void)golem_system_error_note(GOLEM_ERR_IO, "document.scan", "closedir", errno);
-        if (st == GOLEM_OK) st = GOLEM_ERR_IO;
+        if (st == GOLEM_OK)
+            st = GOLEM_ERR_IO;
     }
     return st;
 }
@@ -260,8 +263,9 @@ static golem_status allocate_store(const char *root, bool writable, bool create,
     return st;
 }
 GOLEM_RECORDED_API(golem_document_store_create,
-    (const char *root, golem_bytes spec, const golem_allocator *a, golem_document_store **out,
-     golem_diagnostic *d), (root, spec, a, out, d), d)
+                   (const char *root, golem_bytes spec, const golem_allocator *a,
+                    golem_document_store **out, golem_diagnostic *d),
+                   (root, spec, a, out, d), d)
 {
     if (!out)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -299,8 +303,9 @@ GOLEM_RECORDED_API(golem_document_store_create,
     return dw_report(d, st, NULL);
 }
 GOLEM_RECORDED_API(golem_document_store_open,
-    (const char *root, bool writable, const golem_allocator *a,
-     golem_document_store **out, golem_diagnostic *d), (root, writable, a, out, d), d)
+                   (const char *root, bool writable, const golem_allocator *a,
+                    golem_document_store **out, golem_diagnostic *d),
+                   (root, writable, a, out, d), d)
 {
     if (!out)
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);
@@ -317,7 +322,7 @@ GOLEM_RECORDED_API(golem_document_store_open,
         (void)golem_document_store_close(s);
     return dw_report(d, st, NULL);
 }
-GOLEM_RECORDED_REQUIRED_API(golem_document_store_close, (golem_document_store *s), (s))
+GOLEM_RECORDED_REQUIRED_API(golem_document_store_close, (golem_document_store * s), (s))
 {
     if (!s)
         return GOLEM_OK;
@@ -341,7 +346,8 @@ GOLEM_RECORDED_REQUIRED_API(golem_document_store_close, (golem_document_store *s
         json_object_put(s->admission_links[i]);
     json_object_put(s->workpack_binding);
     gi_product_access_close(s->intent_access);
-    for (size_t i=0;i<s->intent_qa_count;++i) json_object_put(s->intent_qa[i]);
+    for (size_t i = 0; i < s->intent_qa_count; ++i)
+        json_object_put(s->intent_qa[i]);
     json_object_put(s->intent_enrollment);
     json_object_put(s->spec);
     golem_status st = golem_evidence_close(s->cas);
@@ -364,9 +370,9 @@ golem_status golem_document_generation(const golem_document_store *s, uint64_t *
     return GOLEM_OK;
 }
 GOLEM_RECORDED_API(golem_document_submit,
-    (golem_document_store *s, golem_bytes metadata, golem_bytes body,
-     const char *key, golem_document_result *out, golem_diagnostic *d),
-    (s, metadata, body, key, out, d), d)
+                   (golem_document_store * s, golem_bytes metadata, golem_bytes body,
+                    const char *key, golem_document_result *out, golem_diagnostic *d),
+                   (s, metadata, body, key, out, d), d)
 {
     if (!s || !out || !dw_id(key))
         return dw_report(d, GOLEM_ERR_INVALID_ARGUMENT, NULL);

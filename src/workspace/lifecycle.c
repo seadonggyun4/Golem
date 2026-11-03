@@ -53,7 +53,8 @@ static golem_status registered(ws_context *ctx, struct json_object *binding, boo
     if (!text && st == GOLEM_OK)
         st = GOLEM_ERR_OUT_OF_MEMORY;
     if (st == GOLEM_OK && create)
-        st = dw_publish(dir, ctx->host->repository_id, (golem_bytes){(const uint8_t *)text, strlen(text)});
+        st = dw_publish(dir, ctx->host->repository_id,
+                        (golem_bytes){(const uint8_t *)text, strlen(text)});
     else if (st == GOLEM_OK) {
         uint8_t *bytes = NULL;
         size_t size = 0;
@@ -91,7 +92,8 @@ static golem_status initialize(ws_context *ctx, struct json_object *binding, con
             !dw_add(intent, "nonce", json_object_new_string(nonce)) ||
             !dw_add(intent, "main_dirty", json_object_new_boolean(!clean)) ||
             !dw_add_digest(intent, "main_status", &status) ||
-            !dw_add(intent, "runtime_generation", json_object_new_uint64(ctx->store->runtime_profile_count)))
+            !dw_add(intent, "runtime_generation",
+                    json_object_new_uint64(ctx->store->runtime_profile_count)))
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
     if (st == GOLEM_OK)
@@ -113,8 +115,16 @@ static golem_status create_tree(ws_context *ctx)
         close(work);
     if (root >= 0)
         close(root);
-    const char *args[] = {"worktree", "add", "--detach", "--no-checkout", "--lock", "--reason",
-        dw_text(ctx->intent, "nonce"), ctx->path, dw_text(ctx->intent, "base_commit"), NULL};
+    const char *args[] = {"worktree",
+                          "add",
+                          "--detach",
+                          "--no-checkout",
+                          "--lock",
+                          "--reason",
+                          dw_text(ctx->intent, "nonce"),
+                          ctx->path,
+                          dw_text(ctx->intent, "base_commit"),
+                          NULL};
     golem_supervisor_result result = {0};
     if (st == GOLEM_OK)
         st = ws_git(ctx, ctx->host->repository_root, args, &result);
@@ -140,14 +150,14 @@ static golem_status create_tree(ws_context *ctx)
     if (st == GOLEM_OK)
         st = ws_identity(admin, &gitdir);
     if (st == GOLEM_OK && (!ready || !dw_add(ready, "tree", json_object_get(tree)) ||
-        !dw_add(ready, "gitdir", json_object_get(gitdir))))
+                           !dw_add(ready, "gitdir", json_object_get(gitdir))))
         st = GOLEM_ERR_OUT_OF_MEMORY;
     int fd = -1;
     char parent[4096];
     if (st == GOLEM_OK)
         st = ws_join(parent, ctx->common, "worktrees");
-    if (st == GOLEM_OK && (strncmp(admin, parent, strlen(parent)) ||
-        admin[strlen(parent)] != '/' || !ws_admin_id(admin + strlen(parent) + 1)))
+    if (st == GOLEM_OK && (strncmp(admin, parent, strlen(parent)) || admin[strlen(parent)] != '/' ||
+                           !ws_admin_id(admin + strlen(parent) + 1)))
         st = GOLEM_ERR_IDENTITY_MISMATCH;
     if (st == GOLEM_OK)
         st = ws_directory(admin, &fd);
@@ -215,15 +225,16 @@ static golem_status remove_tree(ws_context *ctx)
 }
 
 GOLEM_RECORDED_API(golem_workspace_call,
-    (golem_document_store *store, const golem_workspace_host *host, golem_workspace_operation operation,
-     const char *candidate, const char *base, const golem_digest *evidence,
-     golem_workspace_result *out, golem_diagnostic *diagnostic),
-    (store, host, operation, candidate, base, evidence, out, diagnostic), diagnostic)
+                   (golem_document_store * store, const golem_workspace_host *host,
+                    golem_workspace_operation operation, const char *candidate, const char *base,
+                    const golem_digest *evidence, golem_workspace_result *out,
+                    golem_diagnostic *diagnostic),
+                   (store, host, operation, candidate, base, evidence, out, diagnostic), diagnostic)
 {
     if (!store || !host || host->struct_size != sizeof(*host) || host->version != 1 ||
         !host->check || !host->pulse || !ws_id(host->repository_id) || !ws_id(candidate) || !out ||
-        !host->repository_root || !host->worktree_root ||
-        operation < GOLEM_WORKSPACE_CREATE || operation > GOLEM_WORKSPACE_REMOVE ||
+        !host->repository_root || !host->worktree_root || operation < GOLEM_WORKSPACE_CREATE ||
+        operation > GOLEM_WORKSPACE_REMOVE ||
         (operation == GOLEM_WORKSPACE_CREATE ? !ws_oid(base) : base != NULL) ||
         (operation == GOLEM_WORKSPACE_RETAIN ? evidence == NULL : evidence != NULL))
         return GOLEM_ERR_INVALID_ARGUMENT;
@@ -231,14 +242,19 @@ GOLEM_RECORDED_API(golem_workspace_call,
         return GOLEM_ERR_INVALID_STATE;
     if (!strcmp(dw_text(store->spec, "permission"), "DENY"))
         return GOLEM_ERR_POLICY_DENIED;
-    if (dw_uint(store->spec, "schema_version") == 3) return GOLEM_ERR_UNSUPPORTED_VERSION;
+    if (dw_uint(store->spec, "schema_version") == 3)
+        return GOLEM_ERR_UNSUPPORTED_VERSION;
     golem_status gate = gi_product_check(store, GI_PRODUCT_DEVELOPMENT);
-    if (gate != GOLEM_OK) return gate;
+    if (gate != GOLEM_OK)
+        return gate;
     const char *work_id = dw_text(store->spec, "work_id");
     if (!ws_id(work_id))
         return GOLEM_ERR_POLICY_DENIED;
-    ws_context ctx = {.store = store, .host = host, .operation = operation,
-        .candidate = candidate, .records = -1};
+    ws_context ctx = {.store = store,
+                      .host = host,
+                      .operation = operation,
+                      .candidate = candidate,
+                      .records = -1};
     golem_status st = host->check(host->context, operation, candidate);
     struct json_object *binding = NULL;
     if (st == GOLEM_OK)
@@ -260,8 +276,8 @@ GOLEM_RECORDED_API(golem_workspace_call,
     if (st == GOLEM_OK)
         st = ws_load(&ctx);
     if (st == GOLEM_OK && ctx.sequence) {
-        const char *keys[] = {"registration", "work_id", "candidate", "base_commit", "nonce",
-            "main_dirty", "main_status", "runtime_generation"};
+        const char *keys[] = {"registration", "work_id",    "candidate",   "base_commit",
+                              "nonce",        "main_dirty", "main_status", "runtime_generation"};
         golem_digest status;
         if (!dw_keys(ctx.intent, keys, 8) || !dw_text(ctx.intent, "work_id") ||
             !dw_text(ctx.intent, "candidate") || !ws_oid(dw_text(ctx.intent, "base_commit")) ||
@@ -296,8 +312,10 @@ GOLEM_RECORDED_API(golem_workspace_call,
         if (st == GOLEM_OK)
             st = ws_git_policy(&ctx);
         if (st == GOLEM_OK && operation != GOLEM_WORKSPACE_RESUME) {
-            unsigned target = operation == GOLEM_WORKSPACE_ACTIVATE ? 3 :
-                operation == GOLEM_WORKSPACE_SEAL ? 4 : operation == GOLEM_WORKSPACE_RETAIN ? 5 : 7;
+            unsigned target = operation == GOLEM_WORKSPACE_ACTIVATE ? 3
+                              : operation == GOLEM_WORKSPACE_SEAL   ? 4
+                              : operation == GOLEM_WORKSPACE_RETAIN ? 5
+                                                                    : 7;
             if (ctx.sequence + 1 != target && !(target == 7 && ctx.sequence == 5))
                 st = GOLEM_ERR_INVALID_STATE;
             if (st == GOLEM_OK && operation == GOLEM_WORKSPACE_REMOVE)
@@ -321,8 +339,8 @@ GOLEM_RECORDED_API(golem_workspace_call,
         st = GOLEM_ERR_INVALID_STATE;
     if (st == GOLEM_OK) {
         golem_workspace_result result = {.receipt = ctx.last};
-        result.state = ctx.sequence == 1 || ctx.sequence == 6 ? GOLEM_WORKSPACE_ATTENTION :
-            (golem_workspace_state)ctx.sequence;
+        result.state = ctx.sequence == 1 || ctx.sequence == 6 ? GOLEM_WORKSPACE_ATTENTION
+                                                              : (golem_workspace_state)ctx.sequence;
         memcpy(result.path, ctx.path, strlen(ctx.path) + 1);
         *out = result;
     }
@@ -331,6 +349,8 @@ GOLEM_RECORDED_API(golem_workspace_call,
     json_object_put(ctx.intent);
     json_object_put(ctx.ready);
     json_object_put(binding);
-    return dw_report(diagnostic, st, st == GOLEM_OK ? "workspace receipt verified" :
-        "workspace refused; preserve paths and receipts, reopen before recovery");
+    return dw_report(
+        diagnostic, st,
+        st == GOLEM_OK ? "workspace receipt verified"
+                       : "workspace refused; preserve paths and receipts, reopen before recovery");
 }

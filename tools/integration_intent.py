@@ -2,7 +2,6 @@
 from pathlib import Path
 import os
 import select
-import signal
 import subprocess
 import tempfile
 import time
@@ -82,30 +81,37 @@ class Hosts:
         cfg,row,raw=self.select(entry,envelope)
         return self._capture(cfg,row,raw,output)
     def _capture(self,cfg,row,raw,output):
-        result={'returncode':None,'reason':'UNKNOWN','recording':'RECORDED'};stdout=bytearray();stderr=bytearray();process=None
+        result={'returncode':None,'reason':'UNKNOWN','recording':'RECORDED'};stdout=bytearray();stderr=bytearray()
         try:
             with authority.authorized_root(cfg['repository'],cfg['registration_sha256'],git=Path(cfg['git']['path'])) as (fd,record):
                 c.require(cfg['bridge'] in record['authority']['pins'],'INTENT_REGISTERED_BRIDGE_REQUIRED')
                 reviewfd=os.open(row['review_root']['path'],os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
                 try:
                     info=os.fstat(reviewfd);c.require({'device':info.st_dev,'inode':info.st_ino}==row['review_root']['identity'] and info.st_uid==os.getuid() and not info.st_mode&0o077,'INTENT_REVIEW_ROOT_CHANGED')
-                    with tempfile.TemporaryFile() as source:
-                        source.write(raw);source.seek(0)
-                        process=subprocess.Popen([cfg['bridge']['path'],'--product-fd',str(fd),cfg['registration_sha256'],str(reviewfd)],pass_fds=(fd,reviewfd),stdin=source,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=backend.ENVIRONMENT,start_new_session=True)
-                        streams={process.stdout.fileno():stdout,process.stderr.fileno():stderr};deadline=time.monotonic()+30
-                        while streams:
+                    def exchange(process,deadline):
+                        # Drain both streams while sending the bounded packet: a
+                        # full stderr pipe must not deadlock a large request.
+                        streams={process.stdout.fileno():stdout,process.stderr.fileno():stderr}
+                        pending=memoryview(raw);input_fd=process.stdin.fileno()
+                        os.set_blocking(input_fd,False)
+                        for pipe in streams:os.set_blocking(pipe,False)
+                        while streams or pending:
                             remaining=deadline-time.monotonic();c.require(remaining>0,'INTENT_TIMEOUT')
-                            ready,_,_=select.select(list(streams),[],[],remaining)
+                            ready,writable,_=select.select(list(streams),[input_fd] if pending else [],[],remaining)
+                            if writable:
+                                pending=pending[os.write(input_fd,pending[:65536]):]
+                                if not pending:process.stdin.close()
                             for pipe in ready:
                                 chunk=os.read(pipe,65536)
                                 if not chunk:del streams[pipe];continue
                                 c.require(len(streams[pipe])+len(chunk)<=c.LIMIT,'INTENT_OUTPUT_LIMIT');streams[pipe].extend(chunk)
                         process.wait(timeout=max(.01,deadline-time.monotonic()))
                         result.update(returncode=process.returncode,reason='EXIT')
+                    records.run_private(
+                        [cfg['bridge']['path'],'--product-fd',str(fd),cfg['registration_sha256'],str(reviewfd)],
+                        destination=output/'process',timeout=30,env=backend.ENVIRONMENT,
+                        source=Path(cfg['repository']),protocol=exchange,protocol_stderr=True,pass_fds=(fd,reviewfd))
                 finally:
-                    if process is not None:
-                        if process.poll() is None:os.killpg(process.pid,signal.SIGKILL)
-                        process.wait();process.stdout.close();process.stderr.close()
                     os.close(reviewfd)
             c.require(self.binding(row['binding_id'],row['project_id'],row['work_id'])==(cfg,row,raw),'INTENT_POSTCHECK_CHANGED')
             return result

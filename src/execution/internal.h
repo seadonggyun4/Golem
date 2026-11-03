@@ -47,7 +47,7 @@ golem_status ex_load(golem_document_store *s, const golem_digest *key, const cha
 golem_status ex_markdown(golem_document_store *s, struct json_object *meta,
                          golem_execution_reply *out);
 golem_status ex_document(golem_document_store *s, struct json_object *meta, golem_bytes body);
-golem_status ex_receipt_current(golem_document_store *,struct json_object *);
+golem_status ex_receipt_current(golem_document_store *, struct json_object *);
 golem_status ex_live(golem_document_store *s, struct json_object *meta);
 golem_status ex_pass(golem_document_store *s, struct json_object *meta);
 golem_status ex_required(golem_document_store *s, struct json_object *meta);

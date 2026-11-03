@@ -17,12 +17,12 @@ extern "C" {
  * See docs/completion.md for legacy schema, limits and trust boundaries. */
 golem_status golem_completion_validate(golem_bytes request, golem_diagnostic *diagnostic);
 golem_status golem_completion_call(golem_document_store *store, golem_bytes request,
-    golem_execution_reply *out, golem_diagnostic *diagnostic);
+                                   golem_execution_reply *out, golem_diagnostic *diagnostic);
 /* Read immutable report, optionally restore it and referenced document
  * projections. No differing file is replaced. sequence is 1-based.
  * Historical report restoration does not assert current completion. */
-golem_status golem_completion_report(golem_document_store *store, uint32_t sequence,
-    bool project, golem_execution_reply *out, golem_diagnostic *diagnostic);
+golem_status golem_completion_report(golem_document_store *store, uint32_t sequence, bool project,
+                                     golem_execution_reply *out, golem_diagnostic *diagnostic);
 #ifdef __cplusplus
 }
 #endif

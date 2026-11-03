@@ -56,6 +56,30 @@ class Records(unittest.TestCase):
             record.run_private([sys.executable], destination=self.root / "invalid-protocol",
                 timeout=5, capture_output=True, protocol=reject)
 
+    def test_private_protocol_inherits_only_explicit_descriptors(self):
+        fd = os.open(self.source, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            def exchange(child, deadline):
+                child.stdin.close()
+                data = child.stdout.read()
+                child.wait(timeout=max(.01, deadline-time.monotonic()))
+                return data
+            value = record.run_private([sys.executable, "-c",
+                "import os,sys; print(os.fstat(int(sys.argv[1])).st_ino)", str(fd)],
+                destination=self.root / "fd-protocol", timeout=5, protocol=exchange,
+                source=self.source, pass_fds=(fd,))
+            self.assertEqual(int(value), os.fstat(fd).st_ino)
+            self.assertTrue((self.root / "fd-protocol/result.json").exists())
+            for invalid in ((fd, fd), (True,), (0,), [fd]):
+                with self.assertRaises(ValueError):
+                    record.run_private([sys.executable], destination=self.root / "invalid-fds",
+                        timeout=5, protocol=exchange, pass_fds=invalid)
+            with self.assertRaises(ValueError):
+                record.run_private([sys.executable], destination=self.root / "no-protocol",
+                    timeout=5, pass_fds=(fd,))
+        finally:
+            os.close(fd)
+
     def test_private_output_is_bounded_memory_only_and_never_persisted(self):
         destination = self.root / "private-output"
         secret = "credential-fixture-not-for-disk"

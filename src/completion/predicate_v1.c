@@ -7,7 +7,7 @@
 /* Pure acceptance relative to the replay prefix; live source observation is
  * deliberately optional so later edits cannot invalidate historical replay. */
 golem_status co_evaluate_v1_base(golem_document_store *s, struct json_object *r, bool live,
-                            struct json_object **out)
+                                 struct json_object **out)
 {
     golem_status st = co_validate_v1(r);
     if (st == GOLEM_OK && (strcmp(dw_text(r, "operation"), "finalize") ||
@@ -158,9 +158,12 @@ golem_status co_evaluate_v1_base(golem_document_store *s, struct json_object *r,
     return st;
 }
 
-golem_status co_evaluate_v1(golem_document_store *s,struct json_object *r,bool live,struct json_object **out)
+golem_status co_evaluate_v1(golem_document_store *s, struct json_object *r, bool live,
+                            struct json_object **out)
 {
-    if(!s)return GOLEM_ERR_INVALID_ARGUMENT;
-    if(dw_uint(s->spec,"schema_version")==3)return GOLEM_ERR_UNSUPPORTED_VERSION;
-    return co_evaluate_v1_base(s,r,live,out);
+    if (!s)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    if (dw_uint(s->spec, "schema_version") == 3)
+        return GOLEM_ERR_UNSUPPORTED_VERSION;
+    return co_evaluate_v1_base(s, r, live, out);
 }

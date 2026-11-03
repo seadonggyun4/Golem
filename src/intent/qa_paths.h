@@ -17,5 +17,6 @@ typedef struct gi_qa_paths_result {
  * reference count must be zero before any future gate can consider acceptance.
  * This structure-only API leaves referents unresolved; gi_qa_paths_resolve
  * performs typed byte and current host-evidence resolution. */
-golem_status gi_qa_paths_inspect(const gi_qa_paths_inputs *, gi_qa_paths_result *, golem_diagnostic *);
+golem_status gi_qa_paths_inspect(const gi_qa_paths_inputs *, gi_qa_paths_result *,
+                                 golem_diagnostic *);
 #endif

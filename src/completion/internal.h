@@ -4,11 +4,14 @@
 #include "../execution/internal.h"
 #define CO_MAX_RECORDS 64
 #define CO_INTENT_V1 "golem.completion.intent.local-no-merge.v1"
-golem_status co_evaluate_v1_base(golem_document_store *,struct json_object *,bool,struct json_object **);
-golem_status rc_completion_base(golem_document_store *,struct json_object *,bool,struct json_object **);
+golem_status co_evaluate_v1_base(golem_document_store *, struct json_object *, bool,
+                                 struct json_object **);
+golem_status rc_completion_base(golem_document_store *, struct json_object *, bool,
+                                struct json_object **);
 golem_status co_intent_validate(struct json_object *);
-golem_status co_intent_evaluate(golem_document_store *,struct json_object *,bool,struct json_object **);
-golem_status co_intent_markdown(struct json_object *,golem_execution_reply *);
+golem_status co_intent_evaluate(golem_document_store *, struct json_object *, bool,
+                                struct json_object **);
+golem_status co_intent_markdown(struct json_object *, golem_execution_reply *);
 #define CO_EVALUATOR_V1 "golem.completion.development.v1"
 golem_status co_validate_v1(struct json_object *request);
 /* Immutable historical evaluator. New acceptance semantics require a new

@@ -62,3 +62,24 @@ main `e8f6c936d6acbaf4587895714f05cf7cec8de0bc`의 GitHub CI run
 - 초기 원격 전체 실행 `41603099168`은 M0 단계에서 실패했다. 이후 커밋의 실제 결과는
   [GitHub CI 기록](https://github.com/seadonggyun4/Golem/actions/workflows/c.yml)에서
   해당 source SHA로 대조한다. 과거 실패를 소급 성공으로 변경하지 않는다.
+
+## Linux·Python CI 후속 수정 (2026-11-03)
+
+전체 run `41605798265`의 M0 대조는 통과했으나 Linux 빌드는 GCC의
+`-Werror=misleading-indentation`, Python은 Intent host의 공통 실행 기록 우회와
+기본 비활성 host 인자 기대값 누락으로 실패했다. 실패 기록은 보존한다.
+
+- QC C/header/include 48개는 서식만 정리했다. 전후 C 토큰의 동일성을 확인했으며
+  경고 억제·컴파일 옵션 완화는 하지 않았다. byte pin만 해당 새 bytes에 맞췄다.
+- Intent host는 `execution_record.run_private`로 실행한다. 정확히 선택한 두 FD만
+  전달하고 D01 lock·등록 bridge pin·review root identity·종료 후 최신성 검사를 유지한다.
+  stdout/stderr와 입력을 동시에 처리해 큰 packet의 pipe 교착을 방지한다.
+- 제한 시간·출력 한도·자식 정리와 불확실 결과 보존을 유지한다. 실행 기록을
+  권한이나 성공 증명으로 해석하지 않으며 자동 재시도는 추가하지 않았다.
+- 양방향 대용량 packet·실행 후 stale·FD 검증·spawn 실패 기록 회귀를 추가했다.
+  Intent host 기본값 `None` 검사는 새 인자를 포함해 명시적으로 검사한다.
+- 선택 capability와 전체 repository 정적 대조는 차단 0개다.
+  전체 Python/native 및 새 원격 CI는 진행 중이며 완료 전 PASS로 표시하지 않는다.
+
+설치된 Codex·Claude 프로그램, launcher, owner 정책과 producer pin은 갱신하지 않았다.
+실제 client/Work 검증 HOLD는 계속 유지한다.

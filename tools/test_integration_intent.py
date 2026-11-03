@@ -81,12 +81,44 @@ class IntentBoundaryTests(unittest.TestCase):
                 fd=os.open(folder,os.O_RDONLY|os.O_DIRECTORY)
                 try:yield fd,{'authority':{'pins':[cfg['bridge']]}}
                 finally:os.close(fd)
-            with patch.object(intent.authority,'authorized_root',side_effect=authority),patch.object(intent.subprocess,'Popen',side_effect=OSError('fixture spawn failure')) as spawn:
+            with patch.object(intent.authority,'authorized_root',side_effect=authority),patch.object(intent.records,'source_observation',return_value={'status':'NOT_OBSERVED'}),patch.object(intent.subprocess,'Popen',side_effect=OSError('fixture spawn failure')) as spawn:
                 with self.assertRaises(OSError):host._capture(cfg,row,b'{}',root)
                 self.assertEqual(spawn.call_count,1)
             self.assertTrue((root/'stdout.log').exists());self.assertTrue((root/'stderr.log').exists())
             capture=json.loads((root/'intent-capture.json').read_text())
             self.assertIsNone(capture['returncode']);self.assertEqual(capture['reason'],'UNKNOWN')
+            observation=json.loads((root/'process/result.json').read_text())
+            self.assertEqual(observation['reason'],'LAUNCH_ERROR')
+
+    def test_capture_records_fd_protocol_and_postchecks_without_reexecution(self):
+        import sys
+        host=object.__new__(intent.Hosts)
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve();os.chmod(root,0o700);info=root.stat()
+            bridge=root/'bridge'
+            bridge.write_text('#!'+sys.executable+'\nimport os,sys\n'
+                'os.fstat(int(sys.argv[2]));os.fstat(int(sys.argv[4]))\n'
+                'sys.stderr.buffer.write(b"x"*131072);sys.stderr.buffer.flush()\n'
+                'data=sys.stdin.buffer.read();sys.stdout.buffer.write(data)\n')
+            bridge.chmod(0o700)
+            cfg={'repository':folder,'registration_sha256':'a'*64,'git':{'path':'/unused/git'},'bridge':{'path':str(bridge),'sha256':c.sha(bridge.read_bytes())}}
+            row={'binding_id':'b','project_id':'p','work_id':'w','review_root':{'path':folder,'identity':{'device':info.st_dev,'inode':info.st_ino}}}
+            raw=b'x'*262144
+            @contextmanager
+            def authority(*args,**kwargs):
+                fd=os.open(folder,os.O_RDONLY|os.O_DIRECTORY)
+                try:yield fd,{'authority':{'pins':[cfg['bridge']]}}
+                finally:os.close(fd)
+            for stale in (False,True):
+                output=root/str(stale);output.mkdir(mode=0o700)
+                with patch.object(intent.authority,'authorized_root',side_effect=authority),patch.object(host,'binding',return_value=None if stale else (cfg,row,raw)) as check:
+                    if stale:
+                        with self.assertRaisesRegex(c.IntegrationError,'INTENT_POSTCHECK_CHANGED'):host._capture(cfg,row,raw,output)
+                    else:self.assertEqual(host._capture(cfg,row,raw,output)['returncode'],0)
+                    check.assert_called_once_with('b','p','w')
+                self.assertEqual((output/'stdout.log').read_bytes(),raw)
+                self.assertEqual(len((output/'stderr.log').read_bytes()),131072)
+                self.assertEqual(json.loads((output/'process/result.json').read_text())['reason'],'PROTOCOL_COMPLETE')
 
 
 

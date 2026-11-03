@@ -9,7 +9,7 @@
 #include <string.h>
 
 golem_status rc_completion_base(golem_document_store *s, struct json_object *r, bool live,
-                           struct json_object **out)
+                                struct json_object **out)
 {
     golem_status validated = co_validate(r);
     if (validated != GOLEM_OK || strcmp(dw_text(r, "operation"), "finalize"))
@@ -120,9 +120,12 @@ golem_status rc_markdown(struct json_object *record, golem_execution_reply *out)
     return GOLEM_OK;
 }
 
-golem_status rc_completion(golem_document_store *s,struct json_object *r,bool live,struct json_object **out)
+golem_status rc_completion(golem_document_store *s, struct json_object *r, bool live,
+                           struct json_object **out)
 {
-    if(!s)return GOLEM_ERR_INVALID_ARGUMENT;
-    if(dw_uint(s->spec,"schema_version")==3)return GOLEM_ERR_UNSUPPORTED_VERSION;
-    return rc_completion_base(s,r,live,out);
+    if (!s)
+        return GOLEM_ERR_INVALID_ARGUMENT;
+    if (dw_uint(s->spec, "schema_version") == 3)
+        return GOLEM_ERR_UNSUPPORTED_VERSION;
+    return rc_completion_base(s, r, live, out);
 }

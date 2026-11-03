@@ -71,7 +71,7 @@
     },
     {
       "path": "include/golem/completion.h",
-      "sha256": "e8ca5d1cd93a12230765cf4c109a155baab34382154378906ac010f2f8134885"
+      "sha256": "b9ab26904f0311051610886952e4c678ddb148741d03bad088ad812d1c469535"
     },
     {
       "path": "include/golem/context.h",
@@ -455,7 +455,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "a33a9c89cae7f02b1aa05d114fdab8daded39583b40863b76f6d5c9fce34585f"
+      "sha256": "0ebca3d6b7b3c6e41fd6cd1864dd75bb2aea54397d134a48f1242a48b9c5c2ec"
     },
     {
       "path": "tools/test_capability_m6.py",
