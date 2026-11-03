@@ -37,3 +37,9 @@ schema runner의 종료 성공을 모든 native/host/E2E 검증 완료로 승격
 기존 capability 원장은 새 QC MCP 소스와 source/function 지문이 불일치한다.
 이는 release 차단이며 검사 제거·무조건 repin·기존 설치 policy pin 갱신으로 해소하지 않는다.
 따라서 현재 소스를 "전체 CI 통과" 또는 "설치 준비 완료"로 표시하지 않는다.
+
+후속 확인: 최초 실패 5개를 수정 후 새 fixture로 순차 실행한 결과 **5/5 통과**했다.
+기존 실패 기록은 그대로 보존했다. 이는 최초 병렬 실행을 소급 PASS로 바꾼 것이 아니다.
+main `e8f6c936d6acbaf4587895714f05cf7cec8de0bc`의 GitHub CI run
+`41603004340`이 시작된 것을 확인했다. 전체 원격 CI 통과 및 capability 원장 정합성은
+아직 확인되지 않았으므로 설치 차단 상태를 유지한다.
