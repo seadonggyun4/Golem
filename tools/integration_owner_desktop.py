@@ -64,6 +64,8 @@ class Controller:
         payload=result['plan']['payload']
         c.require(payload['kind']=='DRAFT_ACTION','OWNER_REVIEW_DRAFT_REQUIRED')
         self.selection=copy.deepcopy(args)
+        if payload.get('entry_review',{}).get('tool') in ('intent_qa_accept','intent_completion_finalize'):
+            result['owner_display']={'state':'UNAPPROVED_DRAFT','native_contract':'QC4_CURRENT_QA_AND_QC5_LOCAL_NO_MERGE','effect':'CANDIDATE_FILE_ONLY_NOT_POLICY_APPLICATION','required':'SEPARATE_EXACT_INTENT_HOST_AND_D4','native_assurance_label':'LOCAL_COOPERATIVE_REVIEWED_NOT_PROVEN','automatic_execution':False}
         return result
 
     def export(self,action_id,parent,*,confirmed=False,attachment_path=None,attachment_sha256=None):

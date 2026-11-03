@@ -10,6 +10,7 @@ import integration_task_actions as tasks
 import integration_quality_actions as quality
 import integration_parallel_actions as parallel
 import integration_workpack_actions as workpack
+import integration_intent as intent
 
 AUTO_FIELDS=('work_id','key','expected_sequence','expected_generation','token','input_digest')
 
@@ -36,6 +37,7 @@ def token(status,owner):
 
 
 def build(args,observed,key):
+    if args["tool"] in intent.ACTIONS:return intent.draft(args,observed,key)
     if args["tool"] in workpack.NAMES:return workpack.draft(args,observed,key)
     if args["tool"] in parallel.NAMES:return parallel.draft(args,observed,key)
     if args["tool"] in quality.NAMES:return quality.draft(args,observed,key)
@@ -113,6 +115,7 @@ def guidance(observed,owner=''):
 
 
 def validator(args,envelope,native):
+    if args["tool"] in intent.ACTIONS:return None
     if args["tool"] in workpack.NAMES:return None
     if args["tool"] in parallel.NAMES:return parallel.validator(args["tool"],envelope,native)
     if args["tool"] in quality.NAMES:return quality.validator(args["tool"],envelope,native)
@@ -125,6 +128,7 @@ def validator(args,envelope,native):
 
 def validate_observed(entry,envelope,request,observed):
     """Field equality to observed fences; not the native state/permission reducer."""
+    if entry["tool"] in intent.ACTIONS:return None
     if entry["tool"] in workpack.NAMES:return None
     if entry["tool"] in parallel.NAMES:return None
     if entry["tool"] in quality.NAMES:return None

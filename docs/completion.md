@@ -200,3 +200,7 @@ completion replay: losing an entire side journal is not treated as empty history
 
 These sources motivate the design; they do not establish this implementation's
 correctness or certify the semantic quality of an agent's work.
+
+## Intent Work v3 source extension
+
+Work v3 uses the separate `golem.completion.intent.local-no-merge.v1` predicate and exact COMPLETION host scope. Current QC4 acceptance is mandatory; legacy finalize cannot bypass it. This source extension has **NOT_RUN** build/runtime validation under the current HOLD and is not installed in clients. See [QC5 contract and limitations](intent-assurance-qc5-implementation.ko.md). Existing v1/v2 semantics below are unchanged.

@@ -1,0 +1,55 @@
+{
+  "schema": "golem.intent.context-golden.v1",
+  "status": "NOT_RUN",
+  "sources": [
+    "docs/schemas/intent-qc-contracts.v1.schema.json",
+    "src/common/json.c",
+    "src/completion/model.c",
+    "src/completion/predicate_intent.c",
+    "src/document/schema.c",
+    "src/intent/product_access.c",
+    "src/intent/product_gate.c",
+    "src/intent/qa_acceptance.c",
+    "src/intent/qa_paths.c",
+    "src/intent/qa_resolve.c",
+    "src/intent/review.c",
+    "src/intent/review_host.c",
+    "src/intent/schema.c",
+    "tests/c/intent_context_golden.py",
+    "tests/c/intent_qc7_driver.c",
+    "tests/c/intent_qc7_integration.py",
+    "tools/integration_contract.py",
+    "tools/integration_intent.py",
+    "tools/intent_product_host.inc"
+  ],
+  "checkpoints": {
+    "accept": {
+      "operation": "accept",
+      "equals": {
+        "body/intent_qa_status": "ACCEPTED",
+        "body/execution_status": "PASS"
+      }
+    },
+    "current": {
+      "operation": "current",
+      "equals": {
+        "body/intent_qa_status": "ACCEPTED",
+        "body/execution_status": "PASS"
+      }
+    },
+    "done": {
+      "operation": "completion",
+      "equals": {
+        "action": "DONE",
+        "acceptance_verified": true
+      }
+    },
+    "stale": {
+      "operation": "current",
+      "equals": {
+        "body/intent_qa_status": "STALE",
+        "body/execution_status": "PASS"
+      }
+    }
+  }
+}

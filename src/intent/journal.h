@@ -47,6 +47,12 @@ golem_status gi_journal_inspect(gi_journal *journal, gi_journal_status *out);
 typedef golem_status (*gi_journal_visitor)(void *context, const golem_digest *operation,
     const golem_digest *request, const gi_journal_operation *record);
 golem_status gi_journal_visit(gi_journal *journal, gi_journal_visitor visitor, void *context);
+/* Read-only committed payload visitor after full validation. Borrowed payload
+ * is valid only during callback; no journal reentry. Pending state is rejected. */
+typedef golem_status (*gi_journal_payload_visitor)(void *, const golem_digest *,
+    const golem_digest *, const gi_journal_operation *, golem_bytes);
+golem_status gi_journal_visit_payloads(gi_journal *, gi_journal_payload_visitor, void *);
+
 /* Read-only operation lookup, including prepared/uncommitted operations.
  * Does not clear poison or retry publication. Requires exact request identity. */
 golem_status gi_journal_lookup(gi_journal *journal, const golem_digest *operation,

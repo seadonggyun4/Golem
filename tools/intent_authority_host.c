@@ -13,7 +13,8 @@
 static golem_status registration_guard(void *context)
 {
     /* Trusted host holds common-dir EX and validates the reviewed owner plan.
-     * This private bridge cannot dispatch product actions or choose a lane. */
+     * This legacy callback grants no product action; QC6 uses a separate
+     * exact scope and guard. It cannot choose a different intake lane. */
     return context ? GOLEM_OK : GOLEM_ERR_POLICY_DENIED;
 }
 
@@ -454,9 +455,12 @@ static int store_objects_command(int argc, char **argv)
     return 0;
 }
 
+#include "intent_product_host.inc"
+
 int main(int argc, char **argv)
 {
     if (argc < 4) return 2;
+    if (!strcmp(argv[1], "--product-fd")) return product_command(argc,argv);
     if (!strcmp(argv[1], "--read-baseline-fd")) return read_baseline_command(argc, argv);
     if (!strcmp(argv[1], "--store-objects-fd")) return store_objects_command(argc, argv);
     if (!strcmp(argv[1], "--plan-fragment-fd") || !strcmp(argv[1], "--preserve-fragment-fd") ||

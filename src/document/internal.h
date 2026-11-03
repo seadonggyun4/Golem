@@ -18,6 +18,13 @@ struct golem_document_store {
     bool writable, poisoned, replaying;
     golem_evidence_store *cas;
     struct json_object *spec;
+    struct json_object *intent_enrollment;
+    struct gi_product_access *intent_access;
+    size_t intent_qa_count;
+    struct json_object *intent_qa[64];
+    golem_digest intent_qa_frames[64];
+    bool intent_accepting;
+    bool intent_enrolling; /* private enrollment publication only */
     dw_entry *entries;
     size_t count, edges;
     size_t event_count, reentry_count;

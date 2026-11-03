@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+#include "../intent/product_gate.h"
 #include "internal.h"
 #include "../workflow/role_internal.h"
 #include "../reentry/internal.h"
@@ -7,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-golem_status rc_completion(golem_document_store *s, struct json_object *r, bool live,
+golem_status rc_completion_base(golem_document_store *s, struct json_object *r, bool live,
                            struct json_object **out)
 {
     golem_status validated = co_validate(r);
@@ -29,7 +30,7 @@ golem_status rc_completion(golem_document_store *s, struct json_object *r, bool 
         if (json_object_deep_copy(r, &legacy, NULL) || !ex_uint(legacy, "schema_version", 1))
             st = GOLEM_ERR_OUT_OF_MEMORY;
         if (st == GOLEM_OK)
-            st = co_evaluate_v1(s, legacy, live, &a);
+            st = co_evaluate_v1_base(s, legacy, live, &a);
     } else if (st == GOLEM_OK) {
         const char *action = NULL, *kind = NULL, *reason = NULL;
         st = re_next(s, &action, &kind, &reason);
@@ -117,4 +118,11 @@ golem_status rc_markdown(struct json_object *record, golem_execution_reply *out)
     }
     *out = (golem_execution_reply){(uint8_t *)data, size};
     return GOLEM_OK;
+}
+
+golem_status rc_completion(golem_document_store *s,struct json_object *r,bool live,struct json_object **out)
+{
+    if(!s)return GOLEM_ERR_INVALID_ARGUMENT;
+    if(dw_uint(s->spec,"schema_version")==3)return GOLEM_ERR_UNSUPPORTED_VERSION;
+    return rc_completion_base(s,r,live,out);
 }

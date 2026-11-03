@@ -10,6 +10,7 @@ import integration_backend as backend
 import integration_preparations as preparations
 import integration_quality_reads as quality_reads
 import integration_workpack_reads as workpack_reads
+import integration_intent as intent
 import integration_parallel_reads as parallel_reads
 import integration_parallel_preparations as parallel_preparations
 import integration_reads as extended_reads
@@ -22,6 +23,7 @@ WORK_ARGS = {"project_id": c.ID, "work_id": c.ID}
 CONTEXT_ARGS = {**WORK_ARGS, "selection_id": c.ID, "source_snapshot": c.DIGEST,
                 "target_kind": c.ID, "recipe": c.enum("current-v1", "original-v1")}
 SCHEMAS = {
+    "intent_read": intent.READ_SCHEMA,
     "workpack_read": workpack_reads.SCHEMAS["workpack_read"],
     "workpack_resource_read": read_resources.SCHEMAS["workpack_resource_read"],
     "parallel_prepare": parallel_preparations.SCHEMAS["parallel_prepare"],
@@ -208,7 +210,7 @@ class Service:
                     except (c.IntegrationError, OSError, ValueError):
                         continue
                     result.append({"project_id": scope["binding"]["project_id"], "work_id": work_id,
-                                   "tools": [name for name in scope["tools"] if (name != "workspace_read" or getattr(self, "parallel_result", None) is not None and getattr(self, "parallel_hosts", None) is not None and self.parallel_hosts.parent(scope["binding"]["project_id"], work_id) is not None) and (name not in read_resources.NAMES or
+                                   "tools": [name for name in scope["tools"] if (name != "intent_read" or getattr(self,"intent_hosts",None) is not None and self.intent_hosts.permitted(scope["binding"]["project_id"],work_id)) and (name != "workspace_read" or getattr(self, "parallel_result", None) is not None and getattr(self, "parallel_hosts", None) is not None and self.parallel_hosts.parent(scope["binding"]["project_id"], work_id) is not None) and (name not in read_resources.NAMES or
                                              self.resources is not None and self.resources.permitted(scope["binding"]["project_id"], work_id, name)) and
                                              (name not in preparations.OWNER_NAMES or preparations.owner_available(self, scope["binding"]["project_id"], work_id))],
                                    "read_resources": self.resources.catalog(scope["binding"]["project_id"], work_id, scope["tools"]) if self.resources is not None else []})
@@ -240,7 +242,10 @@ class Service:
                 result["capacity_semantics"] = "READ_SLOTS_ONLY_BYTES_AND_ENTRIES_RECHECKED_NO_ADMISSION_GUARANTEE"
         else:
             scope = self.transfer.scope(args["project_id"], args["work_id"], name)
-            if name in ("context_get", "handoff_prepare"):
+            if name=="intent_read":
+                c.require(getattr(self,"intent_hosts",None) is not None,"OWNER_INTENT_HOST_REQUIRED")
+                result=self.intent_hosts.read(self,scope,args)
+            elif name in ("context_get", "handoff_prepare"):
                 for operation in ("record", "status", "next"):
                     self._authorize(scope, args["work_id"], operation)
                 backend._quota(self.registry.root, AUDIT_READ_COST[name])

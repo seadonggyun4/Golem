@@ -62,7 +62,8 @@ golem_status gi_coverage_validate(golem_bytes text, const gi_span *designated, s
 golem_status gi_source_validate(golem_bytes control, golem_bytes text,
     gi_source_result *out, golem_diagnostic *diagnostic);
 /* Approved ADR-D08 primitive. Explicit source.v1, quota-preparation.v1,
- * baseline.v1 and object-preparation.v1 registry.
+ * baseline.v1, object-preparation.v1, requirement.v1, constraint.v1 and QC2 qa-applicability/obligations/mapping.v1 registry.
+ * Definition registration adds identity only, not object-store permission.
  * SHA256(schema ASCII + NUL || uint64_le(exact JSON length) || exact JSON).
  * This checks JSON/scalar validity and registered schema, not its full shape or
  * provenance. A digest is byte identity, never a receipt or acceptance verdict. */

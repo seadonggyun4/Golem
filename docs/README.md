@@ -63,6 +63,8 @@
 | [integration-mcpb.md](integration-mcpb.md) | Claude Desktop MCPB 설치·사용 안내 |
 | [intent-assurance-architecture.ko.md](intent-assurance-architecture.ko.md) | 아키텍처와 기존 core 재사용 |
 | [intent-assurance-contracts.ko.md](intent-assurance-contracts.ko.md) | 원문·변경·검토·차단 데이터 계약 |
+| [intent-assurance-qa-coverage.ko.md](intent-assurance-qa-coverage.ko.md) | 기획 요구·경로별 QA·완료 연결: 단계별 개발 계획 (실행 HOLD) |
+| [intent-assurance-qa-p0-contract.ko.md](intent-assurance-qa-p0-contract.ko.md) | 채택된 Q1–Q5와 LOCAL_NO_MERGE P0 확정 설계 계약 (미구현) |
 | [intent-assurance-d01-host.ko.md](intent-assurance-d01-host.ko.md) | D01 host 등록과 읽기 전용 native 연결 |
 | [intent-assurance-delivery.ko.md](intent-assurance-delivery.ko.md) | 수용 기준·실패 주입·구현 WBS |
 | [intent-assurance-distribution.ko.md](intent-assurance-distribution.ko.md) | Clone/CMake 없는 MCP 설치·배포 설계 |
@@ -70,6 +72,10 @@
 | [intent-assurance-p0-review.ko.md](intent-assurance-p0-review.ko.md) | Intent Assurance P0 착수 검토 |
 | [intent-assurance-p1-journal.ko.md](intent-assurance-p1-journal.ko.md) | P1 준비 기록과 quota-aware journal |
 | [intent-assurance-p1-object-store.ko.md](intent-assurance-p1-object-store.ko.md) | P1a Object Store 승인 계약과 구현 현황 |
+| [intent-assurance-qc1-implementation.ko.md](intent-assurance-qc1-implementation.ko.md) | QC1 native 기준선·검토 제어 구현과 미연결 범위 (실행 NOT_RUN) |
+| [intent-assurance-qc2-implementation.ko.md](intent-assurance-qc2-implementation.ko.md) | QC2 요구·경로·의무·native case 구조 대조와 미지원 참조 (실행 NOT_RUN) |
+| [intent-assurance-qc3-implementation.ko.md](intent-assurance-qc3-implementation.ko.md) | QC3 Work v3 enrollment·native 차단 경계와 미완료 허용 경로 (실행 NOT_RUN) |
+| [intent-assurance-qc3-access.ko.md](intent-assurance-qc3-access.ko.md) | QC2 typed 참조·현재 stage·QC3 exact-request 허용 연결 (실행 NOT_RUN) |
 | [intent-assurance-p1-schema.ko.md](intent-assurance-p1-schema.ko.md) | Intent Assurance P1 Schema 준비 구현 |
 | [intent-assurance-parallel.ko.md](intent-assurance-parallel.ko.md) | 기능 분할 병렬 실행과 merge queue |
 | [intent-assurance-plan.ko.md](intent-assurance-plan.ko.md) | 원문 대조·병렬 실행·MCP 배포 개발계획 |
@@ -149,3 +155,17 @@ Native validation, catalog/search, limited document binding, proposals, evidence
 | Evidence packages | [Manifest/export/verify](workpacks/receipts.md) |
 | Reference scenario | [Pack](workpacks/reference.md) · [Truthound adapter](workpacks/reference-adapter.md) |
 | Historical milestone results | [Development and validation record](workpacks/development-plan.md) |
+
+- [QC4 실제 결과·현재성·QA 수락 구현 — 실행 HOLD](intent-assurance-qc4-implementation.ko.md)
+
+- [QC5 현재 QA 수락과 완료 predicate — 실행 HOLD](intent-assurance-qc5-implementation.ko.md)
+
+- [QC6 공통 MCP·Owner·선택적 Intent host — 실행 HOLD](intent-assurance-qc6-implementation.ko.md)
+
+- [QC7 검증 시나리오·회귀 보강 — 실행 HOLD](intent-assurance-qc7-qualification.ko.md)
+
+- [QC1–QC7 / P0 정적 재대조](intent-assurance-qc1-qc7-static-review.ko.md): native permission·MCP admission 보완, 실행 NOT_RUN과 남은 exit 구분.
+
+- [QC schema·golden 대조 준비](intent-assurance-schema-golden.ko.md): 구조 정의·고정 bytes·native probe 작성, 실행 동등성 NOT_RUN.
+
+- [Intent QC CI 상태와 설치 전 차단](intent-assurance-ci-status.ko.md)

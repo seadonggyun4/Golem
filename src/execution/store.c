@@ -1,4 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
+#include "../intent/product_access.h"
+#include "../intent/product_gate.h"
 #include "internal.h"
 #include "../common/record_internal.h"
 #include "../policy/approval_internal.h"
@@ -17,6 +19,8 @@ static void hex(const golem_digest *d, char name[65])
 golem_status ex_authorize(golem_document_store *s, struct json_object *token,
                           struct json_object *manifest)
 {
+    golem_status gate = gi_product_check(s, GI_PRODUCT_PUBLICATION);
+    if (gate != GOLEM_OK) return gate;
     as_log log = {.directory = -1};
     golem_status st = as_load(s, NULL, NULL, &log);
     if (st == GOLEM_OK && log.state) {
@@ -32,7 +36,9 @@ golem_status ex_authorize(golem_document_store *s, struct json_object *token,
         if (st == GOLEM_OK && !json_object_equal(pinned, manifest))
             st = GOLEM_ERR_STALE_RESULT;
         json_object_put(pinned);
-    } else if (st == GOLEM_OK && (token || s->runtime_profile_count))
+    /* v3 requires a profile even for document-based execution. Its exact
+     * product scope was checked above; an existing session still requires its token. */
+    } else if (st == GOLEM_OK && (token || (s->runtime_profile_count && dw_uint(s->spec,"schema_version") != 3)))
         st = GOLEM_ERR_IDENTITY_MISMATCH;
     as_close(&log);
     return st;
@@ -286,7 +292,7 @@ static golem_status finish(golem_document_store *s, struct json_object *cp, cons
     json_object_put(snap);
     return st;
 }
-static golem_status live(golem_document_store *s, struct json_object *r)
+golem_status ex_receipt_current(golem_document_store *s, struct json_object *r)
 {
     golem_digest key;
     struct json_object *cp = NULL, *now = NULL;
@@ -320,7 +326,7 @@ golem_status ex_live(golem_document_store *s, struct json_object *meta)
         return GOLEM_ERR_PARSE;
     golem_status st = ex_load(s, &key, NULL, &r);
     if (st == GOLEM_OK)
-        st = live(s, r);
+        st = ex_receipt_current(s, r);
     json_object_put(r);
     return st;
 }
@@ -348,6 +354,8 @@ static golem_status call(golem_document_store *s, golem_bytes bytes, const golem
     const char *failure = NULL;
     golem_status st = golem_json_parse(bytes, GOLEM_DOCUMENT_MAX_JSON, &req);
     const char *op = dw_text(req, "operation");
+    if (st == GOLEM_OK && (!strcmp(op,"prepare") || !strcmp(op,"finish") || !strcmp(op,"run")))
+        st = gi_product_request(s, !strcmp(op,"run") ? GI_PRODUCT_QA_DISPATCH : GI_PRODUCT_DEVELOPMENT, bytes, "EXECUTION");
     bool is_prepare = strcmp(op, "prepare") == 0, is_run = strcmp(op, "run") == 0,
          is_verify = strcmp(op, "verify") == 0;
     bool has_token = dw_get(req, "token") != NULL;
@@ -380,7 +388,7 @@ static golem_status call(golem_document_store *s, golem_bytes bytes, const golem
         if (st == GOLEM_OK)
             st = ex_load(s, &key, is_verify ? NULL : "checkpoint", &cp);
         if (st == GOLEM_OK && is_verify) {
-            st = live(s, cp);
+            st = ex_receipt_current(s, cp);
             if (st == GOLEM_OK)
                 result = json_object_get(cp);
             result_key = key;

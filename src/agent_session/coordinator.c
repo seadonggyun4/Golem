@@ -1,3 +1,5 @@
+#include "../intent/product_access.h"
+#include "../intent/product_gate.h"
 #include "internal.h"
 #include "../common/record_internal.h"
 #include "binding_internal.h"
@@ -718,6 +720,7 @@ GOLEM_RECORDED_API(golem_agent_session_call,
     bool readonly =
         strcmp(op, "status") == 0 || strcmp(op, "next") == 0 || strcmp(op, "context") == 0;
     const char *key = readonly ? NULL : dw_text(r, "key");
+    if (st == GOLEM_OK && !readonly) st = gi_product_request(s, GI_PRODUCT_DEVELOPMENT, bytes, "SESSION");
     golem_digest request, boot;
     uint64_t now = 0;
     if (st == GOLEM_OK && !readonly && (!dw_id(key) || !s->writable))

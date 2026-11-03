@@ -80,6 +80,14 @@ add_library(golem STATIC
     src/workpack/receipt_verify.c
     src/workpack/receipt_store.c
     src/intent/schema.c
+    src/intent/review.c
+    src/intent/review_host.c
+    src/intent/qa_paths.c
+    src/intent/qa_resolve.c
+    src/intent/qa_result.c
+    src/intent/qa_acceptance.c
+    src/intent/product_gate.c
+    src/intent/product_access.c
     src/intent/object.c
     src/intent/quota.c
     src/intent/inventory.c
@@ -139,6 +147,7 @@ add_library(golem STATIC
     src/completion/evaluator.c
     src/completion/deliverable.c
     src/completion/predicate_roles.c
+    src/completion/predicate_intent.c
     src/completion/predicate_v1.c
     src/completion/recovery.c
     src/completion/report.c
@@ -364,3 +373,9 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/GolemConfigVersion.
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/GolemConfig.cmake
     ${CMAKE_CURRENT_BINARY_DIR}/GolemConfigVersion.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Golem)
+
+if(GOLEM_BUILD_INTEGRATION_HOST)
+    add_executable(golem_intent_host tools/intent_authority_host.c)
+    target_link_libraries(golem_intent_host PRIVATE Golem::golem PkgConfig::JSONC)
+    golem_configure_target(golem_intent_host)
+endif()

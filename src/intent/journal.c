@@ -1847,3 +1847,31 @@ done:
     if (started && st != GOLEM_OK) j->poisoned = true;
     free(wire); free(blobs); json_object_put(manifest); free(r); j->busy = false; return st;
 }
+
+
+golem_status gi_journal_visit_payloads(gi_journal *j, gi_journal_payload_visitor visitor, void *context)
+{
+    if (!j || !visitor) return GOLEM_ERR_INVALID_ARGUMENT;
+    if (j->poisoned || j->busy || j->owner != getpid()) return GOLEM_ERR_INVALID_STATE;
+    replay *r = malloc(sizeof(*r));
+    if (!r) return GOLEM_ERR_OUT_OF_MEMORY;
+    j->busy = true;
+    golem_status st = restore(j, r);
+    if (st == GOLEM_OK && r->status.pending) st = GOLEM_ERR_INVALID_STATE;
+    for (size_t i = 0; st == GOLEM_OK && i < r->count; ++i) {
+        record *rec = &r->records[i];
+        uint8_t *data = NULL; size_t n = 0; bool found = false;
+        char path[64]; name(path, sizeof(path), i + 1, "payload");
+        st = read_file(j->root, path, GI_CONTROL_MAX, &data, &n, &found);
+        golem_digest digest, operation, request;
+        if (st == GOLEM_OK && (!found || !rec->committed || n != number(rec->prep + 24)))
+            st = GOLEM_ERR_CORRUPT_JOURNAL;
+        if (st == GOLEM_OK) st = golem_digest_bytes((golem_bytes){data, n}, &digest);
+        if (st == GOLEM_OK && memcmp(digest.bytes, rec->prep + 128, 32)) st = GOLEM_ERR_CORRUPT_JOURNAL;
+        memcpy(operation.bytes, rec->prep + 32, 32); memcpy(request.bytes, rec->prep + 64, 32);
+        gi_journal_operation item = {(gi_quota_lane)number(rec->prep + 8), i + 1, true, false, rec->event};
+        if (st == GOLEM_OK) st = visitor(context, &operation, &request, &item, (golem_bytes){data, n});
+        free(data);
+    }
+    j->busy = false; free(r); return st;
+}

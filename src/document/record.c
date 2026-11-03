@@ -1,3 +1,4 @@
+#include "../intent/product_gate.h"
 #include "internal.h"
 #include <stdio.h>
 #include <string.h>
@@ -15,6 +16,8 @@ golem_status dw_record_prepare(golem_document_store *s, struct json_object *even
     if (!event || !out || !limit || limit > GOLEM_DOCUMENT_MAX_JSON)
         return GOLEM_ERR_INVALID_ARGUMENT;
     golem_status st = writable(s);
+    if (st != GOLEM_OK) return st;
+    st = gi_product_record(s, event);
     if (st != GOLEM_OK) return st;
     st = dw_put_json_bounded(s, event, limit, out);
     if (st == GOLEM_ERR_IO) s->poisoned = true;
@@ -41,6 +44,13 @@ static golem_status publish(golem_document_store *s, int directory, const char *
     if (st != GOLEM_OK) return st;
     if (directory < 0 || !name || !*name || !payload || strchr(name, '/') ||
         !strcmp(name, ".") || !strcmp(name, "..")) return GOLEM_ERR_INVALID_ARGUMENT;
+    struct json_object *record = NULL;
+    if (dw_uint(s->spec, "schema_version") == 3) {
+        st = dw_cas_json(s, payload, &record);
+        if (st == GOLEM_OK) st = gi_product_record(s, record);
+    }
+    json_object_put(record);
+    if (st != GOLEM_OK) return st;
     uint64_t size;
     st = golem_evidence_verify(s->cas, payload, &size, NULL);
     if (st == GOLEM_OK && guard) {

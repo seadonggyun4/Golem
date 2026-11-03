@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+#include "../intent/product_gate.h"
 #include "internal.h"
 #include "../common/record_internal.h"
 #include <errno.h>
@@ -230,6 +231,9 @@ GOLEM_RECORDED_API(golem_workspace_call,
         return GOLEM_ERR_INVALID_STATE;
     if (!strcmp(dw_text(store->spec, "permission"), "DENY"))
         return GOLEM_ERR_POLICY_DENIED;
+    if (dw_uint(store->spec, "schema_version") == 3) return GOLEM_ERR_UNSUPPORTED_VERSION;
+    golem_status gate = gi_product_check(store, GI_PRODUCT_DEVELOPMENT);
+    if (gate != GOLEM_OK) return gate;
     const char *work_id = dw_text(store->spec, "work_id");
     if (!ws_id(work_id))
         return GOLEM_ERR_POLICY_DENIED;

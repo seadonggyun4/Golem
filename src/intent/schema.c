@@ -233,7 +233,10 @@ static bool scalar_escapes(golem_bytes b)
 golem_status gi_domain_digest(golem_bytes control, golem_digest *out, golem_diagnostic *d)
 {
     static const char *const registry[] = {"golem.intent.source.v1", "golem.intent.quota-preparation.v1",
-        "golem.intent.baseline.v1", "golem.intent.object-preparation.v1"};
+        "golem.intent.baseline.v1", "golem.intent.object-preparation.v1",
+        "golem.intent.requirement.v1", "golem.intent.constraint.v1",
+        "golem.intent.qa-applicability.v1", "golem.intent.qa-obligations.v1", "golem.intent.qa-mapping.v1", "golem.intent.work-enrollment.v1", "golem.intent.qa-target.v1", "golem.intent.qa-artifact.v1",
+        "golem.intent.qa-oracle.v1", "golem.intent.qa-oracle-plan.v1", "golem.intent.review-host-evidence.v1", "golem.intent.qa-assessment.v1"};
     if (!out || (!control.data && control.size)) return fail(d, GOLEM_ERR_INVALID_ARGUMENT, "intent.argument");
     if (control.size > GI_CONTROL_MAX) return fail(d, GOLEM_ERR_OVERFLOW, "intent.limit.control_bytes");
     if (!scalar_escapes(control)) return fail(d, GOLEM_ERR_PARSE, "intent.source.unicode_escape");

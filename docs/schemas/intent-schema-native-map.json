@@ -1,0 +1,366 @@
+{
+  "status": "NOT_RUN",
+  "scope": "QC1-QC6 changed boundaries; QC7 fixtures",
+  "definitions": [
+    {
+      "definition": "source",
+      "source": "src/intent/schema.c",
+      "fixture": "tests/c/test_intent_baseline.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "baseline",
+      "source": "src/intent/schema.c",
+      "fixture": "tests/c/test_intent_baseline.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "requirement",
+      "source": "src/intent/review.c",
+      "fixture": "tests/c/test_intent_review.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "constraint",
+      "source": "src/intent/review.c",
+      "fixture": "tests/c/test_intent_review.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "review-control",
+      "source": "src/intent/review.c",
+      "fixture": "tests/c/test_intent_review.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "review-host-policy",
+      "source": "src/intent/review_host.c",
+      "fixture": "tests/c/test_intent_review_host.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "review-host-bundle",
+      "source": "src/intent/review_host.c",
+      "fixture": "tests/c/test_intent_review_host.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "review-host-evidence",
+      "source": "src/intent/review_host.c",
+      "fixture": "tests/c/test_intent_review_host.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-applicability",
+      "source": "src/intent/qa_paths.c",
+      "fixture": "tests/c/test_intent_qa_paths.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-obligations",
+      "source": "src/intent/qa_paths.c",
+      "fixture": "tests/c/test_intent_qa_paths.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-mapping",
+      "source": "src/intent/qa_paths.c",
+      "fixture": "tests/c/test_intent_qa_paths.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-artifact",
+      "source": "src/intent/qa_resolve.c",
+      "fixture": "tests/c/test_intent_qa_resolve.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-target",
+      "source": "src/intent/qa_resolve.c",
+      "fixture": "tests/c/test_intent_qa_resolve.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-oracle",
+      "source": "src/intent/qa_resolve.c",
+      "fixture": "tests/c/test_intent_qa_resolve.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-oracle-plan",
+      "source": "src/intent/qa_resolve.c",
+      "fixture": "tests/c/test_intent_qa_resolve.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "work-enrollment",
+      "source": "src/intent/product_gate.c",
+      "fixture": "tests/c/test_intent_product_gate.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "enrollment-event",
+      "source": "src/intent/product_gate.c",
+      "fixture": "tests/c/test_intent_product_gate.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "work-spec-v3",
+      "source": "src/document/schema.c",
+      "fixture": "tests/c/intent_qc7_integration.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "product-access",
+      "source": "src/intent/product_access.c",
+      "fixture": "tests/c/intent_qc7_integration.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "product-material",
+      "source": "src/intent/product_access.c",
+      "fixture": "tests/c/intent_qc7_integration.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-request",
+      "source": "src/intent/qa_acceptance.c",
+      "fixture": "tests/c/intent_qc7_integration.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-assessment",
+      "source": "src/intent/qa_acceptance.c",
+      "fixture": "tests/c/intent_qc7_integration.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-observation",
+      "source": "src/intent/qa_acceptance.c",
+      "fixture": "tests/c/intent_qc7_integration.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-acceptance",
+      "source": "src/intent/qa_acceptance.c",
+      "fixture": "tests/c/intent_qc7_integration.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "qa-acceptance-prepared",
+      "source": "src/intent/qa_acceptance.c",
+      "fixture": "tests/c/intent_qc7_integration.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "completion-request",
+      "source": "src/completion/predicate_intent.c",
+      "fixture": "tests/c/test_intent_completion.c",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "product-host-packet",
+      "source": "tools/intent_product_host.inc",
+      "fixture": "tests/c/intent_qc7_integration.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "integration-intent-host",
+      "source": "tools/integration_intent.py",
+      "fixture": "tests/c/../../tools/test_integration_intent.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "intent-read-arguments",
+      "source": "tools/integration_intent.py",
+      "fixture": "tests/c/../../tools/test_integration_intent.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    },
+    {
+      "definition": "intent-action-reference",
+      "source": "tools/integration_intent.py",
+      "fixture": "tests/c/../../tools/test_integration_intent.py",
+      "shape_status": "AUTHORED",
+      "native_equivalence": "NOT_RUN",
+      "native_only": [
+        "exact bytes and referenced identities",
+        "current authority and contextual invariants where applicable"
+      ],
+      "notes": "Existing fixture is a verification path, not proof that every schema branch is covered."
+    }
+  ]
+}

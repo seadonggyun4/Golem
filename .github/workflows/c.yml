@@ -79,6 +79,8 @@ jobs:
                       enable('full'); reasons.add('shared-build-export-contract'); continue
                   if path in PACKAGED_DOCS or path.startswith('docs/mcp-'):
                       enable('python_tools'); continue
+                  if path.startswith(('docs/schemas/intent-', 'tests/fixtures/intent/')):
+                      enable('native', 'python_tools', 'integration'); continue
                   if path.startswith('docs/') and path.endswith('.json'):
                       enable('python_tools'); continue
                   if path.startswith(('docs/', 'assets/')) and path.endswith(('.md', '.png', '.jpg', '.jpeg', '.svg', '.webp', '.gif')) or path.endswith('.md') and '/' not in path:
@@ -369,6 +371,25 @@ jobs:
         env:
           ASAN_OPTIONS: "${{ matrix.os == 'ubuntu-latest' && matrix.preset == 'asan' && 'detect_leaks=1:halt_on_error=1' || 'halt_on_error=1' }}"
           UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+      - name: "QC native contracts and disposable integration (release only)"
+        if: "matrix.preset == 'release'"
+        shell: "bash"
+        run: |
+          set -euo pipefail
+          python3 -m pip install jsonschema==4.23.0
+          cmake -S . -B build/qc -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DGOLEM_BUILD_INTEGRATION_HOST=ON -DGOLEM_ENABLE_QC7_INTEGRATION=ON -DGOLEM_ENABLE_QC7_D01_RACES=ON -DGOLEM_ENABLE_INTENT_SCHEMA_GOLDEN=ON
+          cmake --build build/qc --parallel 2
+          mkdir -p build/qc-evidence
+          ctest --test-dir build/qc --output-on-failure -R 'intent_(review|qa_|product_gate|completion|qc7_)' --output-junit "${{ github.workspace }}/build/qc-evidence/native.xml"
+          python3 tests/c/intent_schema_golden.py . build/qc/tests/c/golem_intent_schema_probe --report build/qc-evidence/schema.json
+          python3 -m unittest discover -s tests/c -p test_intent_context_golden.py
+      - name: "Preserve QC evidence"
+        if: "always() && matrix.preset == 'release'"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "qc-${{ matrix.os }}-${{ github.run_attempt }}"
+          path: "build/qc-evidence/"
+          if-no-files-found: "warn"
       - name: "Preserve full-suite evidence (including failures)"
         if: "always()"
         uses: "actions/upload-artifact@v4"

@@ -991,3 +991,131 @@ if(Python3_Interpreter_FOUND)
     endforeach()
 
 endif()
+
+# QC1 tests are registered for future execution; implementation session HOLD.
+add_executable(golem_test_intent_review test_intent_review.c)
+target_link_libraries(golem_test_intent_review PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_intent_review)
+add_test(NAME intent_review COMMAND golem_test_intent_review)
+set_tests_properties(intent_review PROPERTIES TIMEOUT 60 LABELS "intent;restricted-diagnostic")
+
+add_executable(golem_test_intent_review_host test_intent_review_host.c)
+target_link_libraries(golem_test_intent_review_host PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_intent_review_host)
+add_test(NAME intent_review_host COMMAND golem_test_intent_review_host)
+set_tests_properties(intent_review_host PROPERTIES TIMEOUT 60 LABELS "intent;restricted-diagnostic")
+
+add_executable(golem_test_intent_qa_paths test_intent_qa_paths.c)
+target_link_libraries(golem_test_intent_qa_paths PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_intent_qa_paths)
+add_test(NAME intent_qa_paths COMMAND golem_test_intent_qa_paths)
+set_tests_properties(intent_qa_paths PROPERTIES TIMEOUT 60 LABELS "intent;restricted-diagnostic")
+
+add_executable(golem_test_intent_product_gate test_intent_product_gate.c)
+target_link_libraries(golem_test_intent_product_gate PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_intent_product_gate)
+add_test(NAME intent_product_gate COMMAND golem_test_intent_product_gate)
+set_tests_properties(intent_product_gate PROPERTIES TIMEOUT 60 LABELS "intent;restricted-diagnostic")
+
+add_executable(golem_test_intent_qa_resolve test_intent_qa_resolve.c)
+target_link_libraries(golem_test_intent_qa_resolve PRIVATE Golem::golem PkgConfig::JSONC)
+target_compile_definitions(golem_test_intent_qa_resolve PRIVATE INTENT_QA_FIXTURE="${CMAKE_CURRENT_SOURCE_DIR}/../fixtures/intent/qa-resolved-local.json")
+golem_configure_target(golem_test_intent_qa_resolve)
+add_test(NAME intent_qa_resolve COMMAND golem_test_intent_qa_resolve)
+set_tests_properties(intent_qa_resolve PROPERTIES TIMEOUT 60 LABELS "intent;restricted-diagnostic")
+
+# QC4 authored only: runtime validation remains on HOLD.
+add_executable(golem_test_intent_qa_result test_intent_qa_result.c)
+target_link_libraries(golem_test_intent_qa_result PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_intent_qa_result)
+add_test(NAME intent_qa_result COMMAND golem_test_intent_qa_result)
+set_tests_properties(intent_qa_result PROPERTIES TIMEOUT 60 LABELS "intent;restricted-diagnostic")
+
+# QC5 authored only: no execution during HOLD.
+add_executable(golem_test_intent_completion test_intent_completion.c)
+target_link_libraries(golem_test_intent_completion PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_intent_completion)
+add_test(NAME intent_completion COMMAND golem_test_intent_completion)
+set_tests_properties(intent_completion PROPERTIES TIMEOUT 60 LABELS "intent;restricted-diagnostic")
+
+# QC7 observation failure-atomicity fixtures; authored under HOLD, NOT_RUN.
+add_executable(golem_test_intent_qa_observation test_intent_qa_observation.c)
+target_link_libraries(golem_test_intent_qa_observation PRIVATE Golem::golem PkgConfig::JSONC)
+golem_configure_target(golem_test_intent_qa_observation)
+add_test(NAME intent_qa_observation COMMAND golem_test_intent_qa_observation)
+set_tests_properties(intent_qa_observation PROPERTIES TIMEOUT 60 LABELS "intent;restricted-diagnostic")
+
+# Explicit opt-in: these fixtures execute synthetic C QA in fresh temporary roots.
+# Keep OFF while execution qualification is on HOLD. Never installed/packaged.
+option(GOLEM_ENABLE_QC7_INTEGRATION "Register QC7 native progression/crash/lock fixtures" OFF)
+if(GOLEM_ENABLE_QC7_INTEGRATION)
+    if(NOT GOLEM_BUILD_CLI OR NOT Python3_EXECUTABLE)
+        message(FATAL_ERROR "QC7 integration requires the native CLI and Python3")
+    endif()
+    add_executable(golem_intent_qc7_driver intent_qc7_driver.c intent_qc7_completion_faults.c)
+    target_link_libraries(golem_intent_qc7_driver PRIVATE Golem::golem PkgConfig::JSONC)
+    golem_configure_target(golem_intent_qc7_driver)
+    foreach(case IN ITEMS normal completion-response-lost before-prepared after-prepared
+            before-observation after-observation before-accepted after-accepted response-lost
+            prepared-io observation-io accepted-io prepared-pending-crash accepted-pending-crash concurrent lock-exit authority-exit
+            before-completion-payload after-completion-payload before-completion-event after-completion-event
+            completion-payload-io completion-event-io)
+        set(qc7_method test_crash_boundaries)
+        if(case STREQUAL "normal" OR case STREQUAL "completion-response-lost")
+            set(qc7_method test_full_progression)
+        elseif(case MATCHES "^(before|after)-completion-" OR case MATCHES "^completion-.*-io$")
+            set(qc7_method test_completion_crash)
+        elseif(case STREQUAL "concurrent")
+            set(qc7_method test_competing_acceptance)
+        elseif(case STREQUAL "lock-exit" OR case STREQUAL "authority-exit")
+            set(qc7_method test_lock_exit_and_isolation)
+        endif()
+        add_test(NAME intent_qc7_${case} COMMAND ${CMAKE_COMMAND} -E env
+            "GOLEM_QC7_TEST=${qc7_method}" "GOLEM_QC7_CASE=${case}"
+            ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/intent_qc7_integration.py
+            $<TARGET_FILE:golem_cli> ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER}
+            $<TARGET_FILE:golem_intent_qc7_driver>)
+        set_tests_properties(intent_qc7_${case} PROPERTIES TIMEOUT 300 LABELS "intent;qc7-integration;executes-fixture-code")
+    endforeach()
+endif()
+
+# These OS/host integration cases remain separately OFF during validation HOLD.
+option(GOLEM_ENABLE_QC7_D01_RACES "Register real D01 writer/native-lock races" OFF)
+option(GOLEM_ENABLE_QC7_REAL_ENOSPC "Register bounded disk-image ENOSPC fixtures" OFF)
+if(GOLEM_ENABLE_QC7_D01_RACES OR GOLEM_ENABLE_QC7_REAL_ENOSPC)
+    if(NOT GOLEM_ENABLE_QC7_INTEGRATION)
+        message(FATAL_ERROR "QC7 OS fixtures require GOLEM_ENABLE_QC7_INTEGRATION")
+    endif()
+endif()
+if(GOLEM_ENABLE_QC7_D01_RACES)
+    # The root declares this target after add_subdirectory(tests/c).
+    if(NOT GOLEM_BUILD_INTEGRATION_HOST)
+        message(FATAL_ERROR "D01 races require GOLEM_BUILD_INTEGRATION_HOST")
+    endif()
+    add_test(NAME intent_qc7_d01_writers COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/intent_qc7_d01_race.py ${PROJECT_SOURCE_DIR}
+        $<TARGET_FILE:golem_intent_host> $<TARGET_FILE:golem_intent_qc7_driver> $<TARGET_FILE:golem_cli>)
+    set_tests_properties(intent_qc7_d01_writers PROPERTIES TIMEOUT 180 LABELS "intent;qc7-integration;disposable-d01")
+endif()
+if(GOLEM_ENABLE_QC7_REAL_ENOSPC)
+    foreach(phase IN ITEMS qa completion)
+        add_test(NAME intent_qc7_enospc_${phase} COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/intent_qc7_enospc.py
+            ${CMAKE_CURRENT_SOURCE_DIR}/intent_qc7_integration.py $<TARGET_FILE:golem_cli>
+            ${PROJECT_SOURCE_DIR} ${CMAKE_C_COMPILER} $<TARGET_FILE:golem_intent_qc7_driver> ${phase})
+        set_tests_properties(intent_qc7_enospc_${phase} PROPERTIES TIMEOUT 600 SKIP_RETURN_CODE 77
+            LABELS "intent;qc7-integration;disposable-volume;executes-fixture-code")
+    endforeach()
+endif()
+
+# Preparation only: opt in after the explicit validation HOLD is lifted.
+option(GOLEM_ENABLE_INTENT_SCHEMA_GOLDEN "Build pure native schema/golden probes" OFF)
+if(GOLEM_ENABLE_INTENT_SCHEMA_GOLDEN)
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+    add_executable(golem_intent_schema_probe intent_schema_probe.c
+        intent_schema_policy_probe.c intent_schema_request_probe.c)
+    target_link_libraries(golem_intent_schema_probe PRIVATE Golem::golem PkgConfig::JSONC)
+    golem_configure_target(golem_intent_schema_probe)
+    # Run manually with a new --report path; no overwriting historical evidence.
+    # Python runner requires jsonschema (Draft 2020-12). No auto installation.
+endif()

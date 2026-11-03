@@ -1,0 +1,388 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Documentation schema; native byte limits, duplicate-key rejection, complete sets and authority checks remain mandatory. This schema never grants authority.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "baseline_digest",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-applicability.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rows"
+          ],
+          "properties": {
+            "rows": {
+              "type": "array",
+              "maxItems": 1280,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "requirement_ref",
+                  "route",
+                  "target_refs",
+                  "disposition",
+                  "rationale",
+                  "review_ref",
+                  "decision_ref"
+                ],
+                "properties": {
+                  "requirement_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "route": {
+                    "enum": [
+                      "UI",
+                      "API",
+                      "BATCH",
+                      "STATE_TRANSITION",
+                      "OTHER_LOCAL"
+                    ]
+                  },
+                  "target_refs": {
+                    "type": "array",
+                    "maxItems": 64,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "uniqueItems": true
+                  },
+                  "disposition": {
+                    "enum": [
+                      "REQUIRED",
+                      "NOT_APPLICABLE",
+                      "UNDECIDED"
+                    ]
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "review_ref": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "decision_ref": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "disposition": {
+                          "const": "REQUIRED"
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "target_refs": {
+                          "minItems": 1
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "disposition": {
+                          "enum": [
+                            "REQUIRED",
+                            "NOT_APPLICABLE"
+                          ]
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "review_ref": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        },
+                        "decision_ref": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "baseline_digest",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-obligations.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicability_ref",
+            "oracle_plan_ref",
+            "obligations"
+          ],
+          "properties": {
+            "applicability_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "oracle_plan_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "obligations": {
+              "type": "array",
+              "maxItems": 4096,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "requirement_ref",
+                  "route",
+                  "target_ref",
+                  "condition",
+                  "expected_outcome",
+                  "oracle_ref",
+                  "stage",
+                  "evidence_kind"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  },
+                  "requirement_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "route": {
+                    "enum": [
+                      "UI",
+                      "API",
+                      "BATCH",
+                      "STATE_TRANSITION",
+                      "OTHER_LOCAL"
+                    ]
+                  },
+                  "target_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "condition": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "expected_outcome": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "oracle_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "stage": {
+                    "enum": [
+                      "REQUIREMENTS",
+                      "DESIGN",
+                      "TASK_DECOMPOSITION",
+                      "IMPLEMENTATION",
+                      "TEST_DESIGN",
+                      "INTEGRATION",
+                      "FINAL_VALIDATION"
+                    ]
+                  },
+                  "evidence_kind": {
+                    "enum": [
+                      "NATIVE_QA",
+                      "SEMANTIC_REVIEW"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "baseline_digest",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-mapping.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "obligations_ref",
+            "execution_contract_digest",
+            "mappings"
+          ],
+          "properties": {
+            "obligations_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "execution_contract_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "mappings": {
+              "type": "array",
+              "maxItems": 16384,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "obligation_id",
+                  "gate_id",
+                  "gate_version",
+                  "case_id"
+                ],
+                "properties": {
+                  "obligation_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  },
+                  "gate_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  },
+                  "gate_version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 4294967295
+                  },
+                  "case_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

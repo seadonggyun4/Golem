@@ -1,0 +1,1 @@
+{"schema":"golem.intent.review-host-policy.v1","project_id":"demo","work_id":"work","assurance":"LOCAL_COOPERATIVE","principals":[{"id":"owner","role":"OWNER","session":"owner-session","status":"ACTIVE"},{"id":"producer","role":"PRODUCER","session":"producer-session","status":"ACTIVE"},{"id":"reviewer","role":"REVIEWER","session":"reviewer-session","status":"ACTIVE"}]}

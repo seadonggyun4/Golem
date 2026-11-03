@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+#include "../intent/product_access.h"
 #include "internal.h"
 #include "../common/record_internal.h"
 #include "../reentry/internal.h"
@@ -134,7 +135,15 @@ golem_status co_hint(golem_document_store *s, const char *id, const char **actio
     *action = NULL;
     size_t i = latest(s, id);
     if (i == SIZE_MAX)
-        return GOLEM_OK;
+        return GOLEM_OK; /* no historical completion to promote */
+    golem_status gate = gi_product_check(s, GI_PRODUCT_COMPLETION);
+    if (gate != GOLEM_OK) {
+        if (dw_uint(s->spec,"schema_version")==3) {
+            *action="VERIFY_INTENT_COMPLETION"; /* bounded read, never DONE */
+            return GOLEM_OK;
+        }
+        return gate;
+    }
     struct json_object *event = s->completions[i], *observed = NULL, *boundary = NULL;
     golem_status st = co_boundary_verify(s, dw_get(dw_get(event, "record"), "boundary"));
     if (st != GOLEM_OK)
@@ -321,6 +330,18 @@ static golem_status completion_record(golem_document_store *store, struct json_o
     return GOLEM_OK;
 }
 
+/* Re-evaluate both current QA and native completion immediately before publication. */
+typedef struct intent_completion_guard {golem_document_store *store;struct json_object *request,*assessment,*boundary;} intent_completion_guard;
+static golem_status intent_completion_recheck(void *context)
+{
+    intent_completion_guard *g=context;struct json_object *a=NULL,*b=NULL;const char *action=NULL;
+    golem_status st=co_evaluate(g->store,g->request,true,&a);
+    if(st==GOLEM_OK&&!json_object_equal(a,g->assessment))st=GOLEM_ERR_STALE_RESULT;
+    if(st==GOLEM_OK)st=co_quiescent(g->store,&action,&b);
+    if(st==GOLEM_OK&&(action||!json_object_equal(b,g->boundary)))st=GOLEM_ERR_INCOMPLETE_WORK;
+    json_object_put(a);json_object_put(b);return st;
+}
+
 GOLEM_RECORDED_API(golem_completion_call,
     (golem_document_store *s, golem_bytes b, golem_execution_reply *out, golem_diagnostic *d),
     (s, b, out, d), d)
@@ -332,7 +353,12 @@ GOLEM_RECORDED_API(golem_completion_call,
     golem_status st = golem_json_parse(b, GOLEM_DOCUMENT_MAX_JSON, &r);
     if (st == GOLEM_OK)
         st = co_validate(r);
+    if(st==GOLEM_OK&&dw_uint(s->spec,"schema_version")!=3&&dw_uint(r,"schema_version")==3)st=GOLEM_ERR_UNSUPPORTED_VERSION;
     bool read = !strcmp(dw_text(r, "operation"), "resume");
+    if(st==GOLEM_OK&&dw_uint(s->spec,"schema_version")==3){
+        if(dw_uint(r,"schema_version")!=3)st=GOLEM_ERR_UNSUPPORTED_VERSION;
+        else st=gi_product_request(s,GI_PRODUCT_COMPLETION,b,"COMPLETION");
+    }
     if (st == GOLEM_OK && read) {
         st = resume(s, dw_text(r, "selection_id"), out);
         json_object_put(r);
@@ -391,8 +417,10 @@ GOLEM_RECORDED_API(golem_completion_call,
         st = dw_record_prepare(s, event, GOLEM_DOCUMENT_MAX_JSON, &payload);
     if (st == GOLEM_OK)
         st = receipt_value(event, &payload, &response);
-    if (st == GOLEM_OK)
-        st = dw_event_write(s, &payload, &frame);
+    if (st == GOLEM_OK) {
+        intent_completion_guard guard={s,r,assessment,boundary};
+        st=dw_uint(s->spec,"schema_version")==3?dw_event_write_guarded(s,&payload,&frame,intent_completion_recheck,&guard):dw_event_write(s,&payload,&frame);
+    }
     if (st == GOLEM_OK) {
         s->completions[s->completion_count] = json_object_get(event);
         s->completion_digests[s->completion_count++] = payload;

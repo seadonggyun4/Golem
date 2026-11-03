@@ -17,12 +17,12 @@ import execution_record as records
 MAX_ARCHIVE=134217728
 MAX_FILE=67108864
 MAX_FILES=256
-SCHEMAS=('schemas/d2-tools.json','schemas/d4-actions.json','schemas/installation.json','schemas/maintenance.json','schemas/feature-profiles.json','schemas/project-management.json')
+SCHEMAS=('schemas/d2-tools.json','schemas/d4-actions.json','schemas/installation.json','schemas/maintenance.json','schemas/feature-profiles.json','schemas/project-management.json','schemas/intent-host.json')
 SKILLS=('plugins/golem/skills/golem-setup/SKILL.md','plugins/golem/skills/golem-setup/agents/openai.yaml',
         'plugins/golem/skills/golem-work/SKILL.md','plugins/golem/skills/golem-work/agents/openai.yaml',
         'plugins/golem/skills/golem-work/references/profiles.md')
 OWNER_DESKTOP_FILES=('tools/integration_owner_review.py','tools/integration_owner_desktop.py')
-DOCUMENTS=('docs/workpacks/mcp.md','tools/requirements-mcp.txt','docs/mcp-m6-distribution.ko.md','docs/integration-install.md','docs/integration-d5.md',
+DOCUMENTS=('docs/intent-assurance-qc6-implementation.ko.md','docs/workpacks/mcp.md','tools/requirements-mcp.txt','docs/mcp-m6-distribution.ko.md','docs/integration-install.md','docs/integration-d5.md',
            'docs/mcp-m5-parallel-candidates.ko.md')
 
 
@@ -62,10 +62,12 @@ def schema_payloads():
     import integration_install as install
     import integration_update as update
     import integration_owner_maintenance as management
+    import integration_intent as intent
     return {SCHEMAS[0]:c.encoded(reads.SCHEMAS),SCHEMAS[1]:c.encoded({'tools':actions.SCHEMAS,'action':actions.ACTION,'policy':actions.POLICY}),
         SCHEMAS[2]:c.encoded(install.SPECS),SCHEMAS[3]:c.encoded(update.SPEC),
         SCHEMAS[4]:c.encoded([profiles.definition(name) for name in profiles.NAMES]),
-        SCHEMAS[5]:c.encoded({'tools':management.MANAGEMENT_SCHEMAS,'policy':management.MANAGEMENT_POLICY,'operations':management.MANAGEMENT_OPERATIONS})}
+        SCHEMAS[5]:c.encoded({'tools':management.MANAGEMENT_SCHEMAS,'policy':management.MANAGEMENT_POLICY,'operations':management.MANAGEMENT_OPERATIONS}),
+        SCHEMAS[6]:c.encoded(intent.POLICY)}
 
 
 def manifest(profile):
@@ -83,6 +85,7 @@ def manifest(profile):
       'management_policy':('file','Optional separately reviewed project management policy',False),
       'management_sha256':('string','Exact management policy digest',False),
       'approve_management':('boolean','Explicit project management consent',False)}
+    if profile in ('task','quality'):fields.update(intent_host_policy=('file','Separate exact Intent host policy',False),intent_host_sha256=('string','Exact Intent host policy digest',False),approve_intent_host=('boolean','Explicit Intent host consent',False))
     if profile=='quality':fields.update(helper_policy=('file','Separate exact helper-effects policy',False),helper_sha256=('string','Exact helper policy digest',False),approve_helpers=('boolean','Explicit helper effects consent',False))
     if profile=='parallel':fields.update(host_policy=('file','Separate exact native host policy',False),host_sha256=('string','Exact host policy digest',False),approve_host=('boolean','Explicit host contract consent',False))
     value['user_config']={name:{'type':kind,'title':title,'description':title+'. Selecting a value never grants additional authority.',
@@ -94,6 +97,7 @@ def manifest(profile):
         'GOLEM_MANAGEMENT_POLICY':'${user_config.management_policy}',
         'GOLEM_MANAGEMENT_SHA256':'${user_config.management_sha256}',
         'GOLEM_APPROVE_MANAGEMENT':'${user_config.approve_management}'}
+    if profile in ('task','quality'):env.update(GOLEM_INTENT_HOST_POLICY='${user_config.intent_host_policy}',GOLEM_INTENT_HOST_SHA256='${user_config.intent_host_sha256}',GOLEM_APPROVE_INTENT_HOST='${user_config.approve_intent_host}')
     if profile=='quality':env.update(GOLEM_HELPER_POLICY='${user_config.helper_policy}',GOLEM_HELPER_SHA256='${user_config.helper_sha256}',GOLEM_APPROVE_HELPERS='${user_config.approve_helpers}')
     if profile=='parallel':env.update(GOLEM_HOST_POLICY='${user_config.host_policy}',GOLEM_HOST_SHA256='${user_config.host_sha256}',GOLEM_APPROVE_HOST='${user_config.approve_host}')
     value['server']['mcp_config']['env']=env

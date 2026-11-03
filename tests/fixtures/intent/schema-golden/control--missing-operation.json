@@ -1,0 +1,1 @@
+{"schema":"golem.intent.review-control.v1","project_id":"demo","work_id":"work","baseline_digest":"3aa5c69e0ca2f5a006038492a820f1572b13c3823539ff09246bf6193ee65ef5","expected_epoch":0,"body":{"question_digest":"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad","evidence_digest":"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"}}

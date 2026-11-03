@@ -1,0 +1,1 @@
+{"schema":"golem.intent.qa-oracle.v1","project_id":"demo","created_by_assertion":"fixture","body":{"target_ref":"4bc252de4c118fcc12962103c3294540628895f08937fa3c88a599a1820b51f9","condition":"valid input","expected_outcome":"accepted response","stage":"TEST_DESIGN","evidence_kind":"NATIVE_QA"}}

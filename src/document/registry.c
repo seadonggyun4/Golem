@@ -1,3 +1,6 @@
+#include "../intent/qa_result.h"
+#include "../intent/product_access.h"
+#include "../intent/product_gate.h"
 #define _POSIX_C_SOURCE 200809L
 #define _DARWIN_C_SOURCE
 #ifndef _DEFAULT_SOURCE
@@ -120,6 +123,12 @@ golem_status dw_apply(golem_document_store *s, struct json_object *event,
             json_object_put(spec);
         return st;
     }
+    if (strcmp(dw_text(event, "type"), "intent-qa-observation") == 0)
+        return gi_qa_observation_apply(s, event, frame);
+    if (strcmp(dw_text(event, "type"), "intent-enrollment") == 0)
+        return gi_product_apply(s, event, frame);
+    if (dw_uint(s->spec, "schema_version") == 3 && strcmp(dw_text(event, "type"), "document") && strcmp(dw_text(event, "type"), "completion"))
+        return GOLEM_ERR_UNSUPPORTED_VERSION;
     if (strcmp(dw_text(event, "type"), "reentry") == 0)
         return re_apply(s, event, payload, frame);
     if (strcmp(dw_text(event, "type"), "completion") == 0)
@@ -331,6 +340,9 @@ GOLEM_RECORDED_REQUIRED_API(golem_document_store_close, (golem_document_store *s
     for (size_t i = 0; i < s->admission_link_count; ++i)
         json_object_put(s->admission_links[i]);
     json_object_put(s->workpack_binding);
+    gi_product_access_close(s->intent_access);
+    for (size_t i=0;i<s->intent_qa_count;++i) json_object_put(s->intent_qa[i]);
+    json_object_put(s->intent_enrollment);
     json_object_put(s->spec);
     golem_status st = golem_evidence_close(s->cas);
     if (s->events >= 0 && close(s->events) < 0)

@@ -3,7 +3,7 @@ import copy
 import integration_contract as c
 
 NAMES=('read','prepare','task','quality','parallel')
-READ=('workpack_read','workpack_resource_read','projects_list','work_inspect','history_read','context_get','handoff_prepare','evidence_read','completion_check',
+READ=('intent_read','workpack_read','workpack_resource_read','projects_list','work_inspect','history_read','context_get','handoff_prepare','evidence_read','completion_check',
       'workflow_read','template_read','role_read','session_read','binding_read','document_read','context_read',
       'discovery_read','events_read','journal_read','profile_read','diagnostic_read','native_validate','report_read',
       'approval_read','reentry_read','artifact_read','usage_read','revision_read','configuration_read','bundle_read',
@@ -11,10 +11,10 @@ READ=('workpack_read','workpack_resource_read','projects_list','work_inspect','h
 PREP=('inputs_prepare','action_prepare','contract_prepare','plan_read','parallel_prepare','merge_prepare')
 OWNER_PREP=('approved_action_prepare','action_confirm')
 BASE_ACTIONS=('session_claim','session_begin','session_resume','session_reconcile','session_submit','document_submit','execution_request')
-TASK_ACTIONS=('workpack_bind','workpack_receipt_manifest','workpack_receipt_export','session_start','session_heartbeat','session_reject_output','binding_attach','role_enroll','role_assess',
+TASK_ACTIONS=('intent_qa_accept','intent_completion_finalize','workpack_bind','workpack_receipt_manifest','workpack_receipt_export','session_start','session_heartbeat','session_reject_output','binding_attach','role_enroll','role_assess',
  'completion_finalize','completion_report','reentry_decide','reentry_report','document_project','work_create','context_publish',
  'discovery_snapshot','profile_register','run_link','work_noop_run','adapter_noop_run','lineage_store','approval_request')
-QUALITY_ACTIONS=('evidence_import','proof_publish','research_request','research_export','cost_inbox_reconcile','helper_execute','execution_verify')
+QUALITY_ACTIONS=('intent_qa_accept','intent_completion_finalize','evidence_import','proof_publish','research_request','research_export','cost_inbox_reconcile','helper_execute','execution_verify')
 PARALLEL_ACTIONS=('inventory_capture','candidate_request','workspace_request')
 UNIMPLEMENTED=('TASK_DAG_SCHEDULER','TYPED_EDGE_EVIDENCE_ACCEPTANCE','RESOURCE_RECEIVER_BROKER','MERGE_QUEUE',
  'INTEGRATION_WORKSPACE_AND_FRESH_QA','TARGET_REF_CAS_BROKER','MERGE_PUBLICATION_RECEIPT')

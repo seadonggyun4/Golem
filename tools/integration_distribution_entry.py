@@ -15,6 +15,7 @@ import integration_mutations as mutations
 import integration_read_resources as resources
 import integration_helper_contract as helpers
 import integration_parallel_hosts as hosts
+import integration_intent as intent
 import integration_mcp as readonly
 import integration_mutation_mcp as mutation_mcp
 import integration_mcpb_entry as setup
@@ -40,13 +41,15 @@ def _configure_startup(args):
 
 
 def configure(profile,policy,digest,*,approve_owner=False,resource=None,resource_digest=None,approve_resources=False,
-              helper=None,helper_digest=None,approve_helpers=False,host=None,host_digest=None,approve_host=False):
+              helper=None,helper_digest=None,approve_helpers=False,host=None,host_digest=None,approve_host=False,intent_host=None,intent_host_digest=None,approve_intent_host=False):
     spec=profiles.definition(profile)
     c.require(approve_owner is True,'OWNER_PROFILE_APPROVAL_REQUIRED')
     c._validate(digest,c.DIGEST)
     c.require(bool(resource)==bool(resource_digest)==bool(approve_resources),'READ_RESOURCE_OWNER_ARGUMENTS')
     c.require(bool(helper)==bool(helper_digest)==bool(approve_helpers),'HELPER_OWNER_ARGUMENTS')
     c.require(bool(host)==bool(host_digest)==bool(approve_host),'PARALLEL_HOST_OWNER_ARGUMENTS')
+    c.require(bool(intent_host)==bool(intent_host_digest)==bool(approve_intent_host),'INTENT_OWNER_ARGUMENTS')
+    c.require(not intent_host or profile in ('task','quality'),'FEATURE_INTENT_HOST_SCOPE')
     c.require(not helper or profile=='quality','FEATURE_HELPER_SCOPE')
     c.require(not host or profile=='parallel','FEATURE_HOST_SCOPE')
     if spec['family']=='D2':
@@ -58,7 +61,8 @@ def configure(profile,policy,digest,*,approve_owner=False,resource=None,resource
         selected=resources.Resources(Path(resource),resource_digest,owner.transfer,approve_resources=True) if resource else None
         helper_contract=helpers.Helpers(Path(helper),helper_digest,owner,approve_helpers=True) if helper else None
         host_contract=hosts.Hosts(Path(host),host_digest,owner,approve_hosts=True) if host else None
-        service=mutations.Service(owner,selected,helper_contract,host_contract)
+        intent_contract=intent.Hosts(Path(intent_host),intent_host_digest,owner,approve_intent=True) if intent_host else None
+        service=mutations.Service(owner,selected,helper_contract,host_contract,intent_contract)
     return profiles.Scoped(service,profile),owner
 
 
@@ -74,7 +78,8 @@ def environment():
       approve_owner=approved('APPROVE_PROFILE_OWNER'),resource=optional('RESOURCE_POLICY','resource_policy'),
       resource_digest=optional('RESOURCE_SHA256','resource_sha256'),approve_resources=approved('APPROVE_RESOURCES'),
       helper=optional('HELPER_POLICY','helper_policy'),helper_digest=optional('HELPER_SHA256','helper_sha256'),approve_helpers=approved('APPROVE_HELPERS'),
-      host=optional('HOST_POLICY','host_policy'),host_digest=optional('HOST_SHA256','host_sha256'),approve_host=approved('APPROVE_HOST'))
+      host=optional('HOST_POLICY','host_policy'),host_digest=optional('HOST_SHA256','host_sha256'),approve_host=approved('APPROVE_HOST'),
+      intent_host=optional('INTENT_HOST_POLICY','intent_host_policy'),intent_host_digest=optional('INTENT_HOST_SHA256','intent_host_sha256'),approve_intent_host=approved('APPROVE_INTENT_HOST'))
 
 
 async def serve(service,owner):
@@ -100,10 +105,11 @@ def main():
             parser.add_argument('--profile',choices=profiles.NAMES,required=True)
             parser.add_argument('--policy',required=True);parser.add_argument('--reviewed-policy-sha256',dest='digest',required=True)
             parser.add_argument('--approve-owner',action='store_true')
-            for field in ('resource','helper','host'):
-                parser.add_argument('--'+field+'-policy',dest=field)
-                parser.add_argument('--reviewed-'+field+'-sha256',dest=field+'_digest')
+            for field in ('resource','helper','host','intent_host'):
+                parser.add_argument('--'+field.replace('_','-')+'-policy',dest=field)
+                parser.add_argument('--reviewed-'+field.replace('_','-')+'-sha256',dest=field+'_digest')
             parser.add_argument('--approve-resources',action='store_true');parser.add_argument('--approve-helpers',action='store_true');parser.add_argument('--approve-host',action='store_true')
+            parser.add_argument('--approve-intent-host',action='store_true')
             args=vars(parser.parse_args())
         else:args=environment()
         try:service,owner=_configure_startup(args)

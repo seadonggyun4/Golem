@@ -13,9 +13,10 @@ import integration_mutations as mutations
 import integration_lifecycle as lifecycle
 import integration_helper_contract as helper_contract
 import integration_parallel_hosts as host_contract
+import integration_intent as intent
 
 
-TASK_TOOL_DESCRIPTIONS = {
+TASK_TOOL_DESCRIPTIONS = {"intent_qa_accept":"Exact owner action: native current QA acceptance, never QA execution.","intent_completion_finalize":"Exact owner action: QC5 completion with current QC4 acceptance.",
     'workpack_bind': 'Bind exact native-documents-v1 Pack request with its separate owner-pinned binding digest. No execution or release authority.',
     'workpack_receipt_manifest': 'Inspect selected native evidence and the exact owner-pinned private output parent. No publication; return native manifest and proposed export digest.',
     'workpack_receipt_export': 'Publish only the exact native evidence inventory to the pinned private parent with separate export digest. Never retry partial or uncertain publication.',
@@ -74,6 +75,9 @@ def main():
     parser.add_argument("--helper-policy", type=Path)
     parser.add_argument("--reviewed-helper-policy-sha256")
     parser.add_argument("--approve-helper-effects", action="store_true")
+    parser.add_argument("--intent-host-policy", type=Path)
+    parser.add_argument("--reviewed-intent-host-policy-sha256")
+    parser.add_argument("--approve-intent-host", action="store_true")
     parser.add_argument("--parallel-host-policy", type=Path)
     parser.add_argument("--reviewed-parallel-host-policy-sha256")
     parser.add_argument("--approve-parallel-host", action="store_true")
@@ -84,11 +88,13 @@ def main():
         resources = readonly.Resources(args.read_resources, args.reviewed_read_resources_sha256, policy.transfer, approve_resources=True) if args.read_resources else None
         c.require(bool(args.helper_policy) == bool(args.reviewed_helper_policy_sha256) == bool(args.approve_helper_effects), "HELPER_OWNER_ARGUMENTS")
         helpers = helper_contract.Helpers(args.helper_policy, args.reviewed_helper_policy_sha256, policy, approve_helpers=True) if args.helper_policy else None
+        c.require(bool(args.intent_host_policy)==bool(args.reviewed_intent_host_policy_sha256)==bool(args.approve_intent_host),"INTENT_OWNER_ARGUMENTS")
+        intent_hosts=intent.Hosts(args.intent_host_policy,args.reviewed_intent_host_policy_sha256,policy,approve_intent=True) if args.intent_host_policy else None
         c.require(bool(args.parallel_host_policy) == bool(args.reviewed_parallel_host_policy_sha256) == bool(args.approve_parallel_host), "PARALLEL_HOST_OWNER_ARGUMENTS")
         parallel_hosts = host_contract.Hosts(args.parallel_host_policy, args.reviewed_parallel_host_policy_sha256, policy, approve_hosts=True) if args.parallel_host_policy else None
         bindings = [scope["binding"] for scope in policy.transfer.value["scopes"]]
         with lifecycle.participation(policy.registry, bindings):
-            asyncio.run(run(mutations.Service(policy, resources, helpers, parallel_hosts)))
+            asyncio.run(run(mutations.Service(policy, resources, helpers, parallel_hosts,intent_hosts)))
         return 0
     except (c.IntegrationError, OSError, ValueError) as error:
         sys.stderr.write(c.encoded(mutations.blocked(error)).decode())

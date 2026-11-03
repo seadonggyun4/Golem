@@ -1,0 +1,249 @@
+{
+  "status": "NOT_RUN",
+  "cases": {
+    "before-prepared": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "authority_sequence": 0,
+        "observations": 0,
+        "work_sequence": 0
+      },
+      "pending": false
+    },
+    "after-prepared": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "authority_sequence": 1,
+        "observations": 0,
+        "work_sequence": 0
+      },
+      "pending": false
+    },
+    "before-observation": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "authority_sequence": 1,
+        "observations": 0,
+        "work_sequence": 0
+      },
+      "pending": false
+    },
+    "after-observation": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "authority_sequence": 1,
+        "observations": 1,
+        "work_sequence": 1
+      },
+      "pending": false
+    },
+    "before-accepted": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "authority_sequence": 1,
+        "observations": 1,
+        "work_sequence": 1
+      },
+      "pending": false
+    },
+    "after-accepted": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "authority_sequence": 2,
+        "observations": 1,
+        "work_sequence": 1
+      },
+      "pending": false
+    },
+    "response-lost": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "authority_sequence": 2,
+        "observations": 1,
+        "work_sequence": 1
+      },
+      "pending": false
+    },
+    "prepared-io": {
+      "returncodes": [
+        1
+      ],
+      "delta": {
+        "authority_sequence": 0,
+        "observations": 0,
+        "work_sequence": 0
+      },
+      "pending": false
+    },
+    "observation-io": {
+      "returncodes": [
+        1
+      ],
+      "delta": {
+        "authority_sequence": 1,
+        "observations": 0,
+        "work_sequence": 0
+      },
+      "pending": false
+    },
+    "accepted-io": {
+      "returncodes": [
+        1
+      ],
+      "delta": {
+        "authority_sequence": 1,
+        "observations": 1,
+        "work_sequence": 1
+      },
+      "pending": false
+    },
+    "prepared-pending-crash": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "authority_sequence": 0,
+        "observations": 0,
+        "work_sequence": 0
+      },
+      "pending": true
+    },
+    "accepted-pending-crash": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "authority_sequence": 1,
+        "observations": 1,
+        "work_sequence": 1
+      },
+      "pending": true
+    },
+    "before-completion-payload": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "work_sequence": 0,
+        "completions": 0,
+        "authority_sequence": 0
+      }
+    },
+    "after-completion-payload": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "work_sequence": 0,
+        "completions": 0,
+        "authority_sequence": 0
+      }
+    },
+    "before-completion-event": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "work_sequence": 0,
+        "completions": 0,
+        "authority_sequence": 0
+      }
+    },
+    "after-completion-event": {
+      "returncodes": [
+        77
+      ],
+      "delta": {
+        "work_sequence": 1,
+        "completions": 1,
+        "authority_sequence": 0
+      }
+    },
+    "completion-payload-io": {
+      "returncodes": [
+        1
+      ],
+      "delta": {
+        "work_sequence": 0,
+        "completions": 0,
+        "authority_sequence": 0
+      }
+    },
+    "completion-event-io": {
+      "returncodes": [
+        1
+      ],
+      "delta": {
+        "work_sequence": 0,
+        "completions": 0,
+        "authority_sequence": 0
+      }
+    },
+    "enospc-qa": {
+      "returncodes": [
+        1
+      ],
+      "delta": {
+        "work_sequence": 0,
+        "completions": 0,
+        "observations": 0
+      }
+    },
+    "enospc-completion": {
+      "returncodes": [
+        1
+      ],
+      "delta": {
+        "work_sequence": 0,
+        "completions": 0,
+        "observations": 0
+      }
+    },
+    "concurrent": {
+      "returncodes": [
+        0,
+        1
+      ],
+      "delta": {
+        "authority_sequence": 2,
+        "observations": 1
+      }
+    },
+    "lock-exit": {
+      "returncodes": [
+        1
+      ],
+      "delta": {
+        "authority_sequence": 0,
+        "work_sequence": 0,
+        "observations": 0,
+        "completions": 0
+      }
+    },
+    "authority-exit": {
+      "returncodes": [
+        1
+      ],
+      "delta": {
+        "authority_sequence": 0,
+        "work_sequence": 0,
+        "observations": 0,
+        "completions": 0
+      }
+    }
+  }
+}

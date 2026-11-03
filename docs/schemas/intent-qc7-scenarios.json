@@ -1,0 +1,239 @@
+{
+  "schema": "golem.intent.qc7-scenarios.v1",
+  "execution_hold": true,
+  "qualification": "NOT_RUN",
+  "execution_authorized": false,
+  "scenarios": [
+    {
+      "id": "T01",
+      "stage": "QC1",
+      "surface": "native",
+      "fixture_status": "PARTIAL",
+      "fixtures": [
+        "tests/c/test_intent_review.c"
+      ],
+      "required_observation": "원문 gap/OMISSION 거부; 의미 자동탐지 주장 없음",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T02",
+      "stage": "QC2",
+      "surface": "native",
+      "fixture_status": "PARTIAL",
+      "fixtures": [
+        "tests/c/test_intent_qa_paths.c",
+        "tests/c/test_intent_qa_resolve.c"
+      ],
+      "required_observation": "route/target 누락 거부; 출력 failure-atomic",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T03",
+      "stage": "QC1/QC2",
+      "surface": "native",
+      "fixture_status": "PARTIAL",
+      "fixtures": [
+        "tests/c/test_intent_qa_paths.c"
+      ],
+      "required_observation": "N/A exact review 거부/합법 N/A 정상",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T04",
+      "stage": "QC4",
+      "surface": "pure",
+      "fixture_status": "AUTHORED",
+      "fixtures": [
+        "tests/c/test_intent_qa_result.c"
+      ],
+      "required_observation": "case 누락/중복/불일치/모순 PASS 차단",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T05",
+      "stage": "QC1/QC4/QC5",
+      "surface": "native",
+      "fixture_status": "PARTIAL",
+      "fixtures": [
+        "tests/c/test_intent_review.c",
+        "tests/c/test_intent_completion.c"
+      ],
+      "required_observation": "review 미해결이면 raw PASS 보존·수락/완료 차단",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T06",
+      "stage": "QC4/QC5",
+      "surface": "native",
+      "fixture_status": "PARTIAL",
+      "fixtures": [
+        "tests/c/test_intent_review_host.c"
+      ],
+      "required_observation": "실제 snapshot/oracle/epoch drift 후 current 차단",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T07",
+      "stage": "QC1",
+      "surface": "native",
+      "fixture_status": "PARTIAL",
+      "fixtures": [
+        "tests/c/test_intent_review_host.c"
+      ],
+      "required_observation": "self-review/권한 폐기/신원 불일치 차단",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T08",
+      "stage": "QC3/QC5",
+      "surface": "native",
+      "fixture_status": "PARTIAL",
+      "fixtures": [
+        "tests/c/test_intent_product_gate.c",
+        "tests/c/test_intent_completion.c"
+      ],
+      "required_observation": "legacy 우회 거부와 v1/v2 golden 유지",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T09-observation",
+      "stage": "QC4",
+      "surface": "pure",
+      "fixture_status": "AUTHORED",
+      "fixtures": [
+        "tests/c/test_intent_qa_observation.c"
+      ],
+      "required_observation": "관측-only 수락 불가; 변조/중복 상태불변",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T09-crash",
+      "stage": "QC4/QC5",
+      "surface": "native",
+      "fixture_status": "AUTHORED",
+      "fixtures": [
+        "tests/c/intent_qc7_integration.py",
+        "tests/c/intent_qc7_driver.c",
+        "tests/c/intent_qc7_completion_faults.c",
+        "tests/c/intent_qc7_enospc.py"
+      ],
+      "required_observation": "각 journal/CAS 경계 crash·disk full·응답유실; 효과 횟수 보존",
+      "result": "NOT_RUN",
+      "evidence": [],
+      "execution_registration": "GOLEM_ENABLE_QC7_INTEGRATION=OFF (opt-in only)",
+      "authored_scope": "QC4 prepared/observation/accepted 전후·prepared staging crash·QC5 payload/event 전후·응답유실·저장 함수 IO 실패; macOS 64MiB HFS+ 이미지의 실제 ENOSPC 이후 QC4/QC5 native 저장·prefix 보존",
+      "remaining_scope": [],
+      "platform_limit": "실제 ENOSPC backend는 macOS hdiutil; 다른 플랫폼은 NOT_RUN/skip, 성공 아님"
+    },
+    {
+      "id": "T09-transport",
+      "stage": "QC6",
+      "surface": "mock",
+      "fixture_status": "PARTIAL",
+      "fixtures": [
+        "tools/test_integration_intent.py"
+      ],
+      "required_observation": "spawn 실패 1회 로그보존; timeout/응답유실 추가 필요",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T10",
+      "stage": "QC1-QC5",
+      "surface": "native",
+      "fixture_status": "AUTHORED",
+      "fixtures": [
+        "tests/c/intent_qc7_integration.py",
+        "tests/c/intent_qc7_driver.c",
+        "tests/c/intent_qc7_completion_faults.c"
+      ],
+      "required_observation": "전체 정상 진행→reopen/current DONE·합법 N/A·질문 해결",
+      "result": "NOT_RUN",
+      "evidence": [],
+      "execution_registration": "GOLEM_ENABLE_QC7_INTEGRATION=OFF (opt-in only)",
+      "authored_scope": "native source/baseline→host 검토/질문 해결→v3 enrollment→실제 C QA→QC4 수락→QC5 finalize/report→별도 process current DONE; 실제 source drift 차단"
+    },
+    {
+      "id": "T11",
+      "stage": "QC2/QC3",
+      "surface": "native",
+      "fixture_status": "PARTIAL",
+      "fixtures": [
+        "tests/c/test_intent_qa_paths.c",
+        "tests/c/test_intent_product_gate.c"
+      ],
+      "required_observation": "한도·미지원·분할 Work 범위 차단",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T12-mcp",
+      "stage": "QC6",
+      "surface": "mock",
+      "fixture_status": "PARTIAL",
+      "fixtures": [
+        "tools/test_integration_intent.py"
+      ],
+      "required_observation": "native BLOCKED 그대로 전달·read→write 거부",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T12-package",
+      "stage": "QC6",
+      "surface": "package",
+      "fixture_status": "NOT_AUTHORED",
+      "fixtures": [],
+      "required_observation": "새 bridge 및 전체 import closure·생성 artifact 검증",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T12-codex",
+      "stage": "QC6",
+      "surface": "client",
+      "fixture_status": "NOT_AUTHORED",
+      "fixtures": [],
+      "required_observation": "실제 Codex 도구노출·결과·Owner·창0개",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "T12-claude",
+      "stage": "QC6",
+      "surface": "client",
+      "fixture_status": "NOT_AUTHORED",
+      "fixtures": [],
+      "required_observation": "실제 Claude 도구노출·결과·Owner·창0개",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "id": "LOCK",
+      "stage": "QC1-QC6",
+      "surface": "native",
+      "fixture_status": "AUTHORED",
+      "fixtures": [
+        "tests/c/intent_qc7_integration.py",
+        "tests/c/intent_qc7_driver.c",
+        "tests/c/intent_qc7_completion_faults.c",
+        "tests/c/intent_qc7_d01_race.py"
+      ],
+      "required_observation": "D01→Work→authority 경쟁·종료·deadlock 관측",
+      "result": "NOT_RUN",
+      "evidence": [],
+      "execution_registration": "GOLEM_ENABLE_QC7_INTEGRATION=OFF (opt-in only)",
+      "authored_scope": "fixture common-dir flock→실제 Work/authority lock; 같은 Work 수락 경쟁·다른 Work 접근·lock holder 종료; 실제 D01 register/revoke writer 프로세스와 authorized_root→native Work/authority 잠금 경합 및 폐기 후 읽기 차단",
+      "remaining_scope": []
+    }
+  ]
+}

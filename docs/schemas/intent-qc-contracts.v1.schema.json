@@ -1,0 +1,3990 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$comment": "Structural projection only. UTF-8 byte limits, lexical duplicate keys, exact hashes, cross-object coverage, policy, replay and currentness are mandatory native checks. Not an authorization validator. Embedded native_inputs remains delegated. See intent-assurance-schema-golden.ko.md.",
+  "$defs": {
+    "qa-applicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "baseline_digest",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-applicability.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rows"
+          ],
+          "properties": {
+            "rows": {
+              "type": "array",
+              "maxItems": 1280,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "requirement_ref",
+                  "route",
+                  "target_refs",
+                  "disposition",
+                  "rationale",
+                  "review_ref",
+                  "decision_ref"
+                ],
+                "properties": {
+                  "requirement_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "route": {
+                    "enum": [
+                      "UI",
+                      "API",
+                      "BATCH",
+                      "STATE_TRANSITION",
+                      "OTHER_LOCAL"
+                    ]
+                  },
+                  "target_refs": {
+                    "type": "array",
+                    "maxItems": 64,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "uniqueItems": true
+                  },
+                  "disposition": {
+                    "enum": [
+                      "REQUIRED",
+                      "NOT_APPLICABLE",
+                      "UNDECIDED"
+                    ]
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "review_ref": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "decision_ref": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "disposition": {
+                          "const": "REQUIRED"
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "target_refs": {
+                          "minItems": 1
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "if": {
+                      "properties": {
+                        "disposition": {
+                          "enum": [
+                            "REQUIRED",
+                            "NOT_APPLICABLE"
+                          ]
+                        }
+                      }
+                    },
+                    "then": {
+                      "properties": {
+                        "review_ref": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        },
+                        "decision_ref": {
+                          "type": "string",
+                          "pattern": "^[0-9a-f]{64}$"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "qa-obligations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "baseline_digest",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-obligations.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "applicability_ref",
+            "oracle_plan_ref",
+            "obligations"
+          ],
+          "properties": {
+            "applicability_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "oracle_plan_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "obligations": {
+              "type": "array",
+              "maxItems": 4096,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "requirement_ref",
+                  "route",
+                  "target_ref",
+                  "condition",
+                  "expected_outcome",
+                  "oracle_ref",
+                  "stage",
+                  "evidence_kind"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  },
+                  "requirement_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "route": {
+                    "enum": [
+                      "UI",
+                      "API",
+                      "BATCH",
+                      "STATE_TRANSITION",
+                      "OTHER_LOCAL"
+                    ]
+                  },
+                  "target_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "condition": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "expected_outcome": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "oracle_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "stage": {
+                    "enum": [
+                      "REQUIREMENTS",
+                      "DESIGN",
+                      "TASK_DECOMPOSITION",
+                      "IMPLEMENTATION",
+                      "TEST_DESIGN",
+                      "INTEGRATION",
+                      "FINAL_VALIDATION"
+                    ]
+                  },
+                  "evidence_kind": {
+                    "enum": [
+                      "NATIVE_QA",
+                      "SEMANTIC_REVIEW"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "qa-mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "baseline_digest",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-mapping.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "obligations_ref",
+            "execution_contract_digest",
+            "mappings"
+          ],
+          "properties": {
+            "obligations_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "execution_contract_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "mappings": {
+              "type": "array",
+              "maxItems": 16384,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "obligation_id",
+                  "gate_id",
+                  "gate_version",
+                  "case_id"
+                ],
+                "properties": {
+                  "obligation_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  },
+                  "gate_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  },
+                  "gate_version": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 4294967295
+                  },
+                  "case_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "qa-artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-artifact.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "media_type",
+            "content",
+            "sha256"
+          ],
+          "properties": {
+            "media_type": {
+              "const": "text/plain"
+            },
+            "content": {
+              "type": "string"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "qa-target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-target.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "route",
+            "locality",
+            "locator",
+            "artifact_ref"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "route": {
+              "enum": [
+                "UI",
+                "API",
+                "BATCH",
+                "STATE_TRANSITION",
+                "OTHER_LOCAL"
+              ]
+            },
+            "locality": {
+              "const": "LOCAL"
+            },
+            "locator": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "artifact_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "qa-oracle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-oracle.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "target_ref",
+            "condition",
+            "expected_outcome",
+            "stage",
+            "evidence_kind"
+          ],
+          "properties": {
+            "target_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "condition": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "expected_outcome": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "stage": {
+              "enum": [
+                "REQUIREMENTS",
+                "DESIGN",
+                "TASK_DECOMPOSITION",
+                "IMPLEMENTATION",
+                "TEST_DESIGN",
+                "INTEGRATION",
+                "FINAL_VALIDATION"
+              ]
+            },
+            "evidence_kind": {
+              "enum": [
+                "NATIVE_QA",
+                "SEMANTIC_REVIEW"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "qa-oracle-plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-oracle-plan.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "oracle_refs"
+          ],
+          "properties": {
+            "oracle_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "minItems": 0,
+              "maxItems": 4096
+            }
+          }
+        }
+      }
+    },
+    "review-host-policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "assurance",
+        "policy_epoch",
+        "principals"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.review-host-policy.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "assurance": {
+          "const": "LOCAL_COOPERATIVE"
+        },
+        "policy_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "principals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "role",
+              "session",
+              "status"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "maxLength": 64
+              },
+              "role": {
+                "enum": [
+                  "OWNER",
+                  "PRODUCER",
+                  "REVIEWER"
+                ]
+              },
+              "session": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "maxLength": 64
+              },
+              "status": {
+                "enum": [
+                  "ACTIVE",
+                  "REVOKED"
+                ]
+              }
+            }
+          },
+          "minItems": 1,
+          "maxItems": 256
+        }
+      }
+    },
+    "review-host-bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "baseline_digest",
+        "policy_digest",
+        "registration_digest",
+        "control_digest",
+        "owner",
+        "owner_session",
+        "not_before",
+        "expires_at",
+        "evidence",
+        "publication_operation",
+        "expected_sequence",
+        "expected_head"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.review-host-bundle.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "policy_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "registration_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "control_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "owner": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "owner_session": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "not_before": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551614
+        },
+        "expires_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551614
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sha256",
+              "bytes"
+            ],
+            "properties": {
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "bytes": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 262144
+              }
+            }
+          },
+          "minItems": 0,
+          "maxItems": 256
+        },
+        "publication_operation": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "expected_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551614
+        },
+        "expected_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "review-control": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "expected_epoch",
+            "operation",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-control.v1"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "expected_epoch": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551614
+            },
+            "operation": {
+              "const": "review"
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "stage",
+                "producer",
+                "reviewer",
+                "input_manifest",
+                "definitions_digest",
+                "verdict",
+                "evidence_digest"
+              ],
+              "properties": {
+                "stage": {
+                  "enum": [
+                    "REQUIREMENTS",
+                    "DESIGN",
+                    "TASK_DECOMPOSITION",
+                    "IMPLEMENTATION",
+                    "TEST_DESIGN",
+                    "INTEGRATION",
+                    "FINAL_VALIDATION"
+                  ]
+                },
+                "producer": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]+$",
+                  "maxLength": 64
+                },
+                "reviewer": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]+$",
+                  "maxLength": 64
+                },
+                "input_manifest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "definitions_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "verdict": {
+                  "enum": [
+                    "PASS",
+                    "REVISE",
+                    "QUESTION_REQUIRED",
+                    "INCONCLUSIVE"
+                  ]
+                },
+                "evidence_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "expected_epoch",
+            "operation",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-control.v1"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "expected_epoch": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551614
+            },
+            "operation": {
+              "const": "activate"
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "decision_digest",
+                "review_digest",
+                "policy_digest"
+              ],
+              "properties": {
+                "decision_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "review_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "policy_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "expected_epoch",
+            "operation",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-control.v1"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "expected_epoch": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551614
+            },
+            "operation": {
+              "const": "question"
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "question_digest",
+                "evidence_digest"
+              ],
+              "properties": {
+                "question_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "evidence_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "expected_epoch",
+            "operation",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-control.v1"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "expected_epoch": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551614
+            },
+            "operation": {
+              "const": "answer"
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "question_digest",
+                "evidence_digest"
+              ],
+              "properties": {
+                "question_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "evidence_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "expected_epoch",
+            "operation",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-control.v1"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "expected_epoch": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551614
+            },
+            "operation": {
+              "const": "resolve"
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "close",
+                "carry",
+                "evidence_digest"
+              ],
+              "properties": {
+                "close": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "minItems": 1,
+                  "maxItems": 256
+                },
+                "carry": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "minItems": 0,
+                  "maxItems": 256
+                },
+                "evidence_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "review-host-evidence": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "purpose",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "policy_digest",
+            "policy_epoch",
+            "issuer",
+            "issuer_session",
+            "producer",
+            "producer_session",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-host-evidence.v1"
+            },
+            "purpose": {
+              "const": "STAGE"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 18446744073709551614
+            },
+            "issuer": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "issuer_session": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "producer": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "producer_session": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "stage",
+                "input_manifest",
+                "definitions_digest",
+                "verdict",
+                "original_source_reviewed"
+              ],
+              "properties": {
+                "stage": {
+                  "enum": [
+                    "REQUIREMENTS",
+                    "DESIGN",
+                    "TASK_DECOMPOSITION",
+                    "IMPLEMENTATION",
+                    "TEST_DESIGN",
+                    "INTEGRATION",
+                    "FINAL_VALIDATION"
+                  ]
+                },
+                "input_manifest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "definitions_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "verdict": {
+                  "enum": [
+                    "PASS",
+                    "REVISE",
+                    "QUESTION_REQUIRED",
+                    "INCONCLUSIVE"
+                  ]
+                },
+                "original_source_reviewed": {
+                  "const": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "purpose",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "policy_digest",
+            "policy_epoch",
+            "issuer",
+            "issuer_session",
+            "producer",
+            "producer_session",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-host-evidence.v1"
+            },
+            "purpose": {
+              "const": "SOURCE_ADOPTION"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 18446744073709551614
+            },
+            "issuer": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "issuer_session": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "producer": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "producer_session": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "disposition",
+                "all_source_decisions_reviewed"
+              ],
+              "properties": {
+                "disposition": {
+                  "const": "ADOPT_EXACT_BASELINE"
+                },
+                "all_source_decisions_reviewed": {
+                  "const": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "purpose",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "policy_digest",
+            "policy_epoch",
+            "issuer",
+            "issuer_session",
+            "producer",
+            "producer_session",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-host-evidence.v1"
+            },
+            "purpose": {
+              "const": "ACTIVATION"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 18446744073709551614
+            },
+            "issuer": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "issuer_session": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "producer": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "producer_session": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "review_digest",
+                "policy_digest"
+              ],
+              "properties": {
+                "review_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "policy_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "purpose",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "policy_digest",
+            "policy_epoch",
+            "issuer",
+            "issuer_session",
+            "producer",
+            "producer_session",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-host-evidence.v1"
+            },
+            "purpose": {
+              "const": "ANSWER"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 18446744073709551614
+            },
+            "issuer": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "issuer_session": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "producer": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "producer_session": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "question_digest",
+                "disposition"
+              ],
+              "properties": {
+                "question_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "disposition": {
+                  "const": "SAME_BASELINE"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "purpose",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "policy_digest",
+            "policy_epoch",
+            "issuer",
+            "issuer_session",
+            "producer",
+            "producer_session",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-host-evidence.v1"
+            },
+            "purpose": {
+              "const": "RESOLUTION"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 18446744073709551614
+            },
+            "issuer": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "issuer_session": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "producer": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "producer_session": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "close",
+                "carry",
+                "disposition"
+              ],
+              "properties": {
+                "close": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "minItems": 1,
+                  "maxItems": 256
+                },
+                "carry": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "minItems": 0,
+                  "maxItems": 256
+                },
+                "disposition": {
+                  "const": "SAME_BASELINE"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "purpose",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "policy_digest",
+            "policy_epoch",
+            "issuer",
+            "issuer_session",
+            "producer",
+            "producer_session",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-host-evidence.v1"
+            },
+            "purpose": {
+              "const": "APPLICABILITY_REVIEW"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 18446744073709551614
+            },
+            "issuer": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "issuer_session": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "producer": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "producer_session": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "subject_digest",
+                "verdict",
+                "original_source_reviewed"
+              ],
+              "properties": {
+                "subject_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "verdict": {
+                  "enum": [
+                    "PASS"
+                  ]
+                },
+                "original_source_reviewed": {
+                  "const": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "purpose",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "policy_digest",
+            "policy_epoch",
+            "issuer",
+            "issuer_session",
+            "producer",
+            "producer_session",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-host-evidence.v1"
+            },
+            "purpose": {
+              "const": "APPLICABILITY_DECISION"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 18446744073709551614
+            },
+            "issuer": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "issuer_session": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "producer": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "producer_session": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "subject_digest",
+                "verdict",
+                "original_source_reviewed"
+              ],
+              "properties": {
+                "subject_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "verdict": {
+                  "enum": [
+                    "PASS"
+                  ]
+                },
+                "original_source_reviewed": {
+                  "const": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "purpose",
+            "project_id",
+            "work_id",
+            "baseline_digest",
+            "policy_digest",
+            "policy_epoch",
+            "issuer",
+            "issuer_session",
+            "producer",
+            "producer_session",
+            "body"
+          ],
+          "properties": {
+            "schema": {
+              "const": "golem.intent.review-host-evidence.v1"
+            },
+            "purpose": {
+              "const": "QA_SEMANTIC"
+            },
+            "project_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "work_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "baseline_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_epoch": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 18446744073709551614
+            },
+            "issuer": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "issuer_session": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "producer": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "producer_session": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "body": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "subject_digest",
+                "verdict",
+                "original_source_reviewed"
+              ],
+              "properties": {
+                "subject_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "verdict": {
+                  "enum": [
+                    "PASS",
+                    "FAIL",
+                    "ERROR",
+                    "INCONCLUSIVE"
+                  ]
+                },
+                "original_source_reviewed": {
+                  "const": true
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "work-enrollment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "baseline_digest",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.work-enrollment.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "baseline_ref",
+            "work_spec_digest",
+            "requirement_mapping",
+            "support_profile",
+            "policy_ref",
+            "activation_decision_ref",
+            "predecessor_ref"
+          ],
+          "properties": {
+            "baseline_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "work_spec_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "requirement_mapping": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "requirement_ref",
+                  "acceptance_id"
+                ],
+                "properties": {
+                  "requirement_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "acceptance_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  }
+                }
+              },
+              "minItems": 0,
+              "maxItems": 256
+            },
+            "support_profile": {
+              "const": "LOCAL_NO_MERGE"
+            },
+            "policy_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "activation_decision_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "predecessor_ref": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "product-access": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "baseline_digest",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.product-access.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "material_sha256",
+            "work_spec",
+            "work_head",
+            "baseline_operation",
+            "baseline_request",
+            "request_digest",
+            "work_sequence",
+            "review_epoch",
+            "boundary",
+            "channel",
+            "input_kind"
+          ],
+          "properties": {
+            "material_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "work_spec": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "work_head": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "baseline_operation": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "baseline_request": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "request_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "work_sequence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551614
+            },
+            "review_epoch": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551614
+            },
+            "boundary": {
+              "enum": [
+                "DEVELOPMENT",
+                "QA_DISPATCH",
+                "QA_ACCEPTANCE",
+                "COMPLETION"
+              ]
+            },
+            "channel": {
+              "enum": [
+                "SESSION",
+                "EXECUTION",
+                "QA",
+                "COMPLETION"
+              ]
+            },
+            "input_kind": {
+              "enum": [
+                "development-result",
+                "qa-result"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "product-material": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "baseline_digest",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.product-material.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "baseline",
+            "applicability",
+            "obligations",
+            "mapping",
+            "execution_contract",
+            "sources",
+            "definitions",
+            "objects",
+            "native_inputs"
+          ],
+          "properties": {
+            "baseline": {
+              "type": "string",
+              "minLength": 1
+            },
+            "applicability": {
+              "type": "string",
+              "minLength": 1
+            },
+            "obligations": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mapping": {
+              "type": "string",
+              "minLength": 1
+            },
+            "execution_contract": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "control",
+                  "text"
+                ],
+                "properties": {
+                  "control": {
+                    "type": "string"
+                  },
+                  "text": {
+                    "type": "string"
+                  }
+                }
+              },
+              "minItems": 1,
+              "maxItems": 64
+            },
+            "definitions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 0,
+              "maxItems": 256
+            },
+            "objects": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 0,
+              "maxItems": 4096
+            },
+            "native_inputs": {
+              "type": "object",
+              "$comment": "Existing native input manifest contract; equality is checked by native."
+            }
+          }
+        }
+      }
+    },
+    "qa-request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "operation",
+        "execution_receipt_ref",
+        "semantic_reviews",
+        "authority_sequence",
+        "authority_head",
+        "prepare_operation",
+        "accept_operation"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-request.v1"
+        },
+        "operation": {
+          "enum": [
+            "assess",
+            "accept"
+          ]
+        },
+        "execution_receipt_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "semantic_reviews": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "obligation_id",
+              "review_ref"
+            ],
+            "properties": {
+              "obligation_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "maxLength": 64
+              },
+              "review_ref": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          "minItems": 0,
+          "maxItems": 254
+        },
+        "authority_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551614
+        },
+        "authority_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "prepare_operation": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "accept_operation": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "qa-acceptance-prepared": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request_digest",
+        "assessment_digest",
+        "work_head",
+        "work_sequence"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-acceptance-prepared.v1"
+        },
+        "request_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "assessment_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "work_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "work_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551614
+        }
+      }
+    },
+    "qa-acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request_digest",
+        "assessment_digest",
+        "prepared_event",
+        "work_sequence",
+        "work_observation"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-acceptance.v1"
+        },
+        "request_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "assessment_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "prepared_event": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "work_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551614
+        },
+        "work_observation": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "completion-request": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "operation",
+            "selection_id"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": 3
+            },
+            "operation": {
+              "const": "resume"
+            },
+            "selection_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "operation",
+            "selection_id",
+            "key",
+            "expected_generation",
+            "issues",
+            "predicate",
+            "intent_qa_observation"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": 3
+            },
+            "operation": {
+              "const": "finalize"
+            },
+            "selection_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "key": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "expected_generation": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4097
+            },
+            "issues": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "blocking",
+                  "description",
+                  "evidence_digest"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  },
+                  "blocking": {
+                    "type": "boolean"
+                  },
+                  "description": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "evidence_digest": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                }
+              },
+              "minItems": 0,
+              "maxItems": 32
+            },
+            "predicate": {
+              "const": "golem.completion.intent.local-no-merge.v1"
+            },
+            "intent_qa_observation": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      ]
+    },
+    "product-host-packet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "work",
+        "operation",
+        "policy",
+        "bundle",
+        "control",
+        "material",
+        "request",
+        "policy_name",
+        "bundle_name",
+        "policy_sha256",
+        "bundle_sha256"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent-product-host.v1"
+        },
+        "work": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "operation": {
+          "enum": [
+            "assess",
+            "current",
+            "accept",
+            "finalize",
+            "resume"
+          ]
+        },
+        "policy": {
+          "type": "string"
+        },
+        "bundle": {
+          "type": "string"
+        },
+        "control": {
+          "type": "string"
+        },
+        "material": {
+          "type": "string"
+        },
+        "request": {
+          "type": "string"
+        },
+        "policy_name": {
+          "type": "string"
+        },
+        "bundle_name": {
+          "type": "string"
+        },
+        "policy_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "bundle_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.source.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "body_cas",
+            "byte_length",
+            "media_type",
+            "encoding",
+            "origin",
+            "capture_ref",
+            "designation",
+            "execution_authority"
+          ],
+          "properties": {
+            "body_cas": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "byte_length": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 18446744073709551615
+            },
+            "media_type": {
+              "enum": [
+                "text/plain",
+                "text/markdown"
+              ]
+            },
+            "encoding": {
+              "const": "UTF-8"
+            },
+            "origin": {
+              "enum": [
+                "TRUSTED_USER_INPUT",
+                "USER_DESIGNATED_DOCUMENT",
+                "TOOL_OBSERVATION",
+                "EXTERNAL_REFERENCE",
+                "MODEL_DRAFT"
+              ]
+            },
+            "capture_ref": {
+              "type": "string",
+              "minLength": 1
+            },
+            "designation": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "scope_id",
+                "ranges",
+                "purpose",
+                "decision_ref"
+              ],
+              "properties": {
+                "scope_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]+$",
+                  "maxLength": 64
+                },
+                "ranges": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "start",
+                      "end"
+                    ],
+                    "properties": {
+                      "start": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 18446744073709551615
+                      },
+                      "end": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 18446744073709551615
+                      }
+                    }
+                  },
+                  "minItems": 1
+                },
+                "purpose": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "decision_ref": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            },
+            "execution_authority": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.baseline.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source_refs",
+            "previous_baseline_digest",
+            "decision_refs",
+            "requirement_refs",
+            "constraint_refs",
+            "coverage_manifest",
+            "issuer_policy_ref"
+          ],
+          "properties": {
+            "source_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "previous_baseline_digest": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "decision_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "requirement_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "minItems": 0,
+              "uniqueItems": true,
+              "maxItems": 1024
+            },
+            "constraint_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "minItems": 0,
+              "uniqueItems": true
+            },
+            "coverage_manifest": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "source_ref",
+                  "rows"
+                ],
+                "properties": {
+                  "source_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "rows": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "start",
+                        "end",
+                        "classification",
+                        "requirement_refs",
+                        "constraint_refs",
+                        "rationale",
+                        "review_refs"
+                      ],
+                      "properties": {
+                        "start": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 18446744073709551615
+                        },
+                        "end": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 18446744073709551615
+                        },
+                        "classification": {
+                          "enum": [
+                            "REQUIREMENT",
+                            "CONSTRAINT",
+                            "CONTEXT",
+                            "EXPLICIT_NON_GOAL",
+                            "NON_NORMATIVE",
+                            "QUESTION_REQUIRED"
+                          ]
+                        },
+                        "requirement_refs": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "minItems": 0,
+                          "uniqueItems": true
+                        },
+                        "constraint_refs": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "minItems": 0,
+                          "uniqueItems": true
+                        },
+                        "rationale": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "review_refs": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{64}$"
+                          },
+                          "minItems": 0,
+                          "uniqueItems": true
+                        }
+                      }
+                    },
+                    "minItems": 0
+                  }
+                }
+              },
+              "minItems": 0
+            },
+            "issuer_policy_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.requirement.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "exact_text",
+            "source_spans",
+            "modality",
+            "quantifier",
+            "negative",
+            "conditions",
+            "acceptance_oracle_refs",
+            "derivation_rationale"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "exact_text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "source_spans": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "source_ref",
+                  "start",
+                  "end"
+                ],
+                "properties": {
+                  "source_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 18446744073709551615
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 18446744073709551615
+                  }
+                }
+              },
+              "minItems": 1,
+              "maxItems": 64
+            },
+            "modality": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "quantifier": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "negative": {
+              "type": "boolean"
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0,
+              "maxItems": 64,
+              "uniqueItems": true
+            },
+            "acceptance_oracle_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "minItems": 0,
+              "maxItems": 64,
+              "uniqueItems": true
+            },
+            "derivation_rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          }
+        }
+      }
+    },
+    "constraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "body"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.constraint.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "exact_text",
+            "source_spans",
+            "modality",
+            "quantifier",
+            "negative",
+            "conditions",
+            "acceptance_oracle_refs",
+            "derivation_rationale",
+            "scope",
+            "applies_to",
+            "exclusions"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "maxLength": 64
+            },
+            "exact_text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "source_spans": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "source_ref",
+                  "start",
+                  "end"
+                ],
+                "properties": {
+                  "source_ref": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 18446744073709551615
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 18446744073709551615
+                  }
+                }
+              },
+              "minItems": 1,
+              "maxItems": 64
+            },
+            "modality": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "quantifier": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "negative": {
+              "type": "boolean"
+            },
+            "conditions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0,
+              "maxItems": 64,
+              "uniqueItems": true
+            },
+            "acceptance_oracle_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "minItems": 0,
+              "maxItems": 64,
+              "uniqueItems": true
+            },
+            "derivation_rationale": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            "scope": {
+              "enum": [
+                "LOCAL",
+                "GLOBAL",
+                "UNSCOPED"
+              ]
+            },
+            "applies_to": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0,
+              "maxItems": 64,
+              "uniqueItems": true
+            },
+            "exclusions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 0,
+              "maxItems": 64,
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    },
+    "qa-assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "work_id",
+        "created_by_assertion",
+        "body",
+        "baseline_digest"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.intent.qa-assessment.v1"
+        },
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "created_by_assertion": {
+          "const": "native-qc4"
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "input_tuple",
+            "execution_receipt_ref",
+            "review_refs",
+            "obligation_results",
+            "blockers",
+            "execution_status",
+            "intent_qa_status",
+            "assurance"
+          ],
+          "properties": {
+            "input_tuple": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "baseline_ref",
+                "policy_ref",
+                "material_sha256",
+                "applicability_ref",
+                "obligations_ref",
+                "mapping_ref",
+                "work_spec",
+                "reviewer_policy_ref",
+                "constraint_epoch",
+                "constraint_scope",
+                "review_epoch",
+                "work_id",
+                "selection_id",
+                "document_generation",
+                "source_inputs",
+                "checkpoint_ref",
+                "artifact_inventory",
+                "oracle_plan_ref"
+              ],
+              "properties": {
+                "baseline_ref": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "policy_ref": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "material_sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "applicability_ref": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "obligations_ref": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "mapping_ref": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "work_spec": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "reviewer_policy_ref": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "constraint_epoch": {
+                  "const": 0
+                },
+                "constraint_scope": {
+                  "const": "IMMUTABLE_LOCAL_BASELINE"
+                },
+                "review_epoch": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 18446744073709551615
+                },
+                "work_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]+$",
+                  "maxLength": 64
+                },
+                "selection_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_-]+$",
+                  "maxLength": 64
+                },
+                "document_generation": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 18446744073709551615
+                },
+                "source_inputs": {
+                  "type": "object"
+                },
+                "checkpoint_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "artifact_inventory": {
+                  "type": [
+                    "object",
+                    "null"
+                  ]
+                },
+                "oracle_plan_ref": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              }
+            },
+            "execution_receipt_ref": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "review_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "minItems": 0
+            },
+            "obligation_results": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "obligation_id",
+                  "evidence_refs",
+                  "status"
+                ],
+                "properties": {
+                  "obligation_id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]+$",
+                    "maxLength": 64
+                  },
+                  "evidence_refs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "minItems": 0
+                  },
+                  "status": {
+                    "enum": [
+                      "PASS",
+                      "FAIL",
+                      "ERROR",
+                      "NOT_RUN",
+                      "UNKNOWN",
+                      "STALE",
+                      "UNSUPPORTED"
+                    ]
+                  }
+                }
+              },
+              "minItems": 0
+            },
+            "blockers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "code",
+                  "subject_ref",
+                  "cause_ref"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "subject_ref": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "cause_ref": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                }
+              },
+              "minItems": 0
+            },
+            "execution_status": {
+              "enum": [
+                "PASS",
+                "FAIL",
+                "ERROR",
+                null
+              ]
+            },
+            "intent_qa_status": {
+              "enum": [
+                "BLOCKED",
+                "STALE",
+                "UNCERTAIN",
+                "ACCEPTED"
+              ]
+            },
+            "assurance": {
+              "const": "LOCAL_COOPERATIVE_REVIEWED_NOT_PROVEN"
+            }
+          }
+        },
+        "baseline_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "qa-observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "type",
+        "request",
+        "request_digest",
+        "assessment",
+        "assessment_digest",
+        "prepare_operation",
+        "prepare_sequence",
+        "prepare_event",
+        "accept_operation",
+        "previous_work_head",
+        "previous_work_sequence"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "type": {
+          "const": "intent-qa-observation"
+        },
+        "request": {
+          "type": "string",
+          "minLength": 1
+        },
+        "request_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "assessment": {
+          "$ref": "#/$defs/qa-assessment"
+        },
+        "assessment_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "prepare_operation": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "prepare_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551614
+        },
+        "prepare_event": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "accept_operation": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "previous_work_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "previous_work_sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        }
+      }
+    },
+    "enrollment-event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "type",
+        "enrollment",
+        "authority_operation",
+        "authority_request",
+        "authority_sequence",
+        "authority_event",
+        "registration_ref"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 1
+        },
+        "type": {
+          "const": "intent-enrollment"
+        },
+        "enrollment": {
+          "$ref": "#/$defs/work-enrollment"
+        },
+        "authority_operation": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "authority_request": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "authority_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551614
+        },
+        "authority_event": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "registration_ref": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "work-spec-v3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "work_id",
+        "request",
+        "scope",
+        "non_goals",
+        "permission",
+        "max_revisions",
+        "acceptance",
+        "policy_version",
+        "runtime_profile",
+        "intent_binding",
+        "support_profile"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": 3
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "maxLength": 64
+        },
+        "request": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "non_goals": {
+          "type": "string",
+          "minLength": 1
+        },
+        "permission": {
+          "enum": [
+            "AUTO_LOCAL",
+            "ASK_ALWAYS",
+            "DENY",
+            "ASK_ON_EXTERNAL_EFFECT"
+          ]
+        },
+        "max_revisions": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "acceptance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "criterion"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "maxLength": 64
+              },
+              "criterion": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "minItems": 1,
+          "maxItems": 256
+        },
+        "policy_version": {
+          "const": 1
+        },
+        "runtime_profile": {
+          "type": "object",
+          "$comment": "Delegated existing native runtime-profile parser."
+        },
+        "intent_binding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "registration_ref",
+            "baseline_ref",
+            "policy_ref"
+          ],
+          "properties": {
+            "registration_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "baseline_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "policy_ref": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "support_profile": {
+          "const": "LOCAL_NO_MERGE"
+        }
+      }
+    },
+    "integration-intent-host": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "transfer_policy_sha256",
+        "mutation_policy_sha256",
+        "registration_sha256",
+        "repository",
+        "git",
+        "bridge",
+        "bindings",
+        "producer"
+      ],
+      "properties": {
+        "schema": {
+          "const": "golem.integration-intent-host.v1"
+        },
+        "transfer_policy_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "mutation_policy_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "registration_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+        },
+        "git": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "bridge": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "bindings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "binding_id",
+              "project_id",
+              "work_id",
+              "operation",
+              "action_id",
+              "action_sha256",
+              "packet",
+              "review_root"
+            ],
+            "properties": {
+              "binding_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+                "maxLength": 64
+              },
+              "project_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+                "maxLength": 64
+              },
+              "work_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+                "maxLength": 64
+              },
+              "operation": {
+                "enum": [
+                  "assess",
+                  "current",
+                  "resume",
+                  "accept",
+                  "finalize"
+                ]
+              },
+              "action_id": {
+                "type": "string",
+                "maxLength": 64
+              },
+              "action_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "packet": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "path",
+                  "sha256"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                }
+              },
+              "review_root": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "path",
+                  "identity"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+                  },
+                  "identity": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "device",
+                      "inode"
+                    ],
+                    "properties": {
+                      "device": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "inode": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "producer": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "integration_intent.py"
+          ],
+          "properties": {
+            "integration_intent.py": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "intent-read-arguments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project_id",
+        "work_id",
+        "query_id"
+      ],
+      "properties": {
+        "project_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+          "maxLength": 64
+        },
+        "work_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+          "maxLength": 64
+        },
+        "query_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+          "maxLength": 64
+        }
+      }
+    },
+    "intent-action-reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "binding_id"
+      ],
+      "properties": {
+        "binding_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+          "maxLength": 64
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/qa-applicability"
+    },
+    {
+      "$ref": "#/$defs/qa-obligations"
+    },
+    {
+      "$ref": "#/$defs/qa-mapping"
+    },
+    {
+      "$ref": "#/$defs/qa-artifact"
+    },
+    {
+      "$ref": "#/$defs/qa-target"
+    },
+    {
+      "$ref": "#/$defs/qa-oracle"
+    },
+    {
+      "$ref": "#/$defs/qa-oracle-plan"
+    },
+    {
+      "$ref": "#/$defs/review-host-policy"
+    },
+    {
+      "$ref": "#/$defs/review-host-bundle"
+    },
+    {
+      "$ref": "#/$defs/review-control"
+    },
+    {
+      "$ref": "#/$defs/review-host-evidence"
+    },
+    {
+      "$ref": "#/$defs/work-enrollment"
+    },
+    {
+      "$ref": "#/$defs/product-access"
+    },
+    {
+      "$ref": "#/$defs/product-material"
+    },
+    {
+      "$ref": "#/$defs/qa-request"
+    },
+    {
+      "$ref": "#/$defs/qa-acceptance-prepared"
+    },
+    {
+      "$ref": "#/$defs/qa-acceptance"
+    },
+    {
+      "$ref": "#/$defs/completion-request"
+    },
+    {
+      "$ref": "#/$defs/product-host-packet"
+    },
+    {
+      "$ref": "#/$defs/source"
+    },
+    {
+      "$ref": "#/$defs/baseline"
+    },
+    {
+      "$ref": "#/$defs/requirement"
+    },
+    {
+      "$ref": "#/$defs/constraint"
+    },
+    {
+      "$ref": "#/$defs/qa-assessment"
+    },
+    {
+      "$ref": "#/$defs/qa-observation"
+    },
+    {
+      "$ref": "#/$defs/enrollment-event"
+    },
+    {
+      "$ref": "#/$defs/work-spec-v3"
+    },
+    {
+      "$ref": "#/$defs/integration-intent-host"
+    },
+    {
+      "$ref": "#/$defs/intent-read-arguments"
+    },
+    {
+      "$ref": "#/$defs/intent-action-reference"
+    }
+  ]
+}

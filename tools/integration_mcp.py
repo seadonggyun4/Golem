@@ -17,6 +17,7 @@ WIRE_LIMIT = 524288
 ICON_PATH = Path(__file__).resolve().parents[1] / "assets" / "Golem-mcp.png"
 ICON_SHA256 = "ffae18e4515e38d1b72c3bcfaea5adec1a93fb1edcfe633e7dfea2a1d2091b2a"
 COUNTER_TOOL_DESCRIPTIONS = {
+    "intent_read": " Owner-selected bounded native Intent query only. Return QC4/QC5 result unchanged; process success is not QA acceptance. Missing host contract blocks; no retry or mutation.",
     "work_inspect": " In status/next, sequence counts agent-session events; next.document_generation counts registered document revisions plus one.",
     "completion_check": " generation counts registered document revisions plus one, not session events. completion_sequence is the latest receipt position for this selection, zero if absent.",
     "context_get": " preflight status/next sequence is an agent-session counter; next.document_generation is a separate document counter.",

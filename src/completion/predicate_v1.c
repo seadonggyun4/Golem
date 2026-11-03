@@ -1,3 +1,4 @@
+#include "../intent/product_gate.h"
 #include "internal.h"
 #include "../reentry/internal.h"
 #include "../research/internal.h"
@@ -5,7 +6,7 @@
 
 /* Pure acceptance relative to the replay prefix; live source observation is
  * deliberately optional so later edits cannot invalidate historical replay. */
-golem_status co_evaluate_v1(golem_document_store *s, struct json_object *r, bool live,
+golem_status co_evaluate_v1_base(golem_document_store *s, struct json_object *r, bool live,
                             struct json_object **out)
 {
     golem_status st = co_validate_v1(r);
@@ -155,4 +156,11 @@ golem_status co_evaluate_v1(golem_document_store *s, struct json_object *r, bool
     json_object_put(dev);
     json_object_put(cp);
     return st;
+}
+
+golem_status co_evaluate_v1(golem_document_store *s,struct json_object *r,bool live,struct json_object **out)
+{
+    if(!s)return GOLEM_ERR_INVALID_ARGUMENT;
+    if(dw_uint(s->spec,"schema_version")==3)return GOLEM_ERR_UNSUPPORTED_VERSION;
+    return co_evaluate_v1_base(s,r,live,out);
 }

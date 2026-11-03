@@ -16,6 +16,7 @@ import integration_task_actions as tasks
 import integration_quality_actions as quality
 import integration_parallel_actions as parallel
 import integration_workpack_actions as workpack
+import integration_intent as intent_api
 
 
 def blocked(error, *, uncertain=False, evidence_id=None):
@@ -31,11 +32,14 @@ def blocked(error, *, uncertain=False, evidence_id=None):
 
 
 class Service:
-    def __init__(self, policy, resources=None, helpers=None, parallel_hosts=None):
+    def __init__(self, policy, resources=None, helpers=None, parallel_hosts=None, intent_hosts=None):
         self.policy, self.registry = policy, policy.registry
         self.reads = reads.Service(policy.transfer, resources, preparation_policy=policy)
         c.require(helpers is None or helpers.policy.digest == policy.digest, "HELPER_MUTATION_POLICY_BINDING")
         c.require(parallel_hosts is None or parallel_hosts.policy.digest == policy.digest, "PARALLEL_HOST_POLICY_BINDING")
+        c.require(intent_hosts is None or intent_hosts.policy.digest==policy.digest,"INTENT_POLICY_BINDING")
+        self.intent_hosts=intent_hosts
+        self.reads.intent_hosts=intent_hosts
         self.parallel_hosts = parallel_hosts
         self.reads.parallel_hosts = parallel_hosts
         self.reads.parallel_result = self.result
@@ -60,6 +64,10 @@ class Service:
                     if self.parallel_hosts is None:continue
                     try:self.parallel_hosts.select(entry, self.policy.action(entry)[0])
                     except (c.IntegrationError, OSError, ValueError):continue
+                if entry["tool"] in intent_api.ACTIONS:
+                    if self.intent_hosts is None:continue
+                    try:self.intent_hosts.select(entry,self.policy.action(entry)[0])
+                    except (c.IntegrationError,OSError,ValueError):continue
                 result.add(entry["tool"])
         return sorted(result)
 
@@ -119,6 +127,9 @@ class Service:
         c.require(self.parallel_hosts is None or self.parallel_hosts.parent(entry["project_id"], entry["work_id"]) is None or
                   name in (*parallel.HOST_NAMES, "inventory_capture"), "PARALLEL_HOST_OWNS_PARENT_WORK")
         value, native = self.policy.action(entry)
+        if name in intent_api.ACTIONS:
+            c.require(self.intent_hosts is not None,"OWNER_INTENT_HOST_REQUIRED")
+            self.intent_hosts.select(entry,value)
         if name == "helper_execute":
             c.require(self.helpers is not None, "OWNER_HELPER_EFFECTS_APPROVAL_REQUIRED")
             self.helpers.select(entry, value)
@@ -159,7 +170,7 @@ class Service:
             previous = c.decode(r.regular(directory / "intent.json", private=True))
             if name == "helper_execute" and previous.get("tool") == name and previous.get("action") == entry and (directory / "dispatch-intent.json").exists():
                 raise c.IntegrationError("HELPER_ACTION_ALREADY_DISPATCHED_REVIEW_ORIGINAL")
-            if name in parallel.HOST_NAMES and previous.get("tool") == name and previous.get("action") == entry and (directory / "dispatch-intent.json").exists():
+            if name in (*parallel.HOST_NAMES,*intent_api.ACTIONS) and previous.get("tool") == name and previous.get("action") == entry and (directory / "dispatch-intent.json").exists():
                 raise c.IntegrationError("PARALLEL_ACTION_ALREADY_DISPATCHED_REVIEW_ORIGINAL")
             if previous["lineage"] == lineage:
                 resolution = lifecycle.clearance(directory, previous)
@@ -189,6 +200,9 @@ class Service:
         return result
 
     def _preflight(self, entry, native):
+        if entry["tool"] in intent_api.ACTIONS:
+            self.intent_hosts.select(entry,self.policy.action(entry)[0])
+            return {"scope":"EXACT_INTENT_HOST","native_predicate":"CHECKED_BY_NATIVE_DISPATCH_NOT_PREFLIGHT","execution_authorized":False}
         selected = {"project_id": entry["project_id"], "work_id": entry["work_id"]}
         status = self.reads.call("work_inspect", {**selected, "view": "status"})["result"]
         following = self.reads.call("work_inspect", {**selected, "view": "next"})["result"]
@@ -210,6 +224,7 @@ class Service:
         argv = [project["cli"]["path"], "--output-mode", "full"]
         request = str(output / "request.json")
         tool = entry["tool"]
+        if tool in intent_api.ACTIONS:return [] # dispatch through the fixed inherited-fd host
         if tool in workpack.NAMES:
             return [*argv, *workpack.command(entry, project, work, value, output)]
         if tool == "helper_execute":
@@ -303,7 +318,9 @@ class Service:
                     lifecycle.fence(self.registry, args["project_id"])
                     self.policy.authorize(entry)
                 if name in parallel.HOST_NAMES:self.parallel_hosts.select(entry, value)
-                if name == "helper_execute":
+                if name in intent_api.ACTIONS:
+                    process=self.intent_hosts.capture(entry,value,output)
+                elif name == "helper_execute":
                     process = self.helpers.capture(entry, value, output)
                 else:
                     process = records.capture(argv, output, 540 if value["approval"] else backend.TIMEOUT_SECONDS,
