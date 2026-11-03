@@ -1,6 +1,29 @@
 # Intent QC CI 반영 상태
 
-상태: VALIDATION_IN_PROGRESS. 설치·실사용 승인으로 해석하지 않는다.
+상태: **격리 CI PASS**. 검증 source는 `0f903399280ab4c1beeee31925e043481b6191a7`이다.
+설치·실사용 승인으로 해석하지 않는다. Codex·Claude 설치와 실제 Work E2E HOLD는 유지한다.
+
+## 최종 확인
+
+- [전체 CI 41643938875](https://github.com/seadonggyun4/Golem/actions/runs/41643938875):
+  `CI Ready` 포함 **25개 job 모두 성공**. Linux/macOS native dev·release·ASan,
+  QC 통합·schema/golden, Python, MCP, bindings, packaging, public-alpha 및 진단 검사를 포함한다.
+- [push CI 41643917891](https://github.com/seadonggyun4/Golem/actions/runs/41643917891):
+  성공. 선택된 13개 job 성공, 변경 범위 밖 4개 job skip. 전체 실행의 대체 근거가 아니다.
+- capability 선택 목록·repository 대조 차단 0개, capability 회귀 375개 성공.
+  전체 로컬 Python 1,542개는 실패 0개·조건부 skip 188개이며 native QC 32개도 성공했다.
+- schema/golden 324개 비교는 완료했지만 문맥 coverage 표시는 `PARTIAL`,
+  `authority_verified=false`를 유지한다. 실제 ENOSPC disk-image 및 실제 client E2E는 NOT_RUN이다.
+- 이전 public-alpha의 `JOURNAL_BUSY` 1회는 원인 확정 없이 보존한다.
+  새 격리 role-contract 회귀와 현재 양쪽 public-alpha는 통과했다.
+  이를 위해 락 검사 완화·자동 재시도·기존 Work 재실행은 추가하지 않았다.
+- 기존 설치·launcher·정책·승인·Work·증거·COMMIT_UNKNOWN은 변경하지 않았다.
+  Codex Golem 0.2.7과 Claude Golem prepare 0.1.19 각각 한 설치를 확인했으며,
+  연결 `.mcp.json`, Claude manifest, 설치 원장 해시는 작업 전후 동일하다.
+  이 CI source를 설치본에 자동 적용하지 않았다.
+
+아래는 수정 과정과 **당시**의 결과다. 이전 실패·진행 중 표시는 위 최종 결과로
+소급 변경하지 않으며 과거 증거를 보존한다.
 
 2026-11-03 사용자 선택으로 기존 실행 HOLD를 **새 격리 CI fixture와 의존성 설치**에 한해 해제했다.
 기존 TopSolar·정책·승인·Work·증거와 Codex/Claude 설치·실제 client E2E는 변경하지 않는다.
@@ -24,7 +47,7 @@
   기존 session이 있으면 token/live/current 검사, token만 전달한 미등록 세션은 거부한다.
 - pending authority 조회가 거부되는 실제 계약을 fixture 기대 결과에 반영.
 
-## 결과와 남은 차단
+## 당시 결과와 차단
 
 로컬 빌드 성공. 정상 QC7 단독 실행 성공. schema/golden 324개 비교 및 collector 6개,
 Intent MCP 경계 10개 회귀 성공. schema 전체 문맥 coverage는 별도 PARTIAL이며
