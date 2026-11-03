@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "5a2141eed4e64f9f160435b64cc4a026bb717284125ba73428c122aa48b4bb41",
+  "inventory_sha256": "8e3d3be918efa1c272204c76a1e3295abeda76831773480c4ff7952c36c45463",
   "selected_source_count": 616,
   "selected_observation_count": 2380,
   "selected_capability_count": 1263,
@@ -4148,7 +4148,7 @@
     },
     {
       "path": "src/candidate/controller.c",
-      "sha256": "7104faff9f600f0a01fcb7b80954db57ada0bacd1dfa97be1404a3266ec2da1d"
+      "sha256": "489ab229caccbd3f23a38ea5d45dd971640392f60afd0dba61804cc653434a27"
     },
     {
       "path": "src/candidate/current.c",
@@ -4520,7 +4520,7 @@
     },
     {
       "path": "src/document/registry.c",
-      "sha256": "c5f2d3bf91736b05ed49ba30e83a51ad50311a90df54d92a50f651d15af148e7"
+      "sha256": "03db1ea46af59b6b2f85e8466b127f459dd258d5b65d76b1e19c7500c09af026"
     },
     {
       "path": "src/document/schema.c",
@@ -5640,7 +5640,7 @@
     },
     {
       "path": "tools/test_capability_publication.py",
-      "sha256": "5706d3e892e13b612b5128588e67f51313de274e60c26f5fd113993ebc782935"
+      "sha256": "18569202ca884e49bc478a372ea33d16ac63b11acd6efe9649287821e5db41bc"
     },
     {
       "path": "tools/integration_reads.py",
@@ -63665,7 +63665,7 @@
     },
     {
       "path": "tools/capability_c_graph_registry.py",
-      "sha256": "a7a8cbf77022d6b1a66e7be350a56ffc5a1e5c6725b5a71b67f5ae23e3baa7e7",
+      "sha256": "ffe8d22af0ad39a043b5c9db89aa72c7a6369e7a7e70149a16e5cb2eb82a5093",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -63725,7 +63725,7 @@
     },
     {
       "path": "tools/capability_domain_registry.py",
-      "sha256": "a5fee3073f31a81bb7f3cfd78c93f26f2751041473dd3318d0506ec9c9be0b39",
+      "sha256": "8171504b629d65ab7a5fae990463745a852b81e797b939058e37c2d46f572acd",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -63881,7 +63881,7 @@
     },
     {
       "path": "tools/capability_m5_registry.py",
-      "sha256": "5e1b859dd7bc8b783dfbde88d69c5b0ca411722479fc94dd8be882641bbee65b",
+      "sha256": "efabb6ff8444ef8ff7d874b479a4c2e507111c4e18900f3cad580dd1bebcd407",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -63923,7 +63923,7 @@
     },
     {
       "path": "tools/capability_native_registry.py",
-      "sha256": "ed11bd00772d1080142996685508bb03ef4f65b9ec6280b70e5163c3d917a36d",
+      "sha256": "4884a9a582a71ab17cb706e567fa278c5c102a4adab426adc88bd2c55153ab76",
       "shape_sha256": "2ebad2aa2187d7758c167ade4dcb2c5893dde0b1822fe46c7c4af1dde8aeba1a",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64043,7 +64043,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "e71b1780c8218871dc09b464520366da260bec2ad348e25e008bf8d7bd9f2791",
+      "sha256": "85af60de06ba8296143a26d66ff784aad9f7e48f751754ec532002df0cd3cb35",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64079,8 +64079,8 @@
     },
     {
       "path": "tools/test_capability_boundaries.py",
-      "sha256": "3ec4976d9e136986f0aa042234328246343546dae584f4456776e2548ccc5724",
-      "shape_sha256": "777037e7f806c6fb4f1b2a15a002925afb61dbb1185b8089f8f6aecfbefb0a2d",
+      "sha256": "974c68b442e9a26dc0ab2d8c887754d6472ad9737502753b5df191a2efaaf414",
+      "shape_sha256": "ca8f3b3b0664fbb27200276ca271e28336c35e67a8524e975b262806d7a9ba0e",
       "role": "M0_FIXTURE_REGRESSION"
     },
     {
@@ -64235,8 +64235,8 @@
     },
     {
       "path": "tools/test_capability_publication.py",
-      "sha256": "5706d3e892e13b612b5128588e67f51313de274e60c26f5fd113993ebc782935",
-      "shape_sha256": "ddcba03af14862e903ef5f12c143391247301842f91753a851646ff449efbb1a",
+      "sha256": "18569202ca884e49bc478a372ea33d16ac63b11acd6efe9649287821e5db41bc",
+      "shape_sha256": "4cdd325ecade6c74f8be49978cb266e2dd378a9cafae4944be54356830962c1f",
       "role": "M0_FIXTURE_REGRESSION"
     },
     {

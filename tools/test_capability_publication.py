@@ -19,10 +19,17 @@ class PrivatePublication(unittest.TestCase):
         cls.sources=tuple(SourceFile(p,hashlib.sha256((root/p).read_bytes()).hexdigest(),(root/p).read_bytes()) for p in sorted(paths))
         cls.ledger=json.loads((root/'docs/mcp-m0-observations.json').read_bytes())
     def mutate(self,path,old,new,*,repin=False,body_model=False,edge_model=False):
+        from capability_source import _tokens
+        import re
         model=copy.deepcopy(PUBLICATION);out=[]
         for f in self.sources:
             if f.path!=path:out.append(f);continue
-            self.assertIn(old,f.data);raw=f.data.replace(old,new,1);changed=replace(f,data=raw,sha256=hashlib.sha256(raw).hexdigest());out.append(changed)
+            # Match the semantic mutation across formatting-only source edits.
+            pattern=rb'\s*'.join(re.escape(t.encode()) for t in _tokens(old.decode()))
+            raw,count=re.subn(pattern,lambda _:new,f.data,count=1)
+            self.assertEqual(count,1)
+            self.assertNotEqual(_tokens(raw.decode()),_tokens(f.data.decode()))
+            changed=replace(f,data=raw,sha256=hashlib.sha256(raw).hexdigest());out.append(changed)
             for field in ('nodes','declarations'):
                 for n in model[field]:
                     if n['path']==path and repin:n['sha256']=changed.sha256

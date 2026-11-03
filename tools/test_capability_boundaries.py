@@ -31,7 +31,7 @@ class Boundaries(unittest.TestCase):
         files=dict(self.__class__._files)
         _intent_record_contract(files,site,self.ledger)
         path='src/intent/product_gate.c';original=files[path]
-        old=b'return gi_product_access_record(s,event);'
+        old=b'return gi_product_access_record(s, event);'
         self.assertIn(old,original.data)
         raw=original.data.replace(old,b'return GOLEM_OK;',1)
         files[path]=replace(original,data=raw,sha256=hashlib.sha256(raw).hexdigest())
@@ -152,7 +152,9 @@ class Boundaries(unittest.TestCase):
     def test_null_forwarding_requires_literal_value_even_after_snapshot_repin(self):
         from capability_c_syntax import plain_definitions,call_sites
         m=copy.deepcopy(GRAPH);f=self.__class__._files['src/document/record.c']
-        raw=f.data.replace(b'}, NULL, NULL);',b'}, arbitrary_guard, NULL);',1);self.assertNotEqual(raw,f.data)
+        import re
+        raw,count=re.subn(rb'},\s*NULL,\s*NULL\);',b'}, arbitrary_guard, NULL);',f.data,count=1)
+        self.assertEqual(count,1);self.assertNotEqual(raw,f.data)
         changed=replace(f,data=raw,sha256=hashlib.sha256(raw).hexdigest())
         parsed={d[0]:d[3] for d in plain_definitions(raw.decode())}
         for n in m['nodes']:

@@ -1,5 +1,5 @@
-#include "../intent/product_gate.h"
 #define _POSIX_C_SOURCE 200809L
+#include "../intent/product_gate.h"
 #include "internal.h"
 #include "../common/record_internal.h"
 #include <stdlib.h>

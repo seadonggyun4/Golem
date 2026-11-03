@@ -26,14 +26,22 @@ if observed != allowed:
     raise AssertionError(f"Unreviewed record publication path: {observed!r}")
 events = {
     "document/registry.c": 2, "policy/approval_store.c": 1,
-    "research/store.c": 1, "completion/store.c": 1, "workflow/role_store.c": 1,
+    "research/store.c": 1, "workflow/role_store.c": 1,
     "reentry/store.c": 1, "runtime/profile_link.c": 1, "runtime/profile_store.c": 1,
     "daemon/admission_work.c": 1, "workpack/binding.c": 1,
+    "intent/product_gate.c": 1, "intent/qa_acceptance.c": 1,
 }
 for name, count in events.items():
     source = (root / name).read_text()
     assert len(re.findall(r"\bdw_event_write(?:_guarded)?\s*\(", source)) == count, name
     assert len(re.findall(r"\bdw_record_prepare\s*\(", source)) == count, name
+# QC5 has one prepared record and mutually exclusive v3 guarded / legacy
+# publication calls. Neither path may add a second preparation or publication.
+completion = (root / "completion/store.c").read_text()
+assert len(re.findall(r"\bdw_record_prepare\s*\(", completion)) == 1
+assert len(re.findall(r"\bdw_event_write_guarded\s*\(", completion)) == 1
+assert len(re.findall(r"\bdw_event_write\s*\(", completion)) == 1
+assert re.search(r'\?\s*dw_event_write_guarded\(s,\s*&payload,\s*&frame,\s*intent_completion_recheck,\s*&guard\)\s*:\s*dw_event_write\(s,\s*&payload,\s*&frame\)', completion)
 for name in ("agent_session/storage.c", "workspace/store.c", "candidate/store.c"):
     assert "dw_record_prepare(" in (root / name).read_text(), name
 for name in ("document/storage.c", "agent_session/storage.c", "agent_session/history.c"):

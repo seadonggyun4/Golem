@@ -14,6 +14,7 @@ EXPECTED = {
     'reentry/store.c': {'re_markdown': 3, 'golem_reentry_report': 1},
     'completion/evaluator.c': {'co_markdown': 1, 'rc_markdown': 1, 'co_markdown_v1': 1},
     'completion/predicate_roles.c': {'rc_markdown': 1},
+    'completion/predicate_intent.c': {'co_markdown': 1},  # QC5 derives display after native QA/currentness assessment.
     'completion/renderer_v1.c': {'co_markdown_v1': 1},
     'completion/store.c': {'co_markdown': 2},
     'completion/report.c': {'golem_completion_report': 1},

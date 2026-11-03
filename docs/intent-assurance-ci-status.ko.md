@@ -83,3 +83,15 @@ main `e8f6c936d6acbaf4587895714f05cf7cec8de0bc`의 GitHub CI run
 
 설치된 Codex·Claude 프로그램, launcher, owner 정책과 producer pin은 갱신하지 않았다.
 실제 client/Work 검증 HOLD는 계속 유지한다.
+
+후속 fixture 확인: QC native 32/32, capability 375/375, 새 실행 기록/FD 경계
+14/14, schema/golden 및 collector 6개가 통과했다. 전체 Python 첫 실행의
+4개 실패는 서식 변경 후 변조할 원문을 찾지 못한 fixture 결함이었다.
+공백 차이를 허용하되 실제 토큰 변경과 기존 guard 거부 assertion은 유지했다.
+
+원격 `bffd48c` 검증에서 추가로 확인한 Linux POSIX 선언 순서를 수정했다.
+`document/registry.c`와 `candidate/controller.c`의 feature macro를 모든 include
+앞으로 옮겼으며 POSIX guard를 제거하지 않았다. macOS 진단에서 검출한
+QC5 renderer 1개와 guarded/legacy 대체 publication을 정확한 목록에 반영했다.
+새 QC3/QC4 writer 두 개도 prepare/publication 개수를 각각 검사한다.
+전체 최신 원격 CI의 최종 판정은 아직 진행 중이다.

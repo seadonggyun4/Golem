@@ -559,7 +559,7 @@
     },
     {
       "path": "src/candidate/controller.c",
-      "sha256": "7104faff9f600f0a01fcb7b80954db57ada0bacd1dfa97be1404a3266ec2da1d"
+      "sha256": "489ab229caccbd3f23a38ea5d45dd971640392f60afd0dba61804cc653434a27"
     },
     {
       "path": "src/candidate/current.c",
@@ -931,7 +931,7 @@
     },
     {
       "path": "src/document/registry.c",
-      "sha256": "c5f2d3bf91736b05ed49ba30e83a51ad50311a90df54d92a50f651d15af148e7"
+      "sha256": "03db1ea46af59b6b2f85e8466b127f459dd258d5b65d76b1e19c7500c09af026"
     },
     {
       "path": "src/document/schema.c",
@@ -2051,7 +2051,7 @@
     },
     {
       "path": "tools/test_capability_publication.py",
-      "sha256": "5706d3e892e13b612b5128588e67f51313de274e60c26f5fd113993ebc782935"
+      "sha256": "18569202ca884e49bc478a372ea33d16ac63b11acd6efe9649287821e5db41bc"
     },
     {
       "path": "tools/integration_reads.py",
