@@ -9,8 +9,8 @@ from capability_profile import scan_sources
 from capability_source import python_literal_names
 
 PINS = {
-    'tools/integration_service.py':'f82d9963a2152e14c10eeb2805c66eaa82beea9b1c50805b6333a51500102a44',
-    'tools/integration_transfer.py':'79995b31cea23fd8208010417299cc1f40d1de4192040253b5793f209f5e1b05',
+    'tools/integration_service.py':'a2ec4a339ab4169aaf0cc01c75aad1cd14eb0a183dd85f7380de24e00a8a82f3',
+    'tools/integration_transfer.py':'15451b9d4172a0daeb1270e0367475dee8f79ec26bad799d1787e8cda9115999',
     'tools/integration_contract.py':'e2c5e3ec5142f888fd4fcf6f2bd1193fd77ff52f4f4234e54df7ec997aac6fdb',
 }
 

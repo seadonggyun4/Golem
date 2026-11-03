@@ -5,11 +5,11 @@
         "action_confirm",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -18,6 +18,10 @@
           ],
           [
             253,
+            "remainder"
+          ],
+          [
+            258,
             "literal"
           ]
         ]
@@ -26,11 +30,11 @@
         "action_prepare",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -39,6 +43,10 @@
           ],
           [
             253,
+            "remainder"
+          ],
+          [
+            258,
             "literal"
           ]
         ]
@@ -47,11 +55,11 @@
         "approval_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -63,27 +71,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -92,11 +104,11 @@
         "approved_action_prepare",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -105,6 +117,10 @@
           ],
           [
             253,
+            "remainder"
+          ],
+          [
+            258,
             "literal"
           ]
         ]
@@ -113,11 +129,11 @@
         "artifact_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -129,23 +145,27 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
+            "remainder"
+          ],
+          [
+            268,
             "literal"
           ]
         ]
@@ -154,11 +174,11 @@
         "binding_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -170,27 +190,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -199,11 +223,11 @@
         "bundle_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -215,23 +239,27 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
+            "remainder"
+          ],
+          [
+            268,
             "literal"
           ]
         ]
@@ -240,11 +268,11 @@
         "candidate_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -256,11 +284,15 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
+            "remainder"
+          ],
+          [
+            262,
             "literal"
           ]
         ]
@@ -269,19 +301,23 @@
         "completion_check",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
             248,
+            "remainder"
+          ],
+          [
+            253,
             "literal"
           ],
           [
-            249,
+            254,
             "literal"
           ]
         ]
@@ -290,11 +326,11 @@
         "configuration_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -306,23 +342,27 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
+            "remainder"
+          ],
+          [
+            268,
             "literal"
           ]
         ]
@@ -331,11 +371,15 @@
         "context_get",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
+            "remainder"
+          ],
+          [
+            248,
             "literal"
           ]
         ]
@@ -344,11 +388,11 @@
         "context_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -360,27 +404,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -389,11 +437,11 @@
         "contract_prepare",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -402,6 +450,10 @@
           ],
           [
             253,
+            "remainder"
+          ],
+          [
+            258,
             "literal"
           ]
         ]
@@ -410,11 +462,11 @@
         "cost_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -426,15 +478,19 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
+            "remainder"
+          ],
+          [
+            264,
             "literal"
           ]
         ]
@@ -443,11 +499,11 @@
         "diagnostic_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -459,27 +515,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -488,11 +548,11 @@
         "discovery_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -504,27 +564,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -533,11 +597,11 @@
         "document_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -549,27 +613,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -578,11 +646,11 @@
         "events_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -594,23 +662,27 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
+            "remainder"
+          ],
+          [
+            268,
             "literal"
           ]
         ]
@@ -619,19 +691,23 @@
         "evidence_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
             248,
+            "remainder"
+          ],
+          [
+            253,
             "literal"
           ],
           [
-            249,
+            254,
             "remainder"
           ]
         ]
@@ -640,11 +716,11 @@
         "execution_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -656,15 +732,19 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
+            "remainder"
+          ],
+          [
+            264,
             "literal"
           ]
         ]
@@ -673,11 +753,15 @@
         "handoff_prepare",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
+            "remainder"
+          ],
+          [
+            248,
             "literal"
           ]
         ]
@@ -686,11 +770,11 @@
         "history_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -702,31 +786,35 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
-            "remainder"
-          ],
-          [
-            265,
+            266,
             "remainder"
           ],
           [
             268,
+            "remainder"
+          ],
+          [
+            270,
+            "remainder"
+          ],
+          [
+            273,
             "remainder"
           ]
         ]
@@ -735,11 +823,11 @@
         "inputs_prepare",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -748,6 +836,23 @@
           ],
           [
             253,
+            "remainder"
+          ],
+          [
+            258,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "intent_read",
+        [
+          [
+            235,
+            "remainder"
+          ],
+          [
+            245,
             "literal"
           ]
         ]
@@ -756,11 +861,11 @@
         "inventory_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -772,11 +877,15 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
+            "remainder"
+          ],
+          [
+            262,
             "literal"
           ]
         ]
@@ -785,11 +894,11 @@
         "journal_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -801,27 +910,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -830,11 +943,11 @@
         "merge_prepare",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -846,7 +959,11 @@
             "remainder"
           ],
           [
-            255,
+            258,
+            "remainder"
+          ],
+          [
+            260,
             "literal"
           ]
         ]
@@ -855,11 +972,11 @@
         "native_validate",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -871,27 +988,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -900,11 +1021,11 @@
         "parallel_prepare",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -916,7 +1037,11 @@
             "remainder"
           ],
           [
-            255,
+            258,
+            "remainder"
+          ],
+          [
+            260,
             "literal"
           ]
         ]
@@ -925,11 +1050,11 @@
         "plan_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -938,6 +1063,10 @@
           ],
           [
             253,
+            "remainder"
+          ],
+          [
+            258,
             "literal"
           ]
         ]
@@ -946,11 +1075,11 @@
         "profile_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -962,27 +1091,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -991,7 +1124,7 @@
         "projects_list",
         [
           [
-            233,
+            235,
             "literal"
           ]
         ]
@@ -1000,11 +1133,11 @@
         "proof_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -1016,15 +1149,19 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
+            "remainder"
+          ],
+          [
+            264,
             "literal"
           ]
         ]
@@ -1033,11 +1170,11 @@
         "reentry_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -1049,27 +1186,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -1078,11 +1219,11 @@
         "report_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -1094,27 +1235,31 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -1123,11 +1268,11 @@
         "research_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -1139,15 +1284,19 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
+            "remainder"
+          ],
+          [
+            264,
             "literal"
           ]
         ]
@@ -1156,52 +1305,11 @@
         "revision_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
-            "remainder"
-          ],
-          [
-            248,
-            "remainder"
-          ],
-          [
-            253,
-            "remainder"
-          ],
-          [
-            255,
-            "remainder"
-          ],
-          [
-            257,
-            "remainder"
-          ],
-          [
-            259,
-            "remainder"
-          ],
-          [
-            261,
-            "remainder"
-          ],
-          [
-            263,
-            "literal"
-          ]
-        ]
-      ],
-      [
-        "role_read",
-        [
-          [
-            233,
-            "remainder"
-          ],
-          [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -1213,203 +1321,23 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
-            "remainder"
-          ],
-          [
-            265,
-            "literal"
-          ]
-        ]
-      ],
-      [
-        "session_read",
-        [
-          [
-            233,
-            "remainder"
-          ],
-          [
-            243,
-            "remainder"
-          ],
-          [
-            248,
-            "remainder"
-          ],
-          [
-            253,
-            "remainder"
-          ],
-          [
-            255,
-            "remainder"
-          ],
-          [
-            257,
-            "remainder"
-          ],
-          [
-            259,
-            "remainder"
-          ],
-          [
-            261,
-            "remainder"
-          ],
-          [
-            263,
-            "remainder"
-          ],
-          [
-            265,
-            "literal"
-          ]
-        ]
-      ],
-      [
-        "template_read",
-        [
-          [
-            233,
-            "remainder"
-          ],
-          [
-            243,
-            "remainder"
-          ],
-          [
-            248,
-            "remainder"
-          ],
-          [
-            253,
-            "remainder"
-          ],
-          [
-            255,
-            "remainder"
-          ],
-          [
-            257,
-            "remainder"
-          ],
-          [
-            259,
-            "remainder"
-          ],
-          [
-            261,
-            "remainder"
-          ],
-          [
-            263,
-            "remainder"
-          ],
-          [
-            265,
-            "literal"
-          ]
-        ]
-      ],
-      [
-        "usage_read",
-        [
-          [
-            233,
-            "remainder"
-          ],
-          [
-            243,
-            "remainder"
-          ],
-          [
-            248,
-            "remainder"
-          ],
-          [
-            253,
-            "remainder"
-          ],
-          [
-            255,
-            "remainder"
-          ],
-          [
-            257,
-            "remainder"
-          ],
-          [
-            259,
-            "remainder"
-          ],
-          [
-            261,
-            "remainder"
-          ],
-          [
-            263,
-            "literal"
-          ]
-        ]
-      ],
-      [
-        "work_inspect",
-        [
-          [
-            233,
-            "remainder"
-          ],
-          [
-            243,
-            "remainder"
-          ],
-          [
-            248,
-            "remainder"
-          ],
-          [
-            253,
-            "remainder"
-          ],
-          [
-            255,
-            "remainder"
-          ],
-          [
-            257,
-            "remainder"
-          ],
-          [
-            259,
-            "remainder"
-          ],
-          [
-            261,
-            "remainder"
-          ],
-          [
-            263,
-            "remainder"
-          ],
-          [
-            265,
+            266,
             "remainder"
           ],
           [
@@ -1419,14 +1347,14 @@
         ]
       ],
       [
-        "workflow_read",
+        "role_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -1438,27 +1366,276 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
             "remainder"
           ],
           [
-            265,
+            268,
+            "remainder"
+          ],
+          [
+            270,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "session_read",
+        [
+          [
+            235,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            248,
+            "remainder"
+          ],
+          [
+            253,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "remainder"
+          ],
+          [
+            262,
+            "remainder"
+          ],
+          [
+            264,
+            "remainder"
+          ],
+          [
+            266,
+            "remainder"
+          ],
+          [
+            268,
+            "remainder"
+          ],
+          [
+            270,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "template_read",
+        [
+          [
+            235,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            248,
+            "remainder"
+          ],
+          [
+            253,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "remainder"
+          ],
+          [
+            262,
+            "remainder"
+          ],
+          [
+            264,
+            "remainder"
+          ],
+          [
+            266,
+            "remainder"
+          ],
+          [
+            268,
+            "remainder"
+          ],
+          [
+            270,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "usage_read",
+        [
+          [
+            235,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            248,
+            "remainder"
+          ],
+          [
+            253,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "remainder"
+          ],
+          [
+            262,
+            "remainder"
+          ],
+          [
+            264,
+            "remainder"
+          ],
+          [
+            266,
+            "remainder"
+          ],
+          [
+            268,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "work_inspect",
+        [
+          [
+            235,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            248,
+            "remainder"
+          ],
+          [
+            253,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "remainder"
+          ],
+          [
+            262,
+            "remainder"
+          ],
+          [
+            264,
+            "remainder"
+          ],
+          [
+            266,
+            "remainder"
+          ],
+          [
+            268,
+            "remainder"
+          ],
+          [
+            270,
+            "remainder"
+          ],
+          [
+            273,
+            "literal"
+          ]
+        ]
+      ],
+      [
+        "workflow_read",
+        [
+          [
+            235,
+            "remainder"
+          ],
+          [
+            245,
+            "remainder"
+          ],
+          [
+            248,
+            "remainder"
+          ],
+          [
+            253,
+            "remainder"
+          ],
+          [
+            258,
+            "remainder"
+          ],
+          [
+            260,
+            "remainder"
+          ],
+          [
+            262,
+            "remainder"
+          ],
+          [
+            264,
+            "remainder"
+          ],
+          [
+            266,
+            "remainder"
+          ],
+          [
+            268,
+            "remainder"
+          ],
+          [
+            270,
             "literal"
           ]
         ]
@@ -1467,11 +1644,11 @@
         "workpack_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -1483,19 +1660,23 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
+            "remainder"
+          ],
+          [
+            266,
             "literal"
           ]
         ]
@@ -1504,11 +1685,11 @@
         "workpack_resource_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -1520,23 +1701,27 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
             "remainder"
           ],
           [
-            259,
+            262,
             "remainder"
           ],
           [
-            261,
+            264,
             "remainder"
           ],
           [
-            263,
+            266,
+            "remainder"
+          ],
+          [
+            268,
             "literal"
           ]
         ]
@@ -1545,11 +1730,11 @@
         "workspace_read",
         [
           [
-            233,
+            235,
             "remainder"
           ],
           [
-            243,
+            245,
             "remainder"
           ],
           [
@@ -1561,11 +1746,15 @@
             "remainder"
           ],
           [
-            255,
+            258,
             "remainder"
           ],
           [
-            257,
+            260,
+            "remainder"
+          ],
+          [
+            262,
             "literal"
           ]
         ]
@@ -1601,6 +1790,7 @@
       "handoff_prepare",
       "history_read",
       "inputs_prepare",
+      "intent_read",
       "inventory_read",
       "journal_read",
       "merge_prepare",
@@ -1640,6 +1830,8 @@
       "execution_request",
       "execution_verify",
       "helper_execute",
+      "intent_completion_finalize",
+      "intent_qa_accept",
       "inventory_capture",
       "lineage_store",
       "profile_register",
@@ -1680,7 +1872,7 @@
         "CONFIRMED",
         [
           [
-            277,
+            292,
             [
               [
                 "FunctionDef",
@@ -1712,7 +1904,7 @@
         "CONFIRMED",
         [
           [
-            286,
+            301,
             [
               [
                 "FunctionDef",
@@ -1744,7 +1936,7 @@
         "CONFIRMED",
         [
           [
-            290,
+            305,
             [
               [
                 "FunctionDef",
@@ -1776,7 +1968,7 @@
         "CONFIRMED",
         [
           [
-            293,
+            308,
             [
               [
                 "FunctionDef",
@@ -1809,7 +2001,7 @@
             ]
           ],
           [
-            304,
+            319,
             [
               [
                 "FunctionDef",
@@ -1848,7 +2040,7 @@
             ]
           ],
           [
-            329,
+            346,
             [
               [
                 "FunctionDef",
@@ -1888,7 +2080,7 @@
         "CONFIRMED",
         [
           [
-            294,
+            309,
             [
               [
                 "FunctionDef",
@@ -1946,7 +2138,7 @@
         "CONFIRMED",
         [
           [
-            309,
+            326,
             [
               [
                 "FunctionDef",
@@ -1974,6 +2166,12 @@
                 "If",
                 "orelse",
                 0,
+                "Compare(left=Name(id='name', ctx=Load()), ops=[In()], comparators=[Attribute(value=Name(id='intent_api', ctx=Load()), attr='ACTIONS', ctx=Load())])"
+              ],
+              [
+                "If",
+                "orelse",
+                0,
                 "Compare(left=Name(id='name', ctx=Load()), ops=[Eq()], comparators=[Constant(value='helper_execute')])"
               ],
               [
@@ -1992,7 +2190,7 @@
         "CONFIRMED",
         [
           [
-            118,
+            126,
             [
               [
                 "FunctionDef",
@@ -2016,7 +2214,7 @@
         "CONFIRMED",
         [
           [
-            121,
+            129,
             [
               [
                 "FunctionDef",
@@ -2040,7 +2238,7 @@
         "CONFIRMED",
         [
           [
-            183,
+            185,
             [
               [
                 "FunctionDef",
@@ -2064,7 +2262,7 @@
         "CONFIRMED",
         [
           [
-            196,
+            198,
             [
               [
                 "FunctionDef",
@@ -2479,6 +2677,9 @@
       "golem_helper_execute",
       "golem_history_read",
       "golem_inputs_prepare",
+      "golem_intent_completion_finalize",
+      "golem_intent_qa_accept",
+      "golem_intent_read",
       "golem_inventory_capture",
       "golem_inventory_read",
       "golem_journal_read",
@@ -4338,7 +4539,7 @@
       ]
     ],
     "checked_nodes": 293,
-    "checked_calls": 4722,
+    "checked_calls": 4726,
     "public_endpoints": [
       "golem_adapter_descriptor_current",
       "golem_adapter_descriptor_decode",
@@ -5044,14 +5245,32 @@
       "src/cli/workpack_receipt.c",
       "src/workpack/reference.c",
       "tools/integration_workpack_reads.py",
-      "tools/integration_workpack_actions.py"
+      "tools/integration_workpack_actions.py",
+      "src/completion/predicate_intent.c",
+      "src/intent/product_access.c",
+      "src/intent/product_access.h",
+      "src/intent/product_gate.c",
+      "src/intent/product_gate.h",
+      "src/intent/qa_acceptance.c",
+      "src/intent/qa_paths.c",
+      "src/intent/qa_paths.h",
+      "src/intent/qa_resolve.c",
+      "src/intent/qa_resolve.h",
+      "src/intent/qa_result.c",
+      "src/intent/qa_result.h",
+      "src/intent/review.c",
+      "src/intent/review.h",
+      "src/intent/review_host.c",
+      "src/intent/review_host.h",
+      "tools/integration_intent.py",
+      "tools/intent_product_host.inc"
     ],
     "blockers": [],
     "execution_verified": false
   },
   "reviewed_effects": {
     "blockers": [],
-    "reviewed_capabilities": 1152,
+    "reviewed_capabilities": 1173,
     "execution_verified": false
   },
   "boundary_contracts": {

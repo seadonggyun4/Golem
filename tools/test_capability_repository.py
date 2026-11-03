@@ -11,6 +11,11 @@ from capability_ledger import SCHEMA
 
 
 class RepositoryScope(unittest.TestCase):
+    def test_qc_host_include_is_executable_source_not_fixture_exclusion(self):
+        self.assertTrue(source_candidate('tools/intent_product_host.inc'))
+        self.assertTrue(source_candidate('tools/integration_intent.py'))
+        self.assertTrue(source_candidate('src/intent/product_gate.c'))
+
     def ledger(self):
         return dict(schema=SCHEMA,sources=[],observations=[],capabilities=[])
 

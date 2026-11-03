@@ -98,6 +98,26 @@ def inspect_mutation_graph(sources,pins=PINS):
         from capability_source import python_literal_names
         task_names=set(python_literal_names(files['tools/integration_task_actions.py'].data.decode(),'NAMES',mapping=False)) if 'tools/integration_task_actions.py' in files else set()
         branches=[n for n in native.body if isinstance(n,ast.If)]
+        intent_names=set(python_literal_names(files['tools/integration_intent.py'].data.decode(),'ACTIONS',mapping=False))
+        if intent_names!={'intent_qa_accept','intent_completion_finalize'} or not intent_names<=names:
+            raise ValueError('INTENT_CLOSED_DOMAIN')
+        if _shape(branches[0])!=_shape(ast.parse('if name in intent.ACTIONS:\n    return intent.shape(entry,value)').body[0]):
+            raise ValueError('INTENT_SHAPE_HANDOFF')
+        names-=intent_names;branches=branches[1:]
+        intent_tree=ast.parse(files['tools/integration_intent.py'].data)
+        intent_guards=(
+            (intent_tree,None,'shape',"c.require(entry['tool'] in ACTIONS,'INTENT_ACTION_TOOL')"),
+            (intent_tree,None,'shape',"c.require(not envelope['body'] and not envelope['context_json'] and not envelope['count_json'] and envelope['approval'] is None,'INTENT_ENVELOPE_SCOPE')"),
+            (intent_tree,'Hosts','__init__',"c.require(approve_intent is True,'OWNER_INTENT_HOST_REQUIRED')"),
+            (intent_tree,'Hosts','select',"c.require(row['operation']==expected and row['action_id']==entry['action_id'] and row['action_sha256']==entry['action']['sha256'],'INTENT_EXACT_ACTION')"),
+            (intent_tree,'Hosts','read',"c.require(row['operation'] in ('assess','current','resume') and row['action_id']=='','INTENT_READ_ONLY')"),
+            (tree,'Service','_admit',"c.require(self.intent_hosts is not None,'OWNER_INTENT_HOST_REQUIRED')"),
+            (tree,'Service','_mutate','self.intent_hosts.capture(entry,value,output)'),
+        )
+        for selected,cls,method,expression in intent_guards:
+            node=_function(selected,cls,method)
+            if sum(_shape(n)==_expression(expression) for n in ast.walk(node) if isinstance(n,ast.Call))!=1:
+                raise ValueError('INTENT_MANDATORY_GUARD')
         quality_names=set(python_literal_names(files['tools/integration_quality_actions.py'].data.decode(),'NAMES',mapping=False)) if 'tools/integration_quality_actions.py' in files else set()
         parallel_names=set(python_literal_names(files['tools/integration_parallel_actions.py'].data.decode(),'NAMES',mapping=False)) if 'tools/integration_parallel_actions.py' in files else set()
         workpack_names=set(python_literal_names(files['tools/integration_workpack_actions.py'].data.decode(),'NAMES',mapping=False))
@@ -130,6 +150,9 @@ def inspect_mutation_graph(sources,pins=PINS):
         if len(mapping)!=5 or any(not v for _,v in mapping) or len({v for _,v in mapping})!=len(mapping): raise ValueError('PREFIX_DOMAIN')
         if names-{n for n,_ in mapping}!={'document_submit','execution_request'}: raise ValueError('REMAINDER_DOMAIN')
         argv=_function(tree,'Service','_argv'); branches=[n for n in argv.body if isinstance(n,ast.If)]
+        if not branches or _shape(branches[0])!=_shape(ast.parse('if tool in intent_api.ACTIONS:\n    return []').body[0]):
+            raise ValueError('INTENT_NO_GENERIC_ARGV')
+        branches=branches[1:]
         expected=ast.parse('if tool in workpack.NAMES:\n    return [*argv, *workpack.command(entry, project, work, value, output)]').body[0]
         if not branches or _shape(branches[0])!=_shape(expected):raise ValueError('WORKPACK_ARGV_HANDOFF')
         branches=branches[1:]

@@ -11,8 +11,8 @@ from capability_fallback import _shape, inspect_fallback
 from capability_delegation import inspect_delegation
 from capability_mutation_graph import _function
 
-PINS={'tools/integration_mutation_mcp.py':'6334721d13d2faf8debe19e9666d3bd0ec20ac5abe031ac7486da36a33824a69',
-      'tools/integration_mcp.py':'7e4ae98d534e96f22079c8d7b021c0f654a0460987d2f46b13af2c65ebd141db'}
+PINS={'tools/integration_mutation_mcp.py':'00d031f2babb4c19476642ee7c0e5e237650350bab3e4109857e90b2c31948b7',
+      'tools/integration_mcp.py':'bcd2136d57f2af822be2362977393595dac652f0825dbc23bc9de3c9462b6af8'}
 
 
 @dataclass(frozen=True)
@@ -39,7 +39,7 @@ def inspect_transport(sources,pins=PINS):
         return TransportObservation((),(('DECLARED_DOMAIN_UNVERIFIED',(read.blockers,mutation.blockers)),))
     try:
         tree=ast.parse(files['tools/integration_mutation_mcp.py'].data.decode())
-        imports=ast.parse('import integration_contract as c\nimport integration_service as reads\nimport integration_mutation_contract as contract\nimport integration_mutations as mutations').body
+        imports=ast.parse('import integration_contract as c\nimport integration_service as reads\nimport integration_mutation_contract as contract\nimport integration_mutations as mutations\nimport integration_intent as intent').body
         if any(sum(_shape(e)==_shape(n) for n in tree.body)!=1 for e in imports): raise ValueError('IMPORT_BINDING')
         server=_function(tree,None,'server')
         nested={n.name:n for n in server.body if isinstance(n,ast.AsyncFunctionDef)}
@@ -94,7 +94,9 @@ def inspect_transport(sources,pins=PINS):
         run=runs[0]
         require_expression(run,'server(service)')
         main=_function(tree,None,'main')
-        require_expression(main,'asyncio.run(run(mutations.Service(policy, resources, helpers, parallel_hosts)))')
+        require_expression(main,'asyncio.run(run(mutations.Service(policy, resources, helpers, parallel_hosts, intent_hosts)))')
+        require_expression(main,"c.require(bool(args.intent_host_policy)==bool(args.reviewed_intent_host_policy_sha256)==bool(args.approve_intent_host),'INTENT_OWNER_ARGUMENTS')")
+        require_expression(main,'intent.Hosts(args.intent_host_policy,args.reviewed_intent_host_policy_sha256,policy,approve_intent=True) if args.intent_host_policy else None')
         require_expression(main,'c.require(bool(args.read_resources) == bool(args.reviewed_read_resources_sha256) == bool(args.approve_read_resources), "READ_RESOURCE_OWNER_ARGUMENTS")')
         require_expression(main,'readonly.Resources(args.read_resources, args.reviewed_read_resources_sha256, policy.transfer, approve_resources=True) if args.read_resources else None')
         require_expression(main,'c.require(bool(args.helper_policy) == bool(args.reviewed_helper_policy_sha256) == bool(args.approve_helper_effects), "HELPER_OWNER_ARGUMENTS")')

@@ -20,7 +20,8 @@ from capability_public_registry import PUBLIC_HEADERS
 # paths still need explicit boundary review below; filename heuristics never
 # exempt a surface from the final repository gate.
 def source_candidate(path):
-    return (path.startswith(('src/', 'include/')) or
+    # The QC6 native host include contains executable dispatch, not fixture data.
+    return (path == 'tools/intent_product_host.inc' or path.startswith(('src/', 'include/')) or
             path.startswith('tools/') and not path.startswith('tools/test_') and path.endswith(('.py','.c','.h')) or
             path.startswith('bindings/') and not any(part in ('tests','test_bridge.c') for part in path.split('/'))
             and path.endswith(('.c','.h','.py','.mjs','.d.ts')) or

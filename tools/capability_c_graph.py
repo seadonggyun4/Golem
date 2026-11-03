@@ -6,7 +6,7 @@ execution analysis. Models are reviewed inputs and never refreshed by a check.
 """
 from dataclasses import dataclass
 import hashlib,json
-from capability_c_syntax import plain_definitions,call_sites,declaration_tokens,public_declaration
+from capability_c_syntax import plain_definitions,plain_declarations,call_sites,declaration_tokens,public_declaration
 from capability_profile import scan_sources,_recorded_region
 from capability_source import _tokens,_arguments
 from capability_callbacks import declarations
@@ -40,6 +40,35 @@ def _try_definition(raw,variable):
     if found!=[expected]:raise ValueError('TRY_MODEL_CHANGED')
 
 CALL_FIELDS=("expression","arguments_sha256","position","indirect","kind","target","binding","parameter_binding")
+
+def _intent_record_contract(files, site, ledger):
+    """One exact QC3 private contract endpoint, not a generic private-call escape.
+
+    Like public API endpoints this records a contract boundary, not callee
+    execution or policy satisfaction. All QC implementation files remain in
+    the separate whole-source inventory and native regression suite.
+    """
+    if site.expression!=('gi_product_record',) or site.indirect or len(site.arguments)!=2:
+        raise ValueError('INTENT_RECORD_CALL_CHANGED')
+    path='src/intent/product_gate.c';header='src/intent/product_gate.h'
+    for selected in (path,header):
+        f=files.get(selected)
+        if f is None or not any(s['path']==selected and s['sha256']==f.sha256 for s in ledger['sources']):
+            raise ValueError('INTENT_RECORD_SOURCE_UNREVIEWED')
+    prototype=('gi_product_record',('golem_status',),('golem_document_store','*',',','struct','json_object','*'))
+    if [p for p in plain_declarations(files[header].data.decode()) if p[0]=='gi_product_record']!=[prototype]:
+        raise ValueError('INTENT_RECORD_DECLARATION_CHANGED')
+    expected='''golem_status gi_product_record(golem_document_store *s,struct json_object *event) {
+        if(!s)return GOLEM_ERR_INVALID_ARGUMENT;
+        if(!v3(s))return GOLEM_OK;
+        if(eq(event,"type","document"))return GOLEM_OK;
+        if(eq(event,"type","intent-qa-observation")&&s->intent_accepting)return gi_product_check(s,GI_PRODUCT_QA_ACCEPTANCE);
+        if(eq(event,"type","intent-enrollment")&&s->intent_enrolling)return GOLEM_OK;
+        return gi_product_access_record(s,event);
+    }'''
+    found=[p for p in plain_definitions(files[path].data.decode()) if p[0]=='gi_product_record']
+    if found!=list(plain_definitions(expected)):
+        raise ValueError('INTENT_RECORD_GUARDS_CHANGED')
 
 def call_rules(node):
     return tuple(c if isinstance(c,dict) else dict(zip(CALL_FIELDS,c)) for c in node["calls"])
@@ -106,6 +135,10 @@ def inspect_graph(sources,ledger,model,domains=None):
                 elif kind=='external':
                     if site.indirect or target not in model['externals']:raise ValueError('UNREGISTERED_EXTERNAL')
                     declaration_tokens(source.data.decode(),target)
+                elif kind=='intent_record_contract':
+                    if key!=('src/document/record.c','publish') or target!='gi_product_record':
+                        raise ValueError('INTENT_RECORD_ENDPOINT_SCOPE')
+                    _intent_record_contract(files,site,ledger)
                 elif kind=='macro':
                     if site.expression!=('TRY',) or not any(p==path for p,v in model['try_macros']) or len(site.arguments)!=1:
                         raise ValueError('MACRO_UNSUPPORTED')

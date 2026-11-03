@@ -34,12 +34,31 @@ schema runner의 종료 성공을 모든 native/host/E2E 검증 완료로 승격
 나머지 정상 흐름·observation 경계는 새 격리 Work에서 순차 재확인한다.
 원래 실패/시간초과 자료는 삭제하지 않는다.
 
-기존 capability 원장은 새 QC MCP 소스와 source/function 지문이 불일치한다.
-이는 release 차단이며 검사 제거·무조건 repin·기존 설치 policy pin 갱신으로 해소하지 않는다.
-따라서 현재 소스를 "전체 CI 통과" 또는 "설치 준비 완료"로 표시하지 않는다.
+초기 capability 원장은 새 QC MCP 소스와 source/function 지문 불일치로 차단됐다.
+후속 소스 대조에서 QC 실행 소스 18개와 문서·fixture 368개를 구분하고, 새 MCP 도구
+3개의 제공 경로·권한·효과를 등록했다. 기존 API→schema 인자와 경로를 보존했고,
+추가된 exact Intent host 동의·action·읽기 제한 및 QC3 publication 계약 검사를 보강했다.
+선택 capability와 repository 대조는 모두 차단 0개다. 이는 정적 목록 정합성 결과이며
+실제 설치·client E2E·기존 Work의 QA 수락을 인증하지 않는다.
 
 후속 확인: 최초 실패 5개를 수정 후 새 fixture로 순차 실행한 결과 **5/5 통과**했다.
 기존 실패 기록은 그대로 보존했다. 이는 최초 병렬 실행을 소급 PASS로 바꾼 것이 아니다.
 main `e8f6c936d6acbaf4587895714f05cf7cec8de0bc`의 GitHub CI run
 `41603004340`이 시작된 것을 확인했다. 전체 원격 CI 통과 및 capability 원장 정합성은
 아직 확인되지 않았으므로 설치 차단 상태를 유지한다.
+
+## 후속 원장 검토 범위
+
+- `intent_product_host.inc`를 실행 소스로 명시해 fixture 제외 경로로 빠지지 않게 한다.
+- v3 publication의 `gi_product_record`는 고정 선언·정의·인자와 필수 guard를 대조하는
+  한정 계약 경계다. 임의 private 함수·callback을 허용하지 않으며 callee 실행 성공은 주장하지 않는다.
+- 깨끗한 validation source export에 고정 host include·MCP 모듈·QC2 native fixture를
+  명시적으로 포함한다. 임의 include/fixture 제외 검사는 유지한다.
+- capability 회귀 375개가 통과했다.
+- 해시를 다시 맞춰도 owner 동의·exact action·read-only 제한 또는 native record guard를
+  제거하면 회귀 검사가 차단한다. 기존 M0~M6 부정 검사는 유지한다.
+- 기존 85개 도구에 Intent 조회 1개·exact action 2개가 추가돼 정적 선언은 88개다.
+  설치 정책·producer pin은 갱신하지 않는다.
+- 초기 원격 전체 실행 `41603099168`은 M0 단계에서 실패했다. 이후 커밋의 실제 결과는
+  [GitHub CI 기록](https://github.com/seadonggyun4/Golem/actions/workflows/c.yml)에서
+  해당 source SHA로 대조한다. 과거 실패를 소급 성공으로 변경하지 않는다.

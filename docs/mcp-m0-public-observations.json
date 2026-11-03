@@ -7,7 +7,7 @@
     },
     {
       "path": "docs/completion.md",
-      "sha256": "35126fefdd0226452d0e5c9a10be4a8cd89aabfd753c6ff22727687f0c6c02a7"
+      "sha256": "2f89a4260ba56c889f3885f6c3d1b27537f23711a41b370c504404990f2da6fa"
     },
     {
       "path": "docs/workflow.md",
@@ -71,7 +71,7 @@
     },
     {
       "path": "include/golem/completion.h",
-      "sha256": "0b054b094d8f5ada7b179c6824364337a512ded957ef04366479e5bb44a3c96b"
+      "sha256": "e8ca5d1cd93a12230765cf4c109a155baab34382154378906ac010f2f8134885"
     },
     {
       "path": "include/golem/context.h",
@@ -447,7 +447,7 @@
     },
     {
       "path": "tools/test_capability_m5.py",
-      "sha256": "8c1868b05357653eeade6ed1519e66a1ce495ca55e2d6a065eaece8b1493cdfa"
+      "sha256": "f39eea4f4d6f0c901bef840dcb8719413b01a238b714a155ed17d9a96fea9030"
     },
     {
       "path": "docs/mcp-m5-parallel-candidates.ko.md",

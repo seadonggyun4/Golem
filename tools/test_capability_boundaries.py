@@ -24,6 +24,22 @@ class Boundaries(unittest.TestCase):
         cls.ledger=json.loads((root/'docs/mcp-m0-observations.json').read_bytes())
         cls._files={s['path']:SourceFile(s['path'],s['sha256'],(root/s['path']).read_bytes()) for s in cls.ledger['sources']}
     def files(self):return tuple(self.__class__._files.values())
+    def test_qc_record_contract_rejects_guard_removal_after_source_repin(self):
+        from capability_c_graph import _intent_record_contract
+        from capability_c_syntax import call_sites
+        site=call_sites('gi_product_record(s, record);')[0]
+        files=dict(self.__class__._files)
+        _intent_record_contract(files,site,self.ledger)
+        path='src/intent/product_gate.c';original=files[path]
+        old=b'return gi_product_access_record(s,event);'
+        self.assertIn(old,original.data)
+        raw=original.data.replace(old,b'return GOLEM_OK;',1)
+        files[path]=replace(original,data=raw,sha256=hashlib.sha256(raw).hexdigest())
+        ledger=copy.deepcopy(self.ledger)
+        next(s for s in ledger['sources'] if s['path']==path)['sha256']=files[path].sha256
+        with self.assertRaisesRegex(ValueError,'INTENT_RECORD_GUARDS_CHANGED'):
+            _intent_record_contract(files,site,ledger)
+
     def one(self,name):
         m=copy.deepcopy(GRAPH);node=next(n for n in m['nodes'] if n['name']==name);m['nodes']=[node];m['roots']=[(node['path'],name)];m['try_macros']=();return m
     def test_public_callback_boundary_has_no_execution_or_identity_claim(self):

@@ -13,7 +13,7 @@ import integration_parallel_actions as parallel
 import integration_workpack_actions as workpack
 import integration_intent as intent
 
-NAMES = (*intent.ACTIONS, "workpack_bind", "workpack_receipt_manifest", "workpack_receipt_export", "session_claim", "session_begin", "session_resume", "session_reconcile",
+NAMES = ("intent_qa_accept", "intent_completion_finalize", "workpack_bind", "workpack_receipt_manifest", "workpack_receipt_export", "session_claim", "session_begin", "session_resume", "session_reconcile",
          "session_submit", "document_submit", "execution_request",
     "session_start", "session_heartbeat", "session_reject_output", "binding_attach",
     "role_enroll", "role_assess", "completion_finalize", "completion_report", "reentry_decide",

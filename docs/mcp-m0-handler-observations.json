@@ -25,6 +25,7 @@
       "handoff_prepare",
       "history_read",
       "inputs_prepare",
+      "intent_read",
       "inventory_read",
       "journal_read",
       "merge_prepare",
@@ -71,6 +72,7 @@
       "execution_read",
       "handoff_prepare",
       "inputs_prepare",
+      "intent_read",
       "inventory_read",
       "journal_read",
       "merge_prepare",
@@ -101,27 +103,23 @@
     "blockers": [
       [
         "COMPUTED_COMPARISON",
-        234
+        236
       ],
       [
         "ELSE_FALLBACK",
-        233
+        235
       ],
       [
         "ELSE_FALLBACK",
-        265
+        270
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        234
+        236
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        242
-      ],
-      [
-        "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        247
+        244
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
@@ -129,51 +127,47 @@
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        254
+        257
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        256
+        259
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        258
+        261
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        260
+        263
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        262
+        265
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        264
+        267
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        266
+        269
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        268
+        271
       ],
       [
         "SUBJECT_ASSIGNMENT_OR_ALIAS",
-        282
+        273
+      ],
+      [
+        "SUBJECT_ASSIGNMENT_OR_ALIAS",
+        287
       ],
       [
         "UNREGISTERED_HELPER",
-        242
-      ],
-      [
-        "UNREGISTERED_HELPER",
-        246
-      ],
-      [
-        "UNREGISTERED_HELPER",
-        247
+        244
       ],
       [
         "UNREGISTERED_HELPER",
@@ -185,35 +179,43 @@
       ],
       [
         "UNREGISTERED_HELPER",
-        254
-      ],
-      [
-        "UNREGISTERED_HELPER",
         256
       ],
       [
         "UNREGISTERED_HELPER",
-        258
+        257
       ],
       [
         "UNREGISTERED_HELPER",
-        260
+        259
       ],
       [
         "UNREGISTERED_HELPER",
-        262
+        261
       ],
       [
         "UNREGISTERED_HELPER",
-        264
+        263
       ],
       [
         "UNREGISTERED_HELPER",
-        266
+        265
       ],
       [
         "UNREGISTERED_HELPER",
-        282
+        267
+      ],
+      [
+        "UNREGISTERED_HELPER",
+        269
+      ],
+      [
+        "UNREGISTERED_HELPER",
+        271
+      ],
+      [
+        "UNREGISTERED_HELPER",
+        287
       ]
     ],
     "linked": false
@@ -236,6 +238,8 @@
       "execution_request",
       "execution_verify",
       "helper_execute",
+      "intent_completion_finalize",
+      "intent_qa_accept",
       "inventory_capture",
       "lineage_store",
       "profile_register",
@@ -279,6 +283,8 @@
       "execution_request",
       "execution_verify",
       "helper_execute",
+      "intent_completion_finalize",
+      "intent_qa_accept",
       "inventory_capture",
       "lineage_store",
       "profile_register",
@@ -309,27 +315,27 @@
     "blockers": [
       [
         "COMPUTED_COMPARISON",
-        67
+        75
       ],
       [
         "COMPUTED_COMPARISON",
-        69
+        77
       ],
       [
         "UNREGISTERED_HELPER",
-        68
+        76
       ],
       [
         "UNREGISTERED_HELPER",
-        69
+        77
       ],
       [
         "UNREGISTERED_HELPER",
-        72
+        80
       ],
       [
         "UNREGISTERED_HELPER",
-        75
+        83
       ]
     ],
     "linked": false

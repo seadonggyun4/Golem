@@ -3,7 +3,7 @@
   "sources": [
     {
       "path": "src/agent_session/coordinator.c",
-      "sha256": "1a3f640eb69e8ac3eb113f16b1e222b3c8b51d28a768cfc6c373b8c2ae065ede"
+      "sha256": "bf38d5d8895de6a44789d25bbd2feee57eba44695fca155a94eb44a6b961958c"
     },
     {
       "path": "src/common/record_internal.h",
@@ -23,19 +23,19 @@
     },
     {
       "path": "tools/integration_service.py",
-      "sha256": "f82d9963a2152e14c10eeb2805c66eaa82beea9b1c50805b6333a51500102a44"
+      "sha256": "a2ec4a339ab4169aaf0cc01c75aad1cd14eb0a183dd85f7380de24e00a8a82f3"
     },
     {
       "path": "tools/integration_mutation_contract.py",
-      "sha256": "586501b124e655e328861dccd821c752743ccface1fbe1396514fb066cde3335"
+      "sha256": "301d7a013ddd90aafbb0c36a17c7aea9f5e8f24ae96c26af2f28eef57d2abc98"
     },
     {
       "path": "tools/integration_mutations.py",
-      "sha256": "e9232924c824bf5eaef8be7683bdd480c74ba338d04b8a7fd26ac25f96987cb8"
+      "sha256": "b41150e05b293e0f35c48a213b7c1ba350740ae14b1c18b82728487e426ad536"
     },
     {
       "path": "tools/integration_mutation_mcp.py",
-      "sha256": "6334721d13d2faf8debe19e9666d3bd0ec20ac5abe031ac7486da36a33824a69"
+      "sha256": "00d031f2babb4c19476642ee7c0e5e237650350bab3e4109857e90b2c31948b7"
     },
     {
       "path": "tools/integration_backend.py",
@@ -47,7 +47,7 @@
     },
     {
       "path": "docs/completion.md",
-      "sha256": "35126fefdd0226452d0e5c9a10be4a8cd89aabfd753c6ff22727687f0c6c02a7"
+      "sha256": "2f89a4260ba56c889f3885f6c3d1b27537f23711a41b370c504404990f2da6fa"
     },
     {
       "path": "docs/integration-d2.md",
@@ -191,7 +191,7 @@
     },
     {
       "path": "tools/integration_transfer.py",
-      "sha256": "79995b31cea23fd8208010417299cc1f40d1de4192040253b5793f209f5e1b05"
+      "sha256": "15451b9d4172a0daeb1270e0367475dee8f79ec26bad799d1787e8cda9115999"
     },
     {
       "path": "docs/runtime-events.md",
@@ -215,7 +215,7 @@
     },
     {
       "path": "CMakeLists.txt",
-      "sha256": "5c1155e0323478e0b2cef2f4d71cd541deba59263ce5b2cef61f9bd848a4feae"
+      "sha256": "7844bf42466f665670277755b2be938943a35e2ca23ad5ccd57f18c691178dbc"
     },
     {
       "path": "CMakePresets.json",
@@ -287,7 +287,7 @@
     },
     {
       "path": "include/golem/completion.h",
-      "sha256": "0b054b094d8f5ada7b179c6824364337a512ded957ef04366479e5bb44a3c96b"
+      "sha256": "e8ca5d1cd93a12230765cf4c109a155baab34382154378906ac010f2f8134885"
     },
     {
       "path": "include/golem/context.h",
@@ -451,7 +451,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "23027ecd50fa2d49248b200327c272773bb8c8510d26e88048d0940809ffc74c"
+      "sha256": "b9145ea68d7e5f38d31a76dc74f6677a9e83a39732c5bb4b78d73fa0d873a133"
     },
     {
       "path": "src/adapter_protocol/adapter.c",
@@ -559,7 +559,7 @@
     },
     {
       "path": "src/candidate/controller.c",
-      "sha256": "cbe5a806c1d7327804f937817564d88b1e13070fd9af14ee16d1ac0334db543e"
+      "sha256": "5fbabfd24bfae633b267646c9d3bc997181df4acc50b608c88002d15fa5cbc99"
     },
     {
       "path": "src/candidate/current.c",
@@ -719,19 +719,19 @@
     },
     {
       "path": "src/completion/evaluator.c",
-      "sha256": "f30b989844a871f94e382656eb95b44c706e57788bc44badce2dc813ac199170"
+      "sha256": "5fdad78da8aa3e787937fb77fae392e4233fe40cbdc664581efc0e60865919ee"
     },
     {
       "path": "src/completion/internal.h",
-      "sha256": "435d18127bfe50c4d4a07886aec04f9531b0e3a762e0e1201e2cdd2ab8324010"
+      "sha256": "7fadb90944e13735d357584c38ce42d990d5d7e9c3ab2ca628a2e4a06c18f24d"
     },
     {
       "path": "src/completion/predicate_roles.c",
-      "sha256": "abbe23207dfcbd4a963701e372ffc1641dd9d260dd6fad0334b84e44df40ac30"
+      "sha256": "433945baa4fc09bb77ab5a447bb4d8141f05299e6142596533d39001a1788f01"
     },
     {
       "path": "src/completion/predicate_v1.c",
-      "sha256": "7ddfd092da1ae6fc10af75d9c5c43a252a26221e82595e05ff310303e96a742a"
+      "sha256": "9525d5d6fa56c66c2c25b7ef021a89aba43aa7b397df4b4baae17bca8098113a"
     },
     {
       "path": "src/completion/recovery.c",
@@ -747,7 +747,7 @@
     },
     {
       "path": "src/completion/store.c",
-      "sha256": "786ab2171f69d9f3183675acb76b3653598ed1df6c4edcfd10d5bf636fa22708"
+      "sha256": "30abb39335dfaf2f2020a252cf64d2a806825fb35c5d3855e03c9b29f895b039"
     },
     {
       "path": "src/core/authorization.c",
@@ -915,7 +915,7 @@
     },
     {
       "path": "src/document/internal.h",
-      "sha256": "f6c9950f09b162a30188555db8768b954c5d78b6ba62f27845a85745c7a6e2fb"
+      "sha256": "d8cfcb3dd323e07289628474a774cfbc72638d982d9c312001c02c0d15c5c315"
     },
     {
       "path": "src/document/markdown.c",
@@ -923,7 +923,7 @@
     },
     {
       "path": "src/document/record.c",
-      "sha256": "aa6fd7671fc3c662c1cf85920220857d9c8bba3f314e5948efbd405ed4944125"
+      "sha256": "93f699e37791703ccd43d27e636cd1b61bdd67d2bb7ce3ad506281e82303baaf"
     },
     {
       "path": "src/document/record_read.c",
@@ -931,11 +931,11 @@
     },
     {
       "path": "src/document/registry.c",
-      "sha256": "06e3ac0316fbfdcac2356bc568dc8c7b8c2bd2ecd72164793f71f8f1c30ecd53"
+      "sha256": "3035c2f96335913b0377e5f104672b2a837aca56eb6e5a1225b6800581677171"
     },
     {
       "path": "src/document/schema.c",
-      "sha256": "184598df1835e89b5853ddea6ffea98bc8502f040caf3d4d5407581821e379d4"
+      "sha256": "d2853d7018d69ea7f586ee2ee3bde30cb0b3c25c7d13f0c7bfe6671bbb179e39"
     },
     {
       "path": "src/document/storage.c",
@@ -979,7 +979,7 @@
     },
     {
       "path": "src/execution/internal.h",
-      "sha256": "ad06351bee61af0932a940fd3f3a04c206c39d631ad88152a95711087775ade1"
+      "sha256": "9b8db13ca0200075ac5217909dd56170dbbebbf3c454c99b684f0d5ae2a5677a"
     },
     {
       "path": "src/execution/inventory_ref.c",
@@ -1019,7 +1019,7 @@
     },
     {
       "path": "src/execution/store.c",
-      "sha256": "99f44479643ccf0e7a9cbe6e87313521697caad476d7cbfdbebe09c7d1f27f5c"
+      "sha256": "b4a0d15d89bea694838a97e2ea80995cc9f465172a0afb2aaaa26e3a99e05900"
     },
     {
       "path": "src/golem/__init__.py",
@@ -1103,11 +1103,11 @@
     },
     {
       "path": "src/intent/journal.c",
-      "sha256": "2c6c3359feb112e137900d523a8193dc65b3ed07251a6388773dd120f320d18a"
+      "sha256": "c6e210fc109d201a555f82afc6f22884418be97b7aace10102face81d41b1665"
     },
     {
       "path": "src/intent/journal.h",
-      "sha256": "cdbe554a8c1e6bf78e63da95cc0a41bc183b3614bbec643ddb86e86e3590fc2f"
+      "sha256": "0708e361e272b7513b0f879cc2aaf85a392a1246f84669822de241b6989a1e5c"
     },
     {
       "path": "src/intent/object.c",
@@ -1143,11 +1143,11 @@
     },
     {
       "path": "src/intent/schema.c",
-      "sha256": "5261041e0122d25c5949822f17dc8e2b482c38d7b4c0d1414405b16614e95407"
+      "sha256": "5052a3094b6e1c5160ce27356bb308d40a8f2ecb9c791fdaf13c96035f7f6d58"
     },
     {
       "path": "src/intent/schema.h",
-      "sha256": "9d7ba2619d14997f4c8ee0b2ab3ad058d385dc70cb5b76f4fec6ab051d152015"
+      "sha256": "aa6a57ad5262ec9ecb26aa5c0577c3ad792d353a052044168f737b92ce1e5015"
     },
     {
       "path": "src/inventory/capture.c",
@@ -1459,7 +1459,7 @@
     },
     {
       "path": "src/workspace/lifecycle.c",
-      "sha256": "c4513572151cd8d1253e7526a26d742c28535adcdea6ef3b7fab836ee3f270a6"
+      "sha256": "4065a9284732100acca08bd2993837729a69e476111b0957ff140e37b5eb47cc"
     },
     {
       "path": "src/workspace/model.c",
@@ -1611,7 +1611,7 @@
     },
     {
       "path": "tools/integration_mcp.py",
-      "sha256": "7e4ae98d534e96f22079c8d7b021c0f654a0460987d2f46b13af2c65ebd141db"
+      "sha256": "bcd2136d57f2af822be2362977393595dac652f0825dbc23bc9de3c9462b6af8"
     },
     {
       "path": "tools/integration_mcpb.py",
@@ -1643,7 +1643,7 @@
     },
     {
       "path": "tools/intent_authority_host.c",
-      "sha256": "dd8b8fe7b905b345da7161ec00fb50d987860c6e1802f9800349e0948d8956fd"
+      "sha256": "a80f164de6d769ac4d3a17d299659066e4beefcb1fe12bb1b7b76d69d83a55dc"
     },
     {
       "path": "tools/intent_authority_lifecycle.py",
@@ -1951,7 +1951,7 @@
     },
     {
       "path": ".github/workflows/c.yml",
-      "sha256": "67a3997123402566d2b8d0cd1cc4e19797fdbd430d8b4181301a042014d297bb"
+      "sha256": "b95af165478a666e3abf2df7484434184b444cd15e6b9df7333cfd79c4212789"
     },
     {
       "path": ".github/workflows/conan.yml",
@@ -2087,7 +2087,7 @@
     },
     {
       "path": "tools/integration_prepare_builders.py",
-      "sha256": "767d8fa8919e437932dd8576c178cfefdc3b1f6a314caffe305bf6b7772f3d92"
+      "sha256": "adc69135049a2aaa04ce1e3b3c67a4e082c9ee377b55a4cc6d0e8be1d43c4478"
     },
     {
       "path": "tools/test_integration_m2.py",
@@ -2163,7 +2163,7 @@
     },
     {
       "path": "tools/test_capability_m5.py",
-      "sha256": "8c1868b05357653eeade6ed1519e66a1ce495ca55e2d6a065eaece8b1493cdfa"
+      "sha256": "f39eea4f4d6f0c901bef840dcb8719413b01a238b714a155ed17d9a96fea9030"
     },
     {
       "path": "docs/mcp-m5-parallel-candidates.ko.md",
@@ -2171,15 +2171,15 @@
     },
     {
       "path": "tools/integration_feature_profiles.py",
-      "sha256": "94d152a375ecc243c5eed71bf24f2a1d369eef2fa52a009d098734d6c7fc1b8a"
+      "sha256": "6b6b93040697caf97cfaf1e24e1b533f4cd78ec51b44ee6133aa1b761cb6c49d"
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "199fb9872e7a19ab5341f9d6fff24bfed2774c9f612886c58cdfa4abe105d1e7"
+      "sha256": "639d7cb2af42837d26893734d740e62ad46f58e04eda1e76043b6f12d34dab96"
     },
     {
       "path": "tools/integration_distribution_entry.py",
-      "sha256": "11a0ef7def1fecae06748724af02550a9973b060d6565fa1a91f43aad69afde9"
+      "sha256": "6bf683995dbc9189b7861a392df2c1d0e1b7944bcb1498cf76392737968c960c"
     },
     {
       "path": "tools/integration_owner_maintenance.py",
@@ -2219,7 +2219,7 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "c7d3a29221db252f4e0d66c1b9715ee1766864e8854af9e936432fe8a5a6bebd"
+      "sha256": "9b07b4e66a5572f7344dc714087e1a2b2cf0e9bb8c9cf8b6bc88251ea9884bfc"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
@@ -2384,6 +2384,86 @@
     {
       "path": "tests/c/workpack_mcp_actions.py",
       "sha256": "dc9f14df360d7c3877a1385b18702fc861dcdcb4b8aacc03f8e8a996e8564f6a"
+    },
+    {
+      "path": "src/completion/predicate_intent.c",
+      "sha256": "f932b7376ae600ad63e01d38c386999dccdb36402142708c8d9bc66e41856e40"
+    },
+    {
+      "path": "src/intent/product_access.c",
+      "sha256": "92a0f49256383d3279f704ea1356c5de67c32ecfca63e1094919b3b71e9f2cc7"
+    },
+    {
+      "path": "src/intent/product_access.h",
+      "sha256": "372496f2bcb6d0d449ae12241a6a878b339412567da1f343a750818f44dc106d"
+    },
+    {
+      "path": "src/intent/product_gate.c",
+      "sha256": "7a84991c41cd9580c0c5a503271984a7e0a4eb5c8524d47d08238f0f6636c266"
+    },
+    {
+      "path": "src/intent/product_gate.h",
+      "sha256": "629ded1373c6a271296277ccea0fba7e0ed97bbc647abdcef0c04c221741b38f"
+    },
+    {
+      "path": "src/intent/qa_acceptance.c",
+      "sha256": "6b315747ee8612c63111a37f10138e77304f514d0f1ad01c393a954008b7de5e"
+    },
+    {
+      "path": "src/intent/qa_paths.c",
+      "sha256": "63b989d9cbfcd660da69008d1693fe4957e0c0d74d1528c03f1ee9c0aaaa129b"
+    },
+    {
+      "path": "src/intent/qa_paths.h",
+      "sha256": "054acebe39d99d374fbb26cc2deeb20c8cab38f27b3feec49d0e6b0fb7c2a14f"
+    },
+    {
+      "path": "src/intent/qa_resolve.c",
+      "sha256": "60a0c718ddd075dca1c05bde57f21613c15faaee2b69b7217719032c1f705820"
+    },
+    {
+      "path": "src/intent/qa_resolve.h",
+      "sha256": "6dfd935ce9e05223001511b440efc8c931623da1664ee8408b15250a81b8f239"
+    },
+    {
+      "path": "src/intent/qa_result.c",
+      "sha256": "7e1604a378559d643ca9b9e0029c1a230dacb5a3095f9ffebf056a7f27061181"
+    },
+    {
+      "path": "src/intent/qa_result.h",
+      "sha256": "162f95ae26e0117f51b216596eee10459cae4dfcd06edc85a595bc6d8e13d2de"
+    },
+    {
+      "path": "src/intent/review.c",
+      "sha256": "1d6255275163cee57d098dcbba7add38f7be374ba2df238624d511a9d7e812a1"
+    },
+    {
+      "path": "src/intent/review.h",
+      "sha256": "211cf6c1f77ee6727fa876d98d661d68bcff13cb00257cad4a23719b535ec78c"
+    },
+    {
+      "path": "src/intent/review_host.c",
+      "sha256": "fe06bb998f305cfdf0089e486304607f35f684c86e268ae80d6d708967282b6b"
+    },
+    {
+      "path": "src/intent/review_host.h",
+      "sha256": "c873dc01c10481c8bcae37932fc618b95889569af6d5bff8669c68f29f94720b"
+    },
+    {
+      "path": "tools/integration_intent.py",
+      "sha256": "72103b38fc70af4697064f515abe4edc02f8e6e9b1d0b1869f44be4c15b3c577"
+    },
+    {
+      "path": "tools/intent_product_host.inc",
+      "sha256": "076286d4962fe379953376195ca0b9df938f7b2329d589cf6b1e2e3a61bb7b2f"
+    },
+    {
+      "path": "tools/test_integration_intent.py",
+      "sha256": "7d8d47ce3cbb669099663b89d998f95a77c12cdc21ada21b13868e3c4ee14a45"
+    },
+    {
+      "path": "docs/intent-assurance-qc6-implementation.ko.md",
+      "sha256": "8e40cb479d1b78a41ad2351e65671bd2839a7b27f0cf3c5dd12908ced1ab6e59"
     }
   ],
   "observations": [
@@ -18899,6 +18979,153 @@
       "source_path": "tools/integration_workpack_actions.py",
       "entrypoint": "file-surface",
       "selector": null
+    },
+    {
+      "id": "obs-f95c06507f7d0ecbec3d6fec3bb6f4e988652708c50580e4b9d7406cbf52da8f",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/completion/predicate_intent.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-4af67f91d670b5b67c9611329fa876c2fabae654835c9a51dcb1a46e0cf300de",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/product_access.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-e006b3cbda9996200233c33faf5fe17ad1ef25434553f340f5cde0c9a02d7d64",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/product_access.h",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-ed8aaf715238382a2b7f9956e90d6434729bbef7e5e213b3cfa4f091f77a71b7",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/product_gate.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-10a9b31687e32e945b6c60f169ceb2f92cf76e179742b0a6ce42bff6f613e7f9",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/product_gate.h",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-2c4967de8ed00e07fc8509f9ec2d9b302b8251347b1906bdc985b6873860a53a",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/qa_acceptance.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-1617377bffcbc2b1586c0a99645a76671ea2857b4ea2c84d1579f9ee91409416",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/qa_paths.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-ac01117dead42e9bd22b415a9dc4620f30a4d68b2f2dc00808cabfe85245dc77",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/qa_paths.h",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-10af994fb6754261a70137b5d62026906186f7a2d73abb072a741df217466334",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/qa_resolve.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-c90bf743ffd3ed989e707e5641b50afa9b1591d858907c06587fdb0b3e6b5a64",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/qa_resolve.h",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-2767f09859a31fec08aa12c424042c67e63f3122672c081235c420e337c97ec8",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/qa_result.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-c11a4a85db80d70ce989e597899661cdea2127b9a457013de25fd322f558dcde",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/qa_result.h",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-d7551791d5d7887812171830b73f8912ac9e3f8baa9dbd92e995526dcfbc5066",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/review.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-db2daf4f4718ef87fe1b1553f5d4c85deacd0f622f3dac40fe8ba1fd933fa7a6",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/review.h",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-ea91e94b3d36bceb7f074301458614e7eafc6bc5244d54f1f6668188edf9da99",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/review_host.c",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-342ab95e75316db11e4e1cdf54896f8b2cc11b0d943657283a5f4ddb28345168",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "src/intent/review_host.h",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-612a6a7981b27b8d660e77b9d7217d63fde14d9e95e3b2068a1423704e9e4458",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_intent.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-da8bcae4183b5030b32f12d60e6669bc6962d47103767e86215cf96b80982425",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "tools/intent_product_host.inc",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-4dcaebf43dae2e827be5a4ed36fc78b08ca7ff813b11e3675e37c8c0e26610ea",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_service.py",
+      "entrypoint": "SCHEMAS",
+      "selector": "intent_read"
+    },
+    {
+      "id": "obs-630d2e2da158e05e3de207636a8b42e353dfee92575354f1fc956cff4c016fec",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_mutation_contract.py",
+      "entrypoint": "NAMES",
+      "selector": "intent_qa_accept"
+    },
+    {
+      "id": "obs-09242a9792c1425efcac52efc73e87f2701d639904dc36a658411b5053461bd4",
+      "kind": "MCP_TOOL_DECLARATION",
+      "source_path": "tools/integration_mutation_contract.py",
+      "entrypoint": "NAMES",
+      "selector": "intent_completion_finalize"
     }
   ],
   "capabilities": [
@@ -78403,6 +78630,904 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Bounded native calls under existing scope/quota/producer and immutable audit guards. Unknown/error never retried."
+    },
+    {
+      "id": "surface.src.completion.predicate_intent.c.file-surface",
+      "observation_ids": [
+        "obs-f95c06507f7d0ecbec3d6fec3bb6f4e988652708c50580e4b9d7406cbf52da8f"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC5 current QA plus existing native completion predicate"
+    },
+    {
+      "id": "surface.src.intent.product_access.c.file-surface",
+      "observation_ids": [
+        "obs-4af67f91d670b5b67c9611329fa876c2fabae654835c9a51dcb1a46e0cf300de"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC3 exact request, material, current stage and enrollment checks"
+    },
+    {
+      "id": "surface.src.intent.product_access.h.file-surface",
+      "observation_ids": [
+        "obs-e006b3cbda9996200233c33faf5fe17ad1ef25434553f340f5cde0c9a02d7d64"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Private QC declaration contract; not standalone MCP authority"
+    },
+    {
+      "id": "surface.src.intent.product_gate.c.file-surface",
+      "observation_ids": [
+        "obs-ed8aaf715238382a2b7f9956e90d6434729bbef7e5e213b3cfa4f091f77a71b7"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC3 v3 mandatory denial and exact enrollment, journal/CAS publication"
+    },
+    {
+      "id": "surface.src.intent.product_gate.h.file-surface",
+      "observation_ids": [
+        "obs-10a9b31687e32e945b6c60f169ceb2f92cf76e179742b0a6ce42bff6f613e7f9"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Private QC declaration contract; not standalone MCP authority"
+    },
+    {
+      "id": "surface.src.intent.qa_acceptance.c.file-surface",
+      "observation_ids": [
+        "obs-2c4967de8ed00e07fc8509f9ec2d9b302b8251347b1906bdc985b6873860a53a"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC4 prepare/observation/accept publication and current receipt verification"
+    },
+    {
+      "id": "surface.src.intent.qa_paths.c.file-surface",
+      "observation_ids": [
+        "obs-1617377bffcbc2b1586c0a99645a76671ea2857b4ea2c84d1579f9ee91409416"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC2 bounded complete requirement x route structural matrix"
+    },
+    {
+      "id": "surface.src.intent.qa_paths.h.file-surface",
+      "observation_ids": [
+        "obs-ac01117dead42e9bd22b415a9dc4620f30a4d68b2f2dc00808cabfe85245dc77"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Private QC declaration contract; not standalone MCP authority"
+    },
+    {
+      "id": "surface.src.intent.qa_resolve.c.file-surface",
+      "observation_ids": [
+        "obs-10af994fb6754261a70137b5d62026906186f7a2d73abb072a741df217466334"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC2 explicit local bytes and exact owner/reviewer evidence resolution"
+    },
+    {
+      "id": "surface.src.intent.qa_resolve.h.file-surface",
+      "observation_ids": [
+        "obs-c90bf743ffd3ed989e707e5641b50afa9b1591d858907c06587fdb0b3e6b5a64"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Private QC declaration contract; not standalone MCP authority"
+    },
+    {
+      "id": "surface.src.intent.qa_result.c.file-surface",
+      "observation_ids": [
+        "obs-2767f09859a31fec08aa12c424042c67e63f3122672c081235c420e337c97ec8"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC4 bounded receipt synthesis; absent or inconsistent rows never PASS"
+    },
+    {
+      "id": "surface.src.intent.qa_result.h.file-surface",
+      "observation_ids": [
+        "obs-c11a4a85db80d70ce989e597899661cdea2127b9a457013de25fd322f558dcde"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Private QC declaration contract; not standalone MCP authority"
+    },
+    {
+      "id": "surface.src.intent.review.c.file-surface",
+      "observation_ids": [
+        "obs-d7551791d5d7887812171830b73f8912ac9e3f8baa9dbd92e995526dcfbc5066"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC1 baseline/review reducer and guarded journal publication"
+    },
+    {
+      "id": "surface.src.intent.review.h.file-surface",
+      "observation_ids": [
+        "obs-db2daf4f4718ef87fe1b1553f5d4c85deacd0f622f3dac40fe8ba1fd933fa7a6"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Private QC declaration contract; not standalone MCP authority"
+    },
+    {
+      "id": "surface.src.intent.review_host.c.file-surface",
+      "observation_ids": [
+        "obs-ea91e94b3d36bceb7f074301458614e7eafc6bc5244d54f1f6668188edf9da99"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC1 selected policy/bundle/registration/clock and native reviewer checks"
+    },
+    {
+      "id": "surface.src.intent.review_host.h.file-surface",
+      "observation_ids": [
+        "obs-342ab95e75316db11e4e1cdf54896f8b2cc11b0d943657283a5f4ddb28345168"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Private QC declaration contract; not standalone MCP authority"
+    },
+    {
+      "id": "surface.tools.integration_intent.py.file-surface",
+      "observation_ids": [
+        "obs-612a6a7981b27b8d660e77b9d7217d63fde14d9e95e3b2068a1423704e9e4458"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC6 optional owner-pinned inherited-fd host transport; exact D2/D4 action; no approval issuance"
+    },
+    {
+      "id": "surface.tools.intent_product_host.inc.file-surface",
+      "observation_ids": [
+        "obs-da8bcae4183b5030b32f12d60e6669bc6962d47103767e86215cf96b80982425"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Exact QC native host, current registration and selected policy; MCP requires separate D2 and exact D4 Intent host contract."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Native bounded parsers and lock/CAS; LOCAL_NO_MERGE"
+        ],
+        "notes": "Structural inventory only. No execution, current approval, semantic truth or Desktop E2E claim."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "QC6 native five-operation inherited-fd dispatcher; rechecks registration then exact native scope"
+    },
+    {
+      "id": "m4.tool.intent_read",
+      "observation_ids": [
+        "obs-4dcaebf43dae2e827be5a4ed36fc78b08ca7ff813b11e3675e37c8c0e26610ea"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_READ"
+      ],
+      "target_routes": [
+        "MCP_READ"
+      ],
+      "authorities": [
+        "Separate opt-in exact Intent host policy, current D01 registration, D2 disclosure, D4 action for mutation and native current review scope."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Pinned packet and review root; 30 second bounded host transport; no automatic retry"
+        ],
+        "notes": "Optional QC6 delivery. Native current QA acceptance differs from QA execution; current completion differs from historical receipt. Client E2E NOT_RUN."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit five-operation native host; read operation allowlist and exact D4 action mapping remain separate."
+    },
+    {
+      "id": "m4.tool.intent_qa_accept",
+      "observation_ids": [
+        "obs-630d2e2da158e05e3de207636a8b42e353dfee92575354f1fc956cff4c016fec"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in exact Intent host policy, current D01 registration, D2 disclosure, D4 action for mutation and native current review scope."
+      ],
+      "effects": [
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Pinned packet and review root; 30 second bounded host transport; no automatic retry"
+        ],
+        "notes": "Optional QC6 delivery. Native current QA acceptance differs from QA execution; current completion differs from historical receipt. Client E2E NOT_RUN."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit five-operation native host; read operation allowlist and exact D4 action mapping remain separate."
+    },
+    {
+      "id": "m4.tool.intent_completion_finalize",
+      "observation_ids": [
+        "obs-09242a9792c1425efcac52efc73e87f2701d639904dc36a658411b5053461bd4"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "target_routes": [
+        "MCP_REVIEWED_ACTION"
+      ],
+      "authorities": [
+        "Separate opt-in exact Intent host policy, current D01 registration, D2 disclosure, D4 action for mutation and native current review scope."
+      ],
+      "effects": [
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX"
+        ],
+        "limits": [
+          "Pinned packet and review root; 30 second bounded host transport; no automatic retry"
+        ],
+        "notes": "Optional QC6 delivery. Native current QA acceptance differs from QA execution; current completion differs from historical receipt. Client E2E NOT_RUN."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_intent.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-qc6-implementation.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Explicit five-operation native host; read operation allowlist and exact D4 action mapping remain separate."
     }
   ]
 }

@@ -1248,6 +1248,27 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | workpack.mcp.workpack_receipt_manifest | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | workpack.mcp.workpack_receipt_export | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | surface.tools.integration_workpack_actions.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.completion.predicate_intent.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.product_access.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.product_access.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.product_gate.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.product_gate.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_acceptance.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_paths.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_paths.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_resolve.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_resolve.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_result.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_result.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.review.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.review.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.review_host.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.review_host.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_intent.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.intent_product_host.inc.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| m4.tool.intent_read | IMPLEMENTED | MCP_READ | MCP_READ | REVIEWED |
+| m4.tool.intent_qa_accept | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| m4.tool.intent_completion_finalize | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3612,6 +3633,27 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | workpack_receipt_manifest |
 | MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | workpack_receipt_export |
 | PYTHON_DECLARATION | tools/integration_workpack_actions.py | file-surface | None |
+| NATIVE_OPERATION | src/completion/predicate_intent.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/product_access.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/product_access.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/product_gate.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/product_gate.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_acceptance.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_paths.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_paths.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_resolve.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_resolve.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_result.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_result.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/review.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/review.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/review_host.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/review_host.h | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_intent.py | file-surface | None |
+| NATIVE_OPERATION | tools/intent_product_host.inc | file-surface | None |
+| MCP_TOOL_DECLARATION | tools/integration_service.py | SCHEMAS | intent_read |
+| MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | intent_qa_accept |
+| MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | intent_completion_finalize |
 
 ## Blockers
 

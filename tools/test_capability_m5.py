@@ -55,7 +55,7 @@ class ParallelProfile(unittest.TestCase):
         for old,new in ((b"'reserve','start'",b"'reserve','finish','start'"),(b"'cohort-record')",b"'cohort-record','grant')")):
             files,model=self.changed('tools/integration_parallel_actions.py',old,new,shapes=True);self.assertTrue(self.inspect(files,model).blockers)
     def test_immutable_intent_cannot_be_bypassed_with_new_request(self):
-        files,model=self.changed('tools/integration_mutations.py',b'if name in parallel.HOST_NAMES and previous.get("tool") == name',b'if False and previous.get("tool") == name',shapes=True);self.assertTrue(self.inspect(files,model).blockers)
+        files,model=self.changed('tools/integration_mutations.py',b'if name in (*parallel.HOST_NAMES,*intent_api.ACTIONS) and previous.get("tool") == name',b'if False and previous.get("tool") == name',shapes=True);self.assertTrue(self.inspect(files,model).blockers)
     def test_schema_handoff_and_native_argv_binding_remain_exact(self):
         files,model=self.changed('tools/integration_service.py',b'parallel_reads.SCHEMAS["candidate_read"]',b'parallel_reads.SCHEMAS["inventory_read"]',shapes=True);self.assertTrue(self.inspect(files,model).blockers)
         files,model=self.changed('tools/integration_mutations.py',b'self.parallel_hosts.command(entry, value, output)',b'self.parallel_hosts.command(value, entry, output)',shapes=True);self.assertTrue(self.inspect(files,model).blockers)

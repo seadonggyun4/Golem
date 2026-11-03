@@ -17,6 +17,15 @@ class Graph(unittest.TestCase):
                         (b'name.startswith("session_")',b'name.startswith(prefix)')):
             files,pins=self.changed(delegation,'tools/integration_mutation_contract.py',old,new)
             self.assertTrue(inspect_mutation_graph(files,pins).blockers)
+
+    def test_intent_guards_cannot_be_removed_even_after_repin(self):
+        for old in (
+            b"c.require(approve_intent is True,'OWNER_INTENT_HOST_REQUIRED')",
+            b"c.require(row['operation']==expected and row['action_id']==entry['action_id'] and row['action_sha256']==entry['action']['sha256'],'INTENT_EXACT_ACTION')",
+            b"c.require(row['operation'] in ('assess','current','resume') and row['action_id']=='','INTENT_READ_ONLY')",
+        ):
+            files,pins=self.changed(delegation,'tools/integration_intent.py',old,b'pass')
+            self.assertTrue(inspect_mutation_graph(files,pins).blockers)
     def test_capture_arguments_and_scope(self):
         for old,new in ((b'records.capture(argv, output, 540',b'records.capture(other, output, 540'),
                         (b'with admission:',b'if False:')):

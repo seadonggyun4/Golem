@@ -1248,6 +1248,27 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | workpack.mcp.workpack_receipt_manifest | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | workpack.mcp.workpack_receipt_export | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | surface.tools.integration_workpack_actions.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.completion.predicate_intent.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.product_access.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.product_access.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.product_gate.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.product_gate.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_acceptance.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_paths.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_paths.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_resolve.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_resolve.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_result.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.qa_result.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.review.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.review.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.review_host.c.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.src.intent.review_host.h.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_intent.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.intent_product_host.inc.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| m4.tool.intent_read | IMPLEMENTED | MCP_READ | MCP_READ | REVIEWED |
+| m4.tool.intent_qa_accept | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| m4.tool.intent_completion_finalize | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3612,6 +3633,27 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | workpack_receipt_manifest |
 | MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | workpack_receipt_export |
 | PYTHON_DECLARATION | tools/integration_workpack_actions.py | file-surface | None |
+| NATIVE_OPERATION | src/completion/predicate_intent.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/product_access.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/product_access.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/product_gate.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/product_gate.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_acceptance.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_paths.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_paths.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_resolve.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_resolve.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_result.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/qa_result.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/review.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/review.h | file-surface | None |
+| NATIVE_OPERATION | src/intent/review_host.c | file-surface | None |
+| NATIVE_OPERATION | src/intent/review_host.h | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_intent.py | file-surface | None |
+| NATIVE_OPERATION | tools/intent_product_host.inc | file-surface | None |
+| MCP_TOOL_DECLARATION | tools/integration_service.py | SCHEMAS | intent_read |
+| MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | intent_qa_accept |
+| MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | intent_completion_finalize |
 
 ## Blockers
 
@@ -3701,7 +3743,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 462; explicitly selected: 462. Other tracked paths still require explicit boundary review.
+Candidate source surfaces: 480; explicitly selected: 480. Other tracked paths still require explicit boundary review.
 Public declarations observed in selected headers: 358.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
@@ -3873,6 +3915,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | src/completion/evaluator.c | YES |
 | src/completion/internal.h | YES |
 | src/completion/model.c | YES |
+| src/completion/predicate_intent.c | YES |
 | src/completion/predicate_roles.c | YES |
 | src/completion/predicate_v1.c | YES |
 | src/completion/recovery.c | YES |
@@ -3975,8 +4018,23 @@ This is static inventory reconciliation, never native execution, authority or pr
 | src/intent/object_graph.h | YES |
 | src/intent/object_inventory.c | YES |
 | src/intent/object_inventory.h | YES |
+| src/intent/product_access.c | YES |
+| src/intent/product_access.h | YES |
+| src/intent/product_gate.c | YES |
+| src/intent/product_gate.h | YES |
+| src/intent/qa_acceptance.c | YES |
+| src/intent/qa_paths.c | YES |
+| src/intent/qa_paths.h | YES |
+| src/intent/qa_resolve.c | YES |
+| src/intent/qa_resolve.h | YES |
+| src/intent/qa_result.c | YES |
+| src/intent/qa_result.h | YES |
 | src/intent/quota.c | YES |
 | src/intent/quota.h | YES |
+| src/intent/review.c | YES |
+| src/intent/review.h | YES |
+| src/intent/review_host.c | YES |
+| src/intent/review_host.h | YES |
 | src/intent/schema.c | YES |
 | src/intent/schema.h | YES |
 | src/inventory/capture.c | YES |
@@ -4109,6 +4167,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | tools/integration_hook_contract.py | YES |
 | tools/integration_hooks.py | YES |
 | tools/integration_install.py | YES |
+| tools/integration_intent.py | YES |
 | tools/integration_launch.py | YES |
 | tools/integration_lifecycle.py | YES |
 | tools/integration_mcp.py | YES |
@@ -4143,6 +4202,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | tools/intent_authority.py | YES |
 | tools/intent_authority_host.c | YES |
 | tools/intent_authority_lifecycle.py | YES |
+| tools/intent_product_host.inc | YES |
 | tools/isolation_canary.py | YES |
 | tools/judgment_record.py | YES |
 | tools/native_record.py | YES |

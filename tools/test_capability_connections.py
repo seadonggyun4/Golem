@@ -41,7 +41,7 @@ class Connections(unittest.TestCase):
         self.assertFalse(r.blockers);self.assertIn('history_new',dict(r.paths))
     def test_actual_d4_only_direct_edge(self):
         r=delegation.inspect_delegation(self.inputs(delegation))
-        self.assertFalse(r.blockers);self.assertEqual(len(r.delegated),40)
+        self.assertFalse(r.blockers);self.assertEqual(len(r.delegated),42)
         self.assertEqual(r.helper,'Service._mutate');self.assertFalse(r.helper_body_verified)
     def test_dynamic_receiver_and_reordered_args_block(self):
         for new in (b'other._mutate(name, args)',b'self._mutate(args, name)'):

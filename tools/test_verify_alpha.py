@@ -126,6 +126,11 @@ class SourceSnapshotTests(unittest.TestCase):
             self.assertFalse(selected("src/other/workspace/state.c", profile))
         for name in ("src/core/work_run.c", "include/golem/core.h", "CMakeLists.txt"):
             self.assertTrue(selected(name))
+        for name in ("tools/intent_product_host.inc", "tools/integration_intent.py",
+                     "tests/fixtures/intent/qa-resolved-local.json"):
+            self.assertTrue(selected(name))
+        self.assertFalse(selected("tools/unreviewed_host.inc"))
+        self.assertFalse(selected("tests/fixtures/intent/unreviewed-local.json"))
         for name in (".git/config", ".env", "project-docs/plan.md", ".golem/journal.bin", "build/cache", "README.md"):
             self.assertFalse(selected(name))
         for name in ("../src/secret", "/src/core.c"):

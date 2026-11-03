@@ -55,7 +55,7 @@ class StaticAdapters(unittest.TestCase):
     def test_transport_closed_declared_names_are_not_client_delivery(self):
         result=inspect_transport(self.files)
         self.assertFalse(result.blockers)
-        self.assertEqual(len(result.declared_tool_names),85)
+        self.assertEqual(len(result.declared_tool_names),88)
         self.assertIn('golem_workflow_read',result.declared_tool_names)
         self.assertIn('golem_action_prepare',result.declared_tool_names)
         self.assertFalse(result.client_delivery_verified)
@@ -66,7 +66,7 @@ class StaticAdapters(unittest.TestCase):
                              (b'"golem_" + name',b'"other_" + name'),
                              (b'run_sync(service.call,',b'run_sync(other.call,'),
                              (b'on_call_tool=call_tool',b'on_call_tool=list_tools'),
-                             (b'run(mutations.Service(policy, resources, helpers, parallel_hosts))',b'run(other.Service(policy, resources, helpers, parallel_hosts))')):
+                             (b'run(mutations.Service(policy, resources, helpers, parallel_hosts,intent_hosts))',b'run(other.Service(policy, resources, helpers, parallel_hosts,intent_hosts))')):
             files,pins=self.mutate('tools/integration_mutation_mcp.py',before,after,TRANSPORT_PINS)
             self.assertTrue(inspect_transport(files,pins).blockers)
 

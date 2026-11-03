@@ -104,7 +104,7 @@ def inspect_m5(sources,ledger,model,backlog):
         gate=next(n for n in ast.walk(admit) if isinstance(n,ast.Call) and _shape(n)==stop)
         for call in (n for n in ast.walk(admit) if isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute) and n.func.attr in ('mkdir','save')):
             if call.lineno<=gate.lineno:raise ValueError('M5_RESULT_READ_CREATES_INTENT')
-        expected=ast.parse('if name in parallel.HOST_NAMES and previous.get("tool") == name and previous.get("action") == entry and (directory / "dispatch-intent.json").exists():\n    raise c.IntegrationError("PARALLEL_ACTION_ALREADY_DISPATCHED_REVIEW_ORIGINAL")').body[0]
+        expected=ast.parse('if name in (*parallel.HOST_NAMES,*intent_api.ACTIONS) and previous.get("tool") == name and previous.get("action") == entry and (directory / "dispatch-intent.json").exists():\n    raise c.IntegrationError("PARALLEL_ACTION_ALREADY_DISPATCHED_REVIEW_ORIGINAL")').body[0]
         if sum(_shape(n)==_shape(expected) for n in ast.walk(admit))!=1:raise ValueError('M5_REDISPATCH_GUARD')
     except (KeyError,ValueError,StopIteration,AttributeError,TypeError,SyntaxError) as e:errors.append(('M5_CONNECTION_UNVERIFIED',str(e)))
     for path,function,anchors in (
