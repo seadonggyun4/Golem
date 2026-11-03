@@ -95,3 +95,8 @@ main `e8f6c936d6acbaf4587895714f05cf7cec8de0bc`의 GitHub CI run
 QC5 renderer 1개와 guarded/legacy 대체 publication을 정확한 목록에 반영했다.
 새 QC3/QC4 writer 두 개도 prepare/publication 개수를 각각 검사한다.
 전체 최신 원격 CI의 최종 판정은 아직 진행 중이다.
+
+추가 로컬 결과: 전체 Python 1,542개, 실패 0개, 기존 opt-in skip 188개.
+D2-only MCP fixture는 QC6 host가 없으므로 `intent_read` 미노출을 명시적으로 검사한다.
+modern/legacy stdio와 폐기 후 차단을 포함한 해당 9개 검사는 통과했다.
+이는 합성 Work의 로컬 protocol 검사이며 Codex·Claude Desktop 설치/E2E가 아니다.

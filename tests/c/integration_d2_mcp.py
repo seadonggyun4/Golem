@@ -235,10 +235,12 @@ class D2(fixture.ReadBackend):
                         self.assertEqual(c.sha(client.server_info.icons[0].src.encode()),
                                          c.sha(branding.server_icons()[0].src.encode()))
                         # This fixture supplies D1/D2 only. M1 external files,
-                        # M2 owner actions and M5 host results need separate contracts.
+                        # M2 owner actions, M5 host results and QC6 Intent host
+                        # reads need separate contracts; D1/D2 cannot enable them.
                         conditional = {"workpack_resource_read", "artifact_read", "configuration_read", "events_read",
                             "revision_read", "usage_read", "bundle_read", "workspace_read",
-                            "approved_action_prepare", "action_confirm"}
+                            "approved_action_prepare", "action_confirm", "intent_read"}
+                        self.assertNotIn("golem_intent_read", descriptions)
                         self.assertEqual({t.name for t in listed.tools},
                                          {"golem_" + n for n in set(transfer.NAMES) - conditional})
                         result = await client.call_tool("golem_context_get", self.context_args())
