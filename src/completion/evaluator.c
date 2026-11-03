@@ -59,7 +59,7 @@ golem_status co_evaluate_record(golem_document_store *store, struct json_object 
     const char *predicate = dw_text(policy, "predicate");
     if (!strcmp(predicate, CO_INTENT_V1) && dw_uint(policy, "schema_version") == 1)
         return co_intent_evaluate(store, request, false, out);
-    if (dw_uint(store->spec, "schema_version") == 3)
+    if (store && dw_uint(store->spec, "schema_version") == 3)
         return GOLEM_ERR_UNSUPPORTED_VERSION;
     if (!strcmp(predicate, RC_PREDICATE) && dw_uint(policy, "schema_version") == 1)
         return rc_completion(store, request, false, out);

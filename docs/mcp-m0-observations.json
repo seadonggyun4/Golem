@@ -719,7 +719,7 @@
     },
     {
       "path": "src/completion/evaluator.c",
-      "sha256": "8e70fd64b52bc0ab13c1cf0859adb650f6b334d500ab3e392c321ce0f8255a34"
+      "sha256": "889874e0ba63f3da3f7b54009575a2d270f3ff246a6379a71ede1244dfd8cfd4"
     },
     {
       "path": "src/completion/internal.h",

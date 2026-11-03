@@ -100,3 +100,10 @@ QC5 renderer 1개와 guarded/legacy 대체 publication을 정확한 목록에 �
 D2-only MCP fixture는 QC6 host가 없으므로 `intent_read` 미노출을 명시적으로 검사한다.
 modern/legacy stdio와 폐기 후 차단을 포함한 해당 9개 검사는 통과했다.
 이는 합성 Work의 로컬 protocol 검사이며 Codex·Claude Desktop 설치/E2E가 아니다.
+
+전체 Linux native run `41639327381`에서 436개 중 435개가 통과했고,
+`completion_version_allocator`의 NULL store 역참조가 검출됐다.
+미지원 역사적 predicate를 판단하기 전에 새 v3 검사에서 `store->spec`에 접근한
+결함이다. store가 있을 때만 이 v3 분기를 검사하도록 수정했다. 기존 미지원 버전·
+corrupt journal 거부와 실제 v3 Work의 QA/완료 조건은 유지한다.
+기존 allocator/version 회귀를 그대로 사용해 이 결함을 검증하며 skip하지 않는다.
