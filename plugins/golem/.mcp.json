@@ -4,6 +4,7 @@
       "type": "stdio",
       "command": "python3",
       "cwd": "./",
+      "startup_timeout_sec": 60,
       "args": ["-I", "-B", "scripts/launcher.py", "serve"]
     }
   }

@@ -11,6 +11,17 @@ import sys
 
 LIMIT = 256 * 1024
 SCHEMA = 'golem.codex-launcher.v1'
+CLIENTS = ('codex', 'claude-code', 'portable', 'claude-desktop')
+
+
+def client_schema(client):
+    require(client in CLIENTS, 'CLIENT_REQUIRED')
+    return SCHEMA if client == 'codex' else f'golem.{client}-launcher.v1'
+
+
+def default_state(client):
+    client_schema(client)
+    return Path.home() / '.local/share/golem' / f'{client}-plugin'
 
 
 class SetupError(ValueError):
@@ -104,10 +115,10 @@ def locked(state, write=False):
         os.close(fd)
 
 
-def load(private):
+def load(private, client='codex'):
     value = decode(read_private(private / 'approval.json'))
     require(isinstance(value, dict) and set(value) == {'schema', 'launcher', 'launcher_sha256'}
-            and value['schema'] == SCHEMA, 'APPROVAL_FIELDS')
+            and value['schema'] == client_schema(client), 'APPROVAL_FIELDS')
     raw = value['launcher']
     require(isinstance(raw, str) and digest(raw.encode()) == value['launcher_sha256'], 'APPROVAL_DIGEST')
     return validate_launcher(decode(raw.encode())), value['launcher_sha256']
@@ -121,17 +132,17 @@ def sync_directory(path):
         os.close(fd)
 
 
-def configure(state, source, reviewed, approved):
+def configure(state, source, reviewed, approved, client='codex'):
     require(approved, 'OWNER_LAUNCHER_APPROVAL_REQUIRED')
     raw = read_private(source)
     require(digest(raw) == reviewed, 'REVIEWED_LAUNCHER_CHANGED')
     launcher = validate_launcher(decode(raw))
-    value = {'schema': SCHEMA, 'launcher': raw.decode(), 'launcher_sha256': reviewed}
+    value = {'schema': client_schema(client), 'launcher': raw.decode(), 'launcher_sha256': reviewed}
     data = (json.dumps(value, separators=(',', ':')) + '\n').encode()
     require(len(data) <= LIMIT, 'APPROVAL_TOO_LARGE')
     with locked(state, write=True) as private:
         if (private / 'approval.json').exists():
-            require(load(private) == (launcher, reviewed), 'EXISTING_APPROVAL_DIFFERS')
+            require(load(private, client) == (launcher, reviewed), 'EXISTING_APPROVAL_DIFFERS')
             return {'state': 'CONFIGURED', 'changed': False, 'launcher_sha256': reviewed}
         fd = os.open(private / 'approval.pending', os.O_WRONLY | os.O_CREAT | os.O_EXCL
                      | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
@@ -146,37 +157,39 @@ def configure(state, source, reviewed, approved):
     return {'state': 'CONFIGURED', 'changed': True, 'launcher_sha256': reviewed}
 
 
-def status(state):
+def status(state, client='codex'):
     with locked(state) as private:
-        _, pin = load(private)
+        _, pin = load(private, client)
     return {'state': 'CONFIGURED', 'launcher_sha256': pin, 'project_access_verified': False}
 
 
-def serve(state):
+def serve(state, client='codex'):
     with locked(state) as private:
-        launcher, _ = load(private)
+        launcher, _ = load(private, client)
     os.execv(launcher['command'], [launcher['command'], *launcher['args']])
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('operation', choices=('configure', 'status', 'serve'))
+    parser.add_argument('--client', choices=CLIENTS, default='codex')
     parser.add_argument('--state', type=Path)
     parser.add_argument('--launcher', type=Path)
     parser.add_argument('--reviewed-launcher-sha256')
     parser.add_argument('--approve-launcher', action='store_true')
     args = parser.parse_args()
     try:
-        state = args.state or Path.home() / '.local/share/golem/codex-plugin'
+        state = args.state or default_state(args.client)
         require(state.is_absolute(), 'STATE_PATH_REQUIRED')
         if args.operation == 'configure':
             require(args.launcher is not None and args.reviewed_launcher_sha256 is not None,
                     'REVIEWED_LAUNCHER_REQUIRED')
-            result = configure(state, args.launcher, args.reviewed_launcher_sha256, args.approve_launcher)
+            result = configure(state, args.launcher, args.reviewed_launcher_sha256,
+                               args.approve_launcher, args.client)
         elif args.operation == 'status':
-            result = status(state)
+            result = status(state, args.client)
         else:
-            serve(state)
+            serve(state, args.client)
             return
         print(json.dumps(result, separators=(',', ':')))
     except (OSError, ValueError, TypeError, RecursionError) as error:

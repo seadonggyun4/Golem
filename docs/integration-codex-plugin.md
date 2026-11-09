@@ -1,5 +1,7 @@
 # Codex MCP 설치·사용 안내
 
+일반 사용자 설치 진입점은 [Styxis Plugin](https://github.com/seadonggyun4/styxis-plugin#install)으로 통일합니다. 기존 정상 연결은 새 패키지·launcher·권한을 대조한 뒤 공식 전환 절차로 교체합니다. [설치·전환 조건 및 Claude Code 구분](integration-styxis.md)을 먼저 확인합니다.
+
 프로젝트 관리도 자연어로 요청한다. 사용 가능한 기능은 현재 설치본·profile·승인된 정책의 교집합으로 결정한다. 선택적 관리·resource·helper·host 기능은 별도 정책을 검토한 뒤 활성화하며, 설치 시 기존 승인/producer pin을 자동 이전하지 않는다. [관리 흐름과 지원 범위](mcp-m6-distribution.ko.md#현재-남은-전달-경로-3개-연결)를 참고한다.
 
 설치 버전과 실제 검증 범위는 [현재 검증 기록](workpacks/mcp.md#verification-status)에서 구분해 확인한다. **Golem Setup**은 연결 관리, **Golem Work**는 작업 진행에 사용한다. 이미 검증본이 연결돼 있으면 재설치하지 않는다.
@@ -22,9 +24,9 @@ Golem Setup으로 해당 연결만 reload하거나 새 대화에서 **Golem Work
 패키지 갱신·서버 초기화와 Work 검증을 동시에 시작하지 않는다. 읽기 시간 초과도 원래 한도와 실패 증거를 보존하고 원인을 확인한다. 조회를 실행·QA 재호출로 대체하거나 자동 재시도하지 않는다. `EXISTING_APPROVAL_DIFFERS`·`PARTIAL_PUBLICATION`이면 기록을 보존하고 중단한다.
 
 <details>
-<summary>신규 설치가 필요한 경우</summary>
+<summary>Owner 전용 개발·유지보수 설치가 필요한 경우</summary>
 
-검토한 marketplace를 사용한다. 기존 launcher에서 private package를 만드는 예시는 다음과 같으며, 경로·이름은 owner가 검토한 값으로 대체한다. 새 출력 경로만 사용하고 GitHub 소스가 검증된 로컬 수정본과 같다고 가정하지 않는다.
+아래 private marketplace는 일반 사용자 배포 창구가 아닌 owner 전용 개발·유지보수 경로다. 기존 launcher에서 private package를 만드는 예시이며, 경로·이름은 owner가 검토한 값으로 대체한다. 새 출력 경로만 사용하고 GitHub 소스가 검증된 로컬 수정본과 같다고 가정하지 않는다.
 
 ```sh
 python3 tools/integration_codex_plugin.py --launcher /absolute/private/reviewed-launcher.json --output /absolute/private/new-marketplace --marketplace golem-reviewed --server golem-reviewed

@@ -1269,6 +1269,11 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | m4.tool.intent_read | IMPLEMENTED | MCP_READ | MCP_READ | REVIEWED |
 | m4.tool.intent_qa_accept | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | m4.tool.intent_completion_finalize | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| surface.plugins.golem..claude-plugin.plugin.json.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.plugin.json.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.mcp.json.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_desktop_plugin.py.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_desktop_plugin.py.commands.owner | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3654,6 +3659,17 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | MCP_TOOL_DECLARATION | tools/integration_service.py | SCHEMAS | intent_read |
 | MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | intent_qa_accept |
 | MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | intent_completion_finalize |
+| PYTHON_DECLARATION | plugins/golem/scripts/launcher.py | client_schema | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/launcher.py | default_state | None |
+| NATIVE_OPERATION | plugins/golem/scripts/launcher.py | branch:Name(id=&#x27;client&#x27;, ctx=Load()) | codex |
+| NATIVE_OPERATION | plugins/golem/.claude-plugin/plugin.json | file-surface | None |
+| NATIVE_OPERATION | plugins/golem/plugin.json | file-surface | None |
+| NATIVE_OPERATION | plugins/golem/mcp.json | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_desktop_plugin.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_desktop_plugin.py | build | None |
+| PYTHON_DECLARATION | tools/integration_desktop_plugin.py | main | None |
+| PYTHON_DECLARATION | tools/integration_desktop_plugin.py | manifest | None |
+| CLI_ROUTE | tools/integration_desktop_plugin.py | main | build |
 
 ## Blockers
 
@@ -3743,7 +3759,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 480; explicitly selected: 480. Other tracked paths still require explicit boundary review.
+Candidate source surfaces: 484; explicitly selected: 484. Other tracked paths still require explicit boundary review.
 Public declarations observed in selected headers: 358.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
@@ -3808,8 +3824,11 @@ This is static inventory reconciliation, never native execution, authority or pr
 | include/golem/workflow_template.h | YES |
 | include/golem/workpack.h | YES |
 | include/golem/workspace.h | YES |
+| plugins/golem/.claude-plugin/plugin.json | YES |
 | plugins/golem/.codex-plugin/plugin.json | YES |
 | plugins/golem/.mcp.json | YES |
+| plugins/golem/mcp.json | YES |
+| plugins/golem/plugin.json | YES |
 | plugins/golem/scripts/launcher.py | YES |
 | plugins/golem/skills/golem-setup/SKILL.md | YES |
 | plugins/golem/skills/golem-work/SKILL.md | YES |
@@ -4157,6 +4176,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | tools/integration_codex_plugin.py | YES |
 | tools/integration_config.py | YES |
 | tools/integration_contract.py | YES |
+| tools/integration_desktop_plugin.py | YES |
 | tools/integration_distribution.py | YES |
 | tools/integration_distribution_entry.py | YES |
 | tools/integration_feature_profiles.py | YES |

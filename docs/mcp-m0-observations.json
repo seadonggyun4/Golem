@@ -431,19 +431,19 @@
     },
     {
       "path": "plugins/golem/.codex-plugin/plugin.json",
-      "sha256": "83a60082f5f5e957702e43fddf1566a8c831a6ef7bf47719e1c9c0dde9775fab"
+      "sha256": "ed1433ed92326d864a00fb2449c22e8032dc16f9f54790a3472f12504c9db83a"
     },
     {
       "path": "plugins/golem/.mcp.json",
-      "sha256": "5f9ec9cb3fab62e65cfb23f35ab38ddce8fac8975d6c62222750e772e31fc1cd"
+      "sha256": "24d8e98653ac1fddeb7456b8d88e9789395d93ae28ea420496795a39a6be9d76"
     },
     {
       "path": "plugins/golem/scripts/launcher.py",
-      "sha256": "53abcaef0d8b2443cd23c9d28e66dc841b51d3b25ac373693eb6a7120ee72170"
+      "sha256": "f35f52225e2aea1fc1090610b5dc9fc1906838d01df18dcc25a527de28104ccf"
     },
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
-      "sha256": "b5f9213a1b3052f9f18c85efcd494db7ca4d0ab0f208570d59a64fc1c744b723"
+      "sha256": "8a2aab5e00223dca128808204950293001548d87022e4cfe7567f91cc20fe5a7"
     },
     {
       "path": "pyproject.toml",
@@ -1939,7 +1939,7 @@
     },
     {
       "path": ".agents/plugins/marketplace.json",
-      "sha256": "98b0590d834d9fc7b54b6a15b0203c27005a778040446d2dbdf48428072c2726"
+      "sha256": "20cc6c4ef878ba8701af885b84b2dbc573497c337a56a2dcb89663777484a128"
     },
     {
       "path": ".clang-format",
@@ -2464,6 +2464,38 @@
     {
       "path": "docs/intent-assurance-qc6-implementation.ko.md",
       "sha256": "8e40cb479d1b78a41ad2351e65671bd2839a7b27f0cf3c5dd12908ced1ab6e59"
+    },
+    {
+      "path": "plugins/golem/.claude-plugin/plugin.json",
+      "sha256": "d32a80be9984955f9c51e48dbc4736bde01537a0b56e02e08a906d9daeb9ec6c"
+    },
+    {
+      "path": "plugins/golem/plugin.json",
+      "sha256": "0b354acc6e0f3b1080c9b51e4de2e6c015940781b1ba159a46e04611f64733e8"
+    },
+    {
+      "path": "plugins/golem/mcp.json",
+      "sha256": "3ee1ee6b6a6570330b534c23f592cca632bde4a1790ca2e04e4f9d6a95b05505"
+    },
+    {
+      "path": "docs/integration-styxis.md",
+      "sha256": "36b09fee16543fc963de578a0094f47e0a5c76ef93934ccd57c2104bffa1e8af"
+    },
+    {
+      "path": "tools/test_integration_plugin_clients.py",
+      "sha256": "206cdf636c15bd103fa2ede9160e002344fd220273fea2fedfa572b9ba3c18bd"
+    },
+    {
+      "path": "tools/integration_desktop_plugin.py",
+      "sha256": "ce11fd16e4f8fec5cd5562bb028860162e2807bee7d63460abc425577bb88330"
+    },
+    {
+      "path": "tools/test_integration_desktop_plugin.py",
+      "sha256": "0eb8512d5c1a1d7128787135924068e750b00ab719c1350dd152ce06018a2ac4"
+    },
+    {
+      "path": "tools/test_integration_codex_marketplace.py",
+      "sha256": "dd34bbd646aff46bfd111b11b0cc027aae37f9c594aa7a389f8dd3d40c596d86"
     }
   ],
   "observations": [
@@ -19126,6 +19158,83 @@
       "source_path": "tools/integration_mutation_contract.py",
       "entrypoint": "NAMES",
       "selector": "intent_completion_finalize"
+    },
+    {
+      "id": "obs-91b7f9ba313190159ee541e64e7e8454b42b7ca476bfb6ee6b8889dac2fb73c8",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/launcher.py",
+      "entrypoint": "client_schema",
+      "selector": null
+    },
+    {
+      "id": "obs-85e0c926e98d46db638183f0facff236b10fd2ac45ceb6d98874c5025f7585d0",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/launcher.py",
+      "entrypoint": "default_state",
+      "selector": null
+    },
+    {
+      "id": "obs-797b1bf913e86d610de60ba6308db0794de03c5d59b2d868fbec45a6ffe68269",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/launcher.py",
+      "entrypoint": "branch:Name(id='client', ctx=Load())",
+      "selector": "codex"
+    },
+    {
+      "id": "obs-e636ee8c8fbc4796c5d61c45583eeebb03b227ac6be21e954eb4484b87969ac3",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/.claude-plugin/plugin.json",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-f283de1c2d96f18e69655176d890d3ffb4f71a420541a266e2405d91057dd47f",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/plugin.json",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-bc75e6567294bd8aaa301ffdcc3b6befdeeb9211a00dab91f761a034e27b3f0d",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/mcp.json",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-1f9b50a3b27f9ad1ea24065343be4d16938baaab82706bee5dcd2d6c5fdef882",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_desktop_plugin.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-609170520a149b478129f34d0c845352259353c18042ce907bc94fcc2dca0212",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_desktop_plugin.py",
+      "entrypoint": "build",
+      "selector": null
+    },
+    {
+      "id": "obs-1af30302bba6921389efd2b45f55e5a37f202bf4c937a25e025e4e13c143cc62",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_desktop_plugin.py",
+      "entrypoint": "main",
+      "selector": null
+    },
+    {
+      "id": "obs-af9460ad22317d2e3688d5a892e55d2a0400e9ed02feeb2c62ce0fd1f7714222",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_desktop_plugin.py",
+      "entrypoint": "manifest",
+      "selector": null
+    },
+    {
+      "id": "obs-9a02f12784c44fe59b1865acec91d737b4614a5d196b46720265adff2d03dabc",
+      "kind": "CLI_ROUTE",
+      "source_path": "tools/integration_desktop_plugin.py",
+      "entrypoint": "main",
+      "selector": "build"
     }
   ],
   "capabilities": [
@@ -52530,17 +52639,29 @@
         "limits": [
           "No receiver identity, policy satisfaction or execution proof"
         ],
-        "notes": "Reviewed base profile/package/skill dependency plus the explicitly listed optional management extension. Actual new Desktop installation, policy apply, service/recovery/approval effects NOT_RUN. External runtime, P7 signing and P4/P5 scheduler/merge obligations remain."
+        "notes": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory."
       },
       "test_refs": [
         {
           "path": "tests/c/cli_integration.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_plugin_clients.py",
+          "selector": "ClientPackaging.test_manifests_share_identity_and_resolve_local_components"
+        },
+        {
+          "path": "tools/test_integration_codex_marketplace.py",
+          "selector": "Adapter.test_legacy_catalog_is_empty_and_product_components_resolve"
         }
       ],
       "doc_refs": [
         {
           "path": "docs/architecture.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-styxis.md",
           "anchor": null
         }
       ],
@@ -52570,17 +52691,29 @@
         "limits": [
           "No receiver identity, policy satisfaction or execution proof"
         ],
-        "notes": "Plugin setup instructions/manifest/transport package; owner connection setup and declared read tools only, no new Work execution."
+        "notes": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory."
       },
       "test_refs": [
         {
           "path": "tests/c/cli_integration.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_plugin_clients.py",
+          "selector": "ClientPackaging.test_manifests_share_identity_and_resolve_local_components"
+        },
+        {
+          "path": "tools/test_integration_codex_marketplace.py",
+          "selector": "Adapter.test_legacy_catalog_is_empty_and_product_components_resolve"
         }
       ],
       "doc_refs": [
         {
           "path": "docs/architecture.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-styxis.md",
           "anchor": null
         }
       ],
@@ -52608,7 +52741,10 @@
         "obs-3b0265a5d4d1a1926d030608fd8ba8cc0dd997f6f787f671e4dd646f6af63b34",
         "obs-954d4470d3d056429891ad329a10b030a6eb48ca559f1872491378fb7acad575",
         "obs-4abb8941b02b6fdf6409317779ea02839354f22526a6172d0d85d81fcfbdddbf",
-        "obs-d203a8790912438334e3c2a2a2d5052fbbb9eef7277a35677c9e5fa0618ab28d"
+        "obs-d203a8790912438334e3c2a2a2d5052fbbb9eef7277a35677c9e5fa0618ab28d",
+        "obs-91b7f9ba313190159ee541e64e7e8454b42b7ca476bfb6ee6b8889dac2fb73c8",
+        "obs-85e0c926e98d46db638183f0facff236b10fd2ac45ceb6d98874c5025f7585d0",
+        "obs-797b1bf913e86d610de60ba6308db0794de03c5d59b2d868fbec45a6ffe68269"
       ],
       "implementation": "IMPLEMENTED",
       "current_routes": [
@@ -52628,17 +52764,29 @@
         "limits": [
           "No receiver identity, policy satisfaction or execution proof"
         ],
-        "notes": "Plugin setup instructions/manifest/transport package; owner connection setup and declared read tools only, no new Work execution."
+        "notes": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory."
       },
       "test_refs": [
         {
           "path": "tests/c/cli_integration.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_plugin_clients.py",
+          "selector": "ClientPackaging.test_existing_codex_record_is_neither_imported_nor_cross_client_accepted"
+        },
+        {
+          "path": "tools/test_integration_codex_marketplace.py",
+          "selector": "Adapter.test_legacy_catalog_is_empty_and_product_components_resolve"
         }
       ],
       "doc_refs": [
         {
           "path": "docs/architecture.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-styxis.md",
           "anchor": null
         }
       ],
@@ -52668,17 +52816,29 @@
         "limits": [
           "No receiver identity, policy satisfaction or execution proof"
         ],
-        "notes": "Plugin setup instructions/manifest/transport package; owner connection setup and declared read tools only, no new Work execution."
+        "notes": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory."
       },
       "test_refs": [
         {
           "path": "tests/c/cli_integration.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_plugin_clients.py",
+          "selector": "ClientPackaging.test_manifests_share_identity_and_resolve_local_components"
+        },
+        {
+          "path": "tools/test_integration_codex_marketplace.py",
+          "selector": "Adapter.test_legacy_catalog_is_empty_and_product_components_resolve"
         }
       ],
       "doc_refs": [
         {
           "path": "docs/architecture.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-styxis.md",
           "anchor": null
         }
       ],
@@ -68391,17 +68551,29 @@
         "limits": [
           "Actual process/network/receiver/policy effects remain unverified at runtime"
         ],
-        "notes": "Plugin setup instructions/manifest/transport package; owner connection setup and declared read tools only, no new Work execution. Potential effect union of this explicit command group. Read facades must constrain native argv and full output; capture/report artifacts are separate writes. Owner AGENTS/install/config changes remain owner-only."
+        "notes": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory."
       },
       "test_refs": [
         {
           "path": "tests/c/cli_integration.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_plugin_clients.py",
+          "selector": "ClientPackaging.test_existing_codex_record_is_neither_imported_nor_cross_client_accepted"
+        },
+        {
+          "path": "tools/test_integration_codex_marketplace.py",
+          "selector": "Adapter.test_legacy_catalog_is_empty_and_product_components_resolve"
         }
       ],
       "doc_refs": [
         {
           "path": "docs/architecture.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-styxis.md",
           "anchor": null
         }
       ],
@@ -79528,6 +79700,213 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Explicit five-operation native host; read operation allowlist and exact D4 action mapping remain separate."
+    },
+    {
+      "id": "surface.plugins.golem..claude-plugin.plugin.json.internal",
+      "observation_ids": [
+        "obs-e636ee8c8fbc4796c5d61c45583eeebb03b227ac6be21e954eb4484b87969ac3"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Base Work profiles still only intersect original D1/D2/D4/resource/helper/host contracts. Installer/D5 delegation preserves exact reviewed plans. The optional management facade is separately pinned and explicitly classified under mcp.management.*; it creates no automatic project or Work grants."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "static lexical/AST source contract"
+        ],
+        "limits": [
+          "No receiver identity, policy satisfaction or execution proof"
+        ],
+        "notes": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_plugin_clients.py",
+          "selector": "ClientPackaging.test_manifests_share_identity_and_resolve_local_components"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-styxis.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Full JSON package declaration reviewed; connection setup only, not runtime grants or client E2E."
+    },
+    {
+      "id": "surface.plugins.golem.plugin.json.internal",
+      "observation_ids": [
+        "obs-f283de1c2d96f18e69655176d890d3ffb4f71a420541a266e2405d91057dd47f"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Base Work profiles still only intersect original D1/D2/D4/resource/helper/host contracts. Installer/D5 delegation preserves exact reviewed plans. The optional management facade is separately pinned and explicitly classified under mcp.management.*; it creates no automatic project or Work grants."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "static lexical/AST source contract"
+        ],
+        "limits": [
+          "No receiver identity, policy satisfaction or execution proof"
+        ],
+        "notes": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_plugin_clients.py",
+          "selector": "ClientPackaging.test_manifests_share_identity_and_resolve_local_components"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-styxis.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Full JSON package declaration reviewed; connection setup only, not runtime grants or client E2E."
+    },
+    {
+      "id": "surface.plugins.golem.mcp.json.internal",
+      "observation_ids": [
+        "obs-bc75e6567294bd8aaa301ffdcc3b6befdeeb9211a00dab91f761a034e27b3f0d"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Base Work profiles still only intersect original D1/D2/D4/resource/helper/host contracts. Installer/D5 delegation preserves exact reviewed plans. The optional management facade is separately pinned and explicitly classified under mcp.management.*; it creates no automatic project or Work grants."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "static lexical/AST source contract"
+        ],
+        "limits": [
+          "No receiver identity, policy satisfaction or execution proof"
+        ],
+        "notes": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_plugin_clients.py",
+          "selector": "ClientPackaging.test_manifests_share_identity_and_resolve_local_components"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-styxis.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Full JSON package declaration reviewed; connection setup only, not runtime grants or client E2E."
+    },
+    {
+      "id": "surface.tools.integration_desktop_plugin.py.internal",
+      "observation_ids": [
+        "obs-1f9b50a3b27f9ad1ea24065343be4d16938baaab82706bee5dcd2d6c5fdef882",
+        "obs-609170520a149b478129f34d0c845352259353c18042ce907bc94fcc2dca0212",
+        "obs-1af30302bba6921389efd2b45f55e5a37f202bf4c937a25e025e4e13c143cc62",
+        "obs-af9460ad22317d2e3688d5a892e55d2a0400e9ed02feeb2c62ce0fd1f7714222"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Existing core, owner, input and evidence contracts; inventory grants none"
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "static lexical/AST source contract"
+        ],
+        "limits": [
+          "No receiver identity, policy satisfaction or execution proof"
+        ],
+        "notes": "Fixed public package construction helpers; no native executable, Work grant, installation or automatic UI."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_desktop_plugin.py",
+          "selector": "DesktopPackaging.test_deterministic_exact_allowlist_and_public_manifest"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-styxis.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Whole-file OWNER_TOOL review; declared symbols/helpers excluded as standalone tools. Concrete named command operations are separate. Target route is backlog classification only."
+    },
+    {
+      "id": "surface.tools.integration_desktop_plugin.py.commands.owner",
+      "observation_ids": [
+        "obs-9a02f12784c44fe59b1865acec91d737b4614a5d196b46720265adff2d03dabc"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Existing typed core/input/owner/evidence contracts; no new grant"
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "static source contract"
+        ],
+        "limits": [
+          "Actual process/network/receiver/policy effects remain unverified at runtime"
+        ],
+        "notes": "Explicit owner-local build CLI: reads a fixed source package and creates one new MCPB via exclusive output open; no install or server/native execution, no overwrite, no policy or authority transfer."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_desktop_plugin.py",
+          "selector": "DesktopPackaging.test_cli_never_overwrites_existing_artifact"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-styxis.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete command grammar and source branch; named CLI operations are not helper exclusions. Existing checks remain mandatory; target route is planning only."
     }
   ]
 }

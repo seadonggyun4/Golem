@@ -67,6 +67,8 @@ flowchart TD
 
 ## MCP
 
+설치 진입점은 **[Styxis Plugin](https://github.com/seadonggyun4/styxis-plugin#install)**입니다. 고정된 Golem 패키지를 선택한 뒤 owner가 검토한 로컬 launcher에 연결합니다. [설치 흐름](docs/integration-styxis.md)
+
 사용할 client의 안내에 따라 검토한 패키지를 설치하고, 기존에 승인된 프로젝트·Work·action에 연결하세요.
 설치만으로 접근·실행 권한이 생기지는 않습니다.
 
@@ -100,7 +102,7 @@ Agent는 판단하고 작업을 수행합니다. MCP 연동 계층은 허용 범
 flowchart TD
     A["외부 Agent: 판단·코드 수정·도구 사용"] -->|"직접 CLI / C API"| C["Native C17 core: 상태·소유권·의존성·증거 검사"]
     A --> L["로컬 Codex 플러그인 / Claude MCPB"]
-    G["GitHub marketplace / Golem Setup"] --> L
+    G["Styxis Plugin / Golem Setup"] --> L
     L -->|"stdio MCP: 승인된 조회·맥락"| I["Python integration layer: D1-D6"]
     A -->|"별도로 opt-in한 지원 hook"| I
     O["소유자가 검토한 client·프로젝트·전달·변경 정책"] --> I

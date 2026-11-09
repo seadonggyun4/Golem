@@ -1,5 +1,7 @@
 # Claude Desktop MCPB 설치·사용 안내
 
+설치 진입점은 [Styxis Plugin](https://github.com/seadonggyun4/styxis-plugin#install)입니다. **Claude Code marketplace 플러그인과 Desktop MCPB는 별개**입니다. 공개 launcher 연결용 MCPB는 검토한 client별 adapter state 경로만 선택하며, 아래 profile MCPB의 D2/D4 구성과 구분합니다. 기존 정책·권한은 launcher에서 유지합니다. [설치 흐름](integration-styxis.md)
+
 프로젝트 관리도 자연어로 요청한다. 사용 가능한 기능은 현재 설치본·profile·승인된 정책의 교집합으로 결정한다. 선택적 관리·resource·helper·host 기능은 별도 정책을 검토한 뒤 활성화하며, 설치 시 기존 승인/producer pin을 자동 이전하지 않는다. [관리 흐름과 지원 범위](mcp-m6-distribution.ko.md#현재-남은-전달-경로-3개-연결)를 참고한다.
 
 설치 버전과 실제 검증 범위는 [현재 검증 기록](workpacks/mcp.md#verification-status)에서 구분해 확인한다. 검토한 기능별 MCPB를 사용하며, 이미 같은 검증본이 연결돼 있으면 재설치하지 않는다. profile은 기존 권한의 상한이다.

@@ -2591,7 +2591,7 @@
       "task"
     ],
     "owner_backlog_count": 83,
-    "checked_functions": 120,
+    "checked_functions": 123,
     "blockers": [],
     "owner_backlog_discharged": false,
     "actual_installation": "NOT_RUN",
@@ -5263,14 +5263,18 @@
       "src/intent/review_host.c",
       "src/intent/review_host.h",
       "tools/integration_intent.py",
-      "tools/intent_product_host.inc"
+      "tools/intent_product_host.inc",
+      "plugins/golem/.claude-plugin/plugin.json",
+      "plugins/golem/plugin.json",
+      "plugins/golem/mcp.json",
+      "tools/integration_desktop_plugin.py"
     ],
     "blockers": [],
     "execution_verified": false
   },
   "reviewed_effects": {
     "blockers": [],
-    "reviewed_capabilities": 1173,
+    "reviewed_capabilities": 1178,
     "execution_verified": false
   },
   "boundary_contracts": {

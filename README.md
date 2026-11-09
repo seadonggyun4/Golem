@@ -69,6 +69,8 @@ flowchart TD
 
 ## MCP
 
+Start at **[Styxis Plugin](https://github.com/seadonggyun4/styxis-plugin#install)**. Choose the pinned Golem package, then connect an owner-reviewed local launcher. [Installation flow](docs/integration-styxis.md)
+
 Follow your client's guide to install a reviewed package and connect it to existing approved projects, Works and actions.
 Installation itself grants no access or execution authority.
 
@@ -102,7 +104,7 @@ The agent plans and performs the work. The MCP integration checks the allowed sc
 flowchart TD
     A["External agent: judgment, edits and tools"] -->|"Direct CLI / C API"| C["Native C17 core: state, ownership, dependencies and evidence"]
     A --> L["Local Codex plugin / Claude MCPB"]
-    G["GitHub marketplace / Golem Setup"] --> L
+    G["Styxis Plugin / Golem Setup"] --> L
     L -->|"stdio MCP: approved reads and context"| I["Python integration layer: D1-D6"]
     A -->|"Separately opt-in supported hooks"| I
     O["Owner-reviewed client, project, disclosure and action policies"] --> I

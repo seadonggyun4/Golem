@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "8b569e3fcf6f0079d3d261dc98879e458840586aee6b724a060d015177a4e500",
-  "selected_source_count": 616,
-  "selected_observation_count": 2380,
-  "selected_capability_count": 1263,
+  "inventory_sha256": "1d9b239d67ce8f1448612aab50f8ef274434de4889600f2ab9d9a123d2ea3717",
+  "selected_source_count": 624,
+  "selected_observation_count": 2391,
+  "selected_capability_count": 1268,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -170,8 +170,11 @@
       "include/golem/workflow_template.h",
       "include/golem/workpack.h",
       "include/golem/workspace.h",
+      "plugins/golem/.claude-plugin/plugin.json",
       "plugins/golem/.codex-plugin/plugin.json",
       "plugins/golem/.mcp.json",
+      "plugins/golem/mcp.json",
+      "plugins/golem/plugin.json",
       "plugins/golem/scripts/launcher.py",
       "plugins/golem/skills/golem-setup/SKILL.md",
       "plugins/golem/skills/golem-work/SKILL.md",
@@ -519,6 +522,7 @@
       "tools/integration_codex_plugin.py",
       "tools/integration_config.py",
       "tools/integration_contract.py",
+      "tools/integration_desktop_plugin.py",
       "tools/integration_distribution.py",
       "tools/integration_distribution_entry.py",
       "tools/integration_feature_profiles.py",
@@ -652,8 +656,11 @@
       "include/golem/workflow_template.h",
       "include/golem/workpack.h",
       "include/golem/workspace.h",
+      "plugins/golem/.claude-plugin/plugin.json",
       "plugins/golem/.codex-plugin/plugin.json",
       "plugins/golem/.mcp.json",
+      "plugins/golem/mcp.json",
+      "plugins/golem/plugin.json",
       "plugins/golem/scripts/launcher.py",
       "plugins/golem/skills/golem-setup/SKILL.md",
       "plugins/golem/skills/golem-work/SKILL.md",
@@ -1001,6 +1008,7 @@
       "tools/integration_codex_plugin.py",
       "tools/integration_config.py",
       "tools/integration_contract.py",
+      "tools/integration_desktop_plugin.py",
       "tools/integration_distribution.py",
       "tools/integration_distribution_entry.py",
       "tools/integration_feature_profiles.py",
@@ -4020,19 +4028,19 @@
     },
     {
       "path": "plugins/golem/.codex-plugin/plugin.json",
-      "sha256": "83a60082f5f5e957702e43fddf1566a8c831a6ef7bf47719e1c9c0dde9775fab"
+      "sha256": "ed1433ed92326d864a00fb2449c22e8032dc16f9f54790a3472f12504c9db83a"
     },
     {
       "path": "plugins/golem/.mcp.json",
-      "sha256": "5f9ec9cb3fab62e65cfb23f35ab38ddce8fac8975d6c62222750e772e31fc1cd"
+      "sha256": "24d8e98653ac1fddeb7456b8d88e9789395d93ae28ea420496795a39a6be9d76"
     },
     {
       "path": "plugins/golem/scripts/launcher.py",
-      "sha256": "53abcaef0d8b2443cd23c9d28e66dc841b51d3b25ac373693eb6a7120ee72170"
+      "sha256": "f35f52225e2aea1fc1090610b5dc9fc1906838d01df18dcc25a527de28104ccf"
     },
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
-      "sha256": "b5f9213a1b3052f9f18c85efcd494db7ca4d0ab0f208570d59a64fc1c744b723"
+      "sha256": "8a2aab5e00223dca128808204950293001548d87022e4cfe7567f91cc20fe5a7"
     },
     {
       "path": "pyproject.toml",
@@ -5528,7 +5536,7 @@
     },
     {
       "path": ".agents/plugins/marketplace.json",
-      "sha256": "98b0590d834d9fc7b54b6a15b0203c27005a778040446d2dbdf48428072c2726"
+      "sha256": "20cc6c4ef878ba8701af885b84b2dbc573497c337a56a2dcb89663777484a128"
     },
     {
       "path": ".clang-format",
@@ -6053,6 +6061,38 @@
     {
       "path": "docs/intent-assurance-qc6-implementation.ko.md",
       "sha256": "8e40cb479d1b78a41ad2351e65671bd2839a7b27f0cf3c5dd12908ced1ab6e59"
+    },
+    {
+      "path": "plugins/golem/.claude-plugin/plugin.json",
+      "sha256": "d32a80be9984955f9c51e48dbc4736bde01537a0b56e02e08a906d9daeb9ec6c"
+    },
+    {
+      "path": "plugins/golem/plugin.json",
+      "sha256": "0b354acc6e0f3b1080c9b51e4de2e6c015940781b1ba159a46e04611f64733e8"
+    },
+    {
+      "path": "plugins/golem/mcp.json",
+      "sha256": "3ee1ee6b6a6570330b534c23f592cca632bde4a1790ca2e04e4f9d6a95b05505"
+    },
+    {
+      "path": "docs/integration-styxis.md",
+      "sha256": "36b09fee16543fc963de578a0094f47e0a5c76ef93934ccd57c2104bffa1e8af"
+    },
+    {
+      "path": "tools/test_integration_plugin_clients.py",
+      "sha256": "206cdf636c15bd103fa2ede9160e002344fd220273fea2fedfa572b9ba3c18bd"
+    },
+    {
+      "path": "tools/integration_desktop_plugin.py",
+      "sha256": "ce11fd16e4f8fec5cd5562bb028860162e2807bee7d63460abc425577bb88330"
+    },
+    {
+      "path": "tools/test_integration_desktop_plugin.py",
+      "sha256": "0eb8512d5c1a1d7128787135924068e750b00ab719c1350dd152ce06018a2ac4"
+    },
+    {
+      "path": "tools/test_integration_codex_marketplace.py",
+      "sha256": "dd34bbd646aff46bfd111b11b0cc027aae37f9c594aa7a389f8dd3d40c596d86"
     }
   ],
   "native_definitions": [
@@ -12230,7 +12270,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 120,
+      "checked_functions": 123,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -14902,14 +14942,18 @@
         "src/intent/review_host.c",
         "src/intent/review_host.h",
         "tools/integration_intent.py",
-        "tools/intent_product_host.inc"
+        "tools/intent_product_host.inc",
+        "plugins/golem/.claude-plugin/plugin.json",
+        "plugins/golem/plugin.json",
+        "plugins/golem/mcp.json",
+        "tools/integration_desktop_plugin.py"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1173,
+      "reviewed_capabilities": 1178,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -23082,7 +23126,7 @@
     {
       "path": "plugins/golem/.codex-plugin/plugin.json",
       "role": "PACKAGE_CONTRACT",
-      "rationale": "Plugin setup instructions/manifest/transport package; owner connection setup and declared read tools only, no new Work execution.",
+      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory.",
       "symbols": [],
       "declarations": [],
       "literal_branches": [],
@@ -23091,7 +23135,7 @@
     {
       "path": "plugins/golem/.mcp.json",
       "role": "PACKAGE_CONTRACT",
-      "rationale": "Plugin setup instructions/manifest/transport package; owner connection setup and declared read tools only, no new Work execution.",
+      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory.",
       "symbols": [],
       "declarations": [],
       "literal_branches": [],
@@ -23100,12 +23144,14 @@
     {
       "path": "plugins/golem/scripts/launcher.py",
       "role": "PACKAGE_CONTRACT",
-      "rationale": "Plugin setup instructions/manifest/transport package; owner connection setup and declared read tools only, no new Work execution.",
+      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory.",
       "symbols": [
         "SetupError",
         "canonical",
+        "client_schema",
         "configure",
         "decode",
+        "default_state",
         "digest",
         "directory",
         "load",
@@ -23121,6 +23167,7 @@
       ],
       "declarations": [
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-launcher')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--client')], keywords=[keyword(arg='choices', value=Name(id='CLIENTS', ctx=Load())), keyword(arg='default', value=Constant(value='codex'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--launcher')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--reviewed-launcher-sha256')])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--state')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
@@ -23170,6 +23217,10 @@
         [
           "Name(id='__name__', ctx=Load())",
           "__main__"
+        ],
+        [
+          "Name(id='client', ctx=Load())",
+          "codex"
         ]
       ],
       "operations": [
@@ -23277,13 +23328,28 @@
           "PYTHON_DECLARATION",
           "validate_launcher",
           null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "client_schema",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "default_state",
+          null
+        ],
+        [
+          "NATIVE_OPERATION",
+          "branch:Name(id='client', ctx=Load())",
+          "codex"
         ]
       ]
     },
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
       "role": "PACKAGE_CONTRACT",
-      "rationale": "Plugin setup instructions/manifest/transport package; owner connection setup and declared read tools only, no new Work execution.",
+      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory.",
       "symbols": [],
       "declarations": [],
       "literal_branches": [],
@@ -57436,6 +57502,74 @@
         ]
       ],
       "operations": []
+    },
+    {
+      "path": "plugins/golem/.claude-plugin/plugin.json",
+      "role": "PACKAGE_CONTRACT",
+      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory.",
+      "symbols": [],
+      "declarations": [],
+      "literal_branches": [],
+      "operations": []
+    },
+    {
+      "path": "plugins/golem/plugin.json",
+      "role": "PACKAGE_CONTRACT",
+      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory.",
+      "symbols": [],
+      "declarations": [],
+      "literal_branches": [],
+      "operations": []
+    },
+    {
+      "path": "plugins/golem/mcp.json",
+      "role": "PACKAGE_CONTRACT",
+      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory.",
+      "symbols": [],
+      "declarations": [],
+      "literal_branches": [],
+      "operations": []
+    },
+    {
+      "path": "tools/integration_desktop_plugin.py",
+      "role": "M6_FEATURE_PACKAGING_OWNER_BRIDGE_OR_SKILL",
+      "rationale": "Public launcher-only deterministic MCPB builder. Reads fixed repository package files, writes a new exclusive output artifact, and reports its hash. Does not install, execute the launcher, grant access or generate Work/native approval.",
+      "symbols": [
+        "build",
+        "main",
+        "manifest"
+      ],
+      "declarations": [
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--output')], keywords=[keyword(arg='required', value=Constant(value=True)), keyword(arg='type', value=Name(id='Path', ctx=Load()))])"
+      ],
+      "literal_branches": [
+        [
+          "Name(id='__name__', ctx=Load())",
+          "__main__"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "build",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "main",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "manifest",
+          null
+        ],
+        [
+          "CLI_ROUTE",
+          "main",
+          "build"
+        ]
+      ]
     }
   ],
   "repository_boundary_reviews": [
@@ -57443,7 +57577,7 @@
       "path": ".agents/plugins/marketplace.json",
       "role": "BUILD_PACKAGE_LICENSE",
       "rationale": "Build/export/package/dependency/license/CI metadata; production FFI sources and plugin contracts reviewed separately. Does not create a daily Work operation.",
-      "contract_sha256": "98b0590d834d9fc7b54b6a15b0203c27005a778040446d2dbdf48428072c2726"
+      "contract_sha256": "20cc6c4ef878ba8701af885b84b2dbc573497c337a56a2dcb89663777484a128"
     },
     {
       "path": ".clang-format",
@@ -63629,7 +63763,7 @@
     },
     {
       "path": "tools/capability_boundary_registry.py",
-      "sha256": "e9ee54eca0d8a004fc56a09ec4aee572e4b658bf8bb5c864dfbf2dc65104aaf3",
+      "sha256": "c86921d4988b57e552feaac22a93822f212c38f666342a8e93c120e52f80c587",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -63737,7 +63871,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "334648cca2d7d676c28abb5341ecbe5947856fa20d35fa8560fb9aab8cb1c2e6",
+      "sha256": "e23538b537310bf8f8af448bd9aa201395971b03ef0791dbf3e34abf6c54e63c",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -63899,7 +64033,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "b555d5cc9ab640f2a343b6869e24f2eb8a121f51994939f318ebf5b2ff8151a4",
+      "sha256": "abe06ed12a631160822c587dfc24e68a9e272d21b26f7b0e0174c1cb099feede",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -63995,7 +64129,7 @@
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "5070b5bcadf565ddaf0e16fb308d8b56b44d0b029b7cdb1f3e7b50f9af4c124d",
+      "sha256": "9f399dba572df2eba5177f3c67d33e4ce36261450f5fa8c09ff43825368bca82",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64007,7 +64141,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "b82ec91a031f3f9e8285dff2eb7378a0153fbbfa696f6890de5d39219ed3361b",
+      "sha256": "b5c8347705b727efdde568b80ebb7cae8356068f9f62824efd3fb2e25d80b11a",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64043,7 +64177,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "850ad1372472e5840f4798af59f9c8d4b4ffec97ed338883e3835ab01faf5e80",
+      "sha256": "931d3fdfbe63475e207d2fdd54bc2747a43b494407d5eb38517e88b9f7a13dd5",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },

@@ -1,0 +1,27 @@
+{
+  "name": "golem",
+  "version": "0.2.8",
+  "description": "Owner-approved local workflow context and evidence.",
+  "author": {
+    "name": "Donggyun Seo",
+    "url": "https://github.com/seadonggyun4/Golem"
+  },
+  "homepage": "https://github.com/seadonggyun4/Golem",
+  "repository": "https://github.com/seadonggyun4/Golem",
+  "license": "PolyForm-Noncommercial-1.0.0",
+  "skills": "./skills/",
+  "mcpServers": {
+    "golem-local": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "-I",
+        "-B",
+        "${CLAUDE_PLUGIN_ROOT}/scripts/launcher.py",
+        "serve",
+        "--client",
+        "claude-code"
+      ]
+    }
+  }
+}

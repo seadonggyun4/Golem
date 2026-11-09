@@ -1269,6 +1269,11 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | m4.tool.intent_read | IMPLEMENTED | MCP_READ | MCP_READ | REVIEWED |
 | m4.tool.intent_qa_accept | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
 | m4.tool.intent_completion_finalize | IMPLEMENTED | MCP_REVIEWED_ACTION | MCP_REVIEWED_ACTION | REVIEWED |
+| surface.plugins.golem..claude-plugin.plugin.json.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.plugin.json.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.mcp.json.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_desktop_plugin.py.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_desktop_plugin.py.commands.owner | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3654,6 +3659,17 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | MCP_TOOL_DECLARATION | tools/integration_service.py | SCHEMAS | intent_read |
 | MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | intent_qa_accept |
 | MCP_TOOL_DECLARATION | tools/integration_mutation_contract.py | NAMES | intent_completion_finalize |
+| PYTHON_DECLARATION | plugins/golem/scripts/launcher.py | client_schema | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/launcher.py | default_state | None |
+| NATIVE_OPERATION | plugins/golem/scripts/launcher.py | branch:Name(id=&#x27;client&#x27;, ctx=Load()) | codex |
+| NATIVE_OPERATION | plugins/golem/.claude-plugin/plugin.json | file-surface | None |
+| NATIVE_OPERATION | plugins/golem/plugin.json | file-surface | None |
+| NATIVE_OPERATION | plugins/golem/mcp.json | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_desktop_plugin.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_desktop_plugin.py | build | None |
+| PYTHON_DECLARATION | tools/integration_desktop_plugin.py | main | None |
+| PYTHON_DECLARATION | tools/integration_desktop_plugin.py | manifest | None |
+| CLI_ROUTE | tools/integration_desktop_plugin.py | main | build |
 
 ## Blockers
 

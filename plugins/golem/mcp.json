@@ -1,0 +1,18 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "golem-local": {
+      "type": "stdio",
+      "command": "python3",
+      "cwd": "./",
+      "args": [
+        "-I",
+        "-B",
+        "scripts/launcher.py",
+        "serve",
+        "--client",
+        "portable"
+      ]
+    }
+  }
+}

@@ -144,9 +144,11 @@ class Adapter(unittest.TestCase):
         self.assertEqual(notice['state'], 'SETUP_REQUIRED')
         self.assertNotIn(str(self.root), result.stderr.decode())
 
-    def test_catalog_is_public_and_skill_and_branding_resolve(self):
+    def test_legacy_catalog_is_empty_and_product_components_resolve(self):
         catalog = json.loads((ROOT / '.agents/plugins/marketplace.json').read_text())
-        package = ROOT / catalog['plugins'][0]['source']['path']
+        self.assertEqual(catalog['name'], 'golem')
+        self.assertEqual(catalog['plugins'], [])
+        package = ROOT / 'plugins/golem'
         manifest = json.loads((package / '.codex-plugin/plugin.json').read_text())
         skill = manifest['extensions']['com.openai']['onboardingSkill']
         self.assertTrue((package / skill).is_file())
