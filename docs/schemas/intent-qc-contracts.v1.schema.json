@@ -3674,21 +3674,27 @@
         },
         "transfer_policy_sha256": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^[0-9a-f]{64}$",
+          "maxLength": 64
         },
         "mutation_policy_sha256": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^[0-9a-f]{64}$",
+          "maxLength": 64
         },
         "registration_sha256": {
           "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
+          "pattern": "^[0-9a-f]{64}$",
+          "maxLength": 64
         },
         "repository": {
           "type": "string",
           "minLength": 1,
           "maxLength": 4096,
-          "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+          "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+          "not": {
+            "pattern": "[\\x00-\\x1f\\x7f]"
+          }
         },
         "git": {
           "type": "object",
@@ -3702,11 +3708,15 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 4096,
-              "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+              "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+              "not": {
+                "pattern": "[\\x00-\\x1f\\x7f]"
+              }
             },
             "sha256": {
               "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
+              "pattern": "^[0-9a-f]{64}$",
+              "maxLength": 64
             }
           }
         },
@@ -3722,11 +3732,15 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 4096,
-              "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+              "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+              "not": {
+                "pattern": "[\\x00-\\x1f\\x7f]"
+              }
             },
             "sha256": {
               "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
+              "pattern": "^[0-9a-f]{64}$",
+              "maxLength": 64
             }
           }
         },
@@ -3749,23 +3763,33 @@
               "binding_id": {
                 "type": "string",
                 "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
-                "maxLength": 64
+                "maxLength": 64,
+                "not": {
+                  "pattern": "[^A-Za-z0-9_-]"
+                }
               },
               "project_id": {
                 "type": "string",
                 "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
-                "maxLength": 64
+                "maxLength": 64,
+                "not": {
+                  "pattern": "[^A-Za-z0-9_-]"
+                }
               },
               "work_id": {
                 "type": "string",
                 "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
-                "maxLength": 64
+                "maxLength": 64,
+                "not": {
+                  "pattern": "[^A-Za-z0-9_-]"
+                }
               },
               "operation": {
                 "enum": [
                   "assess",
                   "current",
                   "resume",
+                  "enrollment-inspect",
                   "accept",
                   "finalize"
                 ]
@@ -3776,7 +3800,8 @@
               },
               "action_sha256": {
                 "type": "string",
-                "pattern": "^[0-9a-f]{64}$"
+                "pattern": "^[0-9a-f]{64}$",
+                "maxLength": 64
               },
               "packet": {
                 "type": "object",
@@ -3790,11 +3815,15 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 4096,
-                    "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+                    "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+                    "not": {
+                      "pattern": "[\\x00-\\x1f\\x7f]"
+                    }
                   },
                   "sha256": {
                     "type": "string",
-                    "pattern": "^[0-9a-f]{64}$"
+                    "pattern": "^[0-9a-f]{64}$",
+                    "maxLength": 64
                   }
                 }
               },
@@ -3810,7 +3839,10 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 4096,
-                    "pattern": "^[^\\x00-\\x1f\\x7f]+$"
+                    "pattern": "^[^\\x00-\\x1f\\x7f]+$",
+                    "not": {
+                      "pattern": "[\\x00-\\x1f\\x7f]"
+                    }
                   },
                   "identity": {
                     "type": "object",
@@ -3837,7 +3869,8 @@
             }
           },
           "minItems": 1,
-          "maxItems": 32
+          "maxItems": 32,
+          "uniqueItems": true
         },
         "producer": {
           "type": "object",
@@ -3848,7 +3881,8 @@
           "properties": {
             "integration_intent.py": {
               "type": "string",
-              "pattern": "^[0-9a-f]{64}$"
+              "pattern": "^[0-9a-f]{64}$",
+              "maxLength": 64
             }
           }
         }

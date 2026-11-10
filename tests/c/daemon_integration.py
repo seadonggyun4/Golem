@@ -9,6 +9,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest import mock
 
 CLI = str(Path(sys.argv[1]).resolve())
 ROOT = str(Path(sys.argv[2]).resolve())
@@ -64,11 +65,17 @@ class DaemonIntegration(unittest.TestCase):
 
     def wait_for(self, condition):
         deadline = time.monotonic() + 8
-        while time.monotonic() < deadline:
+        while True:
             value = condition()
             if value:
                 return value
-            time.sleep(0.02)
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            # Observe once after the final bounded sleep. Checking the clock
+            # first can miss completion during that sleep and report a timeout
+            # whose diagnostic status is already complete.
+            time.sleep(min(0.02, remaining))
         self.fail(f"Timed out: jobs={self.status()}, processes={[p.poll() for p in self.children]}")
 
     def worker(self, mode):
@@ -243,6 +250,50 @@ while True:
         self.assertEqual(self.status()[0]["state"], "attention")
         time.sleep(2.2)
         self.assertFalse((job / "evidence/descendant-survived").exists())
+
+
+class DaemonWaitContract(unittest.TestCase):
+    """Deadline observations without starting a daemon or issuing a command."""
+
+    def fixture(self):
+        case = DaemonIntegration("test_foreground_lock_and_live_submission")
+        case.children = []
+        case.status = mock.Mock(return_value=[{"state": "busy"}])
+        return case
+
+    def test_observes_completion_after_final_bounded_sleep(self):
+        case = self.fixture()
+        condition = mock.Mock(side_effect=[False, "complete"])
+        with mock.patch.object(time, "monotonic", side_effect=[0.0, 7.99]), \
+                mock.patch.object(time, "sleep") as sleep:
+            self.assertEqual(case.wait_for(condition), "complete")
+        self.assertEqual(condition.call_count, 2)
+        sleep.assert_called_once()
+        self.assertAlmostEqual(sleep.call_args.args[0], 0.01)
+        case.status.assert_not_called()
+
+    def test_unfinished_condition_still_times_out_at_eight_seconds(self):
+        case = self.fixture()
+        condition = mock.Mock(return_value=False)
+        with mock.patch.object(time, "monotonic", side_effect=[0.0, 7.99, 8.0]), \
+                mock.patch.object(time, "sleep") as sleep:
+            with self.assertRaisesRegex(AssertionError, "Timed out:.*busy"):
+                case.wait_for(condition)
+        self.assertEqual(condition.call_count, 2)
+        sleep.assert_called_once()
+        self.assertAlmostEqual(sleep.call_args.args[0], 0.01)
+        case.status.assert_called_once_with()
+
+    def test_observation_error_is_not_retried(self):
+        case = self.fixture()
+        condition = mock.Mock(side_effect=RuntimeError("observation failed"))
+        with mock.patch.object(time, "monotonic", return_value=0.0), \
+                mock.patch.object(time, "sleep") as sleep:
+            with self.assertRaisesRegex(RuntimeError, "observation failed"):
+                case.wait_for(condition)
+        condition.assert_called_once_with()
+        sleep.assert_not_called()
+        case.status.assert_not_called()
 
 
 if __name__ == "__main__":

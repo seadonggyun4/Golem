@@ -114,6 +114,13 @@ CI creates separate Linux/macOS full dev/release/ASan and diagnostic artifacts.
 Hosted diagnostic jobs exercise injection, not Codex sandbox isolation. Real
 sandbox observations are a separate local evidence set.
 
+The daemon fixture polls a condition before testing its remaining eight-second
+budget and caps each sleep at that remainder. This retains a final observation
+at the deadline instead of missing a completion during the last sleep. Synthetic
+clock cases cover that boundary, a genuinely unfinished condition, and observation
+errors without retries. The daemon CTest limit remains 120 seconds; neither the
+native runtime nor its approval and timeout contracts are changed.
+
 ## Research rationale
 
 Reviewed 2026-09-26. Relevant sections were reviewed, not every book chapter or

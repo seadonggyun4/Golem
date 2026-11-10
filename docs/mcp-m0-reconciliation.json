@@ -1,6 +1,6 @@
 {
-  "inventory_sha256": "43a08cec3682afabd8abb72feebb18ac2838d84bd34b0580a561c2398e9ad0d6",
-  "selected_source_count": 635,
+  "inventory_sha256": "beded9c1bae898d066051813aeac1aac79280294e49d01547c6b932c6899deeb",
+  "selected_source_count": 636,
   "selected_observation_count": 2404,
   "selected_capability_count": 1270,
   "selected_inventory_complete": true,
@@ -6120,7 +6120,7 @@
     },
     {
       "path": "docs/intent-assurance-owner-bootstrap.ko.md",
-      "sha256": "9358b017322932b1e5e168c12da87563054a05a9c40bc4bd6b393081361e39be"
+      "sha256": "8b6d9ea54e6e035cb68692b7febdadf30b0d559aa5cd1eda127647010badda7b"
     },
     {
       "path": "docs/mcp-managed-bootstrap.ko.md",
@@ -6141,6 +6141,10 @@
     {
       "path": "tests/c/discovery_integration.py",
       "sha256": "f261617456858c71b5c8756323e40a0ee772f18488aab8e22cf47a0e6a7eba97"
+    },
+    {
+      "path": "tools/test_intent_schema_golden.py",
+      "sha256": "1ffe34cb5903d5a8f9d60b4fd04032f34b68ed91ef5db1b06e0dc3d08d3e2f6d"
     }
   ],
   "native_definitions": [
@@ -64045,6 +64049,42 @@
       "role": "QC_DOCUMENTATION_FIXTURE",
       "rationale": "Fixed QC contract documentation or isolated synthetic test/expected fixture; never runtime authority or release PASS.",
       "contract_sha256": null
+    },
+    {
+      "path": "tests/fixtures/intent/schema-golden/integration-intent-host--digest-newline.json",
+      "role": "QC_DOCUMENTATION_FIXTURE",
+      "rationale": "Fixed QC contract documentation or isolated synthetic test/expected fixture; never runtime authority or release PASS.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/fixtures/intent/schema-golden/integration-intent-host--duplicate-binding.json",
+      "role": "QC_DOCUMENTATION_FIXTURE",
+      "rationale": "Fixed QC contract documentation or isolated synthetic test/expected fixture; never runtime authority or release PASS.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/fixtures/intent/schema-golden/integration-intent-host--enrollment-inspect.json",
+      "role": "QC_DOCUMENTATION_FIXTURE",
+      "rationale": "Fixed QC contract documentation or isolated synthetic test/expected fixture; never runtime authority or release PASS.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/fixtures/intent/schema-golden/integration-intent-host--id-newline.json",
+      "role": "QC_DOCUMENTATION_FIXTURE",
+      "rationale": "Fixed QC contract documentation or isolated synthetic test/expected fixture; never runtime authority or release PASS.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/fixtures/intent/schema-golden/integration-intent-host--path-newline.json",
+      "role": "QC_DOCUMENTATION_FIXTURE",
+      "rationale": "Fixed QC contract documentation or isolated synthetic test/expected fixture; never runtime authority or release PASS.",
+      "contract_sha256": null
+    },
+    {
+      "path": "tests/fixtures/intent/schema-golden/integration-intent-host--unsupported-enroll.json",
+      "role": "QC_DOCUMENTATION_FIXTURE",
+      "rationale": "Fixed QC contract documentation or isolated synthetic test/expected fixture; never runtime authority or release PASS.",
+      "contract_sha256": null
     }
   ],
   "development_reviews": [
@@ -64074,7 +64114,7 @@
     },
     {
       "path": "tools/capability_boundary_registry.py",
-      "sha256": "5ac05faa2cbd8ce2fd8665752c869f9dfc2509df3de8db873a545a3461c6612d",
+      "sha256": "3d250f198f986103d36664b7f638c61a0c85f9c31d6b3002ee11b285e5e47d09",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64434,13 +64474,13 @@
     },
     {
       "path": "tools/capability_repository.py",
-      "sha256": "6435e15915211b862b2264e56c6560f22419659fafb18fb788bb6806e1065206",
+      "sha256": "e526edb197b0192f24bfcd5863f7493dbbfd735c635dd9e85cb71226c52aec96",
       "shape_sha256": "6d9af9283d17b17d9b3a95815343435f861de9c53cb32ba70bf944c54b761947",
       "role": "M0_STATIC_ANALYSIS"
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "bd29dd2733aee3334cd68a5659d5520f5fcf50f1204086328059d1b4b294dc4b",
+      "sha256": "8c4ae6136d44531daaa7a33f9413f15ada217ffa59fa69b8c60f2dd7e1de60b7",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64452,7 +64492,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "70e87e8e89085743a752c48e95f22824a493d5e31ba9f0885c74dd4b5a5145ea",
+      "sha256": "d3533b401b002533d0e2a626732d438059e81b7fe5b47040533ecc74127aa81a",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },

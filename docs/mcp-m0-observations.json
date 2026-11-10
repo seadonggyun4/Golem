@@ -2519,7 +2519,7 @@
     },
     {
       "path": "docs/intent-assurance-owner-bootstrap.ko.md",
-      "sha256": "9358b017322932b1e5e168c12da87563054a05a9c40bc4bd6b393081361e39be"
+      "sha256": "8b6d9ea54e6e035cb68692b7febdadf30b0d559aa5cd1eda127647010badda7b"
     },
     {
       "path": "docs/mcp-managed-bootstrap.ko.md",
@@ -2540,6 +2540,10 @@
     {
       "path": "tests/c/discovery_integration.py",
       "sha256": "f261617456858c71b5c8756323e40a0ee772f18488aab8e22cf47a0e6a7eba97"
+    },
+    {
+      "path": "tools/test_intent_schema_golden.py",
+      "sha256": "1ffe34cb5903d5a8f9d60b4fd04032f34b68ed91ef5db1b06e0dc3d08d3e2f6d"
     }
   ],
   "observations": [
@@ -79737,6 +79741,10 @@
       "test_refs": [
         {
           "path": "tools/test_integration_intent.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_intent_schema_golden.py",
           "selector": null
         }
       ],

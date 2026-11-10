@@ -3805,6 +3805,78 @@
       "native_status": "NOT_RUN",
       "context_required": true,
       "scope": "STRUCTURAL_ONLY_SYNTHETIC_REFS"
+    },
+    {
+      "id": "integration-intent-host--enrollment-inspect",
+      "file": "integration-intent-host--enrollment-inspect.json",
+      "sha256": "3151e673ac866f1d0f288c7b2443ebf478aac80302f0fa596f4bd48dc7c6e8c0",
+      "definition": "integration-intent-host",
+      "shape_accept": true,
+      "native_probe": null,
+      "native_accept": null,
+      "native_status": "NOT_RUN",
+      "context_required": true,
+      "scope": "STRUCTURAL_ONLY_SYNTHETIC_REFS"
+    },
+    {
+      "id": "integration-intent-host--unsupported-enroll",
+      "file": "integration-intent-host--unsupported-enroll.json",
+      "sha256": "4dfe46738c095c85fe57bbad4ee0b9265f001440b02635ce2d5ba49b60554177",
+      "definition": "integration-intent-host",
+      "shape_accept": false,
+      "native_probe": null,
+      "native_accept": null,
+      "native_status": "NOT_RUN",
+      "context_required": true,
+      "scope": "STRUCTURAL_ONLY_SYNTHETIC_REFS"
+    },
+    {
+      "id": "integration-intent-host--duplicate-binding",
+      "file": "integration-intent-host--duplicate-binding.json",
+      "sha256": "b6043508f614f6978ea45603ff34ebc3e805eadb13ab058dcd584aa28024dd5a",
+      "definition": "integration-intent-host",
+      "shape_accept": false,
+      "native_probe": null,
+      "native_accept": null,
+      "native_status": "NOT_RUN",
+      "context_required": true,
+      "scope": "STRUCTURAL_ONLY_SYNTHETIC_REFS"
+    },
+    {
+      "id": "integration-intent-host--digest-newline",
+      "file": "integration-intent-host--digest-newline.json",
+      "sha256": "81912d2e77717b8fce6dfd21ed941cd10158b871ce367c8e0b8798d82cd394ed",
+      "definition": "integration-intent-host",
+      "shape_accept": false,
+      "native_probe": null,
+      "native_accept": null,
+      "native_status": "NOT_RUN",
+      "context_required": true,
+      "scope": "STRUCTURAL_ONLY_SYNTHETIC_REFS"
+    },
+    {
+      "id": "integration-intent-host--id-newline",
+      "file": "integration-intent-host--id-newline.json",
+      "sha256": "4bf6bc9a670cde75d68cd84284413584f0841a8331655ce687840a2472796a4f",
+      "definition": "integration-intent-host",
+      "shape_accept": false,
+      "native_probe": null,
+      "native_accept": null,
+      "native_status": "NOT_RUN",
+      "context_required": true,
+      "scope": "STRUCTURAL_ONLY_SYNTHETIC_REFS"
+    },
+    {
+      "id": "integration-intent-host--path-newline",
+      "file": "integration-intent-host--path-newline.json",
+      "sha256": "fc89a061a22e65f022ff2d7dd6ec0d9fbf9f78de76eee34d62237c91acf3c7ca",
+      "definition": "integration-intent-host",
+      "shape_accept": false,
+      "native_probe": null,
+      "native_accept": null,
+      "native_status": "NOT_RUN",
+      "context_required": true,
+      "scope": "STRUCTURAL_ONLY_SYNTHETIC_REFS"
     }
   ],
   "required_definitions": [
@@ -3853,8 +3925,8 @@
     "src/intent/review.c": "b2f1d60cee30849dc822836de1d991b0a175e4d03d5349032f670abbd1357c2b",
     "src/intent/review_host.c": "bf4d82816c06bcd16561e45b5ae81ea6e9e8c4c16fd0cd5dbc56eb755a00b32a",
     "src/intent/schema.c": "8533fdc2f2b7b17c76fbe5c24133ef82778b2a98dcd5ccdc15183f078bd3c898",
-    "tools/integration_contract.py": "e2c5e3ec5142f888fd4fcf6f2bd1193fd77ff52f4f4234e54df7ec997aac6fdb",
-    "tools/integration_intent.py": "cc2264a72b8b48c79baa5d5e9008efba94584a955e92ad57d49deba5f57a2513",
+    "tools/integration_contract.py": "f0d08c56e0834580c67e47ae53e6cf174715a76aa5b64d4e7e51ddcb5aac9287",
+    "tools/integration_intent.py": "db8faae602e324092f334b84b5ca080ec812a7c36b91b833d56f778accffd339",
     "tools/intent_product_host.inc": "c196a7931fe86ad16a214e65a98ea0d9e62e6149fa1a69b27ca4761d483b7f2f"
   }
 }

@@ -95,3 +95,22 @@ fixture 외 기존 Work나 설치 설정은 입력으로 받지 않는다. 테�
 메타데이터 관측을 할 수 있으며, 기존 제품 gate·QA 수락·완료 조건은 바꾸지 않는다.
 review bundle의 native 유효기간은 그대로 적용한다. 만료 시 새 owner 선택 없이는
 자동 갱신하거나 다시 호출하지 않는다.
+
+## 공개 schema와 관측 계약 대조
+
+공개 QC schema의 `integration-intent-host` binding에도 `enrollment-inspect`를
+명시한다. 중복 binding, 64자 digest 한도, ASCII ID와 경로의 제어문자 거부는
+기존 runtime 규칙과 맞춘다. 정상 Unicode 경로와 기존 `action_id` 문자열 규칙은
+유지한다. `product-host-packet`의 operation은 늘리지 않으며, 별도 private bootstrap
+packet을 공개 제품 packet이나 승인 계약으로 바꾸지 않는다.
+
+원래 golden 324개의 bytes와 기대값을 보존하고, 관측 양성·미지원 enroll·중복 binding·
+digest/ID/경로 말단 개행의 6개 구조 사례를 추가했다. `test_intent_schema_golden.py`는
+이 구조 판정을 실제 Python runtime과 비교한다. 형식 통과는 owner 선택이나 전달
+승인이 아니며, 위의 `INTENT_INSPECTION_ONLY`·정확한 action 검사는 별도로 유지한다.
+
+2026-11-10 격리 확인: 구조 동등성 5개와 기존 Intent 경계 14개, 문맥 collector 6개가
+통과했다. 전체 golden 330개는 구조 295개와 native probe 지원 61개를 대조했으며,
+문맥이 필요한 native 269개는 `NOT_RUN`으로 남겼다. 따라서 대조 결과는 `PARTIAL`,
+`authority_verified=false`이며 전체 native 의미 동등성·현재 QA PASS·완료를 주장하지 않는다.
+설치·정책·기존 Work·승인·증거는 이 검증의 변경 대상이 아니다.
