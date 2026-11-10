@@ -1,9 +1,12 @@
 """D5 shared admission, kernel-held participation and immutable clearance reads."""
 from contextlib import contextmanager
+import copy
 import fcntl
 import os
 from pathlib import Path
 import stat
+import threading
+import time
 import uuid
 
 import execution_record as records
@@ -127,6 +130,87 @@ def participation(registry, bindings):
         yield path.name
     finally:
         os.close(fd)
+
+
+class CallAdmission:
+    """One retained D5 participant per used stdio connection, not discovery.
+
+    The existing exclusive registry admission and fence remain authoritative.
+    Close rejects new work, waits for in-flight calls, then releases only our FD.
+    A failed/partial admission is terminal; its files are never removed/reused.
+    """
+    def __init__(self, registry, bindings):
+        self.registry = registry
+        self.bindings = copy.deepcopy(bindings)
+        self._condition = threading.Condition()
+        self._participant = None
+        self._inflight = 0
+        self._closed = False
+        self._failure = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *unused):
+        self.close()
+
+    def _admit(self):
+        # Called under the connection mutex, before any service/registry lock.
+        # Only registry-lock contention BEFORE participation has effects waits.
+        deadline = time.monotonic() + 5
+        while True:
+            candidate = participation(self.registry, self.bindings)
+            try:
+                candidate.__enter__()
+            except c.IntegrationError as error:
+                if error.code == 'REGISTRY_BUSY' and time.monotonic() < deadline:
+                    time.sleep(0.05)
+                    continue
+                raise
+            self._participant = candidate
+            return
+
+    @contextmanager
+    def operation(self):
+        with self._condition:
+            c.require(not self._closed, 'PARTICIPATION_CLOSED')
+            c.require(self._failure is None, self._failure or 'PARTICIPATION_ADMISSION_FAILED')
+            if self._participant is None:
+                try:
+                    self._admit()
+                except BaseException as error:
+                    self._failure = getattr(error, 'code', 'PARTICIPATION_ADMISSION_FAILED')
+                    raise
+            self._inflight += 1
+        try:
+            yield
+        finally:
+            with self._condition:
+                self._inflight -= 1
+                self._condition.notify_all()
+
+    def close(self):
+        with self._condition:
+            self._closed = True
+            while self._inflight:
+                self._condition.wait()
+            participant, self._participant = self._participant, None
+        if participant is not None:
+            participant.__exit__(None, None, None)
+
+
+class AdmittedService:
+    """Metadata passes through; every actual call enters shared D5 admission."""
+    def __init__(self, service, admission):
+        self._service = service
+        self.admission = admission
+
+    def __getattr__(self, name):
+        return getattr(self._service, name)
+
+    def call(self, name, args):
+        with self.admission.operation():
+            return self._service.call(name, args)
 
 
 def quiet(registry, project_id):

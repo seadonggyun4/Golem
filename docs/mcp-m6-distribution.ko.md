@@ -1,5 +1,19 @@
 # M6 Setup/업무 스킬·기능 profile·패키징·설치·재로딩
 
+## 참여 기록 수명주기 수정 (2026-11-10)
+
+공통 stdio·직접 D4·관리·Owner 진입점의 D4 경로는 첫 실제 도구 호출에서만 기존 D5 참여
+검사를 수행한다. 초기화·도구 목록 조회·재연결만으로 기록을 만들지 않으며,
+registry 128개 상한·maintenance fence·기존 승인·실패 후 자동 재실행 금지는 유지한다.
+동시 최초 호출은 한 참여를 공유하고 종료는 처리 중 호출을 기다린 뒤 자신의 lock만 닫는다.
+
+Codex·Claude의 새 Desktop 대화에서 정의 탐색 시 참여 증가 0개, 기존 권한의
+세 조회를 수행한 연결별 증가 1개를 확인했다. 제품 실행·QA·완료는 HOLD다.
+공개 main의 참여 수정과 설치된 개발 snapshot의 다른 기능은 구분한다.
+범위·회귀·실제 관측·미검증 사항은 [참여 수명주기](mcp-participation-lifecycle.ko.md)를 따른다.
+
+아래 기능별 버전·설치 결과는 해당 개발 단계의 역사적 기록이다.
+
 ## 현재: 남은 전달 경로 3개 연결
 
 선택적 공통 관리 정책에 `adapter_convert`, `adapter_probe`, `candidate_serve`와 별도 승인 `candidate_stop`을 추가했다. 관리 도구는 5개이며 `management_host_status`가 연결이 소유한 프로세스 상태·관측된 socket identity를 알려준다. native 명령 연결은 17개, 중지 제어를 포함한 관리 operation은 18개다.

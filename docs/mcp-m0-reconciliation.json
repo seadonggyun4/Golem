@@ -1,7 +1,7 @@
 {
-  "inventory_sha256": "1d9b239d67ce8f1448612aab50f8ef274434de4889600f2ab9d9a123d2ea3717",
-  "selected_source_count": 624,
-  "selected_observation_count": 2391,
+  "inventory_sha256": "8a7c83d1242009d3f1ce8b55147678f98423535ec7a332e4458db0b1e4446da9",
+  "selected_source_count": 626,
+  "selected_observation_count": 2400,
   "selected_capability_count": 1268,
   "selected_inventory_complete": true,
   "selected_blockers": [],
@@ -3632,7 +3632,7 @@
     },
     {
       "path": "tools/integration_mutation_mcp.py",
-      "sha256": "00d031f2babb4c19476642ee7c0e5e237650350bab3e4109857e90b2c31948b7"
+      "sha256": "745604aaa52a547f1a9723b9459a2f14a17db2e734e474bcf2f7a20e32308b6c"
     },
     {
       "path": "tools/integration_backend.py",
@@ -5204,7 +5204,7 @@
     },
     {
       "path": "tools/integration_lifecycle.py",
-      "sha256": "6582ae60458976c6b1701532da010a03d6395ca4883215141a489885ac672ec4"
+      "sha256": "acbe1b63e6a47ce5b47d03a79836a1a2257e3f70cbd344ae69e23c37a46ce70a"
     },
     {
       "path": "tools/integration_mcp.py",
@@ -5776,11 +5776,11 @@
     },
     {
       "path": "tools/integration_distribution_entry.py",
-      "sha256": "6bf683995dbc9189b7861a392df2c1d0e1b7944bcb1498cf76392737968c960c"
+      "sha256": "5527af3196f70f40d64ecef181fd5ed3acd374247ed219236fb8de27475c05c6"
     },
     {
       "path": "tools/integration_owner_maintenance.py",
-      "sha256": "a82f7f88a2a75a35161b666ff66077f9b481bd0c2cdfa0149d088a7fe260f2ee"
+      "sha256": "068267621752a4d8c1aa2ba129c797df39b0ef17a84483cfe230922995ff763c"
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
@@ -5796,15 +5796,15 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "0ebca3d6b7b3c6e41fd6cd1864dd75bb2aea54397d134a48f1242a48b9c5c2ec"
+      "sha256": "8c1371affc7dd3a6e30ddc653f17603439e1267d87e6d43a4629d274b27be5c9"
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "04c336247391b4b025c27fedfa29fefbb3f64d34bc97f7095187f3179221dd45"
+      "sha256": "6056e69065301b8b073f302da2fdeaf441ffea3d70a9cbf3b68334cdecb4bf18"
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "0463dd24337abeb33db5fe3cc02d4819e79b8830f440233d647958a79fa61579"
+      "sha256": "8377bbe3f8fe96697039d7176067292199abfeac362a28312fbfd9568db4e28f"
     },
     {
       "path": "tools/integration_owner_review.py",
@@ -5816,11 +5816,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "9b07b4e66a5572f7344dc714087e1a2b2cf0e9bb8c9cf8b6bc88251ea9884bfc"
+      "sha256": "4a3950234c45b5303150854af9a71cd2bc2998f50f56270dda9123dd07785a99"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "738695c1f725eb2ca732aa8fd257fedba152f0f9d0d879a7db0ad576970a64b1"
+      "sha256": "19eb2af844890b81e0058eb13a3f2cc706ee22a7ba73dc49ccb1f781a02cc82c"
     },
     {
       "path": "include/golem/workpack.h",
@@ -6093,6 +6093,14 @@
     {
       "path": "tools/test_integration_codex_marketplace.py",
       "sha256": "dd34bbd646aff46bfd111b11b0cc027aae37f9c594aa7a389f8dd3d40c596d86"
+    },
+    {
+      "path": "tools/test_integration_participation.py",
+      "sha256": "5dc006ba7ddd7a1082e917c376418de5d81c801253a9568a8a82172b1e545ba7"
+    },
+    {
+      "path": "docs/mcp-participation-lifecycle.ko.md",
+      "sha256": "e23f90ed2ebee9382b5897e85141711c5bc77346088d7b7af44256d8e44edd08"
     }
   ],
   "native_definitions": [
@@ -12270,7 +12278,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 123,
+      "checked_functions": 136,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -46923,6 +46931,17 @@
       "role": "OWNER_TOOL",
       "rationale": "Explicit owner management/policy/install/update module; API helpers are host internal; CLI operations listed separately. Existing checks are required; no new MCP grant.",
       "symbols": [
+        "AdmittedService",
+        "AdmittedService.__getattr__",
+        "AdmittedService.__init__",
+        "AdmittedService.call",
+        "CallAdmission",
+        "CallAdmission.__enter__",
+        "CallAdmission.__exit__",
+        "CallAdmission.__init__",
+        "CallAdmission._admit",
+        "CallAdmission.close",
+        "CallAdmission.operation",
         "clearance",
         "current",
         "fence",
@@ -46935,6 +46954,10 @@
       ],
       "declarations": [],
       "literal_branches": [
+        [
+          "Attribute(value=Name(id='error', ctx=Load()), attr='code', ctx=Load())",
+          "REGISTRY_BUSY"
+        ],
         [
           "Name(id='tool', ctx=Load())",
           "document_submit"
@@ -46957,6 +46980,51 @@
         ]
       ],
       "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "AdmittedService.__getattr__",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "AdmittedService.__init__",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "AdmittedService.call",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "CallAdmission.__enter__",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "CallAdmission.__exit__",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "CallAdmission.__init__",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "CallAdmission._admit",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "CallAdmission.close",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "CallAdmission.operation",
+          null
+        ],
         [
           "PYTHON_DECLARATION",
           "clearance",
@@ -54057,6 +54125,7 @@
         "_configure_startup",
         "_startup_pause",
         "configure",
+        "connection",
         "environment",
         "main",
         "serve"
@@ -54373,10 +54442,6 @@
         [
           "Name(id='reason', ctx=Load())",
           "EXIT"
-        ],
-        [
-          "Subscript(value=Attribute(value=Name(id='base', ctx=Load()), attr='profile', ctx=Load()), slice=Constant(value='family'), ctx=Load())",
-          "D4"
         ],
         [
           "Subscript(value=Attribute(value=Name(id='sys', ctx=Load()), attr='argv', ctx=Load()), slice=Constant(value=1), ctx=Load())",
@@ -63871,7 +63936,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "e23538b537310bf8f8af448bd9aa201395971b03ef0791dbf3e34abf6c54e63c",
+      "sha256": "d33e11b6e3ac2339b83a41af2c033c83d2792f783ca0fcea517bb9a44e9d9829",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -63943,7 +64008,7 @@
     },
     {
       "path": "tools/capability_m1_registry.py",
-      "sha256": "64e0b8cc38a00b76f4c73fcce2e24e98ff79c24b804b04bf392ba2d16eec1e32",
+      "sha256": "6133ed4c52be6eaf3ad308f32fd686a388aad0889133cd163fac6dee1537d3c0",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -63979,7 +64044,7 @@
     },
     {
       "path": "tools/capability_m3_registry.py",
-      "sha256": "6b8dd1a59b93e27b73b3daa14740121d51eb1923cbbcec3945182a15af3f5d86",
+      "sha256": "1b97bef6124f6eea9d0486084f6fa1dd16981c70690cb26c10e40d3ec8761fa7",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -63997,7 +64062,7 @@
     },
     {
       "path": "tools/capability_m4_registry.py",
-      "sha256": "6943e11f7bf7ab77b38dfd83acbddc6d8d8d2d2413cf3531ff169e87516c9707",
+      "sha256": "3b7308e794687f69f43623d7e8ecf53e5553a7f2acd1a56c0db09c5cadbb1cea",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64015,14 +64080,14 @@
     },
     {
       "path": "tools/capability_m5_registry.py",
-      "sha256": "efabb6ff8444ef8ff7d874b479a4c2e507111c4e18900f3cad580dd1bebcd407",
+      "sha256": "89835febec903f262978a092d565c06921cc9d5d3f17f21e068a38eeb88586b9",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
     {
       "path": "tools/capability_m6.py",
-      "sha256": "09a8b9582606b167f0536fb57ea8ae703d2c95f62ab7d6bf252ee6db15b89ab1",
-      "shape_sha256": "b55968f8239250743a915731952dc065513f132c95dd891c66f7d312f976b7dd",
+      "sha256": "5cd26b15412070271aeff9549ca288306d177351f2334d56dcb07780a7fb572c",
+      "shape_sha256": "e14e8319f06fbf5547abb3d25b0cf51daaea6c42d0269f01bbdd67141a6bc1c1",
       "role": "M0_STATIC_ANALYSIS"
     },
     {
@@ -64033,7 +64098,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "abe06ed12a631160822c587dfc24e68a9e272d21b26f7b0e0174c1cb099feede",
+      "sha256": "350dbe3b02d4b79397a23f2a9705fe5faaf91da734ea5b8c1983ca8ed52e7183",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64129,7 +64194,7 @@
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "9f399dba572df2eba5177f3c67d33e4ce36261450f5fa8c09ff43825368bca82",
+      "sha256": "014b844721156d42fd7327cca42bb21800093010ffa2101efb466715575bcee0",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64141,7 +64206,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "b5c8347705b727efdde568b80ebb7cae8356068f9f62824efd3fb2e25d80b11a",
+      "sha256": "88882df7ce38f59e4945f7d13cb76ab02ce7f3060ad7ddca50c2c18fc256cfe0",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64159,7 +64224,7 @@
     },
     {
       "path": "tools/capability_source_role_registry.py",
-      "sha256": "4d0e1470c60d0e7c7a494028409aa1475aad2c5e21e118e46e5a2805d66fdfea",
+      "sha256": "ce5021884c20a3db9fa8132a67db252086bf10d232eb6bacd17fa9548ebd4c59",
       "shape_sha256": "f259a8e7cb62145570c4b44cf1567dbf9da61ee4f84567383cb816dc5fe0a8b0",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64177,13 +64242,13 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "931d3fdfbe63475e207d2fdd54bc2747a43b494407d5eb38517e88b9f7a13dd5",
+      "sha256": "82b94188f144f1b722d3b2661a376fafbe17c68adcb19d15126e0150c8a2a897",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
     {
       "path": "tools/capability_transport.py",
-      "sha256": "7155bee8c1ea1b98c5c78937436166685090d2eb6fd2923f55ec2fae9c6e7927",
+      "sha256": "cdf663970d3d7801d3876cd0beb14cfc8b3adc6676f315aea78888188ab8a58e",
       "shape_sha256": "fde51cdad3ece95b53f5dc77b7d32fe176af5a353fc39a762565ea1bde5d6b4f",
       "role": "M0_STATIC_ANALYSIS"
     },
@@ -64207,7 +64272,7 @@
     },
     {
       "path": "tools/test_capability_backend_transport.py",
-      "sha256": "fb4535297d4de6ad39ae7aa9bacb4970133f310ffc35861461a9391edf7b3987",
+      "sha256": "fad2aec49605287885331c3481cba6b80916cccdb3ff8d471f23e50959a430b2",
       "shape_sha256": "d520134d48913abed97bdeec48fc9cb117841dfd9fdd3f26f93cb37775cd364a",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -64333,7 +64398,7 @@
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "04c336247391b4b025c27fedfa29fefbb3f64d34bc97f7095187f3179221dd45",
+      "sha256": "6056e69065301b8b073f302da2fdeaf441ffea3d70a9cbf3b68334cdecb4bf18",
       "shape_sha256": "f76210add26870e75f046b598aeb0642b0edc2d502ecd5077f248ee3843329dc",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -64471,7 +64536,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "0ebca3d6b7b3c6e41fd6cd1864dd75bb2aea54397d134a48f1242a48b9c5c2ec",
+      "sha256": "8c1371affc7dd3a6e30ddc653f17603439e1267d87e6d43a4629d274b27be5c9",
       "shape_sha256": "229f03b8755734b621536982445ca6330de50865d2787da1f1aaa7b01abba5f7",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -64483,8 +64548,14 @@
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "738695c1f725eb2ca732aa8fd257fedba152f0f9d0d879a7db0ad576970a64b1",
-      "shape_sha256": "fefa8b7941eaeb9024b84ae5979ac48ceed85b6ba213356928b0d602ad6f4b49",
+      "sha256": "19eb2af844890b81e0058eb13a3f2cc706ee22a7ba73dc49ccb1f781a02cc82c",
+      "shape_sha256": "4ec42cff0a170bde09fe7446fb6c2d8a71235d0c2c796ee45174c40d80fe3c6d",
+      "role": "M0_FIXTURE_REGRESSION"
+    },
+    {
+      "path": "tools/test_integration_participation.py",
+      "sha256": "5dc006ba7ddd7a1082e917c376418de5d81c801253a9568a8a82172b1e545ba7",
+      "shape_sha256": "bd3296ddaeb89dedbef144cb7753087c92378bc13ee53d6f860e53c0b064923b",
       "role": "M0_FIXTURE_REGRESSION"
     }
   ],

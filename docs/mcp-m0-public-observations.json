@@ -455,15 +455,15 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "0ebca3d6b7b3c6e41fd6cd1864dd75bb2aea54397d134a48f1242a48b9c5c2ec"
+      "sha256": "8c1371affc7dd3a6e30ddc653f17603439e1267d87e6d43a4629d274b27be5c9"
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "04c336247391b4b025c27fedfa29fefbb3f64d34bc97f7095187f3179221dd45"
+      "sha256": "6056e69065301b8b073f302da2fdeaf441ffea3d70a9cbf3b68334cdecb4bf18"
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "0463dd24337abeb33db5fe3cc02d4819e79b8830f440233d647958a79fa61579"
+      "sha256": "8377bbe3f8fe96697039d7176067292199abfeac362a28312fbfd9568db4e28f"
     },
     {
       "path": "include/golem/workpack.h",

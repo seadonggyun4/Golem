@@ -35,7 +35,7 @@
     },
     {
       "path": "tools/integration_mutation_mcp.py",
-      "sha256": "00d031f2babb4c19476642ee7c0e5e237650350bab3e4109857e90b2c31948b7"
+      "sha256": "745604aaa52a547f1a9723b9459a2f14a17db2e734e474bcf2f7a20e32308b6c"
     },
     {
       "path": "tools/integration_backend.py",
@@ -1607,7 +1607,7 @@
     },
     {
       "path": "tools/integration_lifecycle.py",
-      "sha256": "6582ae60458976c6b1701532da010a03d6395ca4883215141a489885ac672ec4"
+      "sha256": "acbe1b63e6a47ce5b47d03a79836a1a2257e3f70cbd344ae69e23c37a46ce70a"
     },
     {
       "path": "tools/integration_mcp.py",
@@ -2179,11 +2179,11 @@
     },
     {
       "path": "tools/integration_distribution_entry.py",
-      "sha256": "6bf683995dbc9189b7861a392df2c1d0e1b7944bcb1498cf76392737968c960c"
+      "sha256": "5527af3196f70f40d64ecef181fd5ed3acd374247ed219236fb8de27475c05c6"
     },
     {
       "path": "tools/integration_owner_maintenance.py",
-      "sha256": "a82f7f88a2a75a35161b666ff66077f9b481bd0c2cdfa0149d088a7fe260f2ee"
+      "sha256": "068267621752a4d8c1aa2ba129c797df39b0ef17a84483cfe230922995ff763c"
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
@@ -2199,15 +2199,15 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "0ebca3d6b7b3c6e41fd6cd1864dd75bb2aea54397d134a48f1242a48b9c5c2ec"
+      "sha256": "8c1371affc7dd3a6e30ddc653f17603439e1267d87e6d43a4629d274b27be5c9"
     },
     {
       "path": "tools/test_capability_m6.py",
-      "sha256": "04c336247391b4b025c27fedfa29fefbb3f64d34bc97f7095187f3179221dd45"
+      "sha256": "6056e69065301b8b073f302da2fdeaf441ffea3d70a9cbf3b68334cdecb4bf18"
     },
     {
       "path": "docs/mcp-m6-distribution.ko.md",
-      "sha256": "0463dd24337abeb33db5fe3cc02d4819e79b8830f440233d647958a79fa61579"
+      "sha256": "8377bbe3f8fe96697039d7176067292199abfeac362a28312fbfd9568db4e28f"
     },
     {
       "path": "tools/integration_owner_review.py",
@@ -2219,11 +2219,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "9b07b4e66a5572f7344dc714087e1a2b2cf0e9bb8c9cf8b6bc88251ea9884bfc"
+      "sha256": "4a3950234c45b5303150854af9a71cd2bc2998f50f56270dda9123dd07785a99"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "738695c1f725eb2ca732aa8fd257fedba152f0f9d0d879a7db0ad576970a64b1"
+      "sha256": "19eb2af844890b81e0058eb13a3f2cc706ee22a7ba73dc49ccb1f781a02cc82c"
     },
     {
       "path": "include/golem/workpack.h",
@@ -2496,6 +2496,14 @@
     {
       "path": "tools/test_integration_codex_marketplace.py",
       "sha256": "dd34bbd646aff46bfd111b11b0cc027aae37f9c594aa7a389f8dd3d40c596d86"
+    },
+    {
+      "path": "tools/test_integration_participation.py",
+      "sha256": "5dc006ba7ddd7a1082e917c376418de5d81c801253a9568a8a82172b1e545ba7"
+    },
+    {
+      "path": "docs/mcp-participation-lifecycle.ko.md",
+      "sha256": "e23f90ed2ebee9382b5897e85141711c5bc77346088d7b7af44256d8e44edd08"
     }
   ],
   "observations": [
@@ -19235,6 +19243,69 @@
       "source_path": "tools/integration_desktop_plugin.py",
       "entrypoint": "main",
       "selector": "build"
+    },
+    {
+      "id": "obs-671899fe3d9126470cfc0d138ba40ea254d362abedb492abe4321c6e07c19db9",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_lifecycle.py",
+      "entrypoint": "CallAdmission.__init__",
+      "selector": null
+    },
+    {
+      "id": "obs-ba697449b384ceb26ee8c2ba569954a4834d1740d05ef1a5b01975b082bd8a78",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_lifecycle.py",
+      "entrypoint": "CallAdmission.__enter__",
+      "selector": null
+    },
+    {
+      "id": "obs-421e7bddb7977bfa39dc6dfcff36ff5db2e9650fac8c54a9bac65974ef8f8cf0",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_lifecycle.py",
+      "entrypoint": "CallAdmission.__exit__",
+      "selector": null
+    },
+    {
+      "id": "obs-62a97911969393241d26685f7aa2f45005fbbe0e8e932b6aaa9c33f625794a8f",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_lifecycle.py",
+      "entrypoint": "CallAdmission._admit",
+      "selector": null
+    },
+    {
+      "id": "obs-d8dec182dab6c10fd25895ec705fe7ae6a89574c3bd04dcdad0c7df43e79819f",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_lifecycle.py",
+      "entrypoint": "CallAdmission.operation",
+      "selector": null
+    },
+    {
+      "id": "obs-c0d1172e0d9fdd179f5fe74e7d3f17852092637ac531f7c5141527dca6885ca9",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_lifecycle.py",
+      "entrypoint": "CallAdmission.close",
+      "selector": null
+    },
+    {
+      "id": "obs-fb2cd68c82546418a5afa61b26fa7d5c0347ca6347926e70a9b50c2a727c8194",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_lifecycle.py",
+      "entrypoint": "AdmittedService.__init__",
+      "selector": null
+    },
+    {
+      "id": "obs-f23b9f262a5fb07231b617042e043f4161a6c1465f673bf2bfb0beac4bfecc84",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_lifecycle.py",
+      "entrypoint": "AdmittedService.__getattr__",
+      "selector": null
+    },
+    {
+      "id": "obs-3f08f729899151540be9079bfc9485c6829ea2a703302905dfa661ae64e07361",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_lifecycle.py",
+      "entrypoint": "AdmittedService.call",
+      "selector": null
     }
   ],
   "capabilities": [
@@ -66320,7 +66391,16 @@
         "obs-bf0f0b1c565a329e34eec650181d3abf3b24527f11a8d15196b5710e25362d5e",
         "obs-c30a897a1567cee269bb2588003d375aab79ca0b3505dae21f3fe49b7f352397",
         "obs-a249eb5c582dae9007e258b84b6a969cd7b1961a82970647adac0537e3dc7a0b",
-        "obs-da623a7bb7600e023dc6bb7febaeb7746ddc7f90de5ce7364019a90a564aefa3"
+        "obs-da623a7bb7600e023dc6bb7febaeb7746ddc7f90de5ce7364019a90a564aefa3",
+        "obs-671899fe3d9126470cfc0d138ba40ea254d362abedb492abe4321c6e07c19db9",
+        "obs-ba697449b384ceb26ee8c2ba569954a4834d1740d05ef1a5b01975b082bd8a78",
+        "obs-421e7bddb7977bfa39dc6dfcff36ff5db2e9650fac8c54a9bac65974ef8f8cf0",
+        "obs-62a97911969393241d26685f7aa2f45005fbbe0e8e932b6aaa9c33f625794a8f",
+        "obs-d8dec182dab6c10fd25895ec705fe7ae6a89574c3bd04dcdad0c7df43e79819f",
+        "obs-c0d1172e0d9fdd179f5fe74e7d3f17852092637ac531f7c5141527dca6885ca9",
+        "obs-fb2cd68c82546418a5afa61b26fa7d5c0347ca6347926e70a9b50c2a727c8194",
+        "obs-f23b9f262a5fb07231b617042e043f4161a6c1465f673bf2bfb0beac4bfecc84",
+        "obs-3f08f729899151540be9079bfc9485c6829ea2a703302905dfa661ae64e07361"
       ],
       "implementation": "IMPLEMENTED",
       "current_routes": [
@@ -66346,11 +66426,19 @@
         {
           "path": "tests/c/cli_integration.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_participation.py",
+          "selector": null
         }
       ],
       "doc_refs": [
         {
           "path": "docs/architecture.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-participation-lifecycle.ko.md",
           "anchor": null
         }
       ],
@@ -66577,11 +66665,19 @@
         {
           "path": "tests/c/cli_integration.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_participation.py",
+          "selector": null
         }
       ],
       "doc_refs": [
         {
           "path": "docs/architecture.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-participation-lifecycle.ko.md",
           "anchor": null
         }
       ],
@@ -75908,11 +76004,19 @@
         {
           "path": "tools/test_capability_m6.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_participation.py",
+          "selector": null
         }
       ],
       "doc_refs": [
         {
           "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-participation-lifecycle.ko.md",
           "anchor": null
         }
       ],
@@ -75958,11 +76062,19 @@
         {
           "path": "tools/test_capability_m6.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_participation.py",
+          "selector": null
         }
       ],
       "doc_refs": [
         {
           "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-participation-lifecycle.ko.md",
           "anchor": null
         }
       ],
@@ -77334,11 +77446,19 @@
         {
           "path": "tools/test_integration_owner_desktop.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_participation.py",
+          "selector": null
         }
       ],
       "doc_refs": [
         {
           "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-participation-lifecycle.ko.md",
           "anchor": null
         }
       ],

@@ -21,6 +21,39 @@ class Desktop(unittest.TestCase):
         with patch.object(self.api,'_read',self.observed):return self.controller.inspect(self.args)
     def export(self,**kw):
         with patch.object(self.api,'_read',self.observed):return self.controller.export('new',self.root,**kw)
+    def test_d4_owner_inspect_export_share_transport_participation(self):
+        import integration_lifecycle as life
+        api=self.prepare();before_work=self.inventory()
+        with desktop.entry.connection(profiles.Scoped(api,'task'),api.policy) as scoped:
+            self.controller=desktop.Controller(scoped,api.policy,approve_ui=True)
+            self.assertEqual(self.controller.drafts(),[self.args])
+            self.assertEqual(list(self.registry.root.glob('d5-client-*')),[])
+            self.inspect()
+            self.expect('PARTICIPANT_OR_WRITER_LIVE',lambda:life.quiet(self.registry,'p'))
+            candidate=self.export(confirmed=True)
+            self.assertFalse(candidate['policy_applied'])
+            self.assertEqual(len(list(self.registry.root.glob('d5-client-*'))),1)
+        life.quiet(self.registry,'p')
+        self.assertEqual(before_work,self.inventory())
+        self.expect('PARTICIPATION_CLOSED',lambda:self.inspect())
+
+    def test_owner_endpoint_drains_before_transport_participant_release(self):
+        import integration_lifecycle as life
+        from unittest.mock import AsyncMock
+        api=self.prepare();events=[];test=self
+        class Endpoint:
+            def __init__(self,directory,controller,**kw):self.controller=controller
+            def start(self):
+                self.controller.inspect(test.args)
+                events.append('inspect')
+            def close(self):
+                test.expect('PARTICIPANT_OR_WRITER_LIVE',lambda:life.quiet(test.registry,'p'))
+                events.append('joined')
+        with patch.object(self.api,'_read',self.observed),patch.object(desktop,'ReviewEndpoint',Endpoint),patch.object(desktop.entry,'serve',new_callable=AsyncMock):
+            self.assertEqual(desktop.run(profiles.Scoped(api,'task'),api.policy,approve_ui=True,review_directory=self.root),0)
+        self.assertEqual(events,['inspect','joined'])
+        life.quiet(self.registry,'p')
+        self.assertEqual(len(list(self.registry.root.glob('d5-client-*'))),1)
     def test_inspect_export_same_instance_and_no_policy_activation(self):
         api=self.prepare();before=api.policy.path.read_bytes();self.inspect()
         result=self.export(confirmed=True)
@@ -138,13 +171,13 @@ class Headless(unittest.TestCase):
             if name.startswith('tkinter'):raise AssertionError('background UI import')
             return original(name,*a,**kw)
         with patch('builtins.__import__',no_tk),patch.object(desktop,'Controller',side_effect=AssertionError('UI constructed')),patch.object(desktop.entry,'serve',new_callable=AsyncMock) as serve:
-            for _ in range(20):self.assertEqual(desktop.run(None,None,approve_ui=True),0)
+            for _ in range(20):self.assertEqual(desktop.run(__import__('types').SimpleNamespace(profile={'family':'D2'}),None,approve_ui=True),0)
             self.assertEqual(serve.await_count,20)
 
     def test_optional_review_failure_does_not_break_mcp(self):
         from unittest.mock import AsyncMock
         with patch.object(desktop,'Controller'),patch.object(desktop,'ReviewEndpoint',side_effect=OSError('fixture')),patch.object(desktop.entry,'serve',new_callable=AsyncMock) as serve:
-            self.assertEqual(desktop.run(None,None,approve_ui=True,review_directory='/missing'),0)
+            self.assertEqual(desktop.run(__import__('types').SimpleNamespace(profile={'family':'D2'}),None,approve_ui=True,review_directory='/missing'),0)
             serve.assert_awaited_once()
 
     def test_close_is_presentation_only(self):

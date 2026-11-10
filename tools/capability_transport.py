@@ -11,7 +11,7 @@ from capability_fallback import _shape, inspect_fallback
 from capability_delegation import inspect_delegation
 from capability_mutation_graph import _function
 
-PINS={'tools/integration_mutation_mcp.py':'00d031f2babb4c19476642ee7c0e5e237650350bab3e4109857e90b2c31948b7',
+PINS={'tools/integration_mutation_mcp.py':'745604aaa52a547f1a9723b9459a2f14a17db2e734e474bcf2f7a20e32308b6c',
       'tools/integration_mcp.py':'bcd2136d57f2af822be2362977393595dac652f0825dbc23bc9de3c9462b6af8'}
 
 
@@ -39,7 +39,7 @@ def inspect_transport(sources,pins=PINS):
         return TransportObservation((),(('DECLARED_DOMAIN_UNVERIFIED',(read.blockers,mutation.blockers)),))
     try:
         tree=ast.parse(files['tools/integration_mutation_mcp.py'].data.decode())
-        imports=ast.parse('import integration_contract as c\nimport integration_service as reads\nimport integration_mutation_contract as contract\nimport integration_mutations as mutations\nimport integration_intent as intent').body
+        imports=ast.parse('import integration_contract as c\nimport integration_service as reads\nimport integration_mutation_contract as contract\nimport integration_mutations as mutations\nimport integration_lifecycle as lifecycle\nimport integration_intent as intent').body
         if any(sum(_shape(e)==_shape(n) for n in tree.body)!=1 for e in imports): raise ValueError('IMPORT_BINDING')
         server=_function(tree,None,'server')
         nested={n.name:n for n in server.body if isinstance(n,ast.AsyncFunctionDef)}
@@ -94,7 +94,33 @@ def inspect_transport(sources,pins=PINS):
         run=runs[0]
         require_expression(run,'server(service)')
         main=_function(tree,None,'main')
-        require_expression(main,'asyncio.run(run(mutations.Service(policy, resources, helpers, parallel_hosts, intent_hosts)))')
+        # Direct stdio must retain admission through the whole transport. The
+        # M6 profile checks CallAdmission's mutex/failure/drain implementation;
+        # this independent profile checks the declared transport receiver and
+        # rejects a raw service, a different guard or an unguarded extra run.
+        expected=ast.parse('''with lifecycle.CallAdmission(policy.registry, bindings) as admission:
+    service = mutations.Service(policy, resources, helpers, parallel_hosts, intent_hosts)
+    asyncio.run(run(lifecycle.AdmittedService(service, admission)))
+''').body[0]
+        contexts=[n for n in ast.walk(main) if isinstance(n,ast.With) and
+                  any(_shape(item.context_expr)==_expr('lifecycle.CallAdmission(policy.registry, bindings)') for item in n.items)]
+        if len(contexts)!=1 or _shape(contexts[0])!=_shape(expected):raise ValueError('ADMITTED_TRANSPORT_LIFETIME')
+        required_calls={
+            'lifecycle.CallAdmission':'lifecycle.CallAdmission(policy.registry, bindings)',
+            'mutations.Service':'mutations.Service(policy, resources, helpers, parallel_hosts, intent_hosts)',
+            'lifecycle.AdmittedService':'lifecycle.AdmittedService(service, admission)',
+            'run':'run(lifecycle.AdmittedService(service, admission))',
+            'asyncio.run':'asyncio.run(run(lifecycle.AdmittedService(service, admission)))',
+        }
+        for receiver,expression in required_calls.items():
+            calls=[n for n in ast.walk(main) if isinstance(n,ast.Call) and ast.unparse(n.func)==receiver]
+            if len(calls)!=1 or _shape(calls[0])!=_expr(expression):raise ValueError('ADMITTED_TRANSPORT_RECEIVER')
+        bindings=ast.parse("bindings = [scope['binding'] for scope in policy.transfer.value['scopes']]").body[0]
+        assignments=[n for n in ast.walk(main) if isinstance(n,(ast.Assign,ast.AnnAssign,ast.NamedExpr,ast.AugAssign)) and
+                     any(isinstance(v,ast.Name) and v.id=='bindings' and isinstance(v.ctx,ast.Store) for target in
+                         (n.targets if isinstance(n,ast.Assign) else [n.target]) for v in ast.walk(target))]
+        if len(assignments)!=1 or _shape(assignments[0])!=_shape(bindings):raise ValueError('ADMITTED_TRANSPORT_BINDINGS')
+        require_expression(main,'contract.Policy(args.policy, args.reviewed_policy_sha256, approve_mutations=args.approve_mutations)')
         require_expression(main,"c.require(bool(args.intent_host_policy)==bool(args.reviewed_intent_host_policy_sha256)==bool(args.approve_intent_host),'INTENT_OWNER_ARGUMENTS')")
         require_expression(main,'intent.Hosts(args.intent_host_policy,args.reviewed_intent_host_policy_sha256,policy,approve_intent=True) if args.intent_host_policy else None')
         require_expression(main,'c.require(bool(args.read_resources) == bool(args.reviewed_read_resources_sha256) == bool(args.approve_read_resources), "READ_RESOURCE_OWNER_ARGUMENTS")')

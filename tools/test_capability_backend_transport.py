@@ -66,9 +66,25 @@ class StaticAdapters(unittest.TestCase):
                              (b'"golem_" + name',b'"other_" + name'),
                              (b'run_sync(service.call,',b'run_sync(other.call,'),
                              (b'on_call_tool=call_tool',b'on_call_tool=list_tools'),
-                             (b'run(mutations.Service(policy, resources, helpers, parallel_hosts,intent_hosts))',b'run(other.Service(policy, resources, helpers, parallel_hosts,intent_hosts))')):
+                             (b'service = mutations.Service(policy, resources, helpers, parallel_hosts,intent_hosts)',b'service = other.Service(policy, resources, helpers, parallel_hosts,intent_hosts)')):
             files,pins=self.mutate('tools/integration_mutation_mcp.py',before,after,TRANSPORT_PINS)
             self.assertTrue(inspect_transport(files,pins).blockers)
+
+    def test_transport_admission_dominates_creation_and_handoff_after_repin(self):
+        for before,after in (
+                (b'asyncio.run(run(lifecycle.AdmittedService(service, admission)))',b'asyncio.run(run(service))'),
+                (b'lifecycle.AdmittedService(service, admission)',b'lifecycle.AdmittedService(service, other_admission)'),
+                (b'with lifecycle.CallAdmission(policy.registry, bindings) as admission:',b'with nullcontext() as admission:'),
+                (b'lifecycle.CallAdmission(policy.registry, bindings)',b'lifecycle.CallAdmission(other.registry, bindings)'),
+                (b'bindings = [scope["binding"] for scope in policy.transfer.value["scopes"]]',b'bindings = []'),
+                (b'            asyncio.run(run(lifecycle.AdmittedService(service, admission)))',b'        asyncio.run(run(lifecycle.AdmittedService(service, admission)))'),
+                (b'            asyncio.run(run(lifecycle.AdmittedService(service, admission)))',b'            asyncio.run(run(lifecycle.AdmittedService(service, admission)))\n        asyncio.run(run(service))'),
+                (b'import integration_lifecycle as lifecycle',b'import unrelated_lifecycle as lifecycle')):
+            with self.subTest(before=before):
+                files,pins=self.mutate('tools/integration_mutation_mcp.py',before,after,TRANSPORT_PINS)
+                blockers=inspect_transport(files,pins).blockers
+                self.assertTrue(any(code=='TRANSPORT_PROFILE_UNSUPPORTED' for code,_ in blockers),blockers)
+                self.assertFalse(any(code=='SOURCE_MISSING_OR_DRIFT' for code,_ in blockers),blockers)
 
     def test_transport_alias_and_attribute_assignment_block(self):
         for inserted in (b'            alias = service\n',b'            params.name = "golem_work_inspect"\n'):

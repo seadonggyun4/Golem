@@ -318,27 +318,41 @@ class StartupAdmission(unittest.TestCase):
     def exercise(self,events,failures,run):
         import asyncio
         from types import SimpleNamespace
-        service=SimpleNamespace(profile={'family':'D4'})
+        def called(*args):events.append('call');return {'state':'OBSERVED'}
+        service=SimpleNamespace(profile={'family':'D4'},call=called)
         owner=SimpleNamespace(registry=object(),transfer=SimpleNamespace(value={'scopes':[]}))
-        with patch.object(entry,'time',self.clock()),patch.object(entry.lifecycle,'participation',self.participation(events,failures)),patch.object(entry.mutation_mcp,'run',run):
+        with patch.object(entry,'time',self.clock()),patch.object(entry.lifecycle,'time',self.clock()),patch.object(entry.lifecycle,'participation',self.participation(events,failures)),patch.object(entry.mutation_mcp,'run',run):
             asyncio.run(entry.serve(service,owner))
 
-    def test_participation_waits_before_serving_and_releases_original_context(self):
+    def test_discovery_transport_does_not_enter_participation(self):
         events=[]
         async def serve(*args):events.append('serve')
         run=AsyncMock(side_effect=serve)
+        self.exercise(events,[],run)
+        self.assertEqual(events,['serve']);run.assert_awaited_once()
+
+    def test_first_call_waits_for_admission_and_releases_original_context(self):
+        events=[]
+        async def serve(service):events.append('serve');service.call('projects_list',{})
+        run=AsyncMock(side_effect=serve)
         self.exercise(events,[c.IntegrationError('REGISTRY_BUSY')],run)
-        self.assertEqual(events,['enter','enter','admitted','serve','released']);run.assert_awaited_once()
+        self.assertEqual(events,['serve','enter','enter','admitted','call','released']);run.assert_awaited_once()
 
-    def test_failure_after_server_admission_cannot_reenter_or_redispatch(self):
-        events=[];run=AsyncMock(side_effect=c.IntegrationError('REGISTRY_BUSY'))
+    def test_failure_after_first_call_cannot_reenter_or_redispatch(self):
+        events=[]
+        async def serve(service):
+            service.call('projects_list',{})
+            raise c.IntegrationError('REGISTRY_BUSY')
+        run=AsyncMock(side_effect=serve)
         with self.assertRaises(c.IntegrationError):self.exercise(events,[],run)
-        self.assertEqual(events,['enter','admitted','released']);run.assert_awaited_once()
+        self.assertEqual(events,['enter','admitted','call','released']);run.assert_awaited_once()
 
-    def test_nonbusy_participation_failure_cannot_start_server(self):
-        events=[];run=AsyncMock()
+    def test_nonbusy_first_call_admission_failure_never_dispatches_body(self):
+        events=[]
+        async def serve(service):service.call('projects_list',{})
+        run=AsyncMock(side_effect=serve)
         with self.assertRaises(c.IntegrationError):self.exercise(events,[c.IntegrationError('AUDIT_QUOTA')],run)
-        self.assertEqual(events,['enter']);run.assert_not_awaited()
+        self.assertEqual(events,['enter']);run.assert_awaited_once()
 
     def test_tool_inventory_wait_rechecks_metadata_only_and_stops_at_deadline(self):
         import asyncio
@@ -600,14 +614,14 @@ class ProjectManagement(unittest.TestCase):
             admission.assert_awaited_once_with(service)
         service.call.assert_not_called();service.tools.assert_not_called()
 
-    def test_common_entry_reuses_startup_wait_only_before_serving(self):
+    def test_unused_management_connection_never_enters_participation(self):
         import asyncio
         from contextlib import nullcontext
         from types import SimpleNamespace
         backend=SimpleNamespace(profile={'family':'D4'});base_owner=SimpleNamespace(registry=object(),transfer=SimpleNamespace(value={'scopes':[]}))
         def no_run(coroutine):coroutine.close()
-        with patch.dict(os.environ,{},clear=True),patch.object(entry,'_configure_startup',return_value=(backend,base_owner)),patch.object(owner.life,'participation',side_effect=[c.IntegrationError('REGISTRY_BUSY'),nullcontext()]) as participation,patch.object(entry,'_startup_pause') as pause,patch.object(asyncio,'run',side_effect=no_run):
-            self.assertEqual(owner.management_main([]),0);self.assertEqual(participation.call_count,2);pause.assert_called_once()
+        with patch.dict(os.environ,{},clear=True),patch.object(entry,'_configure_startup',return_value=(backend,base_owner)),patch.object(owner.life,'participation',side_effect=AssertionError('unused connection')) as participation,patch.object(entry,'_startup_pause') as pause,patch.object(asyncio,'run',side_effect=no_run):
+            self.assertEqual(owner.management_main([]),0);participation.assert_not_called();pause.assert_not_called()
 
     def test_existing_maintenance_fence_prevents_any_management_dispatch(self):
         with self.registry.locked(exclusive=True):owner.life.publish(self.registry,'p','FROZEN','fixture-freeze',{})

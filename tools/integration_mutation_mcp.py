@@ -93,8 +93,9 @@ def main():
         c.require(bool(args.parallel_host_policy) == bool(args.reviewed_parallel_host_policy_sha256) == bool(args.approve_parallel_host), "PARALLEL_HOST_OWNER_ARGUMENTS")
         parallel_hosts = host_contract.Hosts(args.parallel_host_policy, args.reviewed_parallel_host_policy_sha256, policy, approve_hosts=True) if args.parallel_host_policy else None
         bindings = [scope["binding"] for scope in policy.transfer.value["scopes"]]
-        with lifecycle.participation(policy.registry, bindings):
-            asyncio.run(run(mutations.Service(policy, resources, helpers, parallel_hosts,intent_hosts)))
+        with lifecycle.CallAdmission(policy.registry, bindings) as admission:
+            service = mutations.Service(policy, resources, helpers, parallel_hosts,intent_hosts)
+            asyncio.run(run(lifecycle.AdmittedService(service, admission)))
         return 0
     except (c.IntegrationError, OSError, ValueError) as error:
         sys.stderr.write(c.encoded(mutations.blocked(error)).decode())

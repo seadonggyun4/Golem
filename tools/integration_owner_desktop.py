@@ -7,6 +7,7 @@ Same-user IPC is not proof of human identity. No TCP, shell, or policy activatio
 import argparse
 import asyncio
 import copy
+from contextlib import nullcontext
 from pathlib import Path
 import queue
 import sys
@@ -18,6 +19,7 @@ import integration_mutation_contract as actions
 import integration_owner_review as review
 import integration_distribution_entry as entry
 import integration_preparations as preparations
+import integration_lifecycle as lifecycle
 
 
 class Controller:
@@ -69,27 +71,30 @@ class Controller:
         return result
 
     def export(self,action_id,parent,*,confirmed=False,attachment_path=None,attachment_sha256=None):
-        c.require(confirmed is True,'OWNER_REVIEW_REQUIRED')
-        c.require(self.selection is not None and not self.attempted,'OWNER_DESKTOP_REVIEW_REQUIRED')
-        # Reserve before any effect, including a failed attachment read. Manual
-        # reinspection is possible, but never an automatic repeat of publication.
-        self.attempted=True
-        attachment=None
-        c.require(bool(attachment_path)==bool(attachment_sha256),'OWNER_ATTACHMENT_SELECTION')
-        if attachment_path:
-            c._validate(attachment_sha256,c.DIGEST)
-            raw=r.regular(r.real_path(str(attachment_path)),private=True)
-            c.require(c.sha(raw)==attachment_sha256,'OWNER_ATTACHMENT_CHANGED')
-            attachment=c.decode(raw);c._validate(attachment,actions.QA)
-        parent=r.real_path(str(parent));self.reads.registry._private(parent)
-        destination=parent/('owner-review-'+uuid.uuid4().hex)
-        try:
-            result=review.export_candidate(self.reads,self.selection,self.owner,action_id,destination,
-                approve_review=True,native_attachment=attachment)
-        except (c.IntegrationError,OSError,ValueError) as error:
-            error.evidence_path=str(destination)
-            raise
-        return {'candidate_directory':str(destination),**result}
+        # Share MCP admission through the complete candidate publication. A
+        # transport close cannot release D5 while an Owner export is in flight.
+        with (self.scoped.admission.operation() if isinstance(self.scoped,lifecycle.AdmittedService) else nullcontext()):
+            c.require(confirmed is True,'OWNER_REVIEW_REQUIRED')
+            c.require(self.selection is not None and not self.attempted,'OWNER_DESKTOP_REVIEW_REQUIRED')
+            # Reserve before any effect, including a failed attachment read. Manual
+            # reinspection is possible, but never an automatic repeat of publication.
+            self.attempted=True
+            attachment=None
+            c.require(bool(attachment_path)==bool(attachment_sha256),'OWNER_ATTACHMENT_SELECTION')
+            if attachment_path:
+                c._validate(attachment_sha256,c.DIGEST)
+                raw=r.regular(r.real_path(str(attachment_path)),private=True)
+                c.require(c.sha(raw)==attachment_sha256,'OWNER_ATTACHMENT_CHANGED')
+                attachment=c.decode(raw);c._validate(attachment,actions.QA)
+            parent=r.real_path(str(parent));self.reads.registry._private(parent)
+            destination=parent/('owner-review-'+uuid.uuid4().hex)
+            try:
+                result=review.export_candidate(self.reads,self.selection,self.owner,action_id,destination,
+                    approve_review=True,native_attachment=attachment)
+            except (c.IntegrationError,OSError,ValueError) as error:
+                error.evidence_path=str(destination)
+                raise
+            return {'candidate_directory':str(destination),**result}
 
 
 class Window:
@@ -231,26 +236,27 @@ class Window:
 
 def run(scoped,owner,*,approve_ui=False,review_directory=None,review_label="Golem"):
     """Legacy launcher-compatible headless entry; IPC is separately opt-in."""
-    endpoint=None
-    if review_directory is not None:
-        controller=Controller(scoped,owner,approve_ui=approve_ui)
+    with entry.connection(scoped,owner) as scoped:
+        endpoint=None
+        if review_directory is not None:
+            controller=Controller(scoped,owner,approve_ui=approve_ui)
+            try:
+                endpoint=ReviewEndpoint(review_directory,controller,label=review_label)
+                endpoint.start()
+            except Exception:
+                # An optional presentation failure must not take down MCP. Do not
+                # retry, repair directories, or expose endpoint tokens in stderr.
+                if endpoint is not None:endpoint.close()
+                endpoint=None
+                sys.stderr.write('OWNER_REVIEW_UNAVAILABLE; MCP remains headless.\n')
         try:
-            endpoint=ReviewEndpoint(review_directory,controller,label=review_label)
-            endpoint.start()
+            asyncio.run(entry.serve(scoped,owner))
+            return 0
         except Exception:
-            # An optional presentation failure must not take down MCP. Do not
-            # retry, repair directories, or expose endpoint tokens in stderr.
+            sys.stderr.write('Golem transport stopped; no automatic restart.\n')
+            return 1
+        finally:
             if endpoint is not None:endpoint.close()
-            endpoint=None
-            sys.stderr.write('OWNER_REVIEW_UNAVAILABLE; MCP remains headless.\n')
-    try:
-        asyncio.run(entry.serve(scoped,owner))
-        return 0
-    except Exception:
-        sys.stderr.write('Golem transport stopped; no automatic restart.\n')
-        return 1
-    finally:
-        if endpoint is not None:endpoint.close()
 
 
 

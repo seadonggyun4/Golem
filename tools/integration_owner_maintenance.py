@@ -590,7 +590,6 @@ def management_server(service):
 def management_main(argv=None):
     import asyncio
     import os
-    from contextlib import ExitStack
     import integration_distribution_entry as entry
     import integration_mcp as wire
     from mcp.server.stdio import stdio_server
@@ -608,22 +607,17 @@ def management_main(argv=None):
             asyncio.run(entry.setup.run_setup(entry.setup.setup_notice('SETUP_VALIDATION_FAILED')));return 0
         policy=ManagementPolicy(Path(path),digest,owner,approve_management=True) if path else None
         service=ManagementService(base,policy)
-        async def run():
-            incoming=wire.BoundedInput();instance=management_server(service)
+        async def run(admitted):
+            incoming=wire.BoundedInput();instance=management_server(admitted)
             try:
                 async with stdio_server(stdin=incoming) as (reader,writer):
                     await instance.run(reader,writer,instance.create_initialization_options())
             finally:await __import__('anyio').to_thread.run_sync(service.close)
             if incoming.error is not None:raise incoming.error
-        with ExitStack() as stack:
-            if base.profile['family']=='D4':
-                deadline=entry.time.monotonic()+entry.STARTUP_WAIT_SECONDS
-                while True:
-                    try:
-                        stack.enter_context(life.participation(owner.registry,[s['binding'] for s in owner.transfer.value['scopes']]))
-                        break
-                    except c.IntegrationError as error:entry._startup_pause(error,deadline)
-            asyncio.run(run())
+        with entry.connection(base,owner) as admitted_base:
+            admitted = (life.AdmittedService(service,admitted_base.admission)
+                        if isinstance(admitted_base,life.AdmittedService) else service)
+            asyncio.run(run(admitted))
         return 0
     except (c.IntegrationError,OSError,ValueError) as error:
         sys.stderr.write(c.encoded({'state':'BLOCKED','code':getattr(error,'code','MANAGEMENT_IO_ERROR'),

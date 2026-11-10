@@ -3670,6 +3670,15 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | PYTHON_DECLARATION | tools/integration_desktop_plugin.py | main | None |
 | PYTHON_DECLARATION | tools/integration_desktop_plugin.py | manifest | None |
 | CLI_ROUTE | tools/integration_desktop_plugin.py | main | build |
+| PYTHON_DECLARATION | tools/integration_lifecycle.py | CallAdmission.__init__ | None |
+| PYTHON_DECLARATION | tools/integration_lifecycle.py | CallAdmission.__enter__ | None |
+| PYTHON_DECLARATION | tools/integration_lifecycle.py | CallAdmission.__exit__ | None |
+| PYTHON_DECLARATION | tools/integration_lifecycle.py | CallAdmission._admit | None |
+| PYTHON_DECLARATION | tools/integration_lifecycle.py | CallAdmission.operation | None |
+| PYTHON_DECLARATION | tools/integration_lifecycle.py | CallAdmission.close | None |
+| PYTHON_DECLARATION | tools/integration_lifecycle.py | AdmittedService.__init__ | None |
+| PYTHON_DECLARATION | tools/integration_lifecycle.py | AdmittedService.__getattr__ | None |
+| PYTHON_DECLARATION | tools/integration_lifecycle.py | AdmittedService.call | None |
 
 ## Blockers
 

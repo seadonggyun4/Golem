@@ -22,6 +22,151 @@ class M6Observation:
     scheduler_or_merge_implemented:bool=False
 
 
+def _body(node):
+    body=node.body
+    if body and isinstance(body[0],ast.Expr) and isinstance(body[0].value,ast.Constant) and isinstance(body[0].value.value,str):
+        body=body[1:]
+    return body
+
+
+def _exact_body(node,source,code):
+    if tuple(map(_shape,_body(node)))!=tuple(map(_shape,ast.parse(source).body)):
+        raise ValueError(code)
+
+
+def _one_context(node,expression,code):
+    expected=_shape(ast.parse(expression,mode='eval').body)
+    matches=[n for n in ast.walk(node) if isinstance(n,ast.With) and len(n.items)==1 and
+             _shape(n.items[0].context_expr)==expected]
+    if len(matches)!=1:raise ValueError(code)
+    return matches[0]
+
+
+def _lazy_participation(trees,model):
+    """Closed control-flow contract, independent of refreshed source/function pins.
+
+    Discovery is not a D5 participant. Real calls share one terminal admission
+    and its lifetime encloses transport shutdown plus Owner worker drainage.
+    These AST templates execute no inspected product code or native operation.
+    """
+    path='tools/integration_lifecycle.py';life=_functions(trees[path])
+    bodies={
+      'CallAdmission.__init__': '''self.registry = registry
+self.bindings = copy.deepcopy(bindings)
+self._condition = threading.Condition()
+self._participant = None
+self._inflight = 0
+self._closed = False
+self._failure = None''',
+      'CallAdmission.__enter__': 'return self',
+      'CallAdmission.__exit__': 'self.close()',
+      'CallAdmission._admit': '''deadline = time.monotonic() + 5
+while True:
+    candidate = participation(self.registry, self.bindings)
+    try:
+        candidate.__enter__()
+    except c.IntegrationError as error:
+        if error.code == 'REGISTRY_BUSY' and time.monotonic() < deadline:
+            time.sleep(0.05)
+            continue
+        raise
+    self._participant = candidate
+    return''',
+      'CallAdmission.operation': '''with self._condition:
+    c.require(not self._closed, 'PARTICIPATION_CLOSED')
+    c.require(self._failure is None, self._failure or 'PARTICIPATION_ADMISSION_FAILED')
+    if self._participant is None:
+        try:
+            self._admit()
+        except BaseException as error:
+            self._failure = getattr(error, 'code', 'PARTICIPATION_ADMISSION_FAILED')
+            raise
+    self._inflight += 1
+try:
+    yield
+finally:
+    with self._condition:
+        self._inflight -= 1
+        self._condition.notify_all()''',
+      'CallAdmission.close': '''with self._condition:
+    self._closed = True
+    while self._inflight:
+        self._condition.wait()
+    participant, self._participant = self._participant, None
+if participant is not None:
+    participant.__exit__(None, None, None)''',
+      'AdmittedService.__init__': '''self._service = service
+self.admission = admission''',
+      'AdmittedService.__getattr__': 'return getattr(self._service, name)',
+      'AdmittedService.call': '''with self.admission.operation():
+    return self._service.call(name, args)''',
+    }
+    required={(path,name) for name in bodies}|{('tools/integration_distribution_entry.py','connection')}
+    if not required<={(p,n) for p,n,_ in model['functions']}:raise ValueError('M6_LAZY_FUNCTION_MODEL_MISSING')
+    for name,body in bodies.items():
+        _exact_body(life[name],body,'M6_LAZY_ADMISSION_CONTROL_CHANGED:'+name)
+        expected=('contextmanager',) if name=='CallAdmission.operation' else ()
+        if tuple(ast.unparse(v) for v in life[name].decorator_list)!=expected:raise ValueError('M6_LAZY_ADMISSION_DECORATOR_CHANGED')
+    for name in ('CallAdmission','AdmittedService'):
+        cls=next(n for n in trees[path].body if isinstance(n,ast.ClassDef) and n.name==name)
+        expected={key.split('.')[1] for key in bodies if key.startswith(name+'.')}
+        if cls.bases or cls.keywords or cls.decorator_list or any(not isinstance(n,ast.FunctionDef) for n in _body(cls)) or {n.name for n in _body(cls)}!=expected:
+            raise ValueError('M6_LAZY_ADMISSION_CLASS_CHANGED')
+    admission=_one_context(life['participation'],'registry.locked(exclusive=True)','M6_PARTICIPATION_EXCLUSIVE_ADMISSION')
+    for expression in ("c.require(len(list(registry.root.glob('d5-client-*'))) < 128, 'PARTICIPATION_QUOTA')",
+                       "fence(registry, binding['project_id'])",
+                       "records.save(path / 'participant.json', c.encoded({'bindings': bindings}))"):
+        expected=_shape(ast.parse(expression,mode='eval').body)
+        if sum(_shape(n)==expected for n in ast.walk(admission) if isinstance(n,ast.Call))!=1:
+            raise ValueError('M6_PARTICIPATION_PERSISTENT_FENCE_CHANGED')
+    _exact_body(life['fence'],'''value, _ = current(registry, project_id)
+c.require(value is None or value['phase'] == 'OPEN', 'PROJECT_MAINTENANCE')''','M6_PARTICIPATION_MAINTENANCE_BYPASS')
+    quiet=life['quiet'];expected=_shape(ast.parse("c.require(len(clients) <= 128 and len(writers) <= 128, 'PARTICIPATION_QUOTA')",mode='eval').body)
+    if sum(_shape(n)==expected for n in ast.walk(quiet) if isinstance(n,ast.Call))!=1:raise ValueError('M6_PARTICIPATION_DRAIN_LIMIT_CHANGED')
+    entry=_functions(trees['tools/integration_distribution_entry.py'])
+    _exact_body(entry['connection'],'''if service.profile['family']=='D2' or isinstance(service,lifecycle.AdmittedService):
+    yield service
+    return
+bindings=[scope['binding'] for scope in owner.transfer.value['scopes']]
+with lifecycle.CallAdmission(owner.registry,bindings) as admission:
+    yield lifecycle.AdmittedService(service,admission)''','M6_LAZY_CONNECTION_SCOPE_CHANGED')
+    if tuple(ast.unparse(n) for n in entry['connection'].decorator_list)!=('contextmanager',):raise ValueError('M6_LAZY_CONNECTION_DECORATOR_CHANGED')
+    _exact_body(entry['serve'],'''with connection(service,owner) as admitted:
+    if service.profile['family']=='D2':await readonly.run(admitted)
+    else:await mutation_mcp.run(admitted)''','M6_LAZY_TRANSPORT_LIFETIME_CHANGED')
+    mutation=_functions(trees['tools/integration_mutation_mcp.py'])['main']
+    guard=_one_context(mutation,'lifecycle.CallAdmission(policy.registry, bindings)','M6_DIRECT_D4_ADMISSION_MISSING')
+    if _shape(guard.items[0].optional_vars)!=_shape(ast.Name(id='admission',ctx=ast.Store())):raise ValueError('M6_DIRECT_D4_ADMISSION_ALIAS')
+    _exact_body(guard,'''service = mutations.Service(policy, resources, helpers, parallel_hosts,intent_hosts)
+asyncio.run(run(lifecycle.AdmittedService(service, admission)))''','M6_DIRECT_D4_HANDOFF_CHANGED')
+    management=_functions(trees['tools/integration_owner_maintenance.py'])['management_main']
+    guard=_one_context(management,'entry.connection(base,owner)','M6_MANAGEMENT_ADMISSION_MISSING')
+    if ast.unparse(guard.items[0].optional_vars)!='admitted_base':raise ValueError('M6_MANAGEMENT_ADMISSION_ALIAS')
+    _exact_body(guard,'''admitted = (life.AdmittedService(service,admitted_base.admission)
+            if isinstance(admitted_base,life.AdmittedService) else service)
+asyncio.run(run(admitted))''','M6_MANAGEMENT_ADMISSION_HANDOFF_CHANGED')
+    run=next(n for n in ast.walk(management) if isinstance(n,ast.AsyncFunctionDef) and n.name=='run')
+    calls=[n for n in ast.walk(run) if isinstance(n,ast.Call) and ast.unparse(n.func)=='management_server']
+    if len(calls)!=1 or _shape(calls[0])!=_shape(ast.parse('management_server(admitted)',mode='eval').body):raise ValueError('M6_MANAGEMENT_RAW_SERVICE_HANDOFF')
+    if not any(isinstance(n,ast.Try) and any(isinstance(v,ast.Call) and ast.unparse(v)=='__import__(\'anyio\').to_thread.run_sync(service.close)' for stmt in n.finalbody for v in ast.walk(stmt)) for n in ast.walk(run)):
+        raise ValueError('M6_MANAGEMENT_CLOSE_BEFORE_DRAIN')
+    owner=_functions(trees['tools/integration_owner_desktop.py'])
+    guard=_one_context(owner['run'],'entry.connection(scoped,owner)','M6_OWNER_ADMISSION_MISSING')
+    if _body(owner['run'])!=[guard] or ast.unparse(guard.items[0].optional_vars)!='scoped':raise ValueError('M6_OWNER_LIFETIME_ESCAPE')
+    for target in ('Controller','ReviewEndpoint','asyncio.run'):
+        if sum(isinstance(n,ast.Call) and ast.unparse(n.func)==target for n in ast.walk(guard))!=1:raise ValueError('M6_OWNER_LIFETIME_HANDOFF')
+    if not any(isinstance(n,ast.Try) and any(isinstance(v,ast.Call) and ast.unparse(v)=='endpoint.close()' for stmt in n.finalbody for v in ast.walk(stmt)) for n in ast.walk(guard)):
+        raise ValueError('M6_OWNER_CLOSE_BEFORE_DRAIN')
+    export=_one_context(owner['Controller.export'],"self.scoped.admission.operation() if isinstance(self.scoped,lifecycle.AdmittedService) else nullcontext()",'M6_OWNER_EXPORT_ADMISSION_MISSING')
+    if _body(owner['Controller.export'])!=[export]:raise ValueError('M6_OWNER_EXPORT_LIFETIME_ESCAPE')
+    for path in ('tools/integration_mcp.py','tools/integration_reload_probe.py'):
+        if any(isinstance(n,ast.Call) and ast.unparse(n.func).split('.')[-1] in ('CallAdmission','AdmittedService','participation','operation') for n in ast.walk(trees[path])):
+            raise ValueError('M6_D2_RELOAD_PARTICIPATION_ADDED')
+    for path in ('tools/integration_distribution_entry.py','tools/integration_mutation_mcp.py','tools/integration_owner_maintenance.py','tools/integration_owner_desktop.py'):
+        if any(isinstance(n,ast.Call) and ast.unparse(n.func).split('.')[-1]=='participation' for n in ast.walk(trees[path])):
+            raise ValueError('M6_EAGER_PARTICIPATION_REINTRODUCED')
+
+
 def inspect_m6(sources,ledger,model,backlog):
     scan_sources(sources,());files={f.path:f for f in sources};trees={};errors=[];checked=0;names=()
     for path,digest in model['pins']:
@@ -60,7 +205,7 @@ def inspect_m6(sources,ledger,model,backlog):
       ('tools/integration_distribution_entry.py','configure',"helpers.Helpers(Path(helper),helper_digest,owner,approve_helpers=True)"),
       ('tools/integration_distribution_entry.py','configure',"hosts.Hosts(Path(host),host_digest,owner,approve_hosts=True)"),
       ('tools/integration_distribution_entry.py','_configure_startup','configure(**args)'),
-      ('tools/integration_distribution_entry.py','serve','startup.enter_context(lifecycle.participation(owner.registry,bindings))'),
+      ('tools/integration_distribution_entry.py','serve','connection(service,owner)'),
       ('tools/integration_distribution_entry.py','_startup_pause','time.sleep(0.05)'),
       ('tools/integration_distribution.py','verify',"c.require(len(raw)<=MAX_ARCHIVE and c.sha(raw)==reviewed_sha256,'PACKAGE_DIGEST')"),
       ('tools/integration_distribution.py','verify',"c.require(inventory['files']=={path:c.sha(data) for path,data in sorted(payloads.items())},'PACKAGE_CONTENT_CHANGED')"),
@@ -86,6 +231,7 @@ def inspect_m6(sources,ledger,model,backlog):
         node=_functions(trees[path]).get(name) if path in trees else None;expected=_shape(ast.parse(expression,mode='eval').body)
         if node is None or sum(_shape(n)==expected for n in ast.walk(node) if isinstance(n,ast.Call))!=1:errors.append(('M6_MANDATORY_GUARD_CHANGED',(path,name,expression)))
     try:
+        _lazy_participation(trees,model)
         ui=trees['tools/integration_owner_desktop.py'];ui_functions=_functions(ui)
         start=ui_functions['run']
         if any(isinstance(n,(ast.Import,ast.ImportFrom)) and 'tkinter' in ast.unparse(n) for n in ast.walk(start)):raise ValueError('OWNER_BACKGROUND_TK')
@@ -155,7 +301,7 @@ def inspect_m6(sources,ledger,model,backlog):
                 if _shape(handler.type)!=_shape(ast.parse('c.IntegrationError',mode='eval').body):raise ValueError('M6_STARTUP_EXCEPTION_EXPANSION')
             for loop in (n for n in ast.walk(startup[name]) if isinstance(n,ast.While)):
                 if any(isinstance(n,ast.Await) for n in ast.walk(loop)):raise ValueError('M6_REQUEST_HANDLER_IN_STARTUP_LOOP')
-                allowed={'configure','_startup_pause','startup.enter_context','lifecycle.participation'}
+                allowed={'configure','_startup_pause'}
                 if any(ast.unparse(n.func) not in allowed for n in ast.walk(loop) if isinstance(n,ast.Call)):raise ValueError('M6_ACTION_IN_STARTUP_LOOP')
         for path in ('tools/integration_distribution.py','tools/integration_owner_maintenance.py'):
             for call in (n for n in ast.walk(trees[path]) if isinstance(n,ast.Call)):

@@ -68,6 +68,86 @@ class DistributionProfile(unittest.TestCase):
             files,model=self.changed('tools/integration_distribution_entry.py',old,new,True)
             self.assertTrue(self.inspect(files,model).blockers)
 
+    def assert_lifecycle_guard(self,path,old,new):
+        files,model=self.changed(path,old,new,True)
+        blockers=self.inspect(files,model).blockers
+        self.assertTrue(any(code=='M6_OWNER_LIFECYCLE_CHANGED' for code,_ in blockers),blockers)
+        self.assertFalse(any(code in ('M6_SOURCE_MISSING_OR_DRIFT','M6_FUNCTION_CHANGED') for code,_ in blockers),blockers)
+
+    def test_lazy_functions_cannot_be_omitted_from_the_review_model(self):
+        for name in ('CallAdmission.operation','AdmittedService.call','connection'):
+            model=copy.deepcopy(M6)
+            model['functions']=tuple(row for row in model['functions'] if row[1]!=name)
+            self.assertIn(('M6_OWNER_LIFECYCLE_CHANGED','M6_LAZY_FUNCTION_MODEL_MISSING'),self.inspect(model=model).blockers)
+
+    def test_lazy_admission_reuses_finite_registry_busy_only_wait(self):
+        for old,new in ((b"error.code == 'REGISTRY_BUSY'",b"error.code == 'COMMIT_UNKNOWN'"),
+                        (b'time.monotonic() + 5',b'time.monotonic() + 500'),
+                        (b'candidate.__enter__()',b'self.service.call("execution_request", {})'),
+                        (b'except c.IntegrationError as error:',b'except Exception as error:')):
+            self.assert_lifecycle_guard('tools/integration_lifecycle.py',old,new)
+
+    def test_lazy_call_failure_and_close_cannot_reset_or_release_early(self):
+        for old,new in ((b"c.require(not self._closed, 'PARTICIPATION_CLOSED')",b'pass'),
+                        (b"c.require(self._failure is None, self._failure or 'PARTICIPATION_ADMISSION_FAILED')",b'pass'),
+                        (b"self._failure = getattr(error, 'code', 'PARTICIPATION_ADMISSION_FAILED')",b'self._failure = None'),
+                        (b'self._inflight += 1',b'self._inflight += 0'),
+                        (b'while self._inflight:',b'while False:'),
+                        (b'self._condition.wait()',b'pass'),
+                        (b'participant.__exit__(None, None, None)',b'pass')):
+            self.assert_lifecycle_guard('tools/integration_lifecycle.py',old,new)
+
+    def test_lazy_actual_call_must_be_inside_operation_context(self):
+        self.assert_lifecycle_guard('tools/integration_lifecycle.py',
+            b'with self.admission.operation():\n            return self._service.call(name, args)',
+            b'with self.admission.operation():\n            pass\n        return self._service.call(name, args)')
+        self.assert_lifecycle_guard('tools/integration_lifecycle.py',
+            b'return getattr(self._service, name)',
+            b'with self.admission.operation():\n            return getattr(self._service, name)')
+
+    def test_lazy_discovery_cannot_reintroduce_eager_participation(self):
+        self.assert_lifecycle_guard('tools/integration_distribution_entry.py',
+            b'with connection(service,owner) as admitted:',
+            b'with lifecycle.participation(owner.registry, []) as admitted:')
+        self.assert_lifecycle_guard('tools/integration_mcp.py',
+            b'names = await listed_tools(service)',
+            b'with service.admission.operation():\n            names = await listed_tools(service)')
+        self.assert_lifecycle_guard('tools/integration_reload_probe.py',
+            b'runtime_before = runtime()',
+            b'runtime_before = runtime()\n    life.CallAdmission(None, [])')
+
+    def test_lazy_connection_preserves_d2_bypass_and_same_guard_reuse(self):
+        for old,new in ((b"service.profile['family']=='D2' or isinstance(service,lifecycle.AdmittedService)",b"service.profile['family']=='D4' or isinstance(service,lifecycle.AdmittedService)"),
+                        (b'yield lifecycle.AdmittedService(service,admission)',b'yield service'),
+                        (b'await mutation_mcp.run(admitted)',b'await mutation_mcp.run(service)')):
+            self.assert_lifecycle_guard('tools/integration_distribution_entry.py',old,new)
+
+    def test_direct_and_management_transports_cannot_handoff_raw_service(self):
+        self.assert_lifecycle_guard('tools/integration_mutation_mcp.py',
+            b'asyncio.run(run(lifecycle.AdmittedService(service, admission)))',b'asyncio.run(run(service))')
+        self.assert_lifecycle_guard('tools/integration_owner_maintenance.py',
+            b'instance=management_server(admitted)',b'instance=management_server(service)')
+        self.assert_lifecycle_guard('tools/integration_owner_maintenance.py',
+            b'asyncio.run(run(admitted))',b'asyncio.run(run(service))')
+        self.assert_lifecycle_guard('tools/integration_owner_maintenance.py',
+            b"finally:await __import__('anyio').to_thread.run_sync(service.close)",b'finally:pass')
+
+    def test_owner_export_and_worker_join_remain_inside_connection(self):
+        self.assert_lifecycle_guard('tools/integration_owner_desktop.py',
+            b'with entry.connection(scoped,owner) as scoped:',b'with nullcontext(scoped) as scoped:')
+        self.assert_lifecycle_guard('tools/integration_owner_desktop.py',
+            b'self.scoped.admission.operation() if isinstance(self.scoped,lifecycle.AdmittedService) else nullcontext()',b'nullcontext()')
+        self.assert_lifecycle_guard('tools/integration_owner_desktop.py',
+            b'finally:\n            if endpoint is not None:endpoint.close()',b'finally:\n            pass')
+
+    def test_retained_participant_quota_freeze_and_drain_are_not_weakened(self):
+        for old,new in ((b'len(list(registry.root.glob("d5-client-*"))) < 128',b'len(list(registry.root.glob("d5-client-*"))) < 1024'),
+                        (b'len(clients) <= 128 and len(writers) <= 128',b'len(clients) <= 1024 and len(writers) <= 128'),
+                        (b'fence(registry, binding["project_id"])',b'pass'),
+                        (b'with registry.locked(exclusive=True):\n        from integration_backend import _quota',b'with registry.locked():\n        from integration_backend import _quota'),
+                        (b'value is None or value["phase"] == "OPEN"',b'value is None or value["phase"] in ("OPEN", "FROZEN")')):
+            self.assert_lifecycle_guard('tools/integration_lifecycle.py',old,new)
+
     def test_management_guards_and_exactly_once_reservation_survive_repin(self):
         for old in (b"c.require(approve_management is True,'MANAGEMENT_APPROVAL_REQUIRED')",
                     b"c.require(self.policy is not None,'MANAGEMENT_DISABLED')",
@@ -93,7 +173,7 @@ class DistributionProfile(unittest.TestCase):
                         (b"c.require(key not in self.exports,'OWNER_EXPORT_ALREADY_ATTEMPTED')",b'pass'),
                         (b"c.require(args['confirmed'] is True,'OWNER_REVIEW_REQUIRED')",b'pass'),
                         (b'socket.AF_UNIX',b'socket.AF_INET'),
-                        (b'    endpoint=None',b'    import tkinter\n    endpoint=None')):
+                        (b'        endpoint=None',b'        import tkinter\n        endpoint=None')):
             files,model=self.changed('tools/integration_owner_desktop.py',old,new,True)
             self.assertTrue(self.inspect(files,model).blockers)
 

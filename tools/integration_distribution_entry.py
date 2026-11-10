@@ -1,7 +1,7 @@
 """Opt-in feature package entry. Reuses D2/D4 services and owner contracts."""
 import argparse
 import asyncio
-from contextlib import ExitStack
+from contextlib import contextmanager
 import os
 from pathlib import Path
 import sys
@@ -82,20 +82,22 @@ def environment():
       intent_host=optional('INTENT_HOST_POLICY','intent_host_policy'),intent_host_digest=optional('INTENT_HOST_SHA256','intent_host_sha256'),approve_intent_host=approved('APPROVE_INTENT_HOST'))
 
 
+@contextmanager
+def connection(service,owner):
+    # Owner IPC must share this lifetime outside serve(), through worker join.
+    # D2 reload verification deliberately retains its existing no-D5 contract.
+    if service.profile['family']=='D2' or isinstance(service,lifecycle.AdmittedService):
+        yield service
+        return
+    bindings=[scope['binding'] for scope in owner.transfer.value['scopes']]
+    with lifecycle.CallAdmission(owner.registry,bindings) as admission:
+        yield lifecycle.AdmittedService(service,admission)
+
+
 async def serve(service,owner):
-    if service.profile['family']=='D2':await readonly.run(service)
-    else:
-        bindings=[scope['binding'] for scope in owner.transfer.value['scopes']]
-        with ExitStack() as startup:
-            deadline = time.monotonic() + STARTUP_WAIT_SECONDS
-            while True:
-                try:
-                    startup.enter_context(lifecycle.participation(owner.registry,bindings))
-                    break
-                except c.IntegrationError as error:
-                    _startup_pause(error, deadline)
-            # No request handler or native action is inside the admission loop.
-            await mutation_mcp.run(service)
+    with connection(service,owner) as admitted:
+        if service.profile['family']=='D2':await readonly.run(admitted)
+        else:await mutation_mcp.run(admitted)
 
 
 def main():
