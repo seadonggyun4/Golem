@@ -415,7 +415,7 @@
     },
     {
       "path": "docs/mcp-m2-preparation.ko.md",
-      "sha256": "44e512babdd663103760e0716746281e9809eae40fead07e2e7822cd6acd3d7d"
+      "sha256": "50462bd035c962c922f00d5a45038fde8c7d5b510e8488da781c04b1dafab11d"
     },
     {
       "path": "tools/test_integration_m3.py",
@@ -431,7 +431,7 @@
     },
     {
       "path": "tools/test_integration_m4.py",
-      "sha256": "494429eb57919a80338a3e5734ab317385889aad9921594870cf17cee12c946c"
+      "sha256": "a953514ce3e14da8a7faba032174e244a5a0be3e441d847730d959102962c39d"
     },
     {
       "path": "tools/test_capability_m4.py",
@@ -455,7 +455,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "8c1371affc7dd3a6e30ddc653f17603439e1267d87e6d43a4629d274b27be5c9"
+      "sha256": "9ddfb355694934e4b6bc6f07c05798131e5f5b1b348e4c563fe2c6dc8a1de09a"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -536,6 +536,18 @@
     {
       "path": "docs/workpacks/reference-adapter.md",
       "sha256": "cf29e5dce4d3f76d3ff6a2ed7a95decfc13e2f27b9e025a307a535acbf7a3f0e"
+    },
+    {
+      "path": "docs/mcp-managed-bootstrap.ko.md",
+      "sha256": "3615305bde962931b16cac557d43e67cec00c1a8cdd18da51a3033b2ad66bbbd"
+    },
+    {
+      "path": "tests/c/work_record_integration.py",
+      "sha256": "a3eca26cbe3f8115256f492f6de4438f700df31d6176cf6db03ac2d0b3e03b63"
+    },
+    {
+      "path": "tests/c/discovery_integration.py",
+      "sha256": "f261617456858c71b5c8756323e40a0ee772f18488aab8e22cf47a0e6a7eba97"
     }
   ],
   "observations": [
@@ -9218,6 +9230,10 @@
         {
           "path": "tools/test_capability_m3.py",
           "selector": null
+        },
+        {
+          "path": "tests/c/discovery_integration.py",
+          "selector": null
         }
       ],
       "doc_refs": [
@@ -9231,6 +9247,10 @@
         },
         {
           "path": "docs/mcp-m3-task-actions.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-managed-bootstrap.ko.md",
           "anchor": null
         }
       ],
@@ -17459,6 +17479,10 @@
         {
           "path": "tools/test_capability_m1.py",
           "selector": "M1Profiles.test_original_backlog_requires_every_disposition_and_retained_owner_boundary"
+        },
+        {
+          "path": "tests/c/work_record_integration.py",
+          "selector": null
         }
       ],
       "doc_refs": [
@@ -17468,6 +17492,10 @@
         },
         {
           "path": "docs/mcp-m1-read-coverage.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-managed-bootstrap.ko.md",
           "anchor": null
         }
       ],

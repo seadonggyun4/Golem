@@ -9,9 +9,9 @@ from capability_profile import scan_sources
 from capability_source import python_literal_names
 
 PINS = {
-    'tools/integration_service.py':'a2ec4a339ab4169aaf0cc01c75aad1cd14eb0a183dd85f7380de24e00a8a82f3',
-    'tools/integration_transfer.py':'15451b9d4172a0daeb1270e0367475dee8f79ec26bad799d1787e8cda9115999',
-    'tools/integration_contract.py':'e2c5e3ec5142f888fd4fcf6f2bd1193fd77ff52f4f4234e54df7ec997aac6fdb',
+    'tools/integration_service.py':'c15b4d00b839872c99c45b1bbbc97409868fc0bac3b18445e61c653a119a8b22',
+    'tools/integration_transfer.py':'d98eb26a35c61175bfc096b8719b5ebc2e9e289f7226ea98ab651c493c996e27',
+    'tools/integration_contract.py':'f0d08c56e0834580c67e47ae53e6cf174715a76aa5b64d4e7e51ddcb5aac9287',
 }
 
 @dataclass(frozen=True)
@@ -51,7 +51,7 @@ def inspect_fallback(sources, pins=PINS):
         expected=ast.parse('import integration_contract as c\nfrom integration_transfer import NAMES').body
         if any(sum(_shape(n)==_shape(e) for n in imports)!=1 for e in expected): raise ValueError('IMPORT_BINDING')
         guard=[n for n in contract.body if isinstance(n,ast.FunctionDef) and n.name=='require']
-        model=ast.parse('def require(condition, code):\n    if not condition:\n        raise IntegrationError(code)').body[0]
+        model=ast.parse('def require(condition, code, *, diagnostic=None):\n    if not condition:\n        raise IntegrationError(code, diagnostic=diagnostic)').body[0]
         if len(guard)!=1 or _shape(guard[0])!=_shape(model): raise ValueError('GUARD_NOT_REJECTING')
         entry=_method(service,'call'); handler=_method(service,'_call_locked')
         first=ast.parse('c.require(name in NAMES, "UNSUPPORTED_TOOL")').body[0]

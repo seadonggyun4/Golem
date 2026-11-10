@@ -36,7 +36,7 @@ ACTION = c.obj({"schema": {"const": "golem.integration-native-action.v1"},
 ENTRY = c.obj({"action_id": c.ID, "project_id": c.ID, "work_id": c.ID,
     "tool": c.enum(*NAMES), "session_id": c.ID, "native_binding_id": LABEL, "action": c.PIN})
 POLICY = c.obj({"schema": {"const": "golem.integration-mutations.v1"},
-    "transfer_policy": c.PIN, "actions": c.array(ENTRY, 32),
+    "transfer_policy": c.PIN, "actions": c.array(ENTRY, 32, minimum=0),
     "producer": c.obj({name: c.DIGEST for name in (*transfer.PRODUCER_NAMES, *MODULES)})})
 DECISION = c.obj({"schema": {"const": "golem.integration-local-decision.v1"},
     "action_digest": c.DIGEST, "issuer": c.DIGEST,
@@ -109,9 +109,16 @@ def action_shape(entry, value, *, allow_missing_approval=False):
         if operation not in ("claim", "resume"):
             c.require(request["token"]["session_id"] == owner, "NATIVE_OWNER_MAPPING")
     elif name == "document_submit":
-        # Metadata is validated by the existing native document parser/replay.
-        c.require(request.get("schema_version") in (3, 4, 5) and
-                  request.get("work_id") == entry["work_id"], "NATIVE_ACTION")
+        # Schema 2 is the native discovery/research/scope bootstrap. Its
+        # assessment, kind/stage, evidence and parents remain native-owned;
+        # schema 1 legacy planning is not a substitute for managed selection.
+        version = request.get("schema_version")
+        c.require(type(version) is int and version in (2, 3, 4, 5), "NATIVE_ACTION",
+                  diagnostic=c.field_diagnostic("$.native_json.schema_version", "RANGE",
+                      {"type": "integer", "minimum": 2, "maximum": 5}))
+        c.require(request.get("work_id") == entry["work_id"], "NATIVE_ACTION",
+                  diagnostic=c.field_diagnostic("$.native_json.work_id", "FIELD_SCOPE",
+                      {"type": "string"}))
     else:
         c.require(request.get("operation") in ("prepare", "finish", "run"), "NATIVE_ACTION")
         fields = {"schema_version": {"const": 1}, "operation": {"const": request["operation"]}}
@@ -124,7 +131,11 @@ def action_shape(entry, value, *, allow_missing_approval=False):
             c._validate(request["token"], TOKEN)
             c.require(request["token"].get("session_id") == owner, "NATIVE_OWNER_MAPPING")
         c._validate(request, c.obj(fields))
-    c.require((name == "document_submit") == bool(value["body"]), "ACTION_BODY_SCOPE")
+    document = name == "document_submit"
+    c.require(document == bool(value["body"]), "ACTION_BODY_SCOPE",
+              diagnostic=c.field_diagnostic("$.body",
+                  "NONEMPTY_REQUIRED" if document else "EMPTY_REQUIRED",
+                  {"type": "string", "minLength": 1} if document else {"type": "string", "maxLength": 0}))
     if name == "session_resume":
         context, count = c.decode(value["context_json"].encode()), c.decode(value["count_json"].encode())
         c.require(isinstance(context, dict) and isinstance(count, dict) and
@@ -134,7 +145,10 @@ def action_shape(entry, value, *, allow_missing_approval=False):
                   type(context.get("excerpt_bytes")) is int and context["excerpt_bytes"] == 0,
                   "RESUME_COUNT_REQUIRED")
     else:
-        c.require(not value["context_json"] and not value["count_json"], "ACTION_CONTEXT_SCOPE")
+        for field in ("context_json", "count_json"):
+            c.require(not value[field], "ACTION_CONTEXT_SCOPE",
+                      diagnostic=c.field_diagnostic("$." + field, "EMPTY_REQUIRED",
+                          {"type": "string", "maxLength": 0}))
     if name == "execution_request":
         if value["approval"] is None:
             c.require(allow_missing_approval is True, "PENDING_APPROVAL")

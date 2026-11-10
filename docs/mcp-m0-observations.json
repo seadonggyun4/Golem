@@ -23,15 +23,15 @@
     },
     {
       "path": "tools/integration_service.py",
-      "sha256": "a2ec4a339ab4169aaf0cc01c75aad1cd14eb0a183dd85f7380de24e00a8a82f3"
+      "sha256": "c15b4d00b839872c99c45b1bbbc97409868fc0bac3b18445e61c653a119a8b22"
     },
     {
       "path": "tools/integration_mutation_contract.py",
-      "sha256": "301d7a013ddd90aafbb0c36a17c7aea9f5e8f24ae96c26af2f28eef57d2abc98"
+      "sha256": "0edf3888cdeadaf5fae9ed99af83f122ece23146dffea0ae381ae1b054969020"
     },
     {
       "path": "tools/integration_mutations.py",
-      "sha256": "b41150e05b293e0f35c48a213b7c1ba350740ae14b1c18b82728487e426ad536"
+      "sha256": "e69ba630714b2c545cc165c3fcce91e54473fe8cb9ca3baae3d5bdb1cc2be565"
     },
     {
       "path": "tools/integration_mutation_mcp.py",
@@ -79,7 +79,7 @@
     },
     {
       "path": "tools/test_integration_mutations.py",
-      "sha256": "d05f820c4fd1a3c1386a99f33d7f23a9fd261af0f45f907dac8ae9cb66a85566"
+      "sha256": "a985261037aab1dd4181998265109366898fbdcfe827136caedc048364c861fa"
     },
     {
       "path": "docs/cli-errors.md",
@@ -187,11 +187,11 @@
     },
     {
       "path": "tools/integration_contract.py",
-      "sha256": "e2c5e3ec5142f888fd4fcf6f2bd1193fd77ff52f4f4234e54df7ec997aac6fdb"
+      "sha256": "f0d08c56e0834580c67e47ae53e6cf174715a76aa5b64d4e7e51ddcb5aac9287"
     },
     {
       "path": "tools/integration_transfer.py",
-      "sha256": "15451b9d4172a0daeb1270e0367475dee8f79ec26bad799d1787e8cda9115999"
+      "sha256": "d98eb26a35c61175bfc096b8719b5ebc2e9e289f7226ea98ab651c493c996e27"
     },
     {
       "path": "docs/runtime-events.md",
@@ -451,7 +451,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "b9145ea68d7e5f38d31a76dc74f6677a9e83a39732c5bb4b78d73fa0d873a133"
+      "sha256": "b707c35cd445e951e09a51d19e3f423bc7e515f4e8a8bd268d5fffc4be393047"
     },
     {
       "path": "src/adapter_protocol/adapter.c",
@@ -539,7 +539,7 @@
     },
     {
       "path": "src/agent_session/record.c",
-      "sha256": "7289302da01b7021ce1fa89fd8a5b24c5b3d82b2a8180f80fb8ef9529ff466d3"
+      "sha256": "2807d0a132eb7220a2b2bcb4dca62a9c05970daf6ff5ac88f1e6cdc5e7e652f1"
     },
     {
       "path": "src/agent_session/rejection.c",
@@ -1643,7 +1643,7 @@
     },
     {
       "path": "tools/intent_authority_host.c",
-      "sha256": "b1d28248c08ae7eb7edbc82f0db354cf09766412ca0d2916c97b4e2563eb1fa6"
+      "sha256": "8bd0c54fa7e4b8151ac9478925250ecb3428e569fdd6fd50420f754f2c44966c"
     },
     {
       "path": "tools/intent_authority_lifecycle.py",
@@ -1959,7 +1959,7 @@
     },
     {
       "path": ".github/workflows/observation.yml",
-      "sha256": "f32a2a5cb45e07a853d4308209b596f09a15c9f8311156628093aa48c5189af7"
+      "sha256": "3e1cb92dda3dfc8f5d43d1e271c8ebc44af19987c7f1269ae58e0cbe19966582"
     },
     {
       "path": ".gitignore",
@@ -2087,11 +2087,11 @@
     },
     {
       "path": "tools/integration_prepare_builders.py",
-      "sha256": "adc69135049a2aaa04ce1e3b3c67a4e082c9ee377b55a4cc6d0e8be1d43c4478"
+      "sha256": "087041b4a8fe1bad9dbf97cc3d4da3daa758b998459ae604de21c250ad2e1f1a"
     },
     {
       "path": "tools/test_integration_m2.py",
-      "sha256": "b8c1dd396d7a09cbe9abdff80036562ba41646bb9f288a009e64e1a3a9b61e8b"
+      "sha256": "ba99e60a2da66ed6d09797f98d4192a783b4c80193a1d174d8ac6f818273aef1"
     },
     {
       "path": "tools/test_capability_m2.py",
@@ -2099,7 +2099,7 @@
     },
     {
       "path": "docs/mcp-m2-preparation.ko.md",
-      "sha256": "44e512babdd663103760e0716746281e9809eae40fead07e2e7822cd6acd3d7d"
+      "sha256": "50462bd035c962c922f00d5a45038fde8c7d5b510e8488da781c04b1dafab11d"
     },
     {
       "path": "tools/integration_task_actions.py",
@@ -2131,7 +2131,7 @@
     },
     {
       "path": "tools/test_integration_m4.py",
-      "sha256": "494429eb57919a80338a3e5734ab317385889aad9921594870cf17cee12c946c"
+      "sha256": "a953514ce3e14da8a7faba032174e244a5a0be3e441d847730d959102962c39d"
     },
     {
       "path": "tools/test_capability_m4.py",
@@ -2171,7 +2171,7 @@
     },
     {
       "path": "tools/integration_feature_profiles.py",
-      "sha256": "6b6b93040697caf97cfaf1e24e1b533f4cd78ec51b44ee6133aa1b761cb6c49d"
+      "sha256": "b15f236a0b5c1b8fc97e083355e274c01a87698230e465a21690cb59379ff8a5"
     },
     {
       "path": "tools/integration_distribution.py",
@@ -2199,7 +2199,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "8c1371affc7dd3a6e30ddc653f17603439e1267d87e6d43a4629d274b27be5c9"
+      "sha256": "9ddfb355694934e4b6bc6f07c05798131e5f5b1b348e4c563fe2c6dc8a1de09a"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -2223,7 +2223,7 @@
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "19eb2af844890b81e0058eb13a3f2cc706ee22a7ba73dc49ccb1f781a02cc82c"
+      "sha256": "ac849b33d63f74a3826fe3c604467f5afbe2cac15d79a044fd5435a0221599ba"
     },
     {
       "path": "include/golem/workpack.h",
@@ -2451,7 +2451,7 @@
     },
     {
       "path": "tools/integration_intent.py",
-      "sha256": "cc2264a72b8b48c79baa5d5e9008efba94584a955e92ad57d49deba5f57a2513"
+      "sha256": "db8faae602e324092f334b84b5ca080ec812a7c36b91b833d56f778accffd339"
     },
     {
       "path": "tools/intent_product_host.inc",
@@ -2459,11 +2459,11 @@
     },
     {
       "path": "tools/test_integration_intent.py",
-      "sha256": "de41e72375f494007c75a397e00af68daddfd275057dce0927910572ec3edfad"
+      "sha256": "c561508d586f06b488d5be8a8b0f280b082a2c48247b9a85e9979f65829e2263"
     },
     {
       "path": "docs/intent-assurance-qc6-implementation.ko.md",
-      "sha256": "8e40cb479d1b78a41ad2351e65671bd2839a7b27f0cf3c5dd12908ced1ab6e59"
+      "sha256": "fb9a7a39dbe260d8f5ff2a120880b553205a260b4fd8f4c029e40ce8de58284f"
     },
     {
       "path": "plugins/golem/.claude-plugin/plugin.json",
@@ -2499,11 +2499,47 @@
     },
     {
       "path": "tools/test_integration_participation.py",
-      "sha256": "5dc006ba7ddd7a1082e917c376418de5d81c801253a9568a8a82172b1e545ba7"
+      "sha256": "df9285d42a99e7854519816d929cdbb9c01f5a2ffc3b9679cafa561c2a4101b2"
     },
     {
       "path": "docs/mcp-participation-lifecycle.ko.md",
       "sha256": "e23f90ed2ebee9382b5897e85141711c5bc77346088d7b7af44256d8e44edd08"
+    },
+    {
+      "path": "tools/intent_bootstrap.py",
+      "sha256": "9dccc92418052f193066e5a835d16ddcb4272717d13248ba27e964b9b69ed0d8"
+    },
+    {
+      "path": "tools/intent_bootstrap_host.inc",
+      "sha256": "6c9606c84a814211c62590f2c61bb9ac3fc6eb571b6ae38a3bf36b92af8a6635"
+    },
+    {
+      "path": "tools/test_intent_bootstrap.py",
+      "sha256": "f63d2bc6e40d0ee889ec0feb08cd6f127c12ba713833ccd7533c9b341e4b9d44"
+    },
+    {
+      "path": "docs/intent-assurance-owner-bootstrap.ko.md",
+      "sha256": "9358b017322932b1e5e168c12da87563054a05a9c40bc4bd6b393081361e39be"
+    },
+    {
+      "path": "docs/mcp-managed-bootstrap.ko.md",
+      "sha256": "3615305bde962931b16cac557d43e67cec00c1a8cdd18da51a3033b2ad66bbbd"
+    },
+    {
+      "path": "tests/c/integration_managed_bootstrap.py",
+      "sha256": "d80b7e3112c2ab2887ebe7ac74aca77c81b63941b1ca399757d0ebbff06e5c0e"
+    },
+    {
+      "path": "tools/test_integration_diagnostics.py",
+      "sha256": "39176846fbeb465933b8bea22d613fae73c81419ebbdfe5830cf03bd27df7c21"
+    },
+    {
+      "path": "tests/c/work_record_integration.py",
+      "sha256": "a3eca26cbe3f8115256f492f6de4438f700df31d6176cf6db03ac2d0b3e03b63"
+    },
+    {
+      "path": "tests/c/discovery_integration.py",
+      "sha256": "f261617456858c71b5c8756323e40a0ee772f18488aab8e22cf47a0e6a7eba97"
     }
   ],
   "observations": [
@@ -19306,6 +19342,34 @@
       "source_path": "tools/integration_lifecycle.py",
       "entrypoint": "AdmittedService.call",
       "selector": null
+    },
+    {
+      "id": "obs-d7c4a222e4ac34d7d50b6d4c3b4d5d78130159eec349d362e92f715b71f4cc97",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/intent_bootstrap.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-a594ef30f63f09146f7dbd753bb38b23e0774da8c599425592b8cdce606bacce",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "tools/intent_bootstrap_host.inc",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-d51e0d4e0535f878170d62be5faa6093348b9ce55b4b049a113f32ec995e9a1e",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_contract.py",
+      "entrypoint": "field_diagnostic",
+      "selector": null
+    },
+    {
+      "id": "obs-8333a2a907ab71609a12f4a6f3f0237396017fe2e7489ca91d2e927eec201b48",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_contract.py",
+      "entrypoint": "validation_diagnostic",
+      "selector": null
     }
   ],
   "capabilities": [
@@ -19656,11 +19720,23 @@
         {
           "path": "tools/test_integration_mutations.py",
           "selector": "D4.test_tools_and_model_arguments_cannot_supply_authority"
+        },
+        {
+          "path": "tests/c/integration_managed_bootstrap.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_m2.py",
+          "selector": null
         }
       ],
       "doc_refs": [
         {
           "path": "docs/integration-d4.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-managed-bootstrap.ko.md",
           "anchor": null
         }
       ],
@@ -34092,6 +34168,10 @@
         {
           "path": "tools/test_capability_m3.py",
           "selector": null
+        },
+        {
+          "path": "tests/c/discovery_integration.py",
+          "selector": null
         }
       ],
       "doc_refs": [
@@ -34105,6 +34185,10 @@
         },
         {
           "path": "docs/mcp-m3-task-actions.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-managed-bootstrap.ko.md",
           "anchor": null
         }
       ],
@@ -42333,6 +42417,10 @@
         {
           "path": "tools/test_capability_m1.py",
           "selector": "M1Profiles.test_original_backlog_requires_every_disposition_and_retained_owner_boundary"
+        },
+        {
+          "path": "tests/c/work_record_integration.py",
+          "selector": null
         }
       ],
       "doc_refs": [
@@ -42342,6 +42430,10 @@
         },
         {
           "path": "docs/mcp-m1-read-coverage.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-managed-bootstrap.ko.md",
           "anchor": null
         }
       ],
@@ -65992,7 +66084,9 @@
         "obs-0cfd94424cc95062c3bbb6155a503e3b3d22ef71156dea5aa3a8d03c88dab502",
         "obs-7c7ee246d29a9620a5bd16bbcf4af128f20b92761fc104e66a78e9ae38265647",
         "obs-3b4a28af79780b894c4a03db1b622731682ffdfa1f6c2abaf24ba104fc9dad4d",
-        "obs-71af4b58b31b7942d3c7afdd4e0eaae29be64fb9d8c6e2661dc36e6c33f9d754"
+        "obs-71af4b58b31b7942d3c7afdd4e0eaae29be64fb9d8c6e2661dc36e6c33f9d754",
+        "obs-d51e0d4e0535f878170d62be5faa6093348b9ce55b4b049a113f32ec995e9a1e",
+        "obs-8333a2a907ab71609a12f4a6f3f0237396017fe2e7489ca91d2e927eec201b48"
       ],
       "implementation": "IMPLEMENTED",
       "current_routes": [
@@ -66018,11 +66112,19 @@
         {
           "path": "tests/c/cli_integration.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_integration_diagnostics.py",
+          "selector": null
         }
       ],
       "doc_refs": [
         {
           "path": "docs/architecture.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-managed-bootstrap.ko.md",
           "anchor": null
         }
       ],
@@ -75909,6 +76011,10 @@
         {
           "path": "docs/mcp-m6-distribution.ko.md",
           "anchor": null
+        },
+        {
+          "path": "docs/mcp-managed-bootstrap.ko.md",
+          "anchor": null
         }
       ],
       "review_status": "REVIEWED",
@@ -80027,6 +80133,95 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Reviewed concrete command grammar and source branch; named CLI operations are not helper exclusions. Existing checks remain mandatory; target route is planning only."
+    },
+    {
+      "id": "surface.tools.intent_bootstrap.py.owner-bootstrap",
+      "observation_ids": [
+        "obs-d7c4a222e4ac34d7d50b6d4c3b4d5d78130159eec349d362e92f715b71f4cc97"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Existing core, owner, input and evidence contracts; inventory grants none"
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "GIT"
+      ],
+      "constraints": {
+        "platforms": [
+          "static lexical/AST source contract"
+        ],
+        "limits": [
+          "No receiver identity, policy satisfaction or execution proof"
+        ],
+        "notes": "Selected packet/pins/action, private audit, no automatic replay; actual client activation NOT_RUN."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_intent_bootstrap.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-owner-bootstrap.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Owner-only exact bootstrap contract; not MCP approval issuance or automatic QA. Native semantics reused; source review is not deployment qualification."
+    },
+    {
+      "id": "surface.tools.intent_bootstrap_host.inc.owner-bootstrap",
+      "observation_ids": [
+        "obs-a594ef30f63f09146f7dbd753bb38b23e0774da8c599425592b8cdce606bacce"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Existing core, owner, input and evidence contracts; inventory grants none"
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE"
+      ],
+      "constraints": {
+        "platforms": [
+          "static lexical/AST source contract"
+        ],
+        "limits": [
+          "No receiver identity, policy satisfaction or execution proof"
+        ],
+        "notes": "Selected packet/pins/action, private audit, no automatic replay; actual client activation NOT_RUN."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_intent_bootstrap.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/intent-assurance-owner-bootstrap.ko.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Owner-only exact bootstrap contract; not MCP approval issuance or automatic QA. Native semantics reused; source review is not deployment qualification."
     }
   ]
 }

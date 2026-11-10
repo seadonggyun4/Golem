@@ -12,6 +12,9 @@ TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.
     "execution_record.py", "test_execution_record.py",
     "intent_authority.py", "intent_authority_lifecycle.py", "intent_authority_host.c",
     "intent_product_host.inc", "integration_intent.py", "test_integration_intent.py",
+    # Exact bootstrap inspection is imported by MCP; the native host and its
+    # CTest fixture also require these reviewed source dependencies.
+    "intent_bootstrap.py", "intent_bootstrap_host.inc", "test_intent_bootstrap.py",
     "test_intent_authority.py", "benchmark_intent_journal.py", "test_benchmark_intent_journal.py",
     "native_record.py", "syscall_record.py", "test_syscall_record.py",
     "doctor_environment.py", "test_doctor_environment.py", "classify_failures.py",

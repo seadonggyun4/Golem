@@ -83,6 +83,7 @@ class SourceSnapshotTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         required = ("tools/intent_authority.py", "tools/intent_authority_lifecycle.py",
             "tools/intent_authority_host.c", "tools/test_intent_authority.py",
+            "tools/intent_bootstrap.py", "tools/intent_bootstrap_host.inc", "tools/test_intent_bootstrap.py",
             "tools/benchmark_intent_journal.py", "tools/test_benchmark_intent_journal.py",
             "samples/intent/source.schema.json", "tests/c/fixtures/intent/source-v1.json")
         with tempfile.TemporaryDirectory() as tmp:
@@ -91,9 +92,12 @@ class SourceSnapshotTests(unittest.TestCase):
             for name in required:
                 self.assertIn(name, exported)
                 self.assertEqual((output / name).read_bytes(), (root / name).read_bytes())
-            subprocess.run([sys.executable, "-c", "import intent_authority, intent_authority_lifecycle"],
+            subprocess.run([sys.executable, "-c",
+                            "import intent_authority, intent_authority_lifecycle, intent_bootstrap, integration_intent"],
                            cwd=output / "tools", check=True, timeout=30)
         for name in ("tools/intent_local_report.py", "samples/intent/owner-approval.json",
+                     "tools/intent_bootstrap_local.py", "tools/intent_bootstrap_local.inc",
+                     "tools/intent_bootstrap_approval.json",
                      "tests/c/fixtures/intent/live-evidence.json", ".git/golem-intent-authority.host-final.json",
                      "authority/quarantine/evidence", "docs/intent-assurance-d01-host.ko.md"):
             self.assertFalse(selected(name), name)
@@ -109,11 +113,16 @@ class SourceSnapshotTests(unittest.TestCase):
                 self.assertTrue((output / "tools" / name).is_file(), name)
             env = {k: v for k, v in os.environ.items()
                    if not k.startswith("GIT_") and k not in ("PYTHONPATH", "PYTHONHOME")}
-            result = subprocess.run([sys.executable, "-m", "unittest", "test_doctor_environment",
-                                     "test_classify_failures", "test_verify_environment", "test_agent_io", "test_agent_entrypoint", "test_instruction_bundle", "test_syscall_record"],
-                                    cwd=output / "tools", env=env, capture_output=True,
-                                    text=True, timeout=60)
-            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            # Every diagnostic module remains mandatory. Bound each independent
+            # suite, so earlier modules cannot consume a later module's budget.
+            for module in ("test_doctor_environment", "test_classify_failures",
+                           "test_verify_environment", "test_agent_io", "test_agent_entrypoint",
+                           "test_instruction_bundle", "test_syscall_record"):
+                with self.subTest(module=module):
+                    result = subprocess.run([sys.executable, "-m", "unittest", "-v", module],
+                                            cwd=output / "tools", env=env, capture_output=True,
+                                            text=True, timeout=60)
+                    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             subprocess.run([sys.executable, "-c", "import native_record"],
                            cwd=output / "tools", env=env, check=True, timeout=30)
 

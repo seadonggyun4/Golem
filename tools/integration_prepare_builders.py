@@ -4,6 +4,7 @@ Common fences are copied from the scoped snapshot. Caller prose, evidence and
 source attribution remain untrusted. Pure D4 shape checking creates no approval.
 """
 import copy
+import json
 import integration_contract as c
 import integration_mutation_contract as actions
 import integration_task_actions as tasks
@@ -74,6 +75,9 @@ def build(args,observed,key):
                 c.require(row is not None and reference(row)==value['output'],'PREPARATION_OUTPUT_BINDING')
     elif target=='document_submit':
         for name in ('schema_version','document_id','kind','stage','producer_attempt','requirement_ids','source_snapshot','scope_revision','template_version','policy_version'):need(name)
+        # Native schema 2 carries the caller's assessment unchanged. Ask for a
+        # missing input; never infer permission, findings or scope readiness.
+        if value.get('schema_version')==2:need('assessment')
         if 'document_id' in value:
             row=latest(record,value['document_id']);derive('revision',row['revision']+1 if row else 1,'NATIVE_LATEST_DOCUMENT_REVISION')
             derive('supersedes',row['digest'] if row else '','NATIVE_LATEST_MANIFEST_DIGEST')
@@ -98,7 +102,11 @@ def build(args,observed,key):
         for name in (('contract',) if operation=='prepare' else ('checkpoint','attempt_id') if operation=='run' else ('checkpoint',)):need(name)
         if current:derive('token',token(status,owner),'NATIVE_ACTIVE_FENCE')
     else:raise c.IntegrationError('PREPARATION_TARGET')
-    envelope={'schema':'golem.integration-native-action.v1','native_json':c.encoded(value).decode(),
+    # Native discovery hashes its parsed snapshot in native object order. Keep
+    # supplied nested order while adding observed metadata fences; canonical
+    # owner/spool envelopes must not reorder the embedded native document.
+    native_json=(json.dumps(value,ensure_ascii=True,separators=(',',':'))+'\n') if target=='document_submit' else c.encoded(value).decode()
+    envelope={'schema':'golem.integration-native-action.v1','native_json':native_json,
               'body':args['body'],'context_json':args['context_json'],'count_json':args['count_json'],'approval':None}
     entry={'tool':target,'work_id':args['work_id'],'session_id':owner,'native_binding_id':args['native_binding_id']}
     if not missing:actions.action_shape(entry,envelope,allow_missing_approval=True)

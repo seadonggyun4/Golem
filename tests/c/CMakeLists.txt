@@ -439,6 +439,14 @@ if(GOLEM_BUILD_CLI)
     # Isolated host cases exceed 180s under parallel macOS CI; each Git/native
     # subprocess retains its own 10/15/30s bound. Do not drop cases from the suite.
     set_tests_properties(intent_authority_host PROPERTIES TIMEOUT 600 LABELS "intent;integration")
+    # Bootstrap host fixtures must run with the exact build targets, not skip in
+    # the Python-only job or assume the CLI is adjacent to the test host.
+    add_test(NAME intent_bootstrap_host COMMAND ${CMAKE_COMMAND} -E env
+        "GOLEM_INTENT_HOST=$<TARGET_FILE:golem_intent_authority_host>"
+        "GOLEM_NATIVE_CLI=$<TARGET_FILE:golem_cli>"
+        ${Python3_EXECUTABLE} -m unittest discover -v -s ${PROJECT_SOURCE_DIR}/tools
+        -p test_intent_bootstrap.py)
+    set_tests_properties(intent_bootstrap_host PROPERTIES TIMEOUT 240 LABELS "intent;integration")
     add_test(NAME intent_schema_conformance COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/intent_schema_conformance.py
         --native $<TARGET_FILE:golem_intent_schema_helper>)
@@ -574,6 +582,10 @@ if(GOLEM_BUILD_CLI)
         ${CMAKE_CURRENT_SOURCE_DIR}/integration_read_backend.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR})
     set_tests_properties(integration_read_backend PROPERTIES TIMEOUT 180)
+    add_test(NAME integration_managed_bootstrap COMMAND ${Python3_EXECUTABLE}
+        ${CMAKE_CURRENT_SOURCE_DIR}/integration_managed_bootstrap.py $<TARGET_FILE:golem_cli>
+        ${PROJECT_SOURCE_DIR})
+    set_tests_properties(integration_managed_bootstrap PROPERTIES TIMEOUT 240)
     add_test(NAME integration_startup_hooks COMMAND ${Python3_EXECUTABLE}
         ${CMAKE_CURRENT_SOURCE_DIR}/integration_d3_hooks.py $<TARGET_FILE:golem_cli>
         ${PROJECT_SOURCE_DIR})

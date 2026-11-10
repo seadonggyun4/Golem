@@ -11,7 +11,7 @@ READ=('intent_read','workpack_read','workpack_resource_read','projects_list','wo
 PREP=('inputs_prepare','action_prepare','contract_prepare','plan_read','parallel_prepare','merge_prepare')
 OWNER_PREP=('approved_action_prepare','action_confirm')
 BASE_ACTIONS=('session_claim','session_begin','session_resume','session_reconcile','session_submit','document_submit','execution_request')
-TASK_ACTIONS=('intent_qa_accept','intent_completion_finalize','workpack_bind','workpack_receipt_manifest','workpack_receipt_export','session_start','session_heartbeat','session_reject_output','binding_attach','role_enroll','role_assess',
+TASK_ACTIONS=('intent_qa_accept','intent_completion_finalize','execution_verify','workpack_bind','workpack_receipt_manifest','workpack_receipt_export','session_start','session_heartbeat','session_reject_output','binding_attach','role_enroll','role_assess',
  'completion_finalize','completion_report','reentry_decide','reentry_report','document_project','work_create','context_publish',
  'discovery_snapshot','profile_register','run_link','work_noop_run','adapter_noop_run','lineage_store','approval_request')
 QUALITY_ACTIONS=('intent_qa_accept','intent_completion_finalize','evidence_import','proof_publish','research_request','research_export','cost_inbox_reconcile','helper_execute','execution_verify')

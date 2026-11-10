@@ -61,15 +61,17 @@
 | [integration-layer-design.md](integration-layer-design.md) | Golem Integration Layer and MCP Design |
 | [integration-layer-references.md](integration-layer-references.md) | Integration Layer: Research and Decision Record |
 | [integration-mcpb.md](integration-mcpb.md) | Claude Desktop MCPB 설치·사용 안내 |
+| [integration-styxis.md](integration-styxis.md) | Styxis 공개 설치 진입점과 client별 launcher 선택 |
 | [intent-assurance-architecture.ko.md](intent-assurance-architecture.ko.md) | 아키텍처와 기존 core 재사용 |
 | [intent-assurance-contracts.ko.md](intent-assurance-contracts.ko.md) | 원문·변경·검토·차단 데이터 계약 |
 | [intent-assurance-qa-coverage.ko.md](intent-assurance-qa-coverage.ko.md) | 기획 요구·경로별 QA·완료 연결: 단계별 개발 계획 (실행 HOLD) |
-| [intent-assurance-qa-p0-contract.ko.md](intent-assurance-qa-p0-contract.ko.md) | 채택된 Q1–Q5와 LOCAL_NO_MERGE P0 확정 설계 계약 (미구현) |
+| [intent-assurance-qa-p0-contract.ko.md](intent-assurance-qa-p0-contract.ko.md) | 채택된 Q1–Q5와 LOCAL_NO_MERGE P0 확정 설계 계약·당시 구현 계획 |
 | [intent-assurance-d01-host.ko.md](intent-assurance-d01-host.ko.md) | D01 host 등록과 읽기 전용 native 연결 |
 | [intent-assurance-delivery.ko.md](intent-assurance-delivery.ko.md) | 수용 기준·실패 주입·구현 WBS |
 | [intent-assurance-distribution.ko.md](intent-assurance-distribution.ko.md) | Clone/CMake 없는 MCP 설치·배포 설계 |
 | [intent-assurance-journal-capacity.ko.md](intent-assurance-journal-capacity.ko.md) | P1 Journal 용량 실험과 D08 결정 제안 |
 | [intent-assurance-p0-review.ko.md](intent-assurance-p0-review.ko.md) | Intent Assurance P0 착수 검토 |
+| [intent-assurance-owner-bootstrap.ko.md](intent-assurance-owner-bootstrap.ko.md) | Owner 전용 기준선 검토·활성화·요구사항 등록 host |
 | [intent-assurance-p1-journal.ko.md](intent-assurance-p1-journal.ko.md) | P1 준비 기록과 quota-aware journal |
 | [intent-assurance-p1-object-store.ko.md](intent-assurance-p1-object-store.ko.md) | P1a Object Store 승인 계약과 구현 현황 |
 | [intent-assurance-qc1-implementation.ko.md](intent-assurance-qc1-implementation.ko.md) | QC1 native 기준선·검토 제어 구현과 미연결 범위 (실행 NOT_RUN) |
@@ -95,6 +97,8 @@
 | [mcp-m5-parallel-candidates.ko.md](mcp-m5-parallel-candidates.ko.md) | M5 병렬 작업·후보 결과·병합 절차 연결 |
 | [mcp-m6-distribution.ko.md](mcp-m6-distribution.ko.md) | M6 Setup/업무 스킬·기능 profile·패키징·설치·재로딩 |
 | [mcp-m7-m8-validation.ko.md](mcp-m7-m8-validation.ko.md) | M7/M8 실제 설치·검증 기록 — 2026-10-26~27 |
+| [mcp-managed-bootstrap.ko.md](mcp-managed-bootstrap.ko.md) | MCP 최초 scope·selection·session 준비와 소스 기준점 |
+| [mcp-participation-lifecycle.ko.md](mcp-participation-lifecycle.ko.md) | 연결별 최초 실제 호출의 참여 기록·현재 Desktop 읽기 검증 |
 | [metrics.ko.md](metrics.ko.md) | Research Metrics (29C) |
 | [metrics.md](metrics.md) | Research Metrics (29C) |
 | [mvp-runtime.md](mvp-runtime.md) | MVP Runtime |
@@ -155,6 +159,11 @@ Native validation, catalog/search, limited document binding, proposals, evidence
 | Evidence packages | [Manifest/export/verify](workpacks/receipts.md) |
 | Reference scenario | [Pack](workpacks/reference.md) · [Truthound adapter](workpacks/reference-adapter.md) |
 | Historical milestone results | [Development and validation record](workpacks/development-plan.md) |
+
+## Intent QC 구현·검증 기록
+
+각 문서의 HOLD·NOT_RUN은 기록 당시 범위다. 후속 CI 결과와 실제 client 설치·업무 실행을
+구분하며, 현재 권한이나 제품 QA 통과는 과거 기록에서 추론하지 않는다.
 
 - [QC4 실제 결과·현재성·QA 수락 구현 — 실행 HOLD](intent-assurance-qc4-implementation.ko.md)
 

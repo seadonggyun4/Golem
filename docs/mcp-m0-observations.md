@@ -1274,6 +1274,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.plugins.golem.mcp.json.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.tools.integration_desktop_plugin.py.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.tools.integration_desktop_plugin.py.commands.owner | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.intent_bootstrap.py.owner-bootstrap | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.intent_bootstrap_host.inc.owner-bootstrap | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3679,6 +3681,10 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | PYTHON_DECLARATION | tools/integration_lifecycle.py | AdmittedService.__init__ | None |
 | PYTHON_DECLARATION | tools/integration_lifecycle.py | AdmittedService.__getattr__ | None |
 | PYTHON_DECLARATION | tools/integration_lifecycle.py | AdmittedService.call | None |
+| PYTHON_DECLARATION | tools/intent_bootstrap.py | file-surface | None |
+| NATIVE_OPERATION | tools/intent_bootstrap_host.inc | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_contract.py | field_diagnostic | None |
+| PYTHON_DECLARATION | tools/integration_contract.py | validation_diagnostic | None |
 
 ## Blockers
 

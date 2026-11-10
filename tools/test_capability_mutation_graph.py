@@ -22,7 +22,7 @@ class Graph(unittest.TestCase):
         for old in (
             b"c.require(approve_intent is True,'OWNER_INTENT_HOST_REQUIRED')",
             b"c.require(row['operation']==expected and row['action_id']==entry['action_id'] and row['action_sha256']==entry['action']['sha256'],'INTENT_EXACT_ACTION')",
-            b"c.require(row['operation'] in ('assess','current','resume') and row['action_id']=='','INTENT_READ_ONLY')",
+            b"c.require(row['operation'] in ('assess','current','resume','enrollment-inspect') and row['action_id']=='','INTENT_READ_ONLY')",
         ):
             files,pins=self.changed(delegation,'tools/integration_intent.py',old,b'pass')
             self.assertTrue(inspect_mutation_graph(files,pins).blockers)

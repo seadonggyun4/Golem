@@ -27,8 +27,14 @@ class Connections(unittest.TestCase):
         self.assertFalse(r.execution_verified);self.assertFalse(r.authority_verified)
     def test_guard_cannot_be_removed_even_with_fixture_pin(self):
         for mod,fn in ((fallback,fallback.inspect_fallback),(delegation,delegation.inspect_delegation)):
-            files,pins=self.changed(mod,'tools/integration_contract.py',b'raise IntegrationError(code)',b'pass')
+            files,pins=self.changed(mod,'tools/integration_contract.py',b'raise IntegrationError(code, diagnostic=diagnostic)',b'pass')
             self.assertTrue(fn(files,pins).blockers)
+    def test_guard_condition_and_diagnostic_forwarding_remain_exact_after_repin(self):
+        for mod,fn in ((fallback,fallback.inspect_fallback),(delegation,delegation.inspect_delegation)):
+            for old,new in ((b'if not condition:',b'if False:'),
+                            (b'raise IntegrationError(code, diagnostic=diagnostic)',b'raise IntegrationError(code)')):
+                files,pins=self.changed(mod,'tools/integration_contract.py',old,new)
+                self.assertTrue(fn(files,pins).blockers)
     def test_d2_computed_routing_blocks(self):
         files,pins=self.changed(fallback,'tools/integration_service.py',b'if name == "projects_list":',b'if name == selected:')
         self.assertTrue(fallback.inspect_fallback(files,pins).blockers)
@@ -56,4 +62,9 @@ class Connections(unittest.TestCase):
 
     def test_unregistered_forwarding_blocks(self):
         files,pins=self.changed(delegation,'tools/integration_mutations.py',b'c.bounded(args)',b'unknown(name)\n        c.bounded(args)')
+        self.assertTrue(delegation.inspect_delegation(files,pins).blockers)
+    def test_input_schema_scope_cannot_be_replaced_after_repin(self):
+        files,pins=self.changed(delegation,'tools/integration_mutations.py',
+            b"c._validate(args, contract.SCHEMAS[name], scope='INPUT_SCHEMA')",
+            b"c._validate(args, contract.SCHEMAS[name], scope='NATIVE_OBSERVATION')")
         self.assertTrue(delegation.inspect_delegation(files,pins).blockers)

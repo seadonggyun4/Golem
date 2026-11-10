@@ -25,6 +25,35 @@ class Record(unittest.TestCase):
         return {str(p.relative_to(self.work)): hashlib.sha256(p.read_bytes()).hexdigest()
                 for p in self.work.rglob("*") if p.is_file()}
 
+    def test_genesis_only_record_preserves_heads_budget_and_start_prerequisites(self):
+        self.work = self.root / "empty-work"
+        self.cli("work", "start", self.work, fixture.SOURCE / "samples/documents/work.json")
+        self.request = dict(schema_version=1, work_id="example-work", byte_budget=32 * 1024 * 1024,
+                            document_head="", agent_head="")
+        before = self.inventory()
+        result = self.record()
+        self.assertEqual(result["documents"], [])
+        self.assertEqual(result["assessments"], {})
+        self.assertEqual(len(result["journal"]), 1)
+        self.assertEqual(result["status"]["sequence"], 0)
+        self.assertIsNone(result["status"]["state"])
+        self.assertFalse(result["execution_authorized"])
+        self.assertFalse(result["acceptance_verified"])
+        self.request.update(document_head=result["document_head"], agent_head=result["agent_head"])
+        self.assertEqual(result, self.record())
+        current = self.request.copy()
+        for change in ({"byte_budget": 1}, {"document_head": "f" * 64}, {"work_id": "foreign"}):
+            self.request = {**current, **change}
+            self.assertEqual(self.record(ok=False).stdout, b"")
+        self.request = current
+        self.assertNotEqual(self.cli("workflow", "select", self.work, "scope", 1,
+                                     "development", ok=False).returncode, 0)
+        self.assertNotEqual(self.cli("session", "call", self.work, self.write("missing-selection.json", dict(
+            schema_version=1, operation="start", work_id="example-work", key="must-not-start",
+            expected_sequence=0, selection_id="selection")), ok=False).returncode, 0)
+        self.assertEqual(result, self.record())
+        self.assertEqual(before, self.inventory())
+
     def test_interning_reconstructs_legacy_metadata_without_writing(self):
         self.prepare()
         second = self.metadata("scope", version=2)

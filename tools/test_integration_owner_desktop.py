@@ -71,8 +71,12 @@ class Desktop(unittest.TestCase):
         scoped=profiles.Scoped(self.api,'prepare')
         self.controller=desktop.Controller(scoped,self.api.transfer,approve_ui=True)
         self.args={'project_id':'p','work_id':'a',**self.plan_args(result)}
-        # The old native D4 contract still rejects an empty action array.
-        self.expect('SCHEMA',lambda:actions.validate(self.controller.owner.current()))
+        # Schema-valid empty D4 actions still grant no action. The D2 draft
+        # builder is not a dispatch Policy and is never installed by export.
+        actions.validate(self.controller.owner.current())
+        self.assertEqual(self.controller.owner.current()['actions'],[])
+        self.assertNotIsInstance(self.controller.owner,actions.Policy)
+        self.assertFalse(hasattr(self.controller.owner,'action'))
         self.inspect();value=self.export(confirmed=True)
         candidate=c.decode(Path(value['candidate_directory'],'policy-candidate.json').read_bytes())
         actions.validate(candidate)

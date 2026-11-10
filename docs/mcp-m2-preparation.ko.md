@@ -1,5 +1,16 @@
 # M2 입력·준비 구현과 검증
 
+새 Work의 첫 문서 준비는 [관리형 bootstrap 안내](mcp-managed-bootstrap.ko.md)를 따른다.
+native record는 문서가 없는 genesis 상태도 원래 head·journal·session과 함께 조회한다.
+MCP 문서 제출은 native schema 2의 discovery/research/scope를 그대로 전달하며,
+assessment·본문 누락은 `action_prepare`에서 질문으로 반환한다. 입력 schema 오류에는 값이 없는
+`validation_diagnostic`을 덧붙이되, 승인·dispatch·재시도 판정은 바꾸지 않는다.
+직접 D4 호출의 누락 입력을 보완하거나 승인된 bytes를 다시 작성하지 않는다.
+
+아래는 M2 최초 구현과 후속 마일스톤의 기록이다. 당시 도구 수·검증 결과·NOT_RUN을
+현재 전체 구현·설치 상태로 해석하지 않는다. 현재 native schema 2 bootstrap은 위 안내를,
+실제 설치 조회 검증은 [연결 참여 검증 기록](mcp-participation-lifecycle.ko.md)을 확인한다.
+
 ## 범위와 계약
 
 M2는 현재 승인된 Work에서 입력·native action 초안·구조 검증·재조회 가능한 불변 준비안을 제공한다. 기존 D2 전달 범위와 D1 record/status/next 권한이 필요하며, owner action 조회·확인은 기존 D4 policy가 있는 서비스에서만 제공한다. 기존 도구 scope에 새 이름을 자동 추가하지 않는다. runtime/연결·승인·policy·등록 Work를 변경하거나 native mutation을 호출하지 않는다.

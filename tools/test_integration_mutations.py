@@ -167,6 +167,51 @@ class D4(unittest.TestCase):
         request["binding_id"] = "forged"
         self.expect("SCHEMA", lambda: contract.native_action(entry, {**action, "native_json": c.encoded(request).decode()}))
 
+    def test_document_v2_envelope_reuses_native_validation_and_keeps_owner_scope(self):
+        entry = {**self.entry, "tool": "document_submit"}
+        for kind in ("discovery", "research", "scope"):
+            request = {"schema_version": 2, "work_id": "a", "kind": kind,
+                       "assessment": {"permission": "ASK"}}
+            action = {**self.action, "native_json": c.encoded(request).decode(), "body": "caller body"}
+            self.assertEqual(contract.native_action(entry, action), request)
+            # This checks only admission shape. Missing native fields cannot be
+            # interpreted as a valid document or approval by this envelope.
+        for version in (1, 6, True, 2.0, "2", None):
+            request = {"schema_version": version, "work_id": "a"}
+            action = {**self.action, "native_json": c.encoded(request).decode(), "body": "caller body"}
+            self.expect("NATIVE_ACTION", lambda: contract.native_action(entry, action))
+        request = {"schema_version": 2, "work_id": "foreign"}
+        action = {**self.action, "native_json": c.encoded(request).decode(), "body": "caller body"}
+        self.expect("NATIVE_ACTION", lambda: contract.native_action(entry, action))
+        request["work_id"] = "a"
+        action["native_json"] = c.encoded(request).decode()
+        self.expect("ACTION_BODY_SCOPE", lambda: contract.native_action(entry, {**action, "body": ""}))
+        self.expect("ACTION_CONTEXT_SCOPE", lambda: contract.native_action(entry, {**action, "context_json": "{}"}))
+        approval = {"host": {"path": "/fixture-host", "sha256": "0" * 64},
+            "decision": {"path": "/fixture-decision", "sha256": "0" * 64},
+            "request_receipt": "0" * 64, "contract": "0" * 64, "shell_contract": ""}
+        self.expect("ACTION_APPROVAL_SCOPE", lambda: contract.native_action(entry, {**action, "approval": approval}))
+
+    def test_document_and_nonresume_scope_diagnostics_do_not_echo_values(self):
+        entry = {**self.entry, "tool": "document_submit"}
+        request = {"schema_version": 2, "work_id": "a"}
+        action = {**self.action, "native_json": c.encoded(request).decode(), "body": "private fixture prose"}
+        cases = [({**action, "body": ""}, "ACTION_BODY_SCOPE", "$.body", "NONEMPTY_REQUIRED"),
+                 ({**action, "context_json": "private context"}, "ACTION_CONTEXT_SCOPE", "$.context_json", "EMPTY_REQUIRED"),
+                 ({**action, "count_json": "private count"}, "ACTION_CONTEXT_SCOPE", "$.count_json", "EMPTY_REQUIRED"),
+                 ({**action, "native_json": c.encoded({**request, "schema_version": 1}).decode()},
+                  "NATIVE_ACTION", "$.native_json.schema_version", "RANGE"),
+                 ({**action, "native_json": c.encoded({**request, "work_id": "private-project"}).decode()},
+                  "NATIVE_ACTION", "$.native_json.work_id", "FIELD_SCOPE")]
+        for candidate, code, path, reason in cases:
+            with self.subTest(path=path), self.assertRaises(c.IntegrationError) as caught:
+                contract.native_action(entry, candidate)
+            self.assertEqual(caught.exception.code, code)
+            diagnostic = c.validation_diagnostic(caught.exception)
+            self.assertEqual((diagnostic['path'], diagnostic['reason']), (path, reason))
+            self.assertTrue(diagnostic['values_omitted'])
+            self.assertNotIn('private', c.encoded(diagnostic).decode())
+
     def test_missing_result_reference_cannot_release_work_quarantine(self):
         result = self.invoke()
         output = self.registry.root / result["local_evidence_id"]

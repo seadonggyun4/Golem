@@ -9,13 +9,14 @@ import integration_contract as c
 import integration_registry as r
 import integration_backend as backend
 import intent_authority as authority
+import intent_bootstrap as bootstrap
 import execution_record as records
 
 ACTIONS=('intent_qa_accept','intent_completion_finalize')
 READ='intent_read'
 READ_SCHEMA=c.obj({'project_id':c.ID,'work_id':c.ID,'query_id':c.ID})
 BINDING=c.obj({'binding_id':c.ID,'project_id':c.ID,'work_id':c.ID,
-    'operation':c.enum('assess','current','resume','accept','finalize'),
+    'operation':c.enum('assess','current','resume','enrollment-inspect','accept','finalize'),
     'action_id':{'type':'string','maxLength':64},'action_sha256':c.DIGEST,
     'packet':c.PIN,'review_root':c.obj({'path':c.PATH,'identity':c.IDENTITY})})
 POLICY=c.obj({'schema':{'const':'golem.integration-intent-host.v1'},
@@ -51,7 +52,7 @@ class Hosts:
         for key in ('git','bridge'):c.require(r.file_pin(Path(value[key]['path']))==value[key],'INTENT_PROGRAM_CHANGED')
         return value
     def permitted(self,project,work):
-        return any((b['project_id'],b['work_id'])==(project,work) and b['operation'] in ('assess','current','resume') for b in self.current()['bindings'])
+        return any((b['project_id'],b['work_id'])==(project,work) and b['operation'] in ('assess','current','resume','enrollment-inspect') for b in self.current()['bindings'])
     def binding(self,binding_id,project,work):
         cfg=self.current();row=next((b for b in cfg['bindings'] if b['binding_id']==binding_id),None)
         c.require(row is not None and (row['project_id'],row['work_id'])==(project,work),'INTENT_SCOPE')
@@ -64,8 +65,14 @@ class Hosts:
         packet_fields={'schema':{'const':'golem.intent-product-host.v1'},'work':c.PATH,'operation':c.enum('assess','current','resume','accept','finalize')}
         packet_fields.update({key:{'type':'string','maxLength':c.LIMIT} for key in ('policy','bundle','control','material','request','policy_name','bundle_name')})
         packet_fields.update(policy_sha256=c.DIGEST,bundle_sha256=c.DIGEST)
-        c._validate(packet,c.obj(packet_fields))
-        c.require(packet.get('schema')=='golem.intent-product-host.v1' and packet.get('work')==workpath and packet.get('operation')==row['operation'],'INTENT_PACKET_SCOPE')
+        if row['operation']=='enrollment-inspect':
+            c._validate(packet,bootstrap.PACKET)
+            c.require(packet['operation']=='enrollment-inspect' and row['action_id']=='' and
+                      row['action_sha256']=='0'*64 and packet['approval']=='0'*64 and
+                      packet['enrollment']=='','INTENT_INSPECTION_ONLY')
+        else:
+            c._validate(packet,c.obj(packet_fields))
+        c.require(packet.get('work')==workpath and packet.get('operation')==row['operation'],'INTENT_PACKET_SCOPE')
         root=r.real_path(row['review_root']['path']);c.require(r.identity(root)==row['review_root']['identity'],'INTENT_REVIEW_ROOT_CHANGED')
         for field in ('policy','bundle'):
             name=packet[field+'_name'];c.require(isinstance(name,str) and name not in ('','.','..') and '/' not in name,'INTENT_FILE_NAME')
@@ -107,8 +114,11 @@ class Hosts:
                                 c.require(len(streams[pipe])+len(chunk)<=c.LIMIT,'INTENT_OUTPUT_LIMIT');streams[pipe].extend(chunk)
                         process.wait(timeout=max(.01,deadline-time.monotonic()))
                         result.update(returncode=process.returncode,reason='EXIT')
+                    argv=[cfg['bridge']['path'],'--product-fd',str(fd),cfg['registration_sha256'],str(reviewfd)]
+                    if row.get('operation')=='enrollment-inspect':
+                        argv=[cfg['bridge']['path'],'--bootstrap-fd',str(fd),cfg['registration_sha256'],str(reviewfd),c.sha(raw)]
                     records.run_private(
-                        [cfg['bridge']['path'],'--product-fd',str(fd),cfg['registration_sha256'],str(reviewfd)],
+                        argv,
                         destination=output/'process',timeout=30,env=backend.ENVIRONMENT,
                         source=Path(cfg['repository']),protocol=exchange,protocol_stderr=True,pass_fds=(fd,reviewfd))
                 finally:
@@ -123,7 +133,7 @@ class Hosts:
     def read(self,service,scope,args):
         service._authorize(scope,args['work_id'],'record')
         cfg,row,raw=self.binding(args['query_id'],args['project_id'],args['work_id'])
-        c.require(row['operation'] in ('assess','current','resume') and row['action_id']=='','INTENT_READ_ONLY')
+        c.require(row['operation'] in ('assess','current','resume','enrollment-inspect') and row['action_id']=='','INTENT_READ_ONLY')
         backend._quota(service.registry.root,1)
         output=Path(tempfile.mkdtemp(prefix='read-intent-',dir=service.registry.root))
         process=self._capture(cfg,row,raw,output)

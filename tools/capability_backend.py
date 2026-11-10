@@ -8,7 +8,7 @@ from capability_mutation_graph import _function
 
 PINS={
     'tools/integration_backend.py':'af4c53f28db212c96a830b6ec282f3e2c7a0b7db97aab2ff2e484d525271125e',
-    'tools/integration_contract.py':'e2c5e3ec5142f888fd4fcf6f2bd1193fd77ff52f4f4234e54df7ec997aac6fdb',
+    'tools/integration_contract.py':'f0d08c56e0834580c67e47ae53e6cf174715a76aa5b64d4e7e51ddcb5aac9287',
 }
 
 
@@ -52,7 +52,7 @@ def inspect_backend(sources,pins=PINS):
         reads=[v for k,v in zip(contracts.keys,contracts.values) if isinstance(k,ast.Constant) and k.value=='read']
         if len(reads)!=1 or _shape(reads[0])!=_expr('QUERY'): raise ValueError('QUERY_CONTRACT_BINDING')
         require=_function(contract,None,'require')
-        model=ast.parse('def require(condition, code):\n if not condition:\n  raise IntegrationError(code)').body[0]
+        model=ast.parse('def require(condition, code, *, diagnostic=None):\n if not condition:\n  raise IntegrationError(code, diagnostic=diagnostic)').body[0]
         if _shape(require)!=_shape(model): raise ValueError('GUARD_NOT_REJECTING')
         native=_function(backend,None,'_native'); read=_function(backend,None,'read')
         if _shape(read.body[0])!=_shape(ast.parse('validate("read", request)').body[0]): raise ValueError('READ_VALIDATION_GUARD')

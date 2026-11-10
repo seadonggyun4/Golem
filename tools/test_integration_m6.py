@@ -28,6 +28,29 @@ class FakeService:
     def call(self,name,args):self.calls.append((name,args));return {'state':'COMMIT_UNKNOWN','request_id':args.get('request_id'),'automatic_retry_allowed':False}
 
 class ProfileBoundaries(unittest.TestCase):
+    def test_task_verification_requires_current_owner_action_and_client_delivery(self):
+        # A task workflow can request the existing verifier without changing
+        # profiles; the ceiling does not install an exact D4 action for it.
+        backend=FakeService();backend.names=['execution_read']
+        scoped=profiles.Scoped(backend,'task')
+        self.assertNotIn('execution_verify',scoped.tools())
+        with self.assertRaises(c.IntegrationError) as caught:
+            scoped.call('execution_verify',{})
+        self.assertEqual(caught.exception.code,'FEATURE_OWNER_SCOPE')
+        self.assertEqual(backend.calls,[])
+        flow=profiles.diagnose('task',backend.names)['workflows']['verify_execution']
+        self.assertEqual(flow['profile_excluded'],[])
+        self.assertEqual(flow['owner_service_unavailable'],['execution_verify'])
+        backend.names.append('execution_verify')
+        flow=profiles.diagnose('task',backend.names,['execution_read'])['workflows']['verify_execution']
+        self.assertTrue(flow['server_tools_present'])
+        self.assertEqual(flow['client_missing'],['execution_verify'])
+        self.assertFalse(flow['execution_authorized'])
+        backend.names.remove('execution_verify')
+        self.assertNotIn('execution_verify',scoped.tools())
+        for profile in ('read','prepare','parallel'):
+            self.assertNotIn('execution_verify',profiles.definition(profile)['tools'])
+
     def test_workflow_diagnostic_distinguishes_ceiling_owner_and_client(self):
         names=['document_submit','execution_request','completion_finalize','completion_report','completion_check']
         task=profiles.diagnose('task',names,names[:-1])

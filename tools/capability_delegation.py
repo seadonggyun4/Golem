@@ -5,16 +5,16 @@ from capability_profile import scan_sources
 from capability_source import python_literal_names
 from capability_fallback import _shape, _method
 
-PINS={'tools/integration_intent.py':'cc2264a72b8b48c79baa5d5e9008efba94584a955e92ad57d49deba5f57a2513',
+PINS={'tools/integration_intent.py':'db8faae602e324092f334b84b5ca080ec812a7c36b91b833d56f778accffd339',
 'tools/integration_workpack_actions.py':'41cd2aa5ce14e9e93982a85e434591c11a44ca65e894e00c48bc21aa35927539',
 'tools/integration_parallel_actions.py':'fba94f6a466bdf9b013ab8ad939ed80d5232bb2dd7ea64da3d2912ff2eb02dc3',
 'tools/integration_quality_actions.py':'9952c0b371fdbcccb13e1ae2872690c541e16c0e076e19588483f5cbd14e02a0',
 'tools/integration_task_actions.py':'070b6c35d8ea0e6f0cbd53706c56c579b7bfe6a43a93406f7e6894a7f2924002',
 
- 'tools/integration_mutations.py':'b41150e05b293e0f35c48a213b7c1ba350740ae14b1c18b82728487e426ad536',
- 'tools/integration_mutation_contract.py':'301d7a013ddd90aafbb0c36a17c7aea9f5e8f24ae96c26af2f28eef57d2abc98',
- 'tools/integration_service.py':'a2ec4a339ab4169aaf0cc01c75aad1cd14eb0a183dd85f7380de24e00a8a82f3',
- 'tools/integration_contract.py':'e2c5e3ec5142f888fd4fcf6f2bd1193fd77ff52f4f4234e54df7ec997aac6fdb',
+ 'tools/integration_mutations.py':'e69ba630714b2c545cc165c3fcce91e54473fe8cb9ca3baae3d5bdb1cc2be565',
+ 'tools/integration_mutation_contract.py':'0edf3888cdeadaf5fae9ed99af83f122ece23146dffea0ae381ae1b054969020',
+ 'tools/integration_service.py':'c15b4d00b839872c99c45b1bbbc97409868fc0bac3b18445e61c653a119a8b22',
+ 'tools/integration_contract.py':'f0d08c56e0834580c67e47ae53e6cf174715a76aa5b64d4e7e51ddcb5aac9287',
 }
 @dataclass(frozen=True)
 class DelegationObservation:
@@ -43,7 +43,7 @@ def inspect_delegation(sources,pins=PINS):
         reads=set(python_literal_names(files['tools/integration_service.py'].data.decode(),'SCHEMAS',mapping=True))
         if names & reads: raise ValueError('DECLARATION_OVERLAP')
         guard=[n for n in trees['tools/integration_contract.py'].body if isinstance(n,ast.FunctionDef) and n.name=='require']
-        model=ast.parse('def require(condition, code):\n    if not condition:\n        raise IntegrationError(code)').body[0]
+        model=ast.parse('def require(condition, code, *, diagnostic=None):\n    if not condition:\n        raise IntegrationError(code, diagnostic=diagnostic)').body[0]
         if len(guard)!=1 or _shape(guard[0])!=_shape(model): raise ValueError('GUARD_NOT_REJECTING')
         entry=_method(root,'call'); helper=_method(root,'_mutate')
         for method in (entry,helper):
@@ -57,7 +57,7 @@ def inspect_delegation(sources,pins=PINS):
         returns=[n for n in ast.walk(entry) if isinstance(n,ast.Return)]
         expected_returns=[first[0].body[0],ast.parse('return self._mutate(name, args)').body[0]]
         if sorted(_shape(n) for n in returns)!=sorted(_shape(n) for n in expected_returns): raise ValueError('RETURN_EDGE')
-        allowed_name_calls={_shape(target),_shape(first[0].body[0].value),_shape(first[1].value),_shape(ast.parse('c._validate(args, contract.SCHEMAS[name])',mode='eval').body)}
+        allowed_name_calls={_shape(target),_shape(first[0].body[0].value),_shape(first[1].value),_shape(ast.parse("c._validate(args, contract.SCHEMAS[name], scope='INPUT_SCHEMA')",mode='eval').body)}
         for n in ast.walk(entry):
             if isinstance(n,ast.Call) and any(isinstance(v,ast.Name) and v.id=='name' for a in (*n.args,*(k.value for k in n.keywords)) for v in ast.walk(a)) and _shape(n) not in allowed_name_calls:
                 raise ValueError('UNREGISTERED_FORWARDING')

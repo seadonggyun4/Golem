@@ -44,6 +44,13 @@ jobs:
         uses: "./.github/actions/setup-json-c"
       - run: "cmake -S . -B build/events -G Ninja -DCMAKE_BUILD_TYPE=Debug -DGOLEM_ENABLE_SANITIZERS=ON -DGOLEM_BUILD_EVENT_BRIDGE=ON -DGOLEM_BUILD_INTEGRATION_HOST=ON"
       - run: "cmake --build build/events --parallel 2"
+      - name: "Exact owner bootstrap host and managed Work setup fixtures"
+        run: |
+          ctest --test-dir build/events --output-on-failure --no-tests=error -R '^intent_bootstrap_host$'
+          ctest --test-dir build/events --output-on-failure --no-tests=error -R '^integration_managed_bootstrap$'
+        env:
+          ASAN_OPTIONS: "halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
       - name: "D2 real MCP stdio and native read-only handoff"
         run: |
           python3 -m pip install -r tools/requirements-mcp.txt

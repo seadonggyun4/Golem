@@ -110,7 +110,8 @@ def inspect_mutation_graph(sources,pins=PINS):
             (intent_tree,None,'shape',"c.require(not envelope['body'] and not envelope['context_json'] and not envelope['count_json'] and envelope['approval'] is None,'INTENT_ENVELOPE_SCOPE')"),
             (intent_tree,'Hosts','__init__',"c.require(approve_intent is True,'OWNER_INTENT_HOST_REQUIRED')"),
             (intent_tree,'Hosts','select',"c.require(row['operation']==expected and row['action_id']==entry['action_id'] and row['action_sha256']==entry['action']['sha256'],'INTENT_EXACT_ACTION')"),
-            (intent_tree,'Hosts','read',"c.require(row['operation'] in ('assess','current','resume') and row['action_id']=='','INTENT_READ_ONLY')"),
+            (intent_tree,'Hosts','read',"c.require(row['operation'] in ('assess','current','resume','enrollment-inspect') and row['action_id']=='','INTENT_READ_ONLY')"),
+            (intent_tree,'Hosts','binding',"c.require(packet['operation']=='enrollment-inspect' and row['action_id']=='' and row['action_sha256']=='0'*64 and packet['approval']=='0'*64 and packet['enrollment']=='','INTENT_INSPECTION_ONLY')"),
             (tree,'Service','_admit',"c.require(self.intent_hosts is not None,'OWNER_INTENT_HOST_REQUIRED')"),
             (tree,'Service','_mutate','self.intent_hosts.capture(entry,value,output)'),
         )

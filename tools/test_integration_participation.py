@@ -64,6 +64,30 @@ class Participation(unittest.TestCase):
         self.assertEqual(self.files(), before)
         self.assertEqual(self.participants(), [])
 
+    def test_empty_action_policy_keeps_read_scope_without_mutation_authority(self):
+        self.fixture.policy['scopes'][0]['tools']=['projects_list','work_inspect']
+        self.fixture.save_policy();self.fixture.repin()
+        policy=self.fixture.mutation_policy
+        policy['actions']=[]
+        self.fixture.mutation_path.write_bytes(c.encoded(policy))
+        digest=c.sha(self.fixture.mutation_path.read_bytes())
+        service,owner=entry.configure('task',str(self.fixture.mutation_path),digest,approve_owner=True)
+        before,work_before=self.files(),self.fixture.inventory()
+        with patch.object(mutations.records,'capture',side_effect=AssertionError('no native dispatch')) as capture:
+            with entry.connection(service,owner) as admitted:
+                self.assertEqual(admitted.tools(),['projects_list','work_inspect'])
+                self.assertEqual(owner.current()['actions'],[])
+                self.assertEqual(self.files(),before)
+                self.assertEqual(self.participants(),[])
+                self.assertEqual(admitted.call('projects_list',{})['state'],'AVAILABLE')
+                self.assertEqual(len(self.participants()),1)
+                self.error('FEATURE_OWNER_SCOPE',lambda:admitted.call('session_claim',self.fixture.args))
+                self.assertEqual(len(self.participants()),1)
+                self.assertEqual(list(self.registry.root.glob('mutation-*')),[])
+            capture.assert_not_called()
+        life.quiet(self.registry,'p')
+        self.assertEqual(work_before,self.fixture.inventory())
+
     def test_first_call_retains_one_record_until_close_and_never_deletes_it(self):
         service = self.backend()
         admission = self.admission()

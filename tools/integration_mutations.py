@@ -20,7 +20,7 @@ import integration_intent as intent_api
 
 
 def blocked(error, *, uncertain=False, evidence_id=None):
-    return {"schema": "golem.integration-mutation-result.v1",
+    response = {"schema": "golem.integration-mutation-result.v1",
         "state": "COMMIT_UNKNOWN" if uncertain else
                  "PENDING_APPROVAL" if getattr(error, "code", None) == "PENDING_APPROVAL" else "NOT_DISPATCHED",
         "code": getattr(error, "code", "IO_OR_CONTRACT_ERROR"),
@@ -29,6 +29,10 @@ def blocked(error, *, uncertain=False, evidence_id=None):
         "acceptance_verified": False, "local_evidence_id": evidence_id,
         "next_operation": "INSPECT_ORIGINAL_INTENT_NATIVE_STATUS_AND_EFFECTS_NO_REDISPATCH" if uncertain else
                           "REVIEW_OWNER_ACTION_POLICY_AND_CURRENT_NATIVE_STATE"}
+    diagnostic = c.validation_diagnostic(error)
+    if diagnostic is not None:
+        response['validation_diagnostic'] = diagnostic
+    return response
 
 
 class Service:
@@ -77,7 +81,7 @@ class Service:
         c.require(name in contract.NAMES, "UNSUPPORTED_TOOL")
         c.bounded(args)
         c.require(len(c.encoded(args)) <= c.LIMIT, "JSON_SIZE")
-        c._validate(args, contract.SCHEMAS[name])
+        c._validate(args, contract.SCHEMAS[name], scope='INPUT_SCHEMA')
         c.require(self._lock.acquire(blocking=False), "SERVICE_BUSY")
         try:
             return self._mutate(name, args)

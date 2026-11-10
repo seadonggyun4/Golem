@@ -9,6 +9,12 @@ static bool text(struct json_object *o, const char *key, const char *value)
 static golem_status documents(golem_document_store *s, struct json_object *docs,
                               struct json_object *assessments, size_t budget)
 {
+    /* A verified genesis-only store has a real empty document inventory.
+     * Do not ask the workflow evaluator for a graph with no nodes. Keep this
+     * case local to the record projection: it does not make a missing scope,
+     * selection, workflow input, or session prerequisite valid. */
+    if (!s->count)
+        return GOLEM_OK;
     wf_graph graph = {0};
     golem_status st = wf_graph_make(s, &graph);
     size_t used = 0;

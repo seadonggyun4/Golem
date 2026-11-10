@@ -16,6 +16,7 @@ import integration_quality_reads as views
 import integration_helper_contract as helpers
 import integration_mutation_contract as actions
 import integration_mutations as mutations
+import integration_feature_profiles as profiles
 import integration_preparations as prep
 import test_integration_m2 as m2
 import test_integration_mutations as d4
@@ -80,6 +81,33 @@ class Quality(unittest.TestCase):
                 result=api.call(name,args);again=api.call(name,args)
             self.assertEqual(result['state'],'NATIVE_RESULT_RECORDED',result);self.assertEqual(result,again);self.assertEqual(len(calls),1)
             self.assertFalse(result['acceptance_verified']);self.assertFalse(result['execution_authorized'])
+    def test_task_verifier_preserves_exact_action_and_one_dispatch_contract(self):
+        value=cases()['execution_verify'];api,path=self.owner_api(envelope(value),tool='execution_verify')
+        scoped=profiles.Scoped(api,'task')
+        args={'project_id':'p','work_id':'a','action_id':'reviewed','request_id':'task-verify'}
+        before=self.inventory();calls=[]
+        def capture(argv,output,*a,**kw):
+            calls.append(argv)
+            self.assertEqual(argv[3:6],['execution','verify',str(self.work)])
+            self.assertEqual((output/'request.json').read_bytes(),envelope(value)['native_json'].encode())
+            self.assertTrue((output/'dispatch-intent.json').is_file())
+            (output/'stdout.log').write_bytes(b'{"status":"FAIL","acceptance_verified":false}\n')
+            (output/'stdout.log').chmod(0o600)
+            return {'returncode':0,'reason':'EXIT','recording':'RECORDED'}
+        self.assertIn('execution_verify',scoped.tools())
+        with patch.object(api,'_preflight',lambda *a:{}),patch.object(mutations.records,'capture',capture):
+            self.expect('MUTATION_SCOPE',lambda:scoped.call('execution_verify',{**args,'action_id':'not-reviewed'}))
+            self.expect('MUTATION_SCOPE',lambda:scoped.call('execution_verify',{**args,'work_id':'other'}))
+            result=scoped.call('execution_verify',args)
+            self.assertEqual(scoped.call('execution_verify',args),result)
+        self.assertEqual(len(calls),1)
+        self.assertFalse(result['acceptance_verified']);self.assertFalse(result['execution_authorized'])
+        self.assertEqual(before,self.inventory())
+        # The profile cannot authorize substituted receipt bytes after review.
+        path.write_bytes(c.encoded(envelope({**value,'receipt':'b'*64})))
+        with patch.object(mutations.records,'capture',side_effect=AssertionError('no native dispatch')):
+            self.expect('ACTION_CHANGED',lambda:scoped.call('execution_verify',{**args,'request_id':'changed-receipt'}))
+
     def test_bounded_export_and_evidence_argv_only_private_spool(self):
         for name,value in cases().items():
             if name=='helper_execute':continue

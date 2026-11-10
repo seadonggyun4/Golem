@@ -18,14 +18,93 @@ INTEGER = {"type": "integer", "minimum": 0, "maximum": 9007199254740991}
 
 
 class IntegrationError(ValueError):
-    def __init__(self, code):
+    def __init__(self, code, *, diagnostic=None):
         self.code = code
+        self.diagnostic = _safe_diagnostic(diagnostic)
         super().__init__(code)
 
 
-def require(condition, code):
+def require(condition, code, *, diagnostic=None):
     if not condition:
-        raise IntegrationError(code)
+        raise IntegrationError(code, diagnostic=diagnostic)
+
+
+DIAGNOSTIC_SCOPES = frozenset(('INPUT_SCHEMA', 'INPUT_CONTRACT', 'CONTRACT_SHAPE',
+                              'NATIVE_OBSERVATION', 'OWNER_ACTION_CONTRACT'))
+DIAGNOSTIC_REASONS = frozenset(('TYPE', 'MISSING_REQUIRED_FIELD', 'UNEXPECTED_FIELDS',
+    'LENGTH', 'FORMAT', 'ENUM', 'CONST', 'RANGE', 'ARRAY_LENGTH', 'DUPLICATE_ITEMS',
+    'ONE_OF', 'EMPTY_REQUIRED', 'NONEMPTY_REQUIRED', 'REQUIRED_JSON_OBJECT', 'FIELD_SCOPE'))
+DIAGNOSTIC_TYPES = frozenset(('object', 'array', 'string', 'integer', 'boolean', 'null'))
+DIAGNOSTIC_FORMATS = frozenset(('identifier', 'sha256', 'declared_pattern',
+    'declared_enum', 'declared_constant', 'empty_string', 'nonempty_string', 'json_object'))
+
+
+def _safe_diagnostic(value):
+    """Project only bounded contract metadata, never values or arbitrary error text."""
+    if not isinstance(value, dict) or set(value) != {'schema', 'scope', 'path', 'reason', 'expected', 'values_omitted'}:
+        return None
+    if (value['schema'] != 'golem.validation-diagnostic.v1'
+            or not isinstance(value['scope'], str) or value['scope'] not in DIAGNOSTIC_SCOPES
+            or not isinstance(value['reason'], str) or value['reason'] not in DIAGNOSTIC_REASONS
+            or value['values_omitted'] is not True):
+        return None
+    path = value['path']
+    if not isinstance(path, str) or len(path) > 1024 or re.fullmatch(
+            r'\$(?:(?:\.[A-Za-z_][A-Za-z0-9_-]{0,63})|(?:\[\d{1,3}\])|(?:\.<field>)){0,48}', path) is None:
+        return None
+    expected = value['expected']
+    numbers = {'minLength', 'maxLength', 'minimum', 'maximum', 'minItems', 'maxItems'}
+    flags = {'uniqueItems', 'additionalProperties'}
+    if not isinstance(expected, dict) or not set(expected) <= numbers | flags | {'type', 'format'}:
+        return None
+    for key, item in expected.items():
+        if key in numbers and (type(item) is not int or not -9007199254740991 <= item <= 9007199254740991):
+            return None
+        if key in flags and type(item) is not bool:
+            return None
+        if key == 'format' and (not isinstance(item, str) or item not in DIAGNOSTIC_FORMATS):
+            return None
+        if key == 'type':
+            kinds = item if isinstance(item, list) else [item]
+            if not 1 <= len(kinds) <= 6 or any(not isinstance(k, str) or k not in DIAGNOSTIC_TYPES for k in kinds):
+                return None
+    return {**value, 'expected': {key: list(item) if isinstance(item, list) else item
+                                  for key, item in expected.items()}}
+
+
+def field_diagnostic(path, reason, expected, *, scope='CONTRACT_SHAPE'):
+    """Only schema-defined paths and expected formats; never caller keys/values."""
+    return _safe_diagnostic({'schema': 'golem.validation-diagnostic.v1', 'scope': scope,
+        'path': path, 'reason': reason, 'expected': expected, 'values_omitted': True})
+
+
+def validation_diagnostic(error):
+    return _safe_diagnostic(getattr(error, 'diagnostic', None))
+
+
+def _property_path(path, key):
+    # Unknown input keys are never passed here. Schema-defined identifier keys
+    # may be shown; non-identifier schema keys are deliberately unnamed.
+    label = key if isinstance(key, str) and re.fullmatch(r'[A-Za-z_][A-Za-z0-9_-]{0,63}', key) else '<field>'
+    return path + '.' + label
+
+
+def _expected(rule):
+    result = {key: rule[key] for key in ('type', 'minLength', 'maxLength', 'minimum',
+        'maximum', 'minItems', 'maxItems', 'uniqueItems', 'additionalProperties') if key in rule}
+    if 'const' in rule:
+        result['format'] = 'declared_constant'
+    elif 'enum' in rule:
+        result['format'] = 'declared_enum'
+    elif 'pattern' in rule:
+        result['format'] = ('identifier' if rule['pattern'] == ID['pattern'] else
+                            'sha256' if rule['pattern'] == DIGEST['pattern'] else 'declared_pattern')
+    return result
+
+
+def _schema_require(condition, path, reason, rule, scope):
+    if not condition:
+        raise IntegrationError('SCHEMA', diagnostic=field_diagnostic(path, reason, _expected(rule), scope=scope))
 
 
 def encoded(value):
@@ -110,43 +189,52 @@ def decode(data, limit=LIMIT):
         raise IntegrationError("JSON_INVALID") from None
 
 
-def _validate(value, rule):
+def _validate(value, rule, *, path='$', scope='CONTRACT_SHAPE'):
     if 'oneOf' in rule:
         require(type(rule['oneOf']) is list and 1 <= len(rule['oneOf']) <= 16, 'SCHEMA')
         matches = 0
         for branch in rule['oneOf']:
             try:
-                _validate(value, branch)
+                _validate(value, branch, path=path, scope=scope)
                 matches += 1
             except IntegrationError:
                 pass
-        require(matches == 1, 'SCHEMA')
+        _schema_require(matches == 1, path, 'ONE_OF', rule, scope)
         return
     if "const" in rule:
-        require(type(value) is type(rule["const"]) and value == rule["const"], "SCHEMA")
+        _schema_require(type(value) is type(rule["const"]) and value == rule["const"], path, 'CONST', rule, scope)
         return
     kind = rule["type"]
     if isinstance(kind, list):
-        require(value is None or isinstance(value, dict), "SCHEMA")
+        _schema_require(value is None or isinstance(value, dict), path, 'TYPE', rule, scope)
         return
     if kind == "object":
-        require(isinstance(value, dict) and set(value) == set(rule["required"]), "SCHEMA")
+        _schema_require(isinstance(value, dict), path, 'TYPE', rule, scope)
+        if set(value) != set(rule['required']):
+            missing = next((key for key in rule['required'] if key not in value), None)
+            if missing is not None:
+                _schema_require(False, _property_path(path, missing), 'MISSING_REQUIRED_FIELD',
+                                rule['properties'][missing], scope)
+            _schema_require(False, path, 'UNEXPECTED_FIELDS', rule, scope)
         for key, child in rule["properties"].items():
-            _validate(value[key], child)
+            _validate(value[key], child, path=_property_path(path, key), scope=scope)
     elif kind == "array":
-        require(isinstance(value, list) and rule["minItems"] <= len(value) <= rule["maxItems"], "SCHEMA")
-        require(len({encoded(item) for item in value}) == len(value), "SCHEMA")
-        for item in value:
-            _validate(item, rule["items"])
+        _schema_require(isinstance(value, list), path, 'TYPE', rule, scope)
+        _schema_require(rule["minItems"] <= len(value) <= rule["maxItems"], path, 'ARRAY_LENGTH', rule, scope)
+        _schema_require(len({encoded(item) for item in value}) == len(value), path, 'DUPLICATE_ITEMS', rule, scope)
+        for index, item in enumerate(value):
+            _validate(item, rule["items"], path=path+'['+str(index)+']', scope=scope)
     elif kind == "string":
-        require(isinstance(value, str), "SCHEMA")
-        require(rule.get("minLength", 0) <= len(value) <= rule.get("maxLength", LIMIT), "SCHEMA")
+        _schema_require(isinstance(value, str), path, 'TYPE', rule, scope)
+        _schema_require(rule.get("minLength", 0) <= len(value) <= rule.get("maxLength", LIMIT), path, 'LENGTH', rule, scope)
         if "pattern" in rule:
-            require(re.fullmatch(rule["pattern"].removeprefix("^").removesuffix("$"), value) is not None, "SCHEMA")
+            _schema_require(re.fullmatch(rule["pattern"].removeprefix("^").removesuffix("$"), value) is not None,
+                            path, 'FORMAT', rule, scope)
         if "enum" in rule:
-            require(value in rule["enum"], "SCHEMA")
+            _schema_require(value in rule["enum"], path, 'ENUM', rule, scope)
     else:
-        require(type(value) is int and rule["minimum"] <= value <= rule["maximum"], "SCHEMA")
+        _schema_require(type(value) is int, path, 'TYPE', rule, scope)
+        _schema_require(rule["minimum"] <= value <= rule["maximum"], path, 'RANGE', rule, scope)
 
 
 def validate(kind, value):

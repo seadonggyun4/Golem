@@ -48,7 +48,7 @@ class StaticAdapters(unittest.TestCase):
 
     def test_backend_domain_or_reject_guard_change_blocks(self):
         for before,after in ((b'enum("status", "next", "record", "history")',b'enum("status", "next", "record", "history", "approve")'),
-                             (b'if not condition:\n        raise IntegrationError(code)',b'if not condition:\n        return')):
+                             (b'if not condition:\n        raise IntegrationError(code, diagnostic=diagnostic)',b'if not condition:\n        return')):
             files,pins=self.mutate('tools/integration_contract.py',before,after,BACKEND_PINS)
             self.assertTrue(inspect_backend(files,pins).blockers)
 

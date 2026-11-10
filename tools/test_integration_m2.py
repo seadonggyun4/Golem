@@ -111,6 +111,36 @@ class Preparations(unittest.TestCase):
         result=self.draft('document_submit',fields,body='# original body\n');value=result['plan']['payload']['action'];native=c.decode(value['native_json'].encode())
         self.assertEqual(native['parents'],[{'document_id':'selection','revision':1,'digest':'c'*64}]);self.assertEqual(native['revision'],1);self.assertEqual(native['expected_generation'],2);self.assertEqual(value['body'],'# original body\n')
         fields['parent_ids']=['unregistered'];self.expect('PREPARATION_PARENT_BINDING',lambda:self.draft('document_submit',fields,body='body'))
+    def test_discovery_metadata_requires_explicit_assessment_and_preserves_claims(self):
+        fields={'schema_version':2,'document_id':'scope','kind':'scope','stage':'planning',
+                'producer_attempt':'author','requirement_ids':['REQ'],'source_snapshot':'0'*64,
+                'scope_revision':1,'template_version':1,'policy_version':1,'parent_ids':[]}
+        missing=self.draft('document_submit',fields,body='unchanged body')
+        self.assertEqual({q['field'] for q in missing['plan']['payload']['questions']},{'assessment'})
+        self.assertEqual(self.captures,[])
+        assessment={'permission':'ASK','findings':[{'status':'UNCONFIRMED'}]}
+        fields['assessment']=assessment
+        before=copy.deepcopy(fields)
+        result=self.draft('document_submit',fields,body='unchanged body')
+        native=c.decode(result['plan']['payload']['action']['native_json'].encode())
+        self.assertEqual(native['assessment'],assessment)
+        self.assertEqual(fields,before)
+        self.assertEqual(native['expected_generation'],2)
+        self.assertEqual(native['parents'],[])
+        self.assertEqual(self.captures[-1][3:5],['document','validate'])
+        self.assertFalse(result['execution_authorized'])
+    def test_document_draft_preserves_native_snapshot_object_order(self):
+        snapshot={'schema_version':1,'capture':'allowlist-read-only','repositories':[]}
+        fields={'schema_version':2,'document_id':'scope','kind':'scope','stage':'planning',
+                'producer_attempt':'author','requirement_ids':['REQ'],'source_snapshot':'0'*64,
+                'scope_revision':1,'template_version':1,'policy_version':1,'parent_ids':[],
+                'assessment':{'schema_version':1,'snapshot':snapshot,'permission':'ASK'}}
+        result=self.run_call('action_prepare',{'tool':'document_submit','session_id':'owner-session',
+            'native_binding_id':'','fields_json':json.dumps(fields),'body':'caller body','context_json':'','count_json':''})
+        native=c.decode(result['plan']['payload']['action']['native_json'].encode())
+        self.assertEqual(list(native['assessment']['snapshot']),list(snapshot))
+        self.assertEqual(native['source_snapshot'],'0'*64)
+        self.assertEqual(native['assessment']['permission'],'ASK')
     def test_execution_draft_missing_approval_is_never_dispatch_valid(self):
         result=self.draft('execution_request',{'operation':'prepare','contract':{}})
         value=result['plan']['payload']['action'];entry=result['plan']['payload']['entry_review']

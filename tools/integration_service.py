@@ -135,6 +135,9 @@ def blocked(error):
         response["explanation"] = "Private audit capacity or inventory safety checks blocked admission. This does not prove physical disk exhaustion or Work failure."
         if isinstance(getattr(error, "audit_capacity", None), dict):
             response["audit_capacity"] = error.audit_capacity
+    diagnostic = c.validation_diagnostic(error)
+    if diagnostic is not None:
+        response['validation_diagnostic'] = diagnostic
     return response
 
 
@@ -223,7 +226,7 @@ class Service:
         c.require(name in NAMES, "UNSUPPORTED_TOOL")
         c.bounded(args)
         c.require(len(c.encoded(args)) <= c.LIMIT, "JSON_SIZE")
-        c._validate(args, SCHEMAS[name])
+        c._validate(args, SCHEMAS[name], scope='INPUT_SCHEMA')
         c.require(self._lock.acquire(blocking=False), "SERVICE_BUSY")
         try:
             with self.registry.locked():

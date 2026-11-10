@@ -1274,6 +1274,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.plugins.golem.mcp.json.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.tools.integration_desktop_plugin.py.internal | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.tools.integration_desktop_plugin.py.commands.owner | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.intent_bootstrap.py.owner-bootstrap | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.intent_bootstrap_host.inc.owner-bootstrap | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3679,6 +3681,10 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | PYTHON_DECLARATION | tools/integration_lifecycle.py | AdmittedService.__init__ | None |
 | PYTHON_DECLARATION | tools/integration_lifecycle.py | AdmittedService.__getattr__ | None |
 | PYTHON_DECLARATION | tools/integration_lifecycle.py | AdmittedService.call | None |
+| PYTHON_DECLARATION | tools/intent_bootstrap.py | file-surface | None |
+| NATIVE_OPERATION | tools/intent_bootstrap_host.inc | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_contract.py | field_diagnostic | None |
+| PYTHON_DECLARATION | tools/integration_contract.py | validation_diagnostic | None |
 
 ## Blockers
 
@@ -3768,7 +3774,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 484; explicitly selected: 484. Other tracked paths still require explicit boundary review.
+Candidate source surfaces: 486; explicitly selected: 486. Other tracked paths still require explicit boundary review.
 Public declarations observed in selected headers: 358.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
@@ -4231,6 +4237,8 @@ This is static inventory reconciliation, never native execution, authority or pr
 | tools/intent_authority.py | YES |
 | tools/intent_authority_host.c | YES |
 | tools/intent_authority_lifecycle.py | YES |
+| tools/intent_bootstrap.py | YES |
+| tools/intent_bootstrap_host.inc | YES |
 | tools/intent_product_host.inc | YES |
 | tools/isolation_canary.py | YES |
 | tools/judgment_record.py | YES |

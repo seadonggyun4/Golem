@@ -4,16 +4,16 @@
 
 프로젝트 관리도 자연어로 요청한다. 사용 가능한 기능은 현재 설치본·profile·승인된 정책의 교집합으로 결정한다. 선택적 관리·resource·helper·host 기능은 별도 정책을 검토한 뒤 활성화하며, 설치 시 기존 승인/producer pin을 자동 이전하지 않는다. [관리 흐름과 지원 범위](mcp-m6-distribution.ko.md#현재-남은-전달-경로-3개-연결)를 참고한다.
 
-설치 버전과 실제 검증 범위는 [현재 검증 기록](workpacks/mcp.md#verification-status)에서 구분해 확인한다. 검토한 기능별 MCPB를 사용하며, 이미 같은 검증본이 연결돼 있으면 재설치하지 않는다. profile은 기존 권한의 상한이다.
+설치 버전과 실제 검증 범위는 [현재 검증 기록](workpacks/mcp.md#verification-status)에서 구분해 확인한다. 공개 launcher MCPB와 owner 전용 기능별 MCPB 중 검토한 파일을 사용하며, 이미 같은 검증본이 연결돼 있으면 재설치하지 않는다. 기능별 profile은 기존 권한의 상한이다.
 
 ## Install and Configure
 
 1. **Settings → Extensions → Advanced settings → Install Extension**에서 검토한 MCPB를 선택한다. 기존 동일 identity에는 지원되는 **Update**를 사용한다. archive SHA·manifest·설치 파일을 대조하고 local-process 설치 확인을 마친다.
-2. **Configure**에서 기존 정책·정확한 SHA와 전달 동의를 지정한다. read·prepare 패키지는 **Existing reviewed D2 policy**를 사용한다. task·quality·parallel은 별도 D4 정책을 사용한다. 정확한 policy SHA와 **Explicit consent to this existing owner policy**도 필요하다. 설치나 동의 체크만으로 새 action 승인이 생기지 않는다.
-3. optional **resource**는 별도 검토한 계약·SHA·동의가 있을 때만 선택한다. helper는 quality, host는 parallel 패키지의 별도 계약이며 task 설정에 추가하지 않는다. read/prepare는 해당 D2 정책을 사용한다.
+2. 공개 launcher MCPB의 **Configure**에서는 **Reviewed Claude Desktop launcher state**에 이 client용으로 검토·준비한 private state 디렉터리만 선택한다. D2/D4 입력칸은 없으며, 기존 launcher가 정책·pin을 검사한다. state가 아직 없으면 [Golem Setup 절차](integration-styxis.md)로 정확한 launcher를 먼저 검토한다. 다른 client의 state를 복사하지 않는다.
+3. owner 전용 **기능별 MCPB**를 선택한 경우에만 기존 정책·정확한 SHA와 owner 동의를 입력한다. read/prepare는 D2, task/quality/parallel은 D4를 사용한다. optional resource, quality의 helper, parallel의 host는 각각 별도 검토 계약이 있을 때만 선택한다. 설치·profile·동의 체크만으로 새 action 승인이 생기지 않는다.
 4. 저장·활성화 후 해당 연결만 reload하고 새 대화에서 **의도한 확장**의 실제 도구를 확인한다. `golem_projects_list`와 허용 Work 조회로 연결을 확인한다. `golem_setup_status`만 보이면 설정 진단 단계이므로 정책·producer pin을 임의 변경해 통과시키지 않는다.
 
-기존 [프로젝트 등록](integration-d1.md)·[전달 범위](integration-d2.md)·[D4 action](integration-d4.md)을 보존한다. Codex의 전달 동의를 Claude에 재사용하지 않는다. 패키지는 owner가 고정한 외부 Python/SDK/native runtime이 필요하며, uv가 의존성을 다운로드할 수 있다. local process는 사용자 OS 권한으로 실행된다.
+기존 [프로젝트 등록](integration-d1.md)·[전달 범위](integration-d2.md)·[D4 action](integration-d4.md)을 보존한다. Codex의 전달 동의를 Claude에 재사용하지 않는다. 공개 adapter에는 Python 3과 검토한 외부 launcher/runtime이 필요하다. 기능별 MCPB는 owner가 고정한 외부 Python/SDK/native runtime을 사용하며, 해당 실행 구성이 uv를 사용하면 의존성을 다운로드할 수 있다. local process는 사용자 OS 권한으로 실행된다.
 
 ## Work Flow
 

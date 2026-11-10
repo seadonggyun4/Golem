@@ -21,7 +21,7 @@ from capability_public_registry import PUBLIC_HEADERS
 # exempt a surface from the final repository gate.
 def source_candidate(path):
     # The QC6 native host include contains executable dispatch, not fixture data.
-    return (path == 'tools/intent_product_host.inc' or path.startswith(('src/', 'include/')) or
+    return (path in ('tools/intent_product_host.inc', 'tools/intent_bootstrap_host.inc') or path.startswith(('src/', 'include/')) or
             path.startswith('tools/') and not path.startswith('tools/test_') and path.endswith(('.py','.c','.h')) or
             path.startswith('bindings/') and not any(part in ('tests','test_bridge.c') for part in path.split('/'))
             and path.endswith(('.c','.h','.py','.mjs','.d.ts')) or
@@ -30,7 +30,8 @@ def source_candidate(path):
 
 
 # Explicit product additions retain full-file review after they enter the Git index.
-REVIEWED_SOURCE_ADDITIONS = ('tools/integration_reads.py', 'tools/integration_read_resources.py', 'tools/integration_read_views.py', 'tools/integration_preparations.py', 'tools/integration_prepare_builders.py', 'tools/integration_task_actions.py', 'tools/integration_quality_actions.py', 'tools/integration_quality_reads.py', 'tools/integration_helper_contract.py', 'tools/integration_parallel_actions.py', 'tools/integration_parallel_reads.py', 'tools/integration_parallel_hosts.py', 'tools/integration_parallel_preparations.py', 'tools/integration_feature_profiles.py', 'tools/integration_distribution.py', 'tools/integration_distribution_entry.py', 'tools/integration_owner_maintenance.py', 'plugins/golem/skills/golem-work/SKILL.md', 'plugins/golem/skills/golem-work/agents/openai.yaml', 'plugins/golem/skills/golem-work/references/profiles.md', 'tools/integration_owner_review.py', 'tools/integration_owner_desktop.py')
+REVIEWED_SOURCE_ADDITIONS = ('tools/integration_reads.py', 'tools/integration_read_resources.py', 'tools/integration_read_views.py', 'tools/integration_preparations.py', 'tools/integration_prepare_builders.py', 'tools/integration_task_actions.py', 'tools/integration_quality_actions.py', 'tools/integration_quality_reads.py', 'tools/integration_helper_contract.py', 'tools/integration_parallel_actions.py', 'tools/integration_parallel_reads.py', 'tools/integration_parallel_hosts.py', 'tools/integration_parallel_preparations.py', 'tools/integration_feature_profiles.py', 'tools/integration_distribution.py', 'tools/integration_distribution_entry.py', 'tools/integration_owner_maintenance.py', 'plugins/golem/skills/golem-work/SKILL.md', 'plugins/golem/skills/golem-work/agents/openai.yaml', 'plugins/golem/skills/golem-work/references/profiles.md', 'tools/integration_owner_review.py', 'tools/integration_owner_desktop.py', 'tools/intent_bootstrap.py', 'tools/intent_bootstrap_host.inc', 'plugins/golem/.claude-plugin/plugin.json', 'plugins/golem/plugin.json', 'plugins/golem/mcp.json')
+REVIEWED_EVIDENCE_ADDITIONS = ('tools/test_intent_bootstrap.py', 'docs/intent-assurance-owner-bootstrap.ko.md', 'docs/integration-styxis.md', 'tools/test_integration_plugin_clients.py', 'docs/mcp-managed-bootstrap.ko.md', 'tests/c/integration_managed_bootstrap.py', 'tools/test_integration_diagnostics.py', 'tools/test_integration_participation.py', 'docs/mcp-participation-lifecycle.ko.md')
 # Development analysis has its own pinned content review and explicit boundary
 # roles. Tracking it must neither promote it into runtime MCP nor drop a product
 # addition's existing surface review. Keep the combined horizon unique.
@@ -74,7 +75,7 @@ def audit_repository(ledger, sources, selected_audit, current_index, profiles=No
         blockers.append(('UNTRACKED_SCOPE_NOT_OBSERVED','untracked names must also be reconciled'))
     else:
         compare_scope(current_untracked,current_untracked)
-        blockers.extend(('UNREVIEWED_NEW_PATH',p) for p in sorted(set(current_untracked)-set(DEVELOPMENT_PATHS)-set(REVIEWED_SOURCE_ADDITIONS)))
+        blockers.extend(('UNREVIEWED_NEW_PATH',p) for p in sorted(set(current_untracked)-set(DEVELOPMENT_PATHS)-set(REVIEWED_SOURCE_ADDITIONS)-set(REVIEWED_EVIDENCE_ADDITIONS)))
 
     for path in REQUIRED_SOURCE_PATHS:
         if path not in available:
@@ -87,6 +88,7 @@ def audit_repository(ledger, sources, selected_audit, current_index, profiles=No
     evidence_only={p for p in referenced if p in available and p not in operation_paths and
                    (p.startswith(('docs/','tests/','tools/test_'))) and
                    recorded.get(p)==available[p].sha256}
+    blockers.extend(('NEW_EVIDENCE_NOT_REVIEWED', p) for p in REVIEWED_EVIDENCE_ADDITIONS if p not in evidence_only)
     from capability_boundary_registry import BOUNDARIES
     boundaries={p:(role,why) for p,role,why in BOUNDARIES}
     if len(boundaries)!=len(BOUNDARIES):raise ValueError('DUPLICATE_BOUNDARY')

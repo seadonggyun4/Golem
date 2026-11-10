@@ -236,6 +236,21 @@ class Discovery(unittest.TestCase):
         (r / "large.c").write_bytes(b"x" * (1048576 + 1))
         self.cli("discovery", "snapshot", self.write("plan.json", self.plan([r], ["large.c"])), ok=False)
 
+    def test_headless_inventory_cannot_be_used_as_native_source_snapshot(self):
+        repo = self.root / "unborn"
+        repo.mkdir()
+        subprocess.run(["/usr/bin/git", "init", str(repo)], check=True, capture_output=True, env=ENV)
+        (repo / "code.c").write_text("untracked fixture source\n")
+        plan = self.write("unborn-plan.json", self.plan([repo], ["code.c"]))
+        before = {str(p.relative_to(repo)): p.read_bytes() for p in repo.rglob("*") if p.is_file()}
+        result = self.cli("discovery", "snapshot", plan, ok=False)
+        self.assertEqual(result.stdout, b"")  # No partial/guessed source snapshot.
+        self.assertEqual(before, {str(p.relative_to(repo)): p.read_bytes() for p in repo.rglob("*") if p.is_file()})
+        head = subprocess.run(["/usr/bin/git", "-C", str(repo), "rev-parse", "--verify", "HEAD"],
+                              capture_output=True, env=ENV)
+        self.assertNotEqual(head.returncode, 0)
+        self.assertFalse((repo / ".git/index").exists())
+
     def test_pager_override_has_safe_actionable_diagnostic(self):
         r, _ = self.repo("pager")
         plan = self.write("plan.json", self.plan([r], ["code.c"]))

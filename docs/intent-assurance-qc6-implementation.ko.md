@@ -1,5 +1,16 @@
 # QC6 공통 MCP·Owner 표시와 exact Intent host
 
+후속 구현: [owner 초기 설정 host](intent-assurance-owner-bootstrap.ko.md)가 기존 설치 host에
+없던 baseline 검토·활성화·Work 요구사항 등록 전달을 보완한다. 이 owner 전용 절차는
+MCP의 승인 발급 도구가 아니다. 공통 `intent_read`에는 별도로 고정한
+`enrollment-inspect` 메타데이터 관측이 추가되며, 실제 QA 수락·완료 action과 구분한다.
+
+아래 최초 작성 시점의 NOT_RUN 기록은 보존한다. 후속 격리 빌드·fixture·회귀 결과는
+[QC CI 기록](intent-assurance-ci-status.ko.md)에서 source별로 확인한다. 소스 구현이나
+조회 성공만으로 현재 client의 QC 활성화·제품 QA·완료를 주장하지 않는다.
+
+## 최초 QC6 구현 기록 — 당시 상태
+
 상태: **소스 구현 / 빌드·fixture·회귀·client E2E NOT_RUN / 실행 HOLD**. 설치·기존 정책 선택·producer pin 갱신·Work 실행·승인 발급·commit/push는 수행하지 않았다. source 문법 점검을 runtime 검증으로 취급하지 않는다.
 
 ## 채택한 연결 계약

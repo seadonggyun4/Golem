@@ -691,11 +691,14 @@ static int store_objects_command(int argc, char **argv)
 }
 
 #include "intent_product_host.inc"
+#include "intent_bootstrap_host.inc"
 
 int main(int argc, char **argv)
 {
     if (argc < 4)
         return 2;
+    if (!strcmp(argv[1], "--bootstrap-fd"))
+        return bootstrap_command(argc, argv);
     if (!strcmp(argv[1], "--product-fd"))
         return product_command(argc, argv);
     if (!strcmp(argv[1], "--read-baseline-fd"))
