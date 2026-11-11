@@ -14,6 +14,42 @@ from source_policy import export_sources, FIXTURES
 
 
 class SourceSnapshotTests(unittest.TestCase):
+    def test_clean_export_runs_exact_connection_protocol_coverage(self):
+        root = Path(__file__).resolve().parents[1]
+        required = ("tools/integration_client_connection.py",
+                    "tools/integration_codex_control.py",
+                    "plugins/golem/scripts/connection_relay.py")
+        for name in required:
+            self.assertTrue(selected(name), name)
+            self.assertFalse(selected(name, "conan"), name)
+        for name in ("plugins/golem/scripts/launcher.py",
+                     "plugins/golem/scripts/local_relay.py",
+                     "plugins/golem/plugin.json", "tools/connection_relay_local.py"):
+            self.assertFalse(selected(name), name)
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp).resolve()
+            exported = export_sources(root, output)
+            for name in required:
+                self.assertIn(name, exported)
+                self.assertEqual((output / name).read_bytes(), (root / name).read_bytes())
+            env = {k: v for k, v in os.environ.items()
+                   if not k.startswith("GIT_") and k not in ("PYTHONPATH", "PYTHONHOME")}
+            # Run the unchanged AST checks in the same no-Git source tree used
+            # by Public Alpha. This must not start a relay or a client service.
+            result = subprocess.run([sys.executable, "-B", "-m", "unittest", "-v",
+                                     "test_execution_record.Coverage"],
+                                    cwd=output / "tools", env=env, capture_output=True,
+                                    text=True, timeout=30)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("Ran 3 tests", result.stderr)
+            # A truncated export must still fail, rather than skip the boundary.
+            (output / required[0]).unlink()
+            missing = subprocess.run([sys.executable, "-B", "-m", "unittest",
+                "test_execution_record.Coverage.test_connection_protocol_exceptions_remain_bounded"],
+                cwd=output / "tools", env=env, capture_output=True, text=True, timeout=30)
+            self.assertNotEqual(missing.returncode, 0)
+            self.assertIn("FileNotFoundError", missing.stderr)
+
     def test_clean_export_contains_current_mcp_producer_closure(self):
         from integration_transfer import PRODUCER_NAMES
         root = Path(__file__).resolve().parents[1]

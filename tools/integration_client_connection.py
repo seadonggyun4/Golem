@@ -19,6 +19,7 @@ import tomllib
 
 LIMIT = 262144
 MAX_CONNECTIONS = 16
+ENDPOINT_ABSENT = 'CLOSED_ENDPOINT_ABSENT'
 DIGEST = re.compile(r'[a-f0-9]{64}\Z')
 
 
@@ -55,6 +56,21 @@ def read_file(path, *, private=False):
 
 def digest(raw):
     return hashlib.sha256(raw).hexdigest()
+
+
+def observation_order(row):
+    # Freshness is only a discovery priority hint, never identity/authority.
+    return (row.get('endpoint_state') != 'PRESENT', -row.get('discovery_mtime_ns', 0), row['instance'])
+
+
+def display_order(row):
+    # Keep observed/reloadable rows visible ahead of preserved history, also
+    # when the UI's separate bounded display cannot fit the entire catalog.
+    priority = (0 if row.get('refreshable') else
+                1 if row.get('relay_current') or row.get('state') == 'CURRENT_ACTIVE_SERVICE' else
+                2 if row.get('state') == 'STALE_OR_UNVERIFIED_SERVICE' else
+                4 if row.get('state') == ENDPOINT_ABSENT else 3)
+    return (priority, -row.get('discovery_mtime_ns', 0), row.get('instance', ''))
 
 
 def unique(items):
@@ -209,7 +225,11 @@ def desktop_parent(pid, reader=None):
 def compare(selected, rows, host):
     current, desktop, unknown = [], [], []
     for row in rows:
+        if row.get('state') == ENDPOINT_ABSENT:
+            continue
         if row.get('kind') == 'codex-connection-relay':
+            if not row.get('relay_current'):
+                unknown.append(row)
             continue
         if row.get('host_kind') not in ('ChatGPT','Codex'):
             unknown.append(row)
@@ -227,6 +247,10 @@ def compare(selected, rows, host):
     # A single matching standalone probe can never qualify the Desktop host.
     if desktop and len(current) == len(desktop) and not unknown:
         state, mode = 'CURRENT_ACTIVE_SERVICE_MODEL_UNVERIFIED', 'VERIFIED'
+    elif any(row.get('state') in ('LEGACY_OR_UNAVAILABLE', 'RELAY_UNAVAILABLE',
+             'RELAY_OBSERVATION_UNAVAILABLE', 'NOT_OBSERVED', 'BOUNDED_OBSERVATION_LIMIT') for row in unknown):
+        # Missing observations are not evidence that restarting the host helps.
+        state, mode = 'CONNECTION_OBSERVATION_INCOMPLETE', 'OBSERVATION_INCOMPLETE'
     elif host.get('reload_supported') and host.get('verified_desktop'):
         state, mode = 'RELOAD_REQUIRED', 'OFFICIAL_RELOAD_AVAILABLE'
     else:
@@ -246,11 +270,49 @@ class ConnectionMonitor:
     def observe(self):
         # Import only when explicitly inspecting; headless MCP startup remains UI-free.
         import integration_owner_desktop as desktop
-        result = []
-        names = desktop.connections(self.directory)
-        for instance in names[:MAX_CONNECTIONS]:
-            row = {'instance':instance, 'state':'NOT_OBSERVED'}
+        def snapshot(instance):
+            value = desktop.descriptor(self.directory, instance)
+            raw = read_file(self.directory/(instance+'.json'), private=True)
+            require(decode(raw) == value, 'CONNECTION_DESCRIPTOR_CHANGED')
+            metadata = (self.directory/(instance+'.json')).lstat()
+            path = self.directory/(instance+'.sock')
             try:
+                info = path.lstat()
+                require(stat.S_ISSOCK(info.st_mode) and info.st_uid == os.getuid() and
+                        stat.S_IMODE(info.st_mode) == 0o600, 'CONNECTION_SOCKET')
+                endpoint = {'endpoint_state':'PRESENT', 'socket_identity':(info.st_dev, info.st_ino)}
+            except FileNotFoundError:
+                endpoint = {'endpoint_state':'ABSENT'}
+            require(read_file(self.directory/(instance+'.json'), private=True) == raw,
+                    'CONNECTION_DESCRIPTOR_CHANGED')
+            return {'instance':instance, 'kind':value['kind'],
+                    'descriptor_sha256':digest(raw), 'discovery_mtime_ns':metadata.st_mtime_ns, **endpoint}
+        catalog, result, closed = [], [], []
+        try:
+            desktop.private_directory(self.directory)
+            paths = sorted(self.directory.glob('*.json'))
+            require(len(paths) <= 128, 'OWNER_CONNECTION_LIMIT')
+        except Exception as error:
+            return [{'state':'NOT_OBSERVED', 'reason':getattr(error,'code','CONNECTION_CATALOG_UNAVAILABLE')}]
+        for path in paths:
+            if path.name == 'owner-app.json':
+                continue
+            try:
+                row = snapshot(path.stem)
+                if row['kind'] != 'review':
+                    continue
+            except Exception as error:
+                row = {'instance':path.stem, 'state':'NOT_OBSERVED',
+                       'reason':getattr(error,'code','CONNECTION_DESCRIPTOR_UNAVAILABLE')}
+            (closed if row.get('endpoint_state') == 'ABSENT' else catalog).append(row)
+        # Missing endpoints never consume the live IPC budget. Unknown records
+        # still count and block CURRENT; valid candidates are observed first.
+        catalog.sort(key=observation_order)
+        for row in catalog[:MAX_CONNECTIONS]:
+            instance = row['instance']
+            try:
+                require(row.get('endpoint_state') == 'PRESENT', row.get('reason','CONNECTION_ENDPOINT_UNAVAILABLE'))
+                require(snapshot(instance) == row, 'CONNECTION_DESCRIPTOR_CHANGED')
                 remote = desktop.RemoteController(self.directory, instance)
                 value = remote.connection_status()
                 require(value.get('schema') == 'golem.owner-connection-status.v1', 'CONNECTION_STATUS_SCHEMA')
@@ -258,12 +320,26 @@ class ConnectionMonitor:
                 require(isinstance(value.get('tools'),list) and 0 < len(value['tools'])<=256 and
                         all(type(t) is str and re.fullmatch(r'golem_[a-z0-9_]{1,120}',t) for t in value['tools']) and
                         len(set(value['tools'])) == len(value['tools']), 'CONNECTION_TOOLS')
-                row.update(value, **self.ancestry(value['pid']), tools_count=len(value['tools']))
+                require(not set(value) & {'state','kind','instance','endpoint_state','socket_identity',
+                        'descriptor_sha256','relay_current','refreshable','discovery_mtime_ns'}, 'CONNECTION_STATUS_FIELDS')
+                require(snapshot(instance) == row, 'CONNECTION_ENDPOINT_CHANGED')
+                row.update({key:value.get(key) for key in ('pid','ppid','client','launcher_sha256',
+                    'adapter_state','package_version','policy_sha256','runtime_path','runtime_sha256','tools')},
+                    **self.ancestry(value['pid']), tools_count=len(value['tools']))
             except Exception as error:
                 row.update(state='LEGACY_OR_UNAVAILABLE', reason=getattr(error,'code','CONNECTION_OBSERVATION_UNAVAILABLE'))
             result.append(row)
-        if len(names) > MAX_CONNECTIONS:
+        if len(catalog) > MAX_CONNECTIONS:
+            result.extend(dict(row, state='NOT_OBSERVED', reason='BOUNDED_OBSERVATION_LIMIT')
+                          for row in catalog[MAX_CONNECTIONS:])
             result.append({'state':'NOT_OBSERVED','reason':'BOUNDED_OBSERVATION_LIMIT'})
+        for row in closed:
+            try:
+                require(snapshot(row['instance']) == row, 'CONNECTION_ENDPOINT_CHANGED')
+                row.update(state=ENDPOINT_ABSENT, reason='SOCKET_PATH_ABSENT_NOT_PROCESS_OR_WORK_COMPLETION')
+            except Exception as error:
+                row.update(state='NOT_OBSERVED',reason=getattr(error,'code','CONNECTION_ENDPOINT_UNAVAILABLE'))
+            result.append(row)
         return result
 
     def relay_client(self):
@@ -291,25 +367,49 @@ class ConnectionMonitor:
             return []
         except Exception:
             return [{'kind':'codex-connection-relay','state':'RELAY_OBSERVATION_UNAVAILABLE'}]
-        for descriptor in descriptors[:MAX_CONNECTIONS]:
+        closed = [row for row in descriptors if row.get('endpoint_state') == 'ABSENT']
+        candidates = [row for row in descriptors if row.get('endpoint_state') != 'ABSENT']
+        candidates.sort(key=observation_order)
+        for descriptor in candidates[:MAX_CONNECTIONS]:
             row = {**descriptor, 'refreshable':False}
             try:
+                require(descriptor.get('endpoint_state') == 'PRESENT',
+                        descriptor.get('reason','RELAY_ENDPOINT_UNAVAILABLE'))
+                require(relay.endpoint(descriptor['instance']) == descriptor, 'RELAY_IDENTITY_CHANGED')
                 observed = relay.request(descriptor['instance'],'status',{})
                 require(observed.get('ok') is True, 'RELAY_STATUS_UNAVAILABLE')
                 value = observed['value']
                 require(value['pid'] == descriptor['pid'] and value['instance'] == descriptor['instance'],
                         'RELAY_IDENTITY_CHANGED')
-                row.update(value, **self.ancestry(value['pid']))
+                require(value.get('state') in ('STARTING','READY','DRAINING','UNKNOWN') and
+                        type(value.get('busy')) is bool, 'RELAY_STATUS_FIELDS')
+                require(not set(value) & {'endpoint_state','socket_identity','descriptor_sha256',
+                        'relay_current','refreshable','discovery_mtime_ns'}, 'RELAY_STATUS_FIELDS')
+                require(relay.endpoint(descriptor['instance']) == descriptor, 'RELAY_IDENTITY_CHANGED')
+                row.update({key:value.get(key) for key in ('pid','instance','state','busy','plugin_version',
+                    'selected_state','launcher_sha256','approval_sha256')}, **self.ancestry(value['pid']))
                 same = (value['launcher_sha256'], value['approval_sha256'],value['selected_state']) == (
                     selected['launcher_sha256'],selected['approval_sha256'],selected['adapter_state'])
+                row['relay_current'] = (same and value['state'] == 'READY' and
+                    row.get('host_kind') in ('ChatGPT','Codex') and value['plugin_version'] == selected['package_version'])
                 row['refreshable'] = (not same and value['state'] == 'READY' and not value['busy']
                     and row.get('host_kind') in ('ChatGPT','Codex')
                     and value['plugin_version'] == selected['package_version'])
             except Exception as error:
                 row.update(state='RELAY_UNAVAILABLE',reason=getattr(error,'code','RELAY_OBSERVATION_UNAVAILABLE'))
             result.append(row)
-        if len(descriptors) > MAX_CONNECTIONS:
+        if len(candidates) > MAX_CONNECTIONS:
+            result.extend(dict(row, state='NOT_OBSERVED', reason='BOUNDED_OBSERVATION_LIMIT', refreshable=False)
+                          for row in candidates[MAX_CONNECTIONS:])
             result.append({'kind':'codex-connection-relay','state':'BOUNDED_OBSERVATION_LIMIT'})
+        for descriptor in closed:
+            row = {**descriptor, 'refreshable':False}
+            try:
+                require(relay.endpoint(descriptor['instance']) == descriptor, 'RELAY_IDENTITY_CHANGED')
+                row.update(state=ENDPOINT_ABSENT, reason='SOCKET_PATH_ABSENT_NOT_PROCESS_OR_WORK_COMPLETION')
+            except Exception as error:
+                row.update(state='RELAY_UNAVAILABLE',reason=getattr(error,'code','RELAY_ENDPOINT_UNAVAILABLE'))
+            result.append(row)
         return result
 
     def inspect(self):
@@ -334,6 +434,7 @@ class ConnectionMonitor:
         state, mode = compare(selected, rows, host)
         if any(row.get('refreshable') for row in rows):
             state, mode = 'GOLEM_REFRESH_REQUIRED', 'GOLEM_RELAY_AVAILABLE'
+        rows.sort(key=display_order)
         kinds = {r.get('host_kind') for r in rows if r.get('host_kind') in ('ChatGPT','Codex')}
         kind = next(iter(kinds)) if len(kinds)==1 else None
         menu = kind+' → '+kind+' 종료(⌘Q)' if kind else '실제 사용 중인 Codex/ChatGPT 앱의 앱 메뉴 → 종료'
@@ -350,6 +451,11 @@ class ConnectionMonitor:
                      '진행 중인 요청이 없는지 다시 확인한 뒤 기존 child를 정상 EOF로 종료합니다.',
                      '선택된 정확한 launcher·승인 지문을 다시 검사해 새 child를 시작하고 도구 목록 변경을 알립니다.',
                      '연결 갱신과 모델의 도구 전달은 별개입니다. 실패·응답 유실은 자동 재시도하지 않습니다.']
+        if mode == 'OBSERVATION_INCOMPLETE':
+            steps = ['일부 연결을 관찰하지 못했습니다. 관찰한 행과 미확인 사유를 확인합니다.',
+                     '활성·불확실 후보는 기록의 수정 시각이 최근인 순서로 최대 16개만 관찰합니다. 시각은 신원·최신성 인증이 아닙니다.',
+                     '나머지 연결은 미관찰로 보존합니다. 기록을 삭제하거나 한도를 늘리지 않습니다.',
+                     '필요하면 연결 상태 확인을 명시적으로 다시 선택합니다. 자동 재시도·정상 재시작은 요청하지 않습니다.']
         report.update(state=state, summary='디스크 선택과 실제 서버 연결을 대조했습니다. 모델 전달·실행 권한은 별도입니다.',
                       selected=selected, connections=rows, host_control=host,
                       reload={'mode':mode,'reason':host.get('reason','실제 활성 연결과 선택 지문 대조'),'steps':steps})

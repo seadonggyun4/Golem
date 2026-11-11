@@ -65,6 +65,14 @@ class Presentation(unittest.TestCase):
         self.assertIn('모델 전달 검증은 별도', shown['renewal_label'])
         self.assertIn('미확인', shown['model_delivery'])
 
+    def test_partial_observation_is_not_a_restart_or_success_recommendation(self):
+        value=report('OBSERVATION_INCOMPLETE')
+        value['connections'][0]['reason']='BOUNDED_OBSERVATION_LIMIT'
+        shown=ui.presentation(value)
+        self.assertIn('일부 연결 미관찰',shown['renewal_label'])
+        self.assertNotIn('재시작 필요 ·',shown['renewal_label'])
+        self.assertIn('BOUNDED_OBSERVATION_LIMIT',shown['details'])
+
     def test_refresh_token_is_exact_or_unavailable_never_synthesized(self):
         value = report('OFFICIAL_RELOAD_AVAILABLE')
         self.assertEqual(ui.presentation(value)['refresh_token'], 'f'*64)
@@ -172,6 +180,22 @@ class NativePanel(unittest.TestCase):
             time.sleep(.01)
         self.root.update()
         self.assertFalse(panel.request.busy)
+
+    def test_partial_observation_only_allows_explicit_inspection(self):
+        class Controller:
+            def __init__(self): self.calls=[]
+            def inspect(self): self.calls.append('inspect');return report('OBSERVATION_INCOMPLETE')
+            def request_refresh(self, **kwargs): raise AssertionError('no refresh for missing observations')
+        controller=Controller()
+        panel=ui.ConnectionPanel(self.root,controller)
+        panel.inspect_button.invoke();self.settle(panel)
+        self.assertIn('일부 연결 미관찰',panel.guidance.get())
+        for button in (panel.refresh_button,panel.ack_button,panel.recheck_button,panel.reload_consent_button):
+            self.assertEqual(str(button.cget('state')),'disabled')
+            button.invoke()
+        self.assertEqual(controller.calls,['inspect'])
+        panel.inspect_button.invoke();self.settle(panel)
+        self.assertEqual(controller.calls,['inspect','inspect'])
 
     def test_manual_guide_has_no_automatic_inspection_or_restart(self):
         class Controller:

@@ -451,7 +451,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "b707c35cd445e951e09a51d19e3f423bc7e515f4e8a8bd268d5fffc4be393047"
+      "sha256": "a864204ede9dcd23d449f0428ee0f51263c62201f183a0c171032e0be58ec505"
     },
     {
       "path": "src/adapter_protocol/adapter.c",
@@ -2551,15 +2551,15 @@
     },
     {
       "path": "tools/integration_client_connection.py",
-      "sha256": "1e4964daa0a5694df93c5f218076f23cb70fee0c28163946c4014d09202093eb"
+      "sha256": "70f04f4050b7b10dcb49b2db6091834ca4e02c73ab19c76fd57c0b4dc3aba791"
     },
     {
       "path": "tools/integration_connection_ui.py",
-      "sha256": "a5f5bf80296f2b8f456a63cb0f685890b1c13077713fdcdee8d24ad7ab12764d"
+      "sha256": "99cddd3ae6197473c947594bed8d18ccf4e55b3d448a41658396512e7a9794e3"
     },
     {
       "path": "plugins/golem/scripts/connection_relay.py",
-      "sha256": "5f8c816f2421e75c26f7a2a9bc1dca02ec9a8a6d9562177a9a4b46544ee54c86"
+      "sha256": "27f9ae286b1544a782664032a2996be36be70709ee466a08f360548567a02fa1"
     },
     {
       "path": "tools/test_integration_codex_control.py",
@@ -2567,15 +2567,15 @@
     },
     {
       "path": "tools/test_integration_client_connection.py",
-      "sha256": "3c2d6f8f4d17b14624cdae66d603a15fa54d4de27dfcb56275f7fe1a4da1be6e"
+      "sha256": "cfeead8bf18775e291cd6052b558fd3f5b1a02d99b1184e9391639208f037a67"
     },
     {
       "path": "tools/test_integration_connection_ui.py",
-      "sha256": "fd90739897b4b92a9da3ffe8637e8e9ec2d4d4c904e412f009ddd41350144235"
+      "sha256": "cc20417ddf23cea57f20be68b93167a68fbeb6889ae7b22dab050a0dddd5f18d"
     },
     {
       "path": "tools/test_integration_connection_relay.py",
-      "sha256": "ab80f48c4168fc41f831af8039f6fa5d922e65e072bd61f828b4ec60006317f6"
+      "sha256": "f4892c33afddc60dfe6363c390a604a7fbec6cf494f0b9dd432a97720c20a6e5"
     },
     {
       "path": "docs/integration-codex-plugin.md",
@@ -2583,11 +2583,15 @@
     },
     {
       "path": "docs/integration-connection-renewal.md",
-      "sha256": "244d7575ee7f5d230653de2ba9b1618f6bc59295e60e6e233fc62cdc5d63ee93"
+      "sha256": "d03b66edca7f39940ffa5cbc62f591afef802da358dcd82f743b108e6fbc6fcc"
     },
     {
       "path": "tools/test_execution_record.py",
       "sha256": "38cc4351e8d11582e46ab3174ddfa1d6c6e3b7f5c153a336960665b7fab2af2c"
+    },
+    {
+      "path": "tools/test_verify_alpha.py",
+      "sha256": "54a46485938a66c05693533518de43565dd363c7b51ef0415e31c63df9dd4650"
     }
   ],
   "observations": [
@@ -19551,6 +19555,13 @@
       "source_path": "tools/integration_owner_desktop.py",
       "entrypoint": "ReviewEndpoint.handle",
       "selector": "connection-status"
+    },
+    {
+      "id": "obs-f319e20ee894b17bb2c487525cc6c81044aa68d4f9b538911c22d958b95b92d2",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "endpoint",
+      "selector": null
     }
   ],
   "capabilities": [
@@ -53254,12 +53265,16 @@
         "limits": [
           "No receiver identity, policy satisfaction or execution proof"
         ],
-        "notes": "Build/packaging/source policy configuration, not standalone Work operations."
+        "notes": "Build/packaging/source policy configuration, not standalone Work operations. The validation-only snapshot explicitly includes the three AST coverage inputs; Conan export and private/local exclusions remain unchanged."
       },
       "test_refs": [
         {
           "path": "tests/c/cli_integration.py",
           "selector": null
+        },
+        {
+          "path": "tools/test_verify_alpha.py",
+          "selector": "SourceSnapshotTests.test_clean_export_runs_exact_connection_protocol_coverage"
         }
       ],
       "doc_refs": [
@@ -80784,7 +80799,7 @@
         "limits": [
           "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
         ],
-        "notes": "Explicit bounded disk/live observations only. Unknown/stale/partial rows cannot be promoted to current model delivery."
+        "notes": "Explicit bounded disk/live observations only. Unknown/stale/partial rows cannot be promoted to current model delivery. Bounded observation prioritizes validated present endpoints and preserves missing endpoints separately. Unknown, changed, refused, timed out or over-budget candidates remain unobserved and cannot establish whole-connection CURRENT; no history is deleted."
       },
       "test_refs": [
         {
@@ -81136,7 +81151,7 @@
         "limits": [
           "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
         ],
-        "notes": "Bounded private metadata listing excludes authentication tokens and does not connect or replace a child."
+        "notes": "Bounded private metadata listing excludes authentication tokens and does not connect or replace a child. Bounded observation prioritizes validated present endpoints and preserves missing endpoints separately. Unknown, changed, refused, timed out or over-budget candidates remain unobserved and cannot establish whole-connection CURRENT; no history is deleted."
       },
       "test_refs": [
         {
@@ -81498,6 +81513,62 @@
         },
         {
           "path": "tools/test_integration_owner_desktop.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.connection_relay.py.operation-7",
+      "observation_ids": [
+        "obs-f319e20ee894b17bb2c487525cc6c81044aa68d4f9b538911c22d958b95b92d2"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Read one validated private endpoint descriptor and socket metadata, recheck bytes, and omit the authentication token. ABSENT means verified socket-path ENOENT only, not process/Work completion. mtime is observation priority only; malformed or changed records fail closed. No connect, probe, deletion, service replacement or authority change."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_relay.py",
           "selector": null
         },
         {

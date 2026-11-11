@@ -42,6 +42,7 @@ def presentation(value):
         'VERIFY_REQUIRED': '갱신 후 실제 연결 재확인 필요 · 완료로 판정하지 않음',
         'WAIT_FOR_IDLE': '진행 중 작업 확인 필요 · 갱신하지 않음',
         'NOT_CONFIGURED': '연결 설정 확인 필요 · 갱신하지 않음',
+        'OBSERVATION_INCOMPLETE': '일부 연결 미관찰 · 재시작 필요 여부 미확인',
         'VERIFIED': '실제 연결 대조 완료 · 모델 전달 검증은 별도',
     }
     selected_lines = [
@@ -77,6 +78,7 @@ def presentation(value):
             '호스트: ' + text(row.get('host_kind')) + ' / PID ' + text(row.get('host_pid')),
             '프로세스 PID: ' + text(row.get('pid')),
             '관측 상태: ' + text(row.get('state')),
+            '관측 사유: ' + text(row.get('reason')),
             '실제 launcher SHA-256: ' + text(row.get('launcher_sha256')),
             '실제 policy SHA-256: ' + text(row.get('policy_sha256')),
             '실제 runtime SHA-256: ' + text(row.get('runtime_sha256')),

@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "965baf030c18f33443f4086f2a794d91700e723cd263581519f3324a74946bff",
-  "selected_source_count": 647,
-  "selected_observation_count": 2423,
-  "selected_capability_count": 1289,
+  "inventory_sha256": "0da1ccdc3c886ea93ebd13e1c65ec3af5db6f7f6428cea9405ac89a8bf4dd051",
+  "selected_source_count": 648,
+  "selected_observation_count": 2424,
+  "selected_capability_count": 1290,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -4060,7 +4060,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "b707c35cd445e951e09a51d19e3f423bc7e515f4e8a8bd268d5fffc4be393047"
+      "sha256": "a864204ede9dcd23d449f0428ee0f51263c62201f183a0c171032e0be58ec505"
     },
     {
       "path": "src/adapter_protocol/adapter.c",
@@ -6160,15 +6160,15 @@
     },
     {
       "path": "tools/integration_client_connection.py",
-      "sha256": "1e4964daa0a5694df93c5f218076f23cb70fee0c28163946c4014d09202093eb"
+      "sha256": "70f04f4050b7b10dcb49b2db6091834ca4e02c73ab19c76fd57c0b4dc3aba791"
     },
     {
       "path": "tools/integration_connection_ui.py",
-      "sha256": "a5f5bf80296f2b8f456a63cb0f685890b1c13077713fdcdee8d24ad7ab12764d"
+      "sha256": "99cddd3ae6197473c947594bed8d18ccf4e55b3d448a41658396512e7a9794e3"
     },
     {
       "path": "plugins/golem/scripts/connection_relay.py",
-      "sha256": "5f8c816f2421e75c26f7a2a9bc1dca02ec9a8a6d9562177a9a4b46544ee54c86"
+      "sha256": "27f9ae286b1544a782664032a2996be36be70709ee466a08f360548567a02fa1"
     },
     {
       "path": "tools/test_integration_codex_control.py",
@@ -6176,15 +6176,15 @@
     },
     {
       "path": "tools/test_integration_client_connection.py",
-      "sha256": "3c2d6f8f4d17b14624cdae66d603a15fa54d4de27dfcb56275f7fe1a4da1be6e"
+      "sha256": "cfeead8bf18775e291cd6052b558fd3f5b1a02d99b1184e9391639208f037a67"
     },
     {
       "path": "tools/test_integration_connection_ui.py",
-      "sha256": "fd90739897b4b92a9da3ffe8637e8e9ec2d4d4c904e412f009ddd41350144235"
+      "sha256": "cc20417ddf23cea57f20be68b93167a68fbeb6889ae7b22dab050a0dddd5f18d"
     },
     {
       "path": "tools/test_integration_connection_relay.py",
-      "sha256": "ab80f48c4168fc41f831af8039f6fa5d922e65e072bd61f828b4ec60006317f6"
+      "sha256": "f4892c33afddc60dfe6363c390a604a7fbec6cf494f0b9dd432a97720c20a6e5"
     },
     {
       "path": "docs/integration-codex-plugin.md",
@@ -6192,11 +6192,15 @@
     },
     {
       "path": "docs/integration-connection-renewal.md",
-      "sha256": "244d7575ee7f5d230653de2ba9b1618f6bc59295e60e6e233fc62cdc5d63ee93"
+      "sha256": "d03b66edca7f39940ffa5cbc62f591afef802da358dcd82f743b108e6fbc6fcc"
     },
     {
       "path": "tools/test_execution_record.py",
       "sha256": "38cc4351e8d11582e46ab3174ddfa1d6c6e3b7f5c153a336960665b7fab2af2c"
+    },
+    {
+      "path": "tools/test_verify_alpha.py",
+      "sha256": "54a46485938a66c05693533518de43565dd363c7b51ef0415e31c63df9dd4650"
     }
   ],
   "native_definitions": [
@@ -12374,7 +12378,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 240,
+      "checked_functions": 243,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -15087,7 +15091,7 @@
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1199,
+      "reviewed_capabilities": 1200,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -23502,7 +23506,7 @@
     {
       "path": "source_policy.py",
       "role": "BUILD_CONTRACT",
-      "rationale": "Build/packaging/source policy configuration, not standalone Work operations.",
+      "rationale": "Build/packaging/source policy configuration, not standalone Work operations. Validation-only export includes the exact two connection metadata sources and canonical relay needed by unchanged subprocess-boundary AST tests; no other plugin scripts or Conan sources become selected.",
       "symbols": [
         "export_sources",
         "selected"
@@ -58060,7 +58064,7 @@
     {
       "path": "tools/integration_client_connection.py",
       "role": "OWNER_LOCAL_CONNECTION_MONITOR",
-      "rationale": "Owner-local comparison of exact selected config/adapter/policy/runtime bytes with authenticated live Golem metadata and bounded Desktop process ancestry. Provenance environment values are not authority. Explicit observation, Golem relay refresh and optional host-wide reload are distinct; no Work call, policy application or model conversation.",
+      "rationale": "Owner-local comparison of exact selected config/adapter/policy/runtime bytes with authenticated live Golem metadata and bounded Desktop process ancestry. Provenance environment values are not authority. Explicit observation, Golem relay refresh and optional host-wide reload are distinct; no Work call, policy application or model conversation. Preserved absent endpoints do not consume the 16-probe live budget; active/unknown candidates are prioritized by mtime only for observation. Unobserved/invalid/overflow rows block whole-connection CURRENT and do not imply a restart is required.",
       "symbols": [
         "ConnectionError",
         "ConnectionError.__init__",
@@ -58075,7 +58079,9 @@
         "decode",
         "desktop_parent",
         "digest",
+        "display_order",
         "live_status",
+        "observation_order",
         "owner_launch_description",
         "read_file",
         "require",
@@ -58109,6 +58115,14 @@
           "integration_owner_desktop"
         ],
         [
+          "Attribute(value=Name(id='path', ctx=Load()), attr='name', ctx=Load())",
+          "owner-app.json"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='descriptor', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='endpoint_state')])",
+          "PRESENT"
+        ],
+        [
           "Call(func=Attribute(value=Name(id='manifest', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='name')])",
           "golem"
         ],
@@ -58125,6 +58139,14 @@
           "REFRESH_QUEUED"
         ],
         [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='endpoint_state')])",
+          "ABSENT"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='endpoint_state')])",
+          "PRESENT"
+        ],
+        [
           "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='host_kind')])",
           "ChatGPT"
         ],
@@ -58137,8 +58159,52 @@
           "codex-connection-relay"
         ],
         [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "BOUNDED_OBSERVATION_LIMIT"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "CURRENT_ACTIVE_SERVICE"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "LEGACY_OR_UNAVAILABLE"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "NOT_OBSERVED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "RELAY_OBSERVATION_UNAVAILABLE"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "RELAY_UNAVAILABLE"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "STALE_OR_UNVERIFIED_SERVICE"
+        ],
+        [
           "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='schema')])",
           "golem.owner-connection-status.v1"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "DRAINING"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "READY"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "STARTING"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "UNKNOWN"
         ],
         [
           "Call(func=Name(id='set', ctx=Load()), args=[Name(id='approval', ctx=Load())])",
@@ -58179,6 +58245,10 @@
         [
           "Name(id='mode', ctx=Load())",
           "GOLEM_RELAY_AVAILABLE"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "OBSERVATION_INCOMPLETE"
         ],
         [
           "Name(id='mode', ctx=Load())",
@@ -58223,6 +58293,10 @@
         [
           "Subscript(value=Name(id='args', ctx=Load()), slice=Slice(upper=Constant(value=3)), ctx=Load())",
           "-c"
+        ],
+        [
+          "Subscript(value=Name(id='row', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "review"
         ],
         [
           "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='state'), ctx=Load())",
@@ -58344,7 +58418,7 @@
     {
       "path": "plugins/golem/scripts/connection_relay.py",
       "role": "CLIENT_TRANSPORT_RELAY",
-      "rationale": "Public Codex-only stdio relay around the exact existing approved child. Owner-private local status/refresh IPC does not add an MCP tool or approval authority. Refresh checks old/new approval bytes and current config pin, blocks pending/partial traffic, waits for normal stdin EOF and exit 0, reinitializes once and emits tools/list_changed. This does not certify Work or native lease idle. UNKNOWN is terminal; no Work replay, automatic repair or force-kill. File-level effects name direct relay effects; operation rows additionally include inherited approved-child startup effects.",
+      "rationale": "Public Codex-only stdio relay around the exact existing approved child. Owner-private local status/refresh IPC does not add an MCP tool or approval authority. Refresh checks old/new approval bytes and current config pin, blocks pending/partial traffic, waits for normal stdin EOF and exit 0, reinitializes once and emits tools/list_changed. This does not certify Work or native lease idle. UNKNOWN is terminal; no Work replay, automatic repair or force-kill. File-level effects name direct relay effects; operation rows additionally include inherited approved-child startup effects. Endpoint discovery distinguishes only verified socket-path absence from PRESENT/UNKNOWN and rechecks descriptor identity; neither absence nor descriptor mtime certifies process/Work completion or current authority.",
       "symbols": [
         "Relay",
         "Relay.__init__",
@@ -58376,6 +58450,7 @@
         "_record",
         "descriptors",
         "encoded",
+        "endpoint",
         "frame_receive",
         "frame_send",
         "identifier",
@@ -58546,6 +58621,11 @@
           "NATIVE_OPERATION",
           "request",
           "refresh"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "endpoint",
+          null
         ]
       ]
     }
@@ -64885,7 +64965,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "50b4b9a43175432e3f16032d0ce739ceef6e805d78608b64c3489e522b5908fd",
+      "sha256": "e6547069b964605b438a41db4f2f8f22735733826ebdb5f10d782e73133471a2",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65047,7 +65127,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "d6e22b64c4d49df8b429c32996a9a6ec8ca7c87b7636aa14e48161c617c8bc68",
+      "sha256": "a66993e283de03e880165488a35271f1e4b674f4ce7dd6888ed99be4f455ceac",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65143,7 +65223,7 @@
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "a800ea121fa0b1b844c2e9b7193b3126b9745b381d32e9f4f252f2e66fa44476",
+      "sha256": "ce50768ca9b98d5d7cb5f41ec4b7c6cbbadcbee5445b2fa8bde927ea0a9caffe",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65191,7 +65271,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "848110b8c0bba9a53b968c6f0aaabb271435d33eb1d790dd544643e22828e86b",
+      "sha256": "4c2f093ce6bfdc0eec62bc95cd3f6f3621e7ed10fa1bdd67a70e332bdf886a41",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },

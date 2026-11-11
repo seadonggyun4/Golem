@@ -10,6 +10,9 @@ PRIVATE = frozenset({"project-docs", "credentials", "secrets", "reports", "works
 BASE = frozenset({"CMakeLists.txt", "LICENSE", "NOTICE", "COMMERCIAL-LICENSE.md"})
 TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.py",
     "execution_record.py", "test_execution_record.py",
+    # The execution-record coverage test parses these exact control sources.
+    # Exporting validation inputs neither imports nor activates their services.
+    "integration_client_connection.py", "integration_codex_control.py",
     "intent_authority.py", "intent_authority_lifecycle.py", "intent_authority_host.c",
     "intent_product_host.inc", "integration_intent.py", "test_integration_intent.py",
     # Exact bootstrap inspection is imported by MCP; the native host and its
@@ -63,6 +66,9 @@ TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.
     "benchmark_runtime.py", "verify_isolation.py", "test_verify_isolation.py",
     "verify_resource.py", "test_verify_resource.py", "event_bridge.c", "event_bridge_limits.h",
     "verify_orchestration.py", "test_verify_orchestration.py", "benchmark_orchestration.py"})
+# The same AST coverage test also inspects the canonical public relay. Keep this
+# path exact: other plugin scripts, manifests and local state are not selected.
+VALIDATION_SCRIPTS = frozenset({"plugins/golem/scripts/connection_relay.py"})
 # Every data fixture is deliberately reviewed. New local .json/.md files do not
 # become public just because their directory or extension looks like a sample.
 FIXTURES = frozenset("""
@@ -150,7 +156,7 @@ def selected(name, profile="validation"):
         return True
     types = {"src": {".c", ".h"}, "include": {".h"}, "cmake": {".in"}}
     if profile == "validation":
-        if name in FIXTURES or name in ("CMakePresets.json", "source_policy.py"):
+        if name in FIXTURES or name in VALIDATION_SCRIPTS or name in ("CMakePresets.json", "source_policy.py"):
             return True
         if p.parts[0] == "tools":
             return len(p.parts) == 2 and p.name in TOOLS

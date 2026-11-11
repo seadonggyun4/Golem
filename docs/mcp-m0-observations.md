@@ -1295,6 +1295,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.plugins.golem.scripts.connection_relay.py.operation-5 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 | surface.plugins.golem.scripts.connection_relay.py.operation-6 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 | surface.tools.integration_owner_desktop.py.connection-status | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.scripts.connection_relay.py.operation-7 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3723,6 +3724,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | NATIVE_OPERATION | plugins/golem/scripts/connection_relay.py | request | status |
 | NATIVE_OPERATION | plugins/golem/scripts/connection_relay.py | request | refresh |
 | NATIVE_OPERATION | tools/integration_owner_desktop.py | ReviewEndpoint.handle | connection-status |
+| PYTHON_DECLARATION | plugins/golem/scripts/connection_relay.py | endpoint | None |
 
 ## Blockers
 

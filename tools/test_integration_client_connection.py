@@ -3,7 +3,9 @@ import copy
 import json
 import os
 from pathlib import Path
+import stat
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -310,6 +312,145 @@ class OfficialControl(Fixture):
         self.assertEqual(calls,['config/mcpServer/reload'])
 
 
+class EndpointHistory(Fixture):
+    """Retained metadata is not a live admission slot or a completion claim."""
+    def setUp(self):
+        super().setUp()
+        import integration_owner_desktop as desktop
+        self.desktop = desktop
+        self.active = set()
+        self.calls = []
+        self.reply = self.row(schema='golem.owner-connection-status.v1')
+        self.reply.pop('instance')
+        self.errors = {}
+        original = Path.lstat
+        def info(path, *args, **kwargs):
+            if path.parent == self.review and path.suffix == '.sock' and path.stem in self.active:
+                problem = self.errors.get(path.stem)
+                if isinstance(problem, Exception):
+                    raise problem
+                return SimpleNamespace(st_mode=stat.S_IFSOCK|0o600,
+                    st_uid=os.getuid()+(1 if problem == 'wrong-uid' else 0), st_dev=1, st_ino=99)
+            return original(path, *args, **kwargs)
+        self.addCleanup(patch.stopall)
+        patch.object(Path,'lstat',side_effect=info,autospec=True).start()
+        def remote(directory, instance):
+            self.calls.append(instance)
+            def status():
+                if self.errors.get(instance) == 'refused':
+                    raise ConnectionRefusedError('fixture stale socket')
+                return copy.deepcopy(self.reply)
+            return SimpleNamespace(last_peer_pid=31,connection_status=status)
+        patch.object(desktop,'RemoteController',side_effect=remote).start()
+        self.monitor = connection.ConnectionMonitor(self.config,self.review,
+            ancestry=lambda pid:{'host_kind':'ChatGPT','host_pid':30})
+        self.monitor.relay = SimpleNamespace(descriptors=lambda:[])
+
+    def record(self, number, *, active=False, timestamp=None):
+        instance = f'{number:032x}'
+        path = self.review/(instance+'.json')
+        self.write(path, {'instance':instance,'token':'a'*64,'kind':'review','label':'fixture'})
+        if timestamp is not None:
+            os.utime(path,ns=(timestamp,timestamp))
+        if active:
+            self.active.add(instance)
+        return instance
+
+    def test_forty_missing_endpoints_do_not_hide_live_Desktop_or_delete_history(self):
+        for number in range(40): self.record(number)
+        current = self.record(100,active=True)
+        before = {p.name:p.read_bytes() for p in self.review.glob('*.json')}
+        report = self.monitor.inspect()
+        self.assertEqual(self.calls,[current])
+        self.assertEqual(report['reload']['mode'],'VERIFIED')
+        self.assertEqual(report['connections'][0]['instance'],current)
+        closed = [r for r in report['connections'] if r['state']==connection.ENDPOINT_ABSENT]
+        self.assertEqual(len(closed),40)
+        self.assertTrue(all('NOT_PROCESS_OR_WORK_COMPLETION' in r['reason'] for r in closed))
+        self.assertEqual(before,{p.name:p.read_bytes() for p in self.review.glob('*.json')})
+        self.assertEqual(report['model_tool_delivery'],'NOT_OBSERVED')
+
+    def test_forty_retained_socket_paths_prioritize_new_record_but_remain_partial(self):
+        for number in range(40):
+            old = self.record(number,active=True,timestamp=1)
+            self.errors[old]='refused'
+        current = self.record(100,active=True,timestamp=2)
+        report = self.monitor.inspect()
+        self.assertEqual(self.calls[0],current)
+        self.assertEqual(len(self.calls),16)
+        self.assertEqual(report['connections'][0]['state'],'CURRENT_ACTIVE_SERVICE')
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+        self.assertTrue(any(r.get('reason')=='BOUNDED_OBSERVATION_LIMIT' for r in report['connections']))
+        self.assertEqual(len(list(self.review.glob('*.json'))),41)
+        self.assertFalse(any('정상 종료한 뒤' in s for s in report['reload']['steps']))
+
+    def test_seventeen_live_candidates_keep_budget_and_block_global_current(self):
+        for number in range(17): self.record(number,active=True,timestamp=1)
+        report=self.monitor.inspect()
+        self.assertEqual(self.calls,[f'{i:032x}' for i in range(16)])
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+        self.assertEqual(report['Work_calls'],0)
+
+    def test_invalid_descriptor_socket_symlink_uid_and_permission_are_not_closed(self):
+        current=self.record(100,active=True)
+        wrong=self.record(1,active=True);self.errors[wrong]='wrong-uid'
+        denied=self.record(2,active=True);self.errors[denied]=PermissionError('fixture')
+        linked=self.record(3)
+        (self.review/(linked+'.sock')).symlink_to(self.policy)
+        malformed=self.record(4);self.write(self.review/(malformed+'.json'),{'invalid':True})
+        stale=self.record(5,active=True);self.errors[stale]='refused'
+        report=self.monitor.inspect()
+        self.assertIn(current,self.calls)
+        self.assertFalse(any(r.get('state')==connection.ENDPOINT_ABSENT for r in report['connections']))
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+
+    def test_absent_endpoint_that_reappears_is_unobserved_not_closed(self):
+        absent=self.record(1)
+        current=self.record(2,active=True)
+        remote=self.desktop.RemoteController.side_effect
+        def appear(directory, instance):
+            value=remote(directory,instance)
+            self.active.add(absent)
+            return value
+        self.desktop.RemoteController.side_effect=appear
+        report=self.monitor.inspect()
+        self.assertEqual(self.calls,[current])
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+        self.assertFalse(any(r.get('state')==connection.ENDPOINT_ABSENT for r in report['connections']))
+
+    def test_descriptor_change_and_peer_pid_mismatch_remain_unknown(self):
+        target=self.record(1,active=True)
+        self.reply['pid']=999
+        report=self.monitor.inspect()
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+        self.assertEqual(report['connections'][0]['reason'],'CONNECTION_PEER_PID')
+        self.reply['pid']=31
+        remote=self.desktop.RemoteController.side_effect
+        def change(directory, instance):
+            value=remote(directory,instance)
+            path=self.review/(target+'.json')
+            raw=json.loads(path.read_bytes());raw['label']='changed';self.write(path,raw)
+            return value
+        self.desktop.RemoteController.side_effect=change
+        report=self.monitor.inspect()
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+        self.assertEqual(report['connections'][0]['reason'],'CONNECTION_ENDPOINT_CHANGED')
+
+    def test_owner_catalog_limit_is_not_silently_expanded(self):
+        for number in range(129): self.record(number)
+        report=self.monitor.inspect()
+        self.assertEqual(self.calls,[])
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+        self.assertEqual(report['connections'][0]['reason'],'OWNER_CONNECTION_LIMIT')
+
+    def test_peer_metadata_cannot_forge_local_closed_or_verified_state(self):
+        self.record(1,active=True)
+        self.reply.update(state=connection.ENDPOINT_ABSENT,relay_current=True)
+        report=self.monitor.inspect()
+        self.assertEqual(report['connections'][0]['reason'],'CONNECTION_STATUS_FIELDS')
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+
+
 class Relay(Fixture):
     def setUp(self):
         super().setUp()
@@ -323,10 +464,15 @@ class Relay(Fixture):
                 self.calls=[]
                 self.failure=None
             def descriptors(self):
-                return [{'instance':key,'pid':value['pid'],'kind':'codex-connection-relay'}
-                        for key,value in self.rows.items()]
+                return [self.endpoint(key) for key in self.rows]
+            def endpoint(self, key):
+                return {'instance':key,'pid':self.rows[key]['pid'],'kind':'codex-connection-relay',
+                        'discovery_mtime_ns':self.rows[key].get('discovery_mtime_ns',0),
+                        'endpoint_state':self.rows[key].get('endpoint_state','PRESENT')}
             def request(self,instance,operation,params):
-                if operation=='status': return {'ok':True,'value':copy.deepcopy(self.rows[instance])}
+                if operation=='status':
+                    value={k:v for k,v in self.rows[instance].items() if k not in ('endpoint_state','discovery_mtime_ns')}
+                    return {'ok':True,'value':copy.deepcopy(value)}
                 self.calls.append((instance,operation,copy.deepcopy(params)))
                 if self.failure: raise self.failure
                 row=self.rows[instance]
@@ -400,6 +546,73 @@ class Relay(Fixture):
         self.refresh(self.monitor.inspect()['refresh_token'],target='b'*32)
         self.assertEqual([(i,op) for i,op,_ in self.relay.calls],
                          [('a'*32,'refresh'),('b'*32,'refresh')])
+
+    def test_forty_absent_relay_endpoints_do_not_consume_live_budget(self):
+        template=copy.deepcopy(self.relay.rows['a'*32])
+        for number in range(40):
+            key=f'{number:032x}'
+            self.relay.rows[key]=dict(template,instance=key,endpoint_state='ABSENT')
+        with patch.object(self.relay,'request',wraps=self.relay.request) as request:
+            report=self.monitor.inspect()
+        self.assertEqual(request.call_count,2)
+        self.assertEqual(sum(r.get('state')==connection.ENDPOINT_ABSENT for r in report['connections']),40)
+        self.assertEqual(report['connections'][0]['instance'],'a'*32)
+        self.assertEqual(len(self.relay.rows),42)
+
+    def test_relay_unknown_and_budget_sentinel_block_current_Desktop(self):
+        self.monitor.observer=lambda:[self.row()]
+        selected=self.selected()
+        template=copy.deepcopy(self.relay.rows['a'*32])
+        template.update(launcher_sha256=selected['launcher_sha256'],approval_sha256=selected['approval_sha256'],
+                        selected_state=selected['adapter_state'])
+        self.relay.rows={f'{i:032x}':dict(template,instance=f'{i:032x}') for i in range(17)}
+        with patch.object(self.relay,'request',wraps=self.relay.request) as request:
+            report=self.monitor.inspect()
+        self.assertEqual(request.call_count,16)
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+        self.relay.rows={f'{0:032x}':dict(template,instance=f'{0:032x}',endpoint_state='UNKNOWN')}
+        self.assertEqual(self.monitor.inspect()['reload']['mode'],'OBSERVATION_INCOMPLETE')
+
+    def test_latest_relay_found_among_retained_socket_records_without_global_current(self):
+        selected=self.selected()
+        template=copy.deepcopy(self.relay.rows['a'*32])
+        template.update(launcher_sha256=selected['launcher_sha256'],approval_sha256=selected['approval_sha256'],
+                        selected_state=selected['adapter_state'])
+        self.relay.rows={f'{i:032x}':dict(template,instance=f'{i:032x}',discovery_mtime_ns=1) for i in range(40)}
+        newest='f'*32
+        self.relay.rows[newest]=dict(template,instance=newest,discovery_mtime_ns=2)
+        original=self.relay.request
+        def status(instance,operation,arguments):
+            if instance != newest: raise ConnectionRefusedError('fixture retained socket')
+            return original(instance,operation,arguments)
+        with patch.object(self.relay,'request',side_effect=status) as request:
+            report=self.monitor.inspect()
+        self.assertEqual(request.call_count,16)
+        self.assertEqual(request.call_args_list[0].args[0],newest)
+        self.assertTrue(report['connections'][0]['relay_current'])
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+
+    def test_relay_response_cannot_override_local_absence_or_current_fields(self):
+        self.monitor.observer=lambda:[self.row()]
+        original=self.relay.request
+        def forged(instance,operation,arguments):
+            response=original(instance,operation,arguments)
+            response['value'].update(state=connection.ENDPOINT_ABSENT,relay_current=True)
+            return response
+        with patch.object(self.relay,'request',side_effect=forged):
+            report=self.monitor.inspect()
+        self.assertEqual(report['reload']['mode'],'OBSERVATION_INCOMPLETE')
+        self.assertTrue(all(row['state']=='RELAY_UNAVAILABLE' for row in report['connections'][1:]))
+
+    def test_observed_relay_is_not_hidden_by_UI_history_display_limit(self):
+        import integration_connection_ui as ui
+        self.monitor.observer=lambda:[{'instance':f'{i:032x}','state':'NOT_OBSERVED'} for i in range(128)]
+        report=self.monitor.inspect()
+        shown=ui.presentation(report)
+        self.assertEqual(shown['relay_targets'],{'0':'a'*32,'1':'b'*32})
+        self.assertEqual(len(report['connections']),130)
+        self.assertEqual(len(shown['rows']),128)
+        self.assertNotEqual(report['reload']['mode'],'VERIFIED')
 
 
 if __name__ == '__main__':

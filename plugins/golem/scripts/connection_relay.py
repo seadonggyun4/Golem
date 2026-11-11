@@ -6,6 +6,7 @@ No process is killed, no Work request is replayed, and uncertain close/start
 permanently blocks this relay until its owning client closes the transport.
 """
 import ctypes
+import hashlib
 import hmac
 import json
 import os
@@ -586,8 +587,26 @@ def _record(instance):
     return value
 
 
+def endpoint(instance):
+    """Validated discovery snapshot; absence is not process/Work completion."""
+    value = _record(instance)
+    metadata = (_directory() / (instance + '.json')).lstat()
+    path = _directory() / (instance + '.sock')
+    try:
+        info = path.lstat()
+        require(stat.S_ISSOCK(info.st_mode) and info.st_uid == os.getuid()
+                and stat.S_IMODE(info.st_mode) == 0o600, 'CONTROL_SOCKET')
+        observation = {'endpoint_state':'PRESENT', 'socket_identity':(info.st_dev, info.st_ino)}
+    except FileNotFoundError:
+        observation = {'endpoint_state':'ABSENT'}
+    require(_record(instance) == value, 'CONTROL_RECORD_CHANGED')
+    return {**{key:item for key,item in value.items() if key != 'token'},
+            'descriptor_sha256':hashlib.sha256(encoded(value)).hexdigest(),
+            'discovery_mtime_ns':metadata.st_mtime_ns, **observation}
+
+
 def descriptors():
-    """Read bounded discovery records, omitting authentication tokens; no socket call."""
+    """Read bounded discovery records, omitting tokens; no connect/probe or deletion."""
     try:
         directory = _directory()
     except FileNotFoundError:
@@ -597,8 +616,12 @@ def descriptors():
     result = []
     for path in sorted(entries):
         if re.fullmatch(r'[0-9a-f]{32}\.json', path.name):
-            value = _record(path.stem)
-            result.append({key: item for key, item in value.items() if key != 'token'})
+            try:
+                result.append(endpoint(path.stem))
+            except Exception as error:
+                result.append({'instance':path.stem, 'kind':'codex-connection-relay',
+                               'endpoint_state':'UNKNOWN',
+                               'reason':str(error) if isinstance(error, RelayError) else 'CONTROL_RECORD_UNAVAILABLE'})
     return result
 
 

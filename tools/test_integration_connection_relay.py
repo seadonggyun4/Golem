@@ -5,11 +5,13 @@ import json
 import os
 from pathlib import Path
 import select
+import stat
 import sys
 import tempfile
 import threading
 import time
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -398,6 +400,61 @@ class ConnectionRelay(unittest.TestCase):
                 {'jsonrpc':'2.0', 'method':'notifications/progress', 'params':{'data':'x'*500000}},
                 deadline=start+.03)
         self.assertLess(time.monotonic()-start, 1.0)
+
+
+class Discovery(unittest.TestCase):
+    """Discovery never connects, drops old records, or proves process exit."""
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory(prefix='golem-discovery-')
+        self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name).resolve()
+        self.root.chmod(0o700)
+        directory=patch.object(relay,'_directory',return_value=self.root)
+        directory.start();self.addCleanup(directory.stop)
+
+    def record(self, number):
+        instance=f'{number:032x}'
+        value={'schema':relay.SCHEMA,'instance':instance,'token':'a'*64,
+               'pid':50,'kind':'codex-connection-relay'}
+        path=self.root/(instance+'.json')
+        path.write_bytes(relay.encoded(value));path.chmod(0o600)
+        return instance
+
+    def test_missing_socket_history_is_retained_without_token_or_dispatch(self):
+        for i in range(40): self.record(i)
+        before={p.name:p.read_bytes() for p in self.root.iterdir()}
+        with patch.object(relay,'request',side_effect=AssertionError('no IPC')):
+            rows=relay.descriptors()
+        self.assertEqual(len(rows),40)
+        self.assertTrue(all(r['endpoint_state']=='ABSENT' for r in rows))
+        self.assertTrue(all('token' not in r for r in rows))
+        self.assertEqual(before,{p.name:p.read_bytes() for p in self.root.iterdir()})
+
+    def test_invalid_record_symlink_socket_and_wrong_uid_stay_unknown(self):
+        invalid=self.record(1);(self.root/(invalid+'.json')).write_bytes(b'{}')
+        linked=self.record(2);(self.root/(linked+'.sock')).symlink_to(self.root/(linked+'.json'))
+        foreign=self.record(3)
+        original=Path.lstat
+        def info(path,*args,**kwargs):
+            if path.name==foreign+'.sock':
+                return SimpleNamespace(st_mode=stat.S_IFSOCK|0o600,st_uid=os.getuid()+1,st_dev=1,st_ino=1)
+            return original(path,*args,**kwargs)
+        with patch.object(Path,'lstat',side_effect=info,autospec=True): rows=relay.descriptors()
+        self.assertEqual([r['endpoint_state'] for r in rows],['UNKNOWN']*3)
+        self.assertTrue(all('token' not in r for r in rows))
+
+    def test_discovery_bound_1024_entries_is_not_increased(self):
+        for i in range(1025): (self.root/str(i)).touch()
+        with self.assertRaisesRegex(relay.RelayError,'CONTROL_DISCOVERY_LIMIT'):
+            relay.descriptors()
+
+    def test_record_change_during_endpoint_observation_is_rejected(self):
+        instance=self.record(1)
+        original=relay._record
+        first=original(instance)
+        with patch.object(relay,'_record',side_effect=[first,dict(first,pid=51)]):
+            with self.assertRaisesRegex(relay.RelayError,'CONTROL_RECORD_CHANGED'):
+                relay.endpoint(instance)
 
 
 if __name__ == '__main__':
