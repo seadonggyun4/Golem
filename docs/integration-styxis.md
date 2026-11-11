@@ -22,6 +22,10 @@ Codex, Claude Code, portable and Claude Desktop adapters use separate approval r
 
 각 client의 승인 기록은 분리합니다. Desktop의 `golem-prepare` 이름은 기존 extension identity를 유지하기 위한 것으로, 공개 launcher 연결 패키지의 권한은 기존 launcher·정책이 결정합니다. 기존 기능별 MCPB의 profile 권한 계약을 자동 이전하지 않습니다.
 
+The catalog pins the installation adapter, skills and Desktop archive. The selected local launcher separately identifies the native executable, MCP runtime and policy pins; a catalog update alone does not replace them. Verify both the public package and the selected local runtime before claiming an update is active.
+
+카탈로그 패키지와 실제 선택된 native·MCP runtime은 별도로 대조합니다. 연결 후 새 Work를 시작할 때는 [관리형 bootstrap 안내](mcp-managed-bootstrap.ko.md)의 도구 진단과 Owner 초안 검토 경로를 따릅니다. 도구 노출·준비 성공은 실행 승인이 아닙니다.
+
 ## Setup and migration / 설정·전환
 
 1. Verify the catalog's exact source SHA and package inventory. For Desktop, verify the linked archive SHA as well. Product code stays in Golem.

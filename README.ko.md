@@ -77,7 +77,9 @@ flowchart TD
 이미지는 검증한 합성 테스트 설치 사례이며, 설치만으로 권한이 생기지는 않습니다.
 
 - **[Codex 설치·사용](docs/integration-codex-plugin.md)** — Golem Setup으로 연결하고 Golem Work로 진행합니다.
-- **[Claude Desktop 설치·사용](docs/integration-mcpb.md#install-and-configure)** — 필요한 기능 패키지를 설치하고 연결을 확인합니다.
+- **[Claude Desktop 설치·사용](docs/integration-mcpb.md#install-and-configure)** — Styxis 패키지와 검토한 launcher를 선택하고 연결을 확인합니다.
+
+새 Work는 [소스 준비·Owner 검토 흐름](docs/mcp-managed-bootstrap.ko.md)을 따릅니다.
 
 각 client에는 **검증된 Golem 최신본 한 개와 의도한 연결 한 개만** 유지합니다.
 

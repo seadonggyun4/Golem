@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "1a5d5036444007bdeb6cbdf87ad03075748e95286a110dffb2daae75be93d8a5",
+  "inventory_sha256": "64dfb3541770e0aa6325501953955ff9ae2d9df6afa5501a4c3348e253974a64",
   "selected_source_count": 636,
   "selected_observation_count": 2404,
   "selected_capability_count": 1270,
@@ -6080,7 +6080,7 @@
     },
     {
       "path": "docs/integration-styxis.md",
-      "sha256": "36b09fee16543fc963de578a0094f47e0a5c76ef93934ccd57c2104bffa1e8af"
+      "sha256": "b0e1574fb44f04d9ca3cd1660adc031e38a0795b6e22e42ced52dce6fde62ae7"
     },
     {
       "path": "tools/test_integration_plugin_clients.py",

@@ -2479,7 +2479,7 @@
     },
     {
       "path": "docs/integration-styxis.md",
-      "sha256": "36b09fee16543fc963de578a0094f47e0a5c76ef93934ccd57c2104bffa1e8af"
+      "sha256": "b0e1574fb44f04d9ca3cd1660adc031e38a0795b6e22e42ced52dce6fde62ae7"
     },
     {
       "path": "tools/test_integration_plugin_clients.py",

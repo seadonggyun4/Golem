@@ -79,7 +79,9 @@ Installation itself grants no access or execution authority.
 The image shows a verified synthetic test installation; installation itself grants no authority.
 
 - **[Codex setup and use](docs/integration-codex-plugin.md)** — connect with Golem Setup and proceed with Golem Work.
-- **[Claude Desktop setup and use](docs/integration-mcpb.md#install-and-configure)** — install the needed feature package and verify the connection.
+- **[Claude Desktop setup and use](docs/integration-mcpb.md#install-and-configure)** — select the Styxis package and reviewed launcher, then verify the connection.
+
+For a new Work, follow [source preparation and owner review](docs/mcp-managed-bootstrap.ko.md).
 
 Keep **one latest verified Golem installation and one intended connection per client**.
 
