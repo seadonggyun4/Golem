@@ -431,7 +431,7 @@
     },
     {
       "path": "plugins/golem/.codex-plugin/plugin.json",
-      "sha256": "953a59ede46daa384bf254a150d4951cf5eb7224bf88b54f54e4804b8eaa3b02"
+      "sha256": "52f1ee68d39ea37a214e7c8a8134f46322f7d89162f9f415ddaf89f7e09fde09"
     },
     {
       "path": "plugins/golem/.mcp.json",
@@ -439,11 +439,11 @@
     },
     {
       "path": "plugins/golem/scripts/launcher.py",
-      "sha256": "25d30125332c9c9a5880de601ef1be2d52c623f63219186d6b046c5cbe2108fe"
+      "sha256": "d8fdd348222720046a2df1d9e74c9381f4d8ac3f336ac77ebc0fa0cee4b0f5e3"
     },
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
-      "sha256": "072df943fd8dbe8c67686ea3ef202955003d4ca457d1c0e4d398d0bd6ea8ae3e"
+      "sha256": "ef61e5f48aff32ed5bec8363da7506a161e0272acbfef92a65a7eae3825375a6"
     },
     {
       "path": "pyproject.toml",
@@ -2467,11 +2467,11 @@
     },
     {
       "path": "plugins/golem/.claude-plugin/plugin.json",
-      "sha256": "1dff309d9795cfc9e19bc38d1896ea7a05bd895acc51e9e9216311a9c845f42b"
+      "sha256": "0e5ad31c71d839af9c19e3c4aadba75bab6b3174c0947ce36110ac53ea994042"
     },
     {
       "path": "plugins/golem/plugin.json",
-      "sha256": "054823fd961c6b6e082896a61af7335b2376d1b3c632c74aa3c856e685030313"
+      "sha256": "20915f6348b3cbf02975c8e5d73fb10e636d43a33a29e05a05d577808e63ef4a"
     },
     {
       "path": "plugins/golem/mcp.json",
@@ -2483,7 +2483,7 @@
     },
     {
       "path": "tools/test_integration_plugin_clients.py",
-      "sha256": "5e0d56c3a8e38328547e3633325a84d8d7b1789ba5f9bcb8c89c2064120c434a"
+      "sha256": "f0da4409fafec9a462088fbc12e29e4be009aff01765f0a747f168f9382ed192"
     },
     {
       "path": "tools/integration_desktop_plugin.py",
@@ -2491,7 +2491,7 @@
     },
     {
       "path": "tools/test_integration_desktop_plugin.py",
-      "sha256": "811bbd6176e3d68ea7554d9e77b37e4c8244bb9ab2a182d014f40027982afc94"
+      "sha256": "64614cea4096ae9549a4f471b7fb34bdfbc62d8d86eadf57b6aba82779179008"
     },
     {
       "path": "tools/test_integration_codex_marketplace.py",
@@ -2551,15 +2551,15 @@
     },
     {
       "path": "tools/integration_client_connection.py",
-      "sha256": "70f04f4050b7b10dcb49b2db6091834ca4e02c73ab19c76fd57c0b4dc3aba791"
+      "sha256": "4be2d1c38cb525833ee38e742e436d86d5c740815eedc4f0fa035fa4821457b0"
     },
     {
       "path": "tools/integration_connection_ui.py",
-      "sha256": "99cddd3ae6197473c947594bed8d18ccf4e55b3d448a41658396512e7a9794e3"
+      "sha256": "70af7f1a14fc61af9f22899b051c0d81b5aa305e48dbef881bf6c3c1cd937b96"
     },
     {
       "path": "plugins/golem/scripts/connection_relay.py",
-      "sha256": "27f9ae286b1544a782664032a2996be36be70709ee466a08f360548567a02fa1"
+      "sha256": "3e31ef5b35505922c7f5bc76b434fb9be241965314a58d290141661faf1e34e0"
     },
     {
       "path": "tools/test_integration_codex_control.py",
@@ -2567,23 +2567,23 @@
     },
     {
       "path": "tools/test_integration_client_connection.py",
-      "sha256": "cfeead8bf18775e291cd6052b558fd3f5b1a02d99b1184e9391639208f037a67"
+      "sha256": "0c9905276dd942143d571e61bd53601d6ed3145cbc1ae687d27340449b50d5fc"
     },
     {
       "path": "tools/test_integration_connection_ui.py",
-      "sha256": "cc20417ddf23cea57f20be68b93167a68fbeb6889ae7b22dab050a0dddd5f18d"
+      "sha256": "2197d0e6be595eb88b69e230983d5813273fa3c24ca97dc85620ca543198650b"
     },
     {
       "path": "tools/test_integration_connection_relay.py",
-      "sha256": "f4892c33afddc60dfe6363c390a604a7fbec6cf494f0b9dd432a97720c20a6e5"
+      "sha256": "8cfb923b83eabb5291c943ca70a065d0aafeee968debed20245cc5f293195024"
     },
     {
       "path": "docs/integration-codex-plugin.md",
-      "sha256": "31dd30d4533105875652cee59f7d6bb8af577f05fe4f73e65deafad8420d0a66"
+      "sha256": "57747d402e24c5d7dc9c30952fd028b0a5f294fd72442813aee5eb0571751832"
     },
     {
       "path": "docs/integration-connection-renewal.md",
-      "sha256": "d03b66edca7f39940ffa5cbc62f591afef802da358dcd82f743b108e6fbc6fcc"
+      "sha256": "2719afed344b614fa30b2b74e8c00aedff97aff7fb6ed5d122b47153a05640c6"
     },
     {
       "path": "tools/test_execution_record.py",
@@ -19561,6 +19561,27 @@
       "kind": "PYTHON_DECLARATION",
       "source_path": "plugins/golem/scripts/connection_relay.py",
       "entrypoint": "endpoint",
+      "selector": null
+    },
+    {
+      "id": "obs-4119da49debbed36943682b993c7044d22002f2351e038e17fb18cd54f33432a",
+      "kind": "CLI_ROUTE",
+      "source_path": "plugins/golem/scripts/launcher.py",
+      "entrypoint": "argparse:operation",
+      "selector": "connection-status"
+    },
+    {
+      "id": "obs-7971b769c2268e058e82e7b0357e76ce57b72994c13a18081fe73cce271da0fb",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/launcher.py",
+      "entrypoint": "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+      "selector": "connection-status"
+    },
+    {
+      "id": "obs-7695dea9822e6dc7c7add853b1c9822fb2b7114ab907ab3d2d551fca4d393629",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/launcher.py",
+      "entrypoint": "connection_status",
       "selector": null
     }
   ],
@@ -81592,6 +81613,51 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.launcher.py.connection-status",
+      "observation_ids": [
+        "obs-4119da49debbed36943682b993c7044d22002f2351e038e17fb18cd54f33432a",
+        "obs-7971b769c2268e058e82e7b0357e76ce57b72994c13a18081fe73cce271da0fb",
+        "obs-7695dea9822e6dc7c7add853b1c9822fb2b7114ab907ab3d2d551fca4d393629"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Existing typed core/input/owner/evidence contracts; no new grant"
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "static source contract"
+        ],
+        "limits": [
+          "Actual process/network/receiver/policy effects remain unverified at runtime"
+        ],
+        "notes": "Explicit Codex-only exact 32-hex relay instance. Validate the existing selected adapter state, then one UID/PID/descriptor-checked status IPC read. No implicit discovery, config mutation, refresh, model turn or Work call; mismatching version/selection stays distinct. Host reply forwarding is not model or thread identity verification. Existing approvals remain byte-identical."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_plugin_clients.py",
+          "selector": "ClientPackaging.test_connection_status_observes_exact_relay_without_refresh_or_authority_change"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete command grammar and source branch; named CLI operations are not helper exclusions. Existing checks remain mandatory; target route is planning only."
     }
   ]
 }

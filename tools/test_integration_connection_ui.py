@@ -30,6 +30,16 @@ def report(mode='MANUAL_RESTART_REQUIRED'):
     }
 
 
+def host_catalog(**updates):
+    result = {'schema':'golem.host-tool-catalog-observation.v1',
+        'child_generation':2,'catalog_generation':3,'state':'HOST_CATALOG_NOT_RELISTED',
+        'requests':0,'responses':0,'errors':0,'list_changed_notifications_sent':1,
+        'last_complete_generation':1,'last_complete_sha256':'a'*64,'last_complete_pages':1,
+        'current_complete_sha256':None,'current_complete_pages':None,'model_delivery_verified':False}
+    result.update(updates)
+    return result
+
+
 class Presentation(unittest.TestCase):
     def test_selected_and_live_policy_separate_without_authority_inference(self):
         source = report()
@@ -64,6 +74,46 @@ class Presentation(unittest.TestCase):
         shown = ui.presentation(report('VERIFIED'))
         self.assertIn('모델 전달 검증은 별도', shown['renewal_label'])
         self.assertIn('미확인', shown['model_delivery'])
+
+    def test_ready_server_and_host_catalog_requery_are_distinct(self):
+        value=report('VERIFIED')
+        value['connections'][0].update(state='READY',host_catalog=host_catalog())
+        shown=ui.presentation(value)
+        self.assertEqual(shown['rows'][0][1][3],'READY')
+        self.assertEqual(shown['rows'][0][1][6],'변경 후 목록 재조회 없음')
+        self.assertIn('현 목록 세대 요청 / 전송 응답 / 오류: 0 / 0 / 0',shown['details'])
+        self.assertIn('현 세대 전체 페이지 SHA-256 / 페이지 수: 미확인 / 미확인',shown['details'])
+        self.assertIn('과거일 수 있음',shown['details'])
+        self.assertIn('호스트 PID나 준비안 보유만으로 현재 대화의 transport를 확정하지 않습니다',shown['details'])
+        self.assertIn('미확인',shown['model_delivery'])
+
+    def test_complete_response_never_becomes_model_or_current_chat_success(self):
+        value=report('VERIFIED')
+        value['connections'][0]['host_catalog']=host_catalog(state='HOST_CATALOG_RESPONSE_SENT',
+            requests=1,responses=1,last_complete_generation=3,last_complete_sha256='b'*64,
+            current_complete_sha256='b'*64,current_complete_pages=1)
+        shown=ui.presentation(value)
+        self.assertEqual(shown['rows'][0][1][6],'목록 응답 전송 · 모델 미확인')
+        self.assertIn('호스트 cache 반영·모델 도구 전달·실행 권한을 증명하지 않습니다',shown['details'])
+        self.assertIn('미확인',shown['model_delivery'])
+
+    def test_missing_catalog_is_unobserved_without_invented_zero_counts(self):
+        shown=ui.presentation(report())
+        self.assertEqual(shown['rows'][0][1][6],'미관찰')
+        self.assertIn('NOT_OBSERVED',shown['details'])
+        self.assertNotIn('현 목록 세대 요청 / 전송 응답 / 오류:',shown['details'])
+
+    def test_malformed_catalog_cannot_display_counters_or_false_success(self):
+        for observation in ({},{'state':'HOST_CATALOG_RESPONSE_SENT'},
+                            host_catalog(model_delivery_verified=True),host_catalog(requests=True)):
+            with self.subTest(observation=observation):
+                value=report()
+                value['connections'][0]['host_catalog']=observation
+                shown=ui.presentation(value)
+                self.assertEqual(shown['rows'][0][1][6],'관측 형식 미확인')
+                self.assertIn('INVALID_METADATA',shown['details'])
+                self.assertNotIn('현 목록 세대 요청 / 전송 응답 / 오류:',shown['details'])
+                self.assertIn('미확인',shown['model_delivery'])
 
     def test_partial_observation_is_not_a_restart_or_success_recommendation(self):
         value=report('OBSERVATION_INCOMPLETE')

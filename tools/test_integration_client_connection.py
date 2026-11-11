@@ -12,6 +12,16 @@ from unittest.mock import patch
 import integration_client_connection as connection
 
 
+def catalog_observation(**updates):
+    result = {'schema':'golem.host-tool-catalog-observation.v1',
+        'child_generation':2, 'catalog_generation':3, 'state':'HOST_CATALOG_NOT_RELISTED',
+        'requests':0, 'responses':0, 'errors':0, 'list_changed_notifications_sent':1,
+        'last_complete_generation':2, 'last_complete_sha256':'a'*64, 'last_complete_pages':1,
+        'current_complete_sha256':None, 'current_complete_pages':None, 'model_delivery_verified':False}
+    result.update(updates)
+    return result
+
+
 class Fixture(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='golem-connection-', dir='/private/tmp' if Path('/private/tmp').is_dir() else None)
@@ -496,6 +506,72 @@ class Relay(Fixture):
         self.assertFalse(any(row.get('refreshable') for row in result['connections']))
         self.assertEqual(self.relay.calls,[])
         self.assertEqual(result['model_tool_delivery'],'NOT_OBSERVED')
+
+    def test_legacy_catalog_absence_is_unknown_without_synthetic_counts(self):
+        result=self.monitor.inspect()
+        self.assertTrue(all(row['host_catalog'] is None for row in result['connections']))
+        self.assertEqual(result['model_tool_delivery'],'NOT_OBSERVED')
+        self.assertEqual(self.relay.calls,[])
+
+    def test_new_catalog_observation_preserves_generation_and_historical_digest(self):
+        observation=catalog_observation()
+        self.relay.rows['a'*32]['host_catalog']=observation
+        result=self.monitor.inspect()
+        row=next(row for row in result['connections'] if row['instance']=='a'*32)
+        self.assertEqual(row['state'],'READY')
+        self.assertEqual(row['host_catalog'],observation)
+        self.assertIsNone(row['host_catalog']['current_complete_sha256'])
+        self.assertEqual(result['model_tool_delivery'],'NOT_OBSERVED')
+        self.assertEqual(self.relay.calls,[])
+
+    def test_complete_host_response_does_not_certify_model_delivery(self):
+        observation=catalog_observation(state='HOST_CATALOG_RESPONSE_SENT',requests=2,responses=2,
+            last_complete_generation=3,last_complete_sha256='b'*64,last_complete_pages=2,
+            current_complete_sha256='b'*64,current_complete_pages=2)
+        self.relay.rows['a'*32]['host_catalog']=observation
+        report=self.monitor.inspect()
+        self.assertEqual(report['connections'][0]['host_catalog'],observation)
+        self.assertEqual(report['model_tool_delivery'],'NOT_OBSERVED')
+        self.assertEqual(report['Work_calls'],0)
+
+    def test_catalog_metadata_rejects_malformed_or_false_delivery_claim(self):
+        invalid=[None, {}, dict(catalog_observation(),unexpected=True)]
+        for key,value in [('schema','v2'),('state','VERIFIED'),('state',[]),
+                          ('child_generation',True),('catalog_generation',1),
+                          ('requests',-1),('responses',1),('errors',True),
+                          ('list_changed_notifications_sent',1 << 63),
+                          ('last_complete_generation',4),('last_complete_sha256','g'*64),
+                          ('last_complete_pages',129),('current_complete_sha256','b'*64),
+                          ('current_complete_pages',False),('model_delivery_verified',True)]:
+            invalid.append(catalog_observation(**{key:value}))
+        for value in invalid:
+            with self.subTest(value=value):
+                self.relay.rows['a'*32]['host_catalog']=value
+                row=next(row for row in self.monitor.inspect()['connections'] if row['instance']=='a'*32)
+                self.assertEqual(row['state'],'RELAY_UNAVAILABLE')
+                self.assertEqual(row['reason'],'RELAY_HOST_CATALOG_FIELDS')
+                self.assertFalse(row['refreshable'])
+        self.assertEqual(self.relay.calls,[])
+
+    def test_pre_spawn_generation_zero_is_observable_but_not_ready(self):
+        observation=catalog_observation(child_generation=0,catalog_generation=0,
+            state='HOST_CATALOG_NOT_REQUESTED',list_changed_notifications_sent=0,
+            last_complete_generation=None,last_complete_sha256=None,last_complete_pages=None)
+        self.relay.rows['a'*32].update(state='STARTING',host_catalog=observation)
+        row=next(row for row in self.monitor.inspect()['connections'] if row['instance']=='a'*32)
+        self.assertEqual(row['host_catalog'],observation)
+        self.assertFalse(row['refreshable'])
+        self.relay.rows['a'*32]['state']='READY'
+        row=next(row for row in self.monitor.inspect()['connections'] if row['instance']=='a'*32)
+        self.assertEqual(row['reason'],'RELAY_HOST_CATALOG_FIELDS')
+
+    def test_identical_catalog_observation_has_stable_token_but_change_requires_reselection(self):
+        self.relay.rows['a'*32]['host_catalog']=catalog_observation()
+        token=self.monitor.inspect()['refresh_token']
+        self.assertEqual(self.monitor.inspect()['refresh_token'],token)
+        self.relay.rows['a'*32]['host_catalog'].update(state='HOST_CATALOG_REQUEST_PENDING',requests=1)
+        self.expect('REFRESH_SELECTION_CHANGED',lambda:self.refresh(token))
+        self.assertEqual(self.relay.calls,[])
 
     def test_standalone_or_mismatched_peer_cannot_be_refresh_target(self):
         self.monitor.ancestry=lambda pid:{'host_kind':'INDEPENDENT_STDIO','host_pid':None}

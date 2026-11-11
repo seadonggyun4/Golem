@@ -70,6 +70,10 @@ Owner 앱의 **Codex 연결·갱신**에서 설정과 실제 프로세스를 대
 **Golem 연결 갱신**을 사용한다. 이전 adapter에는 최초 정상 재연결이 필요할 수 있다.
 `ready`·새 대화·CLI 목록만으로 Desktop 반영을 판정하지 않으며, 현재 대화의 도구
 노출을 따로 확인한다. [연결 갱신 방법과 보존 조건](integration-connection-renewal.md)을 따른다.
+서버 목록에 있는 도구가 대화에 없으면 relay의 `connection-status`에서 호스트의
+목록 재조회 관측을 확인한다. 새 목록 응답·호스트 reload 접수·모델의 실제 도구 정의는
+별개다. 지원되는 호스트 갱신 후 **같은 대화의 다음 turn**에서 정의를 대조하며,
+같은 설치나 relay 갱신을 반복하거나 숨겨진 action을 다른 도구로 우회하지 않는다.
 
 - 새 artifact·설치 bytes와 검증 범위를 확인하고 기존 identity의 지원되는 update 절차를 사용한다. runtime·정책 변경은 [D5](integration-d5.md)를 따르며 기존 승인 bytes/key/pin을 자동 이전하지 않는다.
 - 복구 자료를 owner-private 위치에 보존한 뒤 **검증된 Golem 한 개와 의도한 연결 한 개만** 유지한다. 확인한 구버전 plugin·marketplace·중복 direct MCP만 지원되는 remove 명령/UI로 정리하고 재확인한다.

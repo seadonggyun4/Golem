@@ -51,7 +51,7 @@ class ClientPackaging(unittest.TestCase):
         manifests = [json.loads((PACKAGE / path).read_text()) for path in
                      ('.codex-plugin/plugin.json', '.claude-plugin/plugin.json', 'plugin.json')]
         for manifest in manifests:
-            self.assertEqual((manifest['name'], manifest['version']), ('golem', '0.2.9'))
+            self.assertEqual((manifest['name'], manifest['version']), ('golem', '0.2.10'))
             self.assertEqual(manifest['license'], 'PolyForm-Noncommercial-1.0.0')
         for manifest in manifests[:2]:
             self.assertTrue((PACKAGE / manifest['skills']).is_dir())
@@ -141,8 +141,58 @@ class ClientPackaging(unittest.TestCase):
                     self.assertEqual(environment['GOLEM_LAUNCHER_SHA256'], self.pin)
                     self.assertEqual(environment['GOLEM_LAUNCHER_CLIENT'], client)
                     self.assertEqual(environment['GOLEM_LAUNCHER_STATE'], str(state))
-                    self.assertEqual(environment['GOLEM_LAUNCHER_PLUGIN_VERSION'], '0.2.9')
+                    self.assertEqual(environment['GOLEM_LAUNCHER_PLUGIN_VERSION'], '0.2.10')
             self.assertEqual((state / 'golem-launcher/approval.json').read_bytes(), before)
+
+    def test_connection_status_observes_exact_relay_without_refresh_or_authority_change(self):
+        state, _ = self.configure('codex')
+        record = state / 'golem-launcher/approval.json'
+        before = record.read_bytes()
+        instance = 'a' * 32
+        observed = {'selected_state': str(state), 'launcher_sha256': self.pin,
+                    'plugin_version': adapter.ADAPTER_VERSION, 'state': 'READY',
+                    'host_catalog': {'state': 'HOST_CATALOG_NOT_RELISTED'}}
+        with patch.object(adapter, 'relay_module') as module, \
+             patch.object(adapter.os, 'execve') as execute:
+            module.return_value.request.return_value = {'ok': True, 'value': observed}
+            result = adapter.connection_status(state, instance)
+            module.return_value.request.assert_called_once_with(instance, 'status', {})
+            execute.assert_not_called()
+        self.assertEqual(result['state'], 'SELECTED_RELAY_OBSERVED')
+        self.assertEqual(result['relay'], observed)
+        self.assertFalse(result['model_tools_delivery_verified'])
+        self.assertFalse(result['thread_identity_verified'])
+        self.assertFalse(result['automatic_retry_allowed'])
+        self.assertEqual(result['work_calls'], 0)
+        self.assertEqual(record.read_bytes(), before)
+
+    def test_connection_status_rejects_implicit_target_and_other_clients_before_ipc(self):
+        state, _ = self.configure('codex')
+        with patch.object(adapter, 'relay_module') as module:
+            for instance in (None, '', '../socket', 'A' * 32, 'a' * 31):
+                with self.subTest(instance=instance), self.assertRaisesRegex(
+                        adapter.SetupError, 'EXACT_CONNECTION_INSTANCE_REQUIRED'):
+                    adapter.connection_status(state, instance)
+            for client in ('claude-code', 'claude-desktop', 'portable'):
+                with self.subTest(client=client), self.assertRaisesRegex(
+                        adapter.SetupError, 'CODEX_CONNECTION_ONLY'):
+                    adapter.connection_status(state, 'a' * 32, client)
+            module.assert_not_called()
+
+    def test_connection_status_does_not_promote_old_relay_or_failed_observation(self):
+        state, _ = self.configure('codex')
+        with patch.object(adapter, 'relay_module') as module:
+            module.return_value.request.return_value = {'ok': True, 'value': {
+                'selected_state': str(state), 'launcher_sha256': self.pin,
+                'plugin_version': '0.2.9', 'state': 'READY'}}
+            result = adapter.connection_status(state, 'a' * 32)
+            self.assertEqual(result['state'], 'OTHER_SELECTION_OR_VERSION')
+            self.assertFalse(result['model_tools_delivery_verified'])
+            module.return_value.request.reset_mock()
+            module.return_value.request.return_value = {'ok': False, 'error': 'CLOSED'}
+            with self.assertRaisesRegex(adapter.SetupError, 'CONNECTION_STATUS_UNAVAILABLE'):
+                adapter.connection_status(state, 'a' * 32)
+            module.return_value.request.assert_called_once_with('a' * 32, 'status', {})
 
     def test_real_manifest_commands_resolve_installed_root_and_preserve_stdio(self):
         installed = self.root / 'Plugin path with spaces'

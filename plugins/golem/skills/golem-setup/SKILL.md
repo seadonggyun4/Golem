@@ -59,6 +59,19 @@ verify reload and calls separately.
    and an explicitly granted Work; otherwise record calls as NOT_RUN. Confirm the
    returned tool scope rather than inferring it from the package.
    `tools/list_changed` or a reload ACK is not proof of model tool delivery.
+   For one known Codex relay ID, the installed adapter's `connection-status
+   --client codex --state PATH --connection-instance ID` reads only that relay's
+   status. It does not discover transports, reload a host or call a Work tool.
+   `host_catalog` separates the current refresh generation's host list requests
+   and forwarded responses from its last complete catalog digest. A forwarded
+   response is not proof that the host cached it or exposed it to the model.
+   A service owning a plan, or sharing the Desktop PID, does not identify the
+   current chat's transport. Missing observations must remain NOT_OBSERVED.
+   If the host does not re-list, do not repeat the relay refresh: use the supported
+   host reconnect/reload within the user's scope, then inspect definitions in a
+   subsequent turn of the same chat. A reload queues loaded-thread refreshes;
+   changing an in-progress turn's tool inventory is not guaranteed. A new
+   app-server fixture is not verification of the existing Desktop process.
    Transport idle is not proof that native leases or external work have ended.
    Never retry uncertain refreshes, replay Work requests or kill an existing host.
 5. Report configuration, tool exposure and calls separately. `AVAILABLE` means

@@ -9,9 +9,21 @@ ACK is not a Desktop/model success.
 import queue
 import threading
 
+from integration_client_connection import ConnectionError, validate_host_catalog
+
 
 UNKNOWN = '미확인'
 MAX_TEXT = 4096
+CATALOG_LABELS = {
+    'HOST_CATALOG_NOT_REQUESTED': '현 세대 목록 요청 없음',
+    'HOST_CATALOG_NOT_RELISTED': '변경 후 목록 재조회 없음',
+    'HOST_CATALOG_REQUEST_PENDING': '목록 응답 대기',
+    'HOST_CATALOG_PARTIAL_RESPONSE': '목록 일부 페이지 전송',
+    'HOST_CATALOG_RESPONSE_SENT': '목록 응답 전송 · 모델 미확인',
+    'HOST_CATALOG_ERROR_SENT': '목록 오류 응답 전송',
+    'HOST_CATALOG_UNVERIFIED_PAGE': '목록 페이지 연속성 미확인',
+    'HOST_CATALOG_INVALID_RESPONSE': '목록 응답 형식 미확인',
+}
 
 
 def text(value):
@@ -23,6 +35,28 @@ def text(value):
     value = str(value)
     return ''.join(ch if ch.isprintable() or ch in '\n\t' else '\ufffd'
                    for ch in value[:MAX_TEXT])
+
+
+def catalog_presentation(row):
+    """Separate observed host transport from server readiness and model tools."""
+    value = row.get('host_catalog')
+    if value is None:
+        return '미관찰', ['호스트 목록 관측: NOT_OBSERVED · 구버전/미제공 수치를 0으로 추정하지 않습니다.']
+    try:
+        value = validate_host_catalog(value)
+    except ConnectionError:
+        return '관측 형식 미확인', ['호스트 목록 관측: INVALID_METADATA · 성공 여부와 수치 미확인']
+    state = value['state']
+    return CATALOG_LABELS[state], [
+        '호스트 목록 관측: '+state+' · '+CATALOG_LABELS[state],
+        'child 세대 / 목록 세대: '+text(value['child_generation'])+' / '+text(value['catalog_generation']),
+        '현 목록 세대 요청 / 전송 응답 / 오류: '+text(value['requests'])+' / '+text(value['responses'])+' / '+text(value['errors']),
+        '현 목록 세대 변경 알림 전송: '+text(value['list_changed_notifications_sent']),
+        '현 세대 전체 페이지 SHA-256 / 페이지 수: '+text(value['current_complete_sha256'])+' / '+text(value['current_complete_pages']),
+        '마지막 전체 응답 세대 / SHA-256 / 페이지 수 (과거일 수 있음): '+
+            text(value['last_complete_generation'])+' / '+text(value['last_complete_sha256'])+' / '+text(value['last_complete_pages']),
+        '응답 전송은 해당 transport로 쓴 관측입니다. 호스트 cache 반영·모델 도구 전달·실행 권한을 증명하지 않습니다.',
+    ]
 
 
 def presentation(value):
@@ -54,7 +88,8 @@ def presentation(value):
     ]
     rows = []
     relay_targets = {}
-    details = list(selected_lines)
+    details = [*selected_lines,
+        '연결의 호스트 PID나 준비안 보유만으로 현재 대화의 transport를 확정하지 않습니다. 대화 연결 근거는 별도입니다.']
     connections = value.get('connections')
     if not isinstance(connections, list):
         connections = []
@@ -64,10 +99,11 @@ def presentation(value):
         tool_count = row.get('tools_count')
         if type(tool_count) is not int or tool_count < 0:
             tool_count = None
+        catalog_label, catalog_details = catalog_presentation(row)
         rows.append((str(index), (
             text(row.get('host_kind')), text(row.get('host_pid')),
             text(row.get('pid')), text(row.get('state')), text(tool_count),
-            text(row.get('instance')),
+            text(row.get('instance')), catalog_label,
         )))
         instance = row.get('instance')
         if (row.get('refreshable') is True and isinstance(instance, str) and
@@ -83,6 +119,7 @@ def presentation(value):
             '실제 policy SHA-256: ' + text(row.get('policy_sha256')),
             '실제 runtime SHA-256: ' + text(row.get('runtime_sha256')),
             '관측 도구 수: ' + text(tool_count),
+            *catalog_details,
         ])
         tools = row.get('tools')
         if isinstance(tools, list):
@@ -182,11 +219,12 @@ class ConnectionPanel:
         ttk.Label(self.frame, textvariable=self.selected, wraplength=830).pack(anchor='w', pady=4)
         table = ttk.Frame(self.frame)
         table.pack(fill='both', expand=True)
-        self.tree = ttk.Treeview(table, columns=('host', 'host_pid', 'pid', 'state', 'tools', 'instance'),
+        self.tree = ttk.Treeview(table, columns=('host', 'host_pid', 'pid', 'state', 'tools', 'instance', 'host_catalog'),
                                  show='headings', selectmode='browse', height=4)
         for name, title, width in [('host', '호스트', 110), ('host_pid', '호스트 PID', 85),
-                                   ('pid', '연결 PID', 85), ('state', '관측 상태', 220),
-                                   ('tools', '도구 수', 70), ('instance', '연결 ID', 200)]:
+                                   ('pid', '연결 PID', 85), ('state', '서버/연결 상태', 180),
+                                   ('tools', '도구 수', 70), ('instance', '연결 ID', 200),
+                                   ('host_catalog', '호스트 목록 관측', 210)]:
             self.tree.heading(name, text=title)
             self.tree.column(name, width=width, minwidth=60)
         scrollbar = ttk.Scrollbar(table, orient='vertical', command=self.tree.yview)

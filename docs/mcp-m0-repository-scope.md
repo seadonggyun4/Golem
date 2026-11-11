@@ -1296,6 +1296,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.plugins.golem.scripts.connection_relay.py.operation-6 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 | surface.tools.integration_owner_desktop.py.connection-status | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.plugins.golem.scripts.connection_relay.py.operation-7 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.launcher.py.connection-status | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3725,6 +3726,9 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | NATIVE_OPERATION | plugins/golem/scripts/connection_relay.py | request | refresh |
 | NATIVE_OPERATION | tools/integration_owner_desktop.py | ReviewEndpoint.handle | connection-status |
 | PYTHON_DECLARATION | plugins/golem/scripts/connection_relay.py | endpoint | None |
+| CLI_ROUTE | plugins/golem/scripts/launcher.py | argparse:operation | connection-status |
+| NATIVE_OPERATION | plugins/golem/scripts/launcher.py | branch:Attribute(value=Name(id=&#x27;args&#x27;, ctx=Load()), attr=&#x27;operation&#x27;, ctx=Load()) | connection-status |
+| PYTHON_DECLARATION | plugins/golem/scripts/launcher.py | connection_status | None |
 
 ## Blockers
 

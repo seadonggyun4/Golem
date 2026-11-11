@@ -21,6 +21,12 @@ LIMIT = 262144
 MAX_CONNECTIONS = 16
 ENDPOINT_ABSENT = 'CLOSED_ENDPOINT_ABSENT'
 DIGEST = re.compile(r'[a-f0-9]{64}\Z')
+HOST_CATALOG_STATES = frozenset((
+    'HOST_CATALOG_NOT_REQUESTED', 'HOST_CATALOG_NOT_RELISTED',
+    'HOST_CATALOG_REQUEST_PENDING', 'HOST_CATALOG_PARTIAL_RESPONSE',
+    'HOST_CATALOG_RESPONSE_SENT', 'HOST_CATALOG_ERROR_SENT',
+    'HOST_CATALOG_UNVERIFIED_PAGE', 'HOST_CATALOG_INVALID_RESPONSE',
+))
 
 
 class ConnectionError(ValueError):
@@ -32,6 +38,48 @@ class ConnectionError(ValueError):
 def require(value, code):
     if not value:
         raise ConnectionError(code)
+
+
+def validate_host_catalog(value):
+    """Validate bounded relay observations, never host/model delivery authority."""
+    code = 'RELAY_HOST_CATALOG_FIELDS'
+    fields = {'schema', 'child_generation', 'catalog_generation', 'state', 'requests',
+              'responses', 'errors', 'list_changed_notifications_sent',
+              'last_complete_generation', 'last_complete_sha256', 'last_complete_pages',
+              'current_complete_sha256', 'current_complete_pages', 'model_delivery_verified'}
+    require(type(value) is dict and set(value) == fields, code)
+    require(value['schema'] == 'golem.host-tool-catalog-observation.v1' and
+            type(value['state']) is str and value['state'] in HOST_CATALOG_STATES and
+            value['model_delivery_verified'] is False, code)
+    for key in ('child_generation', 'catalog_generation'):
+        require(type(value[key]) is int and value[key] >= 0, code)
+    require((value['child_generation'] == value['catalog_generation'] == 0) or
+            1 <= value['child_generation'] <= value['catalog_generation'], code)
+    for key in ('requests', 'responses', 'errors', 'list_changed_notifications_sent'):
+        require(type(value[key]) is int and 0 <= value[key] <= (1 << 63) - 1, code)
+    require(value['errors'] <= value['responses'] <= value['requests'], code)
+    for prefix in ('last', 'current'):
+        sha, pages = value[prefix+'_complete_sha256'], value[prefix+'_complete_pages']
+        require((sha is None and pages is None) or
+                (type(sha) is str and DIGEST.fullmatch(sha) and
+                 type(pages) is int and 1 <= pages <= 128), code)
+    generation = value['last_complete_generation']
+    if value['last_complete_sha256'] is None:
+        require(generation is None, code)
+    else:
+        require(type(generation) is int and 1 <= generation <= value['catalog_generation'], code)
+    if value['current_complete_sha256'] is not None:
+        require(value['state'] == 'HOST_CATALOG_RESPONSE_SENT' and
+                generation == value['catalog_generation'] and
+                value['current_complete_sha256'] == value['last_complete_sha256'] and
+                value['current_complete_pages'] == value['last_complete_pages'] and
+                value['responses'] >= value['current_complete_pages'], code)
+    if value['state'] == 'HOST_CATALOG_RESPONSE_SENT':
+        require(value['current_complete_sha256'] is not None, code)
+    if value['state'] in ('HOST_CATALOG_NOT_REQUESTED', 'HOST_CATALOG_NOT_RELISTED'):
+        require(value['requests'] == value['responses'] == value['errors'] == 0 and
+                value['current_complete_sha256'] is None, code)
+    return dict(value)
 
 
 def read_file(path, *, private=False):
@@ -385,9 +433,15 @@ class ConnectionMonitor:
                         type(value.get('busy')) is bool, 'RELAY_STATUS_FIELDS')
                 require(not set(value) & {'endpoint_state','socket_identity','descriptor_sha256',
                         'relay_current','refreshable','discovery_mtime_ns'}, 'RELAY_STATUS_FIELDS')
+                # Legacy relays cannot observe host catalog requests. Missing
+                # metadata remains unknown, never a synthetic zero/success.
+                catalog = validate_host_catalog(value['host_catalog']) if 'host_catalog' in value else None
+                require(catalog is None or value['state'] != 'READY' or catalog['child_generation'] >= 1,
+                        'RELAY_HOST_CATALOG_FIELDS')
                 require(relay.endpoint(descriptor['instance']) == descriptor, 'RELAY_IDENTITY_CHANGED')
                 row.update({key:value.get(key) for key in ('pid','instance','state','busy','plugin_version',
                     'selected_state','launcher_sha256','approval_sha256')}, **self.ancestry(value['pid']))
+                row['host_catalog'] = catalog
                 same = (value['launcher_sha256'], value['approval_sha256'],value['selected_state']) == (
                     selected['launcher_sha256'],selected['approval_sha256'],selected['adapter_state'])
                 row['relay_current'] = (same and value['state'] == 'READY' and
@@ -448,8 +502,10 @@ class ConnectionMonitor:
                      '접수 응답은 완료가 아닙니다. 이후 상태 확인으로 실제 연결과 도구를 다시 대조합니다.']
         if mode == 'GOLEM_RELAY_AVAILABLE':
             steps = ['목록에서 갱신 가능한 Golem 연결 하나를 선택합니다. 다른 연결은 변경하지 않습니다.',
+                     '같은 호스트 PID나 준비안 보유만으로 현재 대화의 연결을 확정할 수 없습니다. 해당 대화 연결 근거를 별도로 확인합니다.',
                      '진행 중인 요청이 없는지 다시 확인한 뒤 기존 child를 정상 EOF로 종료합니다.',
                      '선택된 정확한 launcher·승인 지문을 다시 검사해 새 child를 시작하고 도구 목록 변경을 알립니다.',
+                     '변경 알림만으로 호스트가 목록을 다시 읽는다고 가정하지 않습니다. 호스트 목록 관측과 모델 전달은 각각 확인합니다.',
                      '연결 갱신과 모델의 도구 전달은 별개입니다. 실패·응답 유실은 자동 재시도하지 않습니다.']
         if mode == 'OBSERVATION_INCOMPLETE':
             steps = ['일부 연결을 관찰하지 못했습니다. 관찰한 행과 미확인 사유를 확인합니다.',

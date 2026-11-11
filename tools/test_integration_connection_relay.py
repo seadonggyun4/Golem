@@ -48,6 +48,9 @@ for line in sys.stdin:
     elif msg.get('method')=='hold':
         time.sleep(.15)
         send({'jsonrpc':'2.0','id':msg['id'],'result':{'held':True}})
+    elif msg.get('method')=='tools/list':
+        send({'jsonrpc':'2.0','id':msg['id'],'result':{'label':label,'tools':[
+            {'name':label,'description':'fixture only','inputSchema':{'type':'object'}}]}})
     elif 'method' in msg and 'id' in msg:
         send({'jsonrpc':'2.0','id':msg['id'],'result':{'label':label}})
 log('eof')
@@ -218,6 +221,37 @@ class ConnectionRelay(unittest.TestCase):
                         next(i for i, e in enumerate(events) if e['label']=='second' and e['kind']=='start'))
         self.assertEqual(sum(e.get('method')=='initialize' and e['label']=='second' for e in events), 1)
         self.assertEqual(sum(e.get('method')=='tools/list' and e['label']=='second' for e in events), 1)
+
+    def test_refresh_notification_without_host_relist_never_reuses_old_catalog(self):
+        running = self.running(self.state('old-private-name'))
+        running.write('tools/list', 2)
+        self.assertEqual(running.read()['result']['label'], 'old-private-name')
+        old = self.control(running, 'status', {})['value']['host_catalog']
+        self.assertEqual(old['state'], 'HOST_CATALOG_RESPONSE_SENT')
+        response = self.control(running, 'refresh', self.refresh_args(running, self.state('new-private-name')))
+        self.assertTrue(response['ok'])
+        self.assertEqual(self.read_method(running), 'notifications/tools/list_changed')
+        current = response['value']['host_catalog']
+        self.assertEqual(current['state'], 'HOST_CATALOG_NOT_RELISTED')
+        self.assertEqual(current['child_generation'], 2)
+        self.assertEqual(current['catalog_generation'], 2)
+        self.assertEqual(current['requests'], 0)
+        self.assertEqual(current['responses'], 0)
+        self.assertEqual(current['list_changed_notifications_sent'], 1)
+        self.assertIsNone(current['current_complete_sha256'])
+        self.assertEqual(current['last_complete_generation'], 1)
+        self.assertEqual(current['last_complete_sha256'], old['current_complete_sha256'])
+        self.assertFalse(any(e.get('method')=='tools/list' and e['label']=='new-private-name'
+                             for e in self.events_read()))
+        running.write('tools/list', 3)
+        self.assertEqual(running.read()['result']['label'], 'new-private-name')
+        observed = self.control(running, 'status', {})['value']['host_catalog']
+        self.assertEqual(observed['state'], 'HOST_CATALOG_RESPONSE_SENT')
+        self.assertEqual(observed['last_complete_generation'], 2)
+        self.assertNotEqual(observed['current_complete_sha256'], old['current_complete_sha256'])
+        self.assertFalse(observed['model_delivery_verified'])
+        self.assertNotIn('private-name', json.dumps(observed))
+        self.assertFalse(any(e.get('method')=='tools/call' for e in self.events_read()))
 
     def read_method(self, running):
         return running.read()['method']
@@ -400,6 +434,115 @@ class ConnectionRelay(unittest.TestCase):
                 {'jsonrpc':'2.0', 'method':'notifications/progress', 'params':{'data':'x'*500000}},
                 deadline=start+.03)
         self.assertLess(time.monotonic()-start, 1.0)
+
+
+class CatalogObservation(unittest.TestCase):
+    """Observe host-originated RPCs without a child, socket or real client."""
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='golem-catalog-')
+        self.addCleanup(self.temp.cleanup)
+        self.instance = relay.Relay(adapter, Path(self.temp.name).resolve())
+        self.addCleanup(self.instance.selector.close)
+        self.instance.child_generation = 1
+        self.instance.new_catalog_generation()
+        self.instance.state, self.instance.initialized = 'READY', True
+        self.child_messages, self.client_messages = [], []
+        self.instance.send_child = self.child_messages.append
+        self.instance.send_client = self.client_messages.append
+
+    def request(self, request_id, cursor=None, *, params=None):
+        args = {} if cursor is None else {'cursor': cursor}
+        self.instance.client_message({'jsonrpc':'2.0', 'method':'tools/list', 'id':request_id,
+                                      'params':args if params is None else params})
+
+    def reply(self, request_id, *, cursor=None, tools=None, error=False):
+        value = {'tools':tools if tools is not None else [
+            {'name':'private-tool-name','inputSchema':{'type':'object'},'description':'private description'}]}
+        if cursor is not None: value['nextCursor'] = cursor
+        self.instance.child_message({'jsonrpc':'2.0','id':request_id, **(
+            {'error':{'code':-32000,'message':'fixture'}} if error else {'result':value})})
+
+    def test_exact_response_id_and_full_pagination_are_required(self):
+        self.request('first');self.reply('first', cursor='private-cursor')
+        state = self.instance.catalog_status()
+        self.assertEqual(state['state'], 'HOST_CATALOG_PARTIAL_RESPONSE')
+        self.assertIsNone(state['current_complete_sha256'])
+        self.request('second', 'private-cursor')
+        with self.assertRaisesRegex(relay.RelayError,'UNEXPECTED_CHILD_RESPONSE'):
+            self.reply('wrong-id')
+        self.assertIsNone(self.instance.catalog_status()['current_complete_sha256'])
+        self.reply('second')
+        state = self.instance.catalog_status()
+        self.assertEqual(state['state'], 'HOST_CATALOG_RESPONSE_SENT')
+        self.assertEqual(state['current_complete_pages'], 2)
+        self.assertEqual((state['requests'], state['responses']), (2,2))
+        self.assertNotIn('private-', json.dumps(state))
+        self.assertFalse(state['model_delivery_verified'])
+
+    def test_error_response_preserves_history_but_not_current_success(self):
+        self.request(1);self.reply(1)
+        original = self.instance.catalog_status()['last_complete_sha256']
+        self.request(2);self.reply(2, error=True)
+        state = self.instance.catalog_status()
+        self.assertEqual(state['state'], 'HOST_CATALOG_ERROR_SENT')
+        self.assertEqual((state['requests'],state['responses'],state['errors']),(2,2,1))
+        self.assertIsNone(state['current_complete_sha256'])
+        self.assertEqual(state['last_complete_sha256'], original)
+
+    def test_notification_invalidates_inflight_and_previous_generation(self):
+        self.request(1);self.reply(1)
+        self.request(2)
+        self.instance.child_message({'jsonrpc':'2.0','method':'notifications/tools/list_changed'})
+        self.reply(2)
+        state = self.instance.catalog_status()
+        self.assertEqual(state['child_generation'], 1)
+        self.assertEqual(state['catalog_generation'], 2)
+        self.assertEqual(state['state'], 'HOST_CATALOG_NOT_RELISTED')
+        self.assertEqual(state['responses'], 0)
+        self.assertEqual(state['list_changed_notifications_sent'], 1)
+        self.assertEqual(state['last_complete_generation'], 1)
+        self.assertIsNone(state['current_complete_sha256'])
+        self.assertEqual(self.instance.catalog_pending, {})
+
+    def test_cursor_only_or_interleaved_chain_never_claims_complete_catalog(self):
+        self.request(1,'unknown');self.reply(1)
+        self.assertEqual(self.instance.catalog_status()['state'],'HOST_CATALOG_UNVERIFIED_PAGE')
+        self.request(2);self.reply(2,cursor='same-cursor')
+        self.request(3,'same-cursor')  # First chain page is still in flight.
+        self.request(4);self.reply(4,cursor='same-cursor')
+        self.reply(3)  # Must not splice a page into the later root's chain.
+        self.assertEqual(self.instance.catalog_status()['state'],'HOST_CATALOG_UNVERIFIED_PAGE')
+        self.assertIsNone(self.instance.catalog_status()['current_complete_sha256'])
+
+    def test_page_loop_and_page_bound_are_not_complete(self):
+        self.request(1);self.reply(1,cursor='a')
+        self.request(2,'a');self.reply(2,cursor='a')
+        self.assertEqual(self.instance.catalog_status()['state'],'HOST_CATALOG_INVALID_RESPONSE')
+        with patch.object(relay,'CATALOG_PAGE_LIMIT',2):
+            self.request(3);self.reply(3,cursor='a')
+            self.request(4,'a');self.reply(4,cursor='b')
+            self.request(5,'b');self.reply(5)
+        self.assertEqual(self.instance.catalog_status()['state'],'HOST_CATALOG_INVALID_RESPONSE')
+        self.assertIsNone(self.instance.catalog_status()['current_complete_sha256'])
+
+    def test_malformed_or_unrelated_response_is_not_catalog_observation(self):
+        self.instance.client_message({'jsonrpc':'2.0','id':1,'method':'ping'})
+        self.instance.child_message({'jsonrpc':'2.0','id':1,'result':{}})
+        self.assertEqual(self.instance.catalog_status()['requests'],0)
+        self.request(2,params={'cursor':5});self.reply(2)
+        self.assertEqual(self.instance.catalog_status()['state'],'HOST_CATALOG_INVALID_RESPONSE')
+        self.request(3);self.reply(3,tools=[{}])
+        self.assertEqual(self.instance.catalog_status()['state'],'HOST_CATALOG_INVALID_RESPONSE')
+        self.assertIsNone(self.instance.catalog_status()['current_complete_sha256'])
+
+    def test_failed_stdout_write_does_not_attest_delivery(self):
+        self.request(1)
+        with patch.object(self.instance,'send_client',side_effect=OSError('fixture closed host')):
+            with self.assertRaises(OSError):self.reply(1)
+        state = self.instance.catalog_status()
+        self.assertEqual(state['responses'],0)
+        self.assertIsNone(state['current_complete_sha256'])
+        self.assertFalse(state['model_delivery_verified'])
 
 
 class Discovery(unittest.TestCase):

@@ -27,6 +27,8 @@ import uuid
 FRAME_LIMIT = 1024 * 1024
 CONTROL_LIMIT = 16 * 1024
 REQUEST_LIMIT = 1024
+CATALOG_PAGE_LIMIT = 128
+CATALOG_COUNTER_LIMIT = (1 << 63) - 1
 CONTROL_TIMEOUT = 2.0
 DRAIN_TIMEOUT = 30.0
 START_TIMEOUT = 60.0
@@ -118,6 +120,112 @@ class Relay:
         self.pin = self.approval_pin = None
         self.launcher = None
         self.stopping = False
+        # Observe only requests the host actually sends. A notification or a
+        # replacement handshake never proves that the host rebuilt its tools.
+        self.child_generation = self.catalog_generation = 0
+        self.catalog_pending = {}
+        self.catalog_last_complete = None
+        self.catalog_chain = None
+        self.catalog_requests = self.catalog_responses = self.catalog_errors = 0
+        self.catalog_notifications = 0
+        self.catalog_state = 'HOST_CATALOG_NOT_REQUESTED'
+        self.catalog_current = None
+
+    def new_catalog_generation(self):
+        self.catalog_generation += 1
+        self.catalog_chain = self.catalog_current = None
+        self.catalog_requests = self.catalog_responses = self.catalog_errors = 0
+        self.catalog_notifications = 0
+        self.catalog_state = ('HOST_CATALOG_NOT_REQUESTED' if self.catalog_generation == 1
+                              else 'HOST_CATALOG_NOT_RELISTED')
+
+    @staticmethod
+    def catalog_digest(value):
+        return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'),
+                                         allow_nan=False).encode()).hexdigest()
+
+    def catalog_request_sent(self, message):
+        if message.get('method') != 'tools/list' or 'id' not in message:
+            return
+        params = message.get('params', {})
+        valid = isinstance(params, dict) and (params.get('cursor') is None or
+                                               type(params.get('cursor')) is str)
+        cursor = params.get('cursor') if valid else None
+        cursor_digest = self.catalog_digest(cursor) if cursor is not None else None
+        chain = ({'pages': [], 'expected': None, 'seen': set()} if cursor is None else
+                 self.catalog_chain if self.catalog_chain is not None and
+                 self.catalog_chain['expected'] == cursor_digest else None)
+        self.catalog_pending[identifier(message['id'])] = {
+            'generation': self.catalog_generation, 'valid': valid,
+            'cursor': cursor_digest, 'chain': chain}
+        self.catalog_requests = min(self.catalog_requests + 1, CATALOG_COUNTER_LIMIT)
+        self.catalog_current = None
+        self.catalog_state = 'HOST_CATALOG_REQUEST_PENDING'
+
+    def catalog_response_sent(self, message):
+        request = self.catalog_pending.pop(identifier(message['id']), None)
+        if request is None or request['generation'] != self.catalog_generation:
+            return  # An old in-flight reply cannot certify a new catalog.
+        self.catalog_responses = min(self.catalog_responses + 1, CATALOG_COUNTER_LIMIT)
+        self.catalog_current = None
+        if 'error' in message:
+            self.catalog_errors = min(self.catalog_errors + 1, CATALOG_COUNTER_LIMIT)
+            self.catalog_chain = None
+            self.catalog_state = 'HOST_CATALOG_ERROR_SENT'
+            return
+        value = message.get('result')
+        if (not request['valid'] or not isinstance(value, dict) or
+                not isinstance(value.get('tools'), list) or
+                not all(isinstance(tool, dict) and type(tool.get('name')) is str and
+                        isinstance(tool.get('inputSchema'), dict) for tool in value['tools']) or
+                (value.get('nextCursor') is not None and type(value['nextCursor']) is not str)):
+            self.catalog_chain = None
+            self.catalog_state = 'HOST_CATALOG_INVALID_RESPONSE'
+            return
+        cursor = request['cursor']
+        if cursor is None:
+            chain = request['chain']
+        elif (self.catalog_chain is not None and request['chain'] is self.catalog_chain and
+              self.catalog_chain['expected'] == cursor):
+            chain = self.catalog_chain
+        else:
+            self.catalog_chain = None
+            self.catalog_state = 'HOST_CATALOG_UNVERIFIED_PAGE'
+            return
+        if len(chain['pages']) >= CATALOG_PAGE_LIMIT:
+            self.catalog_chain = None
+            self.catalog_state = 'HOST_CATALOG_INVALID_RESPONSE'
+            return
+        chain['pages'].append(self.catalog_digest(value))
+        if value.get('nextCursor') is not None:
+            following = self.catalog_digest(value['nextCursor'])
+            if following == cursor or following in chain['seen']:
+                self.catalog_chain = None
+                self.catalog_state = 'HOST_CATALOG_INVALID_RESPONSE'
+                return
+            chain['seen'].add(following)
+            chain['expected'] = following
+            self.catalog_chain = chain
+            self.catalog_state = 'HOST_CATALOG_PARTIAL_RESPONSE'
+            return
+        self.catalog_current = {'generation': self.catalog_generation,
+                                'sha256': self.catalog_digest(chain['pages']),
+                                'pages': len(chain['pages'])}
+        self.catalog_last_complete = dict(self.catalog_current)
+        self.catalog_chain = None
+        self.catalog_state = 'HOST_CATALOG_RESPONSE_SENT'
+
+    def catalog_status(self):
+        current, previous = self.catalog_current or {}, self.catalog_last_complete or {}
+        return {'schema': 'golem.host-tool-catalog-observation.v1',
+                'child_generation': self.child_generation, 'catalog_generation': self.catalog_generation,
+                'state': self.catalog_state, 'requests': self.catalog_requests,
+                'responses': self.catalog_responses, 'errors': self.catalog_errors,
+                'list_changed_notifications_sent': self.catalog_notifications,
+                'last_complete_generation': previous.get('generation'),
+                'last_complete_sha256': previous.get('sha256'), 'last_complete_pages': previous.get('pages'),
+                'current_complete_sha256': current.get('sha256'), 'current_complete_pages': current.get('pages'),
+                'model_delivery_verified': False}
 
     def approved(self, state):
         with self.adapter.locked(state) as private:
@@ -185,6 +293,8 @@ class Relay:
                                  stdout=subprocess.PIPE, stderr=None, bufsize=0, env=environment,
                                  close_fds=True)
         self.child = child
+        self.child_generation += 1
+        self.new_catalog_generation()
         os.set_blocking(child.stdout.fileno(), False)
         os.set_blocking(child.stdin.fileno(), False)
         self.child_buffer.clear()
@@ -253,6 +363,7 @@ class Relay:
             require(key in self.server_pending, 'UNEXPECTED_CLIENT_RESPONSE')
             self.server_pending.remove(key)
         self.send_child(message)
+        self.catalog_request_sent(message)
 
     def child_message(self, message):
         if self.state == 'UNKNOWN':
@@ -279,7 +390,14 @@ class Relay:
                 self.initial_result = result
                 # The relay, not the child, supplies this notification capability.
                 message = self.relay_initialize_result(message)
+        catalog_changed = message.get('method') == 'notifications/tools/list_changed'
+        if catalog_changed:
+            self.new_catalog_generation()
         self.send_client(message)
+        if catalog_changed:
+            self.catalog_notifications = min(self.catalog_notifications + 1, CATALOG_COUNTER_LIMIT)
+        elif 'method' not in message:
+            self.catalog_response_sent(message)
 
     @staticmethod
     def relay_initialize_result(message):
@@ -298,6 +416,7 @@ class Relay:
                     approval_sha256=self.approval_pin, selected_state=str(self.current_state),
                     child_pid=self.child.pid if self.child else None,
                     plugin_version=self.adapter.ADAPTER_VERSION, failure=self.failure,
+                    host_catalog=self.catalog_status(),
                     execution_authorized=False, model_tools_delivery_verified=False,
                     work_idle_verified=False, native_leases_observed=False,
                     shutdown_mode='STDIN_EOF_WAIT_ONLY',
@@ -440,6 +559,7 @@ class Relay:
             self.pin, self.approval_pin = pin, approval_pin
             self.state = 'READY'
             self.send_client({'jsonrpc': '2.0', 'method': 'notifications/tools/list_changed'})
+            self.catalog_notifications = min(self.catalog_notifications + 1, CATALOG_COUNTER_LIMIT)
             return {**self.status(), 'refresh_result': 'CHILD_REINITIALIZED',
                     'model_tools_delivery_verified': False}
         except Exception:

@@ -2591,7 +2591,7 @@
       "task"
     ],
     "owner_backlog_count": 83,
-    "checked_functions": 243,
+    "checked_functions": 252,
     "blockers": [],
     "owner_backlog_discharged": false,
     "actual_installation": "NOT_RUN",
@@ -5304,7 +5304,7 @@
   },
   "reviewed_effects": {
     "blockers": [],
-    "reviewed_capabilities": 1200,
+    "reviewed_capabilities": 1201,
     "execution_verified": false
   },
   "boundary_contracts": {

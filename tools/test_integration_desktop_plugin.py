@@ -54,7 +54,7 @@ class DesktopPackaging(unittest.TestCase):
                 self.assertEqual(archive.read(name), (package.PACKAGE / name).read_bytes())
                 self.assertEqual(archive.getinfo(name).external_attr >> 16, 0o100644)
             manifest = json.loads(archive.read('manifest.json'))
-        self.assertEqual((manifest['name'], manifest['version']), ('golem-prepare', '0.2.9'))
+        self.assertEqual((manifest['name'], manifest['version']), ('golem-prepare', '0.2.10'))
         self.assertEqual(manifest['author'], {'name': 'Golem contributors'})
         self.assertEqual(manifest['license'], 'PolyForm-Noncommercial-1.0.0')
         self.assertEqual(manifest['server']['entry_point'], 'scripts/launcher.py')

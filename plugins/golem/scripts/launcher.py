@@ -13,7 +13,7 @@ LIMIT = 256 * 1024
 SCHEMA = 'golem.codex-launcher.v1'
 CLIENTS = ('codex', 'claude-code', 'portable', 'claude-desktop')
 # Display provenance only. These values never enter an authorization decision.
-ADAPTER_VERSION = '0.2.9'
+ADAPTER_VERSION = '0.2.10'
 
 
 def client_schema(client):
@@ -165,16 +165,40 @@ def status(state, client='codex'):
     return {'state': 'CONFIGURED', 'launcher_sha256': pin, 'project_access_verified': False}
 
 
-def run_relay(state):
+def relay_module():
     # -I omits script directories. Only the adjacent distributed module is used.
     require(sys.version_info >= (3,11), 'CODEX_PYTHON_311_REQUIRED')
     import importlib.util
-    import types
     path = canonical(Path(__file__).parent/'connection_relay.py')
     spec = importlib.util.spec_from_file_location('golem_connection_relay',path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    module.serve(types.SimpleNamespace(**globals()),state)
+    return module
+
+
+def run_relay(state):
+    import types
+    relay_module().serve(types.SimpleNamespace(**globals()),state)
+
+
+def connection_status(state, instance, client='codex'):
+    """One explicit relay observation; no discovery, refresh or Work request."""
+    require(client == 'codex', 'CODEX_CONNECTION_ONLY')
+    import re
+    require(type(instance) is str and re.fullmatch('[0-9a-f]{32}', instance),
+            'EXACT_CONNECTION_INSTANCE_REQUIRED')
+    configured = status(state, client)
+    response = relay_module().request(instance, 'status', {})
+    require(response.get('ok') is True and type(response.get('value')) is dict,
+            'CONNECTION_STATUS_UNAVAILABLE')
+    observed = response['value']
+    current = (observed.get('selected_state') == str(canonical(state)) and
+               observed.get('launcher_sha256') == configured['launcher_sha256'] and
+               observed.get('plugin_version') == ADAPTER_VERSION)
+    return {'state': 'SELECTED_RELAY_OBSERVED' if current else 'OTHER_SELECTION_OR_VERSION',
+            'relay': observed, 'model_tools_delivery_verified': False,
+            'thread_identity_verified': False, 'work_calls': 0,
+            'automatic_retry_allowed': False}
 
 
 def serve(state, client='codex'):
@@ -191,12 +215,13 @@ def serve(state, client='codex'):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=('configure', 'status', 'serve'))
+    parser.add_argument('operation', choices=('configure', 'status', 'connection-status', 'serve'))
     parser.add_argument('--client', choices=CLIENTS, default='codex')
     parser.add_argument('--state', type=Path)
     parser.add_argument('--launcher', type=Path)
     parser.add_argument('--reviewed-launcher-sha256')
     parser.add_argument('--approve-launcher', action='store_true')
+    parser.add_argument('--connection-instance')
     args = parser.parse_args()
     try:
         state = args.state or default_state(args.client)
@@ -208,6 +233,8 @@ def main():
                                args.approve_launcher, args.client)
         elif args.operation == 'status':
             result = status(state, args.client)
+        elif args.operation == 'connection-status':
+            result = connection_status(state, args.connection_instance, args.client)
         else:
             serve(state, args.client)
             return
