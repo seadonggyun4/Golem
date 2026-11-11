@@ -306,6 +306,16 @@ class Records(unittest.TestCase):
 
 
 class Coverage(unittest.TestCase):
+    # Owner-only connection control does not run a product command. Fixed ps/
+    # lsof metadata and the official proxy cannot use execution_record's child
+    # completion wrapper; relay spawn owns an already approved stdio service.
+    # Exact call counts and adversarial connection fixtures bound this exception.
+    CONNECTION_PROTOCOLS = {
+        ('tools/integration_client_connection.py','reader'):1,
+        ('tools/integration_codex_control.py','_metadata'):1,
+        ('tools/integration_codex_control.py','__init__'):1,
+        ('plugins/golem/scripts/connection_relay.py','spawn'):1,
+    }
     # D01 read-only identity probes cannot create observation files. Native
     # mutations use pinned FD protocols and immutable owner intents/receipts;
     # capture()/run() support neither input nor pass_fds. Keep this exception
@@ -337,8 +347,10 @@ class Coverage(unittest.TestCase):
                    # command/output-limit tests live in test_capability_files.
                    ("tools/capability_files.py", "_git_query")}
         allowed.update(self.D01_PROTOCOLS)
+        allowed.update(self.CONNECTION_PROTOCOLS)
         found = set()
-        paths = list((root / "tools").glob("*.py")) + [root / "bench/benchmark.py"]
+        paths = list((root / "tools").glob("*.py")) + [root / "bench/benchmark.py",
+            root/'plugins/golem/scripts/connection_relay.py']
         for path in paths:
             if path.name.startswith("test_") or not path.exists():
                 continue
@@ -353,6 +365,23 @@ class Coverage(unittest.TestCase):
                         parent = parents[parent]
                     found.add((path.relative_to(root).as_posix(), getattr(parent, "name", "<module>")))
         self.assertFalse(found - allowed, "Unreviewed execution bypass: " + str(found - allowed))
+
+    def test_connection_protocol_exceptions_remain_bounded(self):
+        root=Path(record.__file__).resolve().parents[1]
+        counts=dict.fromkeys(self.CONNECTION_PROTOCOLS,0)
+        for filename in {p for p,_ in counts}:
+            tree=ast.parse((root/filename).read_text())
+            parents={child:node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+            for node in ast.walk(tree):
+                if (isinstance(node,ast.Call) and isinstance(node.func,ast.Attribute) and
+                    isinstance(node.func.value,ast.Name) and node.func.value.id=='subprocess' and
+                    node.func.attr in {'run','Popen','check_call','check_output','call'}):
+                    parent=node
+                    while parent in parents and not isinstance(parent,ast.FunctionDef):parent=parents[parent]
+                    key=(filename,getattr(parent,'name','<module>'))
+                    self.assertIn(key,counts)
+                    counts[key]+=1
+        self.assertEqual(counts,self.CONNECTION_PROTOCOLS)
 
     def test_d01_protocol_exceptions_remain_bounded(self):
         root = Path(record.__file__).resolve().parents[1]

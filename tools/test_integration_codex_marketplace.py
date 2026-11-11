@@ -36,16 +36,18 @@ class Adapter(unittest.TestCase):
         return adapter.configure(self.state, self.source, self.pin, True)
 
     def test_real_exec_preserves_stdio_and_exact_args(self):
-        self.assertTrue(self.configure()['changed'])
-        self.assertFalse(self.configure()['changed'])
+        # Non-relay clients preserve arbitrary bytes. Codex's real JSON-RPC
+        # transport is covered by the installed-manifest and relay fixtures.
+        self.assertTrue(adapter.configure(self.state,self.source,self.pin,True,'portable')['changed'])
+        self.assertFalse(adapter.configure(self.state,self.source,self.pin,True,'portable')['changed'])
         data = b'protocol input\n\x00\xff'
         result = subprocess.run([sys.executable, '-I', '-B', str(SCRIPT), 'serve',
-            '--state', str(self.state)], env=os.environ, input=data,
+            '--state', str(self.state),'--client','portable'], env=os.environ, input=data,
             capture_output=True, timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, data)
         self.assertEqual(result.stderr, b'')
-        self.assertFalse(adapter.status(self.state)['project_access_verified'])
+        self.assertFalse(adapter.status(self.state,'portable')['project_access_verified'])
 
     def test_approval_digest_and_schema_fail_before_writes(self):
         for pin, approved in ((self.pin, False), ('0' * 64, True)):
@@ -75,7 +77,7 @@ class Adapter(unittest.TestCase):
         self.configure()
         pending = self.state / 'golem-launcher/approval.pending'
         pending.write_bytes(b'partial')
-        with patch.object(adapter.os, 'execv') as execute:
+        with patch.object(adapter,'run_relay') as execute:
             with self.assertRaisesRegex(adapter.SetupError, 'PARTIAL_PUBLICATION'):
                 adapter.serve(self.state)
             execute.assert_not_called()
@@ -109,7 +111,7 @@ class Adapter(unittest.TestCase):
         path = self.state / 'golem-launcher/owner.lock'
         with path.open('r+b') as stream:
             fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            with patch.object(adapter.os, 'execv') as execute:
+            with patch.object(adapter,'run_relay') as execute:
                 with self.assertRaises(BlockingIOError):
                     adapter.serve(self.state)
                 execute.assert_not_called()
@@ -120,7 +122,7 @@ class Adapter(unittest.TestCase):
         value = json.loads(path.read_text())
         value['launcher'] = json.dumps({'command': '/bin/false', 'args': []})
         path.write_text(json.dumps(value))
-        with patch.object(adapter.os, 'execv') as execute:
+        with patch.object(adapter,'run_relay') as execute:
             with self.assertRaisesRegex(adapter.SetupError, 'APPROVAL_DIGEST'):
                 adapter.serve(self.state)
             execute.assert_not_called()

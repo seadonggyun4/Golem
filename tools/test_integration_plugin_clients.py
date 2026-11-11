@@ -4,6 +4,8 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
+import select
 from pathlib import Path
 import shutil
 import subprocess
@@ -23,11 +25,11 @@ spec.loader.exec_module(adapter)
 
 class ClientPackaging(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory()
+        self.temp = tempfile.TemporaryDirectory(dir='/private/tmp' if Path('/private/tmp').is_dir() else None)
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name).resolve()
-        self.home = self.root / 'home'
-        self.home.mkdir(mode=0o700)
+        # Keep fixture AF_UNIX paths below Darwin's 104-byte sun_path bound.
+        self.home = self.root
         self.source = self.root / 'launcher.json'
         self.selected = {'command': sys.executable, 'args': ['-I', '-B', '-c',
             'import sys;sys.stdout.buffer.write(sys.stdin.buffer.read())']}
@@ -49,7 +51,7 @@ class ClientPackaging(unittest.TestCase):
         manifests = [json.loads((PACKAGE / path).read_text()) for path in
                      ('.codex-plugin/plugin.json', '.claude-plugin/plugin.json', 'plugin.json')]
         for manifest in manifests:
-            self.assertEqual((manifest['name'], manifest['version']), ('golem', '0.2.8'))
+            self.assertEqual((manifest['name'], manifest['version']), ('golem', '0.2.9'))
             self.assertEqual(manifest['license'], 'PolyForm-Noncommercial-1.0.0')
         for manifest in manifests[:2]:
             self.assertTrue((PACKAGE / manifest['skills']).is_dir())
@@ -90,7 +92,7 @@ class ClientPackaging(unittest.TestCase):
                 stderr = io.StringIO()
                 with patch.object(adapter.Path, 'home', return_value=self.home), \
                      patch.object(sys, 'argv', [str(SCRIPT), 'serve', '--client', client]), \
-                     patch.object(adapter.os, 'execv') as execute, \
+                     patch.object(adapter.os, 'execve') as execute, \
                      contextlib.redirect_stderr(stderr), self.assertRaises(SystemExit):
                     adapter.main()
                 execute.assert_not_called()
@@ -105,7 +107,7 @@ class ClientPackaging(unittest.TestCase):
         before = record.read_bytes()
         self.assertEqual(json.loads(before)['schema'], 'golem.codex-launcher.v1')
         for client in ('claude-code', 'portable', 'claude-desktop'):
-            with self.subTest(client=client), patch.object(adapter.os, 'execv') as execute:
+            with self.subTest(client=client), patch.object(adapter.os, 'execve') as execute:
                 with self.assertRaises(OSError):
                     adapter.serve(self.states()[client], client)
                 with self.assertRaisesRegex(adapter.SetupError, 'APPROVAL_FIELDS'):
@@ -126,16 +128,27 @@ class ClientPackaging(unittest.TestCase):
             state, configured = self.configure(client)
             self.assertTrue(configured['changed'])
             before = (state / 'golem-launcher/approval.json').read_bytes()
-            with patch.object(adapter.os, 'execv') as execute:
+            with patch.object(adapter.os, 'execve') as execute, patch.object(adapter,'run_relay') as relay:
                 adapter.serve(state, client)
-                execute.assert_called_once_with(self.selected['command'],
-                    [self.selected['command'], *self.selected['args']])
+                if client == 'codex':
+                    execute.assert_not_called()
+                    relay.assert_called_once_with(state)
+                else:
+                    relay.assert_not_called()
+                    execute.assert_called_once()
+                    command, argv, environment = execute.call_args.args
+                    self.assertEqual((command, argv), (self.selected['command'], [self.selected['command'], *self.selected['args']]))
+                    self.assertEqual(environment['GOLEM_LAUNCHER_SHA256'], self.pin)
+                    self.assertEqual(environment['GOLEM_LAUNCHER_CLIENT'], client)
+                    self.assertEqual(environment['GOLEM_LAUNCHER_STATE'], str(state))
+                    self.assertEqual(environment['GOLEM_LAUNCHER_PLUGIN_VERSION'], '0.2.9')
             self.assertEqual((state / 'golem-launcher/approval.json').read_bytes(), before)
 
     def test_real_manifest_commands_resolve_installed_root_and_preserve_stdio(self):
         installed = self.root / 'Plugin path with spaces'
         (installed / 'scripts').mkdir(parents=True)
         shutil.copyfile(SCRIPT, installed / 'scripts/launcher.py')
+        shutil.copyfile(PACKAGE/'scripts/connection_relay.py',installed/'scripts/connection_relay.py')
         outside = self.root / 'unrelated-project'
         outside.mkdir()
         declarations = {
@@ -145,10 +158,43 @@ class ClientPackaging(unittest.TestCase):
         }
         for client, declaration in declarations.items():
             with self.subTest(client=client):
+                if client == 'codex':
+                    original = self.raw, self.pin
+                    child = ('import json,sys\nfor line in sys.stdin:\n'
+                        ' m=json.loads(line)\n'
+                        ' if "id" in m:\n'
+                        '  r={"protocolVersion":"2025-03-26","capabilities":{"tools":{}},"serverInfo":{"name":"fixture","version":"1"}} if m["method"]=="initialize" else {"tools":[]}\n'
+                        '  print(json.dumps({"jsonrpc":"2.0","id":m["id"],"result":r}),flush=True)\n')
+                    self.raw=json.dumps({'command':sys.executable,'args':['-I','-B','-c',child]}).encode()
+                    self.pin=hashlib.sha256(self.raw).hexdigest();self.source.write_bytes(self.raw)
                 state, _ = self.configure(client)
                 args = [arg.replace('${CLAUDE_PLUGIN_ROOT}', str(installed))
                         for arg in declaration['args']]
                 cwd = installed / declaration['cwd'] if 'cwd' in declaration else outside
+                if client == 'codex':
+                    process=subprocess.Popen([sys.executable,*args,'--state',str(state)],cwd=cwd,
+                        stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+                        env={**os.environ,'HOME':str(self.home)})
+                    try:
+                        def response_line():
+                            self.assertTrue(select.select([process.stdout],[],[],10)[0],'fixture response deadline')
+                            line=process.stdout.readline()
+                            self.assertTrue(line,process.stderr.read().decode() if process.poll() is not None else 'fixture transport closed')
+                            return line
+                        process.stdin.write(b'{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}\n');process.stdin.flush()
+                        response=json.loads(response_line())
+                        self.assertTrue(response['result']['capabilities']['tools']['listChanged'])
+                        process.stdin.write(b'{"jsonrpc":"2.0","method":"notifications/initialized"}\n{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n');process.stdin.flush()
+                        response=json.loads(response_line())
+                        self.assertEqual(response['result'],{'tools':[]})
+                        remaining,stderr=process.communicate(timeout=10)
+                        self.assertEqual((process.returncode,remaining,stderr),(0,b'',b''))
+                    finally:
+                        if process.stdin and not process.stdin.closed:process.stdin.close()
+                        process.wait(timeout=10)
+                        process.stdout.close();process.stderr.close()
+                        self.raw,self.pin=original;self.source.write_bytes(self.raw)
+                    continue
                 data = f'fixture-only:{client}\n'.encode() + b'\x00\xff'
                 result = subprocess.run([sys.executable, *args, '--state', str(state)],
                     cwd=cwd, input=data, capture_output=True, timeout=10)

@@ -37,3 +37,13 @@ The catalog pins the installation adapter, skills and Desktop archive. The selec
 기존 Golem 저장소 카탈로그는 신규 배포 항목 없는 호환 표식입니다. Owner 전용 private marketplace 생성기는 유지보수·격리 검증에만 사용합니다. Styxis 등록은 공개된 정확한 commit의 전체 plugin inventory를 검사한 뒤 진행하며 미게시 변경을 과거 SHA에 붙이지 않습니다.
 
 공개 Desktop 패키지 생성은 `python3 tools/integration_desktop_plugin.py --output /absolute/new/golem.mcpb`로 수행합니다. 생성은 설치·state 설정·승인·Work 실행을 하지 않습니다.
+
+## Updates / 갱신
+
+Codex의 선택 state와 실제 활성 서비스가 다르면 Owner 앱의 **Codex 연결·갱신**에서
+확인한다. [Golem 연결 갱신](integration-connection-renewal.md)은 이미 검토한 state만
+선택하며, 최초 adapter 교체와 실제 모델 도구 전달 검증을 대신하지 않는다.
+
+Update the public adapter through Styxis, then compare the resolved client command, selected state and running launcher. An absolute path to an older installed adapter must be updated through the client's supported configuration path; refreshing the catalog alone does not change that path.
+
+Owner 앱은 별도 검토한 UI 파일·실행 경로를 사용합니다. UI만 갱신할 때는 해당 파일 inventory와 SHA를 대조하고, 기존 MCP runtime·native·정책·승인 state를 유지합니다. 앱의 연결 표시는 관측 결과이며 권한이나 최신 Work 상태를 인증하지 않습니다. Codex 갱신은 Claude 설치·state를 변경하는 동의가 아닙니다.

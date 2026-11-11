@@ -431,7 +431,7 @@
     },
     {
       "path": "plugins/golem/.codex-plugin/plugin.json",
-      "sha256": "ed1433ed92326d864a00fb2449c22e8032dc16f9f54790a3472f12504c9db83a"
+      "sha256": "953a59ede46daa384bf254a150d4951cf5eb7224bf88b54f54e4804b8eaa3b02"
     },
     {
       "path": "plugins/golem/.mcp.json",
@@ -439,11 +439,11 @@
     },
     {
       "path": "plugins/golem/scripts/launcher.py",
-      "sha256": "f35f52225e2aea1fc1090610b5dc9fc1906838d01df18dcc25a527de28104ccf"
+      "sha256": "25d30125332c9c9a5880de601ef1be2d52c623f63219186d6b046c5cbe2108fe"
     },
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
-      "sha256": "8a2aab5e00223dca128808204950293001548d87022e4cfe7567f91cc20fe5a7"
+      "sha256": "072df943fd8dbe8c67686ea3ef202955003d4ca457d1c0e4d398d0bd6ea8ae3e"
     },
     {
       "path": "pyproject.toml",
@@ -2175,7 +2175,7 @@
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "639d7cb2af42837d26893734d740e62ad46f58e04eda1e76043b6f12d34dab96"
+      "sha256": "24c62d96b95a56212f0104510429526224791e7cc786732f5b278fcfbbe4e597"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -2219,11 +2219,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "4a3950234c45b5303150854af9a71cd2bc2998f50f56270dda9123dd07785a99"
+      "sha256": "ee97bff6c48bc9d1c13720c93a7ca43d891ac4ec57689ee604e5f6c336a59a59"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "ac849b33d63f74a3826fe3c604467f5afbe2cac15d79a044fd5435a0221599ba"
+      "sha256": "237f1153802799e45353aecc0c12352aadace40dd3dee62c4da84975a3396974"
     },
     {
       "path": "include/golem/workpack.h",
@@ -2467,11 +2467,11 @@
     },
     {
       "path": "plugins/golem/.claude-plugin/plugin.json",
-      "sha256": "d32a80be9984955f9c51e48dbc4736bde01537a0b56e02e08a906d9daeb9ec6c"
+      "sha256": "1dff309d9795cfc9e19bc38d1896ea7a05bd895acc51e9e9216311a9c845f42b"
     },
     {
       "path": "plugins/golem/plugin.json",
-      "sha256": "0b354acc6e0f3b1080c9b51e4de2e6c015940781b1ba159a46e04611f64733e8"
+      "sha256": "054823fd961c6b6e082896a61af7335b2376d1b3c632c74aa3c856e685030313"
     },
     {
       "path": "plugins/golem/mcp.json",
@@ -2479,11 +2479,11 @@
     },
     {
       "path": "docs/integration-styxis.md",
-      "sha256": "b0e1574fb44f04d9ca3cd1660adc031e38a0795b6e22e42ced52dce6fde62ae7"
+      "sha256": "b397e09978e49d8a419dc1a51c4544847d4da56aed9ce44c145c96697e985c87"
     },
     {
       "path": "tools/test_integration_plugin_clients.py",
-      "sha256": "206cdf636c15bd103fa2ede9160e002344fd220273fea2fedfa572b9ba3c18bd"
+      "sha256": "5e0d56c3a8e38328547e3633325a84d8d7b1789ba5f9bcb8c89c2064120c434a"
     },
     {
       "path": "tools/integration_desktop_plugin.py",
@@ -2491,11 +2491,11 @@
     },
     {
       "path": "tools/test_integration_desktop_plugin.py",
-      "sha256": "0eb8512d5c1a1d7128787135924068e750b00ab719c1350dd152ce06018a2ac4"
+      "sha256": "811bbd6176e3d68ea7554d9e77b37e4c8244bb9ab2a182d014f40027982afc94"
     },
     {
       "path": "tools/test_integration_codex_marketplace.py",
-      "sha256": "dd34bbd646aff46bfd111b11b0cc027aae37f9c594aa7a389f8dd3d40c596d86"
+      "sha256": "83f622c54d44363a5bc97c4d79bfc8afe0f6ab3911bfc251e622dc9328b69564"
     },
     {
       "path": "tools/test_integration_participation.py",
@@ -2544,6 +2544,50 @@
     {
       "path": "tools/test_intent_schema_golden.py",
       "sha256": "1ffe34cb5903d5a8f9d60b4fd04032f34b68ed91ef5db1b06e0dc3d08d3e2f6d"
+    },
+    {
+      "path": "tools/integration_codex_control.py",
+      "sha256": "42ee7ca70443b529b52982b2085371f65c9d024015c32a3ce13c19deb7286b0e"
+    },
+    {
+      "path": "tools/integration_client_connection.py",
+      "sha256": "1e4964daa0a5694df93c5f218076f23cb70fee0c28163946c4014d09202093eb"
+    },
+    {
+      "path": "tools/integration_connection_ui.py",
+      "sha256": "a5f5bf80296f2b8f456a63cb0f685890b1c13077713fdcdee8d24ad7ab12764d"
+    },
+    {
+      "path": "plugins/golem/scripts/connection_relay.py",
+      "sha256": "5f8c816f2421e75c26f7a2a9bc1dca02ec9a8a6d9562177a9a4b46544ee54c86"
+    },
+    {
+      "path": "tools/test_integration_codex_control.py",
+      "sha256": "29c4dc2c28f662fad1f388d1f8c21dd169c1425a77b22d3ba80734bdbfe4abe2"
+    },
+    {
+      "path": "tools/test_integration_client_connection.py",
+      "sha256": "3c2d6f8f4d17b14624cdae66d603a15fa54d4de27dfcb56275f7fe1a4da1be6e"
+    },
+    {
+      "path": "tools/test_integration_connection_ui.py",
+      "sha256": "fd90739897b4b92a9da3ffe8637e8e9ec2d4d4c904e412f009ddd41350144235"
+    },
+    {
+      "path": "tools/test_integration_connection_relay.py",
+      "sha256": "ab80f48c4168fc41f831af8039f6fa5d922e65e072bd61f828b4ec60006317f6"
+    },
+    {
+      "path": "docs/integration-codex-plugin.md",
+      "sha256": "31dd30d4533105875652cee59f7d6bb8af577f05fe4f73e65deafad8420d0a66"
+    },
+    {
+      "path": "docs/integration-connection-renewal.md",
+      "sha256": "244d7575ee7f5d230653de2ba9b1618f6bc59295e60e6e233fc62cdc5d63ee93"
+    },
+    {
+      "path": "tools/test_execution_record.py",
+      "sha256": "38cc4351e8d11582e46ab3174ddfa1d6c6e3b7f5c153a336960665b7fab2af2c"
     }
   ],
   "observations": [
@@ -19374,6 +19418,139 @@
       "source_path": "tools/integration_contract.py",
       "entrypoint": "validation_diagnostic",
       "selector": null
+    },
+    {
+      "id": "obs-cec0e98dfb09646b314279fa7c313e7b06450beb0093750b7a7d2a76dcf92880",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_codex_control.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-3dfda414270d79e8d3ea7390f79fd8bdfae245306dffdfd5a142468f3b593c30",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_codex_control.py",
+      "entrypoint": "CodexControl.inspect",
+      "selector": null
+    },
+    {
+      "id": "obs-6c2541a0341b5bfc01e77fd42b4a9b8054d7857c7146d0c79cafc7645f763c0c",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_codex_control.py",
+      "entrypoint": "CodexControl.reload",
+      "selector": null
+    },
+    {
+      "id": "obs-73c7013dc12d6c9b4475fdc716c57e372a39776a5d1fd11107e093ed8fd0a552",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_client_connection.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-c815aa826dc86ea032e8599da728b2761f8d55515a473abf0d6295cfbbab8f79",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_client_connection.py",
+      "entrypoint": "selected_connection",
+      "selector": null
+    },
+    {
+      "id": "obs-f0b422e860b1c537bb969ba417df8479af84d33272176310c75fcec26fd4e41a",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_client_connection.py",
+      "entrypoint": "live_status",
+      "selector": null
+    },
+    {
+      "id": "obs-0c4a230fd667f965b842c5dc663803999d0e040cec3e0a014e541df1cf967235",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_client_connection.py",
+      "entrypoint": "ConnectionMonitor.inspect",
+      "selector": null
+    },
+    {
+      "id": "obs-a5c275700f26818bedc6775ee3b5615ca6ab6c8492d85cae6393424afea52802",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_client_connection.py",
+      "entrypoint": "ConnectionMonitor.request_refresh",
+      "selector": null
+    },
+    {
+      "id": "obs-46e0c047c7db18fac2cfe221184e71a07d812d12244fbc0ac6899878c87026ba",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_connection_ui.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-102a2faea2bcb7e5691960a7e82da56cb7952713870ac8d6c56a3578c30c1768",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_connection_ui.py",
+      "entrypoint": "ConnectionPanel.inspect",
+      "selector": null
+    },
+    {
+      "id": "obs-0ab58d17b97bf49d85edb109285147b7aa3c78e23d4dee65b2a508b56c62f094",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_connection_ui.py",
+      "entrypoint": "ConnectionPanel.refresh",
+      "selector": null
+    },
+    {
+      "id": "obs-b6929eed83775a57589a206bc17e58d4894b0cf7a7cd8053aeed0bd1fe92e467",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-d530fcc5170e1d5170fee05642c1348982b0f197e7f8d4fc676d4b99861dfe43",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "descriptors",
+      "selector": null
+    },
+    {
+      "id": "obs-c5d5de794a0bfa899f2b462ae213faedc3f128e24075a43f2040b81aeb71302b",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "Relay.status",
+      "selector": null
+    },
+    {
+      "id": "obs-0c93a48a069a9aac20aaa574b6226b7e695ad2bb7fa619e8ba9565080b4762d4",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "Relay.refresh",
+      "selector": null
+    },
+    {
+      "id": "obs-eea3b23043701b7a863cb253fa198dd9863bc3c041bd61e89bff16de2cedd32a",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "Relay.run",
+      "selector": null
+    },
+    {
+      "id": "obs-5f9ac911fa9d78ea2566804793cf672138911ae384d6a0b1d6fd089f2022008b",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "request",
+      "selector": "status"
+    },
+    {
+      "id": "obs-d5beed36ae5f7f85d91ccc82297493a6fb15c3df1c342b1d06cf0d493fde8cf9",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "request",
+      "selector": "refresh"
+    },
+    {
+      "id": "obs-61093ed357bfa742ea8c279bf042de626c2904ab7c85c07b36fc24c175601f9c",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "tools/integration_owner_desktop.py",
+      "entrypoint": "ReviewEndpoint.handle",
+      "selector": "connection-status"
     }
   ],
   "capabilities": [
@@ -68744,7 +68921,9 @@
       "effects": [
         "NATIVE_READ",
         "NATIVE_WRITE",
-        "DISCLOSURE"
+        "DISCLOSURE",
+        "PROCESS",
+        "CLEANUP"
       ],
       "constraints": {
         "platforms": [
@@ -68753,7 +68932,7 @@
         "limits": [
           "Actual process/network/receiver/policy effects remain unverified at runtime"
         ],
-        "notes": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory."
+        "notes": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory. Codex-only owned-child relay adds local process/drain/control-endpoint effects; it does not grant downstream Work or network authority. Current host/model acceptance remains NOT_RUN."
       },
       "test_refs": [
         {
@@ -77550,7 +77729,7 @@
         "limits": [
           "Unix IPC only; 1MiB frames; 30s receive deadline; 1024 requests/endpoint; 128 descriptor catalog bound; service-instance 30 minute M2 lifetime; one export attempt per exact plan."
         ],
-        "notes": "POSIX only. Endpoint cleanup affects its own generated socket/descriptor, never Work/approval/evidence. Same-user code remains in trust boundary. Actual redesigned client activation/E2E NOT_RUN."
+        "notes": "POSIX only. Endpoint cleanup affects its own generated socket/descriptor, never Work/approval/evidence. Same-user code remains in trust boundary. Actual redesigned client activation/E2E NOT_RUN. Explicit connection panel distinguishes read-only observation, exact selected-child relay refresh and separately consented whole-host public control. Actual model delivery is not inferred."
       },
       "test_refs": [
         {
@@ -80230,6 +80409,1118 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Owner-only exact bootstrap contract; not MCP approval issuance or automatic QA. Native semantics reused; source review is not deployment qualification."
+    },
+    {
+      "id": "surface.tools.integration_codex_control.py.file-surface",
+      "observation_ids": [
+        "obs-cec0e98dfb09646b314279fa7c313e7b06450beb0093750b7a7d2a76dcf92880"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "PROCESS",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Optional official proxy to an existing, verified Desktop control socket. Local metadata inspection and separately confirmed host-wide configuration reload are distinct operations. No new app-server fallback, arbitrary RPC, thread/model creation, Work tool call or retry. A queue ACK does not establish current connection or model delivery."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_codex_control.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_codex_control.py.operation-1",
+      "observation_ids": [
+        "obs-3dfda414270d79e8d3ea7390f79fd8bdfae245306dffdfd5a142468f3b593c30"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "PROCESS",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Explicit already-loaded thread metadata only; without a selected supported private control socket return MANUAL, and without a thread do not start transient MCP discovery."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_codex_control.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_codex_control.py.operation-2",
+      "observation_ids": [
+        "obs-6c2541a0341b5bfc01e77fd42b4a9b8054d7857c7146d0c79cafc7645f763c0c"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Exact socket/PID/start/CLI identity plus explicit host-wide confirmation. Public API has no Golem-only selector. It can refresh other configured MCPs and inherit their existing process/network effects; it creates no new grant. ACK is REFRESH_QUEUED only; lost response or changed identity is REFRESH_UNKNOWN and never retried."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_codex_control.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_client_connection.py.file-surface",
+      "observation_ids": [
+        "obs-73c7013dc12d6c9b4475fdc716c57e372a39776a5d1fd11107e093ed8fd0a552"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "PROCESS",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Owner-local comparison of exact selected config/adapter/policy/runtime bytes with authenticated live Golem metadata and bounded Desktop process ancestry. Provenance environment values are not authority. Explicit observation, Golem relay refresh and optional host-wide reload are distinct; no Work call, policy application or model conversation."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_client_connection.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_client_connection.py.operation-1",
+      "observation_ids": [
+        "obs-c815aa826dc86ea032e8599da728b2761f8d55515a473abf0d6295cfbbab8f79"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Read exact current config and existing approved launcher state; parse literal launcher arguments without execution or approval creation."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_client_connection.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_client_connection.py.operation-2",
+      "observation_ids": [
+        "obs-f0b422e860b1c537bb969ba417df8479af84d33272176310c75fcec26fd4e41a"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Current same-service metadata and available tool names, not tools/call, D5 admission or proof of delivery to a model."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_client_connection.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_client_connection.py.operation-3",
+      "observation_ids": [
+        "obs-0c4a230fd667f965b842c5dc663803999d0e040cec3e0a014e541df1cf967235"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "PROCESS",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Explicit bounded disk/live observations only. Unknown/stale/partial rows cannot be promoted to current model delivery."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_client_connection.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_client_connection.py.operation-4",
+      "observation_ids": [
+        "obs-a5c275700f26818bedc6775ee3b5615ca6ab6c8492d85cae6393424afea52802"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Explicit reviewed refresh-token selection. Golem-only relay replacement and separately confirmed whole-host public reload retain distinct scopes. No automatic retry, fresh server fallback, force-kill, policy update or Work action."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_client_connection.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_connection_ui.py.file-surface",
+      "observation_ids": [
+        "obs-46e0c047c7db18fac2cfe221184e71a07d812d12244fbc0ac6899878c87026ba"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "PROCESS",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Explicit Owner-app presentation only. No Tk import or polling at headless MCP startup. Manual buttons and one background request render selected/live/host/model states separately, require scope confirmation before refresh, and never elevate queued or child-reinitialized replies to model success."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_ui.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_connection_ui.py.operation-1",
+      "observation_ids": [
+        "obs-102a2faea2bcb7e5691960a7e82da56cb7952713870ac8d6c56a3578c30c1768"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "PROCESS",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "User-requested metadata inspection; creates no model or Work call and no refresh."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_ui.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_connection_ui.py.operation-2",
+      "observation_ids": [
+        "obs-0ab58d17b97bf49d85edb109285147b7aa3c78e23d4dee65b2a508b56c62f094"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Explicit owner UI request through the reviewed controller and selected scope, not a grant or standalone native action. Real Desktop reload and model delivery remain independently unverified."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_ui.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.connection_relay.py.file-surface",
+      "observation_ids": [
+        "obs-b6929eed83775a57589a206bc17e58d4894b0cf7a7cd8053aeed0bd1fe92e467"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "PROCESS",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Public Codex-only stdio relay around the exact existing approved child. Owner-private local status/refresh IPC does not add an MCP tool or approval authority. Refresh checks old/new approval bytes and current config pin, blocks pending/partial traffic, waits for normal stdin EOF and exit 0, reinitializes once and emits tools/list_changed. This does not certify Work or native lease idle. UNKNOWN is terminal; no Work replay, automatic repair or force-kill. File-level effects name direct relay effects; operation rows additionally include inherited approved-child startup effects."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_relay.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.connection_relay.py.operation-1",
+      "observation_ids": [
+        "obs-d530fcc5170e1d5170fee05642c1348982b0f197e7f8d4fc676d4b99861dfe43"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Bounded private metadata listing excludes authentication tokens and does not connect or replace a child."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_relay.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.connection_relay.py.operation-2",
+      "observation_ids": [
+        "obs-c5d5de794a0bfa899f2b462ae213faedc3f128e24075a43f2040b81aeb71302b"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Read relay state, pending counts and exact selected child identifiers; neither execution permission nor model-delivery verification."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_relay.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.connection_relay.py.operation-3",
+      "observation_ids": [
+        "obs-0c93a48a069a9aac20aaa574b6226b7e695ad2bb7fa619e8ba9565080b4762d4"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Replace only this relay-owned already-approved child after exact config/approval selection, no pending protocol requests or partial frames, normal stdin EOF and exit 0. Work/native lease idle is NOT_OBSERVED. No Work request is replayed; the approved child startup may have existing audit/network/Git effects, governed by its separately selected authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_relay.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.connection_relay.py.operation-4",
+      "observation_ids": [
+        "obs-eea3b23043701b7a863cb253fa198dd9863bc3c041bd61e89bff16de2cedd32a"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Transport forwards client-originated requests to the selected approved child; downstream effects are existing policy-governed capabilities, not new grants. No automatic Owner window or Work redispatch."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_relay.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.connection_relay.py.operation-5",
+      "observation_ids": [
+        "obs-5f9ac911fa9d78ea2566804793cf672138911ae384d6a0b1d6fd089f2022008b"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Single explicit private IPC metadata request with kernel peer UID/PID, exact descriptor/socket and bounded framing."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_relay.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.connection_relay.py.operation-6",
+      "observation_ids": [
+        "obs-d5beed36ae5f7f85d91ccc82297493a6fb15c3df1c342b1d06cf0d493fde8cf9"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Single explicit private IPC replacement request and exact existing config/approval selection. No Work request replay; effects conservatively include inherited approved-child startup behavior. Native lease/Work idle is not certified. Lost response is uncertain; no retry or fallback."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_relay.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
+    },
+    {
+      "id": "surface.tools.integration_owner_desktop.py.connection-status",
+      "observation_ids": [
+        "obs-61093ed357bfa742ea8c279bf042de626c2904ab7c85c07b36fc24c175601f9c"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Explicit owner-local connection observation/refresh only. Existing adapter, D1/D2/D4, producer and native contracts remain mandatory; this inventory grants no authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Desktop control attestation currently macOS only",
+          "Python 3.11+ for tomllib-using monitor/relay; interpreter selection is not automatic"
+        ],
+        "limits": [
+          "Bounded exact-source static inventory; fixture evidence is not current client/host/model acceptance. Actual installation, reload and client E2E for these bytes remain NOT_RUN here."
+        ],
+        "notes": "Existing authenticated owner-private endpoint exposes current same-service connection metadata. It does not call a Work tool, admit a D5 participant, start a GUI or apply an action."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_client_connection.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_owner_desktop.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_execution_record.py",
+          "selector": "Coverage.test_connection_protocol_exceptions_remain_bounded"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-codex-plugin.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/mcp-m6-distribution.ko.md",
+          "anchor": null
+        },
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Reviewed concrete owner-local operation or internal transport boundary; not a new Core operation or MCP tool. Metadata read, host-wide reload and selected-child replacement have separate effects and limits."
     }
   ]
 }

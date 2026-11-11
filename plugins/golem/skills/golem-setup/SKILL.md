@@ -24,7 +24,9 @@ verify reload and calls separately.
    supported configuration tools (`codex mcp list --json` for Codex). Resolve the
    exact installed script; Claude Code expands `${CLAUDE_PLUGIN_ROOT}` and does
    not depend on the project working directory. Do not print unrelated settings.
-   The adapter needs Python 3 and a POSIX host. Run `status` first using the same
+   The adapter needs a POSIX host; Codex's connection relay needs Python 3.11+.
+   Verify the declared interpreter; never silently substitute another executable.
+   Run `status` first using the same
    `--client` value as the declaration: Codex defaults to `codex`, Claude Code
    uses `claude-code`, and the portable manifest uses `portable`. Their default
    states are respectively `~/.local/share/golem/codex-plugin`,
@@ -47,11 +49,18 @@ verify reload and calls separately.
    --reviewed-launcher-sha256 DIGEST --approve-launcher`. This records a reviewed
    local command, not project grants. The existing launcher still enforces its
    native/runtime/producer/policy pins. Never rewrite those pins to fix startup.
-4. Recheck `status` with the same client selector. Arrange a supported MCP reload
-   or new conversation if authorized; preserve ongoing client sessions. Inspect
+4. Recheck `status` with the same client selector. Owner's Codex connection panel
+   compares disk selection with live services. A running relay can refresh one
+   explicitly selected, idle transport to an already approved/configured state.
+   Old adapters need a supported initial reconnect; when unavailable, use the
+   exact normal host restart guidance. A new conversation alone is not a reload.
+   Preserve ongoing client sessions. Inspect
    actual tool exposure. Only if calls are authorized, call `golem_projects_list`
    and an explicitly granted Work; otherwise record calls as NOT_RUN. Confirm the
    returned tool scope rather than inferring it from the package.
+   `tools/list_changed` or a reload ACK is not proof of model tool delivery.
+   Transport idle is not proof that native leases or external work have ended.
+   Never retry uncertain refreshes, replay Work requests or kill an existing host.
 5. Report configuration, tool exposure and calls separately. `AVAILABLE` means
    delivery. Native completion may still require reconciliation. Context delivery
    grants no execution, takeover or automatic resume. Stop on quota, stale pins,

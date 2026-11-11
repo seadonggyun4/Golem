@@ -12,6 +12,8 @@ import sys
 LIMIT = 256 * 1024
 SCHEMA = 'golem.codex-launcher.v1'
 CLIENTS = ('codex', 'claude-code', 'portable', 'claude-desktop')
+# Display provenance only. These values never enter an authorization decision.
+ADAPTER_VERSION = '0.2.9'
 
 
 def client_schema(client):
@@ -163,10 +165,28 @@ def status(state, client='codex'):
     return {'state': 'CONFIGURED', 'launcher_sha256': pin, 'project_access_verified': False}
 
 
+def run_relay(state):
+    # -I omits script directories. Only the adjacent distributed module is used.
+    require(sys.version_info >= (3,11), 'CODEX_PYTHON_311_REQUIRED')
+    import importlib.util
+    import types
+    path = canonical(Path(__file__).parent/'connection_relay.py')
+    spec = importlib.util.spec_from_file_location('golem_connection_relay',path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.serve(types.SimpleNamespace(**globals()),state)
+
+
 def serve(state, client='codex'):
     with locked(state) as private:
-        launcher, _ = load(private, client)
-    os.execv(launcher['command'], [launcher['command'], *launcher['args']])
+        launcher, pin = load(private, client)
+    if client == 'codex':
+        return run_relay(state)
+    environment = dict(os.environ)
+    environment.update(GOLEM_LAUNCHER_SHA256=pin, GOLEM_LAUNCHER_CLIENT=client,
+                       GOLEM_LAUNCHER_STATE=str(state),
+                       GOLEM_LAUNCHER_PLUGIN_VERSION=ADAPTER_VERSION)
+    os.execve(launcher['command'], [launcher['command'], *launcher['args']], environment)
 
 
 def main():

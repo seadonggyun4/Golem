@@ -214,6 +214,23 @@ class LocalReview(unittest.TestCase):
             self.expect('OWNER_EXPORT_ALREADY_ATTEMPTED',lambda:other.export('again',self.root,confirmed=True))
         self.assertEqual(before,self.controller.owner.path.read_bytes());self.assertEqual(len(list(self.root.glob('owner-review-*'))),1)
 
+    def test_connection_metadata_has_kernel_peer_and_does_not_admit_or_call_Work(self):
+        import os
+        remote=self.endpoint();before_work=self.inventory()
+        participants=sorted(self.registry.root.glob('d5-client-*'))
+        with patch.object(self.api,'_read',side_effect=AssertionError('no Work read')), \
+             patch.object(self.controller.scoped,'call',side_effect=AssertionError('no MCP call')):
+            value=remote.connection_status()
+        self.assertEqual(value['pid'],os.getpid())
+        self.assertEqual(remote.last_peer_pid,os.getpid())
+        self.assertEqual(value['policy_sha256'],self.controller.owner.digest)
+        self.assertEqual(value['model_tool_delivery'],'NOT_OBSERVED')
+        self.assertFalse(value['execution_authorized'])
+        self.assertEqual(value['Work_calls'],0)
+        self.assertTrue(value['tools'])
+        self.assertEqual(participants,sorted(self.registry.root.glob('d5-client-*')))
+        self.assertEqual(before_work,self.inventory())
+
     def test_live_instance_scope_and_expiry_are_reused(self):
         remote=self.endpoint()
         with patch.object(self.api,'_read',self.observed):

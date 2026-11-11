@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "64dfb3541770e0aa6325501953955ff9ae2d9df6afa5501a4c3348e253974a64",
-  "selected_source_count": 636,
-  "selected_observation_count": 2404,
-  "selected_capability_count": 1270,
+  "inventory_sha256": "965baf030c18f33443f4086f2a794d91700e723cd263581519f3324a74946bff",
+  "selected_source_count": 647,
+  "selected_observation_count": 2423,
+  "selected_capability_count": 1289,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -175,6 +175,7 @@
       "plugins/golem/.mcp.json",
       "plugins/golem/mcp.json",
       "plugins/golem/plugin.json",
+      "plugins/golem/scripts/connection_relay.py",
       "plugins/golem/scripts/launcher.py",
       "plugins/golem/skills/golem-setup/SKILL.md",
       "plugins/golem/skills/golem-work/SKILL.md",
@@ -519,8 +520,11 @@
       "tools/instruction_bundle.py",
       "tools/integration_approval_host.c",
       "tools/integration_backend.py",
+      "tools/integration_client_connection.py",
+      "tools/integration_codex_control.py",
       "tools/integration_codex_plugin.py",
       "tools/integration_config.py",
+      "tools/integration_connection_ui.py",
       "tools/integration_contract.py",
       "tools/integration_desktop_plugin.py",
       "tools/integration_distribution.py",
@@ -663,6 +667,7 @@
       "plugins/golem/.mcp.json",
       "plugins/golem/mcp.json",
       "plugins/golem/plugin.json",
+      "plugins/golem/scripts/connection_relay.py",
       "plugins/golem/scripts/launcher.py",
       "plugins/golem/skills/golem-setup/SKILL.md",
       "plugins/golem/skills/golem-work/SKILL.md",
@@ -1007,8 +1012,11 @@
       "tools/instruction_bundle.py",
       "tools/integration_approval_host.c",
       "tools/integration_backend.py",
+      "tools/integration_client_connection.py",
+      "tools/integration_codex_control.py",
       "tools/integration_codex_plugin.py",
       "tools/integration_config.py",
+      "tools/integration_connection_ui.py",
       "tools/integration_contract.py",
       "tools/integration_desktop_plugin.py",
       "tools/integration_distribution.py",
@@ -4032,7 +4040,7 @@
     },
     {
       "path": "plugins/golem/.codex-plugin/plugin.json",
-      "sha256": "ed1433ed92326d864a00fb2449c22e8032dc16f9f54790a3472f12504c9db83a"
+      "sha256": "953a59ede46daa384bf254a150d4951cf5eb7224bf88b54f54e4804b8eaa3b02"
     },
     {
       "path": "plugins/golem/.mcp.json",
@@ -4040,11 +4048,11 @@
     },
     {
       "path": "plugins/golem/scripts/launcher.py",
-      "sha256": "f35f52225e2aea1fc1090610b5dc9fc1906838d01df18dcc25a527de28104ccf"
+      "sha256": "25d30125332c9c9a5880de601ef1be2d52c623f63219186d6b046c5cbe2108fe"
     },
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
-      "sha256": "8a2aab5e00223dca128808204950293001548d87022e4cfe7567f91cc20fe5a7"
+      "sha256": "072df943fd8dbe8c67686ea3ef202955003d4ca457d1c0e4d398d0bd6ea8ae3e"
     },
     {
       "path": "pyproject.toml",
@@ -5776,7 +5784,7 @@
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "639d7cb2af42837d26893734d740e62ad46f58e04eda1e76043b6f12d34dab96"
+      "sha256": "24c62d96b95a56212f0104510429526224791e7cc786732f5b278fcfbbe4e597"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -5820,11 +5828,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "4a3950234c45b5303150854af9a71cd2bc2998f50f56270dda9123dd07785a99"
+      "sha256": "ee97bff6c48bc9d1c13720c93a7ca43d891ac4ec57689ee604e5f6c336a59a59"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "ac849b33d63f74a3826fe3c604467f5afbe2cac15d79a044fd5435a0221599ba"
+      "sha256": "237f1153802799e45353aecc0c12352aadace40dd3dee62c4da84975a3396974"
     },
     {
       "path": "include/golem/workpack.h",
@@ -6068,11 +6076,11 @@
     },
     {
       "path": "plugins/golem/.claude-plugin/plugin.json",
-      "sha256": "d32a80be9984955f9c51e48dbc4736bde01537a0b56e02e08a906d9daeb9ec6c"
+      "sha256": "1dff309d9795cfc9e19bc38d1896ea7a05bd895acc51e9e9216311a9c845f42b"
     },
     {
       "path": "plugins/golem/plugin.json",
-      "sha256": "0b354acc6e0f3b1080c9b51e4de2e6c015940781b1ba159a46e04611f64733e8"
+      "sha256": "054823fd961c6b6e082896a61af7335b2376d1b3c632c74aa3c856e685030313"
     },
     {
       "path": "plugins/golem/mcp.json",
@@ -6080,11 +6088,11 @@
     },
     {
       "path": "docs/integration-styxis.md",
-      "sha256": "b0e1574fb44f04d9ca3cd1660adc031e38a0795b6e22e42ced52dce6fde62ae7"
+      "sha256": "b397e09978e49d8a419dc1a51c4544847d4da56aed9ce44c145c96697e985c87"
     },
     {
       "path": "tools/test_integration_plugin_clients.py",
-      "sha256": "206cdf636c15bd103fa2ede9160e002344fd220273fea2fedfa572b9ba3c18bd"
+      "sha256": "5e0d56c3a8e38328547e3633325a84d8d7b1789ba5f9bcb8c89c2064120c434a"
     },
     {
       "path": "tools/integration_desktop_plugin.py",
@@ -6092,11 +6100,11 @@
     },
     {
       "path": "tools/test_integration_desktop_plugin.py",
-      "sha256": "0eb8512d5c1a1d7128787135924068e750b00ab719c1350dd152ce06018a2ac4"
+      "sha256": "811bbd6176e3d68ea7554d9e77b37e4c8244bb9ab2a182d014f40027982afc94"
     },
     {
       "path": "tools/test_integration_codex_marketplace.py",
-      "sha256": "dd34bbd646aff46bfd111b11b0cc027aae37f9c594aa7a389f8dd3d40c596d86"
+      "sha256": "83f622c54d44363a5bc97c4d79bfc8afe0f6ab3911bfc251e622dc9328b69564"
     },
     {
       "path": "tools/test_integration_participation.py",
@@ -6145,6 +6153,50 @@
     {
       "path": "tools/test_intent_schema_golden.py",
       "sha256": "1ffe34cb5903d5a8f9d60b4fd04032f34b68ed91ef5db1b06e0dc3d08d3e2f6d"
+    },
+    {
+      "path": "tools/integration_codex_control.py",
+      "sha256": "42ee7ca70443b529b52982b2085371f65c9d024015c32a3ce13c19deb7286b0e"
+    },
+    {
+      "path": "tools/integration_client_connection.py",
+      "sha256": "1e4964daa0a5694df93c5f218076f23cb70fee0c28163946c4014d09202093eb"
+    },
+    {
+      "path": "tools/integration_connection_ui.py",
+      "sha256": "a5f5bf80296f2b8f456a63cb0f685890b1c13077713fdcdee8d24ad7ab12764d"
+    },
+    {
+      "path": "plugins/golem/scripts/connection_relay.py",
+      "sha256": "5f8c816f2421e75c26f7a2a9bc1dca02ec9a8a6d9562177a9a4b46544ee54c86"
+    },
+    {
+      "path": "tools/test_integration_codex_control.py",
+      "sha256": "29c4dc2c28f662fad1f388d1f8c21dd169c1425a77b22d3ba80734bdbfe4abe2"
+    },
+    {
+      "path": "tools/test_integration_client_connection.py",
+      "sha256": "3c2d6f8f4d17b14624cdae66d603a15fa54d4de27dfcb56275f7fe1a4da1be6e"
+    },
+    {
+      "path": "tools/test_integration_connection_ui.py",
+      "sha256": "fd90739897b4b92a9da3ffe8637e8e9ec2d4d4c904e412f009ddd41350144235"
+    },
+    {
+      "path": "tools/test_integration_connection_relay.py",
+      "sha256": "ab80f48c4168fc41f831af8039f6fa5d922e65e072bd61f828b4ec60006317f6"
+    },
+    {
+      "path": "docs/integration-codex-plugin.md",
+      "sha256": "31dd30d4533105875652cee59f7d6bb8af577f05fe4f73e65deafad8420d0a66"
+    },
+    {
+      "path": "docs/integration-connection-renewal.md",
+      "sha256": "244d7575ee7f5d230653de2ba9b1618f6bc59295e60e6e233fc62cdc5d63ee93"
+    },
+    {
+      "path": "tools/test_execution_record.py",
+      "sha256": "38cc4351e8d11582e46ab3174ddfa1d6c6e3b7f5c153a336960665b7fab2af2c"
     }
   ],
   "native_definitions": [
@@ -12322,7 +12374,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 137,
+      "checked_functions": 240,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -15024,14 +15076,18 @@
         "plugins/golem/mcp.json",
         "tools/integration_desktop_plugin.py",
         "tools/intent_bootstrap.py",
-        "tools/intent_bootstrap_host.inc"
+        "tools/intent_bootstrap_host.inc",
+        "tools/integration_codex_control.py",
+        "tools/integration_client_connection.py",
+        "tools/integration_connection_ui.py",
+        "plugins/golem/scripts/connection_relay.py"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1180,
+      "reviewed_capabilities": 1199,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -23222,7 +23278,7 @@
     {
       "path": "plugins/golem/scripts/launcher.py",
       "role": "PACKAGE_CONTRACT",
-      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory.",
+      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory. Codex-only relay keeps the client transport and selects only an already-approved child; other clients retain their existing exec path. GOLEM_LAUNCHER_* environment is display provenance, not authorization.",
       "symbols": [
         "SetupError",
         "canonical",
@@ -23238,6 +23294,7 @@
         "pairs",
         "read_private",
         "require",
+        "run_relay",
         "serve",
         "status",
         "sync_directory",
@@ -54808,7 +54865,7 @@
     {
       "path": "tools/integration_owner_desktop.py",
       "role": "OWNER_LOCAL_DESKTOP",
-      "rationale": "Headless per-connection MCP with optional owner-private Unix IPC and separate singleton Owner app. Instance/TTL/native policy checks reused; catalog/inspect/unapplied candidate only; export replay fenced. No TCP, native action, approval issuance or policy activation. Same-user IPC is not human authentication.",
+      "rationale": "Headless per-connection MCP with optional owner-private Unix IPC and separate singleton Owner app. Instance/TTL/native policy checks reused; catalog/inspect/unapplied candidate only; export replay fenced. No TCP, native action, approval issuance or policy activation. Same-user IPC is not human authentication. Owner app connection panel separately observes exact selected/live metadata and explicitly requests an already-selected Golem relay refresh or confirmed host-wide public control; none is a Work action or policy approval.",
       "symbols": [
         "ConnectionBrowser",
         "ConnectionBrowser.__init__",
@@ -54840,6 +54897,7 @@
         "RemoteController",
         "RemoteController.__init__",
         "RemoteController.call",
+        "RemoteController.connection_status",
         "RemoteController.drafts",
         "RemoteController.export",
         "RemoteController.inspect",
@@ -54871,6 +54929,8 @@
       "declarations": [
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-owner')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-owner-review-ui')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--codex-config')], keywords=[keyword(arg='default', value=Call(func=Name(id='str', ctx=Load()), args=[BinOp(left=Call(func=Attribute(value=Name(id='Path', ctx=Load()), attr='home', ctx=Load())), op=Div(), right=Constant(value='.codex/config.toml'))]))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--codex-control-socket')], keywords=[keyword(arg='help', value=Constant(value='Explicit officially exposed Desktop control socket, if supported'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--policy')], keywords=[keyword(arg='required', value=Constant(value=True))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--profile')], keywords=[keyword(arg='choices', value=Tuple(elts=[Constant(value='prepare'), Constant(value='task'), Constant(value='quality'), Constant(value='parallel')], ctx=Load())), keyword(arg='default', value=Constant(value='prepare'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--review-directory')], keywords=[keyword(arg='help', value=Constant(value='Existing owner-private Unix IPC directory; explicit opt-in only'))])",
@@ -54886,6 +54946,10 @@
         [
           "Attribute(value=Name(id='path', ctx=Load()), attr='stem', ctx=Load())",
           "owner-app"
+        ],
+        [
+          "Attribute(value=Name(id='sys', ctx=Load()), attr='platform', ctx=Load())",
+          "darwin"
         ],
         [
           "Call(func=Attribute(value=Call(func=Attribute(value=Name(id='payload', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='entry_review'), Dict()]), attr='get', ctx=Load()), args=[Constant(value='tool')])",
@@ -54985,6 +55049,10 @@
         ],
         [
           "Name(id='operation', ctx=Load())",
+          "connection-status"
+        ],
+        [
+          "Name(id='operation', ctx=Load())",
           "export"
         ],
         [
@@ -55052,7 +55120,13 @@
           "DRAFT_ACTION"
         ]
       ],
-      "operations": []
+      "operations": [
+        [
+          "NATIVE_OPERATION",
+          "ReviewEndpoint.handle",
+          "connection-status"
+        ]
+      ]
     },
     {
       "path": "include/golem/workpack.h",
@@ -57903,6 +57977,577 @@
         ]
       ],
       "operations": []
+    },
+    {
+      "path": "tools/integration_codex_control.py",
+      "role": "OWNER_LOCAL_CODEX_CONTROL",
+      "rationale": "Optional official proxy to an existing, verified Desktop control socket. Local metadata inspection and separately confirmed host-wide configuration reload are distinct operations. No new app-server fallback, arbitrary RPC, thread/model creation, Work tool call or retry. A queue ACK does not establish current connection or model delivery.",
+      "symbols": [
+        "CodexControl",
+        "CodexControl.__init__",
+        "CodexControl._base",
+        "CodexControl._identity",
+        "CodexControl.inspect",
+        "CodexControl.reload",
+        "ControlError",
+        "_Proxy",
+        "_Proxy.__init__",
+        "_Proxy.call",
+        "_Proxy.close",
+        "_Proxy.initialize",
+        "_Proxy.send",
+        "_host_identity",
+        "_metadata",
+        "_process",
+        "_socket_stat"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Constant(value=' app-server')",
+          " app-server"
+        ],
+        [
+          "Constant(value='..')",
+          ".."
+        ],
+        [
+          "Constant(value='error')",
+          "error"
+        ],
+        [
+          "Constant(value='id')",
+          "id"
+        ],
+        [
+          "Constant(value='method')",
+          "method"
+        ],
+        [
+          "Constant(value='result')",
+          "result"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "config/mcpServer/reload"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "initialize"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "mcpServerStatus/list"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "thread/loaded/list"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "CodexControl.inspect",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "CodexControl.reload",
+          null
+        ]
+      ]
+    },
+    {
+      "path": "tools/integration_client_connection.py",
+      "role": "OWNER_LOCAL_CONNECTION_MONITOR",
+      "rationale": "Owner-local comparison of exact selected config/adapter/policy/runtime bytes with authenticated live Golem metadata and bounded Desktop process ancestry. Provenance environment values are not authority. Explicit observation, Golem relay refresh and optional host-wide reload are distinct; no Work call, policy application or model conversation.",
+      "symbols": [
+        "ConnectionError",
+        "ConnectionError.__init__",
+        "ConnectionMonitor",
+        "ConnectionMonitor.__init__",
+        "ConnectionMonitor.inspect",
+        "ConnectionMonitor.observe",
+        "ConnectionMonitor.observe_relays",
+        "ConnectionMonitor.relay_client",
+        "ConnectionMonitor.request_refresh",
+        "compare",
+        "decode",
+        "desktop_parent",
+        "digest",
+        "live_status",
+        "owner_launch_description",
+        "read_file",
+        "require",
+        "selected_connection",
+        "unique"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Attribute(value=Attribute(value=Attribute(value=Subscript(value=Attribute(value=Name(id='n', ctx=Load()), attr='targets', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='value', ctx=Load()), attr='value', ctx=Load()), attr='id', ctx=Load())",
+          "sys"
+        ],
+        [
+          "Attribute(value=Attribute(value=Name(id='n', ctx=Load()), attr='func', ctx=Load()), attr='attr', ctx=Load())",
+          "main"
+        ],
+        [
+          "Attribute(value=Attribute(value=Subscript(value=Attribute(value=Name(id='n', ctx=Load()), attr='targets', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='value', ctx=Load()), attr='attr', ctx=Load())",
+          "path"
+        ],
+        [
+          "Attribute(value=Call(func=Name(id='Path', ctx=Load()), args=[Name(id='v', ctx=Load())]), attr='name', ctx=Load())",
+          "integration_owner_desktop.py"
+        ],
+        [
+          "Attribute(value=Call(func=Name(id='Path', ctx=Load()), args=[Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value=2), ctx=Load())]), attr='name', ctx=Load())",
+          "launcher.py"
+        ],
+        [
+          "Attribute(value=Name(id='item', ctx=Load()), attr='name', ctx=Load())",
+          "integration_owner_desktop"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='manifest', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='name')])",
+          "golem"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='r', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='host_kind')])",
+          "ChatGPT"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='r', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='host_kind')])",
+          "Codex"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='result', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "REFRESH_QUEUED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='host_kind')])",
+          "ChatGPT"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='host_kind')])",
+          "Codex"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='kind')])",
+          "codex-connection-relay"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='schema')])",
+          "golem.owner-connection-status.v1"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='approval', ctx=Load())])",
+          "launcher"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='approval', ctx=Load())])",
+          "launcher_sha256"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='approval', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='launcher', ctx=Load())])",
+          "args"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='launcher', ctx=Load())])",
+          "command"
+        ],
+        [
+          "Constant(value='-c')",
+          "-c"
+        ],
+        [
+          "Constant(value='..')",
+          ".."
+        ],
+        [
+          "Constant(value='CodexCLI.app/')",
+          "CodexCLI.app/"
+        ],
+        [
+          "Constant(value='codex')",
+          "codex"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "GOLEM_RELAY_AVAILABLE"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "OFFICIAL_RELOAD_AVAILABLE"
+        ],
+        [
+          "Subscript(value=Name(id='approval', ctx=Load()), slice=Constant(value='schema'), ctx=Load())",
+          "golem.codex-launcher.v1"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Slice(lower=Constant(value=3), upper=Constant(value=7)), ctx=Load())",
+          "--client"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Slice(lower=Constant(value=3), upper=Constant(value=7)), ctx=Load())",
+          "--state"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Slice(lower=Constant(value=3), upper=Constant(value=7)), ctx=Load())",
+          "codex"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Slice(lower=Constant(value=3), upper=Constant(value=7)), ctx=Load())",
+          "serve"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Slice(upper=Constant(value=2)), ctx=Load())",
+          "-B"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Slice(upper=Constant(value=2)), ctx=Load())",
+          "-I"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Slice(upper=Constant(value=3)), ctx=Load())",
+          "-B"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Slice(upper=Constant(value=3)), ctx=Load())",
+          "-I"
+        ],
+        [
+          "Subscript(value=Name(id='args', ctx=Load()), slice=Slice(upper=Constant(value=3)), ctx=Load())",
+          "-c"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='state'), ctx=Load())",
+          "READY"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "selected_connection",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "live_status",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "ConnectionMonitor.inspect",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "ConnectionMonitor.request_refresh",
+          null
+        ]
+      ]
+    },
+    {
+      "path": "tools/integration_connection_ui.py",
+      "role": "OWNER_LOCAL_CONNECTION_PRESENTATION",
+      "rationale": "Explicit Owner-app presentation only. No Tk import or polling at headless MCP startup. Manual buttons and one background request render selected/live/host/model states separately, require scope confirmation before refresh, and never elevate queued or child-reinitialized replies to model success.",
+      "symbols": [
+        "BackgroundRequest",
+        "BackgroundRequest.__init__",
+        "BackgroundRequest.close",
+        "BackgroundRequest.start",
+        "BackgroundRequest.take",
+        "ConnectionPanel",
+        "ConnectionPanel.__init__",
+        "ConnectionPanel._destroyed",
+        "ConnectionPanel._drain",
+        "ConnectionPanel._enable",
+        "ConnectionPanel._relay_target",
+        "ConnectionPanel._selection_changed",
+        "ConnectionPanel._submit",
+        "ConnectionPanel.acknowledge",
+        "ConnectionPanel.inspect",
+        "ConnectionPanel.recheck",
+        "ConnectionPanel.refresh",
+        "presentation",
+        "text"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Name(id='ch', ctx=Load())",
+          "\n\t"
+        ],
+        [
+          "Name(id='ch', ctx=Load())",
+          "0123456789abcdef"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "GOLEM_RELAY_AVAILABLE"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "MANUAL_RESTART_REQUIRED"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "OFFICIAL_RELOAD_AVAILABLE"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "REFRESH_QUEUED"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "VERIFY_REQUIRED"
+        ],
+        [
+          "Name(id='value', ctx=Load())",
+          ""
+        ],
+        [
+          "Subscript(value=Attribute(value=Name(id='self', ctx=Load()), attr='report', ctx=Load()), slice=Constant(value='renewal_mode'), ctx=Load())",
+          "MANUAL_RESTART_REQUIRED"
+        ],
+        [
+          "Subscript(value=Name(id='report', ctx=Load()), slice=Constant(value='renewal_mode'), ctx=Load())",
+          "GOLEM_RELAY_AVAILABLE"
+        ],
+        [
+          "Subscript(value=Name(id='report', ctx=Load()), slice=Constant(value='renewal_mode'), ctx=Load())",
+          "MANUAL_RESTART_REQUIRED"
+        ],
+        [
+          "Subscript(value=Name(id='report', ctx=Load()), slice=Constant(value='renewal_mode'), ctx=Load())",
+          "OFFICIAL_RELOAD_AVAILABLE"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "ConnectionPanel.inspect",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "ConnectionPanel.refresh",
+          null
+        ]
+      ]
+    },
+    {
+      "path": "plugins/golem/scripts/connection_relay.py",
+      "role": "CLIENT_TRANSPORT_RELAY",
+      "rationale": "Public Codex-only stdio relay around the exact existing approved child. Owner-private local status/refresh IPC does not add an MCP tool or approval authority. Refresh checks old/new approval bytes and current config pin, blocks pending/partial traffic, waits for normal stdin EOF and exit 0, reinitializes once and emits tools/list_changed. This does not certify Work or native lease idle. UNKNOWN is terminal; no Work replay, automatic repair or force-kill. File-level effects name direct relay effects; operation rows additionally include inherited approved-child startup effects.",
+      "symbols": [
+        "Relay",
+        "Relay.__init__",
+        "Relay.accept_control",
+        "Relay.approved",
+        "Relay.child_message",
+        "Relay.client_message",
+        "Relay.close",
+        "Relay.control",
+        "Relay.decode_rpc",
+        "Relay.drain",
+        "Relay.read_pipe",
+        "Relay.refresh",
+        "Relay.reject_refresh_requests",
+        "Relay.relay_initialize_result",
+        "Relay.replacement_initialize",
+        "Relay.run",
+        "Relay.selected",
+        "Relay.send_child",
+        "Relay.send_client",
+        "Relay.spawn",
+        "Relay.start_endpoint",
+        "Relay.status",
+        "Relay.unknown",
+        "Relay.unregister_child",
+        "Relay.write",
+        "RelayError",
+        "_directory",
+        "_record",
+        "descriptors",
+        "encoded",
+        "frame_receive",
+        "frame_send",
+        "identifier",
+        "peer_pid",
+        "peer_uid",
+        "request",
+        "require",
+        "serve"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Attribute(value=Name(id='key', ctx=Load()), attr='data', ctx=Load())",
+          "control"
+        ],
+        [
+          "Attribute(value=Name(id='self', ctx=Load()), attr='state', ctx=Load())",
+          "DRAINING"
+        ],
+        [
+          "Attribute(value=Name(id='self', ctx=Load()), attr='state', ctx=Load())",
+          "READY"
+        ],
+        [
+          "Attribute(value=Name(id='self', ctx=Load()), attr='state', ctx=Load())",
+          "STARTING"
+        ],
+        [
+          "Attribute(value=Name(id='self', ctx=Load()), attr='state', ctx=Load())",
+          "UNKNOWN"
+        ],
+        [
+          "Attribute(value=Name(id='sys', ctx=Load()), attr='platform', ctx=Load())",
+          "darwin"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='message', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='jsonrpc')])",
+          "2.0"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "arguments"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "instance"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "operation"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "request_id"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "token"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "instance"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "kind"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "pid"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "token"
+        ],
+        [
+          "Constant(value='error')",
+          "error"
+        ],
+        [
+          "Constant(value='id')",
+          "id"
+        ],
+        [
+          "Constant(value='method')",
+          "method"
+        ],
+        [
+          "Constant(value='result')",
+          "result"
+        ],
+        [
+          "Constant(value='tools')",
+          "tools"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
+          "token"
+        ],
+        [
+          "Name(id='operation', ctx=Load())",
+          "refresh"
+        ],
+        [
+          "Name(id='operation', ctx=Load())",
+          "status"
+        ],
+        [
+          "Name(id='source', ctx=Load())",
+          "client"
+        ],
+        [
+          "Subscript(value=Name(id='message', ctx=Load()), slice=Constant(value='method'), ctx=Load())",
+          "initialize"
+        ],
+        [
+          "Subscript(value=Name(id='message', ctx=Load()), slice=Constant(value='method'), ctx=Load())",
+          "notifications/initialized"
+        ],
+        [
+          "Subscript(value=Name(id='request', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "refresh"
+        ],
+        [
+          "Subscript(value=Name(id='request', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "status"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "codex-connection-relay"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "descriptors",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "Relay.status",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "Relay.refresh",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "Relay.run",
+          null
+        ],
+        [
+          "NATIVE_OPERATION",
+          "request",
+          "status"
+        ],
+        [
+          "NATIVE_OPERATION",
+          "request",
+          "refresh"
+        ]
+      ]
     }
   ],
   "repository_boundary_reviews": [
@@ -64240,7 +64885,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "749ffb8cd858a2bf5fdf65185d22d66bd1dba32954b142db637a8c9e4ee8ac7c",
+      "sha256": "50b4b9a43175432e3f16032d0ce739ceef6e805d78608b64c3489e522b5908fd",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64402,7 +65047,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "5a9cb24615e5c1b9feaea0552650c437c705d6190ddfcb1376e38d425ec6d554",
+      "sha256": "d6e22b64c4d49df8b429c32996a9a6ec8ca7c87b7636aa14e48161c617c8bc68",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64492,13 +65137,13 @@
     },
     {
       "path": "tools/capability_repository.py",
-      "sha256": "e526edb197b0192f24bfcd5863f7493dbbfd735c635dd9e85cb71226c52aec96",
+      "sha256": "00af9e11da1c9685bb7f6de7bccc78c29bb891b7c1fda9f82680225abd2585d4",
       "shape_sha256": "6d9af9283d17b17d9b3a95815343435f861de9c53cb32ba70bf944c54b761947",
       "role": "M0_STATIC_ANALYSIS"
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "a5ac5e14f1b9015f42a2729182e110e2e631641ac4c1d95f6452182c5bcf71aa",
+      "sha256": "a800ea121fa0b1b844c2e9b7193b3126b9745b381d32e9f4f252f2e66fa44476",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64510,7 +65155,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "d3533b401b002533d0e2a626732d438059e81b7fe5b47040533ecc74127aa81a",
+      "sha256": "de860320894658e07e1dc4992f6f186e43767d20033e34883d81eaf8f3b152b8",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64546,7 +65191,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "486db3d273969b4ca3d97abbfb7ef7bc2f87e6757ddbd4f6cb8f3f5064e4b270",
+      "sha256": "848110b8c0bba9a53b968c6f0aaabb271435d33eb1d790dd544643e22828e86b",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64852,8 +65497,8 @@
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "ac849b33d63f74a3826fe3c604467f5afbe2cac15d79a044fd5435a0221599ba",
-      "shape_sha256": "4ec42cff0a170bde09fe7446fb6c2d8a71235d0c2c796ee45174c40d80fe3c6d",
+      "sha256": "237f1153802799e45353aecc0c12352aadace40dd3dee62c4da84975a3396974",
+      "shape_sha256": "e41d4161b7e67e068946869fd04259bff390c1c8380e88fcb1635570509cb28b",
       "role": "M0_FIXTURE_REGRESSION"
     },
     {

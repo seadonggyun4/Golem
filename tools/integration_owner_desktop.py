@@ -304,9 +304,9 @@ def identity(value):
     return value
 
 
-def receive_frame(conn):
+def receive_frame(conn,timeout=IPC_TIMEOUT):
     import time
-    deadline=time.monotonic()+IPC_TIMEOUT
+    deadline=time.monotonic()+timeout
     def exact(count):
         result=bytearray()
         while len(result)<count:
@@ -322,9 +322,9 @@ def receive_frame(conn):
     return c.decode(exact(size),IPC_LIMIT)
 
 
-def send_frame(conn,value):
+def send_frame(conn,value,timeout=IPC_TIMEOUT):
     raw=c.encoded(value);c.require(len(raw)<=IPC_LIMIT,'OWNER_IPC_SIZE')
-    conn.settimeout(IPC_TIMEOUT);conn.sendall(len(raw).to_bytes(4,'big')+raw)
+    conn.settimeout(timeout);conn.sendall(len(raw).to_bytes(4,'big')+raw)
 
 
 def descriptor(directory,instance):
@@ -418,6 +418,10 @@ class ReviewEndpoint(LocalEndpoint):
         super().__init__(directory,self.handle,label=label+' / '+controller.scoped.profile['profile'])
 
     def handle(self,operation,args):
+        if operation=='connection-status':
+            c.require(not args,'OWNER_IPC_ARGUMENTS')
+            import integration_client_connection as connection
+            return connection.live_status(self.controller,__file__)
         if operation=='catalog':
             c.require(not args,'OWNER_IPC_ARGUMENTS')
             return self.controller.drafts()
@@ -448,14 +452,28 @@ class RemoteController:
 
     def call(self,operation,args):
         import socket
+        import struct
         c.require(descriptor(self.directory,self.instance)==self.pinned,'OWNER_IPC_CHANGED')
+        timeout=1 if operation=='connection-status' else IPC_TIMEOUT
+        self.last_peer_pid=None
         with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as conn:
-            conn.settimeout(IPC_TIMEOUT)
+            conn.settimeout(timeout)
             try:
                 conn.connect(str(self.directory/(self.instance+'.sock')))
-                send_frame(conn,{'instance':self.instance,'token':self.pinned['token'],
-                    'request_id':uuid.uuid4().hex,'operation':operation,'arguments':args})
-                reply=receive_frame(conn)
+                if operation=='connection-status':
+                    if sys.platform=='darwin':
+                        # macOS SDK sys/un.h: SOL_LOCAL=0, LOCAL_PEERPID=0x002.
+                        self.last_peer_pid=conn.getsockopt(0,2)
+                    elif hasattr(socket,'SO_PEERCRED'):
+                        pid,uid,_=struct.unpack('3i',conn.getsockopt(socket.SOL_SOCKET,socket.SO_PEERCRED,12))
+                        c.require(uid==__import__('os').getuid(),'OWNER_IPC_PEER')
+                        self.last_peer_pid=pid
+                message={'instance':self.instance,'token':self.pinned['token'],
+                    'request_id':uuid.uuid4().hex,'operation':operation,'arguments':args}
+                if operation=='connection-status':
+                    send_frame(conn,message,timeout);reply=receive_frame(conn,timeout)
+                else:
+                    send_frame(conn,message);reply=receive_frame(conn)
             except (OSError,EOFError,ValueError):
                 raise c.IntegrationError('OWNER_EXPORT_UNKNOWN' if operation=='export' else 'OWNER_CONNECTION_UNAVAILABLE') from None
         c.require(isinstance(reply,dict) and type(reply.get('ok')) is bool,'OWNER_IPC_RESPONSE')
@@ -466,6 +484,7 @@ class RemoteController:
         return reply['value']
 
     def drafts(self):return self.call('catalog',{})
+    def connection_status(self):return self.call('connection-status',{})
 
     def inspect(self,args):
         self.selection=None;self.attempted=False
@@ -662,6 +681,8 @@ class OwnerInstance:
 def owner_app(argv):
     parser=argparse.ArgumentParser(description='Explicit local Owner app; no MCP or native execution')
     parser.add_argument('--review-directory',required=True)
+    parser.add_argument('--codex-config',default=str(Path.home()/'.codex/config.toml'))
+    parser.add_argument('--codex-control-socket',help='Explicit officially exposed Desktop control socket, if supported')
     args=parser.parse_args(argv);instance=OwnerInstance(args.review_directory)
     try:
         if not instance.primary:
@@ -669,7 +690,10 @@ def owner_app(argv):
         instance.start()
         import tkinter as tk
         from tkinter import ttk
-        root=tk.Tk();root.title('Golem · Owner 연결 선택');root.geometry('900x480')
+        root=tk.Tk();root.title('Golem · Owner 연결');root.geometry('1000x820')
+        tabs=ttk.Notebook(root);tabs.pack(fill='both',expand=True)
+        review_tab=ttk.Frame(tabs);connection_tab=ttk.Frame(tabs)
+        tabs.add(review_tab,text='Owner 후보');tabs.add(connection_tab,text='Codex 연결·갱신')
         windows={}
         def open_review(key):
             # Recheck descriptor even when a previous child window exists.
@@ -678,7 +702,13 @@ def owner_app(argv):
             if old is not None and old.winfo_exists():old.deiconify();old.lift();return
             child=tk.Toplevel(root);windows[key]=child
             Window(child,controller);child.title('Golem · Owner 검토 · '+key[:12])
-        browser=ConnectionBrowser(root,instance.directory,open_review)
+        browser=ConnectionBrowser(review_tab,instance.directory,open_review)
+        from integration_connection_ui import ConnectionPanel
+        from integration_client_connection import ConnectionMonitor
+        from integration_codex_control import CodexControl
+        connection=ConnectionMonitor(args.codex_config,instance.directory,
+            control=CodexControl(socket_path=args.codex_control_socket))
+        connection_panel=ConnectionPanel(connection_tab,connection)
         def poll():
             try:
                 while True:instance.events.get_nowait();root.deiconify();root.lift()

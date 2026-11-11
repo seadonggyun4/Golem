@@ -2591,7 +2591,7 @@
       "task"
     ],
     "owner_backlog_count": 83,
-    "checked_functions": 137,
+    "checked_functions": 240,
     "blockers": [],
     "owner_backlog_discharged": false,
     "actual_installation": "NOT_RUN",
@@ -5293,14 +5293,18 @@
       "plugins/golem/mcp.json",
       "tools/integration_desktop_plugin.py",
       "tools/intent_bootstrap.py",
-      "tools/intent_bootstrap_host.inc"
+      "tools/intent_bootstrap_host.inc",
+      "tools/integration_codex_control.py",
+      "tools/integration_client_connection.py",
+      "tools/integration_connection_ui.py",
+      "plugins/golem/scripts/connection_relay.py"
     ],
     "blockers": [],
     "execution_verified": false
   },
   "reviewed_effects": {
     "blockers": [],
-    "reviewed_capabilities": 1180,
+    "reviewed_capabilities": 1199,
     "execution_verified": false
   },
   "boundary_contracts": {

@@ -1276,6 +1276,25 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.tools.integration_desktop_plugin.py.commands.owner | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 | surface.tools.intent_bootstrap.py.owner-bootstrap | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 | surface.tools.intent_bootstrap_host.inc.owner-bootstrap | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_codex_control.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_codex_control.py.operation-1 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_codex_control.py.operation-2 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_client_connection.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_client_connection.py.operation-1 | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_client_connection.py.operation-2 | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_client_connection.py.operation-3 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_client_connection.py.operation-4 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_connection_ui.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_connection_ui.py.operation-1 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_connection_ui.py.operation-2 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.connection_relay.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.scripts.connection_relay.py.operation-1 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.connection_relay.py.operation-2 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.connection_relay.py.operation-3 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.connection_relay.py.operation-4 | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.scripts.connection_relay.py.operation-5 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.connection_relay.py.operation-6 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_owner_desktop.py.connection-status | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3685,6 +3704,25 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | NATIVE_OPERATION | tools/intent_bootstrap_host.inc | file-surface | None |
 | PYTHON_DECLARATION | tools/integration_contract.py | field_diagnostic | None |
 | PYTHON_DECLARATION | tools/integration_contract.py | validation_diagnostic | None |
+| PYTHON_DECLARATION | tools/integration_codex_control.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_codex_control.py | CodexControl.inspect | None |
+| PYTHON_DECLARATION | tools/integration_codex_control.py | CodexControl.reload | None |
+| PYTHON_DECLARATION | tools/integration_client_connection.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_client_connection.py | selected_connection | None |
+| PYTHON_DECLARATION | tools/integration_client_connection.py | live_status | None |
+| PYTHON_DECLARATION | tools/integration_client_connection.py | ConnectionMonitor.inspect | None |
+| PYTHON_DECLARATION | tools/integration_client_connection.py | ConnectionMonitor.request_refresh | None |
+| PYTHON_DECLARATION | tools/integration_connection_ui.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_connection_ui.py | ConnectionPanel.inspect | None |
+| PYTHON_DECLARATION | tools/integration_connection_ui.py | ConnectionPanel.refresh | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/connection_relay.py | file-surface | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/connection_relay.py | descriptors | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/connection_relay.py | Relay.status | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/connection_relay.py | Relay.refresh | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/connection_relay.py | Relay.run | None |
+| NATIVE_OPERATION | plugins/golem/scripts/connection_relay.py | request | status |
+| NATIVE_OPERATION | plugins/golem/scripts/connection_relay.py | request | refresh |
+| NATIVE_OPERATION | tools/integration_owner_desktop.py | ReviewEndpoint.handle | connection-status |
 
 ## Blockers
 

@@ -21,7 +21,13 @@ SCHEMAS=('schemas/d2-tools.json','schemas/d4-actions.json','schemas/installation
 SKILLS=('plugins/golem/skills/golem-setup/SKILL.md','plugins/golem/skills/golem-setup/agents/openai.yaml',
         'plugins/golem/skills/golem-work/SKILL.md','plugins/golem/skills/golem-work/agents/openai.yaml',
         'plugins/golem/skills/golem-work/references/profiles.md')
-OWNER_DESKTOP_FILES=('tools/integration_owner_review.py','tools/integration_owner_desktop.py')
+OWNER_DESKTOP_FILES=('tools/integration_owner_review.py','tools/integration_owner_desktop.py',
+    'tools/integration_client_connection.py','tools/integration_codex_control.py',
+    'tools/integration_connection_ui.py')
+# One canonical relay implementation, copied verbatim into the reviewed Owner
+# runtime so its metadata client needs no installed-plugin import path.
+OWNER_RELAY_SOURCE='plugins/golem/scripts/connection_relay.py'
+OWNER_RELAY_PAYLOAD='tools/connection_relay.py'
 DOCUMENTS=('docs/intent-assurance-qc6-implementation.ko.md','docs/workpacks/mcp.md','tools/requirements-mcp.txt','docs/mcp-m6-distribution.ko.md','docs/integration-install.md','docs/integration-d5.md',
            'docs/mcp-m5-parallel-candidates.ko.md')
 
@@ -111,6 +117,7 @@ def build(profile,*,native=None,native_sha256=None,target='external-runtime'):
     c.require(not native or target!='external-runtime','PACKAGE_NATIVE_TARGET_REQUIRED')
     with zipfile.ZipFile(io.BytesIO(legacy.build())) as package:payloads={name:package.read(name) for name in package.namelist()}
     for path in (*SKILLS,*DOCUMENTS,*OWNER_DESKTOP_FILES):payloads[path]=r.regular(root/path,16777216)
+    payloads[OWNER_RELAY_PAYLOAD]=r.regular(root/OWNER_RELAY_SOURCE,16777216)
     payloads.update(schema_payloads())
     payloads['manifest.json']=c.encoded(manifest(profile));closure(payloads)
     native_pin=None
@@ -162,7 +169,7 @@ def verify(raw,reviewed_sha256):
     c.require(set(SKILLS)<=set(payloads) and set(DOCUMENTS)<=set(payloads) and set(OWNER_DESKTOP_FILES)<=set(payloads),'PACKAGE_RESOURCE_MISSING')
     # A forged inventory cannot introduce private files or extra executable paths.
     allowed={'manifest.json','pyproject.toml','assets/Golem-mcp.png','LICENSE',
-        *('tools/'+name for name in (*transfer.PRODUCER_NAMES,'integration_mcpb_entry.py')),*SKILLS,*DOCUMENTS,*SCHEMAS,*OWNER_DESKTOP_FILES}
+        *('tools/'+name for name in (*transfer.PRODUCER_NAMES,'integration_mcpb_entry.py')),*SKILLS,*DOCUMENTS,*SCHEMAS,*OWNER_DESKTOP_FILES,OWNER_RELAY_PAYLOAD}
     if inventory['native'] is not None:
         c.require(inventory['target'] in ('darwin-arm64','linux-x86_64','linux-arm64') and inventory['native']['target']==inventory['target'] and inventory['native']['sha256']==c.sha(payloads.get('native/golem',b'')),'PACKAGE_NATIVE_CHANGED');allowed.add('native/golem')
     c.require(set(payloads)==allowed,'PACKAGE_FILE_SCOPE')
