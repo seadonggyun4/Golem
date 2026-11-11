@@ -76,6 +76,39 @@ class Preparations(unittest.TestCase):
             result=self.draft(fields={})
         fields={q['field'] for q in result['plan']['payload']['questions']}
         self.assertEqual(fields,{'ttl_ms','source_snapshot','byte_budget'})
+        path=self.registry.root/('read-m2-plan-'+result['plan_id'])/'plan.json';raw=path.read_bytes()
+        reread=self.run_call('plan_read',self.plan_args(result))
+        for value in (result,reread):
+            self.assertEqual(value['preparation_state'],'INPUTS_REQUIRED')
+            self.assertEqual(set(value['readiness']['missing_inputs']),fields)
+            self.assertEqual(value['readiness']['validation_scope'],'NOT_RUN_MISSING_INPUTS')
+            self.assertFalse(value['owner_handoff']['ready_for_candidate_review'])
+            self.assertIsNone(value['owner_handoff']['action_id'])
+        self.assertEqual(raw,path.read_bytes());self.assertEqual(self.captures,[])
+    def test_complete_draft_handoff_references_exact_live_plan_without_granting_action(self):
+        self.status['resume_preflight']['reason']='START_REQUIRED'
+        self.following.update(action='BLOCKED',reason='START_REQUIRED')
+        result=self.draft();reread=self.run_call('plan_read',self.plan_args(result))
+        self.assertEqual(result['preparation_state'],'REVIEW_REQUIRED')
+        self.assertEqual(reread['preparation_state'],'CURRENT_BASIS_REVIEW_REQUIRED')
+        for value in (result,reread):
+            handoff=value['owner_handoff']
+            self.assertEqual(handoff['reference'],{'project_id':'p','work_id':'a',**self.plan_args(result)})
+            self.assertEqual(handoff['route'],'LOCAL_OWNER_EXACT_ACTION_REVIEW')
+            self.assertTrue(handoff['ready_for_candidate_review']);self.assertTrue(handoff['same_live_service_required'])
+            self.assertEqual(handoff['owner_registration'],'NOT_PERFORMED');self.assertIsNone(handoff['action_id'])
+            self.assertFalse(handoff['policy_applied']);self.assertFalse(value['execution_authorized'])
+            self.assertEqual(value['readiness']['native_preconditions'],'NOT_CERTIFIED')
+            self.assertEqual(value['plan']['native_guidance']['next']['reason'],'START_REQUIRED')
+        self.assertEqual(list(self.registry.root.glob('mutation-*')),[])
+    def test_separate_effects_are_not_routed_to_first_action_owner_review(self):
+        result=self.draft();plan=copy.deepcopy(result['plan'])
+        for tool in ('helper_execute','candidate_request','workspace_request'):
+            plan['payload']['entry_review']['tool']=tool
+            value=prep.presentation(plan,result['plan_sha256'])
+            self.assertEqual(value['owner_handoff']['route'],'SEPARATE_OWNER_CONTRACT')
+            self.assertFalse(value['owner_handoff']['ready_for_candidate_review'])
+            self.assertFalse(value['execution_authorized'])
     def test_plan_read_preserves_original_key_request_id_and_bytes(self):
         result=self.draft();path=self.registry.root/('read-m2-plan-'+result['plan_id'])/'plan.json';raw=path.read_bytes()
         value=self.run_call('plan_read',self.plan_args(result));again=self.run_call('plan_read',self.plan_args(result))

@@ -75,6 +75,64 @@ class ProfileBoundaries(unittest.TestCase):
         for value in ('execution_request',[None],['x']*257):
             with self.assertRaises(c.IntegrationError):profiles.diagnose('task',value)
 
+    def test_managed_bootstrap_reports_missing_capture_start_and_owner_path(self):
+        existing=['discovery_read','action_prepare','plan_read','workflow_read']
+        flow=profiles.diagnose('task',existing)['workflows']['managed_bootstrap']
+        self.assertEqual(flow['profile_excluded'],[])
+        self.assertEqual(flow['owner_service_unavailable'],
+                         ['action_confirm','approved_action_prepare','discovery_snapshot',
+                          'document_submit','session_start'])
+        self.assertFalse(flow['server_tools_present'])
+        # A prepare profile cannot offer publication/start by inheriting an
+        # owner's wider list, even when those tools exist on another connection.
+        required=flow['required_tools']
+        limited=profiles.diagnose('prepare',required,required)['workflows']['managed_bootstrap']
+        self.assertEqual(limited['owner_service_unavailable'],[])
+        self.assertEqual(limited['profile_excluded'],flow['owner_service_unavailable'])
+        self.assertFalse(limited['server_tools_present'])
+        self.assertFalse(limited['execution_authorized'])
+
+    def test_managed_bootstrap_all_tools_still_cannot_certify_head_or_execution(self):
+        names=list(profiles.WORKFLOWS['managed_bootstrap'])
+        with (patch('builtins.open',side_effect=AssertionError('no repository scan')),
+              patch('subprocess.run',side_effect=AssertionError('no native dispatch'))):
+            flow=profiles.diagnose('task',names,names)['workflows']['managed_bootstrap']
+        self.assertTrue(flow['server_tools_present']);self.assertEqual(flow['client_missing'],[])
+        self.assertFalse(flow['execution_authorized']);self.assertEqual(flow['native_preconditions'],'NOT_CHECKED')
+        guide=flow['guidance'];self.assertEqual(guide['readiness'],'NOT_EVALUATED')
+        self.assertEqual(guide['git_head']['observation'],'NOT_OBSERVED')
+        self.assertTrue(guide['git_head']['required']);self.assertFalse(guide['git_head']['automatic_commit_allowed'])
+        self.assertIn('INITIAL_COMMIT_AUTHORIZATION',guide['git_head']['if_missing'])
+        self.assertEqual(guide['preparation']['authority'],'NON_AUTHORIZING_DRAFT_ONLY')
+        self.assertEqual(guide['owner_review']['registration'],'NOT_OBSERVED')
+        self.assertFalse(guide['owner_review']['confirmation_dispatches'])
+        self.assertFalse(guide['owner_review']['policy_apply_provided'])
+        self.assertFalse(guide['automatic_retry_allowed'])
+        self.assertIn('COMMIT_UNKNOWN',guide['stop_on'])
+        steps=guide['ordered_steps']
+        self.assertEqual([s['tool'] for s in steps],['discovery_snapshot','discovery_read',
+                         'document_submit','workflow_read','document_submit','session_start'])
+        self.assertEqual([s.get('schema_version') for s in steps],[None,None,2,None,3,None])
+        self.assertEqual([s.get('operation') for s in steps],[None,'validate',None,'select',None,None])
+        self.assertEqual([s['tool'] for s in steps if s.get('exact_owner_action_required')],
+                         ['discovery_snapshot','document_submit','document_submit','session_start'])
+        # The response is independent of later caller edits and of untrusted
+        # client claims about definitions which the current owner has not enabled.
+        guide['ordered_steps'][0]['tool']='approve'
+        fresh=profiles.diagnose('task',[],names)['workflows']['managed_bootstrap']
+        self.assertEqual(fresh['guidance']['ordered_steps'][0]['tool'],'discovery_snapshot')
+        self.assertFalse(fresh['server_tools_present'])
+        self.assertFalse(fresh['execution_authorized'])
+
+    def test_workflow_diagnostic_input_bounds_remain_finite(self):
+        profiles.diagnose('task',['x'*128]*256,['y'*128]*256)
+        for bad in (['x']*257,['x'*129],[None],'session_start'):
+            for owner,client in ((bad,None),([],bad)):
+                with self.subTest(owner=type(owner).__name__,client=type(client).__name__):
+                    with self.assertRaises(c.IntegrationError) as caught:
+                        profiles.diagnose('task',owner,client)
+                    self.assertEqual(caught.exception.code,'FEATURE_DIAGNOSTIC_INPUT')
+
     def test_discovery_diagnostics_preserve_budget_and_work_isolation(self):
         from types import SimpleNamespace
         backend=FakeService();backend.names=['projects_list']
@@ -89,6 +147,16 @@ class ProfileBoundaries(unittest.TestCase):
         self.assertEqual(result['projects'][0]['workflow_capabilities']['available_tools'],['work_inspect'])
         self.assertEqual(result['projects'][1]['workflow_capabilities']['available_tools'],['completion_check'])
         self.assertNotIn('workflow_capabilities',original['projects'][0])
+        # New bootstrap guidance consumes the same owner's disclosure budget;
+        # it cannot be truncated or exempted after the service wraps its reply.
+        exact_size=len(c.encoded(result))
+        with patch.object(backend,'call',return_value=original):
+            backend.transfer.current=lambda:{'max_result_bytes':exact_size-1}
+            with self.assertRaises(c.IntegrationError) as caught:
+                profiles.Scoped(backend,'task').call('projects_list',{})
+            self.assertEqual(caught.exception.code,'RESULT_BUDGET_EXCEEDED')
+            backend.transfer.current=lambda:{'max_result_bytes':exact_size}
+            self.assertEqual(profiles.Scoped(backend,'task').call('projects_list',{}),result)
 
     def test_unset_client_templates_never_select_optional_authority(self):
         values={'GOLEM_FEATURE_PROFILE':'quality','GOLEM_PROFILE_POLICY':'/never-read','GOLEM_PROFILE_POLICY_SHA256':'a'*64,'GOLEM_APPROVE_PROFILE_OWNER':'true'}

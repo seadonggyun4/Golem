@@ -187,7 +187,7 @@ static golem_status capture_file(const char *root, const char *path, uint64_t de
     return st;
 }
 static golem_status repository(struct json_object *plan, uint64_t deadline, uint64_t *total,
-                               struct json_object **out)
+                               struct json_object **out, const char **failure_message)
 {
     const char *keys[] = {"id", "root", "paths", "toolchain", "test_configuration"};
     const char *root = dw_text(plan, "root");
@@ -211,8 +211,19 @@ static golem_status repository(struct json_object *plan, uint64_t deadline, uint
         return GOLEM_ERR_IO;
     golem_status st = fstat(fd, &before) == 0 ? GOLEM_OK : GOLEM_ERR_IO;
     char head[GOLEM_SUPERVISOR_OUTPUT_MAX + 1], check[GOLEM_SUPERVISOR_OUTPUT_MAX + 1];
-    if (st == GOLEM_OK)
+    if (st == GOLEM_OK) {
         st = git(root, "rev-parse", "HEAD", NULL, deadline, head);
+        if (st != GOLEM_OK) {
+            /* A failed read is not proof of an unborn repository. Preserve the
+             * supervisor status and do not probe, retry, or modify Git state. */
+            *failure_message =
+                "discovery.head_unavailable: cannot resolve HEAD; cause not classified. "
+                "Inspect repository and access. If unborn, review selected files and obtain "
+                "explicit owner approval for an initial commit; no automatic commit or retry.";
+            close(fd);
+            return st;
+        }
+    }
     if (st == GOLEM_OK) {
         size_t n = strlen(head);
         if (n != 41 && n != 65)
@@ -249,8 +260,14 @@ static golem_status repository(struct json_object *plan, uint64_t deadline, uint
             st = GOLEM_ERR_STALE_RESULT;
         json_object_put(f);
     }
-    if (st == GOLEM_OK)
+    if (st == GOLEM_OK) {
         st = git(root, "rev-parse", "HEAD", NULL, deadline, check);
+        if (st != GOLEM_OK)
+            *failure_message =
+                "discovery.head_recheck_unavailable: HEAD was initially readable but its "
+                "current state could not be verified. Preserve evidence and inspect repository "
+                "and access; no automatic commit or retry.";
+    }
     if (st == GOLEM_OK && strcmp(head, check) != 0)
         st = GOLEM_ERR_STALE_RESULT;
     int end = golem_evidence_path_open(root, true);
@@ -319,6 +336,7 @@ golem_status golem_discovery_snapshot(golem_bytes b, const golem_allocator *a, u
             return dw_report(d, GOLEM_ERR_POLICY_DENIED, message);
         }
     struct json_object *plan = NULL, *snapshot = NULL, *repos = NULL;
+    const char *failure_message = NULL;
     golem_status st = golem_json_parse(b, GOLEM_DOCUMENT_MAX_JSON, &plan);
     const char *keys[] = {"schema_version", "timeout_seconds", "repositories"};
     if (st == GOLEM_OK &&
@@ -343,7 +361,7 @@ golem_status golem_discovery_snapshot(golem_bytes b, const golem_allocator *a, u
             if (strcmp(dw_text(r, "id"), dw_text(json_object_array_get_idx(input, j), "id")) == 0)
                 st = GOLEM_ERR_PARSE;
         if (st == GOLEM_OK)
-            st = repository(r, deadline, &total, &result);
+            st = repository(r, deadline, &total, &result, &failure_message);
         if (st == GOLEM_OK && !append(repos, result))
             st = GOLEM_ERR_OUT_OF_MEMORY;
     }
@@ -378,5 +396,6 @@ golem_status golem_discovery_snapshot(golem_bytes b, const golem_allocator *a, u
     json_object_put(snapshot);
     return dw_report(d, st,
                      st == GOLEM_OK ? "allowlisted snapshot; toolchain declared, tests not run"
-                                    : "snapshot incomplete; no project writes performed");
+                     : failure_message ? failure_message
+                                       : "snapshot incomplete; no project writes performed");
 }

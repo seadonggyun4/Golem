@@ -24,11 +24,54 @@ UNIMPLEMENTED=('TASK_DAG_SCHEDULER','TYPED_EDGE_EVIDENCE_ACCEPTANCE','RESOURCE_R
 WORKFLOWS={
     'inspect':('work_inspect','workflow_read','completion_check'),
     'prepare':('inputs_prepare','action_prepare','plan_read'),
+    'managed_bootstrap':('discovery_snapshot','discovery_read','action_prepare','plan_read',
+                         'document_submit','workflow_read','session_start',
+                         'approved_action_prepare','action_confirm'),
     'review_existing_action':('approved_action_prepare','action_confirm'),
     'document_qa_completion':('document_submit','execution_request','completion_finalize','completion_report','completion_check'),
     'create_and_bind':('work_create','binding_attach','binding_read'),
     'verify_execution':('execution_verify','execution_read'),
 }
+
+
+def managed_bootstrap_guidance():
+    """Static native handoff order, not a check of a repository or Work.
+
+    Keep source capture and publication visible even on prepare-only connections.
+    Neither a diagnostic nor a validated preparation registers an owner action.
+    """
+    return {
+        'readiness':'NOT_EVALUATED',
+        'git_head':{'required':True,'observation':'NOT_OBSERVED',
+                    'if_missing':'REVIEW_TRACKED_AND_EXCLUDED_FILES_AND_REQUEST_INITIAL_COMMIT_AUTHORIZATION',
+                    'automatic_commit_allowed':False},
+        'preparation':{'tools':['action_prepare','plan_read'],
+                       'authority':'NON_AUTHORIZING_DRAFT_ONLY'},
+        'owner_review':{'tools':['approved_action_prepare','action_confirm'],
+                        'requires':'EXISTING_EXACT_D4_OWNER_ACTION',
+                        'registration':'NOT_OBSERVED','confirmation_dispatches':False,
+                        'policy_apply_provided':False},
+        'ordered_steps':[
+            {'step':'source_capture','tool':'discovery_snapshot','exact_owner_action_required':True,
+             'result_dependency':'USE_NATIVE_SNAPSHOT_RESULT_NOT_A_CALLER_FILE_INVENTORY'},
+            {'step':'assessment_validation','tool':'discovery_read','operation':'validate',
+             'result_dependency':'ASSESSMENT_BOUND_TO_CAPTURED_SOURCE_AND_NATIVE_SCOPE_READY'},
+            {'step':'scope_publication','tool':'document_submit','schema_version':2,'kind':'scope',
+             'exact_owner_action_required':True,
+             'result_dependency':'VALIDATED_ASSESSMENT_AND_CURRENT_NATIVE_DOCUMENT_GENERATION'},
+            {'step':'selection_derivation','tool':'workflow_read','operation':'select',
+             'result_dependency':'ACTUAL_PUBLISHED_SCOPE_DOCUMENT_ID_AND_REVISION'},
+            {'step':'selection_publication','tool':'document_submit','schema_version':3,'kind':'stage-selection',
+             'exact_owner_action_required':True,
+             'result_dependency':'RETURNED_NATIVE_SELECTION_AND_EXACT_SCOPE_PARENT_REFERENCE'},
+            {'step':'session_start','tool':'session_start','exact_owner_action_required':True,
+             'result_dependency':'ACTUAL_REGISTERED_SELECTION_AND_CURRENT_NATIVE_SEQUENCE'},
+        ],
+        'reference_rule':'PREPARE_SUCCESSORS_ONLY_AFTER_THE_PRECEDING_NATIVE_RESULT',
+        'review_rule':'DO_NOT_FABRICATE_ASSESSMENT_PERMISSION_OR_REVIEW_FINDINGS',
+        'stop_on':['MISSING_INPUT','MISSING_OWNER_ACTION','STALE','COMMIT_UNKNOWN','UNCERTAIN_RESULT'],
+        'automatic_retry_allowed':False,
+    }
 
 
 def diagnose(profile,owner_tools,client_tools=None):
@@ -53,6 +96,7 @@ def diagnose(profile,owner_tools,client_tools=None):
             'client_missing':None if client is None else sorted((needed&exposed)-client),
             'server_tools_present':needed<=exposed,'execution_authorized':False,
             'native_preconditions':'NOT_CHECKED','client_e2e':'NOT_RUN'}
+    flows['managed_bootstrap']['guidance']=managed_bootstrap_guidance()
     return {'schema':'golem.integration-workflow-capabilities.v1','profile':profile,
         'available_tools':sorted(exposed),'workflows':flows,
         'scope':'CURRENT_TOOL_OBSERVATION_NOT_ACTION_OR_NATIVE_ADMISSION',

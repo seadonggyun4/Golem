@@ -2474,7 +2474,7 @@
       "inputs_prepare",
       "plan_read"
     ],
-    "checked_functions": 29,
+    "checked_functions": 30,
     "backlog_dependencies": 134,
     "retained_delivery_milestones": [
       [
@@ -2591,7 +2591,7 @@
       "task"
     ],
     "owner_backlog_count": 83,
-    "checked_functions": 136,
+    "checked_functions": 137,
     "blockers": [],
     "owner_backlog_discharged": false,
     "actual_installation": "NOT_RUN",

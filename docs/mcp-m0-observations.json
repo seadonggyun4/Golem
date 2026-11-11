@@ -911,7 +911,7 @@
     },
     {
       "path": "src/discovery/snapshot.c",
-      "sha256": "acb7501aba7bd05f8098cf3b4ab3938b2aae95260922c3dc8f1340e9a30bc8d5"
+      "sha256": "c1fb7e9648a196683db5ac7214735ac3abed698ba9fe622a5034b694b018385c"
     },
     {
       "path": "src/document/internal.h",
@@ -1807,7 +1807,7 @@
     },
     {
       "path": "docs/discovery.md",
-      "sha256": "88f89ab9a0a4d948d4274513fad43b89d46f40be87ceefcd22377bcc8d1a7a95"
+      "sha256": "0186b2bce9d2fc960e76c1e931bf668d243082f0b19ef5f7a16b8c2025ba7e3b"
     },
     {
       "path": "tests/c/test_discovery.c",
@@ -2083,7 +2083,7 @@
     },
     {
       "path": "tools/integration_preparations.py",
-      "sha256": "57e19481a8dbbd476c2e8ceb54a887d9c4c757b2ac3733dbc2f0b8ea4454dc83"
+      "sha256": "aef7690a1b4b85187e9259989739c0dc54b463a14fc12c2770d53b0992f7320a"
     },
     {
       "path": "tools/integration_prepare_builders.py",
@@ -2091,7 +2091,7 @@
     },
     {
       "path": "tools/test_integration_m2.py",
-      "sha256": "ba99e60a2da66ed6d09797f98d4192a783b4c80193a1d174d8ac6f818273aef1"
+      "sha256": "88726c17dbc60a09502c2ccea37e426154f96809e7522e95083b71a2e926a95b"
     },
     {
       "path": "tools/test_capability_m2.py",
@@ -2171,7 +2171,7 @@
     },
     {
       "path": "tools/integration_feature_profiles.py",
-      "sha256": "b15f236a0b5c1b8fc97e083355e274c01a87698230e465a21690cb59379ff8a5"
+      "sha256": "d24ade9fb7417d46111a19d97275ada6394973430ff233ce4233d55db427c15c"
     },
     {
       "path": "tools/integration_distribution.py",
@@ -2199,7 +2199,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "9ddfb355694934e4b6bc6f07c05798131e5f5b1b348e4c563fe2c6dc8a1de09a"
+      "sha256": "3cb8196b2a176ca565cf43cd808fd5490e04316d799ae5d3a5fa17ab5684f733"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -2523,11 +2523,11 @@
     },
     {
       "path": "docs/mcp-managed-bootstrap.ko.md",
-      "sha256": "3615305bde962931b16cac557d43e67cec00c1a8cdd18da51a3033b2ad66bbbd"
+      "sha256": "97359d84125f0a71511c4a973225755ad764f3ecf39308d35b41ad26bb27ca4b"
     },
     {
       "path": "tests/c/integration_managed_bootstrap.py",
-      "sha256": "d80b7e3112c2ab2887ebe7ac74aca77c81b63941b1ca399757d0ebbff06e5c0e"
+      "sha256": "3d4a23bfe8a457ff00a03d52be87a9518de50452a4cb0b31ffe250acb578ef06"
     },
     {
       "path": "tools/test_integration_diagnostics.py",
@@ -2539,7 +2539,7 @@
     },
     {
       "path": "tests/c/discovery_integration.py",
-      "sha256": "f261617456858c71b5c8756323e40a0ee772f18488aab8e22cf47a0e6a7eba97"
+      "sha256": "e3cbec1d09f02505bfa804389586893213e5579f1a4b113acb0018a0721c29ae"
     },
     {
       "path": "tools/test_intent_schema_golden.py",

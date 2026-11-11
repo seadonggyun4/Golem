@@ -35,6 +35,15 @@ OFFLINE and UNCONFIRMED, with no selected work. It must not be represented as a
 real project inspection. Snapshot plans contain private absolute paths; never
 publish them or raw runtime evidence by accident.
 
+For an MCP-managed Work, use the existing `action_prepare` draft with
+`tool=discovery_snapshot` and `fields_json` containing the reviewed plan as a
+`plan_json` string. Preparation does not capture sources. The owner reviews the
+live plan and selects its exact D4 action before `discovery_snapshot` is called;
+ordinary Work read access does not grant this file-capture scope. The existing
+first-action owner candidate path also supports a D2-only Work, without applying
+the candidate automatically. Missing tool authority is not a reason to bypass
+MCP with the CLI. See [managed bootstrap](mcp-managed-bootstrap.ko.md).
+
 ## Snapshot Contract
 
 `samples/discovery/plan.json` is the exact plan shape: schema_version 1,
@@ -48,6 +57,15 @@ and ls-tree; optional locks, fsmonitor, replacement objects and hooks are disabl
 tests, reset, checkout, network or cleanup runs. GIT_* environment overrides are
 rejected to avoid silently selecting another index/worktree. `/usr/bin/git` must
 be available, the repository must have a HEAD commit, and files must exist.
+
+If the initial HEAD read fails, `discovery.head_unavailable` preserves the native
+failure status and explains that the cause is not classified. It does not assert
+that the repository is unborn: check the repository and access first. Only for
+an actual unborn repository should the owner review the selected files and
+explicitly authorize an initial commit. If the initial HEAD read succeeded but
+the final read fails, the diagnostic is `discovery.head_recheck_unavailable`.
+Other Git failures retain their own failure result. These diagnostics add no
+probes, automatic retries, staging or commits; no partial snapshot is returned.
 
 Inherited `GIT_PAGER` is also a rejected `GIT_*` override, even though the Git
 child uses `--no-pager` and a fixed environment. The diagnostic names a bounded
@@ -176,6 +194,15 @@ the CLI/API instead of guessing a serializer. The embedded work_id must match
 metadata, and metadata requirement_ids must cover every question/finding ID;
 the registry then checks those requirements against the immutable Work.
 
+For a successful MCP `discovery_snapshot` result, decode `native_stdout_base64`,
+verify the exact bytes against `native_stdout_sha256`, and parse those original
+bytes while preserving JSON member order. Use that snapshot in the assessment
+submitted to `native_validate(kind=discovery)` or `discovery_read(operation=validate)`.
+Do not rebuild it from the convenience `native_reply`: MCP JSON serialization
+may sort its keys. The raw stdout hash verifies the returned bytes; the native
+validator's separate `snapshot_digest` is the value for document
+`source_snapshot`. Neither hash proves the truth of investigation or QA claims.
+
 The agent attaches the assessment object and fills metadata as in Phase 21:
 
 ```sh
@@ -216,3 +243,10 @@ path/secret/symlink/size denial, malformed metadata, research limits, reading
 scope, evidence-only confirmation, permission readiness, report escaping,
 registration, CAS corruption/replay and C ownership. Discovery schemas also run
 through the document mutation/fuzz harness; it never runs snapshot subprocesses.
+HEAD failure fixtures cover an unborn repository, a non-Git directory and a later
+index failure, preserving files and distinguishing conditional guidance from a
+diagnosis. The managed bootstrap fixture additionally captures a disposable Git
+repository through the exact D4 MCP path, restores original stdout ordering and
+registers scope/selection before session start. That native-backed fixture is
+separate from synthetic parser samples, actual client E2E and product QA; it ends
+at `CLAIM_REQUIRED`, without claiming development or completion.

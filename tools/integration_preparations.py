@@ -28,7 +28,13 @@ PLAN_ID={'type':'string','pattern':'^[a-f0-9]{32}$','maxLength':32}
 PLAN_ARGS={**WORK,'plan_id':PLAN_ID,'plan_sha256':c.DIGEST}
 SCHEMAS={
  'inputs_prepare':c.obj({**CREATE,'selection_id':c.ID,'target_kind':c.ID,'source_snapshot':c.DIGEST,'byte_budget':{'type':'integer','minimum':1,'maximum':131072}}),
- 'action_prepare':c.obj({**CREATE,'tool':c.enum(*actions.NAMES),'session_id':c.ID,'native_binding_id':actions.LABEL,'fields_json':JSON,'body':TEXT,'context_json':TEXT,'count_json':TEXT}),
+ 'action_prepare':c.obj({**CREATE,'tool':c.enum(*actions.NAMES),
+     'session_id':{**c.ID,'description':'Required nonempty action session selector, not proof of a started session.'},
+     'native_binding_id':{**actions.LABEL,'description':'Exact binding selector; empty when the selected action needs no binding.'},
+     'fields_json':{**JSON,'description':'JSON object for the selected tool. discovery_snapshot requires plan_json (an encoded native discovery plan). document_submit schema 2 requires assessment and actual Markdown body; preserve native snapshot member order. Never substitute Git HEAD for source_snapshot or fabricate native fences.'},
+     'body':{**TEXT,'description':'Actual Markdown for document_submit; empty for discovery_snapshot and session_start.'},
+     'context_json':{**TEXT,'description':'Use the empty string when unused, including discovery_snapshot, document_submit and session_start; not an empty JSON object.'},
+     'count_json':{**TEXT,'description':'Use the empty string when unused, including discovery_snapshot, document_submit and session_start; not an empty JSON object.'}}),
  'contract_prepare':c.obj({**CREATE,'kind':c.enum('session','document','execution','completion','reentry','role','template','discovery','profile','capsule','binding_request','role_request','approval_request','work_specification','research','redaction'),'request_json':JSON,'body_text':TEXT}),
  'approved_action_prepare':c.obj({**CREATE,'action_id':c.ID}),
  'plan_read':c.obj(PLAN_ARGS),
@@ -142,6 +148,27 @@ def public_plan(plan):
     return value
 
 
+def presentation(plan,digest,*,current=False):
+    """Explain an immutable preparation without asserting native admission."""
+    payload=plan['payload'];missing=payload.get('questions',[])
+    result={'preparation_state':'INPUTS_REQUIRED' if missing else ('CURRENT_BASIS_REVIEW_REQUIRED' if current else 'REVIEW_REQUIRED'),
+            'execution_authorized':False,
+            'readiness':{'missing_inputs':[q['field'] for q in missing],
+                         'validation_scope':payload.get('validation',{}).get('validation_scope','NOT_APPLICABLE'),
+                         'native_preconditions':'NOT_CERTIFIED','live_source_scan':'NOT_RUN'}}
+    if payload['kind']=='DRAFT_ACTION':
+        separate=payload['entry_review']['tool'] in ('helper_execute','candidate_request','workspace_request')
+        result['owner_handoff']={'route':'SEPARATE_OWNER_CONTRACT' if separate else 'LOCAL_OWNER_EXACT_ACTION_REVIEW',
+            'ready_for_candidate_review':not missing and not separate,
+            'reference':{'project_id':plan['project_id'],'work_id':plan['work_id'],'plan_id':plan['plan_id'],'plan_sha256':digest},
+            'action_id':None,'owner_registration':'NOT_PERFORMED','policy_applied':False,
+            'owner_app_connection':'NOT_OBSERVED','same_live_service_required':True,
+            'next_step':'SUPPLY_MISSING_INPUTS_WITH_NEW_PREPARATION_ID' if missing else ('REVIEW_SEPARATE_EFFECTS_CONTRACT' if separate else 'OWNER_SELECTS_EXACT_ACTION_ID_AND_SAVES_UNAPPLIED_CANDIDATE'),
+            'after_candidate':'OWNER_SELECTS_EXACT_POLICY_BYTES_SEPARATELY_BEFORE_APPROVED_ACTION_PREPARE',
+            'automatic_retry_allowed':False}
+    return result
+
+
 def seal(service,scope,args,observed,basis,payload):
     capacity=backend._quota(service.registry.root,1)
     admit_plan(service)
@@ -155,7 +182,7 @@ def seal(service,scope,args,observed,basis,payload):
           'execution_authorized':False,'approval_created':False,'native_state_changed':False}
     raw=c.encoded(plan);c.require(len(raw)<=MAX_PLAN_BYTES,'PREPARATION_SIZE_LIMIT')
     response={'view':'preparation','plan_id':plan_id,'plan_sha256':c.sha(raw),'plan':public_plan(plan),
-              'preparation_state':'REVIEW_REQUIRED','lifetime':'SERVICE_INSTANCE_30_MINUTES_AND_UNCHANGED_BASIS',
+              **presentation(plan,c.sha(raw)),'lifetime':'SERVICE_INSTANCE_30_MINUTES_AND_UNCHANGED_BASIS',
               'read_slots':{'basis':4,'revalidation':4,'validator':1},'content_role':'UNTRUSTED_DATA'}
     c.require(len(c.encoded(response))+2048<=service.transfer.value['max_result_bytes'],'RESULT_BUDGET_EXCEEDED')
     c.require(capacity['remaining']['bytes']>=len(raw)+len(c.encoded(args))+c.LIMIT and capacity['remaining']['entries']>=4,'AUDIT_QUOTA')
@@ -205,7 +232,7 @@ def review_plan(service,scope,args,confirm=False):
         import integration_parallel_preparations as parallel_preparations
         basis=parallel_preparations.reobserve(service,scope,plan,basis)
     compare_basis(plan,basis)
-    result=confirmed(service,scope,args,plan) if confirm else {'view':'preparation','plan_id':args['plan_id'],'plan_sha256':args['plan_sha256'],'plan':public_plan(plan),'preparation_state':'CURRENT_BASIS_REVIEW_REQUIRED','execution_authorized':False}
+    result=confirmed(service,scope,args,plan) if confirm else {'view':'preparation','plan_id':args['plan_id'],'plan_sha256':args['plan_sha256'],'plan':public_plan(plan),**presentation(plan,args['plan_sha256'],current=True)}
     if plan['payload']['kind']=='OWNER_ACTION':
         entry,value,_=owner_action(service,{**args,'action_id':plan['payload']['entry']['action_id']})
         c.require(entry==plan['payload']['entry'] and entry['action']['sha256']==plan['payload']['action_sha256'],'PREPARATION_ACTION_CHANGED')

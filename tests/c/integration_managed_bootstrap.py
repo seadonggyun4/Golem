@@ -4,6 +4,7 @@ Usage: python3 integration_managed_bootstrap.py NATIVE_CLI SOURCE_ROOT
 The local owner policy is constructed only inside this test's temporary directory.
 Discovery statements are explicitly synthetic; CAS integrity is not their truth.
 """
+import base64
 import copy
 import json
 import subprocess
@@ -184,6 +185,85 @@ class ManagedBootstrap(workflow.Workflow):
         result = self.exact_envelope('session_start', start_action)
         self.assert_exact_dispatch(result, start_action)
         self.assertEqual(len(list(self.registry.root.glob('mutation-*'))), 3)
+        status = self.read('work_inspect', view='status')
+        self.assertEqual(status['sequence'], 1)
+        self.assertIsNone(status['state']['active'])
+        self.assertEqual(status['state']['attempts'], 0)
+        self.assertEqual(self.read('work_inspect', view='next')['reason'], 'CLAIM_REQUIRED')
+        self.assertEqual({row['document_id'] for row in self.read('work_inspect', view='record')['documents']},
+                         {'scope', 'selection'})
+
+    def test_exact_mcp_source_capture_to_scope_selection_and_session_start(self):
+        # This repository and all exact owner actions exist only in the disposable
+        # fixture. Capture is the real D4/native path, not the sample's zero hashes.
+        git_env = {**workflow.ENV, 'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': '/dev/null',
+            'GIT_AUTHOR_DATE': '2000-01-01T00:00:00Z', 'GIT_COMMITTER_DATE': '2000-01-01T00:00:00Z'}
+        def git(*args):
+            return subprocess.run(['/usr/bin/git', '-C', str(self.project),
+                '-c', 'core.hooksPath=/dev/null', '-c', 'core.fsmonitor=false', *args],
+                check=True, capture_output=True, env=git_env).stdout.decode().strip()
+        git('init')
+        git('config', 'user.name', 'Fixture')
+        git('config', 'user.email', 'fixture@example.invalid')
+        (self.project / 'code.c').write_text('synthetic bootstrap source\n')
+        git('add', 'code.c')
+        git('commit', '-m', 'disposable bootstrap baseline')
+        head, source_bytes = git('rev-parse', 'HEAD'), (self.project / 'code.c').read_bytes()
+        plan = {'schema_version': 1, 'timeout_seconds': 60, 'repositories': [{
+            'id': 'fixture-repo', 'root': str(self.project), 'paths': ['code.c'],
+            'toolchain': 'Synthetic source; no compiler invocation.',
+            'test_configuration': 'No product commands or QA performed.'}]}
+        before = self.inventory()
+        self.assertNotIn('discovery_snapshot', self.api.tools())
+        capture_action = self.prepare('discovery_snapshot', {'plan_json': json.dumps(plan)},
+                                      name='draft-source-capture')
+        captured = self.exact_envelope('discovery_snapshot', capture_action, name='capture-source')
+        self.assert_exact_dispatch(captured, capture_action)
+        self.assertFalse(captured['execution_authorized'])
+        self.assertFalse(captured['acceptance_verified'])
+        self.assertEqual(before, self.inventory())
+        self.assertEqual(head, git('rev-parse', 'HEAD'))
+        self.assertEqual(source_bytes, (self.project / 'code.c').read_bytes())
+
+        # MCP JSON presentation can reorder object members. Only the preserved
+        # native bytes carry the capture ordering used by the native digest.
+        wire_reply = c.decode(c.encoded(captured))
+        raw = base64.b64decode(wire_reply['native_stdout_base64'], validate=True)
+        self.assertEqual(c.sha(raw), wire_reply['native_stdout_sha256'])
+        snapshot = json.loads(raw)
+        self.assertEqual(snapshot, wire_reply['native_reply'])
+        repo = snapshot['repositories'][0]
+        self.assertEqual(repo['head'], head)
+        self.assertEqual(repo['files'][0]['digest'], c.sha(source_bytes))
+        self.assertTrue(repo['files'][0]['tracked'])
+        self.assertFalse(repo['files'][0]['dirty'])
+        self.a['snapshot'] = snapshot
+        self.a['findings'][0].update(repository_id='fixture-repo', path='code.c')
+        validated = self.read('native_validate', kind='discovery', request_json=json.dumps(self.a))
+        self.assertTrue(validated['scope_ready'])
+        self.assertFalse(validated['execution_authorized'])
+        self.assertFalse(validated['acceptance_verified'])
+        self.source = validated['snapshot_digest']
+        self.assertEqual(len(self.source), 64)
+        self.assertNotEqual(self.source, head)
+
+        metadata = self.metadata_v2()
+        body = self.read('discovery_read', operation='report', kind='scope',
+                         request_json=json.dumps(self.a))
+        scope_action = self.prepare('document_submit', self.document_fields(metadata), body,
+                                    name='captured-draft-scope')
+        self.assertEqual(c.decode(scope_action['native_json'].encode())['source_snapshot'], self.source)
+        self.submit(metadata, envelope=scope_action)
+        selection = self.select()
+        selected = self.selection_metadata(selection)
+        selection_action = self.prepare('document_submit', self.document_fields(selected),
+            self.body('stage-selection', selected['parents']), name='captured-draft-selection')
+        self.submit(selected, envelope=selection_action)
+        start_action = self.prepare('session_start', {'selection_id': 'selection'},
+                                    name='captured-draft-start')
+        started = self.exact_envelope('session_start', start_action)
+        self.assert_exact_dispatch(started, start_action)
+        self.assertEqual(len(list(self.registry.root.glob('mutation-*'))), 4)
         status = self.read('work_inspect', view='status')
         self.assertEqual(status['sequence'], 1)
         self.assertIsNone(status['state']['active'])

@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "beded9c1bae898d066051813aeac1aac79280294e49d01547c6b932c6899deeb",
+  "inventory_sha256": "1a5d5036444007bdeb6cbdf87ad03075748e95286a110dffb2daae75be93d8a5",
   "selected_source_count": 636,
   "selected_observation_count": 2404,
   "selected_capability_count": 1270,
@@ -4512,7 +4512,7 @@
     },
     {
       "path": "src/discovery/snapshot.c",
-      "sha256": "acb7501aba7bd05f8098cf3b4ab3938b2aae95260922c3dc8f1340e9a30bc8d5"
+      "sha256": "c1fb7e9648a196683db5ac7214735ac3abed698ba9fe622a5034b694b018385c"
     },
     {
       "path": "src/document/internal.h",
@@ -5408,7 +5408,7 @@
     },
     {
       "path": "docs/discovery.md",
-      "sha256": "88f89ab9a0a4d948d4274513fad43b89d46f40be87ceefcd22377bcc8d1a7a95"
+      "sha256": "0186b2bce9d2fc960e76c1e931bf668d243082f0b19ef5f7a16b8c2025ba7e3b"
     },
     {
       "path": "tests/c/test_discovery.c",
@@ -5684,7 +5684,7 @@
     },
     {
       "path": "tools/integration_preparations.py",
-      "sha256": "57e19481a8dbbd476c2e8ceb54a887d9c4c757b2ac3733dbc2f0b8ea4454dc83"
+      "sha256": "aef7690a1b4b85187e9259989739c0dc54b463a14fc12c2770d53b0992f7320a"
     },
     {
       "path": "tools/integration_prepare_builders.py",
@@ -5692,7 +5692,7 @@
     },
     {
       "path": "tools/test_integration_m2.py",
-      "sha256": "ba99e60a2da66ed6d09797f98d4192a783b4c80193a1d174d8ac6f818273aef1"
+      "sha256": "88726c17dbc60a09502c2ccea37e426154f96809e7522e95083b71a2e926a95b"
     },
     {
       "path": "tools/test_capability_m2.py",
@@ -5772,7 +5772,7 @@
     },
     {
       "path": "tools/integration_feature_profiles.py",
-      "sha256": "b15f236a0b5c1b8fc97e083355e274c01a87698230e465a21690cb59379ff8a5"
+      "sha256": "d24ade9fb7417d46111a19d97275ada6394973430ff233ce4233d55db427c15c"
     },
     {
       "path": "tools/integration_distribution.py",
@@ -5800,7 +5800,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "9ddfb355694934e4b6bc6f07c05798131e5f5b1b348e4c563fe2c6dc8a1de09a"
+      "sha256": "3cb8196b2a176ca565cf43cd808fd5490e04316d799ae5d3a5fa17ab5684f733"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -6124,11 +6124,11 @@
     },
     {
       "path": "docs/mcp-managed-bootstrap.ko.md",
-      "sha256": "3615305bde962931b16cac557d43e67cec00c1a8cdd18da51a3033b2ad66bbbd"
+      "sha256": "97359d84125f0a71511c4a973225755ad764f3ecf39308d35b41ad26bb27ca4b"
     },
     {
       "path": "tests/c/integration_managed_bootstrap.py",
-      "sha256": "d80b7e3112c2ab2887ebe7ac74aca77c81b63941b1ca399757d0ebbff06e5c0e"
+      "sha256": "3d4a23bfe8a457ff00a03d52be87a9518de50452a4cb0b31ffe250acb578ef06"
     },
     {
       "path": "tools/test_integration_diagnostics.py",
@@ -6140,7 +6140,7 @@
     },
     {
       "path": "tests/c/discovery_integration.py",
-      "sha256": "f261617456858c71b5c8756323e40a0ee772f18488aab8e22cf47a0e6a7eba97"
+      "sha256": "e3cbec1d09f02505bfa804389586893213e5579f1a4b113acb0018a0721c29ae"
     },
     {
       "path": "tools/test_intent_schema_golden.py",
@@ -12205,7 +12205,7 @@
         "inputs_prepare",
         "plan_read"
       ],
-      "checked_functions": 29,
+      "checked_functions": 30,
       "backlog_dependencies": 134,
       "retained_delivery_milestones": [
         [
@@ -12322,7 +12322,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 136,
+      "checked_functions": 137,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -53152,6 +53152,7 @@
         "observe",
         "owner_action",
         "owner_available",
+        "presentation",
         "public_plan",
         "read",
         "request_identity",
@@ -53226,11 +53227,27 @@
         ],
         [
           "Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "DRAFT_ACTION"
+        ],
+        [
+          "Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
           "OWNER_ACTION"
         ],
         [
           "Subscript(value=Name(id='plan', ctx=Load()), slice=Constant(value='schema'), ctx=Load())",
           "golem.integration-preparation.v1"
+        ],
+        [
+          "Subscript(value=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='entry_review'), ctx=Load()), slice=Constant(value='tool'), ctx=Load())",
+          "candidate_request"
+        ],
+        [
+          "Subscript(value=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='entry_review'), ctx=Load()), slice=Constant(value='tool'), ctx=Load())",
+          "helper_execute"
+        ],
+        [
+          "Subscript(value=Subscript(value=Name(id='payload', ctx=Load()), slice=Constant(value='entry_review'), ctx=Load()), slice=Constant(value='tool'), ctx=Load())",
+          "workspace_request"
         ],
         [
           "Subscript(value=Subscript(value=Name(id='plan', ctx=Load()), slice=Constant(value='payload'), ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
@@ -54048,7 +54065,8 @@
         "Scoped.call",
         "Scoped.tools",
         "definition",
-        "diagnose"
+        "diagnose",
+        "managed_bootstrap_guidance"
       ],
       "declarations": [],
       "literal_branches": [
@@ -64312,7 +64330,7 @@
     },
     {
       "path": "tools/capability_m2_registry.py",
-      "sha256": "92c57bbbd5911984e2f1917ece2a79ceb487b4702b149021a377e47bf00dad36",
+      "sha256": "c36bb7ed35b028c278440c93eed6a70b01d5c5ddf417410ac18757a55423a117",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64330,7 +64348,7 @@
     },
     {
       "path": "tools/capability_m3_registry.py",
-      "sha256": "82262037e100430dcf402a6ff3ee1422d24adfc614443f531d635db870f666ef",
+      "sha256": "fa396bb5010c9c8f1a31508a59ac18818555328e5112b129b2a74742d2841c98",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64348,7 +64366,7 @@
     },
     {
       "path": "tools/capability_m4_registry.py",
-      "sha256": "8824b85b074e22b716239aa41a4c94de94004640e1876009a4c31b596fb77612",
+      "sha256": "204e1ae3f2ae6b1dbfc1d5630ed8e2387a5d686f51b3bf675dd80cfa0b084d79",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64366,7 +64384,7 @@
     },
     {
       "path": "tools/capability_m5_registry.py",
-      "sha256": "a0b4e58e3029afea8c0f794bbffd84a01c64a562ddcbf36b86a7e59a97b4f344",
+      "sha256": "b5fa0795974004e9b1f1171d1f4e617d742a2d67cb8ce62fff166a82afd40c2d",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64384,7 +64402,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "9effff30268dda0b7e47c914825d163826b88eab71c1712b5b2aad7e78a0c518",
+      "sha256": "5a9cb24615e5c1b9feaea0552650c437c705d6190ddfcb1376e38d425ec6d554",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64408,7 +64426,7 @@
     },
     {
       "path": "tools/capability_native_registry.py",
-      "sha256": "dd87cd7b7e254c03285aeaeec7ab5a31464c7132d2de0097cb269a2b624d4cff",
+      "sha256": "4bd97cf43eececc203f7f1df92f6843d8e036ef0a51ad502b197b3211cacd091",
       "shape_sha256": "2ebad2aa2187d7758c167ade4dcb2c5893dde0b1822fe46c7c4af1dde8aeba1a",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64480,7 +64498,7 @@
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "8c4ae6136d44531daaa7a33f9413f15ada217ffa59fa69b8c60f2dd7e1de60b7",
+      "sha256": "a5ac5e14f1b9015f42a2729182e110e2e631641ac4c1d95f6452182c5bcf71aa",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64528,7 +64546,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "3a04485ecd6bf6dc24bbdeb590d0ea3136cb5c53afd4b79510192c496d374628",
+      "sha256": "486db3d273969b4ca3d97abbfb7ef7bc2f87e6757ddbd4f6cb8f3f5064e4b270",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -64798,7 +64816,7 @@
     },
     {
       "path": "tools/test_integration_m2.py",
-      "sha256": "ba99e60a2da66ed6d09797f98d4192a783b4c80193a1d174d8ac6f818273aef1",
+      "sha256": "88726c17dbc60a09502c2ccea37e426154f96809e7522e95083b71a2e926a95b",
       "shape_sha256": "d99e56f278c07e134247ef3be1cb946438e7f9f4a0a2bff7ba313be1a547783a",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -64822,7 +64840,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "9ddfb355694934e4b6bc6f07c05798131e5f5b1b348e4c563fe2c6dc8a1de09a",
+      "sha256": "3cb8196b2a176ca565cf43cd808fd5490e04316d799ae5d3a5fa17ab5684f733",
       "shape_sha256": "229f03b8755734b621536982445ca6330de50865d2787da1f1aaa7b01abba5f7",
       "role": "M0_FIXTURE_REGRESSION"
     },

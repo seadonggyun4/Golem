@@ -245,11 +245,50 @@ class Discovery(unittest.TestCase):
         before = {str(p.relative_to(repo)): p.read_bytes() for p in repo.rglob("*") if p.is_file()}
         result = self.cli("discovery", "snapshot", plan, ok=False)
         self.assertEqual(result.stdout, b"")  # No partial/guessed source snapshot.
+        error = json.loads(result.stderr.decode().splitlines()[-1])
+        self.assertEqual(error["code"], "GOLEM_ERR_INCOMPLETE_WORK")
+        self.assertEqual(error["phase"], "discovery_snapshot")
+        self.assertTrue(error["diagnostic"].startswith("discovery.head_unavailable:"))
+        self.assertIn("cause not classified", error["diagnostic"])
+        self.assertIn("If unborn", error["diagnostic"])
+        self.assertIn("explicit owner approval for an initial commit", error["diagnostic"])
+        self.assertIn("no automatic commit or retry", error["diagnostic"])
+        self.assertFalse(error["diagnostic_truncated"])
+        self.assertFalse(error["retry_effect"])
         self.assertEqual(before, {str(p.relative_to(repo)): p.read_bytes() for p in repo.rglob("*") if p.is_file()})
         head = subprocess.run(["/usr/bin/git", "-C", str(repo), "rev-parse", "--verify", "HEAD"],
                               capture_output=True, env=ENV)
         self.assertNotEqual(head.returncode, 0)
         self.assertFalse((repo / ".git/index").exists())
+
+    def test_unavailable_head_does_not_claim_non_git_directory_is_unborn(self):
+        repo = self.root / "private-non-git-directory"
+        repo.mkdir()
+        (repo / "code.c").write_text("fixture source\n")
+        before = {str(p.relative_to(repo)): p.read_bytes() for p in repo.rglob("*") if p.is_file()}
+        result = self.cli("discovery", "snapshot", self.write("non-git-plan.json", self.plan([repo], ["code.c"])), ok=False)
+        error = json.loads(result.stderr.decode().splitlines()[-1])
+        self.assertEqual(error["code"], "GOLEM_ERR_INCOMPLETE_WORK")
+        self.assertTrue(error["diagnostic"].startswith("discovery.head_unavailable:"))
+        self.assertIn("cause not classified", error["diagnostic"])
+        self.assertIn("If unborn", error["diagnostic"])
+        self.assertNotIn(str(repo), error["diagnostic"])
+        self.assertFalse(error["retry_effect"])
+        self.assertEqual(result.stdout, b"")
+        self.assertFalse((repo / ".git").exists())
+        self.assertEqual(before, {str(p.relative_to(repo)): p.read_bytes() for p in repo.rglob("*") if p.is_file()})
+
+    def test_later_git_failure_is_not_reported_as_unavailable_head(self):
+        repo, _ = self.repo("corrupt-index")
+        (repo / ".git/index").write_bytes(b"invalid fixture index\n")
+        before = {str(p.relative_to(repo)): p.read_bytes() for p in repo.rglob("*") if p.is_file()}
+        result = self.cli("discovery", "snapshot", self.write("bad-index-plan.json", self.plan([repo], ["code.c"])), ok=False)
+        error = json.loads(result.stderr.decode().splitlines()[-1])
+        self.assertEqual(error["code"], "GOLEM_ERR_INCOMPLETE_WORK")
+        self.assertEqual(error["diagnostic"], "snapshot incomplete; no project writes performed")
+        self.assertFalse(error["retry_effect"])
+        self.assertEqual(result.stdout, b"")
+        self.assertEqual(before, {str(p.relative_to(repo)): p.read_bytes() for p in repo.rglob("*") if p.is_file()})
 
     def test_pager_override_has_safe_actionable_diagnostic(self):
         r, _ = self.repo("pager")
