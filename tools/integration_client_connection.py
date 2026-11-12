@@ -17,6 +17,23 @@ import subprocess
 import time
 import tomllib
 
+
+def adapter_contract():
+    """Use our reviewed adapter payload, never import a selected arbitrary file."""
+    try:
+        import golem_adapter
+        return golem_adapter
+    except ModuleNotFoundError as error:
+        if error.name != 'golem_adapter':
+            raise
+        import importlib.util
+        path = Path(__file__).resolve().parents[1]/'plugins/golem/scripts/launcher.py'
+        require(path.is_file(), 'ADAPTER_INSPECTION_UNAVAILABLE')
+        spec = importlib.util.spec_from_file_location('golem_adapter_contract', path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
 LIMIT = 262144
 MAX_CONNECTIONS = 16
 ENDPOINT_ABSENT = 'CLOSED_ENDPOINT_ABSENT'
@@ -201,8 +218,13 @@ def selected_connection(config_path, server_name='golem-local'):
             Path(args[2]).name == 'launcher.py', 'UNSUPPORTED_ADAPTER_DECLARATION')
     read_file(args[2])
     state = Path(args[7])
-    approval_path = state/'golem-launcher/approval.json'
+    try:
+        inspection = adapter_contract().inspect_state(state, 'codex')
+    except (OSError, ValueError) as error:
+        raise ConnectionError('CONNECTION_APPROVAL_CHANGED') from error
+    approval_path = Path(inspection['approval_path'])
     approval_raw = read_file(approval_path,private=True)
+    require(digest(approval_raw) == inspection['approval_sha256'], 'CONNECTION_APPROVAL_CHANGED')
     approval = decode(approval_raw)
     require(set(approval) == {'schema', 'launcher', 'launcher_sha256'} and
             approval['schema'] == 'golem.codex-launcher.v1' and
@@ -314,6 +336,65 @@ class ConnectionMonitor:
         self.relay = relay
         self.attempted = set()
         self.last = None
+        self.target_observation = None
+        self.refresh_outcome = None
+
+    def clear_target_observation(self):
+        self.target_observation = None
+        self.last = None
+
+    def set_target_observation(self, thread_id, turn_id, marker, tools, required_tools=None):
+        """Explicit external definition observation; never a grant or chat auth.
+
+        The observer copies this from the intended chat's actual inventory. A
+        process ID, saved plan, tool call result or guessed marker is insufficient.
+        Fresh relay metadata is independently compared on every inspect/refresh.
+        """
+        self.target_observation = None
+        for value in (thread_id, turn_id):
+            require(type(value) is str and re.fullmatch(r'[A-Za-z0-9_-]{1,128}', value),
+                    'TARGET_CHAT_ID_REQUIRED')
+        require(type(tools) is list and 0 < len(tools) <= 256 and
+                all(type(t) is str and re.fullmatch(r'golem_[a-z0-9_]{1,120}', t) for t in tools) and len(set(tools)) == len(tools),
+                'TARGET_TOOL_DEFINITIONS_REQUIRED')
+        required_tools = [] if required_tools is None else required_tools
+        require(type(required_tools) is list and len(required_tools) <= 256 and
+                all(type(t) is str and re.fullmatch(r'golem_[a-z0-9_]{1,120}', t) for t in required_tools) and
+                len(set(required_tools)) == len(required_tools), 'REQUIRED_TOOL_DEFINITIONS_INVALID')
+        try:
+            identity = self.relay_client().parse_definition_marker(marker)
+        except (ValueError, AttributeError) as error:
+            raise ConnectionError('TARGET_DEFINITION_MARKER_REQUIRED') from error
+        self.target_observation = {'source':'EXTERNAL_MODEL_DEFINITION_OBSERVATION',
+            'thread_id':thread_id, 'turn_id':turn_id, 'server_name':'golem-local',
+            'marker':identity, 'tools':list(tools), 'required_tools':list(required_tools),
+            'observed_at_ns':time.time_ns()}
+        self.last = None
+
+    def target_matches(self, row):
+        observation = self.target_observation
+        if not observation or row.get('kind') != 'codex-connection-relay':
+            return False
+        try:
+            return (self.relay_client().parse_definition_marker(row.get('definition_marker')) ==
+                    observation['marker'] and row.get('instance') == observation['marker']['instance'] and
+                    row.get('host_kind') in ('ChatGPT','Codex') and row.get('state') == 'READY' and
+                    0 <= time.time_ns() - observation['observed_at_ns'] <= 300_000_000_000)
+        except (ValueError, AttributeError):
+            return False
+
+    def readiness(self, selected, rows):
+        from integration_connection_readiness import classify
+        model = self.target_observation
+        if model is None:
+            return {'state':'BLOCKED','reason':'TARGET_CHAT_OBSERVATION_REQUIRED',
+                    'preparation_allowed':False,'execution_authorized':False}
+        matches = [row for row in rows if self.target_matches(row)]
+        live = dict(matches[0], observed_at_ns=time.time_ns(),
+                    definition_nonce=model['marker']['definition_nonce']) if len(matches) == 1 else None
+        return classify(selected=selected, target={key:model[key] for key in ('thread_id','server_name')},
+                        live=live, model=model, refresh=self.refresh_outcome, now_ns=time.time_ns(),
+                        required_tools=model['required_tools'])
 
     def observe(self):
         # Import only when explicitly inspecting; headless MCP startup remains UI-free.
@@ -438,17 +519,25 @@ class ConnectionMonitor:
                 catalog = validate_host_catalog(value['host_catalog']) if 'host_catalog' in value else None
                 require(catalog is None or value['state'] != 'READY' or catalog['child_generation'] >= 1,
                         'RELAY_HOST_CATALOG_FIELDS')
+                if value.get('definition_marker') is not None:
+                    marker = relay.parse_definition_marker(value['definition_marker'])
+                    require(marker['instance'] == value['instance'] and catalog is not None and
+                            all(marker[key] == catalog[key] for key in ('child_generation','catalog_generation')),
+                            'RELAY_DEFINITION_MARKER_MISMATCH')
                 require(relay.endpoint(descriptor['instance']) == descriptor, 'RELAY_IDENTITY_CHANGED')
                 row.update({key:value.get(key) for key in ('pid','instance','state','busy','plugin_version',
-                    'selected_state','launcher_sha256','approval_sha256')}, **self.ancestry(value['pid']))
+                    'selected_state','launcher_sha256','approval_sha256','definition_marker',
+                    'definition_tools_sha256','definition_tool_count')}, **self.ancestry(value['pid']))
                 row['host_catalog'] = catalog
                 same = (value['launcher_sha256'], value['approval_sha256'],value['selected_state']) == (
                     selected['launcher_sha256'],selected['approval_sha256'],selected['adapter_state'])
                 row['relay_current'] = (same and value['state'] == 'READY' and
                     row.get('host_kind') in ('ChatGPT','Codex') and value['plugin_version'] == selected['package_version'])
-                row['refreshable'] = (not same and value['state'] == 'READY' and not value['busy']
+                row['refresh_candidate'] = (not same and value['state'] == 'READY' and not value['busy']
                     and row.get('host_kind') in ('ChatGPT','Codex')
                     and value['plugin_version'] == selected['package_version'])
+                row['target_bound'] = self.target_matches(row)
+                row['refreshable'] = row['refresh_candidate'] and row['target_bound']
             except Exception as error:
                 row.update(state='RELAY_UNAVAILABLE',reason=getattr(error,'code','RELAY_OBSERVATION_UNAVAILABLE'))
             result.append(row)
@@ -482,12 +571,15 @@ class ConnectionMonitor:
         # Injected observers are complete deterministic fixture observations.
         if self.observer is None or self.relay is not None:
             rows.extend(self.observe_relays(selected))
-        host = self.control.inspect(server_name='golem-local') if self.control else {
+        host = self.control.inspect(server_name='golem-local', **(
+            {'thread_id':self.target_observation['thread_id']} if self.target_observation else {})) if self.control else {
             'verified_desktop':False,'reload_supported':False,'reason':'SUPPORTED_CONTROL_UNAVAILABLE'}
         require(digest(read_file(self.config_path, private=True)) == selected['config_sha256'], 'CONNECTION_CONFIG_CHANGED')
         state, mode = compare(selected, rows, host)
         if any(row.get('refreshable') for row in rows):
             state, mode = 'GOLEM_REFRESH_REQUIRED', 'GOLEM_RELAY_AVAILABLE'
+        elif any(row.get('refresh_candidate') for row in rows):
+            state, mode = 'TARGET_NOT_IDENTIFIED', 'TARGET_NOT_IDENTIFIED'
         rows.sort(key=display_order)
         kinds = {r.get('host_kind') for r in rows if r.get('host_kind') in ('ChatGPT','Codex')}
         kind = next(iter(kinds)) if len(kinds)==1 else None
@@ -507,6 +599,10 @@ class ConnectionMonitor:
                      '선택된 정확한 launcher·승인 지문을 다시 검사해 새 child를 시작하고 도구 목록 변경을 알립니다.',
                      '변경 알림만으로 호스트가 목록을 다시 읽는다고 가정하지 않습니다. 호스트 목록 관측과 모델 전달은 각각 확인합니다.',
                      '연결 갱신과 모델의 도구 전달은 별개입니다. 실패·응답 유실은 자동 재시도하지 않습니다.']
+        if mode == 'TARGET_NOT_IDENTIFIED':
+            steps = ['현재 대화의 실제 도구 정의에서 연결 표식과 도구 이름을 확인합니다. Work 호출은 하지 않습니다.',
+                     '대화·turn·표식을 대조한 행만 갱신 대상으로 선택할 수 있습니다. PID·준비안·수동 행 선택만으로 갱신하지 않습니다.',
+                     '구버전/표식 미전달 호스트는 대상 미확인으로 보존합니다. 지원되는 호스트 경로 없이 임의 연결을 갱신하지 않습니다.']
         if mode == 'OBSERVATION_INCOMPLETE':
             steps = ['일부 연결을 관찰하지 못했습니다. 관찰한 행과 미확인 사유를 확인합니다.',
                      '활성·불확실 후보는 기록의 수정 시각이 최근인 순서로 최대 16개만 관찰합니다. 시각은 신원·최신성 인증이 아닙니다.',
@@ -515,10 +611,16 @@ class ConnectionMonitor:
         report.update(state=state, summary='디스크 선택과 실제 서버 연결을 대조했습니다. 모델 전달·실행 권한은 별도입니다.',
                       selected=selected, connections=rows, host_control=host,
                       reload={'mode':mode,'reason':host.get('reason','실제 활성 연결과 선택 지문 대조'),'steps':steps})
+        report['target_bound'] = any(self.target_matches(row) for row in rows)
+        report['readiness'] = self.readiness(selected, rows)
+        if report['readiness'].get('preparation_allowed') is True:
+            report['model_tool_delivery'] = 'EXTERNALLY_OBSERVED_SAME_CHAT_DEFINITIONS'
         report['refresh_token'] = digest(json.dumps({'selected':selected,'mode':mode,
-            'host':host.get('socket_identity'), 'connections':rows}, sort_keys=True).encode())
+            'host':host.get('socket_identity'), 'connections':rows,
+            'target':self.target_observation}, sort_keys=True).encode())
         self.last = report
         return report
+
 
     def request_refresh(self, *, expected_token=None, connection_instance=None):
         report = self.inspect()
@@ -532,28 +634,84 @@ class ConnectionMonitor:
                        row.get('instance') == connection_instance]
             require(len(targets) == 1, 'REFRESH_CONNECTION_SELECTION_REQUIRED')
             row, selected = targets[0], report['selected']
+            require(self.target_matches(row), 'REFRESH_TARGET_NOT_IDENTIFIED')
             attempt = ('relay',connection_instance,selected['launcher_sha256'],selected['approval_sha256'])
             require(attempt not in self.attempted,'REFRESH_ALREADY_ATTEMPTED_NO_RETRY')
             self.attempted.add(attempt)
+            self.refresh_outcome = {'state':'UNKNOWN','attempts':1}
+            # Dispatch invalidates the pre-refresh chat observation even if the
+            # host/relay acknowledges before replacing its catalog. A plain
+            # inspect cannot promote that old turn back to preparation-ready.
+            # Selection/no-dispatch errors above retain the prior observation.
+            self.clear_target_observation()
             result = self.relay_client().request(connection_instance,'refresh',{
                 'expected_launcher_sha256':row['launcher_sha256'],
                 'expected_approval_sha256':row['approval_sha256'],
                 'state':selected['adapter_state'],'approval_sha256':selected['approval_sha256'],
                 'launcher_sha256':selected['launcher_sha256'],'config_sha256':selected['config_sha256']})
+            self.refresh_outcome = {'state':'ACKNOWLEDGED' if result.get('ok') is True else 'FAILED','attempts':1}
             report['reload'] = {'mode':'VERIFY_REQUIRED','reason':'Golem child 갱신 결과와 모델 도구 전달을 별도로 확인합니다.',
                 'steps':['상태 확인으로 새 연결을 대조합니다. 실패나 응답 유실이면 같은 갱신을 재요청하지 않습니다.']}
             report['refresh_result'] = result
+            report['readiness'] = {'state':'BLOCKED','reason':'POST_REFRESH_OBSERVATION_REQUIRED',
+                                   'preparation_allowed':False,'execution_authorized':False}
+            report['model_tool_delivery'] = 'NOT_OBSERVED'
+            report['target_bound'] = False
             self.last = report
             return report
         attempt = ('host',report['host_control']['socket_identity']['inode'])
         require(attempt not in self.attempted, 'REFRESH_ALREADY_ATTEMPTED_NO_RETRY')
         self.attempted.add(attempt)
         # UI requires an explicit host-wide consent checkbox before this method.
+        self.refresh_outcome = {'state':'UNKNOWN','attempts':1}
+        self.clear_target_observation()
         result = self.control.reload(allow_host_wide=True,
                                      expected_socket_identity=report['host_control']['socket_identity'])
+        self.refresh_outcome = {'state':{'REFRESH_QUEUED':'ACKNOWLEDGED',
+                                'REFRESH_UNKNOWN':'UNKNOWN'}.get(result.get('state'),'FAILED'),'attempts':1}
         report['reload'] = {'mode':'REFRESH_QUEUED' if result.get('state') == 'REFRESH_QUEUED' else 'VERIFY_REQUIRED',
                             'reason':'공식 요청의 접수와 실제 Desktop 반영은 다릅니다. 자동 재시도하지 않습니다.',
                             'steps':['상태 확인으로 실제 활성 연결을 대조합니다. 같은 갱신 요청을 재실행하지 않습니다.']}
         report['refresh_result'] = result
+        report['readiness'] = {'state':'BLOCKED','reason':'POST_REFRESH_OBSERVATION_REQUIRED',
+                               'preparation_allowed':False,'execution_authorized':False}
+        report['model_tool_delivery'] = 'NOT_OBSERVED'
+        report['target_bound'] = False
         self.last = report
         return report
+
+def main(argv=None):
+    """Owner-local read-only check. No refresh/config selection/Work dispatch."""
+    import argparse
+    parser = argparse.ArgumentParser(description=main.__doc__)
+    parser.add_argument('--config', required=True, type=Path)
+    parser.add_argument('--review-directory', required=True, type=Path)
+    parser.add_argument('--model-observation', type=Path)
+    parser.add_argument('--model-observation-sha256')
+    args = parser.parse_args(argv)
+    try:
+        require(bool(args.model_observation) == bool(args.model_observation_sha256),
+                'MODEL_OBSERVATION_PIN_REQUIRED')
+        monitor = ConnectionMonitor(args.config, args.review_directory)
+        if args.model_observation:
+            raw = read_file(args.model_observation, private=True)
+            require(digest(raw) == args.model_observation_sha256, 'MODEL_OBSERVATION_CHANGED')
+            observation = decode(raw)
+            require(type(observation) is dict and set(observation) == {'thread_id','turn_id','marker','tools','required_tools','observed_at_ns'},
+                    'MODEL_OBSERVATION_FIELDS')
+            require(type(observation['observed_at_ns']) is int and
+                    0 <= time.time_ns() - observation['observed_at_ns'] <= 300_000_000_000,
+                    'MODEL_OBSERVATION_STALE')
+            monitor.set_target_observation(**{k:v for k,v in observation.items() if k != 'observed_at_ns'})
+            monitor.target_observation['observed_at_ns'] = observation['observed_at_ns']
+        report = monitor.inspect()
+        print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+        return 0 if report.get('readiness', {}).get('preparation_allowed') is True else 2
+    except (ValueError, OSError) as error:
+        print(json.dumps({'state':'BLOCKED','reason':getattr(error,'code','CONNECTION_CHECK_FAILED'),
+                          'preparation_allowed':False,'execution_authorized':False}))
+        return 2
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

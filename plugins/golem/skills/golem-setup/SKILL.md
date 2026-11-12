@@ -36,6 +36,10 @@ verify reload and calls separately.
    The Desktop bundle selects `--client claude-desktop`; its explicit configured
    `--state` overrides the adapter's `~/.local/share/golem/claude-desktop-plugin`
    default and must contain a separately reviewed Desktop launcher record.
+   Use `inspect-state --client CLIENT --state PATH` for the adapter's validated
+   approval location and exact pins. Do not assume `STATE/approval.json` or
+   duplicate the adapter's private storage layout in a maintenance controller.
+   This read-only inspection neither starts a service nor configures a launcher.
 2. If unconfigured, locate the launcher explicitly selected by the owner. Export
    only its exact absolute `command` and string `args` into a new owner-private
    JSON file (0600). Do not copy a whole config, credentials or approval registry.
@@ -49,24 +53,33 @@ verify reload and calls separately.
    --reviewed-launcher-sha256 DIGEST --approve-launcher`. This records a reviewed
    local command, not project grants. The existing launcher still enforces its
    native/runtime/producer/policy pins. Never rewrite those pins to fix startup.
-4. Recheck `status` with the same client selector. Owner's Codex connection panel
-   compares disk selection with live services. A running relay can refresh one
-   explicitly selected, idle transport to an already approved/configured state.
-   Old adapters need a supported initial reconnect; when unavailable, use the
-   exact normal host restart guidance. A new conversation alone is not a reload.
-   Preserve ongoing client sessions. Inspect
-   actual tool exposure. Only if calls are authorized, call `golem_projects_list`
-   and an explicitly granted Work; otherwise record calls as NOT_RUN. Confirm the
-   returned tool scope rather than inferring it from the package.
-   `tools/list_changed` or a reload ACK is not proof of model tool delivery.
+4. Recheck `status` with the same client selector. Keep four observations separate:
+   disk selection, the intended live connection, the host's current catalog, and
+   definitions actually delivered in the intended chat. Owner's Codex connection
+   panel accepts an external observation of that chat ID, turn ID, exact marker
+   and actual tool names. Copy the opaque
+   `golem-connection-v1:INSTANCE:CHILD_GENERATION:CATALOG_GENERATION:NONCE`
+   marker from the first tool definition; never invent one or substitute a marker
+   read from a local diagnostic. The marker is correlation data, not an approval,
+   secret credential or authenticated chat identity. The panel checks it against
+   one live relay and the current catalog. Absent, stale, ambiguous or mismatching
+   observations leave delivery unverified and block choosing a transport by guess.
+   A service owning a plan, or sharing the Desktop PID, is insufficient.
+   A verified target's idle relay may refresh only that connection to the already
+   reviewed/configured state. It cannot replace its own installed adapter code.
+   Old adapters or a missing marker need a supported initial host reconnect;
+   an unavailable official control socket is an explicit unsupported path, not
+   permission to guess an IPC endpoint. A host-wide official reload requires its
+   separate effect to be authorized. Preserve other chats and ongoing work.
+   A new conversation alone, disk `config/batchWrite`, `tools/list_changed`, or a
+   reload ACK is not proof of delivery. Observe definitions in the same chat's
+   subsequent turn after renewal. Do not claim that an in-progress turn changed.
    For one known Codex relay ID, the installed adapter's `connection-status
    --client codex --state PATH --connection-instance ID` reads only that relay's
    status. It does not discover transports, reload a host or call a Work tool.
    `host_catalog` separates the current refresh generation's host list requests
    and forwarded responses from its last complete catalog digest. A forwarded
    response is not proof that the host cached it or exposed it to the model.
-   A service owning a plan, or sharing the Desktop PID, does not identify the
-   current chat's transport. Missing observations must remain NOT_OBSERVED.
    If the host does not re-list, do not repeat the relay refresh: use the supported
    host reconnect/reload within the user's scope, then inspect definitions in a
    subsequent turn of the same chat. A reload queues loaded-thread refreshes;
@@ -74,10 +87,17 @@ verify reload and calls separately.
    app-server fixture is not verification of the existing Desktop process.
    Transport idle is not proof that native leases or external work have ended.
    Never retry uncertain refreshes, replay Work requests or kill an existing host.
-5. Report configuration, tool exposure and calls separately. `AVAILABLE` means
-   delivery. Native completion may still require reconciliation. Context delivery
-   grants no execution, takeover or automatic resume. Stop on quota, stale pins,
-   owner conflicts or unknown effects without retries or evidence deletion.
+5. After a connection change, verify actual definitions for the required tools
+   before issuing short-lived execution preparations. Only then prepare the exact
+   action under its existing policy and native freshness checks. Do not extend an
+   old plan's TTL, reuse its instance in another service or renew it automatically
+   while waiting for installation/reload. Connection readiness grants no action.
+   Only if calls are separately authorized, call `golem_projects_list` and an
+   explicitly granted Work; otherwise record calls as NOT_RUN. Report external
+   definition observations, host catalog, configuration and actual calls
+   separately. Native completion still requires its original checks. Stop on
+   quota, stale pins, owner conflicts or unknown effects without retries or
+   evidence deletion.
 
 `EXISTING_APPROVAL_DIFFERS` refuses rebinding. `PARTIAL_PUBLICATION` preserves an
 interrupted adapter record and blocks launch. Do not delete/replace these records

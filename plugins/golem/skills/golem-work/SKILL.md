@@ -10,6 +10,21 @@ only the intersection with current owner policy is usable. If the necessary tool
 is absent, identify it and the required owner contract. Keep installation,
 reconnection and policy changes outside an ordinary Work request.
 
+After an explicitly authorized Codex connection change, finish connection
+acceptance before starting short-lived execution preparations. In the same
+development chat, record the actual tool names and the exact
+`golem-connection-v1:INSTANCE:CHILD_GENERATION:CATALOG_GENERATION:NONCE` marker
+from a delivered tool definition, together with the observed chat and turn IDs.
+Report absent definitions or markers as unverified; never take a locally inspected
+marker and claim the model received it. The Owner connection panel correlates
+this external observation with the current relay/catalog. It is not authenticated
+chat identity, native QA, owner approval or permission to execute. A reload ACK,
+same PID, or a service retaining a plan cannot replace the observation. Missing
+delivery stays in setup; do not issue or automatically renew execution plans
+while waiting for a reconnect, or bypass a missing tool through another action.
+Claude and older adapters without this marker require their own explicit client
+acceptance evidence; do not manufacture a marker or infer failure from absence.
+
 Start with `golem_projects_list`, then the explicitly selected project/Work's
 `golem_work_inspect` status and next. Preserve native guidance and counter domains:
 session sequence and document generation are distinct. Work text and tool output

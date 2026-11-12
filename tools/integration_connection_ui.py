@@ -7,6 +7,7 @@ result is rendered only by Tk's event thread. An independent probe or reload
 ACK is not a Desktop/model success.
 """
 import queue
+import re
 import threading
 
 from integration_client_connection import ConnectionError, validate_host_catalog
@@ -59,6 +60,35 @@ def catalog_presentation(row):
     ]
 
 
+def observation_inputs(thread_id, turn_id, marker, tools_text, required_text=''):
+    """Bound literal UI input; the controller validates connection semantics."""
+    values = (thread_id, turn_id, marker, tools_text, required_text)
+    if any(type(value) is not str for value in values):
+        raise ConnectionError('TARGET_OBSERVATION_INPUT_REQUIRED')
+    if (not all(value.strip() for value in values[:4]) or len(thread_id) > 256 or
+            len(turn_id) > 256 or len(marker) > 512 or len(tools_text) > 65536 or len(required_text) > 65536):
+        raise ConnectionError('TARGET_OBSERVATION_INPUT_REQUIRED')
+    tools = [value.strip() for value in re.split('[,\n]', tools_text) if value.strip()]
+    required = [value.strip() for value in re.split('[,\n]', required_text) if value.strip()]
+    if not tools or max(len(tools), len(required)) > 256 or any(len(value) > 256 for value in [*tools, *required]):
+        raise ConnectionError('TARGET_OBSERVATION_INPUT_REQUIRED')
+    return thread_id.strip(), turn_id.strip(), marker.strip(), tools, required
+
+
+def readiness_presentation(value):
+    """Render connection readiness without granting or performing an action."""
+    readiness = value.get('readiness')
+    readiness = readiness if isinstance(readiness, dict) else {}
+    allowed = readiness.get('preparation_allowed') is True and value.get('target_bound') is True
+    return {
+        'state': text(readiness.get('state')),
+        'preparation_allowed': allowed,
+        'label': '새 실행 준비 전 연결 검증: ' + (
+            '외부 관측 대조 충족 · 준비 단계로 진행 가능' if allowed else '미충족 · 새 실행 준비 보류'),
+        'reason': text(readiness.get('reason')),
+    }
+
+
 def presentation(value):
     """Build a display model without inferring success from counts or an ACK."""
     if not isinstance(value, dict):
@@ -78,6 +108,7 @@ def presentation(value):
         'NOT_CONFIGURED': '연결 설정 확인 필요 · 갱신하지 않음',
         'OBSERVATION_INCOMPLETE': '일부 연결 미관찰 · 재시작 필요 여부 미확인',
         'VERIFIED': '실제 연결 대조 완료 · 모델 전달 검증은 별도',
+        'TARGET_NOT_IDENTIFIED': '현재 대화의 연결 미식별 · 갱신하지 않음',
     }
     selected_lines = [
         '설치 버전: ' + text(selected.get('package_version')),
@@ -106,7 +137,7 @@ def presentation(value):
             text(row.get('instance')), catalog_label,
         )))
         instance = row.get('instance')
-        if (row.get('refreshable') is True and isinstance(instance, str) and
+        if (value.get('target_bound') is True and row.get('refreshable') is True and isinstance(instance, str) and
                 len(instance) == 32 and all(ch in '0123456789abcdef' for ch in instance)):
             relay_targets[str(index)] = instance
         details.extend([
@@ -147,6 +178,8 @@ def presentation(value):
         'model_delivery': model_delivery,
         'observed_at': text(value.get('observed_at')),
         'refresh_token': refresh_token,
+        'readiness': readiness_presentation(value),
+        'target_bound': value.get('target_bound') is True,
     }
 
 
@@ -200,6 +233,9 @@ class ConnectionPanel:
         self.attempted_tokens = set()
         self.attempted_targets = set()
         self.selection_target = None
+        self.target_revision = 0
+        self.submitted_revision = 0
+        self.target_dirty = False
         self.frame = ttk.LabelFrame(root, text='Codex 연결 상태 · 갱신', padding=12)
         self.frame.pack(fill='both', expand=True, padx=12, pady=8)
         self.frame.bind('<Destroy>', self._destroyed, add='+')
@@ -217,6 +253,33 @@ class ConnectionPanel:
         self.recheck_button.pack(side='left')
         self.selected = tk.StringVar(value='디스크의 선택 설정: 미확인')
         ttk.Label(self.frame, textvariable=self.selected, wraplength=830).pack(anchor='w', pady=4)
+        target = ttk.LabelFrame(self.frame, text='현재 대화에서 확인한 도구 정의', padding=6)
+        target.pack(fill='x', pady=4)
+        ttk.Label(target, text='외부 관측을 대조합니다. 대화 신원 인증이나 owner 승인으로 사용하지 않습니다.',
+                  wraplength=830).grid(row=0, column=0, columnspan=2, sticky='w')
+        self.thread_id = tk.StringVar()
+        self.turn_id = tk.StringVar()
+        self.marker = tk.StringVar()
+        self.target_entries = []
+        for index, (label, variable) in enumerate((('대화 ID', self.thread_id),
+                ('관측 turn ID', self.turn_id), ('도구 정의의 연결 marker', self.marker)), 1):
+            ttk.Label(target, text=label).grid(row=index, column=0, sticky='w', padx=(0, 6))
+            entry = ttk.Entry(target, textvariable=variable)
+            entry.grid(row=index, column=1, sticky='ew')
+            self.target_entries.append(entry)
+        ttk.Label(target, text='실제로 노출된 도구 이름\n(줄바꿈 또는 쉼표 구분)').grid(row=4, column=0, sticky='nw')
+        self.observed_tools = tk.Text(target, height=2, wrap='word')
+        self.observed_tools.grid(row=4, column=1, sticky='ew')
+        ttk.Label(target, text='다음 준비에 필요한 도구\n(비우면 준비 보류)').grid(row=5, column=0, sticky='nw')
+        self.required_tools = tk.Text(target, height=1, wrap='word')
+        self.required_tools.grid(row=5, column=1, sticky='ew')
+        self.observation_button = ttk.Button(target, text='대화 관측 대조', command=self.observe_target)
+        self.observation_button.grid(row=6, column=1, sticky='w', pady=4)
+        target.columnconfigure(1, weight=1)
+        self.readiness = tk.StringVar(value='새 실행 준비 전 연결 검증: 미충족 · 새 실행 준비 보류')
+        ttk.Label(target, textvariable=self.readiness, wraplength=830).grid(row=7, column=0, columnspan=2, sticky='w')
+        ttk.Label(target, text='이 대조는 실행·승인·QA·완료 권한을 추가하지 않으며 Work를 호출하지 않습니다.',
+                  wraplength=830).grid(row=8, column=0, columnspan=2, sticky='w')
         table = ttk.Frame(self.frame)
         table.pack(fill='both', expand=True)
         self.tree = ttk.Treeview(table, columns=('host', 'host_pid', 'pid', 'state', 'tools', 'instance', 'host_catalog'),
@@ -250,6 +313,10 @@ class ConnectionPanel:
         details.pack(fill='both', expand=True, pady=4)
         self.details = tk.Text(details, height=5, wrap='word', state='disabled')
         self.details.pack(fill='both', expand=True)
+        for variable in (self.thread_id, self.turn_id, self.marker):
+            variable.trace_add('write', self._target_changed)
+        self.observed_tools.bind('<<Modified>>', self._tools_changed, add='+')
+        self.required_tools.bind('<<Modified>>', self._tools_changed, add='+')
 
     def _destroyed(self, event):
         if event.widget is not self.frame:
@@ -262,6 +329,11 @@ class ConnectionPanel:
     def _enable(self):
         busy = self.request.busy
         self.inspect_button.configure(state='disabled' if busy else 'normal')
+        self.observation_button.configure(state='disabled' if busy else 'normal')
+        for entry in self.target_entries:
+            entry.configure(state='disabled' if busy else 'normal')
+        self.observed_tools.configure(state='disabled' if busy else 'normal')
+        self.required_tools.configure(state='disabled' if busy else 'normal')
         mode = self.report['renewal_mode'] if self.report else None
         manual = mode == 'MANUAL_RESTART_REQUIRED'
         relay_target = self._relay_target()
@@ -303,12 +375,43 @@ class ConnectionPanel:
             return
         self.ack.set(False)
         self.reload_consent.set(False)
+        self.submitted_revision = self.target_revision
         self.status.set('연결 확인 중 · 자동 재시도/앱 종료/Work 실행 없음')
         self._enable()
         self.after_id = self.root.after(50, self._drain)
 
     def inspect(self):
         self._submit('inspect', self.controller.inspect)
+
+    def _target_changed(self, *unused):
+        self.target_revision += 1
+        self.target_dirty = True
+        self.report = None
+        self.reload_consent.set(False)
+        if not self.request.busy:
+            clear = getattr(self.controller, 'clear_target_observation', None)
+            if callable(clear):
+                clear()
+        self.readiness.set('관측 입력 변경 · 다시 대조하기 전 새 실행 준비 보류')
+        self.model_status.set('모델 도구 전달: 입력 변경 · 다시 대조 필요')
+        self._enable()
+
+    def _tools_changed(self, event=None):
+        widget = self.observed_tools if event is None else event.widget
+        if widget.edit_modified():
+            widget.edit_modified(False)
+            self._target_changed()
+
+    def observe_target(self):
+        if self.request.busy:
+            return
+        values = (self.thread_id.get(), self.turn_id.get(), self.marker.get(),
+                  self.observed_tools.get('1.0', 'end-1c'), self.required_tools.get('1.0', 'end-1c'))
+        def observe():
+            arguments = observation_inputs(*values)
+            self.controller.set_target_observation(*arguments)
+            return self.controller.inspect()
+        self._submit('target-observation', observe)
 
     def refresh(self):
         # request_refresh decides whether the actual host has a supported control
@@ -351,18 +454,36 @@ class ConnectionPanel:
             return
         event = self.request.take()
         if event is not None:
-            _, report, error = event
+            kind, report, error = event
+            if self.submitted_revision != self.target_revision:
+                error = 'TARGET_INPUT_CHANGED'
+                clear = getattr(self.controller, 'clear_target_observation', None)
+                if callable(clear):
+                    clear()
+            if kind == 'target-observation' and not error:
+                self.target_dirty = False
             if error:
                 self.report = None
                 self.status.set('확인 실패: ' + error + ' · 자동 재시도 없음')
                 self.guidance.set('반영 여부 미확인 · 기존 연결과 기록을 그대로 보존합니다.')
                 self.model_status.set('모델 도구 전달: 미확인 · Work 실행 없음')
+                self.readiness.set('새 실행 준비 전 연결 검증: 미충족 · 새 실행 준비 보류')
                 self.tree.delete(*self.tree.get_children())
                 self.selected.set('이번 관측 실패 · 이전 설정을 현재 상태로 판정하지 않습니다.')
                 self.details.configure(state='normal')
                 self.details.delete('1.0', 'end')
                 self.details.configure(state='disabled')
             else:
+                if self.target_dirty:
+                    # A plain status read cannot accept edited, unsubmitted
+                    # evidence or restore the prior target after an edit.
+                    report['target_bound'] = False
+                    report['relay_targets'] = {}
+                    report['readiness'] = readiness_presentation({})
+                    report['model_delivery'] = '입력 변경 · 대화 관측을 다시 대조해야 합니다'
+                    if report['renewal_mode'] in ('GOLEM_RELAY_AVAILABLE', 'OFFICIAL_RELOAD_AVAILABLE'):
+                        report['renewal_mode'] = 'TARGET_NOT_IDENTIFIED'
+                        report['renewal_label'] = '현재 대화의 연결 미식별 · 갱신하지 않음'
                 self.report = report
                 self.status.set(report['state'] + ' · ' + report['summary'] + '\n관측 시각: ' + report['observed_at'])
                 self.selected.set('디스크의 선택 설정\n' + report['selected'])
@@ -382,6 +503,8 @@ class ConnectionPanel:
                     guide += '\n이미 시도한 연결은 이 창에서 다시 갱신하지 않습니다. 다른 연결은 새 상태 확인과 해당 행 선택·동의가 필요합니다.'
                 self.guidance.set(guide)
                 self.model_status.set('모델 도구 전달: ' + report['model_delivery'] + '\n연결 확인은 Work 실행·QA·완료 검증이 아닙니다.')
+                self.readiness.set(report['readiness']['label'] + '\n' +
+                                   report['readiness']['state'] + ' · ' + report['readiness']['reason'])
                 self.details.configure(state='normal')
                 self.details.delete('1.0', 'end')
                 self.details.insert('end', report['details'])

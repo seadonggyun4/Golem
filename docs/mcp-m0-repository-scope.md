@@ -1297,6 +1297,12 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.tools.integration_owner_desktop.py.connection-status | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.plugins.golem.scripts.connection_relay.py.operation-7 | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 | surface.plugins.golem.scripts.launcher.py.connection-status | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.launcher.py.inspect-state | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.connection_relay.py.definition-correlation | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_client_connection.py.external-definition-observation | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_client_connection.py.readonly-readiness-cli | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_connection_ui.py.external-definition-observation | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_connection_readiness.py.readiness-classification | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3729,6 +3735,19 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | CLI_ROUTE | plugins/golem/scripts/launcher.py | argparse:operation | connection-status |
 | NATIVE_OPERATION | plugins/golem/scripts/launcher.py | branch:Attribute(value=Name(id=&#x27;args&#x27;, ctx=Load()), attr=&#x27;operation&#x27;, ctx=Load()) | connection-status |
 | PYTHON_DECLARATION | plugins/golem/scripts/launcher.py | connection_status | None |
+| CLI_ROUTE | plugins/golem/scripts/launcher.py | argparse:operation | inspect-state |
+| NATIVE_OPERATION | plugins/golem/scripts/launcher.py | branch:Attribute(value=Name(id=&#x27;args&#x27;, ctx=Load()), attr=&#x27;operation&#x27;, ctx=Load()) | inspect-state |
+| PYTHON_DECLARATION | plugins/golem/scripts/launcher.py | inspect_state | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/launcher.py | load_record | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/connection_relay.py | parse_definition_marker | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/connection_relay.py | Relay.definition_marker | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/connection_relay.py | Relay.mark_tool_definitions | None |
+| PYTHON_DECLARATION | tools/integration_client_connection.py | ConnectionMonitor.set_target_observation | None |
+| PYTHON_DECLARATION | tools/integration_client_connection.py | ConnectionMonitor.readiness | None |
+| PYTHON_DECLARATION | tools/integration_client_connection.py | main | None |
+| PYTHON_DECLARATION | tools/integration_connection_ui.py | ConnectionPanel.observe_target | None |
+| PYTHON_DECLARATION | tools/integration_connection_readiness.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_connection_readiness.py | classify | None |
 
 ## Blockers
 
@@ -3818,7 +3837,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 490; explicitly selected: 490. Other tracked paths still require explicit boundary review.
+Candidate source surfaces: 491; explicitly selected: 491. Other tracked paths still require explicit boundary review.
 Public declarations observed in selected headers: 358.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
@@ -4237,6 +4256,7 @@ This is static inventory reconciliation, never native execution, authority or pr
 | tools/integration_codex_control.py | YES |
 | tools/integration_codex_plugin.py | YES |
 | tools/integration_config.py | YES |
+| tools/integration_connection_readiness.py | YES |
 | tools/integration_connection_ui.py | YES |
 | tools/integration_contract.py | YES |
 | tools/integration_desktop_plugin.py | YES |

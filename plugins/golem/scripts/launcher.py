@@ -13,7 +13,7 @@ LIMIT = 256 * 1024
 SCHEMA = 'golem.codex-launcher.v1'
 CLIENTS = ('codex', 'claude-code', 'portable', 'claude-desktop')
 # Display provenance only. These values never enter an authorization decision.
-ADAPTER_VERSION = '0.2.10'
+ADAPTER_VERSION = '0.2.11'
 
 
 def client_schema(client):
@@ -117,13 +117,20 @@ def locked(state, write=False):
         os.close(fd)
 
 
-def load(private, client='codex'):
-    value = decode(read_private(private / 'approval.json'))
+def load_record(private, client='codex'):
+    """Read the adapter-owned record once; callers hold the adapter lock."""
+    data = read_private(private / 'approval.json')
+    value = decode(data)
     require(isinstance(value, dict) and set(value) == {'schema', 'launcher', 'launcher_sha256'}
             and value['schema'] == client_schema(client), 'APPROVAL_FIELDS')
     raw = value['launcher']
     require(isinstance(raw, str) and digest(raw.encode()) == value['launcher_sha256'], 'APPROVAL_DIGEST')
-    return validate_launcher(decode(raw.encode())), value['launcher_sha256']
+    return validate_launcher(decode(raw.encode())), value['launcher_sha256'], data
+
+
+def load(private, client='codex'):
+    launcher, pin, _ = load_record(private, client)
+    return launcher, pin
 
 
 def sync_directory(path):
@@ -163,6 +170,34 @@ def status(state, client='codex'):
     with locked(state) as private:
         _, pin = load(private, client)
     return {'state': 'CONFIGURED', 'launcher_sha256': pin, 'project_access_verified': False}
+
+
+def inspect_state(state, client='codex', expected_approval_sha256=None,
+                  expected_launcher_sha256=None):
+    """Resolve exact configured bytes without starting a launcher or a relay.
+
+    Maintenance clients use this contract instead of guessing the adapter's
+    private record layout. The result is a locked local snapshot, not proof of
+    a live connection, model delivery, owner identity or Work authorization.
+    """
+    import re
+    for pin in (expected_approval_sha256, expected_launcher_sha256):
+        require(pin is None or (type(pin) is str and
+                re.fullmatch('[0-9a-f]{64}', pin)), 'EXPECTED_DIGEST_REQUIRED')
+    state = canonical(state)
+    with locked(state) as private:
+        _, launcher_pin, data = load_record(private, client)
+        approval_pin = digest(data)
+        require(expected_approval_sha256 is None or
+                approval_pin == expected_approval_sha256, 'INSPECT_APPROVAL_CHANGED')
+        require(expected_launcher_sha256 is None or
+                launcher_pin == expected_launcher_sha256, 'INSPECT_LAUNCHER_CHANGED')
+        return {'schema': 'golem.launcher-inspection.v1', 'state': 'CONFIGURED',
+                'client': client, 'adapter_state': str(state),
+                'approval_path': str(private / 'approval.json'),
+                'approval_sha256': approval_pin, 'launcher_sha256': launcher_pin,
+                'adapter_version': ADAPTER_VERSION,
+                'project_access_verified': False, 'execution_authorized': False}
 
 
 def relay_module():
@@ -215,13 +250,15 @@ def serve(state, client='codex'):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('operation', choices=('configure', 'status', 'connection-status', 'serve'))
+    parser.add_argument('operation', choices=('configure', 'status', 'inspect-state', 'connection-status', 'serve'))
     parser.add_argument('--client', choices=CLIENTS, default='codex')
     parser.add_argument('--state', type=Path)
     parser.add_argument('--launcher', type=Path)
     parser.add_argument('--reviewed-launcher-sha256')
     parser.add_argument('--approve-launcher', action='store_true')
     parser.add_argument('--connection-instance')
+    parser.add_argument('--expected-approval-sha256')
+    parser.add_argument('--expected-launcher-sha256')
     args = parser.parse_args()
     try:
         state = args.state or default_state(args.client)
@@ -233,6 +270,9 @@ def main():
                                args.approve_launcher, args.client)
         elif args.operation == 'status':
             result = status(state, args.client)
+        elif args.operation == 'inspect-state':
+            result = inspect_state(state, args.client, args.expected_approval_sha256,
+                                   args.expected_launcher_sha256)
         elif args.operation == 'connection-status':
             result = connection_status(state, args.connection_instance, args.client)
         else:

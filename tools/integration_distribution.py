@@ -23,11 +23,13 @@ SKILLS=('plugins/golem/skills/golem-setup/SKILL.md','plugins/golem/skills/golem-
         'plugins/golem/skills/golem-work/references/profiles.md')
 OWNER_DESKTOP_FILES=('tools/integration_owner_review.py','tools/integration_owner_desktop.py',
     'tools/integration_client_connection.py','tools/integration_codex_control.py',
-    'tools/integration_connection_ui.py')
+    'tools/integration_connection_ui.py','tools/integration_connection_readiness.py')
 # One canonical relay implementation, copied verbatim into the reviewed Owner
 # runtime so its metadata client needs no installed-plugin import path.
 OWNER_RELAY_SOURCE='plugins/golem/scripts/connection_relay.py'
 OWNER_RELAY_PAYLOAD='tools/connection_relay.py'
+OWNER_ADAPTER_SOURCE='plugins/golem/scripts/launcher.py'
+OWNER_ADAPTER_PAYLOAD='tools/golem_adapter.py'
 DOCUMENTS=('docs/intent-assurance-qc6-implementation.ko.md','docs/workpacks/mcp.md','tools/requirements-mcp.txt','docs/mcp-m6-distribution.ko.md','docs/integration-install.md','docs/integration-d5.md',
            'docs/mcp-m5-parallel-candidates.ko.md')
 
@@ -58,7 +60,7 @@ def closure(payloads):
         for node in ast.walk(ast.parse(raw)):
             modules=[item.name.split('.')[0] for item in node.names] if isinstance(node,ast.Import) else [node.module.split('.')[0]] if isinstance(node,ast.ImportFrom) and node.module else []
             for name in modules:
-                if (name.startswith('integration_') or name in ('execution_record','verify_agent','usage_pipeline','agent_io','agent_lifecycle','provider_usage','provider_costs','hosted_usage','billing_evidence','evidence_export','status_collector')) and name not in names:missing.add(name)
+                if (name.startswith('integration_') or name in ('golem_adapter','connection_relay','execution_record','verify_agent','usage_pipeline','agent_io','agent_lifecycle','provider_usage','provider_costs','hosted_usage','billing_evidence','evidence_export','status_collector')) and name not in names:missing.add(name)
     c.require(not missing,'PACKAGE_IMPORT_CLOSURE')
 
 
@@ -118,6 +120,7 @@ def build(profile,*,native=None,native_sha256=None,target='external-runtime'):
     with zipfile.ZipFile(io.BytesIO(legacy.build())) as package:payloads={name:package.read(name) for name in package.namelist()}
     for path in (*SKILLS,*DOCUMENTS,*OWNER_DESKTOP_FILES):payloads[path]=r.regular(root/path,16777216)
     payloads[OWNER_RELAY_PAYLOAD]=r.regular(root/OWNER_RELAY_SOURCE,16777216)
+    payloads[OWNER_ADAPTER_PAYLOAD]=r.regular(root/OWNER_ADAPTER_SOURCE,16777216)
     payloads.update(schema_payloads())
     payloads['manifest.json']=c.encoded(manifest(profile));closure(payloads)
     native_pin=None
@@ -169,7 +172,7 @@ def verify(raw,reviewed_sha256):
     c.require(set(SKILLS)<=set(payloads) and set(DOCUMENTS)<=set(payloads) and set(OWNER_DESKTOP_FILES)<=set(payloads),'PACKAGE_RESOURCE_MISSING')
     # A forged inventory cannot introduce private files or extra executable paths.
     allowed={'manifest.json','pyproject.toml','assets/Golem-mcp.png','LICENSE',
-        *('tools/'+name for name in (*transfer.PRODUCER_NAMES,'integration_mcpb_entry.py')),*SKILLS,*DOCUMENTS,*SCHEMAS,*OWNER_DESKTOP_FILES,OWNER_RELAY_PAYLOAD}
+        *('tools/'+name for name in (*transfer.PRODUCER_NAMES,'integration_mcpb_entry.py')),*SKILLS,*DOCUMENTS,*SCHEMAS,*OWNER_DESKTOP_FILES,OWNER_RELAY_PAYLOAD,OWNER_ADAPTER_PAYLOAD}
     if inventory['native'] is not None:
         c.require(inventory['target'] in ('darwin-arm64','linux-x86_64','linux-arm64') and inventory['native']['target']==inventory['target'] and inventory['native']['sha256']==c.sha(payloads.get('native/golem',b'')),'PACKAGE_NATIVE_CHANGED');allowed.add('native/golem')
     c.require(set(payloads)==allowed,'PACKAGE_FILE_SCOPE')

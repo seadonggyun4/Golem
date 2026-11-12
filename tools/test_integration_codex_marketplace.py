@@ -137,6 +137,88 @@ class Adapter(unittest.TestCase):
         with patch.object(adapter.os, 'open', side_effect=readonly_host):
             self.assertEqual(adapter.status(self.state)['state'], 'CONFIGURED')
 
+    def test_inspect_state_reports_exact_layout_and_bytes_without_execution(self):
+        self.configure()
+        path = self.state / 'golem-launcher/approval.json'
+        before = {str(p.relative_to(self.state)): p.read_bytes()
+                  for p in self.state.rglob('*') if p.is_file()}
+        approval_pin = adapter.digest(path.read_bytes())
+        # A misleading file at the state root must never be accepted.
+        decoy = self.state / 'approval.json'
+        decoy.write_text('{"not":"the adapter record"}')
+        decoy.chmod(0o600)
+        with patch.object(adapter, 'run_relay') as relay, \
+             patch.object(adapter.os, 'execve') as execute:
+            observed = adapter.inspect_state(self.state, 'codex', approval_pin, self.pin)
+        relay.assert_not_called()
+        execute.assert_not_called()
+        self.assertEqual(observed, {
+            'schema': 'golem.launcher-inspection.v1', 'state': 'CONFIGURED',
+            'client': 'codex', 'adapter_state': str(self.state),
+            'approval_path': str(path), 'approval_sha256': approval_pin,
+            'launcher_sha256': self.pin, 'adapter_version': adapter.ADAPTER_VERSION,
+            'project_access_verified': False, 'execution_authorized': False})
+        self.assertNotIn('command', observed)
+        self.assertNotIn('args', observed)
+        for name, raw in before.items():
+            self.assertEqual((self.state / name).read_bytes(), raw)
+
+    def test_inspect_state_rejects_wrong_client_pin_and_incomplete_state(self):
+        with self.assertRaises(OSError):
+            adapter.inspect_state(self.state)
+        self.assertFalse(self.state.exists())
+        self.configure()
+        for kwargs, code in (
+            ({'client': 'claude-desktop'}, 'APPROVAL_FIELDS'),
+            ({'expected_approval_sha256': '0' * 64}, 'INSPECT_APPROVAL_CHANGED'),
+            ({'expected_launcher_sha256': '0' * 64}, 'INSPECT_LAUNCHER_CHANGED'),
+            ({'expected_approval_sha256': 'not-a-pin'}, 'EXPECTED_DIGEST_REQUIRED'),
+            ({'expected_launcher_sha256': True}, 'EXPECTED_DIGEST_REQUIRED'),
+        ):
+            with self.subTest(code=code), self.assertRaisesRegex(adapter.SetupError, code):
+                adapter.inspect_state(self.state, **kwargs)
+        pending = self.state / 'golem-launcher/approval.pending'
+        pending.write_bytes(b'preserve partial result')
+        with self.assertRaisesRegex(adapter.SetupError, 'PARTIAL_PUBLICATION'):
+            adapter.inspect_state(self.state)
+        self.assertEqual(pending.read_bytes(), b'preserve partial result')
+
+    def test_inspect_state_preserves_lock_and_private_file_validation(self):
+        self.configure()
+        lock = self.state / 'golem-launcher/owner.lock'
+        with lock.open('r+b') as stream:
+            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            with self.assertRaises(BlockingIOError):
+                adapter.inspect_state(self.state)
+        alias = self.root / 'state-alias'
+        alias.symlink_to(self.state, target_is_directory=True)
+        with self.assertRaisesRegex(adapter.SetupError, 'SYMLINK'):
+            adapter.inspect_state(alias)
+        path = self.state / 'golem-launcher/approval.json'
+        value = json.loads(path.read_bytes())
+        value['launcher'] = json.dumps({'command': '/bin/false', 'args': []})
+        path.write_text(json.dumps(value))
+        with self.assertRaisesRegex(adapter.SetupError, 'APPROVAL_DIGEST'):
+            adapter.inspect_state(self.state)
+
+    def test_inspect_state_cli_is_a_read_only_contract_without_launcher_arguments(self):
+        self.value['args'].append('private-argument-sentinel')
+        self.raw = json.dumps(self.value).encode()
+        self.source.write_bytes(self.raw)
+        self.pin = adapter.digest(self.raw)
+        self.configure()
+        path = self.state / 'golem-launcher/approval.json'
+        before = path.read_bytes()
+        result = subprocess.run([sys.executable, '-I', '-B', str(SCRIPT), 'inspect-state',
+            '--client', 'codex', '--state', str(self.state),
+            '--expected-approval-sha256', adapter.digest(before),
+            '--expected-launcher-sha256', self.pin], capture_output=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stderr, b'')
+        self.assertEqual(json.loads(result.stdout)['approval_path'], str(path))
+        self.assertNotIn(b'private-argument-sentinel', result.stdout)
+        self.assertEqual(path.read_bytes(), before)
+
     def test_setup_errors_are_private_and_do_not_emit_protocol_stdout(self):
         result = subprocess.run([sys.executable, '-I', '-B', str(SCRIPT), 'serve',
             '--state', str(self.root / 'missing')], capture_output=True, timeout=10)

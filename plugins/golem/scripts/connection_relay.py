@@ -33,6 +33,17 @@ CONTROL_TIMEOUT = 2.0
 DRAIN_TIMEOUT = 30.0
 START_TIMEOUT = 60.0
 SCHEMA = 'golem.connection-relay.v1'
+DEFINITION_MARKER = re.compile(r'golem-connection-v1:([a-f0-9]{32}):([1-9][0-9]{0,18}):([1-9][0-9]{0,18}):([a-f0-9]{32})\Z')
+
+
+def parse_definition_marker(value):
+    """Public observation, not a credential or authenticated chat identity."""
+    match = DEFINITION_MARKER.fullmatch(value) if type(value) is str else None
+    require(match is not None, 'DEFINITION_MARKER_INVALID')
+    instance, child, catalog, nonce = match.groups()
+    require(int(child) <= int(catalog) <= CATALOG_COUNTER_LIMIT, 'DEFINITION_MARKER_INVALID')
+    return dict(instance=instance, child_generation=int(child),
+                catalog_generation=int(catalog), definition_nonce=nonce)
 
 
 class RelayError(ValueError):
@@ -130,14 +141,52 @@ class Relay:
         self.catalog_notifications = 0
         self.catalog_state = 'HOST_CATALOG_NOT_REQUESTED'
         self.catalog_current = None
+        self.definition_nonce = None
 
     def new_catalog_generation(self):
         self.catalog_generation += 1
+        self.definition_nonce = uuid.uuid4().hex
         self.catalog_chain = self.catalog_current = None
         self.catalog_requests = self.catalog_responses = self.catalog_errors = 0
         self.catalog_notifications = 0
         self.catalog_state = ('HOST_CATALOG_NOT_REQUESTED' if self.catalog_generation == 1
                               else 'HOST_CATALOG_NOT_RELISTED')
+
+    def definition_marker(self):
+        if self.child_generation < 1 or self.definition_nonce is None:
+            return None
+        return (f'golem-connection-v1:{self.instance}:{self.child_generation}:'
+                f'{self.catalog_generation}:{self.definition_nonce}')
+
+    def mark_tool_definitions(self, message):
+        """Identify the transport through definitions, without a Work/tool call.
+
+        Only a valid current tools/list reply is annotated. The opaque marker
+        exposes no paths, policies, command arguments or endpoint credentials.
+        It is also visible when a host preserves descriptions but drops _meta.
+        """
+        request = self.catalog_pending.get(identifier(message['id']))
+        value = message.get('result')
+        if (not request or request['generation'] != self.catalog_generation or
+                not request['valid'] or not isinstance(value, dict) or
+                not isinstance(value.get('tools'), list) or not value['tools'] or
+                not all(isinstance(tool, dict) and type(tool.get('name')) is str and
+                        isinstance(tool.get('inputSchema'), dict) for tool in value['tools'])):
+            return message
+        marker = self.definition_marker()
+        if marker is None:
+            return message
+        tools = list(value['tools'])
+        first = dict(tools[0])
+        description = first.get('description', '')
+        if type(description) is not str:
+            return message
+        first['description'] = description + ('\n\nConnection observation only; no authority: ' + marker)
+        tools[0] = first
+        annotated = {**message, 'result': {**value, 'tools': tools}}
+        # Diagnostics must not turn an otherwise valid near-limit response into
+        # a transport failure. Without a delivered marker readiness stays unknown.
+        return annotated if len(encoded(annotated)) <= FRAME_LIMIT else message
 
     @staticmethod
     def catalog_digest(value):
@@ -152,7 +201,7 @@ class Relay:
                                                type(params.get('cursor')) is str)
         cursor = params.get('cursor') if valid else None
         cursor_digest = self.catalog_digest(cursor) if cursor is not None else None
-        chain = ({'pages': [], 'expected': None, 'seen': set()} if cursor is None else
+        chain = ({'pages': [], 'expected': None, 'seen': set(), 'tools': []} if cursor is None else
                  self.catalog_chain if self.catalog_chain is not None and
                  self.catalog_chain['expected'] == cursor_digest else None)
         self.catalog_pending[identifier(message['id'])] = {
@@ -196,6 +245,12 @@ class Relay:
             self.catalog_chain = None
             self.catalog_state = 'HOST_CATALOG_INVALID_RESPONSE'
             return
+        names = chain['tools'] + [tool['name'] for tool in value['tools']]
+        if len(names) > 256 or len(set(names)) != len(names):
+            self.catalog_chain = None
+            self.catalog_state = 'HOST_CATALOG_INVALID_RESPONSE'
+            return
+        chain['tools'] = names
         chain['pages'].append(self.catalog_digest(value))
         if value.get('nextCursor') is not None:
             following = self.catalog_digest(value['nextCursor'])
@@ -210,7 +265,9 @@ class Relay:
             return
         self.catalog_current = {'generation': self.catalog_generation,
                                 'sha256': self.catalog_digest(chain['pages']),
-                                'pages': len(chain['pages'])}
+                                'pages': len(chain['pages']),
+                                'tools_sha256': self.catalog_digest(sorted(chain['tools'])),
+                                'tool_count': len(chain['tools'])}
         self.catalog_last_complete = dict(self.catalog_current)
         self.catalog_chain = None
         self.catalog_state = 'HOST_CATALOG_RESPONSE_SENT'
@@ -393,6 +450,8 @@ class Relay:
         catalog_changed = message.get('method') == 'notifications/tools/list_changed'
         if catalog_changed:
             self.new_catalog_generation()
+        elif 'method' not in message:
+            message = self.mark_tool_definitions(message)
         self.send_client(message)
         if catalog_changed:
             self.catalog_notifications = min(self.catalog_notifications + 1, CATALOG_COUNTER_LIMIT)
@@ -417,6 +476,9 @@ class Relay:
                     child_pid=self.child.pid if self.child else None,
                     plugin_version=self.adapter.ADAPTER_VERSION, failure=self.failure,
                     host_catalog=self.catalog_status(),
+                    definition_marker=self.definition_marker(),
+                    definition_tools_sha256=(self.catalog_current or {}).get('tools_sha256'),
+                    definition_tool_count=(self.catalog_current or {}).get('tool_count'),
                     execution_authorized=False, model_tools_delivery_verified=False,
                     work_idle_verified=False, native_leases_observed=False,
                     shutdown_mode='STDIN_EOF_WAIT_ONLY',

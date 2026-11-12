@@ -295,6 +295,53 @@ class Packages(unittest.TestCase):
             code='import sys;sys.path.insert(0,'+repr(str(out/'tools'))+');import integration_install as i;import integration_feature_profiles as p;import integration_distribution as d;print(len(i.producer()),len(p.definition("read")["tools"]))'
             result=subprocess.run([sys.executable,'-I','-B','-c',code],cwd=root,env={'PATH':'/usr/bin:/bin','LANG':'C','LC_ALL':'C'},capture_output=True,timeout=30)
             self.assertEqual(result.returncode,0,result.stderr.decode());self.assertTrue(result.stdout.strip())
+    def test_owner_connection_adapter_and_readiness_are_canonical_payloads(self):
+        _, files=package.verify(self.raw,c.sha(self.raw))
+        self.assertEqual(files[package.OWNER_ADAPTER_PAYLOAD],
+                         (ROOT/package.OWNER_ADAPTER_SOURCE).read_bytes())
+        self.assertEqual(files[package.OWNER_RELAY_PAYLOAD],
+                         (ROOT/package.OWNER_RELAY_SOURCE).read_bytes())
+        self.assertEqual(files['tools/integration_connection_readiness.py'],
+                         (ROOT/'tools/integration_connection_readiness.py').read_bytes())
+        for missing in ('golem_adapter','connection_relay','integration_connection_readiness'):
+            with self.subTest(missing=missing):
+                self.expect('PACKAGE_IMPORT_CLOSURE',
+                    lambda:package.closure({'tools/consumer.py':('import '+missing).encode()}))
+
+    def test_extracted_connection_reader_uses_copied_adapter_not_selected_executable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory).resolve();out=root/'package'
+            package.extract(self.raw,c.sha(self.raw),out)
+            # The selected path is metadata to inspect, never code to import.
+            selected=root/'selected-plugin';(selected/'scripts').mkdir(parents=True)
+            (selected/'.codex-plugin').mkdir()
+            executable=selected/'scripts/launcher.py'
+            executable.write_text('raise AssertionError("selected adapter must not be imported")\n')
+            (selected/'.codex-plugin/plugin.json').write_text(json.dumps({'name':'golem','version':'fixture'}))
+            source=root/'reviewed-launcher.json';source.write_text(json.dumps({'command':'/never/execute','args':[]}))
+            source.chmod(0o600)
+            state=root/'adapter-state';config=root/'config.toml'
+            args=['-I','-B',str(executable),'serve','--client','codex','--state',str(state)]
+            config.write_text('[mcp_servers.golem-local]\ncommand = '+json.dumps(sys.executable)+
+                              '\nargs = '+json.dumps(args)+'\n')
+            config.chmod(0o600)
+            code=('import json,sys;from pathlib import Path;sys.path.insert(0,'+repr(str(out/'tools'))+');'
+                  'import integration_client_connection as connection;'
+                  'import integration_connection_readiness as readiness;'
+                  'adapter=connection.adapter_contract();'
+                  'source=Path('+repr(str(source))+');state=Path('+repr(str(state))+');'
+                  'adapter.configure(state,source,adapter.digest(source.read_bytes()),True);'
+                  'selected=connection.selected_connection(Path('+repr(str(config))+'));'
+                  'print(json.dumps({"adapter":adapter.__file__,"readiness":readiness.__file__, '
+                  '"selection":selected["adapter_path"],"identity_detail":selected["identity_detail"]}))')
+            result=subprocess.run([sys.executable,'-I','-B','-c',code],cwd=root,
+                env={'PATH':'/usr/bin:/bin','LANG':'C','LC_ALL':'C'},capture_output=True,timeout=30)
+            self.assertEqual(result.returncode,0,result.stderr.decode())
+            observed=json.loads(result.stdout)
+            self.assertEqual(Path(observed['adapter']),out/'tools/golem_adapter.py')
+            self.assertEqual(Path(observed['readiness']),out/'tools/integration_connection_readiness.py')
+            self.assertEqual(observed['selection'],str(executable))
+            self.assertEqual(observed['identity_detail'],'OPAQUE_OR_CHANGED_LAUNCHER_NOT_EXECUTED')
     def test_missing_import_skill_and_forged_assurance_are_refused(self):
         self.expect('PACKAGE_IMPORT_CLOSURE',lambda:package.closure({'tools/example.py':b'import integration_missing'}))
         def promote(files):

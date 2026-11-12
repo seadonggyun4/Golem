@@ -431,7 +431,7 @@
     },
     {
       "path": "plugins/golem/.codex-plugin/plugin.json",
-      "sha256": "52f1ee68d39ea37a214e7c8a8134f46322f7d89162f9f415ddaf89f7e09fde09"
+      "sha256": "5eff46b827ca249d2d0f4cf8c6dfc8d0de40719cd685b773efeed0b78b79c7d0"
     },
     {
       "path": "plugins/golem/.mcp.json",
@@ -439,11 +439,11 @@
     },
     {
       "path": "plugins/golem/scripts/launcher.py",
-      "sha256": "d8fdd348222720046a2df1d9e74c9381f4d8ac3f336ac77ebc0fa0cee4b0f5e3"
+      "sha256": "dd861a0c11bb30a85a718e073cc04e71e4eeb59073f6f9959393c400bfc857fc"
     },
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
-      "sha256": "ef61e5f48aff32ed5bec8363da7506a161e0272acbfef92a65a7eae3825375a6"
+      "sha256": "705ea1200573704c8ab4f4c01175abeda29373a7bd95ea147771e532387bab4a"
     },
     {
       "path": "pyproject.toml",
@@ -2175,7 +2175,7 @@
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "24c62d96b95a56212f0104510429526224791e7cc786732f5b278fcfbbe4e597"
+      "sha256": "d4aa50e523fc216f5374e29f21c50fc1e65b013c63d23a05c14d21aded2f0e6b"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -2187,7 +2187,7 @@
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
-      "sha256": "a0a9bb1e912ff70900184105e604fce4c6ba4f8ffd239a9ce2741efffa2f5d54"
+      "sha256": "ba5651a86f5c3ae7f623fb3733638e619d130d3666b56648af00283850f6b5d9"
     },
     {
       "path": "plugins/golem/skills/golem-work/agents/openai.yaml",
@@ -2199,7 +2199,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "3cb8196b2a176ca565cf43cd808fd5490e04316d799ae5d3a5fa17ab5684f733"
+      "sha256": "e935ccbc4246df71e40bcb61cb19eb47fa3f23ac25c21432f98f241bffd6cc00"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -2467,11 +2467,11 @@
     },
     {
       "path": "plugins/golem/.claude-plugin/plugin.json",
-      "sha256": "0e5ad31c71d839af9c19e3c4aadba75bab6b3174c0947ce36110ac53ea994042"
+      "sha256": "da464b7308d01bee878388e36e83218b1530bfafa2b98d847846dfcbfa1b5bbf"
     },
     {
       "path": "plugins/golem/plugin.json",
-      "sha256": "20915f6348b3cbf02975c8e5d73fb10e636d43a33a29e05a05d577808e63ef4a"
+      "sha256": "4d3995423d439d4c8b09664df40b9de49f3696f293e47d3b5bb5f49a3ab7dca7"
     },
     {
       "path": "plugins/golem/mcp.json",
@@ -2483,7 +2483,7 @@
     },
     {
       "path": "tools/test_integration_plugin_clients.py",
-      "sha256": "f0da4409fafec9a462088fbc12e29e4be009aff01765f0a747f168f9382ed192"
+      "sha256": "37a08dde445cff62fd7a4bda69886d7b6c19cd309ac8f72501b663aa36f2ca02"
     },
     {
       "path": "tools/integration_desktop_plugin.py",
@@ -2491,11 +2491,11 @@
     },
     {
       "path": "tools/test_integration_desktop_plugin.py",
-      "sha256": "64614cea4096ae9549a4f471b7fb34bdfbc62d8d86eadf57b6aba82779179008"
+      "sha256": "f6370085136ac75dd6959f5fc5e43dc861a01d4e77a1e97cfd06ed1bc03b2553"
     },
     {
       "path": "tools/test_integration_codex_marketplace.py",
-      "sha256": "83f622c54d44363a5bc97c4d79bfc8afe0f6ab3911bfc251e622dc9328b69564"
+      "sha256": "b5883111dab336decf2c26a6386cc34c24307daf9a38722ba8017a41c2740401"
     },
     {
       "path": "tools/test_integration_participation.py",
@@ -2551,15 +2551,15 @@
     },
     {
       "path": "tools/integration_client_connection.py",
-      "sha256": "4be2d1c38cb525833ee38e742e436d86d5c740815eedc4f0fa035fa4821457b0"
+      "sha256": "d36d0ab143dca701a9a1402f85bfa60e682597a45aa4043d05d6d5efa6a976bc"
     },
     {
       "path": "tools/integration_connection_ui.py",
-      "sha256": "70af7f1a14fc61af9f22899b051c0d81b5aa305e48dbef881bf6c3c1cd937b96"
+      "sha256": "00967d4c766d4b25075e3fb54ebe995f792223a05baf11da8a23872b0c7fd890"
     },
     {
       "path": "plugins/golem/scripts/connection_relay.py",
-      "sha256": "3e31ef5b35505922c7f5bc76b434fb9be241965314a58d290141661faf1e34e0"
+      "sha256": "5ba19ce2d448ac2af55a4a162f2ed59ace3b4d248faa0a8bd5947366053f2f1e"
     },
     {
       "path": "tools/test_integration_codex_control.py",
@@ -2567,23 +2567,23 @@
     },
     {
       "path": "tools/test_integration_client_connection.py",
-      "sha256": "0c9905276dd942143d571e61bd53601d6ed3145cbc1ae687d27340449b50d5fc"
+      "sha256": "804b81c1cf6062ed52dbcee12b0543154dc98c6a6c4689603b4e631812c1cc97"
     },
     {
       "path": "tools/test_integration_connection_ui.py",
-      "sha256": "2197d0e6be595eb88b69e230983d5813273fa3c24ca97dc85620ca543198650b"
+      "sha256": "bfdfcde64b036318b04657ce455b621694f9d8f8cdd7d599f2997ba1d1a8f80b"
     },
     {
       "path": "tools/test_integration_connection_relay.py",
-      "sha256": "8cfb923b83eabb5291c943ca70a065d0aafeee968debed20245cc5f293195024"
+      "sha256": "e045773f1f6b8a9a1c4f32e46338ff64bd1d1983107bf4cce23c1680911f8dae"
     },
     {
       "path": "docs/integration-codex-plugin.md",
-      "sha256": "57747d402e24c5d7dc9c30952fd028b0a5f294fd72442813aee5eb0571751832"
+      "sha256": "9e255d98978f7d22513f5a5bbd7b3ff9db068ef4487ccbc8dea80d12e6d9f4fd"
     },
     {
       "path": "docs/integration-connection-renewal.md",
-      "sha256": "2719afed344b614fa30b2b74e8c00aedff97aff7fb6ed5d122b47153a05640c6"
+      "sha256": "2f0ae69beb2d868092d8b0169f1520f3314f1aa77cfbbdbdbe36b7d79472fe8e"
     },
     {
       "path": "tools/test_execution_record.py",
@@ -2592,6 +2592,14 @@
     {
       "path": "tools/test_verify_alpha.py",
       "sha256": "54a46485938a66c05693533518de43565dd363c7b51ef0415e31c63df9dd4650"
+    },
+    {
+      "path": "tools/integration_connection_readiness.py",
+      "sha256": "7a90d8a9e4d932daa252de63264f3b26844d5b91cd671e4405c33634ff0243cd"
+    },
+    {
+      "path": "tools/test_integration_connection_readiness.py",
+      "sha256": "3d5e1b41cc58e8db6ef48c0e0dc2fdc13069c6a1beb71dc8b4d8b540694868df"
     }
   ],
   "observations": [
@@ -19582,6 +19590,97 @@
       "kind": "PYTHON_DECLARATION",
       "source_path": "plugins/golem/scripts/launcher.py",
       "entrypoint": "connection_status",
+      "selector": null
+    },
+    {
+      "id": "obs-1871f3d240dbfd6c914d21e198050cb50cdbb81b4b807f7269df98dc95c32e5d",
+      "kind": "CLI_ROUTE",
+      "source_path": "plugins/golem/scripts/launcher.py",
+      "entrypoint": "argparse:operation",
+      "selector": "inspect-state"
+    },
+    {
+      "id": "obs-18b3011d9559bba3dc05f2a01654eafdd9d2156c549bf5f3533af2bbc4bb1bc4",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/launcher.py",
+      "entrypoint": "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+      "selector": "inspect-state"
+    },
+    {
+      "id": "obs-aabfea2338e6dcfc4fd607d32462bc44e4d1390a287578e389adc555b8c35596",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/launcher.py",
+      "entrypoint": "inspect_state",
+      "selector": null
+    },
+    {
+      "id": "obs-5e12d445bdecb05b5b7c7c88f2ff8fa99e506dfb5e83f2605c6b8fb3e7582afc",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/launcher.py",
+      "entrypoint": "load_record",
+      "selector": null
+    },
+    {
+      "id": "obs-feb32d608cccf37f89d1fdfabaf3c5a2620d745a2691bc6f701f0327e2f18eb5",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "parse_definition_marker",
+      "selector": null
+    },
+    {
+      "id": "obs-64500af37eb115123ccb68246db06e648087d868f30f662c8e95f659708158f0",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "Relay.definition_marker",
+      "selector": null
+    },
+    {
+      "id": "obs-c74a631f25168e5e654f7658da7a319efeba8e60066e1f3ea27c5c2464ddb63b",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/connection_relay.py",
+      "entrypoint": "Relay.mark_tool_definitions",
+      "selector": null
+    },
+    {
+      "id": "obs-51ec728302d3c779909bb2fd21247b9da8747c30cb3cad7382e42005a83507a9",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_client_connection.py",
+      "entrypoint": "ConnectionMonitor.set_target_observation",
+      "selector": null
+    },
+    {
+      "id": "obs-54622b77147fe9a5849f1177d4b2d01a83dd65891d839c8d13de2b6626bb9196",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_client_connection.py",
+      "entrypoint": "ConnectionMonitor.readiness",
+      "selector": null
+    },
+    {
+      "id": "obs-514be918af5b93a0a6e1204542b572db5a46c641324c6d6dc0e3892bab9f616e",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_client_connection.py",
+      "entrypoint": "main",
+      "selector": null
+    },
+    {
+      "id": "obs-7aa69f3e36fe367222afc5b82a49ac2fd34163937ec82239c9d54779c1ae0181",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_connection_ui.py",
+      "entrypoint": "ConnectionPanel.observe_target",
+      "selector": null
+    },
+    {
+      "id": "obs-12f92cf328827e369879bffa7baaebe3a7d8dd7012f0b553df6832e860fb45e5",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_connection_readiness.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-c84131ec5cc26896f81db8dcc004182d2de2b6ad6be3e410679073bcb5393815",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_connection_readiness.py",
+      "entrypoint": "classify",
       "selector": null
     }
   ],
@@ -81658,6 +81757,280 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Reviewed concrete command grammar and source branch; named CLI operations are not helper exclusions. Existing checks remain mandatory; target route is planning only."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.launcher.py.inspect-state",
+      "observation_ids": [
+        "obs-1871f3d240dbfd6c914d21e198050cb50cdbb81b4b807f7269df98dc95c32e5d",
+        "obs-18b3011d9559bba3dc05f2a01654eafdd9d2156c549bf5f3533af2bbc4bb1bc4",
+        "obs-aabfea2338e6dcfc4fd607d32462bc44e4d1390a287578e389adc555b8c35596",
+        "obs-5e12d445bdecb05b5b7c7c88f2ff8fa99e506dfb5e83f2605c6b8fb3e7582afc"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Owner-local diagnostic/transition workflow only; original adapter, D1/D2/D4/native approvals remain mandatory. No new execution or identity authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed static source; actual installed Desktop/model acceptance remains NOT_RUN by this inventory."
+        ],
+        "notes": " Additive inspect-state reuses the exact private layout, shared lock and existing record parser; returns approval location/hash and launcher pin without exposing argv, starting a child, changing approval or granting Work authority. Optional expected pins reject drift."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_codex_marketplace.py",
+          "selector": "Adapter.test_inspect_state_reports_exact_layout_and_bytes_without_execution"
+        },
+        {
+          "path": "tools/test_integration_codex_marketplace.py",
+          "selector": "Adapter.test_inspect_state_rejects_wrong_client_pin_and_incomplete_state"
+        },
+        {
+          "path": "tools/test_integration_codex_marketplace.py",
+          "selector": "Adapter.test_inspect_state_preserves_lock_and_private_file_validation"
+        },
+        {
+          "path": "tools/test_integration_codex_marketplace.py",
+          "selector": "Adapter.test_inspect_state_cli_is_a_read_only_contract_without_launcher_arguments"
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete reviewed operation/dependency boundary; metadata/readiness is not a new MCP Work tool, grant or native success predicate."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.connection_relay.py.definition-correlation",
+      "observation_ids": [
+        "obs-feb32d608cccf37f89d1fdfabaf3c5a2620d745a2691bc6f701f0327e2f18eb5",
+        "obs-64500af37eb115123ccb68246db06e648087d868f30f662c8e95f659708158f0",
+        "obs-c74a631f25168e5e654f7658da7a319efeba8e60066e1f3ea27c5c2464ddb63b"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Owner-local diagnostic/transition workflow only; original adapter, D1/D2/D4/native approvals remain mandatory. No new execution or identity authority."
+      ],
+      "effects": [
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed static source; actual installed Desktop/model acceptance remains NOT_RUN by this inventory."
+        ],
+        "notes": " A valid current tools/list response gets one opaque instance/child/catalog/nonce marker in its first description. The marker exposes no private path, approval secret or tool authority; it correlates externally observed definitions and does not authenticate a chat. Request/response/schema/authority and unknown-effect semantics remain unchanged."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_relay.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete reviewed operation/dependency boundary; metadata/readiness is not a new MCP Work tool, grant or native success predicate."
+    },
+    {
+      "id": "surface.tools.integration_client_connection.py.external-definition-observation",
+      "observation_ids": [
+        "obs-51ec728302d3c779909bb2fd21247b9da8747c30cb3cad7382e42005a83507a9",
+        "obs-54622b77147fe9a5849f1177d4b2d01a83dd65891d839c8d13de2b6626bb9196"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Owner-local diagnostic/transition workflow only; original adapter, D1/D2/D4/native approvals remain mandatory. No new execution or identity authority."
+      ],
+      "effects": [
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed static source; actual installed Desktop/model acceptance remains NOT_RUN by this inventory."
+        ],
+        "notes": " Uses the canonical copied adapter inspection API rather than a guessed record path. An explicit recent external chat/turn/definition-marker/tool observation is correlated with one current relay before selection; PID/plan ownership are insufficient. Required tools and four readiness stages do not grant execution. A new read-only CLI validates the private observation file/hash and original observation time, reports unsupported/unready paths, and never refreshes or starts Work. Actual refresh dispatch invalidates the previous external observation before transport; an ACK or unchanged relay status cannot revive it. Pre-dispatch selection failures preserve the observation; lost replies remain UNKNOWN and block further preparation."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_client_connection.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete reviewed operation/dependency boundary; metadata/readiness is not a new MCP Work tool, grant or native success predicate."
+    },
+    {
+      "id": "surface.tools.integration_client_connection.py.readonly-readiness-cli",
+      "observation_ids": [
+        "obs-514be918af5b93a0a6e1204542b572db5a46c641324c6d6dc0e3892bab9f616e"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Owner-local diagnostic/transition workflow only; original adapter, D1/D2/D4/native approvals remain mandatory. No new execution or identity authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "PROCESS",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed static source; actual installed Desktop/model acceptance remains NOT_RUN by this inventory."
+        ],
+        "notes": "Explicit config/review-directory and optional exact private external-observation bytes/hash. Bounded metadata and process identity reads only; no reload, selected-state write, Work call, model request or retry. Exit zero requires the diagnostic readiness predicate, not native authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_client_connection.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete reviewed operation/dependency boundary; metadata/readiness is not a new MCP Work tool, grant or native success predicate."
+    },
+    {
+      "id": "surface.tools.integration_connection_ui.py.external-definition-observation",
+      "observation_ids": [
+        "obs-7aa69f3e36fe367222afc5b82a49ac2fd34163937ec82239c9d54779c1ae0181"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Owner-local diagnostic/transition workflow only; original adapter, D1/D2/D4/native approvals remain mandatory. No new execution or identity authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "PROCESS",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed static source; actual installed Desktop/model acceptance remains NOT_RUN by this inventory."
+        ],
+        "notes": " Explicit external chat/turn/marker/observed-tools/required-tools input is validated and independently re-observed. Changed input invalidates readiness; ambiguous, stale or mismatching target rows cannot be refreshed. Background results remain separate from GUI-thread state and no headless UI creation or automatic request is introduced."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_ui.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete reviewed operation/dependency boundary; metadata/readiness is not a new MCP Work tool, grant or native success predicate."
+    },
+    {
+      "id": "surface.tools.integration_connection_readiness.py.readiness-classification",
+      "observation_ids": [
+        "obs-12f92cf328827e369879bffa7baaebe3a7d8dd7012f0b553df6832e860fb45e5",
+        "obs-c84131ec5cc26896f81db8dcc004182d2de2b6ad6be3e410679073bcb5393815"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Owner-local diagnostic/transition workflow only; original adapter, D1/D2/D4/native approvals remain mandatory. No new execution or identity authority."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed static source; actual installed Desktop/model acceptance remains NOT_RUN by this inventory."
+        ],
+        "notes": "Pure bounded mapping classifier for disk/live/catalog/external same-chat definition evidence. No I/O, process, clock acquisition, retry, native call or authority mutation. Correlation is not host/owner identity proof; wrong/stale/absent marker, pins, catalog, chat/turn, required tools and unknown/repeated refresh remain blocked. A ready workflow permits only a new unapproved preparation under existing contracts, never Work execution."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_connection_readiness.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-connection-renewal.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete reviewed operation/dependency boundary; metadata/readiness is not a new MCP Work tool, grant or native success predicate."
     }
   ]
 }

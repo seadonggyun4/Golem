@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "152b9f2872de272375b12fbed653bf3108a722b7d7fa7b323f7dd331a41d0294",
-  "selected_source_count": 648,
-  "selected_observation_count": 2427,
-  "selected_capability_count": 1291,
+  "inventory_sha256": "194fc4618cdb52e77922cbe239f87cd01c7befad87b7d795d7cac459436f5225",
+  "selected_source_count": 650,
+  "selected_observation_count": 2440,
+  "selected_capability_count": 1297,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -524,6 +524,7 @@
       "tools/integration_codex_control.py",
       "tools/integration_codex_plugin.py",
       "tools/integration_config.py",
+      "tools/integration_connection_readiness.py",
       "tools/integration_connection_ui.py",
       "tools/integration_contract.py",
       "tools/integration_desktop_plugin.py",
@@ -1016,6 +1017,7 @@
       "tools/integration_codex_control.py",
       "tools/integration_codex_plugin.py",
       "tools/integration_config.py",
+      "tools/integration_connection_readiness.py",
       "tools/integration_connection_ui.py",
       "tools/integration_contract.py",
       "tools/integration_desktop_plugin.py",
@@ -4040,7 +4042,7 @@
     },
     {
       "path": "plugins/golem/.codex-plugin/plugin.json",
-      "sha256": "52f1ee68d39ea37a214e7c8a8134f46322f7d89162f9f415ddaf89f7e09fde09"
+      "sha256": "5eff46b827ca249d2d0f4cf8c6dfc8d0de40719cd685b773efeed0b78b79c7d0"
     },
     {
       "path": "plugins/golem/.mcp.json",
@@ -4048,11 +4050,11 @@
     },
     {
       "path": "plugins/golem/scripts/launcher.py",
-      "sha256": "d8fdd348222720046a2df1d9e74c9381f4d8ac3f336ac77ebc0fa0cee4b0f5e3"
+      "sha256": "dd861a0c11bb30a85a718e073cc04e71e4eeb59073f6f9959393c400bfc857fc"
     },
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
-      "sha256": "ef61e5f48aff32ed5bec8363da7506a161e0272acbfef92a65a7eae3825375a6"
+      "sha256": "705ea1200573704c8ab4f4c01175abeda29373a7bd95ea147771e532387bab4a"
     },
     {
       "path": "pyproject.toml",
@@ -5784,7 +5786,7 @@
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "24c62d96b95a56212f0104510429526224791e7cc786732f5b278fcfbbe4e597"
+      "sha256": "d4aa50e523fc216f5374e29f21c50fc1e65b013c63d23a05c14d21aded2f0e6b"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -5796,7 +5798,7 @@
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
-      "sha256": "a0a9bb1e912ff70900184105e604fce4c6ba4f8ffd239a9ce2741efffa2f5d54"
+      "sha256": "ba5651a86f5c3ae7f623fb3733638e619d130d3666b56648af00283850f6b5d9"
     },
     {
       "path": "plugins/golem/skills/golem-work/agents/openai.yaml",
@@ -5808,7 +5810,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "3cb8196b2a176ca565cf43cd808fd5490e04316d799ae5d3a5fa17ab5684f733"
+      "sha256": "e935ccbc4246df71e40bcb61cb19eb47fa3f23ac25c21432f98f241bffd6cc00"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -6076,11 +6078,11 @@
     },
     {
       "path": "plugins/golem/.claude-plugin/plugin.json",
-      "sha256": "0e5ad31c71d839af9c19e3c4aadba75bab6b3174c0947ce36110ac53ea994042"
+      "sha256": "da464b7308d01bee878388e36e83218b1530bfafa2b98d847846dfcbfa1b5bbf"
     },
     {
       "path": "plugins/golem/plugin.json",
-      "sha256": "20915f6348b3cbf02975c8e5d73fb10e636d43a33a29e05a05d577808e63ef4a"
+      "sha256": "4d3995423d439d4c8b09664df40b9de49f3696f293e47d3b5bb5f49a3ab7dca7"
     },
     {
       "path": "plugins/golem/mcp.json",
@@ -6092,7 +6094,7 @@
     },
     {
       "path": "tools/test_integration_plugin_clients.py",
-      "sha256": "f0da4409fafec9a462088fbc12e29e4be009aff01765f0a747f168f9382ed192"
+      "sha256": "37a08dde445cff62fd7a4bda69886d7b6c19cd309ac8f72501b663aa36f2ca02"
     },
     {
       "path": "tools/integration_desktop_plugin.py",
@@ -6100,11 +6102,11 @@
     },
     {
       "path": "tools/test_integration_desktop_plugin.py",
-      "sha256": "64614cea4096ae9549a4f471b7fb34bdfbc62d8d86eadf57b6aba82779179008"
+      "sha256": "f6370085136ac75dd6959f5fc5e43dc861a01d4e77a1e97cfd06ed1bc03b2553"
     },
     {
       "path": "tools/test_integration_codex_marketplace.py",
-      "sha256": "83f622c54d44363a5bc97c4d79bfc8afe0f6ab3911bfc251e622dc9328b69564"
+      "sha256": "b5883111dab336decf2c26a6386cc34c24307daf9a38722ba8017a41c2740401"
     },
     {
       "path": "tools/test_integration_participation.py",
@@ -6160,15 +6162,15 @@
     },
     {
       "path": "tools/integration_client_connection.py",
-      "sha256": "4be2d1c38cb525833ee38e742e436d86d5c740815eedc4f0fa035fa4821457b0"
+      "sha256": "d36d0ab143dca701a9a1402f85bfa60e682597a45aa4043d05d6d5efa6a976bc"
     },
     {
       "path": "tools/integration_connection_ui.py",
-      "sha256": "70af7f1a14fc61af9f22899b051c0d81b5aa305e48dbef881bf6c3c1cd937b96"
+      "sha256": "00967d4c766d4b25075e3fb54ebe995f792223a05baf11da8a23872b0c7fd890"
     },
     {
       "path": "plugins/golem/scripts/connection_relay.py",
-      "sha256": "3e31ef5b35505922c7f5bc76b434fb9be241965314a58d290141661faf1e34e0"
+      "sha256": "5ba19ce2d448ac2af55a4a162f2ed59ace3b4d248faa0a8bd5947366053f2f1e"
     },
     {
       "path": "tools/test_integration_codex_control.py",
@@ -6176,23 +6178,23 @@
     },
     {
       "path": "tools/test_integration_client_connection.py",
-      "sha256": "0c9905276dd942143d571e61bd53601d6ed3145cbc1ae687d27340449b50d5fc"
+      "sha256": "804b81c1cf6062ed52dbcee12b0543154dc98c6a6c4689603b4e631812c1cc97"
     },
     {
       "path": "tools/test_integration_connection_ui.py",
-      "sha256": "2197d0e6be595eb88b69e230983d5813273fa3c24ca97dc85620ca543198650b"
+      "sha256": "bfdfcde64b036318b04657ce455b621694f9d8f8cdd7d599f2997ba1d1a8f80b"
     },
     {
       "path": "tools/test_integration_connection_relay.py",
-      "sha256": "8cfb923b83eabb5291c943ca70a065d0aafeee968debed20245cc5f293195024"
+      "sha256": "e045773f1f6b8a9a1c4f32e46338ff64bd1d1983107bf4cce23c1680911f8dae"
     },
     {
       "path": "docs/integration-codex-plugin.md",
-      "sha256": "57747d402e24c5d7dc9c30952fd028b0a5f294fd72442813aee5eb0571751832"
+      "sha256": "9e255d98978f7d22513f5a5bbd7b3ff9db068ef4487ccbc8dea80d12e6d9f4fd"
     },
     {
       "path": "docs/integration-connection-renewal.md",
-      "sha256": "2719afed344b614fa30b2b74e8c00aedff97aff7fb6ed5d122b47153a05640c6"
+      "sha256": "2f0ae69beb2d868092d8b0169f1520f3314f1aa77cfbbdbdbe36b7d79472fe8e"
     },
     {
       "path": "tools/test_execution_record.py",
@@ -6201,6 +6203,14 @@
     {
       "path": "tools/test_verify_alpha.py",
       "sha256": "54a46485938a66c05693533518de43565dd363c7b51ef0415e31c63df9dd4650"
+    },
+    {
+      "path": "tools/integration_connection_readiness.py",
+      "sha256": "7a90d8a9e4d932daa252de63264f3b26844d5b91cd671e4405c33634ff0243cd"
+    },
+    {
+      "path": "tools/test_integration_connection_readiness.py",
+      "sha256": "3d5e1b41cc58e8db6ef48c0e0dc2fdc13069c6a1beb71dc8b4d8b540694868df"
     }
   ],
   "native_definitions": [
@@ -12378,7 +12388,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 252,
+      "checked_functions": 277,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -15084,14 +15094,15 @@
         "tools/integration_codex_control.py",
         "tools/integration_client_connection.py",
         "tools/integration_connection_ui.py",
-        "plugins/golem/scripts/connection_relay.py"
+        "plugins/golem/scripts/connection_relay.py",
+        "tools/integration_connection_readiness.py"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1201,
+      "reviewed_capabilities": 1207,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -23282,7 +23293,7 @@
     {
       "path": "plugins/golem/scripts/launcher.py",
       "role": "PACKAGE_CONTRACT",
-      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory. Codex-only relay keeps the client transport and selects only an already-approved child; other clients retain their existing exec path. GOLEM_LAUNCHER_* environment is display provenance, not authorization. Exact-instance connection-status performs one authenticated relay metadata read after existing selected-state validation; it neither refreshes/discovers services nor grants or calls Work tools.",
+      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory. Codex-only relay keeps the client transport and selects only an already-approved child; other clients retain their existing exec path. GOLEM_LAUNCHER_* environment is display provenance, not authorization. Exact-instance connection-status performs one authenticated relay metadata read after existing selected-state validation; it neither refreshes/discovers services nor grants or calls Work tools. Additive inspect-state reuses the exact private layout, shared lock and existing record parser; returns approval location/hash and launcher pin without exposing argv, starting a child, changing approval or granting Work authority. Optional expected pins reject drift.",
       "symbols": [
         "SetupError",
         "canonical",
@@ -23293,7 +23304,9 @@
         "default_state",
         "digest",
         "directory",
+        "inspect_state",
         "load",
+        "load_record",
         "locked",
         "main",
         "pairs",
@@ -23310,10 +23323,12 @@
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-launcher')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--client')], keywords=[keyword(arg='choices', value=Name(id='CLIENTS', ctx=Load())), keyword(arg='default', value=Constant(value='codex'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--connection-instance')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--expected-approval-sha256')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--expected-launcher-sha256')])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--launcher')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--reviewed-launcher-sha256')])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--state')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
-        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='operation')], keywords=[keyword(arg='choices', value=Tuple(elts=[Constant(value='configure'), Constant(value='status'), Constant(value='connection-status'), Constant(value='serve')], ctx=Load()))])"
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='operation')], keywords=[keyword(arg='choices', value=Tuple(elts=[Constant(value='configure'), Constant(value='status'), Constant(value='inspect-state'), Constant(value='connection-status'), Constant(value='serve')], ctx=Load()))])"
       ],
       "literal_branches": [
         [
@@ -23323,6 +23338,10 @@
         [
           "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
           "connection-status"
+        ],
+        [
+          "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "inspect-state"
         ],
         [
           "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
@@ -23503,6 +23522,26 @@
         [
           "PYTHON_DECLARATION",
           "connection_status",
+          null
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:operation",
+          "inspect-state"
+        ],
+        [
+          "NATIVE_OPERATION",
+          "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "inspect-state"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "inspect_state",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "load_record",
           null
         ]
       ]
@@ -54175,7 +54214,7 @@
     {
       "path": "tools/integration_distribution.py",
       "role": "M6_FEATURE_PACKAGING_OWNER_BRIDGE_OR_SKILL",
-      "rationale": "M6 finite profile ceilings intersect unchanged D2/D4 owner tools; public artifact packaging/verification/extraction, owner-local Installer/D5 delegation and separated skills. Full symbols/branches/effects/packaged instructions reviewed; mandatory M6 profile. No implicit grant/repair/real installation/embedded runtime/signature or M5 scheduler implementation.",
+      "rationale": "M6 finite profile ceilings intersect unchanged D2/D4 owner tools; public artifact packaging/verification/extraction, owner-local Installer/D5 delegation and separated skills. Full symbols/branches/effects/packaged instructions reviewed; mandatory M6 profile. No implicit grant/repair/real installation/embedded runtime/signature or M5 scheduler implementation. Feature packages include the exact readiness module and a verbatim canonical adapter inspection payload under golem_adapter.py. Existing exact file-set, byte inventory, native pin and authorization checks remain unchanged; no selected client installation is performed.",
       "symbols": [
         "build",
         "closure",
@@ -54247,11 +54286,19 @@
         ],
         [
           "Name(id='name', ctx=Load())",
+          "connection_relay"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
           "evidence_export"
         ],
         [
           "Name(id='name', ctx=Load())",
           "execution_record"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
+          "golem_adapter"
         ],
         [
           "Name(id='name', ctx=Load())",
@@ -58086,23 +58133,29 @@
     {
       "path": "tools/integration_client_connection.py",
       "role": "OWNER_LOCAL_CONNECTION_MONITOR",
-      "rationale": "Owner-local comparison of exact selected config/adapter/policy/runtime bytes with authenticated live Golem metadata and bounded Desktop process ancestry. Provenance environment values are not authority. Explicit observation, Golem relay refresh and optional host-wide reload are distinct; no Work call, policy application or model conversation. Preserved absent endpoints do not consume the 16-probe live budget; active/unknown candidates are prioritized by mtime only for observation. Unobserved/invalid/overflow rows block whole-connection CURRENT and do not imply a restart is required. Optional host catalog metadata is strictly validated and displayed separately from server readiness and model delivery; absent observations remain unknown and old digests remain historical.",
+      "rationale": "Owner-local comparison of exact selected config/adapter/policy/runtime bytes with authenticated live Golem metadata and bounded Desktop process ancestry. Provenance environment values are not authority. Explicit observation, Golem relay refresh and optional host-wide reload are distinct; no Work call, policy application or model conversation. Preserved absent endpoints do not consume the 16-probe live budget; active/unknown candidates are prioritized by mtime only for observation. Unobserved/invalid/overflow rows block whole-connection CURRENT and do not imply a restart is required. Optional host catalog metadata is strictly validated and displayed separately from server readiness and model delivery; absent observations remain unknown and old digests remain historical. Uses the canonical copied adapter inspection API rather than a guessed record path. An explicit recent external chat/turn/definition-marker/tool observation is correlated with one current relay before selection; PID/plan ownership are insufficient. Required tools and four readiness stages do not grant execution. A new read-only CLI validates the private observation file/hash and original observation time, reports unsupported/unready paths, and never refreshes or starts Work. Actual refresh dispatch invalidates the previous external observation before transport; an ACK or unchanged relay status cannot revive it. Pre-dispatch selection failures preserve the observation; lost replies remain UNKNOWN and block further preparation.",
       "symbols": [
         "ConnectionError",
         "ConnectionError.__init__",
         "ConnectionMonitor",
         "ConnectionMonitor.__init__",
+        "ConnectionMonitor.clear_target_observation",
         "ConnectionMonitor.inspect",
         "ConnectionMonitor.observe",
         "ConnectionMonitor.observe_relays",
+        "ConnectionMonitor.readiness",
         "ConnectionMonitor.relay_client",
         "ConnectionMonitor.request_refresh",
+        "ConnectionMonitor.set_target_observation",
+        "ConnectionMonitor.target_matches",
+        "adapter_contract",
         "compare",
         "decode",
         "desktop_parent",
         "digest",
         "display_order",
         "live_status",
+        "main",
         "observation_order",
         "owner_launch_description",
         "read_file",
@@ -58111,7 +58164,12 @@
         "unique",
         "validate_host_catalog"
       ],
-      "declarations": [],
+      "declarations": [
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--config')], keywords=[keyword(arg='required', value=Constant(value=True)), keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--model-observation')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--model-observation-sha256')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--review-directory')], keywords=[keyword(arg='required', value=Constant(value=True)), keyword(arg='type', value=Name(id='Path', ctx=Load()))])"
+      ],
       "literal_branches": [
         [
           "Attribute(value=Attribute(value=Attribute(value=Subscript(value=Attribute(value=Name(id='n', ctx=Load()), attr='targets', ctx=Load()), slice=Constant(value=0), ctx=Load()), attr='value', ctx=Load()), attr='value', ctx=Load()), attr='id', ctx=Load())",
@@ -58132,6 +58190,10 @@
         [
           "Attribute(value=Call(func=Name(id='Path', ctx=Load()), args=[Subscript(value=Name(id='args', ctx=Load()), slice=Constant(value=2), ctx=Load())]), attr='name', ctx=Load())",
           "launcher.py"
+        ],
+        [
+          "Attribute(value=Name(id='error', ctx=Load()), attr='name', ctx=Load())",
+          "golem_adapter"
         ],
         [
           "Attribute(value=Name(id='item', ctx=Load()), attr='name', ctx=Load())",
@@ -58199,6 +58261,10 @@
         ],
         [
           "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "READY"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='row', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
           "RELAY_OBSERVATION_UNAVAILABLE"
         ],
         [
@@ -58250,6 +58316,30 @@
           "command"
         ],
         [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='observation', ctx=Load())])",
+          "marker"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='observation', ctx=Load())])",
+          "observed_at_ns"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='observation', ctx=Load())])",
+          "required_tools"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='observation', ctx=Load())])",
+          "thread_id"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='observation', ctx=Load())])",
+          "tools"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='observation', ctx=Load())])",
+          "turn_id"
+        ],
+        [
           "Constant(value='-c')",
           "-c"
         ],
@@ -58270,6 +58360,14 @@
           "host_catalog"
         ],
         [
+          "Name(id='__name__', ctx=Load())",
+          "__main__"
+        ],
+        [
+          "Name(id='k', ctx=Load())",
+          "observed_at_ns"
+        ],
+        [
           "Name(id='mode', ctx=Load())",
           "GOLEM_RELAY_AVAILABLE"
         ],
@@ -58280,6 +58378,10 @@
         [
           "Name(id='mode', ctx=Load())",
           "OFFICIAL_RELOAD_AVAILABLE"
+        ],
+        [
+          "Name(id='mode', ctx=Load())",
+          "TARGET_NOT_IDENTIFIED"
         ],
         [
           "Subscript(value=Name(id='approval', ctx=Load()), slice=Constant(value='schema'), ctx=Load())",
@@ -58366,13 +58468,28 @@
           "PYTHON_DECLARATION",
           "ConnectionMonitor.request_refresh",
           null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "ConnectionMonitor.set_target_observation",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "ConnectionMonitor.readiness",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "main",
+          null
         ]
       ]
     },
     {
       "path": "tools/integration_connection_ui.py",
       "role": "OWNER_LOCAL_CONNECTION_PRESENTATION",
-      "rationale": "Explicit Owner-app presentation only. No Tk import or polling at headless MCP startup. Manual buttons and one background request render selected/live/host/model states separately, require scope confirmation before refresh, and never elevate queued or child-reinitialized replies to model success. Optional host catalog metadata is strictly validated and displayed separately from server readiness and model delivery; absent observations remain unknown and old digests remain historical.",
+      "rationale": "Explicit Owner-app presentation only. No Tk import or polling at headless MCP startup. Manual buttons and one background request render selected/live/host/model states separately, require scope confirmation before refresh, and never elevate queued or child-reinitialized replies to model success. Optional host catalog metadata is strictly validated and displayed separately from server readiness and model delivery; absent observations remain unknown and old digests remain historical. Explicit external chat/turn/marker/observed-tools/required-tools input is validated and independently re-observed. Changed input invalidates readiness; ambiguous, stale or mismatching target rows cannot be refreshed. Background results remain separate from GUI-thread state and no headless UI creation or automatic request is introduced.",
       "symbols": [
         "BackgroundRequest",
         "BackgroundRequest.__init__",
@@ -58387,12 +58504,17 @@
         "ConnectionPanel._relay_target",
         "ConnectionPanel._selection_changed",
         "ConnectionPanel._submit",
+        "ConnectionPanel._target_changed",
+        "ConnectionPanel._tools_changed",
         "ConnectionPanel.acknowledge",
         "ConnectionPanel.inspect",
+        "ConnectionPanel.observe_target",
         "ConnectionPanel.recheck",
         "ConnectionPanel.refresh",
         "catalog_presentation",
+        "observation_inputs",
         "presentation",
+        "readiness_presentation",
         "text"
       ],
       "declarations": [],
@@ -58404,6 +58526,10 @@
         [
           "Name(id='ch', ctx=Load())",
           "0123456789abcdef"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "target-observation"
         ],
         [
           "Name(id='mode', ctx=Load())",
@@ -58456,13 +58582,18 @@
           "PYTHON_DECLARATION",
           "ConnectionPanel.refresh",
           null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "ConnectionPanel.observe_target",
+          null
         ]
       ]
     },
     {
       "path": "plugins/golem/scripts/connection_relay.py",
       "role": "CLIENT_TRANSPORT_RELAY",
-      "rationale": "Public Codex-only stdio relay around the exact existing approved child. Owner-private local status/refresh IPC does not add an MCP tool or approval authority. Refresh checks old/new approval bytes and current config pin, blocks pending/partial traffic, waits for normal stdin EOF and exit 0, reinitializes once and emits tools/list_changed. This does not certify Work or native lease idle. UNKNOWN is terminal; no Work replay, automatic repair or force-kill. File-level effects name direct relay effects; operation rows additionally include inherited approved-child startup effects. Endpoint discovery distinguishes only verified socket-path absence from PRESENT/UNKNOWN and rechecks descriptor identity; neither absence nor descriptor mtime certifies process/Work completion or current authority. Generation-bound host tools/list observations follow only actual host requests and successfully forwarded replies; exact IDs, finite pagination, errors and invalidation are tracked. No model delivery certification, tool payload persistence, new request, retry or authority is introduced.",
+      "rationale": "Public Codex-only stdio relay around the exact existing approved child. Owner-private local status/refresh IPC does not add an MCP tool or approval authority. Refresh checks old/new approval bytes and current config pin, blocks pending/partial traffic, waits for normal stdin EOF and exit 0, reinitializes once and emits tools/list_changed. This does not certify Work or native lease idle. UNKNOWN is terminal; no Work replay, automatic repair or force-kill. File-level effects name direct relay effects; operation rows additionally include inherited approved-child startup effects. Endpoint discovery distinguishes only verified socket-path absence from PRESENT/UNKNOWN and rechecks descriptor identity; neither absence nor descriptor mtime certifies process/Work completion or current authority. Generation-bound host tools/list observations follow only actual host requests and successfully forwarded replies; exact IDs, finite pagination, errors and invalidation are tracked. No model delivery certification, tool payload persistence, new request, retry or authority is introduced. A valid current tools/list response gets one opaque instance/child/catalog/nonce marker in its first description. The marker exposes no private path, approval secret or tool authority; it correlates externally observed definitions and does not authenticate a chat. Request/response/schema/authority and unknown-effect semantics remain unchanged.",
       "symbols": [
         "Relay",
         "Relay.__init__",
@@ -58477,7 +58608,9 @@
         "Relay.close",
         "Relay.control",
         "Relay.decode_rpc",
+        "Relay.definition_marker",
         "Relay.drain",
+        "Relay.mark_tool_definitions",
         "Relay.new_catalog_generation",
         "Relay.read_pipe",
         "Relay.refresh",
@@ -58503,6 +58636,7 @@
         "frame_receive",
         "frame_send",
         "identifier",
+        "parse_definition_marker",
         "peer_pid",
         "peer_uid",
         "request",
@@ -58682,6 +58816,101 @@
         [
           "PYTHON_DECLARATION",
           "endpoint",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "parse_definition_marker",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "Relay.definition_marker",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "Relay.mark_tool_definitions",
+          null
+        ]
+      ]
+    },
+    {
+      "path": "tools/integration_connection_readiness.py",
+      "role": "OWNER_LOCAL_CONNECTION_EVIDENCE_CLASSIFIER",
+      "rationale": "Pure bounded mapping classifier for disk/live/catalog/external same-chat definition evidence. No I/O, process, clock acquisition, retry, native call or authority mutation. Correlation is not host/owner identity proof; wrong/stale/absent marker, pins, catalog, chat/turn, required tools and unknown/repeated refresh remain blocked. A ready workflow permits only a new unapproved preparation under existing contracts, never Work execution.",
+      "symbols": [
+        "ChatTarget",
+        "ChatTarget.from_mapping",
+        "DefinitionMarker",
+        "DefinitionMarker.from_mapping",
+        "_catalog_current",
+        "_fresh",
+        "_identifier",
+        "_match",
+        "_positive",
+        "_tool_names",
+        "classify"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Call(func=Attribute(value=Name(id='live', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "READY"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='schema')])",
+          "golem.host-tool-catalog-observation.v1"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "HOST_CATALOG_RESPONSE_SENT"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "catalog_generation"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "child_generation"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "definition_nonce"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "instance"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "server_name"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "thread_id"
+        ],
+        [
+          "Name(id='state', ctx=Load())",
+          "ACKNOWLEDGED"
+        ],
+        [
+          "Name(id='state', ctx=Load())",
+          "FAILED"
+        ],
+        [
+          "Name(id='state', ctx=Load())",
+          "NOT_ATTEMPTED"
+        ],
+        [
+          "Name(id='state', ctx=Load())",
+          "UNKNOWN"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "classify",
           null
         ]
       ]
@@ -65022,7 +65251,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "9e0e8c8da8eb6f37910c027d103c1e93f77d00175d16e3bbeb1fd9b07f808162",
+      "sha256": "f151aad82b63012273703e0a09e631ebc064e6ac748306fd46154e1d271f9aaf",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65184,7 +65413,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "61eee7e6daa2eebb1ef3c6a1e6261ed8cf2acad74ebdedeef91df6ad7f33d22e",
+      "sha256": "3617dd1ca0c9d3ca952d29df8726b17b3c7aca6a75578f33a35b7d8629dfa59e",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65274,13 +65503,13 @@
     },
     {
       "path": "tools/capability_repository.py",
-      "sha256": "00af9e11da1c9685bb7f6de7bccc78c29bb891b7c1fda9f82680225abd2585d4",
+      "sha256": "6786d809cbb0a7983c49f7c6fe62bcb94a14e726962d2812aaa2a3bf801b2a17",
       "shape_sha256": "6d9af9283d17b17d9b3a95815343435f861de9c53cb32ba70bf944c54b761947",
       "role": "M0_STATIC_ANALYSIS"
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "ce50768ca9b98d5d7cb5f41ec4b7c6cbbadcbee5445b2fa8bde927ea0a9caffe",
+      "sha256": "a68e34c198936a7b61c2cf0a12068bb61249ba43230d7d395fd8a1806da7d8c8",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65292,7 +65521,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "de860320894658e07e1dc4992f6f186e43767d20033e34883d81eaf8f3b152b8",
+      "sha256": "7f533823b100cc379c71e602d9e4cd3858e7bc1e4b77397929cc8bec51fc826c",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65328,7 +65557,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "9a27fa078a4fadcf7d8124e86407fbe11d1c527a16fb53c9f3fb500805d54892",
+      "sha256": "d3cc65feab8f8fc0e54bd82e9d7b52952fd3113d8947a238fe62357cd8ff9e4b",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65622,7 +65851,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "3cb8196b2a176ca565cf43cd808fd5490e04316d799ae5d3a5fa17ab5684f733",
+      "sha256": "e935ccbc4246df71e40bcb61cb19eb47fa3f23ac25c21432f98f241bffd6cc00",
       "shape_sha256": "229f03b8755734b621536982445ca6330de50865d2787da1f1aaa7b01abba5f7",
       "role": "M0_FIXTURE_REGRESSION"
     },

@@ -1,6 +1,8 @@
 """Private disposable connection fixtures; no real client/registry/Work dispatch."""
 import copy
 import json
+import importlib.util
+import io
 import os
 from pathlib import Path
 import stat
@@ -8,8 +10,14 @@ import tempfile
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
+from contextlib import redirect_stdout
 
 import integration_client_connection as connection
+
+_RELAY_SPEC = importlib.util.spec_from_file_location('fixture_connection_relay',
+    Path(__file__).resolve().parents[1]/'plugins/golem/scripts/connection_relay.py')
+_RELAY = importlib.util.module_from_spec(_RELAY_SPEC)
+_RELAY_SPEC.loader.exec_module(_RELAY)
 
 
 def catalog_observation(**updates):
@@ -36,6 +44,7 @@ class Fixture(unittest.TestCase):
         for path in (self.package/'scripts', self.package/'.codex-plugin', self.runtime,
                      self.state/'golem-launcher', self.review):
             path.mkdir(mode=0o700, parents=True, exist_ok=True)
+        self.write(self.state/'golem-launcher/owner.lock', b'')
         self.adapter = self.package/'scripts/launcher.py'
         self.write(self.adapter, b'# fixture adapter; never execute\n')
         self.write(self.runtime/'integration_owner_desktop.py', b'# fixture runtime\n')
@@ -317,6 +326,8 @@ class OfficialControl(Fixture):
             result = monitor.request_refresh(expected_token=token)
             self.assertEqual(result['reload']['mode'],'VERIFY_REQUIRED')
             self.assertEqual(result['refresh_result']['state'],'REFRESH_UNKNOWN')
+            self.assertEqual(monitor.refresh_outcome, {'state':'UNKNOWN','attempts':1})
+            self.assertFalse(result['readiness']['preparation_allowed'])
             self.expect('REFRESH_ALREADY_ATTEMPTED_NO_RETRY',
                         lambda:monitor.request_refresh(expected_token=token))
         self.assertEqual(calls,['config/mcpServer/reload'])
@@ -466,11 +477,15 @@ class Relay(Fixture):
         super().setUp()
         selected=self.selected()
         class FakeRelay:
+            parse_definition_marker = staticmethod(_RELAY.parse_definition_marker)
+
             def __init__(self):
                 self.rows={key*32:{'instance':key*32,'pid':50+i,'state':'READY','busy':False,
                     'plugin_version':selected['package_version'],'selected_state':'/fixture/old-state',
                     'launcher_sha256':'d'*64,'approval_sha256':'e'*64,
-                    'kind':'codex-connection-relay'} for i,key in enumerate(('a','b'))}
+                    'kind':'codex-connection-relay', 'host_catalog':catalog_observation(),
+                    'definition_marker':'golem-connection-v1:'+key*32+':2:3:'+key*32}
+                    for i,key in enumerate(('a','b'))}
                 self.calls=[]
                 self.failure=None
             def descriptors(self):
@@ -488,10 +503,17 @@ class Relay(Fixture):
                 row=self.rows[instance]
                 row.update(launcher_sha256=params['launcher_sha256'],
                            approval_sha256=params['approval_sha256'],selected_state=params['state'])
+                row['host_catalog'] = catalog_observation(child_generation=3,catalog_generation=4)
+                row['definition_marker'] = 'golem-connection-v1:'+instance+':3:4:'+'d'*32
                 return {'ok':True,'value':{'state':'READY','model_tool_delivery':'NOT_OBSERVED'}}
         self.relay=FakeRelay()
         self.monitor=connection.ConnectionMonitor(self.config,self.review,observer=lambda:[],
             relay=self.relay,ancestry=lambda pid:{'host_kind':'ChatGPT','host_pid':40})
+        self.bind()
+
+    def bind(self, target='a'*32, required_tools=None):
+        self.monitor.set_target_observation('fixture-chat','fixture-turn',
+            self.relay.rows[target]['definition_marker'], ['golem_projects_list'], required_tools)
 
     def refresh(self, token=None, target='a'*32):
         return self.monitor.request_refresh(expected_token=token,connection_instance=target)
@@ -508,6 +530,9 @@ class Relay(Fixture):
         self.assertEqual(result['model_tool_delivery'],'NOT_OBSERVED')
 
     def test_legacy_catalog_absence_is_unknown_without_synthetic_counts(self):
+        for row in self.relay.rows.values():
+            row.pop('host_catalog'); row.pop('definition_marker')
+        self.monitor.clear_target_observation()
         result=self.monitor.inspect()
         self.assertTrue(all(row['host_catalog'] is None for row in result['connections']))
         self.assertEqual(result['model_tool_delivery'],'NOT_OBSERVED')
@@ -557,7 +582,7 @@ class Relay(Fixture):
         observation=catalog_observation(child_generation=0,catalog_generation=0,
             state='HOST_CATALOG_NOT_REQUESTED',list_changed_notifications_sent=0,
             last_complete_generation=None,last_complete_sha256=None,last_complete_pages=None)
-        self.relay.rows['a'*32].update(state='STARTING',host_catalog=observation)
+        self.relay.rows['a'*32].update(state='STARTING',host_catalog=observation,definition_marker=None)
         row=next(row for row in self.monitor.inspect()['connections'] if row['instance']=='a'*32)
         self.assertEqual(row['host_catalog'],observation)
         self.assertFalse(row['refreshable'])
@@ -591,12 +616,15 @@ class Relay(Fixture):
 
     def test_wrong_target_or_missing_token_never_dispatches(self):
         observed=self.monitor.inspect()
+        observation=copy.deepcopy(self.monitor.target_observation)
         self.expect('REFRESH_SELECTION_CHANGED',lambda:self.refresh())
         self.expect('REFRESH_CONNECTION_SELECTION_REQUIRED',
                     lambda:self.refresh(observed['refresh_token'],target='c'*32))
         self.assertEqual(self.relay.calls,[])
+        self.assertEqual(self.monitor.target_observation,observation)
 
     def test_two_relays_dispatch_only_selected_target_with_exact_selected_pins(self):
+        self.bind('b'*32)
         observed=self.monitor.inspect()
         self.assertEqual(observed['reload']['mode'],'GOLEM_RELAY_AVAILABLE')
         selected=observed['selected']
@@ -613,15 +641,157 @@ class Relay(Fixture):
         observed=self.monitor.inspect()
         self.relay.failure=OSError('fixture reply lost after dispatch')
         with self.assertRaises(OSError): self.refresh(observed['refresh_token'])
+        self.assertIsNone(self.monitor.target_observation)
+        self.bind()
         self.expect('REFRESH_ALREADY_ATTEMPTED_NO_RETRY',
                     lambda:self.refresh(self.monitor.inspect()['refresh_token']))
         self.assertEqual(len(self.relay.calls),1)
 
     def test_new_observation_allows_other_relay_without_repeating_first(self):
         self.refresh(self.monitor.inspect()['refresh_token'],target='a'*32)
+        self.bind('b'*32)
         self.refresh(self.monitor.inspect()['refresh_token'],target='b'*32)
         self.assertEqual([(i,op) for i,op,_ in self.relay.calls],
                          [('a'*32,'refresh'),('b'*32,'refresh')])
+
+    def current(self, target='a'*32):
+        selected = self.selected()
+        self.relay.rows[target].update(definition_tool_count=1,
+            definition_tools_sha256=connection.digest(b'["golem_projects_list"]'),
+            launcher_sha256=selected['launcher_sha256'],
+            approval_sha256=selected['approval_sha256'], selected_state=selected['adapter_state'],
+            host_catalog=catalog_observation(state='HOST_CATALOG_RESPONSE_SENT', requests=1,responses=1,
+                last_complete_generation=3,last_complete_sha256='c'*64,last_complete_pages=1,
+                current_complete_sha256='c'*64,current_complete_pages=1))
+
+    def test_unbound_same_host_rows_cannot_be_selected_for_refresh(self):
+        self.monitor.clear_target_observation()
+        report=self.monitor.inspect()
+        self.assertEqual(report['reload']['mode'],'TARGET_NOT_IDENTIFIED')
+        self.assertTrue(all(row['refresh_candidate'] for row in report['connections']))
+        self.assertFalse(any(row['refreshable'] for row in report['connections']))
+        result=self.refresh(report['refresh_token'])
+        self.assertEqual(result['reload']['mode'],'TARGET_NOT_IDENTIFIED')
+        self.assertEqual(self.relay.calls,[])
+
+    def test_only_observed_marker_binds_its_exact_relay_not_other_same_host_row(self):
+        report=self.monitor.inspect()
+        rows={row['instance']:row for row in report['connections']}
+        self.assertTrue(rows['a'*32]['target_bound'])
+        self.assertFalse(rows['b'*32]['target_bound'])
+        self.expect('REFRESH_CONNECTION_SELECTION_REQUIRED',
+            lambda:self.refresh(report['refresh_token'],target='b'*32))
+        self.assertEqual(self.relay.calls,[])
+
+    def test_stale_model_marker_or_expired_observation_cannot_refresh(self):
+        self.monitor.target_observation['marker']['definition_nonce']='f'*32
+        self.assertEqual(self.monitor.inspect()['reload']['mode'],'TARGET_NOT_IDENTIFIED')
+        self.bind()
+        self.monitor.target_observation['observed_at_ns'] -= 300_000_000_001
+        self.assertEqual(self.monitor.inspect()['reload']['mode'],'TARGET_NOT_IDENTIFIED')
+        self.assertEqual(self.relay.calls,[])
+
+    def test_forged_marker_instance_or_generation_in_relay_status_blocks(self):
+        for value in ('golem-connection-v1:'+'c'*32+':2:3:'+'a'*32,
+                      'golem-connection-v1:'+'a'*32+':2:4:'+'a'*32):
+            with self.subTest(marker=value):
+                self.relay.rows['a'*32]['definition_marker']=value
+                row=next(r for r in self.monitor.inspect()['connections'] if r['instance']=='a'*32)
+                self.assertEqual(row['reason'],'RELAY_DEFINITION_MARKER_MISMATCH')
+                self.assertFalse(row['refreshable'])
+        self.assertEqual(self.relay.calls,[])
+
+    def test_external_current_definitions_qualify_preparation_but_never_authority(self):
+        self.current()
+        self.bind(required_tools=['golem_projects_list'])
+        report=self.monitor.inspect()
+        qualified=report['readiness']
+        self.assertEqual(report['model_tool_delivery'],'EXTERNALLY_OBSERVED_SAME_CHAT_DEFINITIONS')
+        self.assertTrue(qualified['preparation_allowed'])
+        self.assertFalse(qualified['execution_authorized'])
+        self.assertFalse(qualified['owner_identity_authenticated'])
+        self.assertEqual(report['Work_calls'],0)
+        self.assertEqual(self.relay.calls,[])
+
+    def test_required_tool_not_in_model_inventory_never_qualifies(self):
+        self.current()
+        self.bind(required_tools=['golem_document_submit'])
+        report=self.monitor.inspect()
+        self.assertEqual(report['readiness']['reason'],'REQUIRED_MODEL_TOOL_DEFINITIONS_MISSING')
+        self.assertFalse(report['readiness']['preparation_allowed'])
+        self.assertEqual(report['model_tool_delivery'],'NOT_OBSERVED')
+
+    def test_refresh_invalidates_old_definition_evidence_until_new_generation_observed(self):
+        report=self.monitor.inspect()
+        result=self.refresh(report['refresh_token'])
+        self.assertFalse(result['readiness']['preparation_allowed'])
+        self.assertFalse(result['target_bound'])
+        self.assertEqual(result['model_tool_delivery'],'NOT_OBSERVED')
+        after=self.monitor.inspect()
+        self.assertFalse(after['target_bound'])
+        self.assertFalse(after['readiness']['preparation_allowed'])
+        self.assertEqual(len(self.relay.calls),1)
+
+    def test_host_ACK_unchanged_relay_cannot_reaccept_pre_refresh_turn(self):
+        class Control:
+            def __init__(self): self.calls=[]
+            def inspect(self, **kwargs):
+                return {'verified_desktop':True,'reload_supported':True,
+                        'socket_identity':{'host_pid':40,'inode':123}}
+            def reload(self, **kwargs):
+                self.calls.append(kwargs)
+                return {'state':'REFRESH_QUEUED'}
+        control=Control()
+        self.monitor.control=control
+        self.current('a'*32)
+        self.current('b'*32)
+        self.bind(required_tools=['golem_projects_list'])
+        before=self.monitor.inspect()
+        self.assertEqual(before['reload']['mode'],'OFFICIAL_RELOAD_AVAILABLE')
+        self.assertTrue(before['readiness']['preparation_allowed'])
+        prior=copy.deepcopy(self.monitor.target_observation)
+        self.expect('REFRESH_SELECTION_CHANGED',lambda:self.monitor.request_refresh(expected_token='stale'))
+        self.assertEqual(self.monitor.target_observation,prior)
+        self.assertEqual(control.calls,[])
+        result=self.monitor.request_refresh(expected_token=before['refresh_token'])
+        self.assertEqual(result['reload']['mode'],'REFRESH_QUEUED')
+        self.assertIsNone(self.monitor.target_observation)
+        self.assertEqual(self.monitor.refresh_outcome,{'state':'ACKNOWLEDGED','attempts':1})
+        # An ACK may leave the same relay/marker alive until a subsequent turn.
+        # Neither that status nor another ordinary inspection is new chat evidence.
+        for unused in range(2):
+            after=self.monitor.inspect()
+            self.assertFalse(after['target_bound'])
+            self.assertFalse(after['readiness']['preparation_allowed'])
+            self.assertEqual(after['readiness']['reason'],'TARGET_CHAT_OBSERVATION_REQUIRED')
+            self.assertEqual(after['model_tool_delivery'],'NOT_OBSERVED')
+        self.monitor.set_target_observation('fixture-chat','subsequent-turn',
+            self.relay.rows['a'*32]['definition_marker'],['golem_projects_list'],['golem_projects_list'])
+        final=self.monitor.inspect()
+        self.assertTrue(final['readiness']['preparation_allowed'])
+        self.assertFalse(final['readiness']['execution_authorized'])
+        self.assertEqual(len(control.calls),1)
+        self.assertEqual(self.relay.calls,[])
+
+    def test_unknown_refresh_is_not_upgraded_by_matching_later_external_observation(self):
+        self.relay.failure=OSError('fixture reply lost')
+        with self.assertRaises(OSError):self.refresh(self.monitor.inspect()['refresh_token'])
+        self.current()
+        self.bind(required_tools=['golem_projects_list'])
+        report=self.monitor.inspect()
+        self.assertEqual(report['readiness']['reason'],'REFRESH_UNKNOWN')
+        self.assertFalse(report['readiness']['preparation_allowed'])
+        self.assertEqual(len(self.relay.calls),1)
+
+    def test_invalid_target_observation_clears_prior_selection_and_returns_diagnostic(self):
+        variants=[('', 'turn', self.relay.rows['a'*32]['definition_marker'],['golem_projects_list']),
+                  ('chat','turn','guessed',['golem_projects_list']),
+                  ('chat','turn',self.relay.rows['a'*32]['definition_marker'],[{}])]
+        for args in variants:
+            self.bind()
+            with self.assertRaises(connection.ConnectionError):self.monitor.set_target_observation(*args)
+            self.assertIsNone(self.monitor.target_observation)
+        self.assertEqual(self.relay.calls,[])
 
     def test_forty_absent_relay_endpoints_do_not_consume_live_budget(self):
         template=copy.deepcopy(self.relay.rows['a'*32])
@@ -656,7 +826,8 @@ class Relay(Fixture):
                         selected_state=selected['adapter_state'])
         self.relay.rows={f'{i:032x}':dict(template,instance=f'{i:032x}',discovery_mtime_ns=1) for i in range(40)}
         newest='f'*32
-        self.relay.rows[newest]=dict(template,instance=newest,discovery_mtime_ns=2)
+        self.relay.rows[newest]=dict(template,instance=newest,discovery_mtime_ns=2,
+            definition_marker='golem-connection-v1:'+newest+':2:3:'+newest)
         original=self.relay.request
         def status(instance,operation,arguments):
             if instance != newest: raise ConnectionRefusedError('fixture retained socket')
@@ -685,10 +856,64 @@ class Relay(Fixture):
         self.monitor.observer=lambda:[{'instance':f'{i:032x}','state':'NOT_OBSERVED'} for i in range(128)]
         report=self.monitor.inspect()
         shown=ui.presentation(report)
-        self.assertEqual(shown['relay_targets'],{'0':'a'*32,'1':'b'*32})
+        self.assertEqual(shown['relay_targets'],{'0':'a'*32})
         self.assertEqual(len(report['connections']),130)
         self.assertEqual(len(shown['rows']),128)
         self.assertNotEqual(report['reload']['mode'],'VERIFIED')
+
+
+class ReadOnlyCLI(Fixture):
+    def invoke(self, observation, pin=None):
+        path=self.root/'model-observation.json'
+        self.write(path,observation)
+        output=io.StringIO()
+        args=['--config',str(self.config),'--review-directory',str(self.review),
+              '--model-observation',str(path),'--model-observation-sha256',
+              pin or connection.digest(path.read_bytes())]
+        with redirect_stdout(output):
+            code=connection.main(args)
+        return code,json.loads(output.getvalue())
+
+    def observation(self, timestamp):
+        return {'thread_id':'fixture-chat','turn_id':'fixture-turn',
+                'marker':'golem-connection-v1:'+'a'*32+':1:1:'+'b'*32,
+                'tools':['golem_projects_list'],'required_tools':['golem_projects_list'],
+                'observed_at_ns':timestamp}
+
+    def test_wrong_observation_pin_never_observes_host_or_mutates_any_file(self):
+        before={str(p):p.read_bytes() for p in self.root.rglob('*') if p.is_file()}
+        with patch.object(connection.ConnectionMonitor,'inspect',side_effect=AssertionError('no host IPC')):
+            code,result=self.invoke(self.observation(connection.time.time_ns()),'0'*64)
+        self.assertEqual(code,2)
+        self.assertEqual(result['reason'],'MODEL_OBSERVATION_CHANGED')
+        self.assertFalse(result['execution_authorized'])
+        self.assertEqual(before,{str(p):p.read_bytes() for p in self.root.rglob('*')
+                                 if p.is_file() and p.name!='model-observation.json'})
+
+    def test_expired_observation_is_not_restamped_and_never_contacts_host(self):
+        with patch.object(connection.ConnectionMonitor,'inspect',side_effect=AssertionError('no host IPC')):
+            code,result=self.invoke(self.observation(connection.time.time_ns()-300_000_000_001))
+        self.assertEqual(code,2)
+        self.assertEqual(result['reason'],'MODEL_OBSERVATION_STALE')
+
+    def test_valid_observation_retains_original_timestamp_during_check(self):
+        timestamp=connection.time.time_ns()-10_000_000_000
+        seen=[]
+        def inspect(monitor):
+            seen.append(copy.deepcopy(monitor.target_observation))
+            return {'readiness':{'preparation_allowed':False},'execution_authorized':False}
+        with patch.object(connection.ConnectionMonitor,'inspect',autospec=True,side_effect=inspect):
+            code,result=self.invoke(self.observation(timestamp))
+        self.assertEqual(code,2)
+        self.assertEqual(seen[0]['observed_at_ns'],timestamp)
+        self.assertEqual(seen[0]['source'],'EXTERNAL_MODEL_DEFINITION_OBSERVATION')
+        self.assertFalse(result['execution_authorized'])
+
+    def test_invalid_observation_container_is_reported_without_host_io(self):
+        with patch.object(connection.ConnectionMonitor,'inspect',side_effect=AssertionError('no host IPC')):
+            code,result=self.invoke([{}])
+        self.assertEqual(code,2)
+        self.assertEqual(result['reason'],'MODEL_OBSERVATION_FIELDS')
 
 
 if __name__ == '__main__':

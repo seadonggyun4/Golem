@@ -5,7 +5,9 @@ import os
 from pathlib import Path
 import threading
 import time
+import types
 import unittest
+from unittest.mock import Mock
 
 import integration_connection_ui as ui
 
@@ -27,6 +29,7 @@ def report(mode='MANUAL_RESTART_REQUIRED'):
         'model_tool_delivery': 'NOT_OBSERVED',
         'observed_at': '2026-11-11T00:00:00+00:00',
         'refresh_token': 'f'*64,
+        'target_bound': mode == 'GOLEM_RELAY_AVAILABLE',
     }
 
 
@@ -137,6 +140,31 @@ class Presentation(unittest.TestCase):
                               {'instance':'c'*32,'refreshable':1},
                               {'instance':'not-a-relay','refreshable':True}]
         self.assertEqual(ui.presentation(value)['relay_targets'], {'0':'a'*32})
+        value['target_bound'] = False
+        self.assertEqual(ui.presentation(value)['relay_targets'], {})
+
+    def test_readiness_is_separate_from_approval_and_requires_exact_flags(self):
+        value = report('VERIFIED')
+        value['readiness'] = {'state': 'READY_FOR_PREPARATION', 'preparation_allowed': True,
+                              'reason': 'EXTERNAL_OBSERVATION_MATCHED'}
+        shown = ui.presentation(value)
+        self.assertFalse(shown['readiness']['preparation_allowed'])
+        self.assertIn('준비 보류', shown['readiness']['label'])
+        value['target_bound'] = True
+        shown = ui.presentation(value)
+        self.assertTrue(shown['readiness']['preparation_allowed'])
+        self.assertIn('외부 관측', shown['readiness']['label'])
+        self.assertNotIn('승인 완료', shown['readiness']['label'])
+        value['readiness']['preparation_allowed'] = 1
+        self.assertFalse(ui.presentation(value)['readiness']['preparation_allowed'])
+
+    def test_missing_target_has_explicit_no_refresh_guidance(self):
+        value = report('TARGET_NOT_IDENTIFIED')
+        value['connections'][0].update(instance='a'*32, refreshable=True)
+        shown = ui.presentation(value)
+        self.assertIn('연결 미식별', shown['renewal_label'])
+        self.assertEqual(shown['relay_targets'], {})
+        self.assertFalse(shown['readiness']['preparation_allowed'])
 
     def test_metadata_is_literal_bounded_and_never_interpreted_as_command(self):
         value = report()
@@ -215,6 +243,93 @@ class Worker(unittest.TestCase):
         self.assertEqual(calls, [True])
 
 
+class ObservationInput(unittest.TestCase):
+    marker = 'golem-connection-v1:' + 'a'*32 + ':1:2:' + 'b'*32
+
+    def test_literal_inventory_and_required_tools_remain_separate(self):
+        values = ui.observation_inputs(' chat ', ' turn ', self.marker,
+            'golem_projects_list,\ngolem_work_inspect', 'golem_document_submit')
+        self.assertEqual(values, ('chat', 'turn', self.marker,
+            ['golem_projects_list', 'golem_work_inspect'], ['golem_document_submit']))
+        self.assertEqual(ui.observation_inputs('c', 't', self.marker, 'golem_projects_list')[-1], [])
+        # Do not infer or silently normalize names, deduplicate, or fabricate a
+        # required tool. The controller performs semantic validation.
+        self.assertEqual(ui.observation_inputs('c', 't', self.marker, 'x,x')[-2], ['x', 'x'])
+
+    def test_empty_and_oversized_inputs_are_blocked_before_controller(self):
+        valid = ['c', 't', self.marker, 'golem_projects_list', '']
+        for index, bad in ((0, ''), (1, ' '*3), (2, None), (3, ''),
+                           (0, 'c'*257), (2, 'm'*513), (3, 'x'*65537),
+                           (3, ','.join(['x']*257)), (4, 'y'*65537)):
+            with self.subTest(index=index, bad_type=type(bad).__name__):
+                values = valid[:]
+                values[index] = bad
+                with self.assertRaises(ui.ConnectionError):
+                    ui.observation_inputs(*values)
+
+    def panel_stub(self):
+        panel = ui.ConnectionPanel.__new__(ui.ConnectionPanel)
+        panel.request = types.SimpleNamespace(busy=False)
+        panel.controller = Mock()
+        panel.controller.inspect.return_value = report('TARGET_NOT_IDENTIFIED')
+        panel.thread_id = Mock(get=Mock(return_value='chat'))
+        panel.turn_id = Mock(get=Mock(return_value='turn'))
+        panel.marker = Mock(get=Mock(return_value=self.marker))
+        panel.observed_tools = Mock(get=Mock(return_value='golem_projects_list'))
+        panel.required_tools = Mock(get=Mock(return_value='golem_document_submit'))
+        panel._submit = Mock()
+        return panel
+
+    def test_explicit_observation_runs_only_set_and_inspect_when_dispatched(self):
+        panel = self.panel_stub()
+        panel.observe_target()
+        panel.controller.set_target_observation.assert_not_called()
+        panel.controller.inspect.assert_not_called()
+        kind, operation = panel._submit.call_args.args
+        self.assertEqual(kind, 'target-observation')
+        operation()
+        panel.controller.set_target_observation.assert_called_once_with(
+            'chat', 'turn', self.marker, ['golem_projects_list'], ['golem_document_submit'])
+        panel.controller.inspect.assert_called_once_with()
+        panel.controller.request_refresh.assert_not_called()
+
+    def test_busy_or_invalid_observation_never_refreshes_or_uses_old_input(self):
+        panel = self.panel_stub()
+        panel.request.busy = True
+        panel.observe_target()
+        panel._submit.assert_not_called()
+        panel.request.busy = False
+        panel.marker.get.return_value = ''
+        panel.observe_target()
+        operation = panel._submit.call_args.args[1]
+        with self.assertRaises(ui.ConnectionError):
+            operation()
+        panel.controller.set_target_observation.assert_not_called()
+        panel.controller.inspect.assert_not_called()
+        panel.controller.request_refresh.assert_not_called()
+
+    def test_edit_invalidates_report_and_only_clears_memory_when_idle(self):
+        panel = self.panel_stub()
+        panel.target_revision = 0
+        panel.target_dirty = False
+        panel.report = report('GOLEM_RELAY_AVAILABLE')
+        panel.reload_consent = Mock()
+        panel.readiness = Mock()
+        panel.model_status = Mock()
+        panel._enable = Mock()
+        panel._target_changed()
+        self.assertIsNone(panel.report)
+        self.assertTrue(panel.target_dirty)
+        self.assertEqual(panel.target_revision, 1)
+        panel.reload_consent.set.assert_called_with(False)
+        panel.controller.clear_target_observation.assert_called_once_with()
+        panel.controller.inspect.assert_not_called()
+        panel.controller.request_refresh.assert_not_called()
+        panel.request.busy = True
+        panel._target_changed()
+        self.assertEqual(panel.controller.clear_target_observation.call_count, 1)
+
+
 class NativePanel(unittest.TestCase):
     def setUp(self):
         if os.environ.get('GOLEM_TEST_TK') != '1':
@@ -230,6 +345,61 @@ class NativePanel(unittest.TestCase):
             time.sleep(.01)
         self.root.update()
         self.assertFalse(panel.request.busy)
+
+    def test_target_inputs_require_explicit_comparison_and_edit_discards_readiness(self):
+        class Controller:
+            def __init__(self): self.calls=[];self.bound=False
+            def clear_target_observation(self): self.bound=False
+            def set_target_observation(self, *arguments):
+                self.calls.append(('observe', arguments));self.bound=True
+            def inspect(self):
+                self.calls.append(('inspect',))
+                value=report('VERIFIED' if self.bound else 'TARGET_NOT_IDENTIFIED')
+                value['target_bound']=self.bound
+                value['readiness']={'state':'READY_FOR_PREPARATION' if self.bound else 'TARGET_NOT_IDENTIFIED',
+                    'preparation_allowed':self.bound,'reason':'EXTERNAL_OBSERVATION_MATCHED'}
+                return value
+            def request_refresh(self, **kwargs): raise AssertionError('comparison does not refresh')
+        controller=Controller()
+        panel=ui.ConnectionPanel(self.root,controller)
+        panel.thread_id.set('chat');panel.turn_id.set('turn')
+        panel.marker.set(ObservationInput.marker)
+        panel.observed_tools.insert('1.0','golem_projects_list\ngolem_document_submit')
+        panel.required_tools.insert('1.0','golem_document_submit')
+        self.root.update()
+        self.assertEqual(controller.calls, [])
+        self.assertEqual(str(panel.refresh_button.cget('state')), 'disabled')
+        panel.observation_button.invoke();self.settle(panel)
+        self.assertEqual(controller.calls, [('observe', ('chat','turn',ObservationInput.marker,
+            ['golem_projects_list','golem_document_submit'],['golem_document_submit'])), ('inspect',)])
+        self.assertIn('외부', panel.readiness.get())
+        self.assertIn('진행 가능',panel.readiness.get())
+        panel.turn_id.set('next-turn');self.root.update()
+        self.assertIsNone(panel.report)
+        self.assertFalse(controller.bound)
+        self.assertIn('준비 보류',panel.readiness.get())
+        # Even a faulty/old controller response cannot restore edited evidence
+        # through the ordinary status button.
+        controller.bound=True
+        panel.inspect_button.invoke();self.settle(panel)
+        self.assertFalse(panel.report['target_bound'])
+        self.assertFalse(panel.report['readiness']['preparation_allowed'])
+        self.assertIn('준비 보류',panel.readiness.get())
+
+    def test_unidentified_target_blocks_refresh_even_with_forged_row_flag(self):
+        class Controller:
+            def inspect(self):
+                value=report('TARGET_NOT_IDENTIFIED')
+                value['connections'][0].update(instance='a'*32,refreshable=True)
+                return value
+            def request_refresh(self, **kwargs): raise AssertionError('unbound target must not refresh')
+        panel=ui.ConnectionPanel(self.root,Controller())
+        panel.inspect_button.invoke();self.settle(panel)
+        panel.tree.selection_set('0');self.root.update()
+        panel.reload_consent.set(True);panel._enable()
+        self.assertEqual(str(panel.refresh_button.cget('state')), 'disabled')
+        self.assertEqual(str(panel.observation_button.cget('state')), 'normal')
+        self.assertIn('연결 미식별',panel.guidance.get())
 
     def test_partial_observation_only_allows_explicit_inspection(self):
         class Controller:

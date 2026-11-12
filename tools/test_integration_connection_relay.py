@@ -1,5 +1,6 @@
 """Disposable stdio/Unix relay fixtures. No Golem, client, Work or GUI is started."""
 import hashlib
+import copy
 import importlib.util
 import json
 import os
@@ -457,10 +458,118 @@ class CatalogObservation(unittest.TestCase):
 
     def reply(self, request_id, *, cursor=None, tools=None, error=False):
         value = {'tools':tools if tools is not None else [
-            {'name':'private-tool-name','inputSchema':{'type':'object'},'description':'private description'}]}
+            {'name':'private-tool-name-'+str(request_id),'inputSchema':{'type':'object'},'description':'private description'}]}
         if cursor is not None: value['nextCursor'] = cursor
         self.instance.child_message({'jsonrpc':'2.0','id':request_id, **(
             {'error':{'code':-32000,'message':'fixture'}} if error else {'result':value})})
+
+    def test_marker_is_opaque_definition_metadata_without_new_tool_or_authority(self):
+        tools=[{'name':'golem_projects_list','description':'original explanation',
+                'inputSchema':{'type':'object','properties':{}},'annotations':{'readOnlyHint':True}},
+               {'name':'golem_work_inspect','description':'second untouched',
+                'inputSchema':{'type':'object'}}]
+        original=copy.deepcopy(tools)
+        self.request(1);self.reply(1,tools=tools)
+        sent=self.client_messages[-1]['result']['tools']
+        marker=self.instance.definition_marker()
+        parsed=relay.parse_definition_marker(marker)
+        self.assertEqual(parsed['instance'],self.instance.instance)
+        self.assertEqual(parsed['child_generation'],1)
+        self.assertEqual(parsed['catalog_generation'],1)
+        self.assertEqual(len(parsed['definition_nonce']),32)
+        self.assertEqual(tools,original)
+        self.assertEqual([t['name'] for t in sent],[t['name'] for t in original])
+        self.assertEqual(sent[0]['inputSchema'],original[0]['inputSchema'])
+        self.assertEqual(sent[0]['annotations'],original[0]['annotations'])
+        self.assertEqual(sent[1],original[1])
+        self.assertEqual(sent[0]['description'],'original explanation'+
+            '\n\nConnection observation only; no authority: '+marker)
+        self.assertNotIn(self.instance.token,marker)
+        status=self.instance.status()
+        self.assertFalse(status['execution_authorized'])
+        self.assertFalse(status['model_tools_delivery_verified'])
+        forwarded=self.instance.catalog_digest(self.client_messages[-1]['result'])
+        self.assertEqual(status['host_catalog']['current_complete_sha256'],
+                         self.instance.catalog_digest([forwarded]))
+
+    def test_marker_is_stable_across_pages_but_rotates_on_catalog_change(self):
+        self.request(1);self.reply(1,cursor='page-2')
+        before=self.instance.definition_marker()
+        self.request(2,'page-2');self.reply(2)
+        self.assertEqual(self.instance.definition_marker(),before)
+        for response in self.client_messages:
+            self.assertTrue(response['result']['tools'][0]['description'].endswith(before))
+        self.instance.child_message({'jsonrpc':'2.0','method':'notifications/tools/list_changed'})
+        after=self.instance.definition_marker()
+        self.assertNotEqual(after,before)
+        old,new=relay.parse_definition_marker(before),relay.parse_definition_marker(after)
+        self.assertEqual(old['instance'],new['instance'])
+        self.assertEqual(old['child_generation'],new['child_generation'])
+        self.assertEqual(new['catalog_generation'],old['catalog_generation']+1)
+        self.assertNotEqual(old['definition_nonce'],new['definition_nonce'])
+        self.assertEqual(self.instance.catalog_status()['state'],'HOST_CATALOG_NOT_RELISTED')
+
+    def test_old_pending_reply_never_receives_new_generation_marker(self):
+        self.request(1)
+        self.instance.child_message({'jsonrpc':'2.0','method':'notifications/tools/list_changed'})
+        self.reply(1)
+        self.assertNotIn('golem-connection-v1:',self.client_messages[-1]['result']['tools'][0]['description'])
+        self.assertIsNone(self.instance.catalog_status()['current_complete_sha256'])
+
+    def test_unrelated_and_malformed_tool_responses_are_not_marked(self):
+        self.instance.client_message({'jsonrpc':'2.0','id':1,'method':'ping'})
+        ping={'tools':[{'name':'unrelated','inputSchema':{'type':'object'},'description':'unchanged'}]}
+        self.instance.child_message({'jsonrpc':'2.0','id':1,'result':ping})
+        self.assertEqual(self.client_messages[-1]['result'],ping)
+        for request_id,tools in enumerate(([{}],[],[{'name':'malformed','inputSchema':{},'description':None}]),2):
+            self.request(request_id);self.reply(request_id,tools=tools)
+            self.assertEqual(self.client_messages[-1]['result']['tools'],tools)
+
+    def test_marker_annotation_overflow_preserves_valid_original_frame(self):
+        self.request(1)
+        tools=[{'name':'golem_projects_list','description':'x'*100,'inputSchema':{'type':'object'}}]
+        original={'jsonrpc':'2.0','id':1,'result':{'tools':copy.deepcopy(tools)}}
+        with patch.object(relay,'FRAME_LIMIT',len(relay.encoded(original))):
+            self.reply(1,tools=tools)
+        self.assertEqual(self.client_messages[-1],original)
+        self.assertEqual(self.instance.state,'READY')
+        self.assertFalse(self.instance.status()['model_tools_delivery_verified'])
+
+    def test_complete_inventory_digest_uses_sorted_all_page_names_and_invalidates_on_relist(self):
+        self.request(1);self.reply(1,cursor='two',tools=[{'name':'golem_z','inputSchema':{}}])
+        self.assertIsNone(self.instance.status()['definition_tools_sha256'])
+        self.assertIsNone(self.instance.status()['definition_tool_count'])
+        self.request(2,'two');self.reply(2,tools=[{'name':'golem_a','inputSchema':{}}])
+        status=self.instance.status()
+        self.assertEqual(status['definition_tools_sha256'],relay.Relay.catalog_digest(['golem_a','golem_z']))
+        self.assertEqual(status['definition_tool_count'],2)
+        self.request(3)
+        status=self.instance.status()
+        self.assertIsNone(status['definition_tools_sha256'])
+        self.assertIsNone(status['definition_tool_count'])
+        self.reply(3,error=True)
+        self.assertIsNone(self.instance.status()['definition_tools_sha256'])
+
+    def test_duplicate_or_oversized_inventory_does_not_qualify_catalog(self):
+        same={'name':'golem_same','inputSchema':{}}
+        self.request(1);self.reply(1,cursor='two',tools=[same])
+        self.request(2,'two');self.reply(2,tools=[same])
+        self.assertEqual(self.instance.catalog_status()['state'],'HOST_CATALOG_INVALID_RESPONSE')
+        self.assertIsNone(self.instance.status()['definition_tools_sha256'])
+        self.request(3);self.reply(3,tools=[{'name':'golem_'+str(i),'inputSchema':{}} for i in range(257)])
+        self.assertEqual(self.instance.catalog_status()['state'],'HOST_CATALOG_INVALID_RESPONSE')
+        self.assertIsNone(self.instance.status()['definition_tool_count'])
+
+    def test_marker_parser_rejects_guessed_extended_and_unbounded_values(self):
+        valid='golem-connection-v1:'+'a'*32+':1:2:'+'b'*32
+        self.assertEqual(relay.parse_definition_marker(valid)['catalog_generation'],2)
+        invalid=(None,'',valid+' trailing',valid+'\n',valid.replace(':1:2:',':3:2:'),
+                 valid.replace(':1:2:',':0:2:'),valid.replace(':1:2:',':1:9223372036854775808:'),
+                 valid.replace('a'*32,'a'*31),valid.replace('b'*32,'B'*32))
+        for value in invalid:
+            with self.subTest(marker=value):
+                with self.assertRaisesRegex(relay.RelayError,'DEFINITION_MARKER_INVALID'):
+                    relay.parse_definition_marker(value)
 
     def test_exact_response_id_and_full_pagination_are_required(self):
         self.request('first');self.reply('first', cursor='private-cursor')

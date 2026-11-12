@@ -51,7 +51,7 @@ class ClientPackaging(unittest.TestCase):
         manifests = [json.loads((PACKAGE / path).read_text()) for path in
                      ('.codex-plugin/plugin.json', '.claude-plugin/plugin.json', 'plugin.json')]
         for manifest in manifests:
-            self.assertEqual((manifest['name'], manifest['version']), ('golem', '0.2.10'))
+            self.assertEqual((manifest['name'], manifest['version']), ('golem', '0.2.11'))
             self.assertEqual(manifest['license'], 'PolyForm-Noncommercial-1.0.0')
         for manifest in manifests[:2]:
             self.assertTrue((PACKAGE / manifest['skills']).is_dir())
@@ -141,7 +141,7 @@ class ClientPackaging(unittest.TestCase):
                     self.assertEqual(environment['GOLEM_LAUNCHER_SHA256'], self.pin)
                     self.assertEqual(environment['GOLEM_LAUNCHER_CLIENT'], client)
                     self.assertEqual(environment['GOLEM_LAUNCHER_STATE'], str(state))
-                    self.assertEqual(environment['GOLEM_LAUNCHER_PLUGIN_VERSION'], '0.2.10')
+                    self.assertEqual(environment['GOLEM_LAUNCHER_PLUGIN_VERSION'], '0.2.11')
             self.assertEqual((state / 'golem-launcher/approval.json').read_bytes(), before)
 
     def test_connection_status_observes_exact_relay_without_refresh_or_authority_change(self):
