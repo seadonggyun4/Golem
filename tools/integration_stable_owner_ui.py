@@ -220,6 +220,8 @@ class StableOwnerPanel:
         self.tree.grid(row=0,column=0,sticky='nsew'); yscroll.grid(row=0,column=1,sticky='ns')
         xscroll.grid(row=1,column=0,sticky='ew'); table.columnconfigure(0,weight=1)
         self.tree.bind('<<TreeviewSelect>>', self._selection_changed, add='+')
+        self.tree.bind('<Down>', lambda _: self.navigate(1))
+        self.tree.bind('<Up>', lambda _: self.navigate(-1))
         self.observation_path = tk.StringVar(); self.observation_sha = tk.StringVar()
         observation = ttk.LabelFrame(body, text='같은 대화의 실제 도구 정의 관측', padding=8)
         observation.pack(fill='x', pady=5)
@@ -350,6 +352,31 @@ class StableOwnerPanel:
             self.refresh_consent.set(False);self.selected_instance=row
         self._enable()
 
+    def navigate(self, direction):
+        # Tk's default arrows do nothing until an item has focus. As in
+        # ConnectionBrowser, only an explicit key seeds the first/last row;
+        # rendering never chooses a connection or invokes the controller.
+        rows=self.tree.get_children()
+        if not rows:
+            return 'break'
+        selected=self._selected_row()
+        index=rows.index(selected) if selected in rows else (-1 if direction>0 else len(rows))
+        key=rows[max(0,min(len(rows)-1,index+direction))]
+        self.tree.selection_set(key);self.tree.focus(key);self.tree.see(key)
+        self._selection_changed()
+        return 'break'
+
+    def _render_rows(self, rows):
+        selected=self._selected_row()
+        self.tree.delete(*self.tree.get_children())
+        for key,row in rows:
+            self.tree.insert('','end',iid=key,values=row)
+        if selected in self.tree.get_children():
+            self.tree.selection_set(selected);self.tree.focus(selected);self.tree.see(selected)
+        # An absent row invalidates its consent immediately, even before Tk
+        # delivers the queued TreeviewSelect event. Never choose a replacement.
+        self._selection_changed()
+
     def _submit(self, kind, operation):
         if not self.request.start(kind,operation):
             return
@@ -388,7 +415,6 @@ class StableOwnerPanel:
         self._submit('refresh',lambda:self.controller.refresh(client,token,approve=True))
 
     def _render(self, shown):
-        selected=self._selected_row()
         self.report=shown
         self.status.set(shown['state']+' · '+CLIENT_LABELS.get(shown['client'],text(shown['client'])))
         self.selected.set(shown['selected']);self.model.set(shown['model'])
@@ -396,11 +422,7 @@ class StableOwnerPanel:
             self.readiness.set('외부 관측 입력 미대조 · 실제 실행 HOLD')
         else:
             self.readiness.set(shown['readiness']+'\n'+shown['readiness_reason'])
-        self.tree.delete(*self.tree.get_children())
-        for key,row in shown['rows']:
-            self.tree.insert('','end',iid=key,values=row)
-        if selected in self.tree.get_children():
-            self.tree.selection_set(selected);self.tree.focus(selected);self.tree.see(selected)
+        self._render_rows(shown['rows'])
         review=shown.get('review')
         if review:
             self.review_label.set('검토 '+review['kind']+' · token '+review['token']+'\n'+

@@ -1951,7 +1951,7 @@
     },
     {
       "path": ".github/workflows/c.yml",
-      "sha256": "b95af165478a666e3abf2df7484434184b444cd15e6b9df7333cfd79c4212789"
+      "sha256": "69d3499ab6857751f315447f1cf64980a79272ad69f230e313787d154bb7db0b"
     },
     {
       "path": ".github/workflows/conan.yml",
@@ -2659,7 +2659,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "32e40f71c1503f9c83fe8b6e154c47e43f5683043630a148143003204170f48d"
+      "sha256": "6d20fc15270bdaf84f4665ea72dd7e3fdce959900be360ec68479cc945d26a1e"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -2667,7 +2667,7 @@
     },
     {
       "path": "tools/integration_stable_owner_ui.py",
-      "sha256": "19ad15e3514161aae90dc7ff322c593911171a13c46fc0d9753460491a5e94ab"
+      "sha256": "23d72ce803c3ef38ae4bed3602e50e457b6265836c2d467f6c3c2009126d7a47"
     },
     {
       "path": "tools/test_integration_stable_owner.py",
@@ -2675,7 +2675,7 @@
     },
     {
       "path": "tools/test_integration_stable_owner_ui.py",
-      "sha256": "1165cccca9f17e424a478abb3547265f8fba76dce335ae43daf26d078441ab48"
+      "sha256": "fffbaf3f6d364e9c2ab8d658f4e55572f81b0043e46973649157ffe74dd439f5"
     }
   ],
   "observations": [

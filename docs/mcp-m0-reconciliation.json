@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "31e93ad57b7e78fcf1731a6555e0c3285b2750e2e392b58e01c5a1a82da801a7",
+  "inventory_sha256": "9aa587dab78704e8095690d878ddb54dd73bc98481b1eda7003d95265609cf23",
   "selected_source_count": 669,
   "selected_observation_count": 2517,
   "selected_capability_count": 1342,
@@ -5576,7 +5576,7 @@
     },
     {
       "path": ".github/workflows/c.yml",
-      "sha256": "b95af165478a666e3abf2df7484434184b444cd15e6b9df7333cfd79c4212789"
+      "sha256": "69d3499ab6857751f315447f1cf64980a79272ad69f230e313787d154bb7db0b"
     },
     {
       "path": ".github/workflows/conan.yml",
@@ -6284,7 +6284,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "32e40f71c1503f9c83fe8b6e154c47e43f5683043630a148143003204170f48d"
+      "sha256": "6d20fc15270bdaf84f4665ea72dd7e3fdce959900be360ec68479cc945d26a1e"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -6292,7 +6292,7 @@
     },
     {
       "path": "tools/integration_stable_owner_ui.py",
-      "sha256": "19ad15e3514161aae90dc7ff322c593911171a13c46fc0d9753460491a5e94ab"
+      "sha256": "23d72ce803c3ef38ae4bed3602e50e457b6265836c2d467f6c3c2009126d7a47"
     },
     {
       "path": "tools/test_integration_stable_owner.py",
@@ -6300,7 +6300,7 @@
     },
     {
       "path": "tools/test_integration_stable_owner_ui.py",
-      "sha256": "1165cccca9f17e424a478abb3547265f8fba76dce335ae43daf26d078441ab48"
+      "sha256": "fffbaf3f6d364e9c2ab8d658f4e55572f81b0043e46973649157ffe74dd439f5"
     }
   ],
   "native_definitions": [
@@ -12478,7 +12478,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 414,
+      "checked_functions": 416,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -60084,7 +60084,7 @@
     {
       "path": "tools/integration_stable_owner_ui.py",
       "role": "OPTIONAL_OWNER_FIXED_CATALOG_PRESENTATION",
-      "rationale": "Optional manually opened UI delegates finite operations to the pinned controller. Selected disk state, live connection, original external same-chat definition evidence and current readiness are distinct. Client/input changes invalidate review; row selection has no I/O; exact publication and exact-instance refresh have separate confirmations. Background work does not touch Tk and closing the view retains in-flight durable effects without killing/retrying. Unknown/closed/busy/malformed/mismatched reports disable effects. No automatic polling/adoption/relist, host restart, Work permission or invented model observation.",
+      "rationale": "Optional manually opened UI delegates finite operations to the pinned controller. Selected disk state, live connection, original external same-chat definition evidence and current readiness are distinct. Client/input changes invalidate review; row selection has no I/O; exact publication and exact-instance refresh have separate confirmations. Background work does not touch Tk and closing the view retains in-flight durable effects without killing/retrying. Unknown/closed/busy/malformed/mismatched reports disable effects. No automatic polling/adoption/relist, host restart, Work permission or invented model observation. Keyboard navigation seeds an initially unfocused row explicitly; report refresh retains only the exact existing instance selection and item focus. Missing rows clear consent without replacement selection. These two presentation helpers perform no controller I/O and grant no authority.",
       "symbols": [
         "BackgroundRequest",
         "BackgroundRequest.__init__",
@@ -60101,10 +60101,12 @@
         "StableOwnerPanel._file_inputs",
         "StableOwnerPanel._inputs_changed",
         "StableOwnerPanel._render",
+        "StableOwnerPanel._render_rows",
         "StableOwnerPanel._selected_row",
         "StableOwnerPanel._selection_changed",
         "StableOwnerPanel._submit",
         "StableOwnerPanel.inspect",
+        "StableOwnerPanel.navigate",
         "StableOwnerPanel.observe",
         "StableOwnerPanel.publish",
         "StableOwnerPanel.refresh",
@@ -60264,7 +60266,7 @@
       "path": ".github/workflows/c.yml",
       "role": "BUILD_PACKAGE_LICENSE",
       "rationale": "Build/export/package/dependency/license/CI metadata; production FFI sources and plugin contracts reviewed separately. Does not create a daily Work operation.",
-      "contract_sha256": "b95af165478a666e3abf2df7484434184b444cd15e6b9df7333cfd79c4212789"
+      "contract_sha256": "69d3499ab6857751f315447f1cf64980a79272ad69f230e313787d154bb7db0b"
     },
     {
       "path": ".github/workflows/conan.yml",
@@ -66474,7 +66476,7 @@
     },
     {
       "path": "tools/capability_boundary_registry.py",
-      "sha256": "a6821bc508a2c2579e3d4510b7310d44ebd78d933b5edde93f3310767623e1fa",
+      "sha256": "db1d2f20d0cff13d581205df05832da9909ba22ae016dd2ea986ec5122a630a5",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66744,7 +66746,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "e53c47cb435cb41124eb06c38e961a55d91ebe2d4ca12ba32c0e8d02e88b415c",
+      "sha256": "de3d3ea679eb04f814a90f5b721073af4b15667216eb677bbf01ee3a9e986ebf",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66888,7 +66890,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "f1e763d5eb7b19747a018ac74eff59004c0f525b25e3c8a67f7c43379927fa7d",
+      "sha256": "9461ff49d6f281c149658cd7bbb173986facf4d2a71bc81e6aa2cfc6f6da13a0",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },

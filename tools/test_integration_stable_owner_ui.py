@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import threading
 import time
+from unittest.mock import Mock
 import unittest
 
 import integration_stable_owner_ui as ui
@@ -212,6 +213,85 @@ class FixtureController:
         return value
 
 
+class MemoryTree:
+    """Display-only Treeview fixture; no Tk process, connection, or controller."""
+    def __init__(self):
+        self.rows={};self.selected=();self.focused='';self.visible=None
+    def get_children(self):return tuple(self.rows)
+    def selection(self):return self.selected
+    def selection_set(self,key):
+        if key not in self.rows:raise AssertionError('unknown row')
+        self.selected=(key,)
+    def focus(self,key=None):
+        if key is not None:self.focused=key
+        return self.focused
+    def see(self,key):self.visible=key
+    def delete(self,*keys):
+        for key in keys:
+            self.rows.pop(key)
+            if key in self.selected:self.selected=()
+            if key==self.focused:self.focused=''
+    def insert(self,parent,where,*,iid,values):self.rows[iid]=values
+
+
+class KeyboardRows(unittest.TestCase):
+    def setUp(self):
+        self.panel=ui.StableOwnerPanel.__new__(ui.StableOwnerPanel)
+        self.panel.tree=MemoryTree();self.panel.selected_instance=None
+        self.panel.refresh_consent=Mock();self.panel._enable=Mock()
+        self.panel.controller=Mock()
+        self.rows=ui.presentation(report(),'codex')['rows']
+
+    def assert_selected(self,key):
+        p=self.panel
+        self.assertEqual(p.tree.selection(),(key,))
+        self.assertEqual(p.tree.focus(),key)
+        self.assertEqual(p.tree.visible,key)
+        self.assertEqual(p.selected_instance,key)
+        self.assertEqual(p.controller.mock_calls,[])
+
+    def test_render_never_selects_then_down_seeds_first_row(self):
+        p=self.panel;p._render_rows(self.rows)
+        self.assertEqual(p.tree.selection(),());self.assertEqual(p.tree.focus(),'')
+        self.assertEqual(p.navigate(1),'break');self.assert_selected(INSTANCE)
+        p.refresh_consent.set.assert_called_once_with(False)
+
+    def test_up_without_prior_selection_seeds_last_row(self):
+        p=self.panel;p._render_rows(self.rows)
+        self.assertEqual(p.navigate(-1),'break');self.assert_selected(OTHER)
+
+    def test_explicit_navigation_clamps_and_clears_consent_only_on_new_row(self):
+        p=self.panel;p._render_rows(self.rows);p.navigate(1)
+        p.refresh_consent.reset_mock()
+        p.navigate(-1);self.assert_selected(INSTANCE)
+        p.refresh_consent.set.assert_not_called()
+        p.navigate(1);self.assert_selected(OTHER)
+        p.refresh_consent.set.assert_called_once_with(False)
+        p.refresh_consent.reset_mock();p.navigate(1)
+        self.assert_selected(OTHER);p.refresh_consent.set.assert_not_called()
+
+    def test_reordered_report_retains_exact_selected_row_and_focus(self):
+        p=self.panel;p._render_rows(self.rows);p.navigate(1)
+        p.refresh_consent.reset_mock()
+        p._render_rows(list(reversed(self.rows)))
+        self.assert_selected(INSTANCE)
+        p.refresh_consent.set.assert_not_called()
+
+    def test_disappearing_selected_row_clears_consent_without_replacement(self):
+        p=self.panel;p._render_rows(self.rows);p.navigate(1)
+        p.refresh_consent.reset_mock();p._render_rows(self.rows[1:])
+        self.assertEqual(p.tree.selection(),());self.assertEqual(p.tree.focus(),'')
+        self.assertIsNone(p.selected_instance)
+        p.refresh_consent.set.assert_called_once_with(False)
+        self.assertEqual(p.controller.mock_calls,[])
+
+    def test_empty_table_arrows_do_not_select_or_invoke_backend(self):
+        p=self.panel;p._render_rows([]);p._enable.reset_mock()
+        for direction in (-1,1):self.assertEqual(p.navigate(direction),'break')
+        self.assertEqual(p.tree.selection(),());self.assertEqual(p.tree.focus(),'')
+        p._enable.assert_not_called();self.assertEqual(p.controller.mock_calls,[])
+
+
 class NativePanel(unittest.TestCase):
     def setUp(self):
         if os.environ.get('GOLEM_TEST_TK')!='1':
@@ -236,6 +316,29 @@ class NativePanel(unittest.TestCase):
         self.assertEqual(self.controller.calls,[('inspect','codex')])
         self.assertEqual(str(p.refresh_button.cget('state')),'disabled')
         self.assertEqual(str(p.publish_button.cget('state')),'disabled')
+
+    def test_native_arrow_events_seed_first_and_last_without_backend_calls(self):
+        p=self.panel;p.inspect_button.invoke();self.settle()
+        expected_calls=list(self.controller.calls)
+        self.assertEqual(p.tree.selection(),());self.assertEqual(p.tree.focus(),'')
+        p.tree.focus_force();p.tree.event_generate('<Down>');self.root.update()
+        self.assertEqual(p.tree.selection(),(INSTANCE,));self.assertEqual(p.tree.focus(),INSTANCE)
+        p.tree.selection_remove(*p.tree.selection());p.tree.focus('');self.root.update()
+        p.tree.event_generate('<Up>');self.root.update()
+        self.assertEqual(p.tree.selection(),(OTHER,));self.assertEqual(p.tree.focus(),OTHER)
+        self.assertEqual(self.controller.calls,expected_calls)
+        self.assertEqual(str(p.refresh_button.cget('state')),'disabled')
+
+    def test_native_report_reorder_preserves_selection_focus_and_requires_consent(self):
+        p=self.panel;p.review_refresh_button.invoke();self.settle()
+        p.tree.focus_force();p.tree.event_generate('<Down>');self.root.update()
+        self.assertEqual(p.tree.selection(),(INSTANCE,))
+        shown=ui.presentation(report('refresh'),'codex');shown['rows'].reverse()
+        p._render(shown);self.root.update()
+        self.assertEqual(p.tree.selection(),(INSTANCE,));self.assertEqual(p.tree.focus(),INSTANCE)
+        self.assertFalse(p.refresh_consent.get())
+        self.assertEqual(str(p.refresh_button.cget('state')),'disabled')
+        self.assertEqual(self.controller.calls,[('review-refresh','codex','','')])
 
     def test_publish_requires_matching_review_checkbox_and_one_attempt(self):
         p=self.panel;p.selection_path.set('/fixture/selection.json');p.selection_sha.set(NEW)
