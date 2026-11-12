@@ -5305,14 +5305,15 @@
       "tools/integration_stable_catalog.py",
       "tools/integration_stable_readiness.py",
       "tools/integration_stable_owner.py",
-      "tools/integration_stable_owner_ui.py"
+      "tools/integration_stable_owner_ui.py",
+      "tools/integration_stable_observation.py"
     ],
     "blockers": [],
     "execution_verified": false
   },
   "reviewed_effects": {
     "blockers": [],
-    "reviewed_capabilities": 1252,
+    "reviewed_capabilities": 1259,
     "execution_verified": false
   },
   "boundary_contracts": {

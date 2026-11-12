@@ -1348,6 +1348,13 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.tools.integration_distribution.py.stable-owner-resource-closure | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.tools.integration_distribution.py.runtime-payloads | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.tools.integration_distribution.py.runtime-closure | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_observation.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_observation.py.metadata-script | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_observation.py.receipt-correlation | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_observation.py.pinned-input | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_observation.py.private-artifact | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_observation.py.cli-import | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_observation.py.cli-reject-read-thread | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3870,6 +3877,14 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | PYTHON_DECLARATION | tools/integration_distribution.py | verify | None |
 | PYTHON_DECLARATION | tools/integration_distribution.py | runtime_payloads | None |
 | PYTHON_DECLARATION | tools/integration_distribution.py | runtime_closure | None |
+| PYTHON_DECLARATION | tools/integration_stable_observation.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_stable_observation.py | metadata_script | None |
+| PYTHON_DECLARATION | tools/integration_stable_observation.py | collect | None |
+| PYTHON_DECLARATION | tools/integration_stable_observation.py | read_pinned | None |
+| PYTHON_DECLARATION | tools/integration_stable_observation.py | write_result | None |
+| PYTHON_DECLARATION | tools/integration_stable_observation.py | main | None |
+| CLI_ROUTE | tools/integration_stable_observation.py | argparse:input-format | codex-rollout |
+| CLI_ROUTE | tools/integration_stable_observation.py | argparse:input-format | read-thread |
 
 ## Blockers
 

@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "9aa587dab78704e8095690d878ddb54dd73bc98481b1eda7003d95265609cf23",
-  "selected_source_count": 669,
-  "selected_observation_count": 2517,
-  "selected_capability_count": 1342,
+  "inventory_sha256": "7c347371c53685a9a175334960ff03e65012c25273303c6c90403ae4777949ea",
+  "selected_source_count": 672,
+  "selected_observation_count": 2525,
+  "selected_capability_count": 1349,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -569,6 +569,7 @@
       "tools/integration_reload_probe.py",
       "tools/integration_service.py",
       "tools/integration_stable_catalog.py",
+      "tools/integration_stable_observation.py",
       "tools/integration_stable_owner.py",
       "tools/integration_stable_owner_ui.py",
       "tools/integration_stable_readiness.py",
@@ -1069,6 +1070,7 @@
       "tools/integration_reload_probe.py",
       "tools/integration_service.py",
       "tools/integration_stable_catalog.py",
+      "tools/integration_stable_observation.py",
       "tools/integration_stable_owner.py",
       "tools/integration_stable_owner_ui.py",
       "tools/integration_stable_readiness.py",
@@ -6284,7 +6286,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "6d20fc15270bdaf84f4665ea72dd7e3fdce959900be360ec68479cc945d26a1e"
+      "sha256": "668bd1060d0a002c2ba119cd04d159000baa1c1d99922671d21513ea9bdeeb38"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -6301,6 +6303,18 @@
     {
       "path": "tools/test_integration_stable_owner_ui.py",
       "sha256": "fffbaf3f6d364e9c2ab8d658f4e55572f81b0043e46973649157ffe74dd439f5"
+    },
+    {
+      "path": "tools/integration_stable_observation.py",
+      "sha256": "b98ec34417498425306e2e42828ffa0db7162dd3080973b60d9ea0583371f85f"
+    },
+    {
+      "path": "tools/test_integration_stable_observation.py",
+      "sha256": "6625344c98b8c8a4e4f1f256006bbd1be3f9fb03f59b139208439b7445785137"
+    },
+    {
+      "path": "docs/integration-stable-observation.md",
+      "sha256": "ed9847bda208e826c6a95a87a0bccf861d2fa264ac36fd8c70a3e2da37c4e92c"
     }
   ],
   "native_definitions": [
@@ -15192,14 +15206,15 @@
         "tools/integration_stable_catalog.py",
         "tools/integration_stable_readiness.py",
         "tools/integration_stable_owner.py",
-        "tools/integration_stable_owner_ui.py"
+        "tools/integration_stable_owner_ui.py",
+        "tools/integration_stable_observation.py"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1252,
+      "reviewed_capabilities": 1259,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -60241,6 +60256,233 @@
           null
         ]
       ]
+    },
+    {
+      "path": "tools/integration_stable_observation.py",
+      "role": "OFFLINE_FIXED_CATALOG_OBSERVATION_IMPORTER",
+      "rationale": "Caller-selected exact local Codex rollout receipt importer. Pure metadata_script and collect functions do not dispatch tools; read_pinned performs bounded owner-selected file reads and write_result creates only a new private observation/provenance directory. The CLI accepts the reviewed finite metadata script, exact thread/turn/call/output/catalog pins and original timestamp, while read-thread is an explicit missing-receipt rejection route. No live client, service, MCP, subprocess, network, native operation, Owner refresh, installation, policy or Work effects. Local hash consistency is not host authentication or native/QA/completion authority.",
+      "symbols": [
+        "ObservationError",
+        "ObservationError.__init__",
+        "_catalog",
+        "_json",
+        "_metadata",
+        "_pairs",
+        "_script",
+        "_utc",
+        "collect",
+        "digest",
+        "encoded",
+        "main",
+        "metadata_script",
+        "read_pinned",
+        "require",
+        "write_result"
+      ],
+      "declarations": [
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--catalog')], keywords=[keyword(arg='required', value=Constant(value=True)), keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--catalog-sha256')], keywords=[keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--input-format')], keywords=[keyword(arg='choices', value=Tuple(elts=[Constant(value='codex-rollout'), Constant(value='read-thread')], ctx=Load())), keyword(arg='default', value=Constant(value='codex-rollout'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--output-directory')], keywords=[keyword(arg='required', value=Constant(value=True)), keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--server-name')], keywords=[keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--server-prefix')], keywords=[keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--started-not-before-ns')], keywords=[keyword(arg='required', value=Constant(value=True)), keyword(arg='type', value=Name(id='int', ctx=Load()))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--thread-id')], keywords=[keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--trace')], keywords=[keyword(arg='required', value=Constant(value=True)), keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--trace-sha256')], keywords=[keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--turn-id')], keywords=[keyword(arg='required', value=Constant(value=True))])"
+      ],
+      "literal_branches": [
+        [
+          "Call(func=Attribute(value=Name(id='payload', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='name')])",
+          "create_thread"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='payload', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='name')])",
+          "exec"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='payload', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='name')])",
+          "send_message_to_thread"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='payload', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='namespace')])",
+          "codex_app"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='payload', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='status')])",
+          "completed"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='block', ctx=Load())])",
+          "text"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='block', ctx=Load())])",
+          "type"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='entry', ctx=Load())])",
+          "description"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='entry', ctx=Load())])",
+          "name"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "entries"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "profile"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "tools"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "tools_sha256"
+        ],
+        [
+          "Constant(value='..')",
+          ".."
+        ],
+        [
+          "Constant(value='call_id')",
+          "call_id"
+        ],
+        [
+          "Name(id='__name__', ctx=Load())",
+          "__main__"
+        ],
+        [
+          "Name(id='event', ctx=Load())",
+          "custom_tool_call"
+        ],
+        [
+          "Name(id='event', ctx=Load())",
+          "custom_tool_call_output"
+        ],
+        [
+          "Name(id='event', ctx=Load())",
+          "error"
+        ],
+        [
+          "Name(id='event', ctx=Load())",
+          "function_call_output"
+        ],
+        [
+          "Name(id='event', ctx=Load())",
+          "message"
+        ],
+        [
+          "Name(id='event', ctx=Load())",
+          "reasoning"
+        ],
+        [
+          "Name(id='event', ctx=Load())",
+          "task_complete"
+        ],
+        [
+          "Name(id='event', ctx=Load())",
+          "task_started"
+        ],
+        [
+          "Name(id='event', ctx=Load())",
+          "turn_aborted"
+        ],
+        [
+          "Name(id='input_format', ctx=Load())",
+          "codex-rollout"
+        ],
+        [
+          "Name(id='input_format', ctx=Load())",
+          "read-thread"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "event_msg"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "response_item"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "session_meta"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "turn_context"
+        ],
+        [
+          "Subscript(value=Name(id='block', ctx=Load()), slice=Constant(value='type'), ctx=Load())",
+          "input_text"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "parallel"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "prepare"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "quality"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "read"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "task"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "metadata_script",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "collect",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "read_pinned",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "write_result",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "main",
+          null
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:input-format",
+          "codex-rollout"
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:input-format",
+          "read-thread"
+        ]
+      ]
     }
   ],
   "repository_boundary_reviews": [
@@ -66584,7 +66826,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "1c5938cf4915bc88e911fe2fc998261789c6ef23f176edc449ddd410b5ce6375",
+      "sha256": "1050306bed7dd4e7a21ff6ec82d39e9529b7a68ada817f3271531053a0a477d9",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66836,13 +67078,13 @@
     },
     {
       "path": "tools/capability_repository.py",
-      "sha256": "6e13054c0e8d6d4eef25c8f3c529799ca9decc1e08c7b1fbd1fbeb52cfb8dce1",
+      "sha256": "b20f245f00c7f934426b704552a8154da4febea8ebdfdfcd2254a1615fc7666c",
       "shape_sha256": "6d9af9283d17b17d9b3a95815343435f861de9c53cb32ba70bf944c54b761947",
       "role": "M0_STATIC_ANALYSIS"
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "181ba88b1b670f14f73c8bc7aa7b2d5bfb7fdc75852ba64a065f08dd55166108",
+      "sha256": "4b993f63f4caa512d776e1372119b6bcbe9ba8f8ec1d32c7b7a84bca4d3afaab",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66854,7 +67096,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "c7420cb0ca04a36583e89ecaf016eacfadaf0ff7f2d0fd5c17c809747e30d042",
+      "sha256": "e8285193279f1d6dcfd33fd3c1d22a5e88837078b2f615024fdb77045f7f19bb",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66890,7 +67132,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "9461ff49d6f281c149658cd7bbb173986facf4d2a71bc81e6aa2cfc6f6da13a0",
+      "sha256": "5a2b97f28ca0bf0c75880b6356d5e696e8f1a1c82fa92d9b950d67a9d4e6c5d9",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },

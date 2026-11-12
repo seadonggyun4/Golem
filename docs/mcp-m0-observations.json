@@ -2659,7 +2659,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "6d20fc15270bdaf84f4665ea72dd7e3fdce959900be360ec68479cc945d26a1e"
+      "sha256": "668bd1060d0a002c2ba119cd04d159000baa1c1d99922671d21513ea9bdeeb38"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -2676,6 +2676,18 @@
     {
       "path": "tools/test_integration_stable_owner_ui.py",
       "sha256": "fffbaf3f6d364e9c2ab8d658f4e55572f81b0043e46973649157ffe74dd439f5"
+    },
+    {
+      "path": "tools/integration_stable_observation.py",
+      "sha256": "b98ec34417498425306e2e42828ffa0db7162dd3080973b60d9ea0583371f85f"
+    },
+    {
+      "path": "tools/test_integration_stable_observation.py",
+      "sha256": "6625344c98b8c8a4e4f1f256006bbd1be3f9fb03f59b139208439b7445785137"
+    },
+    {
+      "path": "docs/integration-stable-observation.md",
+      "sha256": "ed9847bda208e826c6a95a87a0bccf861d2fa264ac36fd8c70a3e2da37c4e92c"
     }
   ],
   "observations": [
@@ -20297,6 +20309,62 @@
       "source_path": "tools/integration_distribution.py",
       "entrypoint": "runtime_closure",
       "selector": null
+    },
+    {
+      "id": "obs-b5360f4f9c314ea96e99b716894c17272cf82158ca21c691808dcbee92645459",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_observation.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-eb6a6260908a313325e21092d5e4e85d7f3ce23de518fb2686c3e2fe08f5bbe5",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_observation.py",
+      "entrypoint": "metadata_script",
+      "selector": null
+    },
+    {
+      "id": "obs-7f6bb4140584802b22458cf8b959d53e01bfe72077bf1cbe6b2ac81d0f771a6b",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_observation.py",
+      "entrypoint": "collect",
+      "selector": null
+    },
+    {
+      "id": "obs-d96169bd82907deed391675dc0a5dfcefdea06aa96233d249163dda75aabd871",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_observation.py",
+      "entrypoint": "read_pinned",
+      "selector": null
+    },
+    {
+      "id": "obs-4639c55c8323a5cc1297d92bd58002edf82ec7ccb997d29e818737ba9acadede",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_observation.py",
+      "entrypoint": "write_result",
+      "selector": null
+    },
+    {
+      "id": "obs-ef98de903c2e7d5f31cebe47fc8777719ad23ca438963a79071cc70ca462dfd0",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_observation.py",
+      "entrypoint": "main",
+      "selector": null
+    },
+    {
+      "id": "obs-5b764c2967079a1864798f51570e61bafeae7893446cf1624324b4207692ca64",
+      "kind": "CLI_ROUTE",
+      "source_path": "tools/integration_stable_observation.py",
+      "entrypoint": "argparse:input-format",
+      "selector": "codex-rollout"
+    },
+    {
+      "id": "obs-ae4a9f95ee3dd98835d3ba6f1e485ecfa850f8e47e1092ab06a2370b1b280bcd",
+      "kind": "CLI_ROUTE",
+      "source_path": "tools/integration_stable_observation.py",
+      "entrypoint": "argparse:input-format",
+      "selector": "read-thread"
     }
   ],
   "capabilities": [
@@ -84774,6 +84842,338 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Finite packaging helper observed from actual source, not a new MCP Core operation or authority. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_observation.py.file-surface",
+      "observation_ids": [
+        "obs-b5360f4f9c314ea96e99b716894c17272cf82158ca21c691808dcbee92645459"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit local evidence selection only: exact trace/catalog bytes, thread, turn, server prefix and new output directory. No model call, D1/D2/D4 grant, approval issuance, current backend selection or Work authority is inferred."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Codex local rollout format only"
+        ],
+        "limits": [
+          "One selected completed Codex turn and exactly one finite metadata exec receipt. read_thread without that machine receipt is rejected; Claude import is unsupported.",
+          "Trace at most 16 MiB / 100000 lines / 2 MiB per line; metadata output at most 64 KiB; existing finite readiness tool bounds apply.",
+          "Original receipt timestamp only; existing 300-second freshness and exact catalog/full-name/marker correlation. No restamping, name correction or agent-final evidence.",
+          "Local selected bytes are not a signed host attestation; caller server label is not authentication; complete input-schema delivery is not verified.",
+          "New private directory 0700 and exclusive files 0600; no overwrite or automatic retry. Partial files are preserved. Actual Work execution remains HOLD.",
+          "Source and disposable fixture review only; installed client metadata collection and same-chat transition acceptance are NOT_RUN for this source."
+        ],
+        "notes": "Caller-selected exact local Codex rollout receipt importer. Pure metadata_script and collect functions do not dispatch tools; read_pinned performs bounded owner-selected file reads and write_result creates only a new private observation/provenance directory. The CLI accepts the reviewed finite metadata script, exact thread/turn/call/output/catalog pins and original timestamp, while read-thread is an explicit missing-receipt rejection route. No live client, service, MCP, subprocess, network, native operation, Owner refresh, installation, policy or Work effects. Local hash consistency is not host authentication or native/QA/completion authority. NATIVE_READ/NATIVE_WRITE here conservatively denote explicit local evidence file I/O, never native Core or Work mutation. The importer does not update policies, registry, adapter state, approval or installed programs. Provenance retains exact selected input and line hashes but cannot certify fabricated local logs. Output is external observation evidence only; existing Owner current-state/instance/catalog/freshness/idle/unknown checks remain independent."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_observation.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-observation.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete offline local metadata receipt operation, not an MCP Core capability or new execution authority. Actual client/model/native acceptance is not established by source or fixture coverage."
+    },
+    {
+      "id": "surface.tools.integration_stable_observation.py.metadata-script",
+      "observation_ids": [
+        "obs-eb6a6260908a313325e21092d5e4e85d7f3ce23de518fb2686c3e2fe08f5bbe5"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit local evidence selection only: exact trace/catalog bytes, thread, turn, server prefix and new output directory. No model call, D1/D2/D4 grant, approval issuance, current backend selection or Work authority is inferred."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Codex local rollout format only"
+        ],
+        "limits": [
+          "One selected completed Codex turn and exactly one finite metadata exec receipt. read_thread without that machine receipt is rejected; Claude import is unsupported.",
+          "Trace at most 16 MiB / 100000 lines / 2 MiB per line; metadata output at most 64 KiB; existing finite readiness tool bounds apply.",
+          "Original receipt timestamp only; existing 300-second freshness and exact catalog/full-name/marker correlation. No restamping, name correction or agent-final evidence.",
+          "Local selected bytes are not a signed host attestation; caller server label is not authentication; complete input-schema delivery is not verified.",
+          "New private directory 0700 and exclusive files 0600; no overwrite or automatic retry. Partial files are preserved. Actual Work execution remains HOLD.",
+          "Source and disposable fixture review only; installed client metadata collection and same-chat transition acceptance are NOT_RUN for this source."
+        ],
+        "notes": "Return the one finite ALL_TOOLS metadata-only script for an exact bounded prefix. It is not executed by this module; no tool or model is invoked. NATIVE_READ/NATIVE_WRITE here conservatively denote explicit local evidence file I/O, never native Core or Work mutation. The importer does not update policies, registry, adapter state, approval or installed programs. Provenance retains exact selected input and line hashes but cannot certify fabricated local logs. Output is external observation evidence only; existing Owner current-state/instance/catalog/freshness/idle/unknown checks remain independent."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_observation.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-observation.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete offline local metadata receipt operation, not an MCP Core capability or new execution authority. Actual client/model/native acceptance is not established by source or fixture coverage."
+    },
+    {
+      "id": "surface.tools.integration_stable_observation.py.receipt-correlation",
+      "observation_ids": [
+        "obs-7f6bb4140584802b22458cf8b959d53e01bfe72077bf1cbe6b2ac81d0f771a6b"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit local evidence selection only: exact trace/catalog bytes, thread, turn, server prefix and new output directory. No model call, D1/D2/D4 grant, approval issuance, current backend selection or Work authority is inferred."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Codex local rollout format only"
+        ],
+        "limits": [
+          "One selected completed Codex turn and exactly one finite metadata exec receipt. read_thread without that machine receipt is rejected; Claude import is unsupported.",
+          "Trace at most 16 MiB / 100000 lines / 2 MiB per line; metadata output at most 64 KiB; existing finite readiness tool bounds apply.",
+          "Original receipt timestamp only; existing 300-second freshness and exact catalog/full-name/marker correlation. No restamping, name correction or agent-final evidence.",
+          "Local selected bytes are not a signed host attestation; caller server label is not authentication; complete input-schema delivery is not verified.",
+          "New private directory 0700 and exclusive files 0600; no overwrite or automatic retry. Partial files are preserved. Actual Work execution remains HOLD.",
+          "Source and disposable fixture review only; installed client metadata collection and same-chat transition acceptance are NOT_RUN for this source."
+        ],
+        "notes": "Pure in-memory bounded parse and correlation of the exact selected raw trace/catalog, complete turn/context/exec/call ID/output inventory and original timestamps. No filesystem access or actual tool call. NATIVE_READ/NATIVE_WRITE here conservatively denote explicit local evidence file I/O, never native Core or Work mutation. The importer does not update policies, registry, adapter state, approval or installed programs. Provenance retains exact selected input and line hashes but cannot certify fabricated local logs. Output is external observation evidence only; existing Owner current-state/instance/catalog/freshness/idle/unknown checks remain independent."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_observation.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-observation.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete offline local metadata receipt operation, not an MCP Core capability or new execution authority. Actual client/model/native acceptance is not established by source or fixture coverage."
+    },
+    {
+      "id": "surface.tools.integration_stable_observation.py.pinned-input",
+      "observation_ids": [
+        "obs-d96169bd82907deed391675dc0a5dfcefdea06aa96233d249163dda75aabd871"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit local evidence selection only: exact trace/catalog bytes, thread, turn, server prefix and new output directory. No model call, D1/D2/D4 grant, approval issuance, current backend selection or Work authority is inferred."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Codex local rollout format only"
+        ],
+        "limits": [
+          "One selected completed Codex turn and exactly one finite metadata exec receipt. read_thread without that machine receipt is rejected; Claude import is unsupported.",
+          "Trace at most 16 MiB / 100000 lines / 2 MiB per line; metadata output at most 64 KiB; existing finite readiness tool bounds apply.",
+          "Original receipt timestamp only; existing 300-second freshness and exact catalog/full-name/marker correlation. No restamping, name correction or agent-final evidence.",
+          "Local selected bytes are not a signed host attestation; caller server label is not authentication; complete input-schema delivery is not verified.",
+          "New private directory 0700 and exclusive files 0600; no overwrite or automatic retry. Partial files are preserved. Actual Work execution remains HOLD.",
+          "Source and disposable fixture review only; installed client metadata collection and same-chat transition acceptance are NOT_RUN for this source."
+        ],
+        "notes": "Read only explicitly selected absolute regular owner-owned no-symlink/no-hardlink/no-group-writable bounded file bytes with pre/post stat and exact SHA checks. Existing source permissions and bytes remain unchanged. NATIVE_READ/NATIVE_WRITE here conservatively denote explicit local evidence file I/O, never native Core or Work mutation. The importer does not update policies, registry, adapter state, approval or installed programs. Provenance retains exact selected input and line hashes but cannot certify fabricated local logs. Output is external observation evidence only; existing Owner current-state/instance/catalog/freshness/idle/unknown checks remain independent."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_observation.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-observation.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete offline local metadata receipt operation, not an MCP Core capability or new execution authority. Actual client/model/native acceptance is not established by source or fixture coverage."
+    },
+    {
+      "id": "surface.tools.integration_stable_observation.py.private-artifact",
+      "observation_ids": [
+        "obs-4639c55c8323a5cc1297d92bd58002edf82ec7ccb997d29e818737ba9acadede"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit local evidence selection only: exact trace/catalog bytes, thread, turn, server prefix and new output directory. No model call, D1/D2/D4 grant, approval issuance, current backend selection or Work authority is inferred."
+      ],
+      "effects": [
+        "NATIVE_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Codex local rollout format only"
+        ],
+        "limits": [
+          "One selected completed Codex turn and exactly one finite metadata exec receipt. read_thread without that machine receipt is rejected; Claude import is unsupported.",
+          "Trace at most 16 MiB / 100000 lines / 2 MiB per line; metadata output at most 64 KiB; existing finite readiness tool bounds apply.",
+          "Original receipt timestamp only; existing 300-second freshness and exact catalog/full-name/marker correlation. No restamping, name correction or agent-final evidence.",
+          "Local selected bytes are not a signed host attestation; caller server label is not authentication; complete input-schema delivery is not verified.",
+          "New private directory 0700 and exclusive files 0600; no overwrite or automatic retry. Partial files are preserved. Actual Work execution remains HOLD.",
+          "Source and disposable fixture review only; installed client metadata collection and same-chat transition acceptance are NOT_RUN for this source."
+        ],
+        "notes": "Create a caller-selected new private directory and two exclusive JSON evidence files, fsync files/directory, and preserve partial output on failure. No authority, live state or Work output is written. NATIVE_READ/NATIVE_WRITE here conservatively denote explicit local evidence file I/O, never native Core or Work mutation. The importer does not update policies, registry, adapter state, approval or installed programs. Provenance retains exact selected input and line hashes but cannot certify fabricated local logs. Output is external observation evidence only; existing Owner current-state/instance/catalog/freshness/idle/unknown checks remain independent."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_observation.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-observation.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete offline local metadata receipt operation, not an MCP Core capability or new execution authority. Actual client/model/native acceptance is not established by source or fixture coverage."
+    },
+    {
+      "id": "surface.tools.integration_stable_observation.py.cli-import",
+      "observation_ids": [
+        "obs-ef98de903c2e7d5f31cebe47fc8777719ad23ca438963a79071cc70ca462dfd0",
+        "obs-5b764c2967079a1864798f51570e61bafeae7893446cf1624324b4207692ca64"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit local evidence selection only: exact trace/catalog bytes, thread, turn, server prefix and new output directory. No model call, D1/D2/D4 grant, approval issuance, current backend selection or Work authority is inferred."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Codex local rollout format only"
+        ],
+        "limits": [
+          "One selected completed Codex turn and exactly one finite metadata exec receipt. read_thread without that machine receipt is rejected; Claude import is unsupported.",
+          "Trace at most 16 MiB / 100000 lines / 2 MiB per line; metadata output at most 64 KiB; existing finite readiness tool bounds apply.",
+          "Original receipt timestamp only; existing 300-second freshness and exact catalog/full-name/marker correlation. No restamping, name correction or agent-final evidence.",
+          "Local selected bytes are not a signed host attestation; caller server label is not authentication; complete input-schema delivery is not verified.",
+          "New private directory 0700 and exclusive files 0600; no overwrite or automatic retry. Partial files are preserved. Actual Work execution remains HOLD.",
+          "Source and disposable fixture review only; installed client metadata collection and same-chat transition acceptance are NOT_RUN for this source."
+        ],
+        "notes": "Explicit codex-rollout CLI reads pinned trace/catalog, rechecks original observation freshness, creates new evidence files and prints bounded result hashes/counts. No client or model call is part of import. NATIVE_READ/NATIVE_WRITE here conservatively denote explicit local evidence file I/O, never native Core or Work mutation. The importer does not update policies, registry, adapter state, approval or installed programs. Provenance retains exact selected input and line hashes but cannot certify fabricated local logs. Output is external observation evidence only; existing Owner current-state/instance/catalog/freshness/idle/unknown checks remain independent."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_observation.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-observation.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete offline local metadata receipt operation, not an MCP Core capability or new execution authority. Actual client/model/native acceptance is not established by source or fixture coverage."
+    },
+    {
+      "id": "surface.tools.integration_stable_observation.py.cli-reject-read-thread",
+      "observation_ids": [
+        "obs-ae4a9f95ee3dd98835d3ba6f1e485ecfa850f8e47e1092ab06a2370b1b280bcd"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit local evidence selection only: exact trace/catalog bytes, thread, turn, server prefix and new output directory. No model call, D1/D2/D4 grant, approval issuance, current backend selection or Work authority is inferred."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Codex local rollout format only"
+        ],
+        "limits": [
+          "One selected completed Codex turn and exactly one finite metadata exec receipt. read_thread without that machine receipt is rejected; Claude import is unsupported.",
+          "Trace at most 16 MiB / 100000 lines / 2 MiB per line; metadata output at most 64 KiB; existing finite readiness tool bounds apply.",
+          "Original receipt timestamp only; existing 300-second freshness and exact catalog/full-name/marker correlation. No restamping, name correction or agent-final evidence.",
+          "Local selected bytes are not a signed host attestation; caller server label is not authentication; complete input-schema delivery is not verified.",
+          "New private directory 0700 and exclusive files 0600; no overwrite or automatic retry. Partial files are preserved. Actual Work execution remains HOLD.",
+          "Source and disposable fixture review only; installed client metadata collection and same-chat transition acceptance are NOT_RUN for this source."
+        ],
+        "notes": "Implemented fail-closed CLI branch: after selected bounded input reads, read-thread format raises MISSING_MACHINE_RECEIPT and prints BLOCKED without creating output. This is not read_thread import support. NATIVE_READ/NATIVE_WRITE here conservatively denote explicit local evidence file I/O, never native Core or Work mutation. The importer does not update policies, registry, adapter state, approval or installed programs. Provenance retains exact selected input and line hashes but cannot certify fabricated local logs. Output is external observation evidence only; existing Owner current-state/instance/catalog/freshness/idle/unknown checks remain independent."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_observation.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-observation.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete offline local metadata receipt operation, not an MCP Core capability or new execution authority. Actual client/model/native acceptance is not established by source or fixture coverage."
     }
   ]
 }

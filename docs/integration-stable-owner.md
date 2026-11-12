@@ -40,6 +40,8 @@ python3 tools/integration_owner_desktop.py owner-app \
 
 호스트의 tools/list·ready와 모델이 받은 정의를 구분한다. 새 app-server나 다른 대화에서 성공한 결과는 원래 Desktop 대화의 성공이 아니다.
 
+검증 지시에서 필요한 메타데이터 탐색까지 금지하면 연결이 정상이어도 `NOT_OBSERVED`가 나올 수 있다. Codex에서는 허용한 순수 `ALL_TOOLS` 조회의 원본 receipt를 [오프라인 관측 수집기](integration-stable-observation.md)로 대조할 수 있다. 모델의 최종 재작성 문장을 원본 출력으로 대신하지 않는다. 이름 불일치는 원래 정의·검색 응답·모델 답변·화면 전사를 구분해 조사하며, 예상 catalog로 오타를 교정하지 않는다.
+
 Claude 등의 지연 도구 목록에는 이름만 보이고 marker가 포함된 상세 정의는 아직 없을 수 있다. 이때는 `NOT_OBSERVED`다. 허용된 검증 범위에서 해당 client의 **도구 정의 검색·로드만** 수행해 상세 정의를 확인하며, Golem Work 도구를 호출해 노출 여부를 시험하지 않는다. 상세 정의를 얻지 못하면 전환을 중단하고, 설치 화면의 marker나 이전 대화의 값을 대신 사용하지 않는다.
 
 ## 선택 저장과 실행부 전환
