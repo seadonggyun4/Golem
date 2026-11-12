@@ -67,9 +67,13 @@ verify reload and calls separately.
    A service owning a plan, or sharing the Desktop PID, is insufficient.
    A verified target's idle relay may refresh only that connection to the already
    reviewed/configured state. It cannot replace its own installed adapter code.
-   Old adapters or a missing marker need a supported initial host reconnect;
-   an unavailable official control socket is an explicit unsupported path, not
-   permission to guess an IPC endpoint. A host-wide official reload requires its
+   Old adapters or a missing marker leave the intended transport unverified.
+   An unavailable official control socket is an explicit unsupported path, not
+   evidence that restarting the app is necessary. The same host process can own
+   both old and newly selected adapters. Never use unchanged host PID or unrelated
+   old connections to demand another restart, reinstall, or repeated model probe.
+   A verified supported transition is required before changing a connection;
+   do not guess an IPC endpoint. A host-wide official reload requires its
    separate effect to be authorized. Preserve other chats and ongoing work.
    A new conversation alone, disk `config/batchWrite`, `tools/list_changed`, or a
    reload ACK is not proof of delivery. Observe definitions in the same chat's
@@ -81,8 +85,10 @@ verify reload and calls separately.
    and forwarded responses from its last complete catalog digest. A forwarded
    response is not proof that the host cached it or exposed it to the model.
    If the host does not re-list, do not repeat the relay refresh: use the supported
-   host reconnect/reload within the user's scope, then inspect definitions in a
-   subsequent turn of the same chat. A reload queues loaded-thread refreshes;
+   host reconnect/reload only when that route is actually available and within
+   the user's scope, then inspect definitions in a subsequent turn of the same
+   chat. Otherwise report LIVE_TRANSITION_UNAVAILABLE and preserve the current
+   connections and execution HOLD. A reload queues loaded-thread refreshes;
    changing an in-progress turn's tool inventory is not guaranteed. A new
    app-server fixture is not verification of the existing Desktop process.
    Transport idle is not proof that native leases or external work have ended.

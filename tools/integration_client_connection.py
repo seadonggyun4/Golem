@@ -3,8 +3,8 @@
 Disk selection, live server, host tools and model delivery are separate facts.
 The adapter environment is display provenance, not an authorization credential.
 Only the official control proxy may request a host-wide refresh, after explicit
-consent; unavailable host control leads to a normal-restart guide, not a new CLI
-server, process signal, database change or automatic retry.
+consent. Missing control or target observations do not establish that an app
+restart is required. No process signal, database change or automatic retry.
 """
 import ast
 import hashlib
@@ -324,7 +324,15 @@ def compare(selected, rows, host):
     elif host.get('reload_supported') and host.get('verified_desktop'):
         state, mode = 'RELOAD_REQUIRED', 'OFFICIAL_RELOAD_AVAILABLE'
     else:
-        state, mode = 'DESKTOP_RELOAD_NOT_CONFIRMED', 'MANUAL_RESTART_REQUIRED'
+        # A missing control socket and a long-lived host PID say nothing about
+        # whether this host can start a new MCP connection. Mixed generations
+        # are valid observations, not a reason to restart unrelated chats.
+        has_selected = bool(current) or any(row.get('relay_current') is True for row in rows)
+        has_other = bool(unknown) or len(current) != len(desktop)
+        state = ('CONNECTION_SELECTIONS_COEXIST' if has_selected and has_other else
+                 'CURRENT_CHAT_CONNECTION_NOT_OBSERVED' if not rows else
+                 'LIVE_TRANSITION_NOT_CONFIRMED')
+        mode = 'LIVE_TRANSITION_UNAVAILABLE'
     return state, mode
 
 
@@ -581,13 +589,9 @@ class ConnectionMonitor:
         elif any(row.get('refresh_candidate') for row in rows):
             state, mode = 'TARGET_NOT_IDENTIFIED', 'TARGET_NOT_IDENTIFIED'
         rows.sort(key=display_order)
-        kinds = {r.get('host_kind') for r in rows if r.get('host_kind') in ('ChatGPT','Codex')}
-        kind = next(iter(kinds)) if len(kinds)==1 else None
-        menu = kind+' → '+kind+' 종료(⌘Q)' if kind else '실제 사용 중인 Codex/ChatGPT 앱의 앱 메뉴 → 종료'
-        steps = ['다른 대화와 작업을 저장하고 진행 중인 작업이 끝났는지 확인합니다.',
-                 menu+'로 정상 종료한 뒤 같은 앱을 다시 엽니다. 창 닫기는 앱 종료가 아닙니다.',
-                 '이 창의 재시작 후 상태 확인을 눌러 새 launcher·정책·runtime·도구를 다시 대조합니다.',
-                 '모델에 도구가 전달됐는지는 기존 개발 대화의 실제 도구 목록에서 별도로 확인합니다. Work 호출은 하지 않습니다.']
+        steps = ['현재 대화의 실제 도구 정의와 해당 연결의 관측 근거를 대조합니다. Work 호출은 하지 않습니다.',
+                 '지원되는 live 전환 경로가 확인되지 않았습니다. 기존 연결과 실행 HOLD를 유지합니다.',
+                 '제어 경로 부재·동일 호스트 PID·다른 대화의 구버전 연결만으로 앱 재시작을 요구하지 않습니다.']
         if mode == 'OFFICIAL_RELOAD_AVAILABLE':
             steps = ['공식 API는 Golem만 선택할 수 없고 이 호스트의 전체 MCP 설정 갱신을 요청합니다.',
                      '다른 진행 작업을 확인하고 전체 호스트 갱신에 동의한 경우에만 갱신 버튼을 누릅니다.',
@@ -608,10 +612,15 @@ class ConnectionMonitor:
                      '활성·불확실 후보는 기록의 수정 시각이 최근인 순서로 최대 16개만 관찰합니다. 시각은 신원·최신성 인증이 아닙니다.',
                      '나머지 연결은 미관찰로 보존합니다. 기록을 삭제하거나 한도를 늘리지 않습니다.',
                      '필요하면 연결 상태 확인을 명시적으로 다시 선택합니다. 자동 재시도·정상 재시작은 요청하지 않습니다.']
+        if mode == 'VERIFIED':
+            steps = ['관찰한 서비스의 선택 지문을 대조했습니다. 현재 대화의 도구 전달은 별도로 확인합니다.',
+                     '이 조회는 연결 변경·Work 실행·실행 HOLD 해제를 수행하지 않습니다.']
         report.update(state=state, summary='디스크 선택과 실제 서버 연결을 대조했습니다. 모델 전달·실행 권한은 별도입니다.',
                       selected=selected, connections=rows, host_control=host,
                       reload={'mode':mode,'reason':host.get('reason','실제 활성 연결과 선택 지문 대조'),'steps':steps})
         report['target_bound'] = any(self.target_matches(row) for row in rows)
+        report['target_connection_state'] = ('EXTERNALLY_CORRELATED' if report['target_bound'] else
+                                             'CURRENT_CHAT_TRANSPORT_NOT_IDENTIFIED')
         report['readiness'] = self.readiness(selected, rows)
         if report['readiness'].get('preparation_allowed') is True:
             report['model_tool_delivery'] = 'EXTERNALLY_OBSERVED_SAME_CHAT_DEFINITIONS'
@@ -657,6 +666,7 @@ class ConnectionMonitor:
                                    'preparation_allowed':False,'execution_authorized':False}
             report['model_tool_delivery'] = 'NOT_OBSERVED'
             report['target_bound'] = False
+            report['target_connection_state'] = 'CURRENT_CHAT_TRANSPORT_NOT_IDENTIFIED'
             self.last = report
             return report
         attempt = ('host',report['host_control']['socket_identity']['inode'])
@@ -677,6 +687,7 @@ class ConnectionMonitor:
                                'preparation_allowed':False,'execution_authorized':False}
         report['model_tool_delivery'] = 'NOT_OBSERVED'
         report['target_bound'] = False
+        report['target_connection_state'] = 'CURRENT_CHAT_TRANSPORT_NOT_IDENTIFIED'
         self.last = report
         return report
 

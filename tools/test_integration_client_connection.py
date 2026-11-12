@@ -218,21 +218,60 @@ class Observation(Fixture):
             with self.subTest(tools=tools):
                 self.assertNotEqual(connection.compare(selected,[self.row(selected,tools=tools)],{})[1],'VERIFIED')
 
-    def test_manual_refresh_does_not_execute_reconnect_or_touch_files(self):
+    def test_unavailable_live_transition_does_not_execute_reconnect_or_touch_files(self):
         before = {str(p.relative_to(self.root)):p.read_bytes() for p in self.root.rglob('*') if p.is_file()}
         monitor = connection.ConnectionMonitor(self.config,self.review,observer=lambda:[])
         with patch('subprocess.run',side_effect=AssertionError('no host command')):
             result = monitor.request_refresh(expected_token=monitor.inspect()['refresh_token'])
-        self.assertEqual(result['reload']['mode'],'MANUAL_RESTART_REQUIRED')
+        self.assertEqual(result['reload']['mode'],'LIVE_TRANSITION_UNAVAILABLE')
+        self.assertEqual(result['state'],'CURRENT_CHAT_CONNECTION_NOT_OBSERVED')
+        self.assertEqual(result['target_connection_state'],'CURRENT_CHAT_TRANSPORT_NOT_IDENTIFIED')
         self.assertFalse(monitor.attempted)
         self.assertEqual(before,{str(p.relative_to(self.root)):p.read_bytes() for p in self.root.rglob('*') if p.is_file()})
 
-    def test_exact_menu_from_observed_Desktop_and_no_guessed_host(self):
+    def test_missing_control_never_infers_restart_from_observed_Desktop(self):
         monitor = connection.ConnectionMonitor(self.config,self.review,
             observer=lambda:[self.row(policy_sha256='f'*64)])
-        self.assertIn('ChatGPT → ChatGPT 종료', '\n'.join(monitor.inspect()['reload']['steps']))
-        monitor.observer = lambda:[]
-        self.assertNotIn('ChatGPT → ChatGPT 종료', '\n'.join(monitor.inspect()['reload']['steps']))
+        for rows in ([self.row(policy_sha256='f'*64)], []):
+            monitor.observer = lambda: rows
+            value = monitor.inspect()
+            self.assertEqual(value['reload']['mode'],'LIVE_TRANSITION_UNAVAILABLE')
+            steps = '\n'.join(value['reload']['steps'])
+            self.assertNotIn('종료(⌘Q)',steps)
+            self.assertNotIn('정상 종료한 뒤',steps)
+            self.assertIn('실행 HOLD',steps)
+            self.assertFalse(value['readiness']['preparation_allowed'])
+
+    def test_same_host_mixed_versions_do_not_require_restart_or_prove_chat_delivery(self):
+        selected = self.selected()
+        monitor = connection.ConnectionMonitor(self.config,self.review,observer=lambda:[
+            self.row(selected,host_pid=40,pid=51,package_version='previous'),
+            self.row(selected,host_pid=40,pid=52)])
+        value = monitor.inspect()
+        self.assertEqual(value['state'],'CONNECTION_SELECTIONS_COEXIST')
+        self.assertEqual(value['reload']['mode'],'LIVE_TRANSITION_UNAVAILABLE')
+        self.assertEqual(value['target_connection_state'],'CURRENT_CHAT_TRANSPORT_NOT_IDENTIFIED')
+        self.assertEqual(value['model_tool_delivery'],'NOT_OBSERVED')
+        self.assertFalse(value['readiness']['preparation_allowed'])
+        self.assertEqual(value['connections'][0]['host_pid'],value['connections'][1]['host_pid'])
+        self.assertEqual({row['state'] for row in value['connections']},
+                         {'CURRENT_ACTIVE_SERVICE','STALE_OR_UNVERIFIED_SERVICE'})
+
+    def test_current_service_under_unchanged_host_is_not_current_chat_evidence(self):
+        monitor = connection.ConnectionMonitor(self.config,self.review,
+            observer=lambda:[self.row(host_pid=40,pid=52)])
+        value = monitor.inspect()
+        self.assertEqual(value['reload']['mode'],'VERIFIED')
+        self.assertEqual(value['target_connection_state'],'CURRENT_CHAT_TRANSPORT_NOT_IDENTIFIED')
+        self.assertEqual(value['model_tool_delivery'],'NOT_OBSERVED')
+        self.assertFalse(value['readiness']['preparation_allowed'])
+        self.assertNotIn('정상 종료','\n'.join(value['reload']['steps']))
+
+    def test_mixed_relay_generations_do_not_make_restart_required(self):
+        rows = [dict(kind='codex-connection-relay',relay_current=True,host_pid=40),
+                dict(kind='codex-connection-relay',relay_current=False,host_pid=40)]
+        state,mode=connection.compare(self.selected(),rows,{'reload_supported':False})
+        self.assertEqual((state,mode),('CONNECTION_SELECTIONS_COEXIST','LIVE_TRANSITION_UNAVAILABLE'))
 
     def test_same_uid_process_ancestry_distinguishes_Desktop_from_other_servers(self):
         entries = {10:{'pid':10,'ppid':20,'uid':os.getuid(),'exe':'/fixture/python'},
@@ -276,7 +315,7 @@ class OfficialControl(Fixture):
         control = Control()
         monitor = connection.ConnectionMonitor(self.config,self.review,control=control,observer=lambda:[])
         observed = monitor.inspect()
-        self.assertEqual(observed['reload']['mode'],'MANUAL_RESTART_REQUIRED')
+        self.assertEqual(observed['reload']['mode'],'LIVE_TRANSITION_UNAVAILABLE')
         control.available=True
         self.expect('REFRESH_SELECTION_CHANGED',lambda:monitor.request_refresh(expected_token=observed['refresh_token']))
         self.assertFalse(monitor.attempted)
@@ -726,6 +765,7 @@ class Relay(Fixture):
         result=self.refresh(report['refresh_token'])
         self.assertFalse(result['readiness']['preparation_allowed'])
         self.assertFalse(result['target_bound'])
+        self.assertEqual(result['target_connection_state'],'CURRENT_CHAT_TRANSPORT_NOT_IDENTIFIED')
         self.assertEqual(result['model_tool_delivery'],'NOT_OBSERVED')
         after=self.monitor.inspect()
         self.assertFalse(after['target_bound'])
@@ -755,6 +795,7 @@ class Relay(Fixture):
         self.assertEqual(control.calls,[])
         result=self.monitor.request_refresh(expected_token=before['refresh_token'])
         self.assertEqual(result['reload']['mode'],'REFRESH_QUEUED')
+        self.assertEqual(result['target_connection_state'],'CURRENT_CHAT_TRANSPORT_NOT_IDENTIFIED')
         self.assertIsNone(self.monitor.target_observation)
         self.assertEqual(self.monitor.refresh_outcome,{'state':'ACKNOWLEDGED','attempts':1})
         # An ACK may leave the same relay/marker alive until a subsequent turn.

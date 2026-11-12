@@ -443,7 +443,7 @@
     },
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
-      "sha256": "705ea1200573704c8ab4f4c01175abeda29373a7bd95ea147771e532387bab4a"
+      "sha256": "52eb720317e128e4c0a1333843d7730920e7ccfdd24cac19e5ac8c8a7c138b62"
     },
     {
       "path": "pyproject.toml",
@@ -2551,11 +2551,11 @@
     },
     {
       "path": "tools/integration_client_connection.py",
-      "sha256": "d36d0ab143dca701a9a1402f85bfa60e682597a45aa4043d05d6d5efa6a976bc"
+      "sha256": "03574542dcc982b63d48edd6211db64d7dfb29128d2c3a628e4ec68dc9441ccb"
     },
     {
       "path": "tools/integration_connection_ui.py",
-      "sha256": "00967d4c766d4b25075e3fb54ebe995f792223a05baf11da8a23872b0c7fd890"
+      "sha256": "8c1e33ae573b72b602db3d3f805e59375ea444218a9f889a8bee8f937efbf7f8"
     },
     {
       "path": "plugins/golem/scripts/connection_relay.py",
@@ -2567,11 +2567,11 @@
     },
     {
       "path": "tools/test_integration_client_connection.py",
-      "sha256": "804b81c1cf6062ed52dbcee12b0543154dc98c6a6c4689603b4e631812c1cc97"
+      "sha256": "620feaa1d28294a910760480658fa8b13d401931cf70c2026582b48a88bde3bb"
     },
     {
       "path": "tools/test_integration_connection_ui.py",
-      "sha256": "bfdfcde64b036318b04657ce455b621694f9d8f8cdd7d599f2997ba1d1a8f80b"
+      "sha256": "973859ae682ac869766190d802c715b3cab710bd4e63445dedec0b4100588804"
     },
     {
       "path": "tools/test_integration_connection_relay.py",
@@ -2579,11 +2579,11 @@
     },
     {
       "path": "docs/integration-codex-plugin.md",
-      "sha256": "9e255d98978f7d22513f5a5bbd7b3ff9db068ef4487ccbc8dea80d12e6d9f4fd"
+      "sha256": "fe6888a304577016e11b3ff8e2400493a166ca3c6e25c9c1628683e1a278776d"
     },
     {
       "path": "docs/integration-connection-renewal.md",
-      "sha256": "2f0ae69beb2d868092d8b0169f1520f3314f1aa77cfbbdbdbe36b7d79472fe8e"
+      "sha256": "938ded96074b30af070030db99df4473465d11038bc627057002cdb3ae756988"
     },
     {
       "path": "tools/test_execution_record.py",

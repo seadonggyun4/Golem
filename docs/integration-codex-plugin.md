@@ -69,15 +69,17 @@ Styxis의 Golem 업데이트 후 실제 MCP command/args가 새 adapter 경로�
 Owner 앱의 **Codex 연결·갱신**에서 설정과 실제 프로세스를 대조하고, 지원되는
 **Golem 연결 갱신**은 외부 대화 관측과 정확히 대조한 한 연결에만 사용한다.
 도구 설명의 `golem-connection-v1:…` marker·대화·turn·실제 도구 이름이 없거나
-오래되면 PID·준비안 보유 여부로 대상을 추측하지 않는다. 이전 adapter에는
-최초 정상 재연결이 필요할 수 있다.
+오래되면 PID·준비안 보유 여부로 대상을 추측하지 않는다. 같은 호스트 프로세스에
+이전·새 adapter가 함께 있을 수 있으므로 PID가 같다는 이유로 앱 재시작을 요구하지 않는다.
 `ready`·새 대화·CLI 목록만으로 Desktop 반영을 판정하지 않으며, 현재 대화의 도구
 노출을 따로 확인한다. [연결 갱신 방법과 보존 조건](integration-connection-renewal.md)을 따른다.
 서버 목록에 있는 도구가 대화에 없으면 relay의 `connection-status`에서 호스트의
 목록 재조회 관측을 확인한다. 새 목록 응답·호스트 reload 접수·모델의 실제 도구 정의는
 별개다. 지원되는 호스트 갱신 후 **같은 대화의 다음 turn**에서 정의를 대조하며,
 같은 설치나 relay 갱신을 반복하거나 숨겨진 action을 다른 도구로 우회하지 않는다.
-공식 host control socket을 확인하지 못한 경로는 미지원으로 남기고, 새로운 helper
+공식 host control socket을 확인하지 못한 경로는 **live 전환 미지원**으로 남긴다.
+제어 경로 부재를 재시작 필요로 바꾸거나 동일 재시작·재설치·모델 조회를 반복하지 않는다.
+새로운 helper
 app-server의 성공을 기존 Desktop의 성공으로 대신하지 않는다. Owner 앱의
 `PREPARATION_READY_NOT_AUTHORIZED`는 연결 대조 결과이며 실행·승인·QA 권한이 아니다.
 

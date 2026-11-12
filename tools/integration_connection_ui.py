@@ -98,8 +98,13 @@ def presentation(value):
     renewal = value.get('reload')
     renewal = renewal if isinstance(renewal, dict) else {}
     mode = renewal.get('mode')
+    legacy_restart = mode == 'MANUAL_RESTART_REQUIRED'
+    if legacy_restart:
+        # Historical reports remain readable without reviving unsupported
+        # restart advice or turning an old guide into an active UI action.
+        mode = 'LIVE_TRANSITION_UNAVAILABLE'
     labels = {
-        'MANUAL_RESTART_REQUIRED': '호스트 정상 재시작 필요 · 아직 반영 미확인',
+        'LIVE_TRANSITION_UNAVAILABLE': '지원되는 live 전환 경로 미확인 · 기존 연결 유지',
         'OFFICIAL_RELOAD_AVAILABLE': '현재 호스트의 공식 연결 갱신 사용 가능 · 아직 실행하지 않음',
         'GOLEM_RELAY_AVAILABLE': '현재 Golem 연결 갱신 사용 가능 · 아직 실행하지 않음',
         'REFRESH_QUEUED': '갱신 요청 접수 · 실제 연결 반영은 아직 미확인',
@@ -120,7 +125,9 @@ def presentation(value):
     rows = []
     relay_targets = {}
     details = [*selected_lines,
-        '연결의 호스트 PID나 준비안 보유만으로 현재 대화의 transport를 확정하지 않습니다. 대화 연결 근거는 별도입니다.']
+        '연결의 호스트 PID나 준비안 보유만으로 현재 대화의 transport를 확정하지 않습니다. 대화 연결 근거는 별도입니다.',
+        '현재 대화 연결: '+text(value.get('target_connection_state')),
+        '같은 호스트에 여러 버전이 공존해도 대상 대화의 전환 실패나 앱 재시작 필요성을 뜻하지 않습니다.']
     connections = value.get('connections')
     if not isinstance(connections, list):
         connections = []
@@ -157,6 +164,9 @@ def presentation(value):
             details.append('관측 도구: ' + ', '.join(text(t) for t in tools[:256]))
     steps = renewal.get('steps')
     steps = [text(s) for s in steps[:16]] if isinstance(steps, list) else []
+    if legacy_restart:
+        steps = ['과거 재시작 안내는 현재 전환 가능성의 증거가 아닙니다. 기존 연결과 실행 HOLD를 유지합니다.',
+                 '현재 대화의 연결과 지원되는 제어 경로를 별도로 확인합니다. 자동 갱신·앱 종료는 하지 않습니다.']
     model_delivery = value.get('model_tool_delivery')
     model_delivery = ('미확인 · 현재 모델 도구 목록/실제 호출을 별도로 확인해야 합니다'
                       if model_delivery in (None, '', 'NOT_OBSERVED') else text(model_delivery))
@@ -248,7 +258,7 @@ class ConnectionPanel:
         self.refresh_button = ttk.Button(buttons, text='Codex 연결 갱신', command=self.refresh,
                                          state='disabled')
         self.refresh_button.pack(side='left', padx=8)
-        self.recheck_button = ttk.Button(buttons, text='재시작 후 상태 확인', command=self.recheck,
+        self.recheck_button = ttk.Button(buttons, text='갱신 후 상태 확인', command=self.recheck,
                                         state='disabled')
         self.recheck_button.pack(side='left')
         self.selected = tk.StringVar(value='디스크의 선택 설정: 미확인')
@@ -297,11 +307,6 @@ class ConnectionPanel:
         self.tree.bind('<<TreeviewSelect>>', self._selection_changed, add='+')
         self.guidance = tk.StringVar(value='갱신 실행 가능 여부: 미확인')
         ttk.Label(self.frame, textvariable=self.guidance, wraplength=830).pack(anchor='w', pady=5)
-        self.ack = tk.BooleanVar(value=False)
-        self.ack_button = ttk.Checkbutton(self.frame,
-            text='다른 작업을 저장하고 진행 중인 작업을 확인했습니다. 앱을 직접 정상 재시작하겠습니다.',
-            variable=self.ack, command=self.acknowledge, state='disabled')
-        self.ack_button.pack(anchor='w')
         self.reload_consent = tk.BooleanVar(value=False)
         self.reload_consent_button = ttk.Checkbutton(self.frame,
             text='작업 상태를 확인했고, 표시된 Codex 호스트의 전체 MCP 연결 갱신을 1회 요청합니다.',
@@ -335,7 +340,6 @@ class ConnectionPanel:
         self.observed_tools.configure(state='disabled' if busy else 'normal')
         self.required_tools.configure(state='disabled' if busy else 'normal')
         mode = self.report['renewal_mode'] if self.report else None
-        manual = mode == 'MANUAL_RESTART_REQUIRED'
         relay_target = self._relay_target()
         official = (mode in ('OFFICIAL_RELOAD_AVAILABLE', 'GOLEM_RELAY_AVAILABLE') and
                     bool(self.report['refresh_token']) and
@@ -344,18 +348,15 @@ class ConnectionPanel:
                     not in self.attempted_targets)
         if mode == 'GOLEM_RELAY_AVAILABLE' and not relay_target:
             official = False
-        self.refresh_button.configure(text={'MANUAL_RESTART_REQUIRED':'정상 재시작 안내',
-            'OFFICIAL_RELOAD_AVAILABLE':'호스트 MCP 갱신 요청',
+        self.refresh_button.configure(text={'OFFICIAL_RELOAD_AVAILABLE':'호스트 MCP 갱신 요청',
             'GOLEM_RELAY_AVAILABLE':'Golem 연결 갱신'}.get(mode, 'Codex 연결 갱신'))
         self.reload_consent_button.configure(text=(
             '작업 상태를 확인했고, 선택한 Golem 연결 '+text(relay_target)+'만 1회 갱신합니다.' if mode == 'GOLEM_RELAY_AVAILABLE'
             else '작업 상태를 확인했고, 표시된 Codex 호스트의 전체 MCP 연결 갱신을 1회 요청합니다.'))
-        self.refresh_button.configure(state='normal' if not busy and (manual or (official and self.reload_consent.get())) else 'disabled')
-        self.ack_button.configure(state='normal' if manual and not busy else 'disabled')
+        self.refresh_button.configure(state='normal' if not busy and official and self.reload_consent.get() else 'disabled')
         self.reload_consent_button.configure(state='normal' if official and not busy else 'disabled')
         verification = mode in ('REFRESH_QUEUED', 'VERIFY_REQUIRED')
-        self.recheck_button.configure(text='재시작 후 상태 확인' if manual else '갱신 후 상태 확인',
-            state='normal' if not busy and ((manual and self.ack.get()) or verification) else 'disabled')
+        self.recheck_button.configure(state='normal' if not busy and verification else 'disabled')
 
     def _relay_target(self):
         selected = self.tree.selection()
@@ -373,7 +374,6 @@ class ConnectionPanel:
     def _submit(self, kind, operation):
         if not self.request.start(kind, operation):
             return
-        self.ack.set(False)
         self.reload_consent.set(False)
         self.submitted_revision = self.target_revision
         self.status.set('연결 확인 중 · 자동 재시도/앱 종료/Work 실행 없음')
@@ -415,7 +415,7 @@ class ConnectionPanel:
 
     def refresh(self):
         # request_refresh decides whether the actual host has a supported control
-        # route. A manual guide must never be presented as an executed reload.
+        # route. Missing control never becomes a restart or reload action.
         if self.request.busy or not self.report:
             return
         mode = self.report['renewal_mode']
@@ -430,12 +430,6 @@ class ConnectionPanel:
             self.reload_attempted = True
             self.attempted_targets.add(target)
             self.attempted_tokens.add(self.report['refresh_token'])
-        elif mode == 'MANUAL_RESTART_REQUIRED':
-            # A manual guide is strictly observational. The host capability
-            # may have changed since the displayed report; never allow that
-            # change to turn this button into an unconfirmed actual reload.
-            self._submit('inspect', self.controller.inspect)
-            return
         else:
             return
         token = self.report['refresh_token']
@@ -445,7 +439,7 @@ class ConnectionPanel:
     def recheck(self):
         if self.report:
             mode = self.report['renewal_mode']
-            if (mode == 'MANUAL_RESTART_REQUIRED' and self.ack.get()) or mode in ('REFRESH_QUEUED', 'VERIFY_REQUIRED'):
+            if mode in ('REFRESH_QUEUED', 'VERIFY_REQUIRED'):
                 self._submit('recheck', self.controller.inspect)
 
     def _drain(self):
@@ -491,10 +485,7 @@ class ConnectionPanel:
                 for key, row in report['rows']:
                     self.tree.insert('', 'end', iid=key, values=row)
                 guide = report['renewal_label'] + '\n' + report['reason']
-                if report['renewal_mode'] != 'MANUAL_RESTART_REQUIRED':
-                    guide += ''.join('\n'+s for s in report['steps'])
-                else:
-                    guide += '\n아래 확인란을 선택하면 정상 재시작 절차를 표시합니다. 자동 종료하지 않습니다.'
+                guide += ''.join('\n'+s for s in report['steps'])
                 if report['renewal_mode'] == 'OFFICIAL_RELOAD_AVAILABLE':
                     guide += '\n연결 갱신은 이 Codex 호스트의 다른 연결에 영향을 줄 수 있습니다. 작업 상태를 확인한 뒤 1회 요청하세요.'
                 if report['renewal_mode'] == 'GOLEM_RELAY_AVAILABLE':
@@ -512,14 +503,3 @@ class ConnectionPanel:
             self._enable()
         if self.request.busy:
             self.after_id = self.root.after(50, self._drain)
-
-    def acknowledge(self):
-        if self.report and self.report['renewal_mode'] == 'MANUAL_RESTART_REQUIRED':
-            guide = self.report['renewal_label'] + '\n' + self.report['reason']
-            if self.ack.get():
-                guide += ''.join('\n'+s for s in self.report['steps'])
-                guide += '\n재시작을 마친 뒤 “재시작 후 상태 확인”을 누르세요. 확인란은 재시작 성공 증거가 아닙니다.'
-            else:
-                guide += '\n먼저 다른 작업의 저장·진행 상태를 확인하세요. 앱을 자동 종료하지 않습니다.'
-            self.guidance.set(guide)
-        self._enable()

@@ -12,7 +12,7 @@ from unittest.mock import Mock
 import integration_connection_ui as ui
 
 
-def report(mode='MANUAL_RESTART_REQUIRED'):
+def report(mode='LIVE_TRANSITION_UNAVAILABLE'):
     return {
         'state': 'STALE_ACTIVE_CONNECTION',
         'summary': '디스크 선택과 실제 연결이 다릅니다.',
@@ -24,8 +24,8 @@ def report(mode='MANUAL_RESTART_REQUIRED'):
                          'policy_sha256': 'd'*64, 'launcher_sha256': 'e'*64,
                          'tools_count': 28, 'tools': ['golem_projects_list']}],
         'reload': {'mode': mode, 'reason': '공식 Desktop 제어 경로 없음',
-                   'steps': ['다른 작업을 저장하세요.', 'ChatGPT 메뉴에서 정상 종료하세요.',
-                             '앱을 다시 열고 상태를 확인하세요.']},
+                   'steps': ['현재 대화의 연결을 확인합니다.', '지원되는 전환 경로는 미확인입니다.',
+                             '기존 연결과 실행 HOLD를 유지합니다.']},
         'model_tool_delivery': 'NOT_OBSERVED',
         'observed_at': '2026-11-11T00:00:00+00:00',
         'refresh_token': 'f'*64,
@@ -125,6 +125,27 @@ class Presentation(unittest.TestCase):
         self.assertIn('일부 연결 미관찰',shown['renewal_label'])
         self.assertNotIn('재시작 필요 ·',shown['renewal_label'])
         self.assertIn('BOUNDED_OBSERVATION_LIMIT',shown['details'])
+
+    def test_legacy_restart_report_is_read_only_without_old_restart_instructions(self):
+        value=report('MANUAL_RESTART_REQUIRED')
+        value['reload']['steps']=['ChatGPT 메뉴에서 정상 종료하세요.','앱을 다시 여세요.']
+        before=copy.deepcopy(value)
+        shown=ui.presentation(value)
+        self.assertEqual(shown['renewal_mode'],'LIVE_TRANSITION_UNAVAILABLE')
+        self.assertIn('기존 연결 유지',shown['renewal_label'])
+        self.assertNotIn('정상 종료하세요','\n'.join(shown['steps']))
+        self.assertIn('실행 HOLD','\n'.join(shown['steps']))
+        self.assertEqual(value,before)
+
+    def test_mixed_generations_remain_per_connection_and_chat_unobserved(self):
+        value=report()
+        value['target_connection_state']='CURRENT_CHAT_TRANSPORT_NOT_IDENTIFIED'
+        value['connections'].append({**value['connections'][0],'pid':51,'state':'CURRENT_ACTIVE_SERVICE'})
+        shown=ui.presentation(value)
+        self.assertEqual(len(shown['rows']),2)
+        self.assertIn('CURRENT_CHAT_TRANSPORT_NOT_IDENTIFIED',shown['details'])
+        self.assertIn('여러 버전이 공존',shown['details'])
+        self.assertFalse(shown['readiness']['preparation_allowed'])
 
     def test_refresh_token_is_exact_or_unavailable_never_synthesized(self):
         value = report('OFFICIAL_RELOAD_AVAILABLE')
@@ -410,14 +431,14 @@ class NativePanel(unittest.TestCase):
         panel=ui.ConnectionPanel(self.root,controller)
         panel.inspect_button.invoke();self.settle(panel)
         self.assertIn('일부 연결 미관찰',panel.guidance.get())
-        for button in (panel.refresh_button,panel.ack_button,panel.recheck_button,panel.reload_consent_button):
+        for button in (panel.refresh_button,panel.recheck_button,panel.reload_consent_button):
             self.assertEqual(str(button.cget('state')),'disabled')
             button.invoke()
         self.assertEqual(controller.calls,['inspect'])
         panel.inspect_button.invoke();self.settle(panel)
         self.assertEqual(controller.calls,['inspect','inspect'])
 
-    def test_manual_guide_has_no_automatic_inspection_or_restart(self):
+    def test_unavailable_transition_has_no_restart_workflow_or_automatic_inspection(self):
         class Controller:
             def __init__(self): self.calls = []
             def inspect(self): self.calls.append('inspect'); return report()
@@ -429,17 +450,17 @@ class NativePanel(unittest.TestCase):
         panel.refresh_button.invoke()
         self.assertEqual(controller.calls, [])
         panel.inspect_button.invoke(); self.settle(panel)
-        self.assertEqual(panel.refresh_button.cget('text'), '정상 재시작 안내')
+        self.assertEqual(str(panel.refresh_button.cget('state')), 'disabled')
+        self.assertFalse(hasattr(panel,'ack_button'))
         self.assertIn('b'*64, panel.selected.get())
         self.assertIn('d'*64, panel.details.get('1.0', 'end'))
         panel.refresh_button.invoke(); self.settle(panel)
-        self.assertEqual(controller.calls, ['inspect', 'inspect'])
+        self.assertEqual(controller.calls, ['inspect'])
         panel.recheck_button.invoke()
+        self.assertEqual(controller.calls, ['inspect'])
+        self.assertNotIn('정상 종료',panel.guidance.get())
+        panel.inspect_button.invoke(); self.settle(panel)
         self.assertEqual(controller.calls, ['inspect', 'inspect'])
-        panel.ack.set(True); panel.acknowledge()
-        self.assertIn('ChatGPT 메뉴', panel.guidance.get())
-        panel.recheck_button.invoke(); self.settle(panel)
-        self.assertEqual(controller.calls, ['inspect', 'inspect', 'inspect'])
         self.assertIn('미확인', panel.model_status.get())
 
     def test_official_refresh_requires_explicit_consent_and_one_attempt(self):
@@ -505,7 +526,7 @@ class NativePanel(unittest.TestCase):
         self.assertIn('완료로 판정하지 않음', panel.guidance.get())
         self.assertIn('미확인', panel.model_status.get())
 
-    def test_manual_guide_capability_change_never_dispatches_without_consent(self):
+    def test_legacy_guide_capability_change_requires_new_inspection_and_consent(self):
         class Controller:
             def __init__(self): self.calls = []
             def inspect(self):
@@ -516,6 +537,8 @@ class NativePanel(unittest.TestCase):
         panel = ui.ConnectionPanel(self.root, controller)
         panel.inspect_button.invoke(); self.settle(panel)
         panel.refresh_button.invoke(); self.settle(panel)
+        self.assertEqual(controller.calls, ['inspect'])
+        panel.inspect_button.invoke(); self.settle(panel)
         self.assertEqual(controller.calls, ['inspect', 'inspect'])
         self.assertFalse(panel.reload_attempted)
         self.assertEqual(str(panel.refresh_button.cget('state')), 'disabled')

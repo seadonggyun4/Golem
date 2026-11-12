@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "194fc4618cdb52e77922cbe239f87cd01c7befad87b7d795d7cac459436f5225",
+  "inventory_sha256": "842adaed7fbfcc1a912f2abc8689875c704cec9282f25ee1093cd6a8274803de",
   "selected_source_count": 650,
   "selected_observation_count": 2440,
   "selected_capability_count": 1297,
@@ -4054,7 +4054,7 @@
     },
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
-      "sha256": "705ea1200573704c8ab4f4c01175abeda29373a7bd95ea147771e532387bab4a"
+      "sha256": "52eb720317e128e4c0a1333843d7730920e7ccfdd24cac19e5ac8c8a7c138b62"
     },
     {
       "path": "pyproject.toml",
@@ -6162,11 +6162,11 @@
     },
     {
       "path": "tools/integration_client_connection.py",
-      "sha256": "d36d0ab143dca701a9a1402f85bfa60e682597a45aa4043d05d6d5efa6a976bc"
+      "sha256": "03574542dcc982b63d48edd6211db64d7dfb29128d2c3a628e4ec68dc9441ccb"
     },
     {
       "path": "tools/integration_connection_ui.py",
-      "sha256": "00967d4c766d4b25075e3fb54ebe995f792223a05baf11da8a23872b0c7fd890"
+      "sha256": "8c1e33ae573b72b602db3d3f805e59375ea444218a9f889a8bee8f937efbf7f8"
     },
     {
       "path": "plugins/golem/scripts/connection_relay.py",
@@ -6178,11 +6178,11 @@
     },
     {
       "path": "tools/test_integration_client_connection.py",
-      "sha256": "804b81c1cf6062ed52dbcee12b0543154dc98c6a6c4689603b4e631812c1cc97"
+      "sha256": "620feaa1d28294a910760480658fa8b13d401931cf70c2026582b48a88bde3bb"
     },
     {
       "path": "tools/test_integration_connection_ui.py",
-      "sha256": "bfdfcde64b036318b04657ce455b621694f9d8f8cdd7d599f2997ba1d1a8f80b"
+      "sha256": "973859ae682ac869766190d802c715b3cab710bd4e63445dedec0b4100588804"
     },
     {
       "path": "tools/test_integration_connection_relay.py",
@@ -6190,11 +6190,11 @@
     },
     {
       "path": "docs/integration-codex-plugin.md",
-      "sha256": "9e255d98978f7d22513f5a5bbd7b3ff9db068ef4487ccbc8dea80d12e6d9f4fd"
+      "sha256": "fe6888a304577016e11b3ff8e2400493a166ca3c6e25c9c1628683e1a278776d"
     },
     {
       "path": "docs/integration-connection-renewal.md",
-      "sha256": "2f0ae69beb2d868092d8b0169f1520f3314f1aa77cfbbdbdbe36b7d79472fe8e"
+      "sha256": "938ded96074b30af070030db99df4473465d11038bc627057002cdb3ae756988"
     },
     {
       "path": "tools/test_execution_record.py",
@@ -12388,7 +12388,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 277,
+      "checked_functions": 276,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -23549,7 +23549,7 @@
     {
       "path": "plugins/golem/skills/golem-setup/SKILL.md",
       "role": "PACKAGE_CONTRACT",
-      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory.",
+      "rationale": "Reviewed Styxis plugin declarations and client-local launcher state. Codex, Claude Code, portable and Claude Desktop approvals remain separate; no import, Work grant, automatic Owner UI or installed-release claim. Exact launcher approval and native policy checks remain mandatory. Guidance preserves unsupported live transitions without inferring mandatory app restart from a missing control socket, same host PID or unrelated old connection. Existing refresh authority and Work HOLD remain unchanged.",
       "symbols": [],
       "declarations": [],
       "literal_branches": [],
@@ -58133,7 +58133,7 @@
     {
       "path": "tools/integration_client_connection.py",
       "role": "OWNER_LOCAL_CONNECTION_MONITOR",
-      "rationale": "Owner-local comparison of exact selected config/adapter/policy/runtime bytes with authenticated live Golem metadata and bounded Desktop process ancestry. Provenance environment values are not authority. Explicit observation, Golem relay refresh and optional host-wide reload are distinct; no Work call, policy application or model conversation. Preserved absent endpoints do not consume the 16-probe live budget; active/unknown candidates are prioritized by mtime only for observation. Unobserved/invalid/overflow rows block whole-connection CURRENT and do not imply a restart is required. Optional host catalog metadata is strictly validated and displayed separately from server readiness and model delivery; absent observations remain unknown and old digests remain historical. Uses the canonical copied adapter inspection API rather than a guessed record path. An explicit recent external chat/turn/definition-marker/tool observation is correlated with one current relay before selection; PID/plan ownership are insufficient. Required tools and four readiness stages do not grant execution. A new read-only CLI validates the private observation file/hash and original observation time, reports unsupported/unready paths, and never refreshes or starts Work. Actual refresh dispatch invalidates the previous external observation before transport; an ACK or unchanged relay status cannot revive it. Pre-dispatch selection failures preserve the observation; lost replies remain UNKNOWN and block further preparation.",
+      "rationale": "Owner-local comparison of exact selected config/adapter/policy/runtime bytes with authenticated live Golem metadata and bounded Desktop process ancestry. Provenance environment values are not authority. Explicit observation, Golem relay refresh and optional host-wide reload are distinct; no Work call, policy application or model conversation. Preserved absent endpoints do not consume the 16-probe live budget; active/unknown candidates are prioritized by mtime only for observation. Unobserved/invalid/overflow rows block whole-connection CURRENT and do not imply a restart is required. Optional host catalog metadata is strictly validated and displayed separately from server readiness and model delivery; absent observations remain unknown and old digests remain historical. Uses the canonical copied adapter inspection API rather than a guessed record path. An explicit recent external chat/turn/definition-marker/tool observation is correlated with one current relay before selection; PID/plan ownership are insufficient. Required tools and four readiness stages do not grant execution. A new read-only CLI validates the private observation file/hash and original observation time, reports unsupported/unready paths, and never refreshes or starts Work. Actual refresh dispatch invalidates the previous external observation before transport; an ACK or unchanged relay status cannot revive it. Pre-dispatch selection failures preserve the observation; lost replies remain UNKNOWN and block further preparation. Missing official control and unchanged host PID no longer imply a restart requirement. Mixed selected/old connections are preserved as coexistence, while target-chat correlation is reported independently and invalidated on both refresh paths. No new transport/control route or automatic retry is added.",
       "symbols": [
         "ConnectionError",
         "ConnectionError.__init__",
@@ -58210,14 +58210,6 @@
         [
           "Call(func=Attribute(value=Name(id='manifest', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='name')])",
           "golem"
-        ],
-        [
-          "Call(func=Attribute(value=Name(id='r', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='host_kind')])",
-          "ChatGPT"
-        ],
-        [
-          "Call(func=Attribute(value=Name(id='r', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='host_kind')])",
-          "Codex"
         ],
         [
           "Call(func=Attribute(value=Name(id='result', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
@@ -58384,6 +58376,10 @@
           "TARGET_NOT_IDENTIFIED"
         ],
         [
+          "Name(id='mode', ctx=Load())",
+          "VERIFIED"
+        ],
+        [
           "Subscript(value=Name(id='approval', ctx=Load()), slice=Constant(value='schema'), ctx=Load())",
           "golem.codex-launcher.v1"
         ],
@@ -58489,7 +58485,7 @@
     {
       "path": "tools/integration_connection_ui.py",
       "role": "OWNER_LOCAL_CONNECTION_PRESENTATION",
-      "rationale": "Explicit Owner-app presentation only. No Tk import or polling at headless MCP startup. Manual buttons and one background request render selected/live/host/model states separately, require scope confirmation before refresh, and never elevate queued or child-reinitialized replies to model success. Optional host catalog metadata is strictly validated and displayed separately from server readiness and model delivery; absent observations remain unknown and old digests remain historical. Explicit external chat/turn/marker/observed-tools/required-tools input is validated and independently re-observed. Changed input invalidates readiness; ambiguous, stale or mismatching target rows cannot be refreshed. Background results remain separate from GUI-thread state and no headless UI creation or automatic request is introduced.",
+      "rationale": "Explicit Owner-app presentation only. No Tk import or polling at headless MCP startup. Manual buttons and one background request render selected/live/host/model states separately, require scope confirmation before refresh, and never elevate queued or child-reinitialized replies to model success. Optional host catalog metadata is strictly validated and displayed separately from server readiness and model delivery; absent observations remain unknown and old digests remain historical. Explicit external chat/turn/marker/observed-tools/required-tools input is validated and independently re-observed. Changed input invalidates readiness; ambiguous, stale or mismatching target rows cannot be refreshed. Background results remain separate from GUI-thread state and no headless UI creation or automatic request is introduced. Unsupported live transition disables refresh controls. Historical restart advice is read-only and cannot reactivate a restart workflow. The obsolete acknowledgement widget/method is removed; exact refresh consent, target selection, bounds and uncertainty gates remain.",
       "symbols": [
         "BackgroundRequest",
         "BackgroundRequest.__init__",
@@ -58506,7 +58502,6 @@
         "ConnectionPanel._submit",
         "ConnectionPanel._target_changed",
         "ConnectionPanel._tools_changed",
-        "ConnectionPanel.acknowledge",
         "ConnectionPanel.inspect",
         "ConnectionPanel.observe_target",
         "ConnectionPanel.recheck",
@@ -58556,16 +58551,8 @@
           ""
         ],
         [
-          "Subscript(value=Attribute(value=Name(id='self', ctx=Load()), attr='report', ctx=Load()), slice=Constant(value='renewal_mode'), ctx=Load())",
-          "MANUAL_RESTART_REQUIRED"
-        ],
-        [
           "Subscript(value=Name(id='report', ctx=Load()), slice=Constant(value='renewal_mode'), ctx=Load())",
           "GOLEM_RELAY_AVAILABLE"
-        ],
-        [
-          "Subscript(value=Name(id='report', ctx=Load()), slice=Constant(value='renewal_mode'), ctx=Load())",
-          "MANUAL_RESTART_REQUIRED"
         ],
         [
           "Subscript(value=Name(id='report', ctx=Load()), slice=Constant(value='renewal_mode'), ctx=Load())",
@@ -65114,6 +65101,12 @@
       "role": "QC_DOCUMENTATION_FIXTURE",
       "rationale": "Fixed QC contract documentation or isolated synthetic test/expected fixture; never runtime authority or release PASS.",
       "contract_sha256": null
+    },
+    {
+      "path": "docs/integration-stable-connection-design.md",
+      "role": "DOCUMENTATION",
+      "rationale": "Proposed opt-in stable catalog/authority-epoch design only, explicitly PROPOSED_NOT_IMPLEMENTED. No new runtime interface, authority or acceptance claim. Existing policy intersection remains the default.",
+      "contract_sha256": null
     }
   ],
   "development_reviews": [
@@ -65143,7 +65136,7 @@
     },
     {
       "path": "tools/capability_boundary_registry.py",
-      "sha256": "3d250f198f986103d36664b7f638c61a0c85f9c31d6b3002ee11b285e5e47d09",
+      "sha256": "9f96ab81e5dc9ef8dccf16bfd1fab90fb286cd2c89aaaaa9cb388a3ad66a6772",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65413,7 +65406,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "3617dd1ca0c9d3ca952d29df8726b17b3c7aca6a75578f33a35b7d8629dfa59e",
+      "sha256": "e86969ca116a50963524f856f7ca09ee5b4c0e340bac19a8cbf4ae77fd32a8fa",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65521,7 +65514,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "7f533823b100cc379c71e602d9e4cd3858e7bc1e4b77397929cc8bec51fc826c",
+      "sha256": "0b271409fc0a9c759a778f29ce3f03033b76d23a13a0816c286dfb5a3329ec94",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65557,7 +65550,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "d3cc65feab8f8fc0e54bd82e9d7b52952fd3113d8947a238fe62357cd8ff9e4b",
+      "sha256": "702dba91af6e5402a271839672f3b852c39722f0d232f9d4ecf21746915d4272",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
