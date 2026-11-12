@@ -59,7 +59,8 @@ async def run(service):
     from mcp.server.stdio import stdio_server
     instance, incoming = server(service), readonly.BoundedInput()
     async with stdio_server(stdin=incoming) as (reader, writer):
-        await instance.run(reader, writer, instance.create_initialization_options())
+        await instance.run(reader, writer, readonly.initialization_options(instance, service,
+            {**reads.SCHEMAS, **contract.SCHEMAS}))
     if incoming.error:
         raise incoming.error
 

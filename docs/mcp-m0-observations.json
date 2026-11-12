@@ -35,7 +35,7 @@
     },
     {
       "path": "tools/integration_mutation_mcp.py",
-      "sha256": "745604aaa52a547f1a9723b9459a2f14a17db2e734e474bcf2f7a20e32308b6c"
+      "sha256": "f4b46e88211d6eed17d1dd41b71b8deb25715ebd1c69c88d3384f7cc126fe082"
     },
     {
       "path": "tools/integration_backend.py",
@@ -191,7 +191,7 @@
     },
     {
       "path": "tools/integration_transfer.py",
-      "sha256": "d98eb26a35c61175bfc096b8719b5ebc2e9e289f7226ea98ab651c493c996e27"
+      "sha256": "39c512fc30d8c4e10b95ff70752298f718599861c18ed7720b967f45a6bef0e6"
     },
     {
       "path": "docs/runtime-events.md",
@@ -451,7 +451,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "a864204ede9dcd23d449f0428ee0f51263c62201f183a0c171032e0be58ec505"
+      "sha256": "7a8911bf934517a861b56ceab9732ef1ee9a09cf605a1e4d827633d21c85fdf1"
     },
     {
       "path": "src/adapter_protocol/adapter.c",
@@ -1611,7 +1611,7 @@
     },
     {
       "path": "tools/integration_mcp.py",
-      "sha256": "bcd2136d57f2af822be2362977393595dac652f0825dbc23bc9de3c9462b6af8"
+      "sha256": "ecdb07eb7ae8a90bde379aae8340bf33a90e0c063e8b4fb412c995815c506f2b"
     },
     {
       "path": "tools/integration_mcpb.py",
@@ -2183,7 +2183,7 @@
     },
     {
       "path": "tools/integration_owner_maintenance.py",
-      "sha256": "068267621752a4d8c1aa2ba129c797df39b0ef17a84483cfe230922995ff763c"
+      "sha256": "2274ed743c89e98c7f888a72135d5529d7845ff06e4e945bf722a6341fddbe14"
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
@@ -2583,7 +2583,7 @@
     },
     {
       "path": "docs/integration-connection-renewal.md",
-      "sha256": "938ded96074b30af070030db99df4473465d11038bc627057002cdb3ae756988"
+      "sha256": "4aea513c69689824d5955ba185b161151b18db89f4dbfab47b3a122859bc4728"
     },
     {
       "path": "tools/test_execution_record.py",
@@ -2600,6 +2600,62 @@
     {
       "path": "tools/test_integration_connection_readiness.py",
       "sha256": "3d5e1b41cc58e8db6ef48c0e0dc2fdc13069c6a1beb71dc8b4d8b540694868df"
+    },
+    {
+      "path": "docs/integration-stable-connection-design.md",
+      "sha256": "cbaa9fd67a699ec7f83114829bab4b9e6c3039309f449e28bdd17a7099a09127"
+    },
+    {
+      "path": "plugins/golem/scripts/stable_contract.py",
+      "sha256": "5f6a26270f6c01af0317e40acee5fb364f25faf693264463eb1de3326b303ed9"
+    },
+    {
+      "path": "plugins/golem/scripts/stable_entry.py",
+      "sha256": "bbbbcd8def68462e5d3b7641dbd8f6ffbd29308216be947f17bd5a462f6b424d"
+    },
+    {
+      "path": "plugins/golem/scripts/stable_relay.py",
+      "sha256": "056aab7d43bc5f44f7a0f7f92fbec4b2d87151627e372c3bae439075e286df78"
+    },
+    {
+      "path": "tools/integration_stable_catalog.py",
+      "sha256": "d2eaad3d9125625aad95bf64c950de5ae3a886e99aeeea602b858dbc5026a00b"
+    },
+    {
+      "path": "tools/integration_stable_readiness.py",
+      "sha256": "d6b734cd80d7d9bccddb48c96e386d229cc23ff6742848e3813ecbcaff5bbf3a"
+    },
+    {
+      "path": "tools/test_integration_stable_abi.py",
+      "sha256": "cdf623f7f136f5f9ed39180a80fccd07e0bf7bd019599938bb99ef1a53d35883"
+    },
+    {
+      "path": "tools/test_integration_stable_backend_authorization.py",
+      "sha256": "33fb039c4f31b3e64b5fd57ff304b731a818a80b991ac82e418e83b56696c623"
+    },
+    {
+      "path": "tools/test_integration_stable_catalog.py",
+      "sha256": "c2d3bdb6cad29fac6748709bcd2744da50ed5291f0d2dcce39b24f44d760874d"
+    },
+    {
+      "path": "tools/test_integration_stable_contract.py",
+      "sha256": "413853b96ef67609a6c0cbec3f57a7776501afb116ff9a2f6d8c82264c0a139c"
+    },
+    {
+      "path": "tools/test_integration_stable_entry.py",
+      "sha256": "122b563f1a097cde387cdb62fbdbda5d33710a0e37e5b2be877c7cf28f7ee707"
+    },
+    {
+      "path": "tools/test_integration_stable_host.py",
+      "sha256": "fbffbb7bae5f945b83d5db5e2cfb1db7e4bdaac143a7439c8859d3b134514791"
+    },
+    {
+      "path": "tools/test_integration_stable_readiness.py",
+      "sha256": "a046f05119d61a88cd2b8e36213ca5d75207408aead85c17330c7b79c66a68b9"
+    },
+    {
+      "path": "tools/test_integration_stable_relay.py",
+      "sha256": "a1762e12868e112a9e07825eba6d103c32b19571e5d73ee4f373cb2e97f6253c"
     }
   ],
   "observations": [
@@ -19681,6 +19737,321 @@
       "kind": "PYTHON_DECLARATION",
       "source_path": "tools/integration_connection_readiness.py",
       "entrypoint": "classify",
+      "selector": null
+    },
+    {
+      "id": "obs-31908cb971dbbd3bf865e7f75826453953e5ee1fee70e0c643a8e94e4890e076",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-2d7dac499bce1fdd95ab672fcb023f709f79c8dd69f785df3019ff10c9b4b5fe",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "verified_bundle",
+      "selector": null
+    },
+    {
+      "id": "obs-4b0ed24f63bb95be549c4dcd14ba8b9920e11d541541f2557541235779843d41",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "module",
+      "selector": null
+    },
+    {
+      "id": "obs-3aeaaaad94870c0d6551003b460d7222b6174a50ece3267b0e72626a5fe83db2",
+      "kind": "CLI_ROUTE",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "argparse:operation",
+      "selector": "create"
+    },
+    {
+      "id": "obs-132ff1cc8cfb81f233c8a5da87343f141f5d5b497955083d3bc5bdfd21dcc623",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+      "selector": "create"
+    },
+    {
+      "id": "obs-a44eff3f4ddb57b77f67599f87f0cf7b8190640ff101bd67f90e5d9d8c9ccea2",
+      "kind": "CLI_ROUTE",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "argparse:operation",
+      "selector": "publish"
+    },
+    {
+      "id": "obs-91e9dae6dc4d1fed0f0ea70adc842bc51dda66171304a23c7ad13a1038b1f295",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+      "selector": "publish"
+    },
+    {
+      "id": "obs-a5311208eb163b3244425e95c305add89dc989d20a8435c68f40b37ff98309dc",
+      "kind": "CLI_ROUTE",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "argparse:operation",
+      "selector": "inspect"
+    },
+    {
+      "id": "obs-9e6dc47d199a0984a3b8ec1baf3bfe4891f57063b1e5303ecd9018dbcafd6d35",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+      "selector": "inspect"
+    },
+    {
+      "id": "obs-6f6690e1474ba58bfa0db962cdc401c4b03aebf7c0cbf40e9e418474070ed390",
+      "kind": "CLI_ROUTE",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "argparse:operation",
+      "selector": "serve"
+    },
+    {
+      "id": "obs-fcc556a0b63f779fe16ead3e673af84039521c6b0e64aee083b4c9e057a7fde8",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+      "selector": "serve"
+    },
+    {
+      "id": "obs-e29b6f9478710a5e908ee798f9836f39ce158d328d6c4fed5ceea9c8ae990a68",
+      "kind": "CLI_ROUTE",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "argparse:operation",
+      "selector": "status"
+    },
+    {
+      "id": "obs-9d1f8ec2bd352c6e07097b793d86e9387166337db3282393058106d265bd251d",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+      "selector": "status"
+    },
+    {
+      "id": "obs-cda8232eb5605a7bf74cdd8317da44ef15599fd475a96a144b5217582f1a304b",
+      "kind": "CLI_ROUTE",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "argparse:operation",
+      "selector": "refresh"
+    },
+    {
+      "id": "obs-75ff45bdfd46149c1328d88b7ca8ae9ba32ffa6972006acdc0d3fd14c3839b74",
+      "kind": "CLI_ROUTE",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "argparse:operation",
+      "selector": "readiness"
+    },
+    {
+      "id": "obs-dd985e6038dd1efd4e170499b6773d928d79bd9d35da416109a4850648892860",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+      "selector": "readiness"
+    },
+    {
+      "id": "obs-b2b32c953f2f845fa694ff5797c53ce0175cf7799dc56f9bf9133fed049c8104",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_entry.py",
+      "entrypoint": "observation",
+      "selector": null
+    },
+    {
+      "id": "obs-89202095f9ca16206d6a547405ad7f49d24e49ff6b5ddc0df1ee718ac9213897",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_contract.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-6319c66b082a9821b7cc04f3d02580c2dc1f8d37e39b01bc2f7329d1d2e6c7a9",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_contract.py",
+      "entrypoint": "validate_catalog",
+      "selector": null
+    },
+    {
+      "id": "obs-5db3cca7c4967912820b3b8be8147a7488ede6fa92d04b4c68d838ed6c9ced0a",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_contract.py",
+      "entrypoint": "validate_selection",
+      "selector": null
+    },
+    {
+      "id": "obs-4265b0b8423d18b510543cfeff1915c7acc63ff17351f50ba6f1bac0df74c4d5",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_contract.py",
+      "entrypoint": "create",
+      "selector": null
+    },
+    {
+      "id": "obs-daf79b0b98c88b627ec55fbd8ba173b77932cea38eb7ab23039c57aa4917ca00",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_contract.py",
+      "entrypoint": "publish",
+      "selector": null
+    },
+    {
+      "id": "obs-203b01654126e6a157b6673520bc547c0378f2ab930e047a0425707da12fd257",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_contract.py",
+      "entrypoint": "inspect",
+      "selector": null
+    },
+    {
+      "id": "obs-a2714b0fa8afb42e80f100e26b7b80a1735589c7c8b388b75ab70146bc01b6f9",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_contract.py",
+      "entrypoint": "inspect_record",
+      "selector": null
+    },
+    {
+      "id": "obs-24d3077c1323c3465d3bf6bb3e6a916ae75ba92bbf95c61789fb9044772af2d2",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_contract.py",
+      "entrypoint": "shared_admission",
+      "selector": null
+    },
+    {
+      "id": "obs-85301d41b6048baf1023343e238dbb035684ca498eb13e1011b38f78fd343651",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-fe6d723cdeaf84f1636972c6496aedda32a803e89ef41a0e772f0960b379ef3d",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "serve",
+      "selector": null
+    },
+    {
+      "id": "obs-26b9b010196b307238952363c7b8782899d408cde42778c9f7b4fc2b72f18ab3",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "StableRelay.client_message",
+      "selector": null
+    },
+    {
+      "id": "obs-ea45eb1571d85b811f440c7c5703279f7b7e52c69959d1263723a5e48117d6c5",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "StableRelay.refresh",
+      "selector": null
+    },
+    {
+      "id": "obs-a25651442d39ffb4e757b968e02d40fe56068158441ee7c0198e0828104c1a3a",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "request",
+      "selector": "refresh"
+    },
+    {
+      "id": "obs-2f03d950ab57189d91dd1b8bf3973d805614749358500777287deccf8ba453e1",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "StableRelay.status",
+      "selector": null
+    },
+    {
+      "id": "obs-377734d6def6e8e7f4a60e747d22451eae33828a71c1cd025d1fd1a0ea3b01f0",
+      "kind": "NATIVE_OPERATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "request",
+      "selector": "status"
+    },
+    {
+      "id": "obs-ed63d91dd914e85bc039140031e7eb28e15e1bd14269210a3273b8786d42aa89",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "endpoint",
+      "selector": null
+    },
+    {
+      "id": "obs-21792ee992f482d1001fd391a9578082633703bb45c9be077ff902c2dd87d670",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "descriptors",
+      "selector": null
+    },
+    {
+      "id": "obs-8d694a46e9aca72aa98c53afeb4b3e62baeb0ab04a3ca369d6eaeb1194007bba",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "parse_definition_marker",
+      "selector": null
+    },
+    {
+      "id": "obs-b23ea5546d9d81ac83f598650b1747d6552f84577082c8cc64c3cbca63260269",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "plugins/golem/scripts/stable_relay.py",
+      "entrypoint": "StableRelay.definition_marker",
+      "selector": null
+    },
+    {
+      "id": "obs-e284bc3ab14189244c09a8fb7f982d480ffda65ab4d7947d838f8fb68b75dd4b",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_catalog.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-bbb4cc36c7945012080edfac1f2059240993e3a8885b38d3ee295fcdc7bf623d",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_catalog.py",
+      "entrypoint": "catalog",
+      "selector": null
+    },
+    {
+      "id": "obs-44e566a74c89ecafc246359430752a4ca4e59ff8a35e2c83fc369fbaef4d1308",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_catalog.py",
+      "entrypoint": "typed_inventory",
+      "selector": null
+    },
+    {
+      "id": "obs-07c2cd9f83f20640aa7021545e51fa9f8d9e5c24783d36895d04362db42458d6",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_catalog.py",
+      "entrypoint": "build_broker",
+      "selector": null
+    },
+    {
+      "id": "obs-4b13a2529a3ef8d54b75f8713f59f31347aaf15d2629d6dcd439583b0b66b781",
+      "kind": "CLI_ROUTE",
+      "source_path": "tools/integration_stable_catalog.py",
+      "entrypoint": "argparse:operation",
+      "selector": "catalog"
+    },
+    {
+      "id": "obs-6fae94d93992d9c7054fd90e9ab2403902f13165be071317542e92134f451064",
+      "kind": "CLI_ROUTE",
+      "source_path": "tools/integration_stable_catalog.py",
+      "entrypoint": "argparse:operation",
+      "selector": "broker"
+    },
+    {
+      "id": "obs-4e3b1f60e0ebac87f7bbc408356a30358e2661434467add53143d96beae9ce31",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_readiness.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-886639d3b274b8c5a918741fcbb98292efb0f09fce7a31acf27f43c4c192058f",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_readiness.py",
+      "entrypoint": "classify",
+      "selector": null
+    },
+    {
+      "id": "obs-da4da645124d8b5f85a631eef031531b76722af2b3fc68e8646333977597165a",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_mcp.py",
+      "entrypoint": "initialization_options",
       "selector": null
     }
   ],
@@ -82031,6 +82402,1322 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Concrete reviewed operation/dependency boundary; metadata/readiness is not a new MCP Work tool, grant or native success predicate."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_entry.py.file-surface",
+      "observation_ids": [
+        "obs-31908cb971dbbd3bf865e7f75826453953e5ee1fee70e0c643a8e94e4890e076"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Separate opt-in owner CLI verifies the exact closed broker payload inventory and executes only verified in-memory snapshots. Client/store/selection/refresh/model-observation pins are explicit. It does not update installed clients, invent model evidence, select a Work grant or release HOLD. Readiness uses original external timestamps and exact local state/status; status is not execution authority. Effects conservatively include explicitly selected approved-child startup, not a new grant."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_entry.py.verified-bundle",
+      "observation_ids": [
+        "obs-2d7dac499bce1fdd95ab672fcb023f709f79c8dd69f785df3019ff10c9b4b5fe",
+        "obs-4b0ed24f63bb95be549c4dcd14ba8b9920e11d541541f2557541235779843d41"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Separate opt-in owner CLI verifies the exact closed broker payload inventory and executes only verified in-memory snapshots. Client/store/selection/refresh/model-observation pins are explicit. It does not update installed clients, invent model evidence, select a Work grant or release HOLD. Readiness uses original external timestamps and exact local state/status; status is not execution authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_entry.py.cli-create",
+      "observation_ids": [
+        "obs-3aeaaaad94870c0d6551003b460d7222b6174a50ece3267b0e72626a5fe83db2",
+        "obs-132ff1cc8cfb81f233c8a5da87343f141f5d5b497955083d3bc5bdfd21dcc623"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Explicit create path. Separate opt-in owner CLI verifies the exact closed broker payload inventory and executes only verified in-memory snapshots. Client/store/selection/refresh/model-observation pins are explicit. It does not update installed clients, invent model evidence, select a Work grant or release HOLD. Readiness uses original external timestamps and exact local state/status; status is not execution authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_stable_entry.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_entry.py.cli-publish",
+      "observation_ids": [
+        "obs-a44eff3f4ddb57b77f67599f87f0cf7b8190640ff101bd67f90e5d9d8c9ccea2",
+        "obs-91e9dae6dc4d1fed0f0ea70adc842bc51dda66171304a23c7ad13a1038b1f295"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Explicit publish path. Separate opt-in owner CLI verifies the exact closed broker payload inventory and executes only verified in-memory snapshots. Client/store/selection/refresh/model-observation pins are explicit. It does not update installed clients, invent model evidence, select a Work grant or release HOLD. Readiness uses original external timestamps and exact local state/status; status is not execution authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_stable_entry.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_entry.py.cli-inspect",
+      "observation_ids": [
+        "obs-a5311208eb163b3244425e95c305add89dc989d20a8435c68f40b37ff98309dc",
+        "obs-9e6dc47d199a0984a3b8ec1baf3bfe4891f57063b1e5303ecd9018dbcafd6d35"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Explicit inspect path. Separate opt-in owner CLI verifies the exact closed broker payload inventory and executes only verified in-memory snapshots. Client/store/selection/refresh/model-observation pins are explicit. It does not update installed clients, invent model evidence, select a Work grant or release HOLD. Readiness uses original external timestamps and exact local state/status; status is not execution authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_stable_entry.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_entry.py.cli-serve",
+      "observation_ids": [
+        "obs-6f6690e1474ba58bfa0db962cdc401c4b03aebf7c0cbf40e9e418474070ed390",
+        "obs-fcc556a0b63f779fe16ead3e673af84039521c6b0e64aee083b4c9e057a7fde8"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Explicit serve path. Separate opt-in owner CLI verifies the exact closed broker payload inventory and executes only verified in-memory snapshots. Client/store/selection/refresh/model-observation pins are explicit. It does not update installed clients, invent model evidence, select a Work grant or release HOLD. Readiness uses original external timestamps and exact local state/status; status is not execution authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_stable_entry.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_entry.py.cli-status",
+      "observation_ids": [
+        "obs-e29b6f9478710a5e908ee798f9836f39ce158d328d6c4fed5ceea9c8ae990a68",
+        "obs-9d1f8ec2bd352c6e07097b793d86e9387166337db3282393058106d265bd251d"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Explicit status path. Separate opt-in owner CLI verifies the exact closed broker payload inventory and executes only verified in-memory snapshots. Client/store/selection/refresh/model-observation pins are explicit. It does not update installed clients, invent model evidence, select a Work grant or release HOLD. Readiness uses original external timestamps and exact local state/status; status is not execution authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_stable_entry.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_entry.py.cli-refresh",
+      "observation_ids": [
+        "obs-cda8232eb5605a7bf74cdd8317da44ef15599fd475a96a144b5217582f1a304b"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Explicit refresh path. Separate opt-in owner CLI verifies the exact closed broker payload inventory and executes only verified in-memory snapshots. Client/store/selection/refresh/model-observation pins are explicit. It does not update installed clients, invent model evidence, select a Work grant or release HOLD. Readiness uses original external timestamps and exact local state/status; status is not execution authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_stable_entry.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_entry.py.cli-readiness",
+      "observation_ids": [
+        "obs-75ff45bdfd46149c1328d88b7ca8ae9ba32ffa6972006acdc0d3fd14c3839b74",
+        "obs-dd985e6038dd1efd4e170499b6773d928d79bd9d35da416109a4850648892860"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Explicit readiness path. Separate opt-in owner CLI verifies the exact closed broker payload inventory and executes only verified in-memory snapshots. Client/store/selection/refresh/model-observation pins are explicit. It does not update installed clients, invent model evidence, select a Work grant or release HOLD. Readiness uses original external timestamps and exact local state/status; status is not execution authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_stable_entry.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_entry.py.external-observation",
+      "observation_ids": [
+        "obs-b2b32c953f2f845fa694ff5797c53ce0175cf7799dc56f9bf9133fed049c8104"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Read exact bounded canonical external evidence bytes by caller-selected SHA; do not manufacture, restamp or authenticate its contents."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_contract.py.file-surface",
+      "observation_ids": [
+        "obs-89202095f9ca16206d6a547405ad7f49d24e49ff6b5ddc0df1ee718ac9213897"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Owner-local canonical finite typed catalog and append-only exact selection records. Pinned broker interface inventory rejects invented or profile-mismatched definitions. Shared call admission spans head/pin validation and dispatch; publication uses exclusive lock and previous-head CAS. Existing approval records are only inspected. Partial publication, lineage drift, stale pins and uncertain durability remain blocked, never repaired or retried."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_contract.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_contract.py.finite-shape",
+      "observation_ids": [
+        "obs-6319c66b082a9821b7cc04f3d02580c2dc1f8d37e39b01bc2f7329d1d2e6c7a9",
+        "obs-5db3cca7c4967912820b3b8be8147a7488ede6fa92d04b4c68d838ed6c9ced0a"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Owner-local canonical finite typed catalog and append-only exact selection records. Pinned broker interface inventory rejects invented or profile-mismatched definitions. Shared call admission spans head/pin validation and dispatch; publication uses exclusive lock and previous-head CAS. Existing approval records are only inspected. Partial publication, lineage drift, stale pins and uncertain durability remain blocked, never repaired or retried."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_contract.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_contract.py.publication",
+      "observation_ids": [
+        "obs-4265b0b8423d18b510543cfeff1915c7acc63ff17351f50ba6f1bac0df74c4d5",
+        "obs-daf79b0b98c88b627ec55fbd8ba173b77932cea38eb7ab23039c57aa4917ca00"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Owner-local canonical finite typed catalog and append-only exact selection records. Pinned broker interface inventory rejects invented or profile-mismatched definitions. Shared call admission spans head/pin validation and dispatch; publication uses exclusive lock and previous-head CAS. Existing approval records are only inspected. Partial publication, lineage drift, stale pins and uncertain durability remain blocked, never repaired or retried."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_contract.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_contract.py.inspection",
+      "observation_ids": [
+        "obs-203b01654126e6a157b6673520bc547c0378f2ab930e047a0425707da12fd257",
+        "obs-a2714b0fa8afb42e80f100e26b7b80a1735589c7c8b388b75ab70146bc01b6f9"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Exact current or historical immutable selection inspection; historical inspection never selects or replays it. Owner-local canonical finite typed catalog and append-only exact selection records. Pinned broker interface inventory rejects invented or profile-mismatched definitions. Shared call admission spans head/pin validation and dispatch; publication uses exclusive lock and previous-head CAS. Existing approval records are only inspected. Partial publication, lineage drift, stale pins and uncertain durability remain blocked, never repaired or retried."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_contract.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_contract.py.shared-admission",
+      "observation_ids": [
+        "obs-24d3077c1323c3465d3bf6bb3e6a916ae75ba92bbf95c61789fb9044772af2d2"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Shared owner-store lock protects the current selection through downstream dispatch; no new operation grant. Owner-local canonical finite typed catalog and append-only exact selection records. Pinned broker interface inventory rejects invented or profile-mismatched definitions. Shared call admission spans head/pin validation and dispatch; publication uses exclusive lock and previous-head CAS. Existing approval records are only inspected. Partial publication, lineage drift, stale pins and uncertain durability remain blocked, never repaired or retried."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_contract.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_relay.py.file-surface",
+      "observation_ids": [
+        "obs-85301d41b6048baf1023343e238dbb035684ca498eb13e1011b38f78fd343651"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "PROCESS",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Separate client-specific fixed typed frontend over existing approved backend dispatch. Definition inventory and v2 marker survive only ABI-compatible child replacement; first/replacement initialization require exact source-derived catalog ABI evidence. Every call admits against current selection and original backend/native authority. Exact owner local refresh checks idle/pending/partial traffic, drains with EOF only, initializes once, preserves unknown results and never replays, force-kills or falls back. Fixed list visibility is not Work permission; actual Desktop acceptance is NOT_RUN."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_relay.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_relay.py.transport",
+      "observation_ids": [
+        "obs-fe6d723cdeaf84f1636972c6496aedda32a803e89ef41a0e772f0960b379ef3d",
+        "obs-26b9b010196b307238952363c7b8782899d408cde42778c9f7b4fc2b72f18ab3"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Separate client-specific fixed typed frontend over existing approved backend dispatch. Definition inventory and v2 marker survive only ABI-compatible child replacement; first/replacement initialization require exact source-derived catalog ABI evidence. Every call admits against current selection and original backend/native authority. Exact owner local refresh checks idle/pending/partial traffic, drains with EOF only, initializes once, preserves unknown results and never replays, force-kills or falls back. Fixed list visibility is not Work permission; actual Desktop acceptance is NOT_RUN. Conservative inherited-child and typed-call effects remain governed by the selected native policies."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_relay.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_stable_host.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_relay.py.owner-refresh",
+      "observation_ids": [
+        "obs-ea45eb1571d85b811f440c7c5703279f7b7e52c69959d1263723a5e48117d6c5",
+        "obs-a25651442d39ffb4e757b968e02d40fe56068158441ee7c0198e0828104c1a3a"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Separate client-specific fixed typed frontend over existing approved backend dispatch. Definition inventory and v2 marker survive only ABI-compatible child replacement; first/replacement initialization require exact source-derived catalog ABI evidence. Every call admits against current selection and original backend/native authority. Exact owner local refresh checks idle/pending/partial traffic, drains with EOF only, initializes once, preserves unknown results and never replays, force-kills or falls back. Fixed list visibility is not Work permission; actual Desktop acceptance is NOT_RUN."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_relay.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_relay.py.status",
+      "observation_ids": [
+        "obs-2f03d950ab57189d91dd1b8bf3973d805614749358500777287deccf8ba453e1",
+        "obs-377734d6def6e8e7f4a60e747d22451eae33828a71c1cd025d1fd1a0ea3b01f0"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Exact bounded private IPC status only; no Work read, native idle claim or transition. Separate client-specific fixed typed frontend over existing approved backend dispatch. Definition inventory and v2 marker survive only ABI-compatible child replacement; first/replacement initialization require exact source-derived catalog ABI evidence. Every call admits against current selection and original backend/native authority. Exact owner local refresh checks idle/pending/partial traffic, drains with EOF only, initializes once, preserves unknown results and never replays, force-kills or falls back. Fixed list visibility is not Work permission; actual Desktop acceptance is NOT_RUN."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_relay.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_relay.py.discovery",
+      "observation_ids": [
+        "obs-ed63d91dd914e85bc039140031e7eb28e15e1bd14269210a3273b8786d42aa89",
+        "obs-21792ee992f482d1001fd391a9578082633703bb45c9be077ff902c2dd87d670"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Client-separated finite metadata discovery; token omitted, absence is not Work completion, immutable records preserved."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_relay.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.plugins.golem.scripts.stable_relay.py.marker",
+      "observation_ids": [
+        "obs-8d694a46e9aca72aa98c53afeb4b3e62baeb0ab04a3ca369d6eaeb1194007bba",
+        "obs-b23ea5546d9d81ac83f598650b1747d6552f84577082c8cc64c3cbca63260269"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Versioned opaque fixed-catalog correlation marker; not backend epoch, chat authentication or owner authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_relay.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.tools.integration_stable_catalog.py.file-surface",
+      "observation_ids": [
+        "obs-e284bc3ab14189244c09a8fb7f982d480ffda65ab4d7947d838f8fb68b75dd4b"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Pure explicit existing-profile/schema subset builder and uninstalled finite broker artifact writer. Builds pinned typed-interface inventory from source definitions independent of current policy intersection. No global configuration, launcher selection, authority or Work operation is applied. Partial new output is preserved without overwrite/automatic repair."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.tools.integration_stable_catalog.py.definitions",
+      "observation_ids": [
+        "obs-bbb4cc36c7945012080edfac1f2059240993e3a8885b38d3ee295fcdc7bf623d",
+        "obs-44e566a74c89ecafc246359430752a4ca4e59ff8a35e2c83fc369fbaef4d1308"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Pure explicit existing-profile/schema subset builder and uninstalled finite broker artifact writer. Builds pinned typed-interface inventory from source definitions independent of current policy intersection. No global configuration, launcher selection, authority or Work operation is applied. Partial new output is preserved without overwrite/automatic repair."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.tools.integration_stable_catalog.py.artifact",
+      "observation_ids": [
+        "obs-07c2cd9f83f20640aa7021545e51fa9f8d9e5c24783d36895d04362db42458d6"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Pure explicit existing-profile/schema subset builder and uninstalled finite broker artifact writer. Builds pinned typed-interface inventory from source definitions independent of current policy intersection. No global configuration, launcher selection, authority or Work operation is applied. Partial new output is preserved without overwrite/automatic repair."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.tools.integration_stable_catalog.py.cli-catalog",
+      "observation_ids": [
+        "obs-4b13a2529a3ef8d54b75f8713f59f31347aaf15d2629d6dcd439583b0b66b781"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Uninstalled new private catalog artifact only. Pure explicit existing-profile/schema subset builder and uninstalled finite broker artifact writer. Builds pinned typed-interface inventory from source definitions independent of current policy intersection. No global configuration, launcher selection, authority or Work operation is applied. Partial new output is preserved without overwrite/automatic repair."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.tools.integration_stable_catalog.py.cli-broker",
+      "observation_ids": [
+        "obs-6fae94d93992d9c7054fd90e9ab2403902f13165be071317542e92134f451064"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Uninstalled new private broker artifact only. Pure explicit existing-profile/schema subset builder and uninstalled finite broker artifact writer. Builds pinned typed-interface inventory from source definitions independent of current policy intersection. No global configuration, launcher selection, authority or Work operation is applied. Partial new output is preserved without overwrite/automatic repair."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_catalog.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.tools.integration_stable_readiness.py.classification",
+      "observation_ids": [
+        "obs-4e3b1f60e0ebac87f7bbc408356a30358e2661434467add53143d96beae9ce31",
+        "obs-886639d3b274b8c5a918741fcbb98292efb0f09fce7a31acf27f43c4c192058f"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": "Pure bounded correlation of current exact selected snapshot, stable frontend ABI/catalog evidence, external same-chat marker/full-name inventory and fresh backend epoch. ACK alone cannot restore readiness; stale/wrong/unknown/repeated evidence blocks. Fixed frontend observations may survive compatible backend replacement, but backend proof must be current. Ready means unapproved preparation only, never Work authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_readiness.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.tools.integration_mcp.py.optional-stable-abi",
+      "observation_ids": [
+        "obs-da4da645124d8b5f85a631eef031531b76722af2b3fc68e8646333977597165a"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local stable interface/selection contract only. Existing adapter approvals and D1/D2/D4/native call authority remain mandatory. No installed migration, blanket grant or identity certification."
+      ],
+      "effects": [
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+"
+        ],
+        "limits": [
+          "Finite reviewed source and disposable fixtures only; actual Codex/Claude Desktop acceptance NOT_RUN, Work execution HOLD.",
+          "Initial migration/frontend ABI changes still require a supported exact client selection; ordinary compatible backend changes do not require host relisting."
+        ],
+        "notes": " Optional stable initialization metadata derives the exact explicit catalog from current source schemas/profile and checks actual backend schemas, without calling tools/list, admitting participation or granting operations. Default initialization remains unchanged when the finite environment contract is absent."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_backend_authorization.py",
+          "selector": null
+        },
+        {
+          "path": "tools/test_integration_stable_abi.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-connection-design.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
     }
   ]
 }

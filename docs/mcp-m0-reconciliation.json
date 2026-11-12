@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "842adaed7fbfcc1a912f2abc8689875c704cec9282f25ee1093cd6a8274803de",
-  "selected_source_count": 650,
-  "selected_observation_count": 2440,
-  "selected_capability_count": 1297,
+  "inventory_sha256": "e4c58c739bfc768bec6b0d5876cd6bb2141778c77d553509c4fcaecbd90fb474",
+  "selected_source_count": 664,
+  "selected_observation_count": 2485,
+  "selected_capability_count": 1325,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -177,6 +177,9 @@
       "plugins/golem/plugin.json",
       "plugins/golem/scripts/connection_relay.py",
       "plugins/golem/scripts/launcher.py",
+      "plugins/golem/scripts/stable_contract.py",
+      "plugins/golem/scripts/stable_entry.py",
+      "plugins/golem/scripts/stable_relay.py",
       "plugins/golem/skills/golem-setup/SKILL.md",
       "plugins/golem/skills/golem-work/SKILL.md",
       "pyproject.toml",
@@ -565,6 +568,8 @@
       "tools/integration_registry.py",
       "tools/integration_reload_probe.py",
       "tools/integration_service.py",
+      "tools/integration_stable_catalog.py",
+      "tools/integration_stable_readiness.py",
       "tools/integration_task_actions.py",
       "tools/integration_transfer.py",
       "tools/integration_update.py",
@@ -670,6 +675,9 @@
       "plugins/golem/plugin.json",
       "plugins/golem/scripts/connection_relay.py",
       "plugins/golem/scripts/launcher.py",
+      "plugins/golem/scripts/stable_contract.py",
+      "plugins/golem/scripts/stable_entry.py",
+      "plugins/golem/scripts/stable_relay.py",
       "plugins/golem/skills/golem-setup/SKILL.md",
       "plugins/golem/skills/golem-work/SKILL.md",
       "pyproject.toml",
@@ -1058,6 +1066,8 @@
       "tools/integration_registry.py",
       "tools/integration_reload_probe.py",
       "tools/integration_service.py",
+      "tools/integration_stable_catalog.py",
+      "tools/integration_stable_readiness.py",
       "tools/integration_task_actions.py",
       "tools/integration_transfer.py",
       "tools/integration_update.py",
@@ -3646,7 +3656,7 @@
     },
     {
       "path": "tools/integration_mutation_mcp.py",
-      "sha256": "745604aaa52a547f1a9723b9459a2f14a17db2e734e474bcf2f7a20e32308b6c"
+      "sha256": "f4b46e88211d6eed17d1dd41b71b8deb25715ebd1c69c88d3384f7cc126fe082"
     },
     {
       "path": "tools/integration_backend.py",
@@ -3802,7 +3812,7 @@
     },
     {
       "path": "tools/integration_transfer.py",
-      "sha256": "d98eb26a35c61175bfc096b8719b5ebc2e9e289f7226ea98ab651c493c996e27"
+      "sha256": "39c512fc30d8c4e10b95ff70752298f718599861c18ed7720b967f45a6bef0e6"
     },
     {
       "path": "docs/runtime-events.md",
@@ -4062,7 +4072,7 @@
     },
     {
       "path": "source_policy.py",
-      "sha256": "a864204ede9dcd23d449f0428ee0f51263c62201f183a0c171032e0be58ec505"
+      "sha256": "7a8911bf934517a861b56ceab9732ef1ee9a09cf605a1e4d827633d21c85fdf1"
     },
     {
       "path": "src/adapter_protocol/adapter.c",
@@ -5222,7 +5232,7 @@
     },
     {
       "path": "tools/integration_mcp.py",
-      "sha256": "bcd2136d57f2af822be2362977393595dac652f0825dbc23bc9de3c9462b6af8"
+      "sha256": "ecdb07eb7ae8a90bde379aae8340bf33a90e0c063e8b4fb412c995815c506f2b"
     },
     {
       "path": "tools/integration_mcpb.py",
@@ -5794,7 +5804,7 @@
     },
     {
       "path": "tools/integration_owner_maintenance.py",
-      "sha256": "068267621752a4d8c1aa2ba129c797df39b0ef17a84483cfe230922995ff763c"
+      "sha256": "2274ed743c89e98c7f888a72135d5529d7845ff06e4e945bf722a6341fddbe14"
     },
     {
       "path": "plugins/golem/skills/golem-work/SKILL.md",
@@ -6194,7 +6204,7 @@
     },
     {
       "path": "docs/integration-connection-renewal.md",
-      "sha256": "938ded96074b30af070030db99df4473465d11038bc627057002cdb3ae756988"
+      "sha256": "4aea513c69689824d5955ba185b161151b18db89f4dbfab47b3a122859bc4728"
     },
     {
       "path": "tools/test_execution_record.py",
@@ -6211,6 +6221,62 @@
     {
       "path": "tools/test_integration_connection_readiness.py",
       "sha256": "3d5e1b41cc58e8db6ef48c0e0dc2fdc13069c6a1beb71dc8b4d8b540694868df"
+    },
+    {
+      "path": "docs/integration-stable-connection-design.md",
+      "sha256": "cbaa9fd67a699ec7f83114829bab4b9e6c3039309f449e28bdd17a7099a09127"
+    },
+    {
+      "path": "plugins/golem/scripts/stable_contract.py",
+      "sha256": "5f6a26270f6c01af0317e40acee5fb364f25faf693264463eb1de3326b303ed9"
+    },
+    {
+      "path": "plugins/golem/scripts/stable_entry.py",
+      "sha256": "bbbbcd8def68462e5d3b7641dbd8f6ffbd29308216be947f17bd5a462f6b424d"
+    },
+    {
+      "path": "plugins/golem/scripts/stable_relay.py",
+      "sha256": "056aab7d43bc5f44f7a0f7f92fbec4b2d87151627e372c3bae439075e286df78"
+    },
+    {
+      "path": "tools/integration_stable_catalog.py",
+      "sha256": "d2eaad3d9125625aad95bf64c950de5ae3a886e99aeeea602b858dbc5026a00b"
+    },
+    {
+      "path": "tools/integration_stable_readiness.py",
+      "sha256": "d6b734cd80d7d9bccddb48c96e386d229cc23ff6742848e3813ecbcaff5bbf3a"
+    },
+    {
+      "path": "tools/test_integration_stable_abi.py",
+      "sha256": "cdf623f7f136f5f9ed39180a80fccd07e0bf7bd019599938bb99ef1a53d35883"
+    },
+    {
+      "path": "tools/test_integration_stable_backend_authorization.py",
+      "sha256": "33fb039c4f31b3e64b5fd57ff304b731a818a80b991ac82e418e83b56696c623"
+    },
+    {
+      "path": "tools/test_integration_stable_catalog.py",
+      "sha256": "c2d3bdb6cad29fac6748709bcd2744da50ed5291f0d2dcce39b24f44d760874d"
+    },
+    {
+      "path": "tools/test_integration_stable_contract.py",
+      "sha256": "413853b96ef67609a6c0cbec3f57a7776501afb116ff9a2f6d8c82264c0a139c"
+    },
+    {
+      "path": "tools/test_integration_stable_entry.py",
+      "sha256": "122b563f1a097cde387cdb62fbdbda5d33710a0e37e5b2be877c7cf28f7ee707"
+    },
+    {
+      "path": "tools/test_integration_stable_host.py",
+      "sha256": "fbffbb7bae5f945b83d5db5e2cfb1db7e4bdaac143a7439c8859d3b134514791"
+    },
+    {
+      "path": "tools/test_integration_stable_readiness.py",
+      "sha256": "a046f05119d61a88cd2b8e36213ca5d75207408aead85c17330c7b79c66a68b9"
+    },
+    {
+      "path": "tools/test_integration_stable_relay.py",
+      "sha256": "a1762e12868e112a9e07825eba6d103c32b19571e5d73ee4f373cb2e97f6253c"
     }
   ],
   "native_definitions": [
@@ -12388,7 +12454,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 276,
+      "checked_functions": 355,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -15095,14 +15161,19 @@
         "tools/integration_client_connection.py",
         "tools/integration_connection_ui.py",
         "plugins/golem/scripts/connection_relay.py",
-        "tools/integration_connection_readiness.py"
+        "tools/integration_connection_readiness.py",
+        "plugins/golem/scripts/stable_contract.py",
+        "plugins/golem/scripts/stable_entry.py",
+        "plugins/golem/scripts/stable_relay.py",
+        "tools/integration_stable_catalog.py",
+        "tools/integration_stable_readiness.py"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1207,
+      "reviewed_capabilities": 1235,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -23567,7 +23638,7 @@
     {
       "path": "source_policy.py",
       "role": "BUILD_CONTRACT",
-      "rationale": "Build/packaging/source policy configuration, not standalone Work operations. Validation-only export includes the exact two connection metadata sources and canonical relay needed by unchanged subprocess-boundary AST tests; no other plugin scripts or Conan sources become selected.",
+      "rationale": "Build/packaging/source policy configuration, not standalone Work operations. Validation-only export includes the exact two connection metadata sources and canonical relay needed by unchanged subprocess-boundary AST tests; no other plugin scripts or Conan sources become selected. Add only the optional source-derived catalog module to the finite clean-export runtime closure. No stable broker, client state, private selection or actual Work is exported by this addition.",
       "symbols": [
         "export_sources",
         "selected"
@@ -47319,13 +47390,14 @@
     {
       "path": "tools/integration_mcp.py",
       "role": "HOST_TOOL",
-      "rationale": "Explicit host integration, agent I/O, diagnostics, evidence, usage or development verification module; API helpers are host internal; CLI operations listed separately. Existing checks are required; no new MCP grant.",
+      "rationale": "Explicit host integration, agent I/O, diagnostics, evidence, usage or development verification module; API helpers are host internal; CLI operations listed separately. Existing checks are required; no new MCP grant. Optional stable initialization metadata derives the exact explicit catalog from current source schemas/profile and checks actual backend schemas, without calling tools/list, admitting participation or granting operations. Default initialization remains unchanged when the finite environment contract is absent.",
       "symbols": [
         "BoundedInput",
         "BoundedInput.__aiter__",
         "BoundedInput.__anext__",
         "BoundedInput.__init__",
         "icon_bytes",
+        "initialization_options",
         "listed_tools",
         "main",
         "run",
@@ -47360,6 +47432,10 @@
         [
           "Name(id='__name__', ctx=Load())",
           "__main__"
+        ],
+        [
+          "Subscript(value=Name(id='values', ctx=Load()), slice=Constant(value=0), ctx=Load())",
+          "golem.fixed-tool-catalog.v1"
         ]
       ],
       "operations": [
@@ -47391,6 +47467,11 @@
         [
           "PYTHON_DECLARATION",
           "server_icons",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "initialization_options",
           null
         ]
       ]
@@ -47681,7 +47762,7 @@
     {
       "path": "tools/integration_mutation_mcp.py",
       "role": "HOST_TOOL",
-      "rationale": "Explicit host integration, agent I/O, diagnostics, evidence, usage or development verification module; API helpers are host internal; CLI operations listed separately. Existing checks are required; no new MCP grant.",
+      "rationale": "Explicit host integration, agent I/O, diagnostics, evidence, usage or development verification module; API helpers are host internal; CLI operations listed separately. Existing checks are required; no new MCP grant. Optional initialization ABI evidence reuses the common helper with exact read+mutation schema inventory; existing typed call admission, policies and native checks remain unchanged.",
       "symbols": [
         "main",
         "run",
@@ -48773,7 +48854,7 @@
     {
       "path": "tools/integration_transfer.py",
       "role": "HOST_TOOL",
-      "rationale": "Explicit host integration, agent I/O, diagnostics, evidence, usage or development verification module; API helpers are host internal; CLI operations listed separately. Existing checks are required; no new MCP grant.",
+      "rationale": "Explicit host integration, agent I/O, diagnostics, evidence, usage or development verification module; API helpers are host internal; CLI operations listed separately. Existing checks are required; no new MCP grant. The optional source-based stable catalog module is part of the exact finite producer closure and packaging inventory. Existing policy bytes are never rewritten or migrated; changed producer bytes require an explicit new reviewed policy selection.",
       "symbols": [
         "Transfer",
         "Transfer.__init__",
@@ -54455,7 +54536,7 @@
     {
       "path": "tools/integration_owner_maintenance.py",
       "role": "OPTIONAL_PROJECT_MANAGEMENT_MCP_AND_OWNER_BRIDGE",
-      "rationale": "Five optional typed management MCP tools, seventeen existing native CLI operations and explicit owned host stop, separate pinned effects/disclosure/action contract and existing Installer/D5 bridge. Native guards reused; no shell/raw handle/scheduler or live policy migration; service-start dispatch tested with doubles only. Whole-file shape and management mandatory guards are checked.",
+      "rationale": "Five optional typed management MCP tools, seventeen existing native CLI operations and explicit owned host stop, separate pinned effects/disclosure/action contract and existing Installer/D5 bridge. Native guards reused; no shell/raw handle/scheduler or live policy migration; service-start dispatch tested with doubles only. Whole-file shape and management mandatory guards are checked. Optional initialization ABI evidence reuses current source definitions and actual composed schemas. Fixed interface observation does not authorize management operations, native execution or policy application.",
       "symbols": [
         "ManagedHost",
         "ManagedHost.__init__",
@@ -58892,6 +58973,841 @@
         [
           "Name(id='state', ctx=Load())",
           "UNKNOWN"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "classify",
+          null
+        ]
+      ]
+    },
+    {
+      "path": "plugins/golem/scripts/stable_contract.py",
+      "role": "OPTIONAL_OWNER_STABLE_SELECTION_STORAGE",
+      "rationale": "Owner-local canonical finite typed catalog and append-only exact selection records. Pinned broker interface inventory rejects invented or profile-mismatched definitions. Shared call admission spans head/pin validation and dispatch; publication uses exclusive lock and previous-head CAS. Existing approval records are only inspected. Partial publication, lineage drift, stale pins and uncertain durability remain blocked, never repaired or retried.",
+      "symbols": [
+        "ContractError",
+        "_approved",
+        "_commit",
+        "_finish",
+        "_lock",
+        "_pairs",
+        "_pin",
+        "_publish",
+        "_read_store",
+        "_result",
+        "_typed_catalog",
+        "_write",
+        "canonical",
+        "create",
+        "decode",
+        "digest",
+        "encode",
+        "inspect",
+        "inspect_record",
+        "publish",
+        "read",
+        "require",
+        "shared_admission",
+        "validate_catalog",
+        "validate_selection"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Call(func=Attribute(value=Name(id='branch', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='type')])",
+          "object"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='schema', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='type')])",
+          "object"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='annotations', ctx=Load())])",
+          "destructiveHint"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='annotations', ctx=Load())])",
+          "idempotentHint"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='annotations', ctx=Load())])",
+          "openWorldHint"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='annotations', ctx=Load())])",
+          "readOnlyHint"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='index', ctx=Load())])",
+          "profiles"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='index', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='index', ctx=Load())])",
+          "tools"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='schema', ctx=Load())])",
+          "oneOf"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='schema', ctx=Load())])",
+          "type"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='tool', ctx=Load())])",
+          "annotations"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='tool', ctx=Load())])",
+          "description"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='tool', ctx=Load())])",
+          "inputSchema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='tool', ctx=Load())])",
+          "name"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "profile"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "tools"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "tools_sha256"
+        ],
+        [
+          "SetComp(elt=Attribute(value=Name(id='item', ctx=Load()), attr='name', ctx=Load()), generators=[comprehension(target=Name(id='item', ctx=Store()), iter=Call(func=Name(id='islice', ctx=Load()), args=[Call(func=Attribute(value=Name(id='store', ctx=Load()), attr='iterdir', ctx=Load())), Constant(value=5)]), is_async=0)])",
+          "catalog.json"
+        ],
+        [
+          "SetComp(elt=Attribute(value=Name(id='item', ctx=Load()), attr='name', ctx=Load()), generators=[comprehension(target=Name(id='item', ctx=Store()), iter=Call(func=Name(id='islice', ctx=Load()), args=[Call(func=Attribute(value=Name(id='store', ctx=Load()), attr='iterdir', ctx=Load())), Constant(value=5)]), is_async=0)])",
+          "head.json"
+        ],
+        [
+          "SetComp(elt=Attribute(value=Name(id='item', ctx=Load()), attr='name', ctx=Load()), generators=[comprehension(target=Name(id='item', ctx=Store()), iter=Call(func=Name(id='islice', ctx=Load()), args=[Call(func=Attribute(value=Name(id='store', ctx=Load()), attr='iterdir', ctx=Load())), Constant(value=5)]), is_async=0)])",
+          "owner.lock"
+        ],
+        [
+          "SetComp(elt=Attribute(value=Name(id='item', ctx=Load()), attr='name', ctx=Load()), generators=[comprehension(target=Name(id='item', ctx=Store()), iter=Call(func=Name(id='islice', ctx=Load()), args=[Call(func=Attribute(value=Name(id='store', ctx=Load()), attr='iterdir', ctx=Load())), Constant(value=5)]), is_async=0)])",
+          "records"
+        ],
+        [
+          "Subscript(value=Name(id='head', ctx=Load()), slice=Constant(value='schema'), ctx=Load())",
+          "golem.stable-head.v1"
+        ],
+        [
+          "Subscript(value=Name(id='index', ctx=Load()), slice=Constant(value='schema'), ctx=Load())",
+          "golem.typed-interface-inventory.v1"
+        ],
+        [
+          "Subscript(value=Name(id='schema', ctx=Load()), slice=Constant(value='type'), ctx=Load())",
+          "object"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='schema'), ctx=Load())",
+          "golem.fixed-tool-catalog.v1"
+        ],
+        [
+          "Subscript(value=Name(id='value', ctx=Load()), slice=Constant(value='schema'), ctx=Load())",
+          "golem.stable-selection.v1"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "validate_catalog",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "validate_selection",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "create",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "publish",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "inspect",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "inspect_record",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "shared_admission",
+          null
+        ]
+      ]
+    },
+    {
+      "path": "plugins/golem/scripts/stable_entry.py",
+      "role": "OPTIONAL_OWNER_STABLE_ENTRY",
+      "rationale": "Separate opt-in owner CLI verifies the exact closed broker payload inventory and executes only verified in-memory snapshots. Client/store/selection/refresh/model-observation pins are explicit. It does not update installed clients, invent model evidence, select a Work grant or release HOLD. Readiness uses original external timestamps and exact local state/status; status is not execution authority.",
+      "symbols": [
+        "checked_file",
+        "encode",
+        "main",
+        "module",
+        "observation",
+        "pairs",
+        "require",
+        "verified_bundle"
+      ],
+      "declarations": [
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-refresh')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--approve-selection')], keywords=[keyword(arg='action', value=Constant(value='store_true'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--catalog')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--catalog-sha256')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--client')], keywords=[keyword(arg='choices', value=Name(id='CLIENTS', ctx=Load())), keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--connection-instance')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--connection-marker')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--expected-head-sha256')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--expected-selection-sha256')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--model-observation')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--model-observation-sha256')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--refresh-evidence')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--refresh-evidence-sha256')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--require-tool')], keywords=[keyword(arg='action', value=Constant(value='append'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--reviewed-bundle-sha256')], keywords=[keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--selection')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load()))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--selection-sha256')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--store')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load())), keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--target-selection-sha256')])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='operation')], keywords=[keyword(arg='choices', value=Tuple(elts=[Constant(value='create'), Constant(value='publish'), Constant(value='inspect'), Constant(value='serve'), Constant(value='status'), Constant(value='refresh'), Constant(value='readiness')], ctx=Load()))])"
+      ],
+      "literal_branches": [
+        [
+          "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "create"
+        ],
+        [
+          "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "inspect"
+        ],
+        [
+          "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "publish"
+        ],
+        [
+          "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "readiness"
+        ],
+        [
+          "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "refresh"
+        ],
+        [
+          "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "serve"
+        ],
+        [
+          "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "status"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='result', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "BLOCKED"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='manifest', ctx=Load())])",
+          "files"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='manifest', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Constant(value='UNKNOWN')",
+          "UNKNOWN"
+        ],
+        [
+          "Name(id='__name__', ctx=Load())",
+          "__main__"
+        ],
+        [
+          "Subscript(value=Name(id='manifest', ctx=Load()), slice=Constant(value='schema'), ctx=Load())",
+          "golem.stable-broker-bundle.v1"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "verified_bundle",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "module",
+          null
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:operation",
+          "create"
+        ],
+        [
+          "NATIVE_OPERATION",
+          "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "create"
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:operation",
+          "publish"
+        ],
+        [
+          "NATIVE_OPERATION",
+          "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "publish"
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:operation",
+          "inspect"
+        ],
+        [
+          "NATIVE_OPERATION",
+          "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "inspect"
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:operation",
+          "serve"
+        ],
+        [
+          "NATIVE_OPERATION",
+          "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "serve"
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:operation",
+          "status"
+        ],
+        [
+          "NATIVE_OPERATION",
+          "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "status"
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:operation",
+          "refresh"
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:operation",
+          "readiness"
+        ],
+        [
+          "NATIVE_OPERATION",
+          "branch:Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "readiness"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "observation",
+          null
+        ]
+      ]
+    },
+    {
+      "path": "plugins/golem/scripts/stable_relay.py",
+      "role": "OPTIONAL_FIXED_CATALOG_TRANSPORT",
+      "rationale": "Separate client-specific fixed typed frontend over existing approved backend dispatch. Definition inventory and v2 marker survive only ABI-compatible child replacement; first/replacement initialization require exact source-derived catalog ABI evidence. Every call admits against current selection and original backend/native authority. Exact owner local refresh checks idle/pending/partial traffic, drains with EOF only, initializes once, preserves unknown results and never replays, force-kills or falls back. Fixed list visibility is not Work permission; actual Desktop acceptance is NOT_RUN.",
+      "symbols": [
+        "StableRelay",
+        "StableRelay.__init__",
+        "StableRelay._definitions",
+        "StableRelay.approved",
+        "StableRelay.child_message",
+        "StableRelay.client_message",
+        "StableRelay.close",
+        "StableRelay.control",
+        "StableRelay.definition_marker",
+        "StableRelay.deny",
+        "StableRelay.historical_selection",
+        "StableRelay.mark_tool_definitions",
+        "StableRelay.refresh",
+        "StableRelay.relay_initialize_result",
+        "StableRelay.require_current_selection",
+        "StableRelay.require_snapshot",
+        "StableRelay.selected_snapshot",
+        "StableRelay.send_client",
+        "StableRelay.spawn",
+        "StableRelay.start_endpoint",
+        "StableRelay.status",
+        "_client",
+        "_directory",
+        "_module",
+        "_record",
+        "descriptors",
+        "endpoint",
+        "parse_definition_marker",
+        "request",
+        "serve"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Attribute(value=Name(id='self', ctx=Load()), attr='state', ctx=Load())",
+          "READY"
+        ],
+        [
+          "Attribute(value=Name(id='self', ctx=Load()), attr='state', ctx=Load())",
+          "UNKNOWN"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='message', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='method')])",
+          "notifications/tools/list_changed"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='args', ctx=Load())])",
+          "expected_definition_marker"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='args', ctx=Load())])",
+          "expected_selection_sha256"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='args', ctx=Load())])",
+          "target_selection_sha256"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "arguments"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "client"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "instance"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "operation"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "request_id"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='request', ctx=Load())])",
+          "token"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "client"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "instance"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "kind"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "pid"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "token"
+        ],
+        [
+          "Constant(value='id')",
+          "id"
+        ],
+        [
+          "Constant(value='method')",
+          "method"
+        ],
+        [
+          "Constant(value='requestId')",
+          "requestId"
+        ],
+        [
+          "Constant(value='result')",
+          "result"
+        ],
+        [
+          "Name(id='code', ctx=Load())",
+          "ADMISSION_SELECTION_CHANGED"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
+          "token"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "initialize"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "notifications/cancelled"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "notifications/initialized"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "notifications/message"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "notifications/progress"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "ping"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "tools/call"
+        ],
+        [
+          "Name(id='method', ctx=Load())",
+          "tools/list"
+        ],
+        [
+          "Name(id='operation', ctx=Load())",
+          "refresh"
+        ],
+        [
+          "Name(id='operation', ctx=Load())",
+          "status"
+        ],
+        [
+          "Subscript(value=Name(id='message', ctx=Load()), slice=Constant(value='method'), ctx=Load())",
+          "ping"
+        ],
+        [
+          "Subscript(value=Name(id='request', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "refresh"
+        ],
+        [
+          "Subscript(value=Name(id='request', ctx=Load()), slice=Constant(value='operation'), ctx=Load())",
+          "status"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "serve",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableRelay.client_message",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableRelay.refresh",
+          null
+        ],
+        [
+          "NATIVE_OPERATION",
+          "request",
+          "refresh"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableRelay.status",
+          null
+        ],
+        [
+          "NATIVE_OPERATION",
+          "request",
+          "status"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "endpoint",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "descriptors",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "parse_definition_marker",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableRelay.definition_marker",
+          null
+        ]
+      ]
+    },
+    {
+      "path": "tools/integration_stable_catalog.py",
+      "role": "OPTIONAL_FIXED_CATALOG_ARTIFACT_BUILDER",
+      "rationale": "Pure explicit existing-profile/schema subset builder and uninstalled finite broker artifact writer. Builds pinned typed-interface inventory from source definitions independent of current policy intersection. No global configuration, launcher selection, authority or Work operation is applied. Partial new output is preserved without overwrite/automatic repair.",
+      "symbols": [
+        "absolute",
+        "build_broker",
+        "catalog",
+        "digest",
+        "encoded",
+        "main",
+        "typed_inventory",
+        "write_new"
+      ],
+      "declarations": [
+        "Call(func=Attribute(value=Name(id='bundle', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--output')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load())), keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='export', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--output')], keywords=[keyword(arg='type', value=Name(id='Path', ctx=Load())), keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='export', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--profile')], keywords=[keyword(arg='choices', value=Attribute(value=Name(id='profiles', ctx=Load()), attr='NAMES', ctx=Load())), keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='export', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--tool')], keywords=[keyword(arg='action', value=Constant(value='append')), keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='sub', ctx=Load()), attr='add_parser', ctx=Load()), args=[Constant(value='broker')])",
+        "Call(func=Attribute(value=Name(id='sub', ctx=Load()), attr='add_parser', ctx=Load()), args=[Constant(value='catalog')])"
+      ],
+      "literal_branches": [
+        [
+          "Attribute(value=Name(id='args', ctx=Load()), attr='operation', ctx=Load())",
+          "catalog"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='schema', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='type')])",
+          "object"
+        ],
+        [
+          "Constant(value='..')",
+          ".."
+        ],
+        [
+          "Name(id='__name__', ctx=Load())",
+          "__main__"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
+          "execution_read"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
+          "execution_request"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
+          "helper_execute"
+        ],
+        [
+          "Name(id='name', ctx=Load())",
+          "stable_readiness.py"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "catalog",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "typed_inventory",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "build_broker",
+          null
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:operation",
+          "catalog"
+        ],
+        [
+          "CLI_ROUTE",
+          "argparse:operation",
+          "broker"
+        ]
+      ]
+    },
+    {
+      "path": "tools/integration_stable_readiness.py",
+      "role": "OWNER_LOCAL_STABLE_EVIDENCE_CLASSIFIER",
+      "rationale": "Pure bounded correlation of current exact selected snapshot, stable frontend ABI/catalog evidence, external same-chat marker/full-name inventory and fresh backend epoch. ACK alone cannot restore readiness; stale/wrong/unknown/repeated evidence blocks. Fixed frontend observations may survive compatible backend replacement, but backend proof must be current. Ready means unapproved preparation only, never Work authority.",
+      "symbols": [
+        "_canonical_digest",
+        "_fresh",
+        "_identifier",
+        "_match",
+        "_names_digest",
+        "_positive",
+        "_selected",
+        "_tools",
+        "classify"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Call(func=Attribute(value=Name(id='frontend', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='schema')])",
+          "golem.stable-frontend-catalog-observation.v1"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='frontend', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "HOST_CATALOG_RESPONSE_SENT"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='live', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='schema')])",
+          "golem.stable-connection-relay.v1"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='live', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "READY"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='catalog', ctx=Load())])",
+          "profile"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='catalog', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='catalog', ctx=Load())])",
+          "tools"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='catalog', ctx=Load())])",
+          "tools_sha256"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='selection', ctx=Load())])",
+          "adapter_state"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='selection', ctx=Load())])",
+          "approval_sha256"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='selection', ctx=Load())])",
+          "catalog_sha256"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='selection', ctx=Load())])",
+          "client"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='selection', ctx=Load())])",
+          "launcher_sha256"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='selection', ctx=Load())])",
+          "previous_sha256"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='selection', ctx=Load())])",
+          "revision"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='selection', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='target', ctx=Load())])",
+          "server_name"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='target', ctx=Load())])",
+          "thread_id"
+        ],
+        [
+          "Constant(value='..')",
+          ".."
+        ],
+        [
+          "Name(id='state', ctx=Load())",
+          "ACKNOWLEDGED"
+        ],
+        [
+          "Name(id='state', ctx=Load())",
+          "FAILED"
+        ],
+        [
+          "Name(id='state', ctx=Load())",
+          "NOT_ATTEMPTED"
+        ],
+        [
+          "Name(id='state', ctx=Load())",
+          "UNKNOWN"
+        ],
+        [
+          "Subscript(value=Name(id='catalog', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "parallel"
+        ],
+        [
+          "Subscript(value=Name(id='catalog', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "prepare"
+        ],
+        [
+          "Subscript(value=Name(id='catalog', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "quality"
+        ],
+        [
+          "Subscript(value=Name(id='catalog', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "read"
+        ],
+        [
+          "Subscript(value=Name(id='catalog', ctx=Load()), slice=Constant(value='profile'), ctx=Load())",
+          "task"
+        ],
+        [
+          "Subscript(value=Name(id='selection', ctx=Load()), slice=Constant(value='client'), ctx=Load())",
+          "claude-desktop"
+        ],
+        [
+          "Subscript(value=Name(id='selection', ctx=Load()), slice=Constant(value='client'), ctx=Load())",
+          "codex"
+        ],
+        [
+          "Subscript(value=Name(id='selection', ctx=Load()), slice=Constant(value='schema'), ctx=Load())",
+          "golem.stable-selection.v1"
         ]
       ],
       "operations": [
@@ -65105,7 +66021,7 @@
     {
       "path": "docs/integration-stable-connection-design.md",
       "role": "DOCUMENTATION",
-      "rationale": "Proposed opt-in stable catalog/authority-epoch design only, explicitly PROPOSED_NOT_IMPLEMENTED. No new runtime interface, authority or acceptance claim. Existing policy intersection remains the default.",
+      "rationale": "Approved opt-in stable interface contract and implementation/fixture documentation; actual Desktop acceptance and installed migration remain NOT_RUN, Work execution HOLD. Documentation is not approval authority.",
       "contract_sha256": null
     }
   ],
@@ -65136,7 +66052,7 @@
     },
     {
       "path": "tools/capability_boundary_registry.py",
-      "sha256": "9f96ab81e5dc9ef8dccf16bfd1fab90fb286cd2c89aaaaa9cb388a3ad66a6772",
+      "sha256": "a6821bc508a2c2579e3d4510b7310d44ebd78d933b5edde93f3310767623e1fa",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65244,7 +66160,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "f151aad82b63012273703e0a09e631ebc064e6ac748306fd46154e1d271f9aaf",
+      "sha256": "1a61b459144348fe6db0413b5e1eca54eae2a7e750809ebb5b7805fc4dba8387",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65268,7 +66184,7 @@
     },
     {
       "path": "tools/capability_fallback.py",
-      "sha256": "d99983874c70514651fa071a281978d04cd43146469ac3a03c196cc26b25bd96",
+      "sha256": "69def9cbea0f62a3740e5f10556d5429ae471eda0ad6fc34ddc786aeb7b314d3",
       "shape_sha256": "a6ea2f0bb4ecee9ed3e595822c40a85d12d1d47a99c160518691900471965637",
       "role": "M0_STATIC_ANALYSIS"
     },
@@ -65316,7 +66232,7 @@
     },
     {
       "path": "tools/capability_m1_registry.py",
-      "sha256": "a2d56829a2238e76aecb4e3fed353ec5595fcd95f5cfd827b6b02a7184d45db7",
+      "sha256": "71a6c7e30d4916faa47bd98f5a7ae6706da4111c6e4091329e2862ba575a1882",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65334,7 +66250,7 @@
     },
     {
       "path": "tools/capability_m2_registry.py",
-      "sha256": "c36bb7ed35b028c278440c93eed6a70b01d5c5ddf417410ac18757a55423a117",
+      "sha256": "6f3f69aba56daf2c0cc945a88155428fadf12856355f309914b758d10f587a24",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65370,7 +66286,7 @@
     },
     {
       "path": "tools/capability_m4_registry.py",
-      "sha256": "204e1ae3f2ae6b1dbfc1d5630ed8e2387a5d686f51b3bf675dd80cfa0b084d79",
+      "sha256": "2819467a491fea547ad696aa758367510d3658df591f79790cc29014229d6cbe",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65388,7 +66304,7 @@
     },
     {
       "path": "tools/capability_m5_registry.py",
-      "sha256": "b5fa0795974004e9b1f1171d1f4e617d742a2d67cb8ce62fff166a82afd40c2d",
+      "sha256": "f27d3372a82cec23a3d686152e8c03345f225055d44a62bfb5295e66fd0b6f63",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65406,7 +66322,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "e86969ca116a50963524f856f7ca09ee5b4c0e340bac19a8cbf4ae77fd32a8fa",
+      "sha256": "e5aaa3dcdf95932684339950e33f20866f5d618b67a131c021cc78bb65da7ed6",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65496,13 +66412,13 @@
     },
     {
       "path": "tools/capability_repository.py",
-      "sha256": "6786d809cbb0a7983c49f7c6fe62bcb94a14e726962d2812aaa2a3bf801b2a17",
+      "sha256": "efb4af14ed73fe710420016aadfe088080db41bf44fb6f43676ebb18aec34dbe",
       "shape_sha256": "6d9af9283d17b17d9b3a95815343435f861de9c53cb32ba70bf944c54b761947",
       "role": "M0_STATIC_ANALYSIS"
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "a68e34c198936a7b61c2cf0a12068bb61249ba43230d7d395fd8a1806da7d8c8",
+      "sha256": "1ff23a0c6c860d56c8aa55c8aca7ae6b0ed0fb26626df3260c4f6ef3e8529143",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65514,7 +66430,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "0b271409fc0a9c759a778f29ce3f03033b76d23a13a0816c286dfb5a3329ec94",
+      "sha256": "fc91a07b211ac00f769f180e0696bc444a9c8dd01ed61a47c1d76212f8a7a090",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65532,7 +66448,7 @@
     },
     {
       "path": "tools/capability_source_role_registry.py",
-      "sha256": "f0579a89bd02af3927cf02acac414d7a3aa15177c14b434229609aa486a07515",
+      "sha256": "de6b221c6fa30f8f02862decb4e792e74e84a6f2c591c590d0207d6f785057a3",
       "shape_sha256": "f259a8e7cb62145570c4b44cf1567dbf9da61ee4f84567383cb816dc5fe0a8b0",
       "role": "M0_REVIEW_METADATA"
     },
@@ -65550,13 +66466,13 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "702dba91af6e5402a271839672f3b852c39722f0d232f9d4ecf21746915d4272",
+      "sha256": "8efff2aee74317840bd1015da0b6a987d6928199abb16e201801a59a16e2a027",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
     {
       "path": "tools/capability_transport.py",
-      "sha256": "cdf663970d3d7801d3876cd0beb14cfc8b3adc6676f315aea78888188ab8a58e",
+      "sha256": "983427bb0998767667311950a0fd9ced36735b56f0be2737781dbb4667a948ab",
       "shape_sha256": "fde51cdad3ece95b53f5dc77b7d32fe176af5a353fc39a762565ea1bde5d6b4f",
       "role": "M0_STATIC_ANALYSIS"
     },

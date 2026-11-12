@@ -40,6 +40,9 @@ TOOLS = frozenset({"verify_runtime.py", "test_verify_runtime.py", "verify_agent.
     "integration_parallel_actions.py", "integration_parallel_reads.py", "integration_parallel_hosts.py",
     "integration_parallel_preparations.py", "integration_feature_profiles.py", "integration_distribution.py",
     "integration_distribution_entry.py", "integration_owner_maintenance.py",
+    # Optional ABI metadata computes the source-defined fixed catalog; it does
+    # not select a backend, install a broker, or grant any Work operation.
+    "integration_stable_catalog.py",
     "integration_mcpb.py", "integration_mcpb_entry.py",
     "requirements-mcp.txt",
     "integration_hook_contract.py", "integration_hooks.py", "test_integration_hooks.py",

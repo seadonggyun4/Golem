@@ -14,7 +14,7 @@ from integration_read_resources import MODULES as READ_RESOURCE_MODULES
 NAMES = ("intent_read", 'workpack_read', 'workpack_resource_read', 'projects_list', 'work_inspect', 'history_read', 'context_get', 'handoff_prepare', 'evidence_read', 'completion_check', 'workflow_read', 'template_read', 'role_read', 'session_read', 'binding_read', 'document_read', 'context_read', 'discovery_read', 'events_read', 'journal_read', 'profile_read', 'diagnostic_read', 'native_validate', 'report_read', 'approval_read', 'reentry_read', 'artifact_read', 'usage_read', 'revision_read', 'configuration_read', 'bundle_read', 'inputs_prepare', 'action_prepare', 'contract_prepare', 'approved_action_prepare', 'plan_read', 'action_confirm', 'proof_read', 'research_read', 'cost_read', 'execution_read', 'candidate_read', 'inventory_read', 'parallel_prepare', 'merge_prepare', 'workspace_read')
 PRODUCER_NAMES = ("intent_authority.py", "intent_authority_lifecycle.py", "intent_bootstrap.py", "integration_intent.py", "integration_contract.py", "integration_registry.py", "integration_backend.py",
                   "execution_record.py", "verify_agent.py", "integration_transfer.py",
-                  "integration_service.py", "integration_mcp.py", "integration_reads.py", *READ_RESOURCE_MODULES)
+                  "integration_service.py", "integration_mcp.py", "integration_stable_catalog.py", "integration_reads.py", *READ_RESOURCE_MODULES)
 SCOPE = c.obj({"binding": c.BINDING, "work_ids": c.array(c.ID),
                "tools": c.array(c.enum(*NAMES), len(NAMES)), "recipients": c.array(c.BINDING, 32, 0)})
 POLICY = c.obj({"schema": {"const": "golem.integration-transfer.v1"},
@@ -28,7 +28,7 @@ POLICY = c.obj({"schema": {"const": "golem.integration-transfer.v1"},
 def producer():
     root = Path(__file__).resolve().parent
     return {**r.producer(), **{name: c.sha(r.regular(root / name)) for name in
-        ("intent_authority.py", "intent_authority_lifecycle.py", "intent_bootstrap.py", "integration_intent.py", "integration_transfer.py", "integration_service.py", "integration_mcp.py", "integration_reads.py", *READ_RESOURCE_MODULES)}}
+        ("intent_authority.py", "intent_authority_lifecycle.py", "intent_bootstrap.py", "integration_intent.py", "integration_transfer.py", "integration_service.py", "integration_mcp.py", "integration_stable_catalog.py", "integration_reads.py", *READ_RESOURCE_MODULES)}}
 
 
 def validate(value):

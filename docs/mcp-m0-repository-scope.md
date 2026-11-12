@@ -1303,6 +1303,34 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.tools.integration_client_connection.py.readonly-readiness-cli | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 | surface.tools.integration_connection_ui.py.external-definition-observation | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 | surface.tools.integration_connection_readiness.py.readiness-classification | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.scripts.stable_entry.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.scripts.stable_entry.py.verified-bundle | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_entry.py.cli-create | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_entry.py.cli-publish | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_entry.py.cli-inspect | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_entry.py.cli-serve | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_entry.py.cli-status | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_entry.py.cli-refresh | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_entry.py.cli-readiness | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_entry.py.external-observation | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_contract.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.scripts.stable_contract.py.finite-shape | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.scripts.stable_contract.py.publication | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_contract.py.inspection | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_contract.py.shared-admission | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.scripts.stable_relay.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.scripts.stable_relay.py.transport | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.plugins.golem.scripts.stable_relay.py.owner-refresh | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_relay.py.status | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_relay.py.discovery | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.plugins.golem.scripts.stable_relay.py.marker | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_catalog.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_catalog.py.definitions | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_catalog.py.artifact | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_catalog.py.cli-catalog | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_catalog.py.cli-broker | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_readiness.py.classification | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_mcp.py.optional-stable-abi | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3748,6 +3776,51 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | PYTHON_DECLARATION | tools/integration_connection_ui.py | ConnectionPanel.observe_target | None |
 | PYTHON_DECLARATION | tools/integration_connection_readiness.py | file-surface | None |
 | PYTHON_DECLARATION | tools/integration_connection_readiness.py | classify | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_entry.py | file-surface | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_entry.py | verified_bundle | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_entry.py | module | None |
+| CLI_ROUTE | plugins/golem/scripts/stable_entry.py | argparse:operation | create |
+| NATIVE_OPERATION | plugins/golem/scripts/stable_entry.py | branch:Attribute(value=Name(id=&#x27;args&#x27;, ctx=Load()), attr=&#x27;operation&#x27;, ctx=Load()) | create |
+| CLI_ROUTE | plugins/golem/scripts/stable_entry.py | argparse:operation | publish |
+| NATIVE_OPERATION | plugins/golem/scripts/stable_entry.py | branch:Attribute(value=Name(id=&#x27;args&#x27;, ctx=Load()), attr=&#x27;operation&#x27;, ctx=Load()) | publish |
+| CLI_ROUTE | plugins/golem/scripts/stable_entry.py | argparse:operation | inspect |
+| NATIVE_OPERATION | plugins/golem/scripts/stable_entry.py | branch:Attribute(value=Name(id=&#x27;args&#x27;, ctx=Load()), attr=&#x27;operation&#x27;, ctx=Load()) | inspect |
+| CLI_ROUTE | plugins/golem/scripts/stable_entry.py | argparse:operation | serve |
+| NATIVE_OPERATION | plugins/golem/scripts/stable_entry.py | branch:Attribute(value=Name(id=&#x27;args&#x27;, ctx=Load()), attr=&#x27;operation&#x27;, ctx=Load()) | serve |
+| CLI_ROUTE | plugins/golem/scripts/stable_entry.py | argparse:operation | status |
+| NATIVE_OPERATION | plugins/golem/scripts/stable_entry.py | branch:Attribute(value=Name(id=&#x27;args&#x27;, ctx=Load()), attr=&#x27;operation&#x27;, ctx=Load()) | status |
+| CLI_ROUTE | plugins/golem/scripts/stable_entry.py | argparse:operation | refresh |
+| CLI_ROUTE | plugins/golem/scripts/stable_entry.py | argparse:operation | readiness |
+| NATIVE_OPERATION | plugins/golem/scripts/stable_entry.py | branch:Attribute(value=Name(id=&#x27;args&#x27;, ctx=Load()), attr=&#x27;operation&#x27;, ctx=Load()) | readiness |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_entry.py | observation | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_contract.py | file-surface | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_contract.py | validate_catalog | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_contract.py | validate_selection | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_contract.py | create | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_contract.py | publish | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_contract.py | inspect | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_contract.py | inspect_record | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_contract.py | shared_admission | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_relay.py | file-surface | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_relay.py | serve | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_relay.py | StableRelay.client_message | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_relay.py | StableRelay.refresh | None |
+| NATIVE_OPERATION | plugins/golem/scripts/stable_relay.py | request | refresh |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_relay.py | StableRelay.status | None |
+| NATIVE_OPERATION | plugins/golem/scripts/stable_relay.py | request | status |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_relay.py | endpoint | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_relay.py | descriptors | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_relay.py | parse_definition_marker | None |
+| PYTHON_DECLARATION | plugins/golem/scripts/stable_relay.py | StableRelay.definition_marker | None |
+| PYTHON_DECLARATION | tools/integration_stable_catalog.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_stable_catalog.py | catalog | None |
+| PYTHON_DECLARATION | tools/integration_stable_catalog.py | typed_inventory | None |
+| PYTHON_DECLARATION | tools/integration_stable_catalog.py | build_broker | None |
+| CLI_ROUTE | tools/integration_stable_catalog.py | argparse:operation | catalog |
+| CLI_ROUTE | tools/integration_stable_catalog.py | argparse:operation | broker |
+| PYTHON_DECLARATION | tools/integration_stable_readiness.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_stable_readiness.py | classify | None |
+| PYTHON_DECLARATION | tools/integration_mcp.py | initialization_options | None |
 
 ## Blockers
 
@@ -3837,7 +3910,7 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 
 Repository inventory: COMPLETE
 
-Candidate source surfaces: 491; explicitly selected: 491. Other tracked paths still require explicit boundary review.
+Candidate source surfaces: 496; explicitly selected: 496. Other tracked paths still require explicit boundary review.
 Public declarations observed in selected headers: 358.
 This is static inventory reconciliation, never native execution, authority or product acceptance. Client E2E: NOT_RUN.
 
@@ -3909,6 +3982,9 @@ This is static inventory reconciliation, never native execution, authority or pr
 | plugins/golem/plugin.json | YES |
 | plugins/golem/scripts/connection_relay.py | YES |
 | plugins/golem/scripts/launcher.py | YES |
+| plugins/golem/scripts/stable_contract.py | YES |
+| plugins/golem/scripts/stable_entry.py | YES |
+| plugins/golem/scripts/stable_relay.py | YES |
 | plugins/golem/skills/golem-setup/SKILL.md | YES |
 | plugins/golem/skills/golem-work/SKILL.md | YES |
 | pyproject.toml | YES |
@@ -4297,6 +4373,8 @@ This is static inventory reconciliation, never native execution, authority or pr
 | tools/integration_registry.py | YES |
 | tools/integration_reload_probe.py | YES |
 | tools/integration_service.py | YES |
+| tools/integration_stable_catalog.py | YES |
+| tools/integration_stable_readiness.py | YES |
 | tools/integration_task_actions.py | YES |
 | tools/integration_transfer.py | YES |
 | tools/integration_update.py | YES |

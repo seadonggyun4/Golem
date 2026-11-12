@@ -8,11 +8,7 @@ from dataclasses import dataclass
 from capability_profile import scan_sources
 from capability_source import python_literal_names
 
-PINS = {
-    'tools/integration_service.py':'c15b4d00b839872c99c45b1bbbc97409868fc0bac3b18445e61c653a119a8b22',
-    'tools/integration_transfer.py':'d98eb26a35c61175bfc096b8719b5ebc2e9e289f7226ea98ab651c493c996e27',
-    'tools/integration_contract.py':'f0d08c56e0834580c67e47ae53e6cf174715a76aa5b64d4e7e51ddcb5aac9287',
-}
+PINS = {'tools/integration_service.py': 'c15b4d00b839872c99c45b1bbbc97409868fc0bac3b18445e61c653a119a8b22', 'tools/integration_transfer.py': '39c512fc30d8c4e10b95ff70752298f718599861c18ed7720b967f45a6bef0e6', 'tools/integration_contract.py': 'f0d08c56e0834580c67e47ae53e6cf174715a76aa5b64d4e7e51ddcb5aac9287'}
 
 @dataclass(frozen=True)
 class FallbackObservation:

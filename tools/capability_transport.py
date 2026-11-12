@@ -11,8 +11,7 @@ from capability_fallback import _shape, inspect_fallback
 from capability_delegation import inspect_delegation
 from capability_mutation_graph import _function
 
-PINS={'tools/integration_mutation_mcp.py':'745604aaa52a547f1a9723b9459a2f14a17db2e734e474bcf2f7a20e32308b6c',
-      'tools/integration_mcp.py':'bcd2136d57f2af822be2362977393595dac652f0825dbc23bc9de3c9462b6af8'}
+PINS = {'tools/integration_mutation_mcp.py': 'f4b46e88211d6eed17d1dd41b71b8deb25715ebd1c69c88d3384f7cc126fe082', 'tools/integration_mcp.py': 'ecdb07eb7ae8a90bde379aae8340bf33a90e0c063e8b4fb412c995815c506f2b'}
 
 
 @dataclass(frozen=True)

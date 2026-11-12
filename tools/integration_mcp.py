@@ -2,6 +2,7 @@
 import argparse
 import asyncio
 import base64
+import os
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 import sys
@@ -85,6 +86,35 @@ async def listed_tools(service):
             await anyio.sleep(0.05)
 
 
+def initialization_options(instance, service, schemas):
+    """Opt-in ABI evidence from these loaded typed definitions, never authority.
+
+    The stable frontend supplies only an explicit interface subset. Policy
+    tools/call checks and dynamic tools/list remain untouched. Old backends
+    without this evidence cannot be selected by the stable relay.
+    """
+    keys = ('GOLEM_STABLE_FRONTEND_ABI', 'GOLEM_STABLE_FRONTEND_PROFILE',
+            'GOLEM_STABLE_FRONTEND_TOOLS')
+    values = [os.environ.get(key) for key in keys]
+    if all(value is None for value in values):
+        return instance.create_initialization_options()
+    c.require(all(type(value) is str and value for value in values), 'STABLE_ABI_ARGUMENTS')
+    c.require(values[0] == 'golem.fixed-tool-catalog.v1', 'STABLE_ABI_UNSUPPORTED')
+    names = c.decode(values[2].encode(), 16384)
+    c.require(type(names) is list and all(type(name) is str for name in names), 'STABLE_ABI_TOOLS')
+    c.require(set(names) <= set(schemas), 'STABLE_BACKEND_TOOL_UNSUPPORTED')
+    profile = getattr(service, 'profile', None)
+    if profile is not None:
+        c.require(type(profile) is dict and set(names) <= set(profile['tools']), 'STABLE_BACKEND_PROFILE')
+    # Import only on the optional path, after all module definitions are loaded.
+    import integration_stable_catalog as fixed
+    value = fixed.catalog(values[1], names)
+    for tool in value['tools']:
+        c.require(tool['inputSchema'] == schemas[tool['name'][6:]], 'STABLE_BACKEND_SCHEMA_CHANGED')
+    return instance.create_initialization_options(experimental_capabilities={values[0]: {
+        'catalog_sha256':fixed.digest(fixed.encoded(value))}})
+
+
 def server(service):
     try:
         c.require(version("mcp") == "2.3.0" and version("mcp-types") == "2.3.0", "MCP_SDK_VERSION")
@@ -129,7 +159,7 @@ async def run(service):
     from mcp.server.stdio import stdio_server
     incoming = BoundedInput()
     async with stdio_server(stdin=incoming) as (reader, writer):
-        await instance.run(reader, writer, instance.create_initialization_options())
+        await instance.run(reader, writer, initialization_options(instance, service, SCHEMAS))
     if incoming.error is not None:
         raise incoming.error
 

@@ -611,7 +611,7 @@ def management_main(argv=None):
             incoming=wire.BoundedInput();instance=management_server(admitted)
             try:
                 async with stdio_server(stdin=incoming) as (reader,writer):
-                    await instance.run(reader,writer,instance.create_initialization_options())
+                    await instance.run(reader,writer,wire.initialization_options(instance,base,service.schemas()))
             finally:await __import__('anyio').to_thread.run_sync(service.close)
             if incoming.error is not None:raise incoming.error
         with entry.connection(base,owner) as admitted_base:
