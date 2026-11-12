@@ -31,6 +31,10 @@ OWNER_RELAY_SOURCE='plugins/golem/scripts/connection_relay.py'
 OWNER_RELAY_PAYLOAD='tools/connection_relay.py'
 OWNER_ADAPTER_SOURCE='plugins/golem/scripts/launcher.py'
 OWNER_ADAPTER_PAYLOAD='tools/golem_adapter.py'
+RUNTIME_CODE_FILES=tuple(sorted({*('tools/'+name for name in
+    (*transfer.PRODUCER_NAMES,'integration_mcpb_entry.py')),*OWNER_DESKTOP_FILES,
+    OWNER_RELAY_PAYLOAD,OWNER_ADAPTER_PAYLOAD}))
+RUNTIME_ICON='assets/Golem-mcp.png'
 DOCUMENTS=('docs/intent-assurance-qc6-implementation.ko.md','docs/workpacks/mcp.md','tools/requirements-mcp.txt','docs/mcp-m6-distribution.ko.md','docs/integration-install.md','docs/integration-d5.md',
            'docs/mcp-m5-parallel-candidates.ko.md')
 
@@ -63,6 +67,34 @@ def closure(payloads):
             for name in modules:
                 if (name.startswith('integration_') or name in ('golem_adapter','connection_relay','execution_record','verify_agent','usage_pipeline','agent_io','agent_lifecycle','provider_usage','provider_costs','hosted_usage','billing_evidence','evidence_export','status_collector')) and name not in names:missing.add(name)
     c.require(not missing,'PACKAGE_IMPORT_CLOSURE')
+
+
+def runtime_closure(payloads):
+    """Check finite runtime inputs, not host startup or third-party ABI success.
+
+    Python imports alone miss server construction's pinned branding resource.
+    This check applies to private runtimes as well as full feature packages.
+    """
+    c.require(isinstance(payloads,dict) and
+        set(RUNTIME_CODE_FILES)<=set(payloads),'PACKAGE_RUNTIME_CODE_MISSING')
+    c.require(RUNTIME_ICON in payloads,'PACKAGE_RUNTIME_RESOURCE_MISSING')
+    c.require(all(type(payloads[name]) is bytes for name in
+        (*RUNTIME_CODE_FILES,RUNTIME_ICON)),'PACKAGE_RUNTIME_BYTES')
+    c.require(c.sha(payloads[RUNTIME_ICON])==legacy.branding.ICON_SHA256,
+        'PACKAGE_RUNTIME_ICON_CHANGED')
+    closure(payloads)
+
+
+def runtime_payloads():
+    """Collect the public runtime allowlist, including non-Python startup data."""
+    root=Path(__file__).resolve().parents[1]
+    aliases={OWNER_RELAY_PAYLOAD:OWNER_RELAY_SOURCE,
+             OWNER_ADAPTER_PAYLOAD:OWNER_ADAPTER_SOURCE}
+    payloads={path:r.regular(root/aliases.get(path,path),16777216)
+              for path in RUNTIME_CODE_FILES}
+    payloads[RUNTIME_ICON]=r.regular(root/RUNTIME_ICON,163840)
+    runtime_closure(payloads)
+    return payloads
 
 
 def schema_payloads():
@@ -119,11 +151,10 @@ def build(profile,*,native=None,native_sha256=None,target='external-runtime'):
     c.require(bool(native)==bool(native_sha256),'PACKAGE_NATIVE_PIN_REQUIRED')
     c.require(not native or target!='external-runtime','PACKAGE_NATIVE_TARGET_REQUIRED')
     with zipfile.ZipFile(io.BytesIO(legacy.build())) as package:payloads={name:package.read(name) for name in package.namelist()}
-    for path in (*SKILLS,*DOCUMENTS,*OWNER_DESKTOP_FILES):payloads[path]=r.regular(root/path,16777216)
-    payloads[OWNER_RELAY_PAYLOAD]=r.regular(root/OWNER_RELAY_SOURCE,16777216)
-    payloads[OWNER_ADAPTER_PAYLOAD]=r.regular(root/OWNER_ADAPTER_SOURCE,16777216)
+    payloads.update(runtime_payloads())
+    for path in (*SKILLS,*DOCUMENTS):payloads[path]=r.regular(root/path,16777216)
     payloads.update(schema_payloads())
-    payloads['manifest.json']=c.encoded(manifest(profile));closure(payloads)
+    payloads['manifest.json']=c.encoded(manifest(profile));runtime_closure(payloads)
     native_pin=None
     if native:
         c._validate(native_sha256,c.DIGEST);raw=r.regular(Path(native),MAX_FILE)
@@ -172,13 +203,13 @@ def verify(raw,reviewed_sha256):
         inventory['execution_authorized'] is False and inventory['signature']=='NOT_IMPLEMENTED','PACKAGE_ASSURANCE_PROMOTION')
     c.require(set(SKILLS)<=set(payloads) and set(DOCUMENTS)<=set(payloads) and set(OWNER_DESKTOP_FILES)<=set(payloads),'PACKAGE_RESOURCE_MISSING')
     # A forged inventory cannot introduce private files or extra executable paths.
-    allowed={'manifest.json','pyproject.toml','assets/Golem-mcp.png','LICENSE',
-        *('tools/'+name for name in (*transfer.PRODUCER_NAMES,'integration_mcpb_entry.py')),*SKILLS,*DOCUMENTS,*SCHEMAS,*OWNER_DESKTOP_FILES,OWNER_RELAY_PAYLOAD,OWNER_ADAPTER_PAYLOAD}
+    allowed={'manifest.json','pyproject.toml',RUNTIME_ICON,'LICENSE',
+        *RUNTIME_CODE_FILES,*SKILLS,*DOCUMENTS,*SCHEMAS}
     if inventory['native'] is not None:
         c.require(inventory['target'] in ('darwin-arm64','linux-x86_64','linux-arm64') and inventory['native']['target']==inventory['target'] and inventory['native']['sha256']==c.sha(payloads.get('native/golem',b'')),'PACKAGE_NATIVE_CHANGED');allowed.add('native/golem')
     c.require(set(payloads)==allowed,'PACKAGE_FILE_SCOPE')
     c.require(all(payloads.get(name)==raw for name,raw in schema_payloads().items()),'PACKAGE_SCHEMA_CHANGED')
-    closure(payloads)
+    runtime_closure(payloads)
     return inventory,payloads
 
 

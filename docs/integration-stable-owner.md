@@ -16,6 +16,10 @@ Owner 앱 → 고정 연결·실행부 전환
 
 owner가 검토한 broker bundle, client별 store, adapter state와 정확한 pin이 필요하다. 기존 정책을 자동 복사하거나 만료 action을 갱신하지 않는다. `golem.stable-owner-ui.v1` 설정은 client별 bundle 경로·SHA, store, 확인할 도구 목록과 private 검토 기록 디렉터리를 고정한다. Codex와 Claude의 store는 분리한다.
 
+별도 runtime을 만들 때는 검증된 배포 패키지를 그대로 추출하거나 `integration_distribution.runtime_payloads()`의 전체 결과를 사용한다. Python 파일만 복사하면 안 된다. 서버 초기화에 사용하는 `assets/Golem-mcp.png`도 기존 지문으로 검사하는 필수 파일이다. `runtime_closure()`로 코드와 필수 파일을 함께 검사하고, 복사된 위치에서 실제 SDK의 서버 생성·초기화 메타데이터를 격리 검증한 뒤 설치 후보를 고정한다. import 검사나 소스 지문 일치만으로 runtime의 시작 가능성을 판정하지 않는다.
+
+초기 연결이 실패하면 정확한 로그와 부분 상태를 보존한다. 누락 파일을 활성 runtime에 덮어쓰거나 같은 연결을 반복 시작하지 않고, 완전한 새 후보·지문과 추가 시도 범위를 검토한다. 이 과정에서도 기존 승인 검사와 실행 HOLD는 유지한다.
+
 Owner 앱은 아래 옵션으로 선택한 설정만 연다. 경로·SHA는 실제 검토한 값으로 대체하며 명령 예제 자체는 설치·선택 승인이 아니다.
 
 ```sh

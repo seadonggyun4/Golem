@@ -2175,7 +2175,7 @@
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "407c9eabe2a25412f9bd697a5387cf1fd6190779c0f070f576abd552b758761f"
+      "sha256": "51f3625a1760681f31a86721ec6649fac5a95e43a0fadae238b0ab56d0b40133"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -2199,7 +2199,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "c570b71f33133f2e297167533df6c198157fcbeaed6053681a7e6fe069c339d6"
+      "sha256": "54af34ecdea6e7a5f6355e9b62381181a909c1cec913032af0aaf1e11960b19f"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -2659,7 +2659,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "f3002968084b4a89723278705be2df861dd8f054353dea06725981258f186041"
+      "sha256": "32e40f71c1503f9c83fe8b6e154c47e43f5683043630a148143003204170f48d"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -20282,6 +20282,20 @@
       "kind": "PYTHON_DECLARATION",
       "source_path": "tools/integration_distribution.py",
       "entrypoint": "verify",
+      "selector": null
+    },
+    {
+      "id": "obs-a7a790be67315401d02d5412f1614c889ac4b6bafcad2d3551bc38a38acd7edd",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_distribution.py",
+      "entrypoint": "runtime_payloads",
+      "selector": null
+    },
+    {
+      "id": "obs-5e0bfe2fe7257d58b8db3faaf936aef5d1e6abbff52398810a4f79f335135bc5",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_distribution.py",
+      "entrypoint": "runtime_closure",
       "selector": null
     }
   ],
@@ -84673,6 +84687,93 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_distribution.py.runtime-payloads",
+      "observation_ids": [
+        "obs-a7a790be67315401d02d5412f1614c889ac4b6bafcad2d3551bc38a38acd7edd"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Development/package construction only; exact owner installation/producer/native policies remain separate and mandatory."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "Python 3.11+"
+        ],
+        "limits": [
+          "Closed runtime code allowlist plus one exact hash-pinned PNG; package verification retains full package allowlist and size limits.",
+          "Static/isolated fixture validation is separate from actual installed Desktop initialization and same-chat model definitions.",
+          "No policy changes, Work calls, retry or installation follows this helper. Actual execution remains HOLD."
+        ],
+        "notes": "Collect the finite reviewed runtime source/resource bytes for an uninstalled candidate; no launcher or client execution. Canonical finite runtime packaging now includes all declared Python files and the exact pinned assets/Golem-mcp.png startup resource. runtime_payloads reads only the existing finite source allowlist with two declared adapter/relay aliases; runtime_closure requires those files, exact PNG bytes and static local import closure. Package build and verify reuse this contract. Resource integrity is not live startup, model tool exposure, policy satisfaction or Work execution. The prior private code-only R3 candidate failed initialization because it omitted the PNG; that failure remains historical and is not replayed or repaired by this source-only change."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Finite packaging helper observed from actual source, not a new MCP Core operation or authority. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_distribution.py.runtime-closure",
+      "observation_ids": [
+        "obs-5e0bfe2fe7257d58b8db3faaf936aef5d1e6abbff52398810a4f79f335135bc5"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Development/package construction only; exact owner installation/producer/native policies remain separate and mandatory."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "Python 3.11+"
+        ],
+        "limits": [
+          "Closed runtime code allowlist plus one exact hash-pinned PNG; package verification retains full package allowlist and size limits.",
+          "Static/isolated fixture validation is separate from actual installed Desktop initialization and same-chat model definitions.",
+          "No policy changes, Work calls, retry or installation follows this helper. Actual execution remains HOLD."
+        ],
+        "notes": "Pure payload validation of mandatory runtime code/resources, pinned image hash and local Python import closure; does not inspect a live client. Canonical finite runtime packaging now includes all declared Python files and the exact pinned assets/Golem-mcp.png startup resource. runtime_payloads reads only the existing finite source allowlist with two declared adapter/relay aliases; runtime_closure requires those files, exact PNG bytes and static local import closure. Package build and verify reuse this contract. Resource integrity is not live startup, model tool exposure, policy satisfaction or Work execution. The prior private code-only R3 candidate failed initialization because it omitted the PNG; that failure remains historical and is not replayed or repaired by this source-only change."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Finite packaging helper observed from actual source, not a new MCP Core operation or authority. Existing capabilities/backlog remain unchanged."
     }
   ]
 }

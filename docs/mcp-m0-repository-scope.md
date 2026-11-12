@@ -1346,6 +1346,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.tools.integration_stable_readiness.py.frontend-correlation | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.tools.integration_owner_desktop.py.stable-config-panel | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 | surface.tools.integration_distribution.py.stable-owner-resource-closure | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_distribution.py.runtime-payloads | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_distribution.py.runtime-closure | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3866,6 +3868,8 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | PYTHON_DECLARATION | tools/integration_owner_desktop.py | OwnerInstance.start | None |
 | PYTHON_DECLARATION | tools/integration_distribution.py | closure | None |
 | PYTHON_DECLARATION | tools/integration_distribution.py | verify | None |
+| PYTHON_DECLARATION | tools/integration_distribution.py | runtime_payloads | None |
+| PYTHON_DECLARATION | tools/integration_distribution.py | runtime_closure | None |
 
 ## Blockers
 

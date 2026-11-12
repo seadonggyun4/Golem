@@ -1,5 +1,6 @@
 """M6 isolated profiles/packages and existing owner-lifecycle doubles/fixtures."""
 import copy
+from importlib.metadata import PackageNotFoundError, version
 import io
 import json
 import os
@@ -311,6 +312,88 @@ class Packages(unittest.TestCase):
             with self.subTest(missing=missing):
                 self.expect('PACKAGE_IMPORT_CLOSURE',
                     lambda:package.closure({'tools/consumer.py':('import '+missing).encode()}))
+
+    def test_runtime_payloads_include_the_finite_code_and_pinned_startup_asset(self):
+        payloads=package.runtime_payloads()
+        self.assertEqual(set(payloads),set(package.RUNTIME_CODE_FILES)|{package.RUNTIME_ICON})
+        self.assertEqual(payloads,package.runtime_payloads())
+        _,full=package.verify(self.raw,c.sha(self.raw))
+        self.assertEqual(payloads,{name:full[name] for name in payloads})
+        self.assertEqual(payloads[package.OWNER_ADAPTER_PAYLOAD],
+                         (ROOT/package.OWNER_ADAPTER_SOURCE).read_bytes())
+        self.assertEqual(payloads[package.OWNER_RELAY_PAYLOAD],
+                         (ROOT/package.OWNER_RELAY_SOURCE).read_bytes())
+        self.assertEqual(c.sha(payloads[package.RUNTIME_ICON]),package.legacy.branding.ICON_SHA256)
+
+    def test_code_import_closure_cannot_certify_a_runtime_missing_its_icon(self):
+        payloads=package.runtime_payloads();payloads.pop(package.RUNTIME_ICON)
+        package.closure(payloads)  # Historical static import check still passes.
+        self.expect('PACKAGE_RUNTIME_RESOURCE_MISSING',lambda:package.runtime_closure(payloads))
+        with patch.object(package,'runtime_payloads',return_value=payloads),\
+             patch.object(package.legacy,'build') as legacy_build:
+            # Remove the legacy asset too: no alternate collector may cover up
+            # an incomplete independently prepared runtime.
+            with zipfile.ZipFile(io.BytesIO(self.raw)) as archive:
+                out=io.BytesIO()
+                with zipfile.ZipFile(out,'w') as changed:
+                    for name in archive.namelist():
+                        if name!=package.RUNTIME_ICON:changed.writestr(name,archive.read(name))
+            legacy_build.return_value=out.getvalue()
+            self.expect('PACKAGE_RUNTIME_RESOURCE_MISSING',lambda:package.build('read'))
+
+    def test_runtime_rejects_changed_icon_and_missing_required_code(self):
+        payloads=package.runtime_payloads();payloads[package.RUNTIME_ICON]=b'not-the-reviewed-image'
+        self.expect('PACKAGE_RUNTIME_ICON_CHANGED',lambda:package.runtime_closure(payloads))
+        payloads=package.runtime_payloads();payloads.pop('tools/integration_mcpb_entry.py')
+        self.expect('PACKAGE_RUNTIME_CODE_MISSING',lambda:package.runtime_closure(payloads))
+        payloads=package.runtime_payloads();payloads['tools/integration_mcpb_entry.py']=b'import integration_missing'
+        self.expect('PACKAGE_IMPORT_CLOSURE',lambda:package.runtime_closure(payloads))
+
+    def test_resealed_inventory_cannot_substitute_the_pinned_runtime_icon(self):
+        def changed(files):
+            files[package.RUNTIME_ICON]=b'changed'
+            inventory=c.decode(files['feature-package.json'])
+            inventory['files'][package.RUNTIME_ICON]=c.sha(files[package.RUNTIME_ICON])
+            files['feature-package.json']=c.encoded(inventory)
+        raw=self.altered(changed)
+        self.expect('PACKAGE_RUNTIME_ICON_CHANGED',lambda:package.verify(raw,c.sha(raw)))
+
+    def test_extracted_runtime_constructs_real_sdk_servers_and_fixed_catalog_abi(self):
+        try:
+            if version('mcp')!='2.3.0' or version('mcp-types')!='2.3.0':
+                self.skipTest('Pinned MCP SDK required')
+        except PackageNotFoundError:self.skipTest('Pinned MCP SDK required')
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory).resolve();out=root/'runtime';payloads=package.runtime_payloads()
+            for name,raw in payloads.items():
+                path=out/name;path.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
+                path.write_bytes(raw);path.chmod(0o600)
+            code=('import os,sys;from pathlib import Path;from unittest.mock import patch;'
+                'sys.path.insert(0,'+repr(str(out/'tools'))+');\n'
+                'import integration_mcp as reads, integration_mutation_mcp as actions\n'
+                'import integration_stable_catalog as fixed, integration_feature_profiles as profiles\n'
+                'from integration_contract import encoded\n'
+                'class NoWork:\n'
+                ' def tools(self):raise AssertionError("no policy or tool discovery call")\n'
+                ' def call(self,*args):raise AssertionError("no Work call")\n'
+                'with patch("subprocess.Popen",side_effect=AssertionError("no child")):\n'
+                ' for profile,module,schemas in (("read",reads,reads.SCHEMAS),'
+                '("task",actions,{**actions.reads.SCHEMAS,**actions.contract.SCHEMAS})):\n'
+                '  service=NoWork();service.profile=profiles.definition(profile)\n'
+                '  names=list(service.profile["tools"]);catalog=fixed.catalog(profile,names)\n'
+                '  os.environ.update(GOLEM_STABLE_FRONTEND_ABI="golem.fixed-tool-catalog.v1",'
+                'GOLEM_STABLE_FRONTEND_PROFILE=profile,GOLEM_STABLE_FRONTEND_TOOLS=encoded(names).decode())\n'
+                '  server=module.server(service)\n'
+                '  options=reads.initialization_options(server,service,schemas)\n'
+                '  assert options.capabilities.experimental["golem.fixed-tool-catalog.v1"]'
+                '["catalog_sha256"]==fixed.digest(fixed.encoded(catalog))\n'
+                ' assert reads.ICON_PATH==Path('+repr(str(out/package.RUNTIME_ICON))+')\n'
+                ' assert "tkinter" not in sys.modules\n'
+                'print("EXTRACTED_RUNTIME_CONSTRUCTORS_AND_ABI_PASS_NO_WORK")\n')
+            result=subprocess.run([sys.executable,'-I','-B','-c',code],cwd=root,
+                env={'PATH':'/usr/bin:/bin','LANG':'C','LC_ALL':'C'},capture_output=True,timeout=30)
+            self.assertEqual(result.returncode,0,result.stderr.decode())
+            self.assertEqual(result.stdout.strip(),b'EXTRACTED_RUNTIME_CONSTRUCTORS_AND_ABI_PASS_NO_WORK')
 
     def test_extracted_stable_owner_import_has_no_gui_or_selected_backend_effect(self):
         with tempfile.TemporaryDirectory() as directory:

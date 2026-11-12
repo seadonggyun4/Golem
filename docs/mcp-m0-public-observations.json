@@ -455,7 +455,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "c570b71f33133f2e297167533df6c198157fcbeaed6053681a7e6fe069c339d6"
+      "sha256": "54af34ecdea6e7a5f6355e9b62381181a909c1cec913032af0aaf1e11960b19f"
     },
     {
       "path": "tools/test_capability_m6.py",

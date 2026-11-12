@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "fdb9c4e9191dcd9722ddb9547880cee68d87e747916ad9477d037c0e5c535f58",
+  "inventory_sha256": "31e93ad57b7e78fcf1731a6555e0c3285b2750e2e392b58e01c5a1a82da801a7",
   "selected_source_count": 669,
-  "selected_observation_count": 2515,
-  "selected_capability_count": 1340,
+  "selected_observation_count": 2517,
+  "selected_capability_count": 1342,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -5800,7 +5800,7 @@
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "407c9eabe2a25412f9bd697a5387cf1fd6190779c0f070f576abd552b758761f"
+      "sha256": "51f3625a1760681f31a86721ec6649fac5a95e43a0fadae238b0ab56d0b40133"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -5824,7 +5824,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "c570b71f33133f2e297167533df6c198157fcbeaed6053681a7e6fe069c339d6"
+      "sha256": "54af34ecdea6e7a5f6355e9b62381181a909c1cec913032af0aaf1e11960b19f"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -6284,7 +6284,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "f3002968084b4a89723278705be2df861dd8f054353dea06725981258f186041"
+      "sha256": "32e40f71c1503f9c83fe8b6e154c47e43f5683043630a148143003204170f48d"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -12478,7 +12478,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 412,
+      "checked_functions": 414,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -15199,7 +15199,7 @@
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1250,
+      "reviewed_capabilities": 1252,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -54321,7 +54321,7 @@
     {
       "path": "tools/integration_distribution.py",
       "role": "M6_FEATURE_PACKAGING_OWNER_BRIDGE_OR_SKILL",
-      "rationale": "M6 finite profile ceilings intersect unchanged D2/D4 owner tools; public artifact packaging/verification/extraction, owner-local Installer/D5 delegation and separated skills. Full symbols/branches/effects/packaged instructions reviewed; mandatory M6 profile. No implicit grant/repair/real installation/embedded runtime/signature or M5 scheduler implementation. Feature packages include the exact readiness module and a verbatim canonical adapter inspection payload under golem_adapter.py. Existing exact file-set, byte inventory, native pin and authorization checks remain unchanged; no selected client installation is performed. Owner desktop resource closure includes the two exact controller/presentation modules. Artifact verification remains closed and byte-pinned, with no automatic installation, stable store creation, client selection or producer/native approval update.",
+      "rationale": "M6 finite profile ceilings intersect unchanged D2/D4 owner tools; public artifact packaging/verification/extraction, owner-local Installer/D5 delegation and separated skills. Full symbols/branches/effects/packaged instructions reviewed; mandatory M6 profile. No implicit grant/repair/real installation/embedded runtime/signature or M5 scheduler implementation. Feature packages include the exact readiness module and a verbatim canonical adapter inspection payload under golem_adapter.py. Existing exact file-set, byte inventory, native pin and authorization checks remain unchanged; no selected client installation is performed. Owner desktop resource closure includes the two exact controller/presentation modules. Artifact verification remains closed and byte-pinned, with no automatic installation, stable store creation, client selection or producer/native approval update. Canonical finite runtime packaging now includes all declared Python files and the exact pinned assets/Golem-mcp.png startup resource. runtime_payloads reads only the existing finite source allowlist with two declared adapter/relay aliases; runtime_closure requires those files, exact PNG bytes and static local import closure. Package build and verify reuse this contract. Resource integrity is not live startup, model tool exposure, policy satisfaction or Work execution. The prior private code-only R3 candidate failed initialization because it omitted the PNG; that failure remains historical and is not replayed or repaired by this source-only change.",
       "symbols": [
         "build",
         "closure",
@@ -54329,6 +54329,8 @@
         "main",
         "manifest",
         "relative",
+        "runtime_closure",
+        "runtime_payloads",
         "schema_payloads",
         "verify"
       ],
@@ -54505,6 +54507,16 @@
         [
           "PYTHON_DECLARATION",
           "verify",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "runtime_payloads",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "runtime_closure",
           null
         ]
       ]
@@ -66570,7 +66582,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "98ed039ec8d4f1bcdcf01299ca06ae0765d57d94b7119d887a4c35e62af1b174",
+      "sha256": "1c5938cf4915bc88e911fe2fc998261789c6ef23f176edc449ddd410b5ce6375",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66732,7 +66744,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "5764e039a131e6c294311491f5d1a9eb9c5410ee6cc0030bf40daa94fb674b37",
+      "sha256": "e53c47cb435cb41124eb06c38e961a55d91ebe2d4ca12ba32c0e8d02e88b415c",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66876,7 +66888,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "f6993e5cde767969c4926b13ca903f731a6ba5db104c63a022f10625bcdac5a4",
+      "sha256": "f1e763d5eb7b19747a018ac74eff59004c0f525b25e3c8a67f7c43379927fa7d",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -67170,8 +67182,8 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "c570b71f33133f2e297167533df6c198157fcbeaed6053681a7e6fe069c339d6",
-      "shape_sha256": "229f03b8755734b621536982445ca6330de50865d2787da1f1aaa7b01abba5f7",
+      "sha256": "54af34ecdea6e7a5f6355e9b62381181a909c1cec913032af0aaf1e11960b19f",
+      "shape_sha256": "c172d429a7a4422c3ac54a455a072f6b053dc21a750ca06326e869a56cd8514e",
       "role": "M0_FIXTURE_REGRESSION"
     },
     {
