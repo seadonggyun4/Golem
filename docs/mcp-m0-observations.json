@@ -2175,7 +2175,7 @@
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "d4aa50e523fc216f5374e29f21c50fc1e65b013c63d23a05c14d21aded2f0e6b"
+      "sha256": "407c9eabe2a25412f9bd697a5387cf1fd6190779c0f070f576abd552b758761f"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -2199,7 +2199,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "e935ccbc4246df71e40bcb61cb19eb47fa3f23ac25c21432f98f241bffd6cc00"
+      "sha256": "c570b71f33133f2e297167533df6c198157fcbeaed6053681a7e6fe069c339d6"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -2219,11 +2219,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "ee97bff6c48bc9d1c13720c93a7ca43d891ac4ec57689ee604e5f6c336a59a59"
+      "sha256": "6ff15914ac6098a8c31f05cc59f3e90a67ad2ae585d3b3f808109fc3fabb6c80"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "237f1153802799e45353aecc0c12352aadace40dd3dee62c4da84975a3396974"
+      "sha256": "766e413fa44374efb926530f569b8ae47b475594bcea552f598b2ce36647d387"
     },
     {
       "path": "include/golem/workpack.h",
@@ -2579,7 +2579,7 @@
     },
     {
       "path": "docs/integration-codex-plugin.md",
-      "sha256": "fe6888a304577016e11b3ff8e2400493a166ca3c6e25c9c1628683e1a278776d"
+      "sha256": "4e3b6035bc97af9f03d2403f72a8b4d3ffde3152d2ecdbfdbbe82a0b3f5d4a54"
     },
     {
       "path": "docs/integration-connection-renewal.md",
@@ -2603,7 +2603,7 @@
     },
     {
       "path": "docs/integration-stable-connection-design.md",
-      "sha256": "cbaa9fd67a699ec7f83114829bab4b9e6c3039309f449e28bdd17a7099a09127"
+      "sha256": "7c6c71e554990b164c14a9553c13a94f25bbf933084739bfec380442bd8b9c4e"
     },
     {
       "path": "plugins/golem/scripts/stable_contract.py",
@@ -2623,7 +2623,7 @@
     },
     {
       "path": "tools/integration_stable_readiness.py",
-      "sha256": "d6b734cd80d7d9bccddb48c96e386d229cc23ff6742848e3813ecbcaff5bbf3a"
+      "sha256": "4c08f24ac24099545f8c92a3e7538e17aad96b8914b06fec58e90b8d10fa2013"
     },
     {
       "path": "tools/test_integration_stable_abi.py",
@@ -2651,11 +2651,31 @@
     },
     {
       "path": "tools/test_integration_stable_readiness.py",
-      "sha256": "a046f05119d61a88cd2b8e36213ca5d75207408aead85c17330c7b79c66a68b9"
+      "sha256": "bd6cc45d36545c50f51529e44dbd22dca1314d27c51611a87966f18f550b6c2c"
     },
     {
       "path": "tools/test_integration_stable_relay.py",
       "sha256": "a1762e12868e112a9e07825eba6d103c32b19571e5d73ee4f373cb2e97f6253c"
+    },
+    {
+      "path": "docs/integration-stable-owner.md",
+      "sha256": "f3002968084b4a89723278705be2df861dd8f054353dea06725981258f186041"
+    },
+    {
+      "path": "tools/integration_stable_owner.py",
+      "sha256": "81c92d250862cbff2a97b2802c8f8cf254987b2013c1ea3c22776f3464bb5024"
+    },
+    {
+      "path": "tools/integration_stable_owner_ui.py",
+      "sha256": "19ad15e3514161aae90dc7ff322c593911171a13c46fc0d9753460491a5e94ab"
+    },
+    {
+      "path": "tools/test_integration_stable_owner.py",
+      "sha256": "6bfe48c2251c3c8cf5f07b9af7101e814fe070caf60d031c05605e49e50489a9"
+    },
+    {
+      "path": "tools/test_integration_stable_owner_ui.py",
+      "sha256": "1165cccca9f17e424a478abb3547265f8fba76dce335ae43daf26d078441ab48"
     }
   ],
   "observations": [
@@ -20052,6 +20072,216 @@
       "kind": "PYTHON_DECLARATION",
       "source_path": "tools/integration_mcp.py",
       "entrypoint": "initialization_options",
+      "selector": null
+    },
+    {
+      "id": "obs-5d1be904f07304baaa826a8c91e41d92f2d10ead6496c389e6a18dd73d91eb5b",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-c0aadef76088187a3ae77233e527e165dc0a8234c39ec3d036cb90c1f402f114",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "_load_bundle",
+      "selector": null
+    },
+    {
+      "id": "obs-9128177db139febbf6dd32a121c726ee19e2abd934165f70f48ace4275849a47",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "StableOwnerController.__init__",
+      "selector": null
+    },
+    {
+      "id": "obs-e37216dbd9ec06cbf81b36248386e2bbe54801831656536c77fe22f091535292",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "StableOwnerController.inspect",
+      "selector": null
+    },
+    {
+      "id": "obs-cd2fbaf795f9567fb2b861bfd039ca9f284bc3513b31f3bd3d8e16ed2865381e",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "StableOwnerController.observe",
+      "selector": null
+    },
+    {
+      "id": "obs-1311063d8b4ffcfbabac94d5a57720cb37e6793add5425f16d6a2ca41de4fc7a",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "StableOwnerController.review_selection",
+      "selector": null
+    },
+    {
+      "id": "obs-3894861593b5178ad2fa2a8b7e40c6ea3f8c14f31944338b1fa669a57b49bfd4",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "StableOwnerController.publish",
+      "selector": null
+    },
+    {
+      "id": "obs-77b00dbca2c61dd513f006d40ca049febd370d0159b0d01dfbb2462e7c564938",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "StableOwnerController.review_refresh",
+      "selector": null
+    },
+    {
+      "id": "obs-66344c0ea8700dc19300b80732047e6a0958675f78f619d0ff085b4af0b55da8",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "StableOwnerController.refresh",
+      "selector": null
+    },
+    {
+      "id": "obs-d62662ff8d4377de60d24c9eebec740900e18089f1eaa6945e31c4ed612327c1",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "StableOwnerController._effect",
+      "selector": null
+    },
+    {
+      "id": "obs-798f2c2371c8070fc7c2421a95b8e8de0cc26cc671b6ce5a29d6935ba2942db9",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner.py",
+      "entrypoint": "StableOwnerController._refresh_evidence",
+      "selector": null
+    },
+    {
+      "id": "obs-b2c0117863d659cd8c01e4ca682649baf1998df5c203f530035cb829f6887628",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "file-surface",
+      "selector": null
+    },
+    {
+      "id": "obs-ad107a507df7f006eb7fbfa85ba0cfc76e34d132f74da8c75ffc015f5c4dbef7",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "presentation",
+      "selector": null
+    },
+    {
+      "id": "obs-92d517c45b3432da7e9b5688f3c30d93c58047d48e0a27fe16bac215e8329b89",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "StableOwnerPanel.inspect",
+      "selector": null
+    },
+    {
+      "id": "obs-1966229789061e12f616438a3f7c0df98ca7cd1eaaf03ee4b661dc66ad6cd3a3",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "StableOwnerPanel.observe",
+      "selector": null
+    },
+    {
+      "id": "obs-0bbdc535fdf691d552c68432f8ec68c49b98bf884aaa75071c6263939c949f4d",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "StableOwnerPanel.review_selection",
+      "selector": null
+    },
+    {
+      "id": "obs-1d235f5ae669654e0008fb0856a36d01e95a0f761bfc25bcde7d27ccf3e88051",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "StableOwnerPanel.review_refresh",
+      "selector": null
+    },
+    {
+      "id": "obs-f1fb5d431b90100bca31b3cf3c10536807739cdabb99d661f5832536ade215ba",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "StableOwnerPanel.publish",
+      "selector": null
+    },
+    {
+      "id": "obs-59828f01c26145bc8d61f3a64a64eb3adf950cacbfbc1987424039da1ce2dd76",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "StableOwnerPanel.refresh",
+      "selector": null
+    },
+    {
+      "id": "obs-a55e8f914c70d647e83045395e122a70e38456e870871a8d3a925798910bb22a",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "BackgroundRequest.start",
+      "selector": null
+    },
+    {
+      "id": "obs-17d3aad089e9f01e3a64f9f34775f19e91d3ea5e398e94ffe12c51d26c690065",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "BackgroundRequest.take",
+      "selector": null
+    },
+    {
+      "id": "obs-003993f559c10318b6ed0aef0f0940884cb70e0fc25e01fafb1badb6543f82c9",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "BackgroundRequest.close",
+      "selector": null
+    },
+    {
+      "id": "obs-c3ee06487e7817d0b06fdad60e41e2dfddeaae218cb0b6edbfadb1e8cfc13d99",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_owner_ui.py",
+      "entrypoint": "StableOwnerPanel._destroyed",
+      "selector": null
+    },
+    {
+      "id": "obs-44f513ba8889abe6cfbd5bd1f662baa3d12e7bec2e73d5f81223f9ac68620617",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_stable_readiness.py",
+      "entrypoint": "correlate_definitions",
+      "selector": null
+    },
+    {
+      "id": "obs-acdc1084963339bfa092e5f3c410f0ebc0811ae46c9c0a105a8491a3947256ef",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_desktop.py",
+      "entrypoint": "owner_app",
+      "selector": null
+    },
+    {
+      "id": "obs-b9310291ce3c8bd1ad1009fc667ebb392ce7e9a84e9a3cb0fb5101bc210408b8",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_desktop.py",
+      "entrypoint": "OwnerInstance.__init__",
+      "selector": null
+    },
+    {
+      "id": "obs-6672c65d5766365e82df89ad6508c0567ce689428dd81faeabcebfcd098c8cc3",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_desktop.py",
+      "entrypoint": "OwnerInstance.activate",
+      "selector": null
+    },
+    {
+      "id": "obs-4285e69893be1d93ba4159154b882202806d2eefa54dd9f4294a7fed35a2a624",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_owner_desktop.py",
+      "entrypoint": "OwnerInstance.start",
+      "selector": null
+    },
+    {
+      "id": "obs-979cc677c5eeb035bdef198fcd85310494deb6a032071eedad0699ba0fdf086c",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_distribution.py",
+      "entrypoint": "closure",
+      "selector": null
+    },
+    {
+      "id": "obs-813b5d8a3ab42856324b2a311b834ffd9289f68983d0d9eba352696a0622fe04",
+      "kind": "PYTHON_DECLARATION",
+      "source_path": "tools/integration_distribution.py",
+      "entrypoint": "verify",
       "selector": null
     }
   ],
@@ -83718,6 +83948,731 @@
       ],
       "review_status": "REVIEWED",
       "rationale": "Concrete finite opt-in local protocol/artifact operation, not a new Core feature or MCP Work tool. Definition visibility and readiness never confer native authority."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner.py.file-surface",
+      "observation_ids": [
+        "obs-5d1be904f07304baaa826a8c91e41d92f2d10ead6496c389e6a18dd73d91eb5b"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Explicit finite owner-local controller for separately reviewed Codex/Claude fixed-catalog stores. Exact private UI config and closed broker manifest are verified before loading captured bytes. Existing broker selection/approval/CAS, exact instance IPC and readiness functions remain authoritative. External model observation file, original timestamp, exact marker and inventory are retained. Selection review/publication and one idle connection refresh require separate exact previews/confirmation. Durable bounded attempt/pending/result records prevent automatic replay and preserve unknown results, including visible ACK with failed journal synchronization. Only exact result SHA acknowledged by this current controller may restore refresh readiness: historical ACK after UI reopening cannot erase final-cleanup/re-poison double-failure uncertainty and cannot authorize retry. No Work call, policy issuance, arbitrary command/configuration, human authentication claim or client installation is provided. Effects conservatively include approved selected child startup via existing relay; no new child grant."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner.py.pinned-config",
+      "observation_ids": [
+        "obs-c0aadef76088187a3ae77233e527e165dc0a8234c39ec3d036cb90c1f402f114",
+        "obs-9128177db139febbf6dd32a121c726ee19e2abd934165f70f48ace4275849a47"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "PROCESS"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Explicit finite owner-local controller for separately reviewed Codex/Claude fixed-catalog stores. Exact private UI config and closed broker manifest are verified before loading captured bytes. Existing broker selection/approval/CAS, exact instance IPC and readiness functions remain authoritative. External model observation file, original timestamp, exact marker and inventory are retained. Selection review/publication and one idle connection refresh require separate exact previews/confirmation. Durable bounded attempt/pending/result records prevent automatic replay and preserve unknown results, including visible ACK with failed journal synchronization. Only exact result SHA acknowledged by this current controller may restore refresh readiness: historical ACK after UI reopening cannot erase final-cleanup/re-poison double-failure uncertainty and cannot authorize retry. No Work call, policy issuance, arbitrary command/configuration, human authentication claim or client installation is provided."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner.py.observation",
+      "observation_ids": [
+        "obs-e37216dbd9ec06cbf81b36248386e2bbe54801831656536c77fe22f091535292",
+        "obs-cd2fbaf795f9567fb2b861bfd039ca9f284bc3513b31f3bd3d8e16ed2865381e"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Explicit finite owner-local controller for separately reviewed Codex/Claude fixed-catalog stores. Exact private UI config and closed broker manifest are verified before loading captured bytes. Existing broker selection/approval/CAS, exact instance IPC and readiness functions remain authoritative. External model observation file, original timestamp, exact marker and inventory are retained. Selection review/publication and one idle connection refresh require separate exact previews/confirmation. Durable bounded attempt/pending/result records prevent automatic replay and preserve unknown results, including visible ACK with failed journal synchronization. Only exact result SHA acknowledged by this current controller may restore refresh readiness: historical ACK after UI reopening cannot erase final-cleanup/re-poison double-failure uncertainty and cannot authorize retry. No Work call, policy issuance, arbitrary command/configuration, human authentication claim or client installation is provided."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner.py.selection-review",
+      "observation_ids": [
+        "obs-1311063d8b4ffcfbabac94d5a57720cb37e6793add5425f16d6a2ca41de4fc7a"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Explicit finite owner-local controller for separately reviewed Codex/Claude fixed-catalog stores. Exact private UI config and closed broker manifest are verified before loading captured bytes. Existing broker selection/approval/CAS, exact instance IPC and readiness functions remain authoritative. External model observation file, original timestamp, exact marker and inventory are retained. Selection review/publication and one idle connection refresh require separate exact previews/confirmation. Durable bounded attempt/pending/result records prevent automatic replay and preserve unknown results, including visible ACK with failed journal synchronization. Only exact result SHA acknowledged by this current controller may restore refresh readiness: historical ACK after UI reopening cannot erase final-cleanup/re-poison double-failure uncertainty and cannot authorize retry. No Work call, policy issuance, arbitrary command/configuration, human authentication claim or client installation is provided."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner.py.selection-publication",
+      "observation_ids": [
+        "obs-3894861593b5178ad2fa2a8b7e40c6ea3f8c14f31944338b1fa669a57b49bfd4"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Explicit finite owner-local controller for separately reviewed Codex/Claude fixed-catalog stores. Exact private UI config and closed broker manifest are verified before loading captured bytes. Existing broker selection/approval/CAS, exact instance IPC and readiness functions remain authoritative. External model observation file, original timestamp, exact marker and inventory are retained. Selection review/publication and one idle connection refresh require separate exact previews/confirmation. Durable bounded attempt/pending/result records prevent automatic replay and preserve unknown results, including visible ACK with failed journal synchronization. Only exact result SHA acknowledged by this current controller may restore refresh readiness: historical ACK after UI reopening cannot erase final-cleanup/re-poison double-failure uncertainty and cannot authorize retry. No Work call, policy issuance, arbitrary command/configuration, human authentication claim or client installation is provided."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner.py.refresh-review",
+      "observation_ids": [
+        "obs-77b00dbca2c61dd513f006d40ca049febd370d0159b0d01dfbb2462e7c564938"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Explicit finite owner-local controller for separately reviewed Codex/Claude fixed-catalog stores. Exact private UI config and closed broker manifest are verified before loading captured bytes. Existing broker selection/approval/CAS, exact instance IPC and readiness functions remain authoritative. External model observation file, original timestamp, exact marker and inventory are retained. Selection review/publication and one idle connection refresh require separate exact previews/confirmation. Durable bounded attempt/pending/result records prevent automatic replay and preserve unknown results, including visible ACK with failed journal synchronization. Only exact result SHA acknowledged by this current controller may restore refresh readiness: historical ACK after UI reopening cannot erase final-cleanup/re-poison double-failure uncertainty and cannot authorize retry. No Work call, policy issuance, arbitrary command/configuration, human authentication claim or client installation is provided."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner.py.exact-refresh",
+      "observation_ids": [
+        "obs-66344c0ea8700dc19300b80732047e6a0958675f78f619d0ff085b4af0b55da8"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Explicit finite owner-local controller for separately reviewed Codex/Claude fixed-catalog stores. Exact private UI config and closed broker manifest are verified before loading captured bytes. Existing broker selection/approval/CAS, exact instance IPC and readiness functions remain authoritative. External model observation file, original timestamp, exact marker and inventory are retained. Selection review/publication and one idle connection refresh require separate exact previews/confirmation. Durable bounded attempt/pending/result records prevent automatic replay and preserve unknown results, including visible ACK with failed journal synchronization. Only exact result SHA acknowledged by this current controller may restore refresh readiness: historical ACK after UI reopening cannot erase final-cleanup/re-poison double-failure uncertainty and cannot authorize retry. No Work call, policy issuance, arbitrary command/configuration, human authentication claim or client installation is provided."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner.py.durable-attempts",
+      "observation_ids": [
+        "obs-d62662ff8d4377de60d24c9eebec740900e18089f1eaa6945e31c4ed612327c1",
+        "obs-798f2c2371c8070fc7c2421a95b8e8de0cc26cc671b6ce5a29d6935ba2942db9"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Explicit finite owner-local controller for separately reviewed Codex/Claude fixed-catalog stores. Exact private UI config and closed broker manifest are verified before loading captured bytes. Existing broker selection/approval/CAS, exact instance IPC and readiness functions remain authoritative. External model observation file, original timestamp, exact marker and inventory are retained. Selection review/publication and one idle connection refresh require separate exact previews/confirmation. Durable bounded attempt/pending/result records prevent automatic replay and preserve unknown results, including visible ACK with failed journal synchronization. Only exact result SHA acknowledged by this current controller may restore refresh readiness: historical ACK after UI reopening cannot erase final-cleanup/re-poison double-failure uncertainty and cannot authorize retry. No Work call, policy issuance, arbitrary command/configuration, human authentication claim or client installation is provided."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner_ui.py.file-surface",
+      "observation_ids": [
+        "obs-b2c0117863d659cd8c01e4ca682649baf1998df5c203f530035cb829f6887628"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Optional manually opened UI delegates finite operations to the pinned controller. Selected disk state, live connection, original external same-chat definition evidence and current readiness are distinct. Client/input changes invalidate review; row selection has no I/O; exact publication and exact-instance refresh have separate confirmations. Background work does not touch Tk and closing the view retains in-flight durable effects without killing/retrying. Unknown/closed/busy/malformed/mismatched reports disable effects. No automatic polling/adoption/relist, host restart, Work permission or invented model observation. Conservative delegated effects follow the controller and already-approved child, never UI default authority."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner_ui.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner_ui.py.presentation",
+      "observation_ids": [
+        "obs-ad107a507df7f006eb7fbfa85ba0cfc76e34d132f74da8c75ffc015f5c4dbef7"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Optional manually opened UI delegates finite operations to the pinned controller. Selected disk state, live connection, original external same-chat definition evidence and current readiness are distinct. Client/input changes invalidate review; row selection has no I/O; exact publication and exact-instance refresh have separate confirmations. Background work does not touch Tk and closing the view retains in-flight durable effects without killing/retrying. Unknown/closed/busy/malformed/mismatched reports disable effects. No automatic polling/adoption/relist, host restart, Work permission or invented model observation."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner_ui.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner_ui.py.explicit-review-actions",
+      "observation_ids": [
+        "obs-92d517c45b3432da7e9b5688f3c30d93c58047d48e0a27fe16bac215e8329b89",
+        "obs-1966229789061e12f616438a3f7c0df98ca7cd1eaaf03ee4b661dc66ad6cd3a3",
+        "obs-0bbdc535fdf691d552c68432f8ec68c49b98bf884aaa75071c6263939c949f4d",
+        "obs-1d235f5ae669654e0008fb0856a36d01e95a0f761bfc25bcde7d27ccf3e88051",
+        "obs-f1fb5d431b90100bca31b3cf3c10536807739cdabb99d661f5832536ade215ba",
+        "obs-59828f01c26145bc8d61f3a64a64eb3adf950cacbfbc1987424039da1ce2dd76"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Optional manually opened UI delegates finite operations to the pinned controller. Selected disk state, live connection, original external same-chat definition evidence and current readiness are distinct. Client/input changes invalidate review; row selection has no I/O; exact publication and exact-instance refresh have separate confirmations. Background work does not touch Tk and closing the view retains in-flight durable effects without killing/retrying. Unknown/closed/busy/malformed/mismatched reports disable effects. No automatic polling/adoption/relist, host restart, Work permission or invented model observation."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner_ui.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_owner_ui.py.closed-view-lifecycle",
+      "observation_ids": [
+        "obs-a55e8f914c70d647e83045395e122a70e38456e870871a8d3a925798910bb22a",
+        "obs-17d3aad089e9f01e3a64f9f34775f19e91d3ea5e398e94ffe12c51d26c690065",
+        "obs-003993f559c10318b6ed0aef0f0940884cb70e0fc25e01fafb1badb6543f82c9",
+        "obs-c3ee06487e7817d0b06fdad60e41e2dfddeaae218cb0b6edbfadb1e8cfc13d99"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": "Optional manually opened UI delegates finite operations to the pinned controller. Selected disk state, live connection, original external same-chat definition evidence and current readiness are distinct. Client/input changes invalidate review; row selection has no I/O; exact publication and exact-instance refresh have separate confirmations. Background work does not touch Tk and closing the view retains in-flight durable effects without killing/retrying. Unknown/closed/busy/malformed/mismatched reports disable effects. No automatic polling/adoption/relist, host restart, Work permission or invented model observation."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_owner_ui.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_stable_readiness.py.frontend-correlation",
+      "observation_ids": [
+        "obs-44f513ba8889abe6cfbd5bd1f662baa3d12e7bec2e73d5f81223f9ac68620617"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": " Public correlate_definitions verifies selected catalog, frontend ABI/marker/full forwarded inventory and fresh exact external same-chat observation independently of old/new backend selection. It always returns preparation/execution false and cannot authorize refresh. classify reuses it only after existing current backend/epoch/unknown gates; no fake current snapshot or authority weakening."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_stable_readiness.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_owner_desktop.py.stable-config-panel",
+      "observation_ids": [
+        "obs-acdc1084963339bfa092e5f3c410f0ebc0811ae46c9c0a105a8491a3947256ef",
+        "obs-b9310291ce3c8bd1ad1009fc667ebb392ce7e9a84e9a3cb0fb5101bc210408b8",
+        "obs-6672c65d5766365e82df89ad6508c0567ce689428dd81faeabcebfcd098c8cc3",
+        "obs-4285e69893be1d93ba4159154b882202806d2eefa54dd9f4294a7fed35a2a624"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "OWNER_ONLY"
+      ],
+      "target_routes": [
+        "OWNER_ONLY"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "AUDIT_WRITE",
+        "PROCESS",
+        "NETWORK",
+        "GIT",
+        "DISCLOSURE",
+        "CLEANUP"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": " Optional pinned stable-config CLI pair attaches the separate fixed-catalog panel only in explicitly opened Owner app. Singleton activation checks exact selected config identity and rejects mismatched existing app; it never silently adopts the requested config. Defaults and headless MCP lifecycle remain unchanged; no client settings/Work action are applied."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_owner_desktop.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
+    },
+    {
+      "id": "surface.tools.integration_distribution.py.stable-owner-resource-closure",
+      "observation_ids": [
+        "obs-979cc677c5eeb035bdef198fcd85310494deb6a032071eedad0699ba0fdf086c",
+        "obs-813b5d8a3ab42856324b2a311b834ffd9289f68983d0d9eba352696a0622fe04"
+      ],
+      "implementation": "IMPLEMENTED",
+      "current_routes": [
+        "HOST_INTERNAL"
+      ],
+      "target_routes": [
+        "HOST_INTERNAL"
+      ],
+      "authorities": [
+        "Separate explicit owner-local fixed-catalog UI configuration and exact reviewed selection/refresh only. Existing broker adapter approvals and D1/D2/D4/native remain mandatory; UI is not human identity authentication or Work authority."
+      ],
+      "effects": [
+        "NATIVE_READ",
+        "NATIVE_WRITE",
+        "DISCLOSURE"
+      ],
+      "constraints": {
+        "platforms": [
+          "POSIX; Python 3.11+; Tk only for explicit Owner app"
+        ],
+        "limits": [
+          "Private finite configuration: codex and/or claude-desktop; original exact external observation bytes/timestamp required.",
+          "512 bounded journal entries; preview and definition observation freshness 300 seconds; no automatic retry/repair/adoption.",
+          "Disposable fixture source validation only. Installed Desktop same-chat acceptance is NOT_RUN; actual Work execution HOLD."
+        ],
+        "notes": " Owner desktop resource closure includes the two exact controller/presentation modules. Artifact verification remains closed and byte-pinned, with no automatic installation, stable store creation, client selection or producer/native approval update."
+      },
+      "test_refs": [
+        {
+          "path": "tools/test_integration_m6.py",
+          "selector": null
+        }
+      ],
+      "doc_refs": [
+        {
+          "path": "docs/integration-stable-owner.md",
+          "anchor": null
+        }
+      ],
+      "review_status": "REVIEWED",
+      "rationale": "Concrete opt-in owner-local control or presentation path; not an MCP Core operation, policy issuer, Work grant or generic transport. Existing capabilities/backlog remain unchanged."
     }
   ]
 }

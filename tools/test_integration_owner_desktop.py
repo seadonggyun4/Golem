@@ -341,6 +341,40 @@ finally:fixture.doCleanups()
             asyncio.run(exercise())
 
 class NativeSeparatedApp(unittest.TestCase):
+    def test_pinned_stable_tab_preserves_existing_tabs_and_never_probes_on_open(self):
+        import os,tempfile
+        if os.environ.get('GOLEM_TEST_TK')!='1':self.skipTest('native display fixture requires GOLEM_TEST_TK=1')
+        import tkinter as tk
+        from tkinter import ttk
+        from unittest.mock import Mock
+        import integration_stable_owner as stable
+        with tempfile.TemporaryDirectory(dir='/tmp') as tmp:
+            directory=Path(tmp).resolve();directory.chmod(0o700)
+            endpoint=desktop.LocalEndpoint(directory,lambda op,args:[]).start()
+            root=tk.Tk();errors=[]
+            controller=Mock(clients=('codex','claude-desktop'),config_path=directory/'selected.json',config_sha256='a'*64)
+            def check():
+                try:
+                    tabs=next(child for child in root.winfo_children() if isinstance(child,ttk.Notebook))
+                    self.assertEqual([tabs.tab(tab,'text') for tab in tabs.tabs()],
+                        ['Owner 후보','기존 연결 진단','고정 연결·실행부 전환'])
+                    self.assertEqual(tabs.tab(tabs.select(),'text'),'고정 연결·실행부 전환')
+                    controller.inspect.assert_not_called();controller.observe.assert_not_called()
+                    controller.publish.assert_not_called();controller.refresh.assert_not_called()
+                    identity=c.decode((directory/'owner-app.json').read_bytes())['ui_config']
+                    self.assertEqual(identity,{'path':str(directory/'selected.json'),'sha256':'a'*64})
+                except Exception as error:errors.append(error)
+                finally:root.destroy()
+            root.after(150,check)
+            try:
+                with patch.object(tk,'Tk',return_value=root),patch.object(stable,'StableOwnerController',return_value=controller):
+                    self.assertEqual(desktop.owner_app(['--review-directory',str(directory),
+                        '--codex-config',str(directory/'absent-codex-config.toml'),
+                        '--stable-config',str(directory/'selected.json'),'--stable-config-sha256','a'*64]),0)
+                if errors:raise errors[0]
+                self.assertEqual(desktop.RemoteController(directory,endpoint.instance).drafts(),[])
+            finally:endpoint.close()
+
     def test_owner_app_close_keeps_service_and_activation_is_singleton(self):
         import os,tempfile
         if os.environ.get('GOLEM_TEST_TK')!='1':self.skipTest('native display fixture requires GOLEM_TEST_TK=1')
@@ -361,6 +395,71 @@ class NativeSeparatedApp(unittest.TestCase):
                 self.assertEqual(desktop.RemoteController(directory,endpoint.instance).drafts(),[])
                 self.assertEqual(desktop.connections(directory),[endpoint.instance])
             finally:endpoint.close()
+
+
+class OwnerAppConfiguration(unittest.TestCase):
+    """Configuration identity is not an approval or installed-code attestation."""
+    def setUp(self):
+        import tempfile
+        temp=tempfile.TemporaryDirectory(dir='/tmp');self.addCleanup(temp.cleanup)
+        self.directory=Path(temp.name).resolve();self.directory.chmod(0o700)
+        self.identity={'path':str(self.directory/'owner-config.json'),'sha256':'a'*64}
+
+    def instance(self,identity=None):
+        instance=desktop.OwnerInstance(self.directory,ui_config=identity)
+        self.addCleanup(instance.close);return instance
+
+    def test_same_pinned_configuration_activates_only_existing_app(self):
+        first=self.instance(self.identity);first.start()
+        second=self.instance(dict(self.identity));self.assertFalse(second.primary)
+        second.activate();self.assertTrue(first.events.get(timeout=2))
+        self.assertEqual(len(list(self.directory.glob('*.sock'))),1)
+        self.assertEqual(c.decode((self.directory/'owner-app.json').read_bytes())['ui_config'],self.identity)
+
+    def test_old_unbound_app_is_not_success_for_new_stable_configuration(self):
+        first=self.instance();first.start();before=(self.directory/'owner-app.json').read_bytes()
+        second=self.instance(self.identity)
+        with self.assertRaisesRegex(c.IntegrationError,'OWNER_APP_CONFIG_MISMATCH'):second.activate()
+        self.assertTrue(first.events.empty())
+        self.assertEqual((self.directory/'owner-app.json').read_bytes(),before)
+        self.assertEqual(len(list(self.directory.glob('*.sock'))),1)
+
+    def test_absent_or_changed_config_never_activates_other_config(self):
+        first=self.instance(self.identity);first.start()
+        for identity in (None,{**self.identity,'sha256':'b'*64},
+                         {**self.identity,'path':str(self.directory/'different.json')}):
+            with self.subTest(identity=identity):
+                second=self.instance(identity)
+                with self.assertRaisesRegex(c.IntegrationError,'OWNER_APP_CONFIG_MISMATCH'):second.activate()
+        self.assertTrue(first.events.empty())
+
+    def test_activation_endpoint_rechecks_identity_after_record_tampering(self):
+        first=self.instance(self.identity);first.start()
+        changed={**self.identity,'sha256':'b'*64}
+        path=self.directory/'owner-app.json'
+        path.write_bytes(c.encoded({'instance':first.endpoint.instance,'ui_config':changed}))
+        second=self.instance(changed)
+        with self.assertRaisesRegex(c.IntegrationError,'OWNER_APP_ACTIVATION'):second.activate()
+        self.assertTrue(first.events.empty())
+
+    def test_partial_optional_pin_is_rejected_before_owner_app_or_Tk(self):
+        from unittest.mock import Mock
+        import contextlib,io
+        for args in (['--stable-config',self.identity['path']],['--stable-config-sha256',self.identity['sha256']]):
+            with self.subTest(args=args),patch.object(desktop,'OwnerInstance',new=Mock()) as instance:
+                with contextlib.redirect_stderr(io.StringIO()),self.assertRaises(SystemExit):
+                    desktop.owner_app(['--review-directory',str(self.directory),*args])
+                instance.assert_not_called()
+
+    def test_mismatched_config_bytes_fail_before_lock_or_tk(self):
+        from unittest.mock import Mock
+        import integration_stable_owner as stable
+        path=self.directory/'owner-config.json';path.write_bytes(b'{}\n');path.chmod(0o600)
+        with patch.object(desktop,'OwnerInstance',new=Mock()) as instance:
+            with self.assertRaisesRegex(stable.StableOwnerError,'OWNER_CONFIG_CHANGED'):
+                desktop.owner_app(['--review-directory',str(self.directory),'--stable-config',str(path),
+                    '--stable-config-sha256','a'*64])
+            instance.assert_not_called()
 
 class PublicationFault(unittest.TestCase):
     for name in ('setUp','observed','capture','run_call','draft','plan_args','owner_api','approve','query','expect','inventory','save_policy','adapter','prepare','inspect','export','endpoint'):

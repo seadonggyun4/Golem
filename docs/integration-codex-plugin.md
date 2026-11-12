@@ -58,6 +58,8 @@ codex plugin add golem@golem-reviewed --json
 
 ## 업데이트·정리
 
+선택적 고정 연결을 설치한 경우에는 [Owner 앱의 고정 연결·실행부 전환](integration-stable-owner.md)을 사용한다. 같은 catalog 안의 backend 교체는 같은 대화의 정의를 유지하며, 기존 호출 권한은 매번 다시 검사한다. 기본 설치에 이 경로가 자동 적용되는 것은 아니다.
+
 Styxis의 Golem 업데이트 후 실제 MCP command/args가 새 adapter 경로를 가리키는지 확인한다. 설정에 구버전의 절대 경로가 남아 있으면 검토한 state를 유지한 채 지원되는 설정 경로로 교체한다. 설치 버전·선택된 launcher·실행 중인 연결은 별도로 대조하며, Owner 앱의 목록 새로고침을 MCP 서버 재연결로 간주하지 않는다.
 
 도구 미노출은 설치와 대화의 시작 로그를 함께 확인한다. 로컬 marketplace 생성기는

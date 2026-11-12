@@ -42,6 +42,8 @@ python3 tools/integration_distribution.py verify --input /absolute/private/golem
 
 ## 업데이트·정리
 
+선택적 고정 연결을 설치한 경우에는 [Owner 앱의 고정 연결·실행부 전환](integration-stable-owner.md)을 사용한다. Claude용 store·정책은 Codex와 분리하며, 같은 대화의 정의와 새 backend epoch를 대조한다. 일반 MCP 연결은 Owner 창을 자동으로 열지 않는다.
+
 - 새 archive SHA·설치 bytes와 필요한 client 검증을 확인한다. runtime·정책 변경은 [D5](integration-d5.md)에 따라 검토하며 기존 승인 bytes/key/pin을 자동 이전하지 않는다.
 - owner-private 복구 자료를 보존하고 **Extensions → 대상 확장 → Remove**로 확인한 구버전 Golem만 제거한다. 검증된 Golem 한 개와 의도한 연결 한 개만 남기고 실제 목록·설정을 재확인한다.
 - 기존 Work·승인·registry·evidence·CAS·journal와 다른 확장·설정은 보존한다. 설정 저장·handshake·도구 호출·현재 Work 완료는 각각 구분한다.

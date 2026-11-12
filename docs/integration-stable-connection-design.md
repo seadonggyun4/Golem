@@ -31,6 +31,8 @@ owner가 정확히 선택한 backend epoch
 | [stable_contract.py](../plugins/golem/scripts/stable_contract.py) | canonical catalog와 선택 lineage, private 파일, owner lock, 이전 head CAS, 정확한 adapter approval·launcher pin을 검사한다. 선택 저장 성공과 실제 연결 반영을 구분한다. |
 | [stable_relay.py](../plugins/golem/scripts/stable_relay.py) | client별 고정 catalog를 제공하고 기존 backend의 typed 호출 경로를 사용한다. idle인 정확한 연결만 EOF 종료 확인 후 한 번 교체하며 실패·유실을 재실행하지 않는다. |
 | [integration_stable_readiness.py](../tools/integration_stable_readiness.py) | 디스크 선택·현재 backend·고정 정의 전달·외부의 같은 대화 관측을 분리해 판정하는 순수 함수다. I/O·권한 부여·실행은 하지 않는다. |
+| [integration_stable_owner.py](../tools/integration_stable_owner.py) | 정확한 UI 설정과 broker bundle을 검증하고 기존 선택·전환 계약을 호출하는 owner 전용 제어부다. 시도/결과를 private 불변 기록으로 보존하며 반복 실행을 차단한다. |
+| [integration_stable_owner_ui.py](../tools/integration_stable_owner_ui.py) | 기존 Owner 앱에 선택적으로 연결하는 화면이다. 외부의 실제 대화 관측·선택 저장·한 연결 전환을 분리하며 탭 진입이나 행 선택으로 실행하지 않는다. |
 
 owner-local entry의 operation은 다음과 같이 분리한다. 각 operation은 `--reviewed-bundle-sha256`, `--client`, `--store`를 입력받으며, 아래 표가 실제 선택·설치 승인을 대신하지 않는다.
 
@@ -158,4 +160,6 @@ readiness는 fresh한 현재 backend 증거와 외부 관측의 대상 대화·t
 - **실제 Codex·Claude 대화**: 현재 **NOT_RUN**. 이번 소스 구현·fixture 결과를 설치 완료나 실사용 통과로 표시하지 않는다.
 - **native QA·완료**: 실행 **HOLD**. 기존 별도 exact 승인과 실제 결과가 필요하다.
 
-실제 client 수락, 기존 Owner UI의 새 stable 제어 통합, 설치 migration은 각각 구체적인 구현·관측 근거가 생겼을 때만 완료 처리한다. 관련 fixture나 정적 검사를 통과했다는 이유로 미구현·미실행 범위를 완료로 바꾸지 않는다.
+Owner UI의 선택적 제어 통합은 구현됐으며 [사용 절차](integration-stable-owner.md)를 따른다. 선택 변경 후에도 기존 정의의 외부 관측을 대조할 수 있지만, 이 대조만으로 현재 backend나 전환 권한이 확인되지는 않는다. 전환은 별도로 exact old/target·idle·ABI를 검사하고, 성공 응답 뒤에도 새 epoch를 관측한다. 시도 기록이 있는데 결과가 없거나 불확실하면 창을 다시 열어도 전환을 반복하지 않는다.
+
+실제 client 수락과 설치 migration은 각각 구체적인 관측 근거가 생겼을 때만 완료 처리한다. 관련 fixture나 정적 검사를 통과했다는 이유로 미실행 범위를 완료로 바꾸지 않는다.

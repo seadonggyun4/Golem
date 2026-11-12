@@ -1,8 +1,8 @@
 {
-  "inventory_sha256": "e4c58c739bfc768bec6b0d5876cd6bb2141778c77d553509c4fcaecbd90fb474",
-  "selected_source_count": 664,
-  "selected_observation_count": 2485,
-  "selected_capability_count": 1325,
+  "inventory_sha256": "fdb9c4e9191dcd9722ddb9547880cee68d87e747916ad9477d037c0e5c535f58",
+  "selected_source_count": 669,
+  "selected_observation_count": 2515,
+  "selected_capability_count": 1340,
   "selected_inventory_complete": true,
   "selected_blockers": [],
   "delivery_backlog": [],
@@ -569,6 +569,8 @@
       "tools/integration_reload_probe.py",
       "tools/integration_service.py",
       "tools/integration_stable_catalog.py",
+      "tools/integration_stable_owner.py",
+      "tools/integration_stable_owner_ui.py",
       "tools/integration_stable_readiness.py",
       "tools/integration_task_actions.py",
       "tools/integration_transfer.py",
@@ -1067,6 +1069,8 @@
       "tools/integration_reload_probe.py",
       "tools/integration_service.py",
       "tools/integration_stable_catalog.py",
+      "tools/integration_stable_owner.py",
+      "tools/integration_stable_owner_ui.py",
       "tools/integration_stable_readiness.py",
       "tools/integration_task_actions.py",
       "tools/integration_transfer.py",
@@ -5796,7 +5800,7 @@
     },
     {
       "path": "tools/integration_distribution.py",
-      "sha256": "d4aa50e523fc216f5374e29f21c50fc1e65b013c63d23a05c14d21aded2f0e6b"
+      "sha256": "407c9eabe2a25412f9bd697a5387cf1fd6190779c0f070f576abd552b758761f"
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -5820,7 +5824,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "e935ccbc4246df71e40bcb61cb19eb47fa3f23ac25c21432f98f241bffd6cc00"
+      "sha256": "c570b71f33133f2e297167533df6c198157fcbeaed6053681a7e6fe069c339d6"
     },
     {
       "path": "tools/test_capability_m6.py",
@@ -5840,11 +5844,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "ee97bff6c48bc9d1c13720c93a7ca43d891ac4ec57689ee604e5f6c336a59a59"
+      "sha256": "6ff15914ac6098a8c31f05cc59f3e90a67ad2ae585d3b3f808109fc3fabb6c80"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "237f1153802799e45353aecc0c12352aadace40dd3dee62c4da84975a3396974"
+      "sha256": "766e413fa44374efb926530f569b8ae47b475594bcea552f598b2ce36647d387"
     },
     {
       "path": "include/golem/workpack.h",
@@ -6200,7 +6204,7 @@
     },
     {
       "path": "docs/integration-codex-plugin.md",
-      "sha256": "fe6888a304577016e11b3ff8e2400493a166ca3c6e25c9c1628683e1a278776d"
+      "sha256": "4e3b6035bc97af9f03d2403f72a8b4d3ffde3152d2ecdbfdbbe82a0b3f5d4a54"
     },
     {
       "path": "docs/integration-connection-renewal.md",
@@ -6224,7 +6228,7 @@
     },
     {
       "path": "docs/integration-stable-connection-design.md",
-      "sha256": "cbaa9fd67a699ec7f83114829bab4b9e6c3039309f449e28bdd17a7099a09127"
+      "sha256": "7c6c71e554990b164c14a9553c13a94f25bbf933084739bfec380442bd8b9c4e"
     },
     {
       "path": "plugins/golem/scripts/stable_contract.py",
@@ -6244,7 +6248,7 @@
     },
     {
       "path": "tools/integration_stable_readiness.py",
-      "sha256": "d6b734cd80d7d9bccddb48c96e386d229cc23ff6742848e3813ecbcaff5bbf3a"
+      "sha256": "4c08f24ac24099545f8c92a3e7538e17aad96b8914b06fec58e90b8d10fa2013"
     },
     {
       "path": "tools/test_integration_stable_abi.py",
@@ -6272,11 +6276,31 @@
     },
     {
       "path": "tools/test_integration_stable_readiness.py",
-      "sha256": "a046f05119d61a88cd2b8e36213ca5d75207408aead85c17330c7b79c66a68b9"
+      "sha256": "bd6cc45d36545c50f51529e44dbd22dca1314d27c51611a87966f18f550b6c2c"
     },
     {
       "path": "tools/test_integration_stable_relay.py",
       "sha256": "a1762e12868e112a9e07825eba6d103c32b19571e5d73ee4f373cb2e97f6253c"
+    },
+    {
+      "path": "docs/integration-stable-owner.md",
+      "sha256": "f3002968084b4a89723278705be2df861dd8f054353dea06725981258f186041"
+    },
+    {
+      "path": "tools/integration_stable_owner.py",
+      "sha256": "81c92d250862cbff2a97b2802c8f8cf254987b2013c1ea3c22776f3464bb5024"
+    },
+    {
+      "path": "tools/integration_stable_owner_ui.py",
+      "sha256": "19ad15e3514161aae90dc7ff322c593911171a13c46fc0d9753460491a5e94ab"
+    },
+    {
+      "path": "tools/test_integration_stable_owner.py",
+      "sha256": "6bfe48c2251c3c8cf5f07b9af7101e814fe070caf60d031c05605e49e50489a9"
+    },
+    {
+      "path": "tools/test_integration_stable_owner_ui.py",
+      "sha256": "1165cccca9f17e424a478abb3547265f8fba76dce335ae43daf26d078441ab48"
     }
   ],
   "native_definitions": [
@@ -12454,7 +12478,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 355,
+      "checked_functions": 412,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -15166,14 +15190,16 @@
         "plugins/golem/scripts/stable_entry.py",
         "plugins/golem/scripts/stable_relay.py",
         "tools/integration_stable_catalog.py",
-        "tools/integration_stable_readiness.py"
+        "tools/integration_stable_readiness.py",
+        "tools/integration_stable_owner.py",
+        "tools/integration_stable_owner_ui.py"
       ],
       "blockers": [],
       "execution_verified": false
     },
     "reviewed_effects": {
       "blockers": [],
-      "reviewed_capabilities": 1235,
+      "reviewed_capabilities": 1250,
       "execution_verified": false
     },
     "boundary_contracts": {
@@ -54295,7 +54321,7 @@
     {
       "path": "tools/integration_distribution.py",
       "role": "M6_FEATURE_PACKAGING_OWNER_BRIDGE_OR_SKILL",
-      "rationale": "M6 finite profile ceilings intersect unchanged D2/D4 owner tools; public artifact packaging/verification/extraction, owner-local Installer/D5 delegation and separated skills. Full symbols/branches/effects/packaged instructions reviewed; mandatory M6 profile. No implicit grant/repair/real installation/embedded runtime/signature or M5 scheduler implementation. Feature packages include the exact readiness module and a verbatim canonical adapter inspection payload under golem_adapter.py. Existing exact file-set, byte inventory, native pin and authorization checks remain unchanged; no selected client installation is performed.",
+      "rationale": "M6 finite profile ceilings intersect unchanged D2/D4 owner tools; public artifact packaging/verification/extraction, owner-local Installer/D5 delegation and separated skills. Full symbols/branches/effects/packaged instructions reviewed; mandatory M6 profile. No implicit grant/repair/real installation/embedded runtime/signature or M5 scheduler implementation. Feature packages include the exact readiness module and a verbatim canonical adapter inspection payload under golem_adapter.py. Existing exact file-set, byte inventory, native pin and authorization checks remain unchanged; no selected client installation is performed. Owner desktop resource closure includes the two exact controller/presentation modules. Artifact verification remains closed and byte-pinned, with no automatic installation, stable store creation, client selection or producer/native approval update.",
       "symbols": [
         "build",
         "closure",
@@ -54470,7 +54496,18 @@
           "linux-x86_64"
         ]
       ],
-      "operations": []
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "closure",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "verify",
+          null
+        ]
+      ]
     },
     {
       "path": "tools/integration_distribution_entry.py",
@@ -55019,7 +55056,7 @@
     {
       "path": "tools/integration_owner_desktop.py",
       "role": "OWNER_LOCAL_DESKTOP",
-      "rationale": "Headless per-connection MCP with optional owner-private Unix IPC and separate singleton Owner app. Instance/TTL/native policy checks reused; catalog/inspect/unapplied candidate only; export replay fenced. No TCP, native action, approval issuance or policy activation. Same-user IPC is not human authentication. Owner app connection panel separately observes exact selected/live metadata and explicitly requests an already-selected Golem relay refresh or confirmed host-wide public control; none is a Work action or policy approval.",
+      "rationale": "Headless per-connection MCP with optional owner-private Unix IPC and separate singleton Owner app. Instance/TTL/native policy checks reused; catalog/inspect/unapplied candidate only; export replay fenced. No TCP, native action, approval issuance or policy activation. Same-user IPC is not human authentication. Owner app connection panel separately observes exact selected/live metadata and explicitly requests an already-selected Golem relay refresh or confirmed host-wide public control; none is a Work action or policy approval. Optional pinned stable-config CLI pair attaches the separate fixed-catalog panel only in explicitly opened Owner app. Singleton activation checks exact selected config identity and rejects mismatched existing app; it never silently adopts the requested config. Defaults and headless MCP lifecycle remain unchanged; no client settings/Work action are applied.",
       "symbols": [
         "ConnectionBrowser",
         "ConnectionBrowser.__init__",
@@ -55090,7 +55127,9 @@
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--review-directory')], keywords=[keyword(arg='help', value=Constant(value='Existing owner-private Unix IPC directory; explicit opt-in only'))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--review-directory')], keywords=[keyword(arg='required', value=Constant(value=True))])",
         "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--review-label')], keywords=[keyword(arg='default', value=Constant(value='Golem')), keyword(arg='help', value=Constant(value='Display label only; never authenticated client identity'))])",
-        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--reviewed-policy-sha256')], keywords=[keyword(arg='dest', value=Constant(value='digest')), keyword(arg='required', value=Constant(value=True))])"
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--reviewed-policy-sha256')], keywords=[keyword(arg='dest', value=Constant(value='digest')), keyword(arg='required', value=Constant(value=True))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--stable-config')], keywords=[keyword(arg='help', value=Constant(value='Optional exact owner-reviewed fixed-catalog UI configuration'))])",
+        "Call(func=Attribute(value=Name(id='parser', ctx=Load()), attr='add_argument', ctx=Load()), args=[Constant(value='--stable-config-sha256')], keywords=[keyword(arg='help', value=Constant(value='Exact SHA-256 of --stable-config; grants no Work authority'))])"
       ],
       "literal_branches": [
         [
@@ -55176,6 +55215,10 @@
         [
           "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
           "token"
+        ],
+        [
+          "Constant(value='..')",
+          ".."
         ],
         [
           "Constant(value='plan_read')",
@@ -55279,6 +55322,26 @@
           "NATIVE_OPERATION",
           "ReviewEndpoint.handle",
           "connection-status"
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "owner_app",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "OwnerInstance.__init__",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "OwnerInstance.activate",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "OwnerInstance.start",
+          null
         ]
       ]
     },
@@ -59671,7 +59734,7 @@
     {
       "path": "tools/integration_stable_readiness.py",
       "role": "OWNER_LOCAL_STABLE_EVIDENCE_CLASSIFIER",
-      "rationale": "Pure bounded correlation of current exact selected snapshot, stable frontend ABI/catalog evidence, external same-chat marker/full-name inventory and fresh backend epoch. ACK alone cannot restore readiness; stale/wrong/unknown/repeated evidence blocks. Fixed frontend observations may survive compatible backend replacement, but backend proof must be current. Ready means unapproved preparation only, never Work authority.",
+      "rationale": "Pure bounded correlation of current exact selected snapshot, stable frontend ABI/catalog evidence, external same-chat marker/full-name inventory and fresh backend epoch. ACK alone cannot restore readiness; stale/wrong/unknown/repeated evidence blocks. Fixed frontend observations may survive compatible backend replacement, but backend proof must be current. Ready means unapproved preparation only, never Work authority. Public correlate_definitions verifies selected catalog, frontend ABI/marker/full forwarded inventory and fresh exact external same-chat observation independently of old/new backend selection. It always returns preparation/execution false and cannot authorize refresh. classify reuses it only after existing current backend/epoch/unknown gates; no fake current snapshot or authority weakening.",
       "symbols": [
         "_canonical_digest",
         "_fresh",
@@ -59681,7 +59744,8 @@
         "_positive",
         "_selected",
         "_tools",
-        "classify"
+        "classify",
+        "correlate_definitions"
       ],
       "declarations": [],
       "literal_branches": [
@@ -59814,6 +59878,352 @@
         [
           "PYTHON_DECLARATION",
           "classify",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "correlate_definitions",
+          null
+        ]
+      ]
+    },
+    {
+      "path": "tools/integration_stable_owner.py",
+      "role": "OPTIONAL_OWNER_FIXED_CATALOG_CONTROLLER",
+      "rationale": "Explicit finite owner-local controller for separately reviewed Codex/Claude fixed-catalog stores. Exact private UI config and closed broker manifest are verified before loading captured bytes. Existing broker selection/approval/CAS, exact instance IPC and readiness functions remain authoritative. External model observation file, original timestamp, exact marker and inventory are retained. Selection review/publication and one idle connection refresh require separate exact previews/confirmation. Durable bounded attempt/pending/result records prevent automatic replay and preserve unknown results, including visible ACK with failed journal synchronization. Only exact result SHA acknowledged by this current controller may restore refresh readiness: historical ACK after UI reopening cannot erase final-cleanup/re-poison double-failure uncertainty and cannot authorize retry. No Work call, policy issuance, arbitrary command/configuration, human authentication claim or client installation is provided.",
+      "symbols": [
+        "StableOwnerController",
+        "StableOwnerController.__init__",
+        "StableOwnerController._config",
+        "StableOwnerController._effect",
+        "StableOwnerController._journal_lock",
+        "StableOwnerController._observe",
+        "StableOwnerController._operation",
+        "StableOwnerController._refresh_evidence",
+        "StableOwnerController._report",
+        "StableOwnerController._review",
+        "StableOwnerController._selected_review",
+        "StableOwnerController.inspect",
+        "StableOwnerController.observe",
+        "StableOwnerController.publish",
+        "StableOwnerController.refresh",
+        "StableOwnerController.review_refresh",
+        "StableOwnerController.review_selection",
+        "StableOwnerError",
+        "StableOwnerError.__init__",
+        "_code",
+        "_decode",
+        "_directory",
+        "_finish_record",
+        "_load_bundle",
+        "_path",
+        "_pin",
+        "_read",
+        "_sync_directory",
+        "_write_new",
+        "digest",
+        "encoded",
+        "require"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Call(func=Attribute(value=Name(id='identity', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='kind')])",
+          "refresh"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='live', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "READY"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='manifest', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='schema')])",
+          "golem.stable-broker-bundle.v1"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='prior', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "FAILED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='prior', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "UNKNOWN"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='response', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "BLOCKED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='response', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "RESULT_UNKNOWN"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='result', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "ACKNOWLEDGED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='result', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "RESULT_UNKNOWN"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='item', ctx=Load())])",
+          "bundle_directory"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='item', ctx=Load())])",
+          "bundle_sha256"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='item', ctx=Load())])",
+          "required_tools"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='item', ctx=Load())])",
+          "store"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "clients"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "records_directory"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='value', ctx=Load())])",
+          "schema"
+        ],
+        [
+          "Constant(value='..')",
+          ".."
+        ],
+        [
+          "Constant(value='UNKNOWN')",
+          "UNKNOWN"
+        ],
+        [
+          "Subscript(value=Name(id='endpoint', ctx=Load()), slice=Constant(value='endpoint_state'), ctx=Load())",
+          "PRESENT"
+        ],
+        [
+          "Subscript(value=Name(id='result', ctx=Load()), slice=Constant(value='state'), ctx=Load())",
+          "ACKNOWLEDGED"
+        ],
+        [
+          "Subscript(value=Name(id='review', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "publish"
+        ],
+        [
+          "Subscript(value=Name(id='review', ctx=Load()), slice=Constant(value='kind'), ctx=Load())",
+          "refresh"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "_load_bundle",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerController.__init__",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerController.inspect",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerController.observe",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerController.review_selection",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerController.publish",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerController.review_refresh",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerController.refresh",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerController._effect",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerController._refresh_evidence",
+          null
+        ]
+      ]
+    },
+    {
+      "path": "tools/integration_stable_owner_ui.py",
+      "role": "OPTIONAL_OWNER_FIXED_CATALOG_PRESENTATION",
+      "rationale": "Optional manually opened UI delegates finite operations to the pinned controller. Selected disk state, live connection, original external same-chat definition evidence and current readiness are distinct. Client/input changes invalidate review; row selection has no I/O; exact publication and exact-instance refresh have separate confirmations. Background work does not touch Tk and closing the view retains in-flight durable effects without killing/retrying. Unknown/closed/busy/malformed/mismatched reports disable effects. No automatic polling/adoption/relist, host restart, Work permission or invented model observation.",
+      "symbols": [
+        "BackgroundRequest",
+        "BackgroundRequest.__init__",
+        "BackgroundRequest.close",
+        "BackgroundRequest.start",
+        "BackgroundRequest.take",
+        "StableOwnerPanel",
+        "StableOwnerPanel.__init__",
+        "StableOwnerPanel._available_review",
+        "StableOwnerPanel._client_changed",
+        "StableOwnerPanel._destroyed",
+        "StableOwnerPanel._drain",
+        "StableOwnerPanel._enable",
+        "StableOwnerPanel._file_inputs",
+        "StableOwnerPanel._inputs_changed",
+        "StableOwnerPanel._render",
+        "StableOwnerPanel._selected_row",
+        "StableOwnerPanel._selection_changed",
+        "StableOwnerPanel._submit",
+        "StableOwnerPanel.inspect",
+        "StableOwnerPanel.observe",
+        "StableOwnerPanel.publish",
+        "StableOwnerPanel.refresh",
+        "StableOwnerPanel.review_refresh",
+        "StableOwnerPanel.review_selection",
+        "_details",
+        "_hash",
+        "_mapping",
+        "presentation"
+      ],
+      "declarations": [],
+      "literal_branches": [
+        [
+          "Call(func=Attribute(value=Name(id='endpoints', ctx=Load()), attr='get', ctx=Load()), args=[Name(id='instance', ctx=Load())])",
+          "PRESENT"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='live', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "READY"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='readiness', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "PREPARATION_READY_NOT_AUTHORIZED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='actual_execution')])",
+          "HOLD"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "BLOCKED"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "RESULT_UNKNOWN"
+        ],
+        [
+          "Name(id='ch', ctx=Load())",
+          "\n\t"
+        ],
+        [
+          "Name(id='endpoint', ctx=Load())",
+          "ABSENT"
+        ],
+        [
+          "Name(id='endpoint', ctx=Load())",
+          "PRESENT"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
+          "kind"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
+          "token"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "observation"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "observe"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "publish"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "refresh"
+        ],
+        [
+          "Name(id='kind', ctx=Load())",
+          "review-refresh"
+        ]
+      ],
+      "operations": [
+        [
+          "PYTHON_DECLARATION",
+          "presentation",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerPanel.inspect",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerPanel.observe",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerPanel.review_selection",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerPanel.review_refresh",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerPanel.publish",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerPanel.refresh",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "BackgroundRequest.start",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "BackgroundRequest.take",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "BackgroundRequest.close",
+          null
+        ],
+        [
+          "PYTHON_DECLARATION",
+          "StableOwnerPanel._destroyed",
           null
         ]
       ]
@@ -66160,7 +66570,7 @@
     },
     {
       "path": "tools/capability_effect_registry.py",
-      "sha256": "1a61b459144348fe6db0413b5e1eca54eae2a7e750809ebb5b7805fc4dba8387",
+      "sha256": "98ed039ec8d4f1bcdcf01299ca06ae0765d57d94b7119d887a4c35e62af1b174",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66322,7 +66732,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "e5aaa3dcdf95932684339950e33f20866f5d618b67a131c021cc78bb65da7ed6",
+      "sha256": "5764e039a131e6c294311491f5d1a9eb9c5410ee6cc0030bf40daa94fb674b37",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66412,13 +66822,13 @@
     },
     {
       "path": "tools/capability_repository.py",
-      "sha256": "efb4af14ed73fe710420016aadfe088080db41bf44fb6f43676ebb18aec34dbe",
+      "sha256": "6e13054c0e8d6d4eef25c8f3c529799ca9decc1e08c7b1fbd1fbeb52cfb8dce1",
       "shape_sha256": "6d9af9283d17b17d9b3a95815343435f861de9c53cb32ba70bf944c54b761947",
       "role": "M0_STATIC_ANALYSIS"
     },
     {
       "path": "tools/capability_sample_registry.py",
-      "sha256": "1ff23a0c6c860d56c8aa55c8aca7ae6b0ed0fb26626df3260c4f6ef3e8529143",
+      "sha256": "181ba88b1b670f14f73c8bc7aa7b2d5bfb7fdc75852ba64a065f08dd55166108",
       "shape_sha256": "6849185bad3e72e1d6f9cc3d566cf6ad80e940214602dc6f4ec6bfb99c0bb1c1",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66430,7 +66840,7 @@
     },
     {
       "path": "tools/capability_scope_registry.py",
-      "sha256": "fc91a07b211ac00f769f180e0696bc444a9c8dd01ed61a47c1d76212f8a7a090",
+      "sha256": "c7420cb0ca04a36583e89ecaf016eacfadaf0ff7f2d0fd5c17c809747e30d042",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66466,7 +66876,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "8efff2aee74317840bd1015da0b6a987d6928199abb16e201801a59a16e2a027",
+      "sha256": "f6993e5cde767969c4926b13ca903f731a6ba5db104c63a022f10625bcdac5a4",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -66760,7 +67170,7 @@
     },
     {
       "path": "tools/test_integration_m6.py",
-      "sha256": "e935ccbc4246df71e40bcb61cb19eb47fa3f23ac25c21432f98f241bffd6cc00",
+      "sha256": "c570b71f33133f2e297167533df6c198157fcbeaed6053681a7e6fe069c339d6",
       "shape_sha256": "229f03b8755734b621536982445ca6330de50865d2787da1f1aaa7b01abba5f7",
       "role": "M0_FIXTURE_REGRESSION"
     },
@@ -66772,8 +67182,8 @@
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "237f1153802799e45353aecc0c12352aadace40dd3dee62c4da84975a3396974",
-      "shape_sha256": "e41d4161b7e67e068946869fd04259bff390c1c8380e88fcb1635570509cb28b",
+      "sha256": "766e413fa44374efb926530f569b8ae47b475594bcea552f598b2ce36647d387",
+      "shape_sha256": "1f1f8e5580618a73db121112f791e3901cf689c614727f0daea70a803c5450bb",
       "role": "M0_FIXTURE_REGRESSION"
     },
     {

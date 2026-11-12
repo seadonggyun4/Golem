@@ -303,10 +303,29 @@ class Packages(unittest.TestCase):
                          (ROOT/package.OWNER_RELAY_SOURCE).read_bytes())
         self.assertEqual(files['tools/integration_connection_readiness.py'],
                          (ROOT/'tools/integration_connection_readiness.py').read_bytes())
-        for missing in ('golem_adapter','connection_relay','integration_connection_readiness'):
+        for name in ('integration_stable_owner', 'integration_stable_owner_ui'):
+            self.assertEqual(files['tools/'+name+'.py'],
+                             (ROOT/'tools'/(name+'.py')).read_bytes())
+        for missing in ('golem_adapter','connection_relay','integration_connection_readiness',
+                        'integration_stable_owner','integration_stable_owner_ui'):
             with self.subTest(missing=missing):
                 self.expect('PACKAGE_IMPORT_CLOSURE',
                     lambda:package.closure({'tools/consumer.py':('import '+missing).encode()}))
+
+    def test_extracted_stable_owner_import_has_no_gui_or_selected_backend_effect(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory).resolve();out=root/'package'
+            package.extract(self.raw,c.sha(self.raw),out)
+            code=('import sys;from unittest.mock import patch;sys.path.insert(0,'+repr(str(out/'tools'))+');'
+                  '\nwith patch("subprocess.Popen",side_effect=AssertionError("no child")):\n'
+                  ' import integration_stable_owner as controller\n'
+                  ' import integration_stable_owner_ui as ui\n'
+                  ' assert "tkinter" not in sys.modules\n'
+                  ' assert controller.CONFIG_SCHEMA == "golem.stable-owner-ui.v1"\n'
+                  ' assert ui.REPORT_SCHEMA == controller.SCHEMA\n')
+            result=subprocess.run([sys.executable,'-I','-B','-c',code],cwd=root,
+                env={'PATH':'/usr/bin:/bin','LANG':'C','LC_ALL':'C'},capture_output=True,timeout=30)
+            self.assertEqual(result.returncode,0,result.stderr.decode())
 
     def test_extracted_connection_reader_uses_copied_adapter_not_selected_executable(self):
         with tempfile.TemporaryDirectory() as directory:

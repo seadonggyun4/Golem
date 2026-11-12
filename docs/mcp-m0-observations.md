@@ -1331,6 +1331,21 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | surface.tools.integration_stable_catalog.py.cli-broker | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
 | surface.tools.integration_stable_readiness.py.classification | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 | surface.tools.integration_mcp.py.optional-stable-abi | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_owner.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_owner.py.pinned-config | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_owner.py.observation | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_owner.py.selection-review | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_owner.py.selection-publication | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_owner.py.refresh-review | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_owner.py.exact-refresh | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_owner.py.durable-attempts | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_owner_ui.py.file-surface | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_owner_ui.py.presentation | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_owner_ui.py.explicit-review-actions | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_stable_owner_ui.py.closed-view-lifecycle | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_stable_readiness.py.frontend-correlation | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
+| surface.tools.integration_owner_desktop.py.stable-config-panel | IMPLEMENTED | OWNER_ONLY | OWNER_ONLY | REVIEWED |
+| surface.tools.integration_distribution.py.stable-owner-resource-closure | IMPLEMENTED | HOST_INTERNAL | HOST_INTERNAL | REVIEWED |
 
 ## Observed entrypoints
 
@@ -3821,6 +3836,36 @@ This compares only the explicitly selected scope; it is not repository-wide cove
 | PYTHON_DECLARATION | tools/integration_stable_readiness.py | file-surface | None |
 | PYTHON_DECLARATION | tools/integration_stable_readiness.py | classify | None |
 | PYTHON_DECLARATION | tools/integration_mcp.py | initialization_options | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | _load_bundle | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | StableOwnerController.__init__ | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | StableOwnerController.inspect | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | StableOwnerController.observe | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | StableOwnerController.review_selection | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | StableOwnerController.publish | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | StableOwnerController.review_refresh | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | StableOwnerController.refresh | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | StableOwnerController._effect | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner.py | StableOwnerController._refresh_evidence | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | file-surface | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | presentation | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | StableOwnerPanel.inspect | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | StableOwnerPanel.observe | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | StableOwnerPanel.review_selection | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | StableOwnerPanel.review_refresh | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | StableOwnerPanel.publish | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | StableOwnerPanel.refresh | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | BackgroundRequest.start | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | BackgroundRequest.take | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | BackgroundRequest.close | None |
+| PYTHON_DECLARATION | tools/integration_stable_owner_ui.py | StableOwnerPanel._destroyed | None |
+| PYTHON_DECLARATION | tools/integration_stable_readiness.py | correlate_definitions | None |
+| PYTHON_DECLARATION | tools/integration_owner_desktop.py | owner_app | None |
+| PYTHON_DECLARATION | tools/integration_owner_desktop.py | OwnerInstance.__init__ | None |
+| PYTHON_DECLARATION | tools/integration_owner_desktop.py | OwnerInstance.activate | None |
+| PYTHON_DECLARATION | tools/integration_owner_desktop.py | OwnerInstance.start | None |
+| PYTHON_DECLARATION | tools/integration_distribution.py | closure | None |
+| PYTHON_DECLARATION | tools/integration_distribution.py | verify | None |
 
 ## Blockers
 

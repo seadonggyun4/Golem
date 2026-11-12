@@ -635,8 +635,15 @@ class ConnectionBrowser:
 
 class OwnerInstance:
     """OS lock, not PID guessing. Stale files never authorize a new service."""
-    def __init__(self,directory):
+    def __init__(self,directory,*,ui_config=None):
         import os,stat,fcntl
+        if ui_config is not None:
+            c._validate(ui_config,c.PIN)
+            c.require(Path(ui_config['path']).is_absolute() and '..' not in Path(ui_config['path']).parts,
+                'OWNER_APP_CONFIG_IDENTITY')
+        # Selected configuration identity only: not code identity or proof of
+        # a human approval. The stable controller separately verifies bytes.
+        self.ui_config=copy.deepcopy(ui_config)
         self.directory=private_directory(directory);self.endpoint=None;self.primary=False
         path=self.directory/'owner-app.lock'
         self.fd=os.open(path,os.O_RDWR|os.O_CREAT|os.O_NOFOLLOW,0o600)
@@ -650,23 +657,29 @@ class OwnerInstance:
     def activate(self):
         import socket
         raw=r.regular(self.directory/'owner-app.json',4096,private=True)
-        instance=c.decode(raw,4096)['instance'];value=descriptor(self.directory,instance)
+        record=c.decode(raw,4096)
+        c.require(record.get('ui_config')==self.ui_config,'OWNER_APP_CONFIG_MISMATCH')
+        instance=record['instance'];value=descriptor(self.directory,instance)
         c.require(value['kind']=='activation','OWNER_IPC_KIND')
         with socket.socket(socket.AF_UNIX,socket.SOCK_STREAM) as conn:
             conn.settimeout(IPC_TIMEOUT);conn.connect(str(self.directory/(instance+'.sock')))
-            send_frame(conn,{**{k:value[k] for k in ('instance','token')},'request_id':uuid.uuid4().hex,'operation':'activate','arguments':{}})
+            arguments={} if self.ui_config is None else {'ui_config':self.ui_config}
+            send_frame(conn,{**{k:value[k] for k in ('instance','token')},'request_id':uuid.uuid4().hex,'operation':'activate','arguments':arguments})
             c.require(receive_frame(conn)=={'ok':True,'value':True},'OWNER_APP_ACTIVATION')
 
     def start(self):
         import os
         c.require(self.primary,'OWNER_APP_ALREADY_RUNNING')
         def handle(operation,args):
-            c.require(operation=='activate' and not args,'OWNER_IPC_OPERATION')
+            expected={} if self.ui_config is None else {'ui_config':self.ui_config}
+            c.require(operation=='activate' and args==expected,'OWNER_IPC_OPERATION')
             self.events.put(True);return True
         self.endpoint=LocalEndpoint(self.directory,handle,'activation').start()
         from execution_record import save
         temporary=self.directory/(uuid.uuid4().hex+'.tmp')
-        save(temporary,c.encoded({'instance':self.endpoint.instance}))
+        record={'instance':self.endpoint.instance}
+        if self.ui_config is not None:record['ui_config']=self.ui_config
+        save(temporary,c.encoded(record))
         os.replace(temporary,self.directory/'owner-app.json')
 
     def close(self):
@@ -683,7 +696,17 @@ def owner_app(argv):
     parser.add_argument('--review-directory',required=True)
     parser.add_argument('--codex-config',default=str(Path.home()/'.codex/config.toml'))
     parser.add_argument('--codex-control-socket',help='Explicit officially exposed Desktop control socket, if supported')
-    args=parser.parse_args(argv);instance=OwnerInstance(args.review_directory)
+    parser.add_argument('--stable-config',help='Optional exact owner-reviewed fixed-catalog UI configuration')
+    parser.add_argument('--stable-config-sha256',help='Exact SHA-256 of --stable-config; grants no Work authority')
+    args=parser.parse_args(argv)
+    if bool(args.stable_config)!=bool(args.stable_config_sha256):
+        parser.error('--stable-config and --stable-config-sha256 must be selected together')
+    stable=None;identity=None
+    if args.stable_config:
+        from integration_stable_owner import StableOwnerController
+        stable=StableOwnerController(args.stable_config,args.stable_config_sha256)
+        identity={'path':str(stable.config_path),'sha256':stable.config_sha256}
+    instance=OwnerInstance(args.review_directory,ui_config=identity)
     try:
         if not instance.primary:
             instance.activate();return 0
@@ -693,7 +716,8 @@ def owner_app(argv):
         root=tk.Tk();root.title('Golem · Owner 연결');root.geometry('1000x820')
         tabs=ttk.Notebook(root);tabs.pack(fill='both',expand=True)
         review_tab=ttk.Frame(tabs);connection_tab=ttk.Frame(tabs)
-        tabs.add(review_tab,text='Owner 후보');tabs.add(connection_tab,text='Codex 연결·갱신')
+        tabs.add(review_tab,text='Owner 후보')
+        tabs.add(connection_tab,text='기존 연결 진단' if stable is not None else 'Codex 연결·갱신')
         windows={}
         def open_review(key):
             # Recheck descriptor even when a previous child window exists.
@@ -709,6 +733,12 @@ def owner_app(argv):
         connection=ConnectionMonitor(args.codex_config,instance.directory,
             control=CodexControl(socket_path=args.codex_control_socket))
         connection_panel=ConnectionPanel(connection_tab,connection)
+        if stable is not None:
+            from integration_stable_owner_ui import StableOwnerPanel
+            stable_tab=ttk.Frame(tabs)
+            tabs.add(stable_tab,text='고정 연결·실행부 전환')
+            stable_panel=StableOwnerPanel(stable_tab,stable)
+            tabs.select(stable_tab)
         def poll():
             try:
                 while True:instance.events.get_nowait();root.deiconify();root.lift()

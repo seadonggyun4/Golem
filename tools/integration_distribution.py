@@ -23,7 +23,8 @@ SKILLS=('plugins/golem/skills/golem-setup/SKILL.md','plugins/golem/skills/golem-
         'plugins/golem/skills/golem-work/references/profiles.md')
 OWNER_DESKTOP_FILES=('tools/integration_owner_review.py','tools/integration_owner_desktop.py',
     'tools/integration_client_connection.py','tools/integration_codex_control.py',
-    'tools/integration_connection_ui.py','tools/integration_connection_readiness.py')
+    'tools/integration_connection_ui.py','tools/integration_connection_readiness.py',
+    'tools/integration_stable_owner.py','tools/integration_stable_owner_ui.py')
 # One canonical relay implementation, copied verbatim into the reviewed Owner
 # runtime so its metadata client needs no installed-plugin import path.
 OWNER_RELAY_SOURCE='plugins/golem/scripts/connection_relay.py'

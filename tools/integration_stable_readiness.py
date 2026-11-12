@@ -96,6 +96,89 @@ def _selected(value):
     return (selection, catalog, names) if valid else None
 
 
+def correlate_definitions(selected, live, model, now_ns):
+    """Correlate a fixed frontend with external chat evidence, never a backend.
+
+    This is useful while a new selection is published but the old backend is
+    still live. It cannot report preparation readiness or authorize a refresh.
+    The existing exact transition controller and native call gates remain
+    responsible for their own decisions.
+    """
+    if not _positive(now_ns):
+        raise ValueError('OBSERVATION_CLOCK')
+    result = {'schema':'golem.stable-definition-correlation.v1', 'state':'BLOCKED',
+        'correlated':False, 'frontend_bound':False, 'reason':'DISK_SELECTION_NOT_OBSERVED',
+        'next_step':'INSPECT_EXACT_STABLE_SELECTION', 'target':None, 'observed_tools':[],
+        'frontend_catalog':'NOT_OBSERVED', 'same_chat_model_tools':'NOT_OBSERVED',
+        'preparation_allowed':False, 'execution_authorized':False,
+        'owner_identity_authenticated':False, 'native_work_verified':False,
+        'automatic_retry_allowed':False, 'actual_execution':'HOLD'}
+
+    def block(reason, step):
+        result.update(reason=reason, next_step=step)
+        return result
+
+    snapshot = _selected(selected)
+    if snapshot is None:
+        return block('DISK_SELECTION_INVALID_OR_UNOBSERVED', 'INSPECT_EXACT_STABLE_SELECTION')
+    selection, catalog, names = snapshot
+    if not isinstance(live, Mapping):
+        return block('LIVE_BACKEND_NOT_OBSERVED', 'OBSERVE_NEW_BACKEND_STATUS')
+    if not _fresh(live.get('observed_at_ns'), now_ns):
+        return block('LIVE_OBSERVATION_STALE_OR_UNDATED', 'OBSERVE_NEW_BACKEND_STATUS')
+    if (live.get('schema') != 'golem.stable-connection-relay.v1'
+            or live.get('frontend_abi') != FRONTEND_ABI):
+        return block('LIVE_FRONTEND_ABI_MISMATCH', 'REVIEW_FRONTEND_COMPATIBILITY')
+    if (live.get('client') != selection['client']
+            or live.get('catalog_sha256') != selected['catalog_sha256']
+            or live.get('catalog_tools_sha256') != catalog['tools_sha256']):
+        return block('LIVE_SELECTION_OR_CATALOG_MISMATCH', 'REVIEW_EXACT_SELECTED_TRANSITION')
+    marker = live.get('definition_marker')
+    parsed = MARKER.fullmatch(marker) if type(marker) is str else None
+    if parsed is None or parsed.group(1) != live.get('instance') or parsed.group(2) != selected['catalog_sha256']:
+        return block('LIVE_FRONTEND_MARKER_INVALID', 'OBSERVE_CURRENT_FRONTEND_STATUS')
+    result['frontend_bound'] = True
+    frontend = live.get('frontend_catalog')
+    if not isinstance(frontend, Mapping):
+        return block('FRONTEND_CATALOG_NOT_FORWARDED', 'OBSERVE_FIXED_DEFINITIONS_IN_TARGET_CHAT')
+    counts = [frontend.get(key) for key in ('requests', 'responses', 'errors')]
+    if (frontend.get('schema') != 'golem.stable-frontend-catalog-observation.v1'
+            or frontend.get('state') != 'HOST_CATALOG_RESPONSE_SENT'
+            or frontend.get('catalog_sha256') != selected['catalog_sha256']
+            or frontend.get('definition_marker') != marker
+            or frontend.get('model_delivery_verified') is not False
+            or not _match(DIGEST, frontend.get('current_complete_sha256'))
+            or not all(type(value) is int and 0 <= value < (1 << 63) for value in counts)
+            or not 0 <= counts[2] < counts[1] <= counts[0]):
+        return block('FRONTEND_CATALOG_NOT_FORWARDED', 'OBSERVE_FIXED_DEFINITIONS_IN_TARGET_CHAT')
+    if (type(live.get('definition_tool_count')) is not int or live['definition_tool_count'] != len(names)
+            or live.get('definition_tools_sha256') != _names_digest(names)):
+        return block('LIVE_DEFINITION_INVENTORY_MISMATCH', 'OBSERVE_CURRENT_FRONTEND_STATUS')
+    result['frontend_catalog'] = 'FIXED_RESPONSE_FORWARDED_MODEL_UNCONFIRMED'
+    if not isinstance(model, Mapping) or model.get('source') != MODEL_SOURCE:
+        return block('EXTERNAL_MODEL_DEFINITIONS_NOT_OBSERVED', 'OBSERVE_INTENDED_CHAT_DEFINITIONS')
+    target = model.get('target')
+    if (not isinstance(target, Mapping) or set(target) != {'thread_id', 'server_name'}
+            or not all(_identifier(target[key]) for key in target)
+            or model.get('thread_id') != target['thread_id'] or model.get('server_name') != target['server_name']
+            or not _identifier(model.get('turn_id'))):
+        return block('MODEL_TARGET_OR_TURN_MISMATCH', 'OBSERVE_INTENDED_CHAT_DEFINITIONS')
+    result['target'] = dict(target)
+    if not _fresh(model.get('observed_at_ns'), now_ns):
+        return block('MODEL_OBSERVATION_STALE_OR_UNDATED', 'OBSERVE_INTENDED_CHAT_DEFINITIONS')
+    if model['observed_at_ns'] > live['observed_at_ns']:
+        return block('LIVE_OBSERVATION_PRECEDES_MODEL', 'OBSERVE_NEW_BACKEND_STATUS')
+    if model.get('marker') != marker:
+        return block('MODEL_FRONTEND_MARKER_MISMATCH', 'OBSERVE_INTENDED_CHAT_DEFINITIONS')
+    if not _tools(model.get('tools')) or _names_digest(model['tools']) != _names_digest(names):
+        return block('MODEL_FULL_TOOL_INVENTORY_MISMATCH', 'OBSERVE_INTENDED_CHAT_DEFINITIONS')
+    result.update(state='EXTERNAL_CORRELATION_ONLY', correlated=True,
+        reason='FIXED_CHAT_DEFINITIONS_CORRELATED_BACKEND_NOT_ADMITTED',
+        next_step='REVIEW_EXACT_TRANSITION_AND_CURRENT_BACKEND_SEPARATELY',
+        observed_tools=sorted(model['tools']), same_chat_model_tools='EXTERNALLY_CORRELATED_FIXED_DEFINITIONS')
+    return result
+
+
 def classify(selected, live, model, required_tools, now_ns, refresh=None):
     """Use an exact selected snapshot, fresh status and external chat evidence.
 
@@ -172,47 +255,15 @@ def classify(selected, live, model, required_tools, now_ns, refresh=None):
     if acknowledged and (live['observed_at_ns'] <= refresh['completed_at_ns'] or
             live['backend_epoch'] <= refresh['previous_backend_epoch']):
         return block('POST_ACK_BACKEND_PROOF_NOT_OBSERVED', 'OBSERVE_NEW_BACKEND_STATUS')
-    marker = live.get('definition_marker')
-    parsed = MARKER.fullmatch(marker) if type(marker) is str else None
-    if parsed is None or parsed.group(1) != live.get('instance') or parsed.group(2) != selected['catalog_sha256']:
-        return block('LIVE_FRONTEND_MARKER_INVALID', 'OBSERVE_CURRENT_FRONTEND_STATUS')
-    result['stages']['backend_selection'] = 'CURRENT_EXACT_BACKEND_OBSERVED'
-    frontend = live.get('frontend_catalog')
-    if not isinstance(frontend, Mapping):
-        return block('FRONTEND_CATALOG_NOT_FORWARDED', 'OBSERVE_FIXED_DEFINITIONS_IN_TARGET_CHAT')
-    counts = [frontend.get(key) for key in ('requests', 'responses', 'errors')]
-    if (frontend.get('schema') != 'golem.stable-frontend-catalog-observation.v1'
-            or frontend.get('state') != 'HOST_CATALOG_RESPONSE_SENT'
-            or frontend.get('catalog_sha256') != selected['catalog_sha256']
-            or frontend.get('definition_marker') != marker
-            or frontend.get('model_delivery_verified') is not False
-            or not _match(DIGEST, frontend.get('current_complete_sha256'))
-            or not all(type(value) is int and 0 <= value < (1 << 63) for value in counts)
-            or not 0 <= counts[2] < counts[1] <= counts[0]):
-        return block('FRONTEND_CATALOG_NOT_FORWARDED', 'OBSERVE_FIXED_DEFINITIONS_IN_TARGET_CHAT')
-    if (type(live.get('definition_tool_count')) is not int or live['definition_tool_count'] != len(names)
-            or live.get('definition_tools_sha256') != _names_digest(names)):
-        return block('LIVE_DEFINITION_INVENTORY_MISMATCH', 'OBSERVE_CURRENT_FRONTEND_STATUS')
-    result['stages']['frontend_catalog'] = 'FIXED_RESPONSE_FORWARDED_MODEL_UNCONFIRMED'
-    if not isinstance(model, Mapping) or model.get('source') != MODEL_SOURCE:
-        return block('EXTERNAL_MODEL_DEFINITIONS_NOT_OBSERVED', 'OBSERVE_INTENDED_CHAT_DEFINITIONS')
-    target = model.get('target')
-    if (not isinstance(target, Mapping) or set(target) != {'thread_id', 'server_name'}
-            or not all(_identifier(target[key]) for key in target)
-            or model.get('thread_id') != target['thread_id'] or model.get('server_name') != target['server_name']
-            or not _identifier(model.get('turn_id'))):
-        return block('MODEL_TARGET_OR_TURN_MISMATCH', 'OBSERVE_INTENDED_CHAT_DEFINITIONS')
-    result['target'] = dict(target)
-    if not _fresh(model.get('observed_at_ns'), now_ns):
-        return block('MODEL_OBSERVATION_STALE_OR_UNDATED', 'OBSERVE_INTENDED_CHAT_DEFINITIONS')
-    if model['observed_at_ns'] > live['observed_at_ns']:
-        return block('LIVE_OBSERVATION_PRECEDES_MODEL', 'OBSERVE_NEW_BACKEND_STATUS')
-    if model.get('marker') != marker:
-        return block('MODEL_FRONTEND_MARKER_MISMATCH', 'OBSERVE_INTENDED_CHAT_DEFINITIONS')
-    if not _tools(model.get('tools')) or _names_digest(model['tools']) != _names_digest(names):
-        return block('MODEL_FULL_TOOL_INVENTORY_MISMATCH', 'OBSERVE_INTENDED_CHAT_DEFINITIONS')
-    result['observed_tools'] = sorted(model['tools'])
-    result['stages']['same_chat_model_tools'] = 'EXTERNALLY_CORRELATED_FIXED_DEFINITIONS'
+    correlation = correlate_definitions(selected, live, model, now_ns)
+    if correlation['frontend_bound']:
+        result['stages']['backend_selection'] = 'CURRENT_EXACT_BACKEND_OBSERVED'
+    result['target'] = correlation['target']
+    result['observed_tools'] = correlation['observed_tools']
+    for stage in ('frontend_catalog', 'same_chat_model_tools'):
+        result['stages'][stage] = correlation[stage]
+    if not correlation['correlated']:
+        return block(correlation['reason'], correlation['next_step'])
     if not required_tools:
         return block('PREPARATION_TOOLS_NOT_SELECTED', 'SELECT_REQUIRED_TYPED_DEFINITIONS')
     if not set(required_tools).issubset(names):

@@ -92,6 +92,46 @@ class StableReadiness(unittest.TestCase):
         self.live['client']='codex'
         self.assertEqual(self.blocked()['reason'],'LIVE_SELECTION_OR_CATALOG_MISMATCH')
 
+    def test_frontend_correlation_does_not_admit_published_new_backend(self):
+        previous=self.selected
+        selection=dict(previous['selection'],revision=2,previous_sha256=previous['selection_sha256'],
+            adapter_state='/private/fixture/state-2',approval_sha256='d'*64,launcher_sha256='e'*64)
+        self.selected=snapshot(selection,previous['catalog'])
+        result=readiness.correlate_definitions(self.selected,self.live,self.model,self.now)
+        self.assertTrue(result['correlated'])
+        self.assertEqual(result['state'],'EXTERNAL_CORRELATION_ONLY')
+        self.assertFalse(result['preparation_allowed'])
+        self.assert_no_authority(result)
+        self.assertEqual(self.blocked()['reason'],'LIVE_SELECTION_OR_CATALOG_MISMATCH')
+
+    def test_frontend_correlation_does_not_hide_busy_or_uncertain_backend(self):
+        for change in ({'busy':True,'pending':1},{'state':'UNKNOWN','failure':'UNCERTAIN'}):
+            with self.subTest(change=change):
+                live=dict(self.live,**change)
+                result=readiness.correlate_definitions(self.selected,live,self.model,self.now)
+                self.assertTrue(result['correlated'])
+                self.assertFalse(result['preparation_allowed'])
+                self.assert_no_authority(result)
+                self.assertEqual(self.blocked(live=live)['reason'],'LIVE_BACKEND_BUSY_OR_UNCERTAIN')
+
+    def test_frontend_correlation_requires_exact_client_and_fresh_external_proof(self):
+        cases=[('client',dict(self.live,client='claude-desktop'),self.model),
+               ('stale',self.live,dict(self.model,observed_at_ns=self.now-readiness.MAX_AGE_NS-1)),
+               ('marker',self.live,dict(self.model,marker=self.marker[:-1]+'3')),
+               ('inventory',self.live,dict(self.model,tools=self.tools[:1])),
+               ('turn',self.live,dict(self.model,turn_id=''))]
+        for name,live,model in cases:
+            with self.subTest(name=name):
+                result=readiness.correlate_definitions(self.selected,live,model,self.now)
+                self.assertFalse(result['correlated'])
+                self.assertFalse(result['preparation_allowed'])
+                self.assert_no_authority(result)
+
+    def test_invalid_frontend_marker_preserves_unobserved_backend_stage(self):
+        result=self.blocked(live=dict(self.live,definition_marker='invalid'))
+        self.assertEqual(result['reason'],'LIVE_FRONTEND_MARKER_INVALID')
+        self.assertEqual(result['stages']['backend_selection'],'NOT_OBSERVED')
+
     def test_preserved_frontend_evidence_accepts_fresh_new_backend_without_host_relist(self):
         previous=self.selected
         next_selection=dict(previous['selection'],revision=2,previous_sha256=previous['selection_sha256'],
