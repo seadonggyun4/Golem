@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import threading
 import time
+from types import SimpleNamespace
 from unittest.mock import Mock
 import unittest
 
@@ -119,6 +120,21 @@ class Presentation(unittest.TestCase):
         self.assertIn('$(do-not-run)<x>\ufffd',shown['model'])
         self.assertIn('표시 한도',shown['details'])
         self.assertLess(len(shown['details']),262250)
+
+    def test_full_tool_inventory_remains_in_details_not_expanding_summary(self):
+        value=report('refresh')
+        names=['golem_fixture_'+str(i)+'_long_name'*8 for i in range(78)]
+        value['model_observation']['tools']=names
+        original=copy.deepcopy(value)
+        shown=ui.presentation(value,'codex')
+        self.assertIn('78개',shown['model'])
+        self.assertIn('원본 상세',shown['model'])
+        self.assertLess(len(shown['model']),500)
+        for name in names:
+            self.assertIn(name,shown['details'])
+            self.assertNotIn(name,shown['model'])
+        self.assertEqual(value,original)
+        self.assertEqual(shown['review']['token'],TOKEN)
 
     def test_unknown_counters_stay_unknown(self):
         value=report();value['live'].pop('backend_epoch')
@@ -292,6 +308,102 @@ class KeyboardRows(unittest.TestCase):
         p._enable.assert_not_called();self.assertEqual(p.controller.mock_calls,[])
 
 
+class MemoryViewportWidget:
+    def __init__(self, master=None, kind='TButton', top=0, height=24):
+        self.master=master;self.kind=kind;self.top=top;self.height=height
+        self.children=[];self.tags=(str(id(self)),kind,'all');self.bindings={}
+        if master is not None:master.children.append(self)
+    def winfo_class(self):return self.kind
+    def winfo_children(self):return self.children
+    def winfo_rooty(self):return self.top
+    def winfo_height(self):return self.height
+    def bindtags(self, tags=None):
+        if tags is not None:self.tags=tags
+        return self.tags
+    def bind_class(self, tag, sequence, callback):self.bindings[tag,sequence]=callback
+
+
+class MemoryViewportCanvas(MemoryViewportWidget):
+    def __init__(self, master):
+        super().__init__(master,'Canvas',height=400)
+        self.extent=(0,0,800,2000);self.offset=0;self.moves=[];self.scrolls=[]
+    def bbox(self, target):return self.extent
+    def canvasy(self, y):return self.offset+y
+    def yview_moveto(self, fraction):self.moves.append(fraction);self.offset=fraction*2000
+    def yview_scroll(self, amount, unit):self.scrolls.append((amount,unit))
+
+
+class ViewportAccess(unittest.TestCase):
+    def setUp(self):
+        self.panel=ui.StableOwnerPanel.__new__(ui.StableOwnerPanel)
+        self.panel.frame=MemoryViewportWidget(kind='TFrame')
+        self.panel.canvas=MemoryViewportCanvas(self.panel.frame)
+        self.panel.body=MemoryViewportWidget(self.panel.canvas,'TFrame',top=100)
+        self.button=MemoryViewportWidget(self.panel.body,top=1400,height=30)
+        self.panel.controller=Mock()
+
+    def tearDown(self):self.assertEqual(self.panel.controller.mock_calls,[])
+
+    def event(self, widget=None, **fields):
+        return SimpleNamespace(widget=widget or self.button,**fields)
+
+    def test_focus_makes_lower_button_visible_and_retains_already_visible_view(self):
+        p=self.panel;p._follow_focus(self.event())
+        self.assertEqual(p.canvas.moves,[938/2000])
+        p._follow_focus(self.event())
+        self.assertEqual(p.canvas.moves,[938/2000])
+
+    def test_reverse_focus_brings_top_input_into_view(self):
+        p=self.panel;p.canvas.offset=900
+        entry=MemoryViewportWidget(p.body,'TEntry',top=150,height=24)
+        p._follow_focus(self.event(entry))
+        self.assertEqual(p.canvas.moves,[42/2000])
+
+    def test_tall_nested_widget_focus_shows_its_top_without_repeated_movement(self):
+        p=self.panel;text=MemoryViewportWidget(p.body,'Text',top=600,height=700)
+        p._follow_focus(self.event(text));p._follow_focus(self.event(text))
+        self.assertEqual(p.canvas.moves,[492/2000])
+
+    def test_scoped_page_keys_and_platform_wheel_deltas(self):
+        p=self.panel
+        for fields,expected in [({'keysym':'Next'},(1,'pages')),({'keysym':'Prior'},(-1,'pages')),
+                ({'delta':-240},(2,'units')),({'delta':1},(-1,'units')),
+                ({'num':4},(-1,'units')),({'num':5},(1,'units')),({'delta':-24000},(10,'units'))]:
+            self.assertEqual(p._scroll_viewport(self.event(**fields)),'break')
+            self.assertEqual(p.canvas.scrolls[-1],expected)
+
+    def test_nested_scrollables_and_combobox_keep_their_own_events(self):
+        p=self.panel
+        for kind in ('Treeview','Text','Listbox','Canvas','TScrollbar','Scrollbar','TCombobox','Spinbox','TSpinbox'):
+            nested=MemoryViewportWidget(p.body,kind)
+            for target in (nested,MemoryViewportWidget(nested)):
+                for fields in ({'keysym':'Next'},{'keysym':'Prior'},{'delta':-120},{'num':5}):
+                    self.assertIsNone(p._scroll_viewport(self.event(target,**fields)))
+        self.assertEqual(p.canvas.scrolls,[])
+
+    def test_other_tabs_shift_wheel_and_zero_delta_are_not_consumed(self):
+        p=self.panel;other=MemoryViewportWidget()
+        for event in (self.event(other,delta=120),self.event(state=1,delta=-120),self.event(delta=0)):
+            self.assertIsNone(p._scroll_viewport(event))
+        p._follow_focus(self.event(other))
+        self.assertEqual(p.canvas.moves,[]);self.assertEqual(p.canvas.scrolls,[])
+
+    def test_absent_or_nonoverflowing_geometry_never_moves_view(self):
+        p=self.panel
+        for extent,height in [(None,400),((0,0,800,300),400),((0,0,800,2000),1)]:
+            p.canvas.extent=extent;p.canvas.height=height
+            p._follow_focus(self.event())
+        self.assertEqual(p.canvas.moves,[])
+
+    def test_bindings_are_panel_local_and_preserve_widget_and_class_bindings(self):
+        p=self.panel;other=MemoryViewportWidget();old=other.tags
+        old_button=self.button.tags;p._bind_viewport()
+        self.assertEqual(self.button.tags,(old_button[0],p.viewport_tag,*old_button[1:]))
+        self.assertEqual(other.tags,old);self.assertEqual(other.bindings,{})
+        self.assertEqual(set(p.frame.bindings),{(p.viewport_tag,e) for e in p.viewport_events})
+        self.assertEqual(p.canvas.scrolls,[]);self.assertEqual(p.canvas.moves,[])
+
+
 class NativePanel(unittest.TestCase):
     def setUp(self):
         if os.environ.get('GOLEM_TEST_TK')!='1':
@@ -399,6 +511,30 @@ class NativePanel(unittest.TestCase):
         self.assertTrue(p.canvas.cget('yscrollcommand'))
         self.assertTrue(p.details.cget('yscrollcommand'));self.assertTrue(p.details.cget('xscrollcommand'))
         self.assertEqual(p.details.cget('wrap'),'none')
+
+    def test_native_tab_focus_tracks_inputs_and_lower_controls(self):
+        p=self.panel;self.root.geometry('700x400');self.root.update()
+        p.input_widgets[1].focus_force();self.root.update()
+        p.input_widgets[1].event_generate('<Tab>');self.root.update()
+        self.assertIs(self.root.focus_get(),p.input_widgets[2])
+        p.review_refresh_button.focus_force();self.root.update()
+        top=p.review_refresh_button.winfo_rooty()-p.canvas.winfo_rooty()
+        self.assertGreaterEqual(top,0)
+        self.assertLessEqual(top+p.review_refresh_button.winfo_height(),p.canvas.winfo_height())
+        self.assertEqual(self.controller.calls,[])
+        self.assertEqual(str(p.refresh_button.cget('state')),'disabled')
+
+    def test_native_page_and_wheel_scroll_outer_panel_without_stealing_tree(self):
+        p=self.panel;self.root.geometry('700x400');self.root.update()
+        p.observe_button.focus_force();self.root.update();p.canvas.yview_moveto(0)
+        p.observe_button.event_generate('<Next>');self.root.update()
+        self.assertGreater(p.canvas.yview()[0],0)
+        p.canvas.yview_moveto(0);p.observe_button.event_generate('<MouseWheel>',delta=-120)
+        self.root.update();self.assertGreater(p.canvas.yview()[0],0)
+        p.tree.focus_force();self.root.update();position=p.canvas.yview()
+        p.tree.event_generate('<MouseWheel>',delta=-120);p.tree.event_generate('<Next>')
+        self.root.update();self.assertEqual(p.canvas.yview(),position)
+        self.assertEqual(self.controller.calls,[])
 
 
 if __name__=='__main__':unittest.main()

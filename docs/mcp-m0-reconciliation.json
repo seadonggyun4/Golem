@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "7c347371c53685a9a175334960ff03e65012c25273303c6c90403ae4777949ea",
+  "inventory_sha256": "05c708aa56a15ea23576f2194fe8d20c883dac1c3996dc7d08ed4b15f48d63ea",
   "selected_source_count": 672,
   "selected_observation_count": 2525,
   "selected_capability_count": 1349,
@@ -6286,7 +6286,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "668bd1060d0a002c2ba119cd04d159000baa1c1d99922671d21513ea9bdeeb38"
+      "sha256": "2a3b9f4f24ebd9b26bb16765889937923e3d605799be7a2affb64a92fd722a51"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -6294,7 +6294,7 @@
     },
     {
       "path": "tools/integration_stable_owner_ui.py",
-      "sha256": "23d72ce803c3ef38ae4bed3602e50e457b6265836c2d467f6c3c2009126d7a47"
+      "sha256": "e91fde44ca69c60c171bcf591096424455b1655c9c1ccbfd0cc063fa64a1c8e4"
     },
     {
       "path": "tools/test_integration_stable_owner.py",
@@ -6302,7 +6302,7 @@
     },
     {
       "path": "tools/test_integration_stable_owner_ui.py",
-      "sha256": "fffbaf3f6d364e9c2ab8d658f4e55572f81b0043e46973649157ffe74dd439f5"
+      "sha256": "72aa34e9971f5e7980c0163b830b489dbe9a538213da2f60f46805070f205906"
     },
     {
       "path": "tools/integration_stable_observation.py",
@@ -6314,7 +6314,7 @@
     },
     {
       "path": "docs/integration-stable-observation.md",
-      "sha256": "ed9847bda208e826c6a95a87a0bccf861d2fa264ac36fd8c70a3e2da37c4e92c"
+      "sha256": "fed0e228083f82a28c4e662f81f85344e0b29be5cb9b78fa7086d18947b600bf"
     }
   ],
   "native_definitions": [
@@ -12492,7 +12492,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 416,
+      "checked_functions": 420,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -60109,17 +60109,21 @@
         "StableOwnerPanel",
         "StableOwnerPanel.__init__",
         "StableOwnerPanel._available_review",
+        "StableOwnerPanel._bind_viewport",
         "StableOwnerPanel._client_changed",
         "StableOwnerPanel._destroyed",
         "StableOwnerPanel._drain",
         "StableOwnerPanel._enable",
         "StableOwnerPanel._file_inputs",
+        "StableOwnerPanel._follow_focus",
         "StableOwnerPanel._inputs_changed",
         "StableOwnerPanel._render",
         "StableOwnerPanel._render_rows",
+        "StableOwnerPanel._scroll_viewport",
         "StableOwnerPanel._selected_row",
         "StableOwnerPanel._selection_changed",
         "StableOwnerPanel._submit",
+        "StableOwnerPanel._viewport_target",
         "StableOwnerPanel.inspect",
         "StableOwnerPanel.navigate",
         "StableOwnerPanel.observe",
@@ -60147,6 +60151,10 @@
           "PREPARATION_READY_NOT_AUTHORIZED"
         ],
         [
+          "Call(func=Attribute(value=Name(id='self', ctx=Load()), attr='_viewport_target', ctx=Load()), args=[Attribute(value=Name(id='event', ctx=Load()), attr='widget', ctx=Load())])",
+          "outer"
+        ],
+        [
           "Call(func=Attribute(value=Name(id='value', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='actual_execution')])",
           "HOLD"
         ],
@@ -60159,6 +60167,42 @@
           "RESULT_UNKNOWN"
         ],
         [
+          "Call(func=Attribute(value=Name(id='widget', ctx=Load()), attr='winfo_class', ctx=Load()))",
+          "Canvas"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='widget', ctx=Load()), attr='winfo_class', ctx=Load()))",
+          "Listbox"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='widget', ctx=Load()), attr='winfo_class', ctx=Load()))",
+          "Scrollbar"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='widget', ctx=Load()), attr='winfo_class', ctx=Load()))",
+          "Spinbox"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='widget', ctx=Load()), attr='winfo_class', ctx=Load()))",
+          "TCombobox"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='widget', ctx=Load()), attr='winfo_class', ctx=Load()))",
+          "TScrollbar"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='widget', ctx=Load()), attr='winfo_class', ctx=Load()))",
+          "TSpinbox"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='widget', ctx=Load()), attr='winfo_class', ctx=Load()))",
+          "Text"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='widget', ctx=Load()), attr='winfo_class', ctx=Load()))",
+          "Treeview"
+        ],
+        [
           "Name(id='ch', ctx=Load())",
           "\n\t"
         ],
@@ -60169,6 +60213,14 @@
         [
           "Name(id='endpoint', ctx=Load())",
           "PRESENT"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
+          "Next"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
+          "Prior"
         ],
         [
           "Name(id='key', ctx=Load())",
@@ -60197,6 +60249,10 @@
         [
           "Name(id='kind', ctx=Load())",
           "review-refresh"
+        ],
+        [
+          "Name(id='sequence', ctx=Load())",
+          "<FocusIn>"
         ]
       ],
       "operations": [
@@ -66988,7 +67044,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "de3d3ea679eb04f814a90f5b721073af4b15667216eb677bbf01ee3a9e986ebf",
+      "sha256": "2a007ccc081f4994147e36311bfaffbebec90c7c8e7cf43ef193578a3e3dd870",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -67132,7 +67188,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "5a2b97f28ca0bf0c75880b6356d5e696e8f1a1c82fa92d9b950d67a9d4e6c5d9",
+      "sha256": "4e7b5bc7cbb5638774b4a81863d6280b825b8bc9758c39fa8c8b4703b801c06f",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },

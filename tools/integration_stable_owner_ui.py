@@ -113,7 +113,7 @@ def presentation(value, client):
         '외부 관측 대화 / turn: ' + text(model.get('thread_id')) + ' / ' + text(model.get('turn_id')),
         '실제 도구 정의 marker: ' + text(model.get('marker')),
         '원본 관측 시각(ns): ' + text(model.get('observed_at_ns')),
-        '실제 노출 도구: ' + ', '.join(text(name) for name in model.get('tools', [])[:128])
+        '실제 노출 도구: ' + str(len(model['tools'])) + '개 · 전체 이름은 아래 원본 상세에서 확인'
         if type(model.get('tools')) is list else '실제 노출 도구: 미확인',
     ])
     return {'valid': valid, 'client': client, 'state': text(value.get('state')) if valid else 'STABLE_OWNER_REPORT_MISMATCH',
@@ -165,6 +165,8 @@ class BackgroundRequest:
 
 class StableOwnerPanel:
     """Optional explicit UI. Constructing or selecting a row has no I/O effect."""
+    viewport_events = ('<FocusIn>', '<Prior>', '<Next>', '<MouseWheel>', '<Button-4>', '<Button-5>')
+
     def __init__(self, root, controller):
         import tkinter as tk
         from tkinter import ttk
@@ -277,7 +279,75 @@ class StableOwnerPanel:
             variable.trace_add('write', lambda *args: self._inputs_changed('observation'))
         for variable in (self.selection_path,self.selection_sha):
             variable.trace_add('write', lambda *args: self._inputs_changed('selection'))
+        self._bind_viewport()
         self._enable()
+
+    def _bind_viewport(self):
+        # A panel-local tag, not bind_all: other tabs, windows, and native
+        # combobox popdowns keep their own event handling.
+        self.viewport_tag = 'GolemOwnerViewport:' + str(self.frame)
+        for sequence in self.viewport_events:
+            callback = self._follow_focus if sequence == '<FocusIn>' else self._scroll_viewport
+            self.frame.bind_class(self.viewport_tag, sequence, callback)
+        pending = [self.frame]
+        while pending:
+            widget = pending.pop()
+            tags = widget.bindtags()
+            widget.bindtags((tags[0], self.viewport_tag, *tags[1:]))
+            pending.extend(widget.winfo_children())
+
+    def _viewport_target(self, widget):
+        nested = False
+        while widget is not None:
+            if widget is self.frame:
+                return 'nested' if nested else 'outer'
+            if widget is not self.canvas and widget.winfo_class() in (
+                    'Treeview', 'Text', 'Listbox', 'Canvas', 'TScrollbar', 'Scrollbar',
+                    'TCombobox', 'Spinbox', 'TSpinbox'):
+                nested = True
+            widget = widget.master
+        return None
+
+    def _scroll_viewport(self, event):
+        if self._viewport_target(event.widget) != 'outer':
+            return None
+        # Shift-wheel belongs to horizontal navigation, never this viewport.
+        if getattr(event, 'state', 0) & 1:
+            return None
+        key = getattr(event, 'keysym', None)
+        if key in ('Prior', 'Next'):
+            self.canvas.yview_scroll(-1 if key == 'Prior' else 1, 'pages')
+        else:
+            number, delta = getattr(event, 'num', None), getattr(event, 'delta', 0)
+            if number in (4, 5):
+                units = -1 if number == 4 else 1
+            elif type(delta) is int and delta:
+                units = (-1 if delta > 0 else 1) * max(1, min(10, abs(delta) // 120))
+            else:
+                return None
+            self.canvas.yview_scroll(units, 'units')
+        return 'break'
+
+    def _follow_focus(self, event):
+        if self._viewport_target(event.widget) is None:
+            return
+        bounds = self.canvas.bbox('all')
+        if not bounds:
+            return
+        height = self.canvas.winfo_height()
+        extent = bounds[3] - bounds[1]
+        if height <= 1 or extent <= height:
+            return
+        top = event.widget.winfo_rooty() - self.body.winfo_rooty()
+        bottom = top + event.widget.winfo_height()
+        current = self.canvas.canvasy(0)
+        target = current
+        if top < current + 8 or bottom - top > height - 16:
+            target = top - 8
+        elif bottom > current + height - 8:
+            target = bottom - height + 8
+        if target != current:
+            self.canvas.yview_moveto(max(0.0, min(1.0, (target - bounds[1]) / extent)))
 
     def _file_inputs(self, parent, path, pin, row):
         from tkinter import ttk, filedialog
@@ -467,5 +537,8 @@ class StableOwnerPanel:
         if event.widget is not self.frame:
             return
         self.request.close()
+        if hasattr(self, 'viewport_tag'):
+            for sequence in self.viewport_events:
+                self.frame.unbind_class(self.viewport_tag, sequence)
         if self.after_id is not None:
             self.root.after_cancel(self.after_id);self.after_id=None

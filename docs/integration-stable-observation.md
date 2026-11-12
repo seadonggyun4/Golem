@@ -39,6 +39,14 @@ python3 tools/integration_stable_observation.py \
 
 출력은 새 폴더 0700·파일 0600이며 덮어쓰지 않는다. 관측 시각은 원본 tool output의 UTC timestamp다. 현재 시각·파일 mtime·변환 시각으로 갱신하지 않으며 5분이 지난 자료는 거부한다. 부분 출력은 보존하고 같은 경로로 자동 재시도하지 않는다. `observation.json`은 기존 Owner 입력 형식이며 `provenance.json`은 입력 SHA·고정 script SHA·원본 행 SHA·call ID·원래 시각·출력 SHA를 별도로 기록한다.
 
+## Claude의 정의 검색 결과 대조
+
+검색어와 반환된 도구 이름은 별도로 검사한다. 실제 Desktop 관측에서는 `query: golem_work_noop_run, limit: 1`에 `Golem:golem_adapter_noop_run`이 반환됐다. 이는 서로 다른 두 도구이며, 첫 검색 결과를 요청한 정의로 간주하면 안 된다. 원래 이름을 바꾸거나 다른 도구를 호출해 확인하지 않는다.
+
+정의 관측을 준비할 때 현재 목록의 정확한 이름과 설명을 사용하고, 검토한 검색 횟수·결과 개수 안에서 **반환된 상세 정의의 이름이 정확히 일치하는 항목만** 선택한다. 단일 최상위 결과가 정확한 이름 조회를 보장한다고 가정하지 않는다. 이름·marker·schema 중 필요한 정보가 없거나 다른 이름이면 `NOT_OBSERVED`로 기록한다. 실패 후 추가 검색은 자동 수행하지 않고 원래 검증 범위를 따른다.
+
+Anthropic의 [공식 tool search 설명](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool)은 검색어/패턴과 반환된 tool reference를 구분한다. 이 API 설명만으로 Desktop의 내부 검색 알고리즘이나 정확한 이름 조회 지원을 확정하지 않는다. 실제 Desktop의 요청·응답 카드와 모델 답변을 따로 보존한다. 모델 답변의 `nop` 오타와 검색이 반환한 다른 `noop` 도구도 서로 다른 관측이다.
+
 ## 검증 범위와 한계
 
 - `read_thread(includeOutputs=true)`의 관측된 지원 응답은 `functions.exec` receipt를 생략한다. `--input-format read-thread`는 `MISSING_MACHINE_RECEIPT`로 거부하며 final 답변을 대신 사용하지 않는다.
