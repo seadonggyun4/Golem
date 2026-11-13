@@ -301,6 +301,49 @@ class MemoryTree:
     def insert(self,parent,where,*,iid,values):self.rows[iid]=values
 
 
+class InputRequests(unittest.TestCase):
+    def setUp(self):
+        p=self.panel=ui.StableOwnerPanel.__new__(ui.StableOwnerPanel)
+        p.clients=('codex','claude-desktop');p.client=Mock();p.client.get.return_value='codex'
+        p.request=SimpleNamespace(busy=False,closed=False);p._submit=Mock();p.controller=Mock()
+        p.observation_path=Mock();p.observation_sha=Mock();p.selection_path=Mock();p.selection_sha=Mock()
+
+    def inputs(self,path,pin):
+        p=self.panel
+        p.observation_path.get.return_value=p.selection_path.get.return_value=path
+        p.observation_sha.get.return_value=p.selection_sha.get.return_value=pin
+
+    def test_empty_or_malformed_inputs_cannot_start_a_request(self):
+        p=self.panel
+        for path,pin in [('',NEW),(' \t\n',NEW),('/fixture/input.json',''),
+                         ('/fixture/input.json','a'*63),('/fixture/input.json','a'*65),
+                         ('/fixture/input.json','A'*64),('/fixture/input.json','g'*64),
+                         ('/fixture/input.json',NEW+'\n')]:
+            with self.subTest(path=path,pin=pin):
+                self.inputs(path,pin)
+                p.observe();p.review_refresh();p.review_selection()
+                p._submit.assert_not_called();self.assertEqual(p.controller.mock_calls,[])
+
+    def test_busy_closed_or_unconfigured_client_cannot_start_any_request(self):
+        p=self.panel;self.inputs('/fixture/input.json',NEW)
+        for condition in ('busy','closed','unconfigured'):
+            with self.subTest(condition=condition):
+                p.request.busy=condition=='busy';p.request.closed=condition=='closed'
+                p.clients=('claude-desktop',) if condition=='unconfigured' else ('codex','claude-desktop')
+                p.inspect();p.observe();p.review_refresh();p.review_selection()
+                p._submit.assert_not_called();self.assertEqual(p.controller.mock_calls,[])
+
+    def test_valid_shape_is_only_forwarded_on_request_without_normalizing_input(self):
+        p=self.panel;path=' /fixture/not-read-by-view.json ';self.inputs(path,NEW)
+        for action,kind,method in [(p.observe,'observe',p.controller.observe),
+                                  (p.review_refresh,'review-refresh',p.controller.review_refresh),
+                                  (p.review_selection,'review-publish',p.controller.review_selection)]:
+            action();p._submit.assert_called_once()
+            submitted,operation=p._submit.call_args.args;self.assertEqual(submitted,kind)
+            method.assert_not_called();operation();method.assert_called_once_with('codex',path,NEW)
+            p._submit.reset_mock()
+
+
 class KeyboardRows(unittest.TestCase):
     def setUp(self):
         self.panel=ui.StableOwnerPanel.__new__(ui.StableOwnerPanel)
@@ -504,6 +547,84 @@ class NativePanel(unittest.TestCase):
             self.root.update();time.sleep(.01)
         self.root.update();self.assertFalse(self.panel.request.busy)
 
+    def observation_input(self):
+        self.panel.observation_path.set('/fixture/model.json');self.panel.observation_sha.set('a'*64)
+
+    def selection_input(self):
+        self.panel.selection_path.set('/fixture/selection.json');self.panel.selection_sha.set(NEW)
+
+    def test_native_client_buttons_support_tab_space_return_and_direction_keys(self):
+        p=self.panel;self.root.update()
+        codex=p.client_buttons['codex'];claude=p.client_buttons['claude-desktop']
+        codex.focus_force();self.root.update();codex.event_generate('<Tab>');self.root.update()
+        self.assertIs(self.root.focus_get(),claude);self.assertEqual(p.client.get(),'codex')
+        claude.event_generate('<space>');self.root.update()
+        self.assertEqual(p.client.get(),'claude-desktop');self.assertIn('Claude Desktop',p.client_label.get())
+        for widget,key,target in [(claude,'Left','codex'),(codex,'End','claude-desktop'),
+                                  (claude,'Home','codex'),(codex,'Right','claude-desktop')]:
+            widget.event_generate('<'+key+'>');self.root.update()
+            self.assertEqual(p.client.get(),target);self.assertIs(self.root.focus_get(),p.client_buttons[target])
+        codex.focus_force();self.root.update();codex.event_generate('<Return>');self.root.update()
+        self.assertEqual(p.client.get(),'codex');self.assertIn('Codex',p.client_label.get())
+        self.assertEqual(self.controller.calls,[])
+
+    def test_native_invalid_inputs_disable_controls_and_never_invoke_backend(self):
+        p=self.panel;self.root.update()
+        controls=(p.observe_button,p.review_refresh_button,p.recheck_button,p.review_selection_button)
+        for path,pin in [('',NEW),(' \t',NEW),('/fixture/input.json',''),
+                         ('/fixture/input.json','A'*64),('/fixture/input.json','a'*63)]:
+            with self.subTest(path=path,pin=pin):
+                p.observation_path.set(path);p.observation_sha.set(pin)
+                p.selection_path.set(path);p.selection_sha.set(pin);self.root.update()
+                for button in controls:
+                    self.assertEqual(str(button.cget('state')),'disabled')
+                    button.focus_force();self.root.update()
+                    button.event_generate('<space>');button.event_generate('<KeyRelease-space>');button.invoke()
+                p.observe();p.review_refresh();p.review_selection();self.root.update()
+                self.assertFalse(p.request.busy);self.assertEqual(self.controller.calls,[])
+        self.observation_input();self.root.update()
+        for button in controls[:3]:self.assertEqual(str(button.cget('state')),'normal')
+        self.assertEqual(str(p.review_selection_button.cget('state')),'disabled')
+        p.observe_button.invoke();self.settle()
+        self.assertEqual(self.controller.calls,[('observe','codex','/fixture/model.json','a'*64)])
+        self.selection_input();self.root.update()
+        self.assertEqual(str(p.review_selection_button.cget('state')),'normal')
+        self.assertEqual(len(self.controller.calls),1)
+
+    def test_native_client_buttons_and_requests_stay_disabled_while_busy_or_closed(self):
+        p=self.panel;self.observation_input();self.selection_input();release=threading.Event()
+        self.addCleanup(release.set)
+        def delayed(client):
+            self.controller.calls.append(('inspect',client));release.wait(3);return report(client=client)
+        self.controller.inspect=delayed;p.inspect_button.invoke();self.root.update()
+        self.assertTrue(p.request.busy)
+        for closed in (False,True):
+            if closed:
+                release.set();self.settle();p.request.close();p._enable()
+            for button in p.client_buttons.values():
+                self.assertEqual(str(button.cget('state')),'disabled')
+                button.focus_force();self.root.update()
+                for key in ('space','Return','Left','Right','Home','End'):button.event_generate('<'+key+'>')
+                button.invoke()
+            for button in (p.observe_button,p.review_refresh_button,p.recheck_button,p.review_selection_button):
+                self.assertEqual(str(button.cget('state')),'disabled');button.invoke()
+            p.select_client('claude-desktop');p.inspect();p.observe();p.review_refresh();p.review_selection()
+            self.root.update();self.assertEqual(p.client.get(),'codex')
+            self.assertEqual(self.controller.calls,[('inspect','codex')])
+
+    def test_native_only_configured_client_buttons_exist_and_reselection_keeps_review(self):
+        self.panel.frame.destroy();self.controller.clients=('claude-desktop',)
+        p=self.panel=ui.StableOwnerPanel(self.root,self.controller);self.selection_input()
+        self.assertEqual(tuple(p.client_buttons),('claude-desktop',));self.assertEqual(p.client.get(),'claude-desktop')
+        p.review_selection_button.invoke();self.settle();p.publish_consent.set(True);p._enable()
+        previous=p.report;revision=p.input_revision;expected_calls=list(self.controller.calls)
+        button=p.client_buttons['claude-desktop'];button.focus_force();self.root.update()
+        for key in ('Left','Right','Home','End','space','Return'):button.event_generate('<'+key+'>')
+        p.select_client('codex');self.root.update()
+        self.assertEqual(p.client.get(),'claude-desktop');self.assertIs(p.report,previous)
+        self.assertEqual(p.input_revision,revision);self.assertTrue(p.publish_consent.get())
+        self.assertEqual(self.controller.calls,expected_calls)
+
     def test_open_inputs_and_row_selection_never_call_backend(self):
         p=self.panel;self.root.update();self.assertEqual(self.controller.calls,[])
         p.observation_path.set('/fixture/observed.json');p.observation_sha.set('a'*64)
@@ -528,7 +649,7 @@ class NativePanel(unittest.TestCase):
         self.assertEqual(str(p.refresh_button.cget('state')),'disabled')
 
     def test_native_report_reorder_preserves_selection_focus_and_requires_consent(self):
-        p=self.panel;p.review_refresh_button.invoke();self.settle()
+        p=self.panel;self.observation_input();p.review_refresh_button.invoke();self.settle()
         p.tree.focus_force();p.tree.event_generate('<Down>');self.root.update()
         self.assertEqual(p.tree.selection(),(INSTANCE,))
         shown=ui.presentation(report('refresh'),'codex');shown['rows'].reverse()
@@ -536,11 +657,12 @@ class NativePanel(unittest.TestCase):
         self.assertEqual(p.tree.selection(),(INSTANCE,));self.assertEqual(p.tree.focus(),INSTANCE)
         self.assertFalse(p.refresh_consent.get())
         self.assertEqual(str(p.refresh_button.cget('state')),'disabled')
-        self.assertEqual(self.controller.calls,[('review-refresh','codex','','')])
+        self.assertEqual(self.controller.calls,[('review-refresh','codex','/fixture/model.json','a'*64)])
 
     def test_native_observed_button_selects_exact_hidden_row_only_on_explicit_click(self):
         p=self.panel;self.root.geometry('700x400');self.root.focus_force();self.root.update()
         self.assertEqual(str(p.select_observed_button.cget('state')),'disabled')
+        self.observation_input()
         p.review_refresh_button.invoke();self.settle()
         value=correlated_report()
         value['connections']=[{'client':'codex','instance':f'{i:032x}','endpoint_state':'ABSENT'}
@@ -557,7 +679,7 @@ class NativePanel(unittest.TestCase):
         self.assertEqual(self.controller.calls,expected_calls)
 
     def test_native_observed_button_invalidates_without_choosing_another_row(self):
-        p=self.panel;p.review_refresh_button.invoke();self.settle()
+        p=self.panel;self.observation_input();p.review_refresh_button.invoke();self.settle()
         expected_calls=list(self.controller.calls)
         p.observation_sha.set('9'*64);self.root.update()
         self.assertEqual(str(p.select_observed_button.cget('state')),'disabled')
@@ -580,7 +702,7 @@ class NativePanel(unittest.TestCase):
         self.assertEqual(self.controller.calls,expected_calls)
 
     def test_native_observed_button_is_display_only_and_disabled_during_request_or_close(self):
-        p=self.panel;p.review_refresh_button.invoke();self.settle()
+        p=self.panel;self.observation_input();p.review_refresh_button.invoke();self.settle()
         expected_calls=list(self.controller.calls)
         p.request.busy=True;p._enable()
         self.assertEqual(str(p.select_observed_button.cget('state')),'disabled')
@@ -618,7 +740,7 @@ class NativePanel(unittest.TestCase):
         self.assertEqual(sum(c[0]=='refresh' for c in self.controller.calls),1)
 
     def test_input_edit_invalidates_review_and_plain_inspect_does_not_adopt_model(self):
-        p=self.panel;p.review_refresh_button.invoke();self.settle()
+        p=self.panel;self.observation_input();p.review_refresh_button.invoke();self.settle()
         p.tree.selection_set(INSTANCE);self.root.update();p.refresh_consent.set(True);p._enable()
         p.observation_sha.set('b'*64);self.root.update()
         self.assertFalse(p.refresh_consent.get());self.assertIsNone(p.report['review'])
@@ -627,10 +749,17 @@ class NativePanel(unittest.TestCase):
         self.assertEqual(str(p.refresh_button.cget('state')),'disabled')
 
     def test_client_change_clears_selection_and_blocks_old_review(self):
-        p=self.panel;p.review_selection_button.invoke();self.settle()
-        p.publish_consent.set(True);p.client.set('claude-desktop');self.root.update()
+        p=self.panel;self.selection_input();p.review_selection_button.invoke();self.settle()
+        p.publish_consent.set(True);p._enable();expected_calls=list(self.controller.calls)
+        p.client_buttons['codex'].focus_force();self.root.update()
+        p.client_buttons['codex'].event_generate('<Tab>');self.root.update()
+        self.assertIs(self.root.focus_get(),p.client_buttons['claude-desktop'])
+        p.client_buttons['claude-desktop'].event_generate('<space>');self.root.update()
         self.assertIsNone(p.report);self.assertFalse(p.publish_consent.get())
+        self.assertTrue(p.observation_dirty);self.assertIsNone(p.selected_instance)
+        self.assertFalse(p.refresh_consent.get());self.assertIn('대조 미충족',p.readiness.get())
         self.assertEqual(p.tree.get_children(),())
+        self.assertEqual(self.controller.calls,expected_calls)
         p.publish_button.invoke();self.assertFalse(any(c[0]=='publish' for c in self.controller.calls))
         p.inspect_button.invoke();self.settle()
         self.assertEqual(self.controller.calls[-1],('inspect','claude-desktop'))
@@ -651,7 +780,7 @@ class NativePanel(unittest.TestCase):
         self.assertEqual(p.details.cget('wrap'),'none')
 
     def test_native_tab_focus_tracks_inputs_and_lower_controls(self):
-        p=self.panel;self.root.geometry('700x400');self.root.update()
+        p=self.panel;self.observation_input();self.root.geometry('700x400');self.root.update()
         p.input_widgets[1].focus_force();self.root.update()
         p.input_widgets[1].event_generate('<Tab>');self.root.update()
         self.assertIs(self.root.focus_get(),p.input_widgets[2])
@@ -663,7 +792,7 @@ class NativePanel(unittest.TestCase):
         self.assertEqual(str(p.refresh_button.cget('state')),'disabled')
 
     def test_native_page_and_wheel_scroll_outer_panel_without_stealing_tree(self):
-        p=self.panel;self.root.geometry('700x400');self.root.update()
+        p=self.panel;self.observation_input();self.root.geometry('700x400');self.root.update()
         p.observe_button.focus_force();self.root.update();p.canvas.yview_moveto(0)
         p.observe_button.event_generate('<Next>');self.root.update()
         self.assertGreater(p.canvas.yview()[0],0)

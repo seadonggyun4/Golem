@@ -23,6 +23,12 @@ def _hash(value):
     return type(value) is str and HASH.fullmatch(value) is not None
 
 
+def _input_shape(path, pin):
+    # UI availability only: the controller still validates the original bytes,
+    # provenance, freshness, and authority after an explicit request.
+    return type(path) is str and bool(path.strip()) and _hash(pin)
+
+
 def _mapping(value):
     return value if type(value) is dict else {}
 
@@ -250,12 +256,19 @@ class StableOwnerPanel:
                   wraplength=850).pack(anchor='w', pady=4)
         ttk.Label(body, textvariable=self.status, wraplength=850).pack(anchor='w')
         toolbar = ttk.Frame(body); toolbar.pack(fill='x', pady=6)
-        clients = tuple(controller.clients)
-        self.client = tk.StringVar(value=clients[0] if clients else '')
+        self.clients = tuple(dict.fromkeys(client for client in controller.clients if client in CLIENT_LABELS))
+        self.client = tk.StringVar(value=self.clients[0] if self.clients else '')
         ttk.Label(toolbar, text='client').pack(side='left')
-        self.client_select = ttk.Combobox(toolbar, textvariable=self.client, values=clients,
-                                         state='readonly', width=22)
-        self.client_select.pack(side='left', padx=6)
+        self.client_buttons = {}
+        for client in self.clients:
+            button = ttk.Button(toolbar, text=CLIENT_LABELS[client], takefocus=True,
+                                command=lambda client=client: self.select_client(client))
+            button.pack(side='left', padx=6)
+            for key in ('Left', 'Right', 'Home', 'End', 'space', 'Return'):
+                button.bind('<'+key+'>', lambda event, client=client: self._client_key(client, event.keysym))
+            self.client_buttons[client] = button
+        self.client_label = tk.StringVar()
+        ttk.Label(body, textvariable=self.client_label).pack(anchor='w')
         self.inspect_button = ttk.Button(toolbar, text='선택·연결 기록 조회', command=self.inspect)
         self.inspect_button.pack(side='left')
         self.selected = tk.StringVar(value='선택 상태: 미확인')
@@ -448,16 +461,45 @@ class StableOwnerPanel:
         self.tree.focus_set()
         self._selection_changed()
 
+    def select_client(self, client):
+        # Display/input context only. A repeated choice preserves its review.
+        if self.request.busy or self.request.closed or client not in self.clients:
+            return
+        if client != self.client.get():
+            self.client.set(client)
+
+    def _client_key(self, client, key):
+        if self.request.busy or self.request.closed or client not in self.clients:
+            return 'break'
+        index = self.clients.index(client)
+        if key == 'Left': index = max(0, index-1)
+        elif key == 'Right': index = min(len(self.clients)-1, index+1)
+        elif key == 'Home': index = 0
+        elif key == 'End': index = len(self.clients)-1
+        elif key not in ('space', 'Return'): return 'break'
+        target = self.clients[index]
+        self.select_client(target)
+        self.client_buttons[target].focus_set()
+        return 'break'
+
+    def _can_request(self):
+        return not (self.request.busy or self.request.closed) and self.client.get() in self.clients
+
     def _enable(self):
         busy=self.request.busy or self.request.closed
-        selected=self.client.get() in CLIENT_LABELS
+        selected=self.client.get() in self.clients
         normal='normal' if not busy and selected else 'disabled'
-        self.client_select.configure(state='disabled' if busy else 'readonly')
+        for button in self.client_buttons.values():
+            button.configure(state='disabled' if busy else 'normal')
+        self.client_label.set('선택한 client: '+CLIENT_LABELS.get(self.client.get(), '미선택'))
         for widget in self.input_widgets:
             widget.configure(state=normal)
-        for widget in (self.inspect_button,self.observe_button,self.review_selection_button,
-                       self.review_refresh_button,self.recheck_button):
-            widget.configure(state=normal)
+        self.inspect_button.configure(state=normal)
+        observation=not busy and selected and _input_shape(self.observation_path.get(),self.observation_sha.get())
+        selection=not busy and selected and _input_shape(self.selection_path.get(),self.selection_sha.get())
+        for widget in (self.observe_button,self.review_refresh_button,self.recheck_button):
+            widget.configure(state='normal' if observation else 'disabled')
+        self.review_selection_button.configure(state='normal' if selection else 'disabled')
         publish=not busy and self._available_review('publish') is not None
         refresh=not busy and self._available_review('refresh') is not None
         self.publish_check.configure(state='normal' if publish else 'disabled')
@@ -528,18 +570,26 @@ class StableOwnerPanel:
         self._enable();self.after_id=self.root.after(40,self._drain)
 
     def inspect(self):
+        if not self._can_request():
+            return
         client=self.client.get();self._submit('inspect',lambda:self.controller.inspect(client))
 
     def observe(self):
         client,path,pin=self.client.get(),self.observation_path.get(),self.observation_sha.get()
+        if not self._can_request() or not _input_shape(path,pin):
+            return
         self._submit('observe',lambda:self.controller.observe(client,path,pin))
 
     def review_selection(self):
         client,path,pin=self.client.get(),self.selection_path.get(),self.selection_sha.get()
+        if not self._can_request() or not _input_shape(path,pin):
+            return
         self._submit('review-publish',lambda:self.controller.review_selection(client,path,pin))
 
     def review_refresh(self):
         client,path,pin=self.client.get(),self.observation_path.get(),self.observation_sha.get()
+        if not self._can_request() or not _input_shape(path,pin):
+            return
         self._submit('review-refresh',lambda:self.controller.review_refresh(client,path,pin))
 
     def publish(self):

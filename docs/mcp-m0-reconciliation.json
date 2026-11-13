@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "6fd5a652d615e286d3c0dad8abb2cbe50ff0718217ba7d90b4adf50b588e0bf7",
+  "inventory_sha256": "933cb2da372da1ecba038187aba2712076d65925a84b4f902dd8721593c6fab0",
   "selected_source_count": 672,
   "selected_observation_count": 2525,
   "selected_capability_count": 1349,
@@ -6286,7 +6286,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "e2373e7a1c41533bb51bc911412e70b27062fe5659eb98fa77af4dfa88be3f53"
+      "sha256": "4be410aa1d864fd551ccd4ef4b8fa2706b0a31cbb0558fc886aa46703e7fdee3"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -6294,7 +6294,7 @@
     },
     {
       "path": "tools/integration_stable_owner_ui.py",
-      "sha256": "4b8f3188b4213cafab173689544f42ff590aaa49f4e876cbc77a21a38be00f76"
+      "sha256": "34e9cfb9db9b3e17b58dd891d322f3915f43ab485d95175deef4b4207786d944"
     },
     {
       "path": "tools/test_integration_stable_owner.py",
@@ -6302,7 +6302,7 @@
     },
     {
       "path": "tools/test_integration_stable_owner_ui.py",
-      "sha256": "fe81d6c8ec0040ce56e1bb9d0d81a284bc70e7ad80747b0bb48d699afbb44159"
+      "sha256": "a07246024b9c0c9a54d311a0e6e731e4c6955d2ced6e2e21157a4081755ad1b8"
     },
     {
       "path": "tools/integration_stable_observation.py",
@@ -12492,7 +12492,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 423,
+      "checked_functions": 427,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -60111,7 +60111,9 @@
         "StableOwnerPanel._available_observed_instance",
         "StableOwnerPanel._available_review",
         "StableOwnerPanel._bind_viewport",
+        "StableOwnerPanel._can_request",
         "StableOwnerPanel._client_changed",
+        "StableOwnerPanel._client_key",
         "StableOwnerPanel._destroyed",
         "StableOwnerPanel._drain",
         "StableOwnerPanel._enable",
@@ -60132,9 +60134,11 @@
         "StableOwnerPanel.refresh",
         "StableOwnerPanel.review_refresh",
         "StableOwnerPanel.review_selection",
+        "StableOwnerPanel.select_client",
         "StableOwnerPanel.select_observed",
         "_details",
         "_hash",
+        "_input_shape",
         "_mapping",
         "_observed_instance",
         "presentation"
@@ -60259,6 +60263,18 @@
         ],
         [
           "Name(id='key', ctx=Load())",
+          "End"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
+          "Home"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
+          "Left"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
           "Next"
         ],
         [
@@ -60267,7 +60283,19 @@
         ],
         [
           "Name(id='key', ctx=Load())",
+          "Return"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
+          "Right"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
           "kind"
+        ],
+        [
+          "Name(id='key', ctx=Load())",
+          "space"
         ],
         [
           "Name(id='key', ctx=Load())",
@@ -67176,7 +67204,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "445584139b23ab5b63e95791a3f14d678061ff3eb256cca8240f54efcbccc4fc",
+      "sha256": "db44b7ca49686beaa9a7d6103dc68b248cd7dc7e526bbb93e9cffae2f04769ed",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -67320,7 +67348,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "46f48589dab4ccc6f5c46dffca83bfe7dc2f1d1d842077575b0476763d8895d8",
+      "sha256": "6e6df00146801d6ebdc4159119dc296ecdb5ecf5e29fb77e279fa40ea53d807f",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
