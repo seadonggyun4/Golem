@@ -39,6 +39,51 @@ def _details(value):
     return ''.join(ch if ch.isprintable() or ch in '\n\t' else '\ufffd' for ch in raw)
 
 
+def _observed_instance(client, selected, live, model, readiness, endpoints, counts):
+    """Use an explicit native correlation result only for display navigation.
+
+    This does not perform correlation, refresh a receipt, or authorize effects.
+    Recheck the report's exact target so an ambiguous row is never substituted.
+    """
+    target = model.get('target')
+    marker = model.get('marker')
+    parsed = MARKER.fullmatch(marker) if type(marker) is str else None
+    if not (parsed and model.get('source') == 'EXTERNAL_MODEL_DEFINITION_OBSERVATION' and
+            type(target) is dict and set(target) == {'thread_id','server_name'} and
+            all(type(target[key]) is str and target[key] for key in target) and
+            model.get('thread_id') == target['thread_id'] and
+            model.get('server_name') == target['server_name'] and
+            type(model.get('turn_id')) is str and model['turn_id'] and
+            readiness.get('target') == target and readiness.get('execution_authorized') is False and
+            readiness.get('automatic_retry_allowed') is False and readiness.get('actual_execution') == 'HOLD'):
+        return None
+    correlation = (readiness.get('schema') == 'golem.stable-definition-correlation.v1' and
+                   readiness.get('state') == 'EXTERNAL_CORRELATION_ONLY' and
+                   readiness.get('correlated') is True and readiness.get('frontend_bound') is True and
+                   readiness.get('same_chat_model_tools') == 'EXTERNALLY_CORRELATED_FIXED_DEFINITIONS')
+    classified = (readiness.get('schema') == 'golem.stable-connection-readiness.v1' and
+                  readiness.get('state') == 'PREPARATION_READY_NOT_AUTHORIZED' and
+                  readiness.get('preparation_allowed') is True and
+                  _mapping(readiness.get('stages')).get('same_chat_model_tools') ==
+                  'EXTERNALLY_CORRELATED_FIXED_DEFINITIONS')
+    instance = parsed.group(1)
+    names = model.get('tools')
+    if not ((correlation or classified) and type(names) is list and names and
+            all(type(name) is str for name in names) and len(set(names)) == len(names) and
+            readiness.get('observed_tools') == sorted(names) and counts.get(instance) == 1 and
+            endpoints.get(instance) == 'PRESENT' and
+            _mapping(selected.get('selection')).get('client') == client and
+            parsed.group(2) == selected.get('catalog_sha256') and
+            live.get('schema') == 'golem.stable-connection-relay.v1' and
+            live.get('client') == client and live.get('instance') == instance and
+            live.get('definition_marker') == marker and live.get('state') == 'READY' and
+            live.get('busy') is False and live.get('failure') is None and
+            type(live.get('pending')) is int and live['pending'] == 0 and
+            type(live.get('server_pending')) is int and live['server_pending'] == 0):
+        return None
+    return instance
+
+
 def presentation(value, client):
     """Render selected/live/model states separately; reject ambiguous actions."""
     if type(value) is not dict:
@@ -50,10 +95,12 @@ def presentation(value, client):
     selection = _mapping(selected.get('selection'))
     live = _mapping(value.get('live'))
     model = _mapping(value.get('model_observation'))
-    rows, endpoints = [], {}
+    rows, endpoints, counts = [], {}, {}
     for row in value.get('connections', [])[:1024] if type(value.get('connections')) is list else []:
         row = _mapping(row)
         key = row.get('instance')
+        if type(key) is str:
+            counts[key] = counts.get(key, 0) + 1
         if type(key) is not str or INSTANCE.fullmatch(key) is None or key in endpoints:
             continue
         same_client = row.get('client') == client
@@ -102,6 +149,9 @@ def presentation(value, client):
     readiness = _mapping(value.get('readiness'))
     ready = (safe_report and readiness.get('state') == 'PREPARATION_READY_NOT_AUTHORIZED' and
              readiness.get('preparation_allowed') is True and readiness.get('execution_authorized') is False)
+    observed_instance = (_observed_instance(client, selected, live, model, readiness, endpoints, counts)
+                         if safe_report and type(value.get('connections')) is list and
+                         len(value['connections']) <= 1024 else None)
     selected_text = '\n'.join([
         'client: ' + text(value.get('client')),
         '선택 revision / selection SHA: ' + text(selection.get('revision')) + ' / ' + text(selected.get('selection_sha256')),
@@ -118,6 +168,7 @@ def presentation(value, client):
     ])
     return {'valid': valid, 'client': client, 'state': text(value.get('state')) if valid else 'STABLE_OWNER_REPORT_MISMATCH',
             'selected': selected_text, 'rows': rows, 'endpoints': endpoints,
+            'observed_instance': observed_instance,
             'model': model_text, 'review': action_review, 'raw_review': review,
             'readiness': ('연결 대조 충족 · 실제 실행 HOLD' if ready else '연결 대조 미충족 · 실제 실행 HOLD'),
             'readiness_reason': text(readiness.get('reason')), 'preparation_allowed': ready,
@@ -224,6 +275,9 @@ class StableOwnerPanel:
         self.tree.bind('<<TreeviewSelect>>', self._selection_changed, add='+')
         self.tree.bind('<Down>', lambda _: self.navigate(1))
         self.tree.bind('<Up>', lambda _: self.navigate(-1))
+        self.select_observed_button = ttk.Button(table, text='관측된 연결 행 선택',
+                                                command=self.select_observed, state='disabled')
+        self.select_observed_button.grid(row=2,column=0,sticky='w',pady=4)
         self.observation_path = tk.StringVar(); self.observation_sha = tk.StringVar()
         observation = ttk.LabelFrame(body, text='같은 대화의 실제 도구 정의 관측', padding=8)
         observation.pack(fill='x', pady=5)
@@ -378,6 +432,22 @@ class StableOwnerPanel:
             return None
         return review
 
+    def _available_observed_instance(self):
+        if (self.request.busy or self.request.closed or self.observation_dirty or not self.report or
+                self.report.get('client') != self.client.get() or not self.report.get('valid')):
+            return None
+        instance = self.report.get('observed_instance')
+        return instance if instance in self.tree.get_children() else None
+
+    def select_observed(self):
+        # An explicit display action only. No controller call or fallback row.
+        instance = self._available_observed_instance()
+        if instance is None:
+            return
+        self.tree.selection_set(instance);self.tree.focus(instance);self.tree.see(instance)
+        self.tree.focus_set()
+        self._selection_changed()
+
     def _enable(self):
         busy=self.request.busy or self.request.closed
         selected=self.client.get() in CLIENT_LABELS
@@ -394,6 +464,8 @@ class StableOwnerPanel:
         self.refresh_check.configure(state='normal' if refresh else 'disabled')
         self.publish_button.configure(state='normal' if publish and self.publish_consent.get() else 'disabled')
         self.refresh_button.configure(state='normal' if refresh and self.refresh_consent.get() else 'disabled')
+        self.select_observed_button.configure(
+            state='normal' if self._available_observed_instance() is not None else 'disabled')
 
     def _inputs_changed(self, kind):
         self.input_revision+=1

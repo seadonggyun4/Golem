@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "8abd67a3e5bb53b18431d928d4cba8b282f0312db0bb1943f5335566c3e68bf1",
+  "inventory_sha256": "6fd5a652d615e286d3c0dad8abb2cbe50ff0718217ba7d90b4adf50b588e0bf7",
   "selected_source_count": 672,
   "selected_observation_count": 2525,
   "selected_capability_count": 1349,
@@ -6286,7 +6286,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "2a3b9f4f24ebd9b26bb16765889937923e3d605799be7a2affb64a92fd722a51"
+      "sha256": "e2373e7a1c41533bb51bc911412e70b27062fe5659eb98fa77af4dfa88be3f53"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -6294,7 +6294,7 @@
     },
     {
       "path": "tools/integration_stable_owner_ui.py",
-      "sha256": "e91fde44ca69c60c171bcf591096424455b1655c9c1ccbfd0cc063fa64a1c8e4"
+      "sha256": "4b8f3188b4213cafab173689544f42ff590aaa49f4e876cbc77a21a38be00f76"
     },
     {
       "path": "tools/test_integration_stable_owner.py",
@@ -6302,7 +6302,7 @@
     },
     {
       "path": "tools/test_integration_stable_owner_ui.py",
-      "sha256": "72aa34e9971f5e7980c0163b830b489dbe9a538213da2f60f46805070f205906"
+      "sha256": "fe81d6c8ec0040ce56e1bb9d0d81a284bc70e7ad80747b0bb48d699afbb44159"
     },
     {
       "path": "tools/integration_stable_observation.py",
@@ -12492,7 +12492,7 @@
         "task"
       ],
       "owner_backlog_count": 83,
-      "checked_functions": 420,
+      "checked_functions": 423,
       "blockers": [],
       "owner_backlog_discharged": false,
       "actual_installation": "NOT_RUN",
@@ -60108,6 +60108,7 @@
         "BackgroundRequest.take",
         "StableOwnerPanel",
         "StableOwnerPanel.__init__",
+        "StableOwnerPanel._available_observed_instance",
         "StableOwnerPanel._available_review",
         "StableOwnerPanel._bind_viewport",
         "StableOwnerPanel._client_changed",
@@ -60131,20 +60132,54 @@
         "StableOwnerPanel.refresh",
         "StableOwnerPanel.review_refresh",
         "StableOwnerPanel.review_selection",
+        "StableOwnerPanel.select_observed",
         "_details",
         "_hash",
         "_mapping",
+        "_observed_instance",
         "presentation"
       ],
       "declarations": [],
       "literal_branches": [
         [
+          "Call(func=Attribute(value=Call(func=Name(id='_mapping', ctx=Load()), args=[Call(func=Attribute(value=Name(id='readiness', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='stages')])]), attr='get', ctx=Load()), args=[Constant(value='same_chat_model_tools')])",
+          "EXTERNALLY_CORRELATED_FIXED_DEFINITIONS"
+        ],
+        [
           "Call(func=Attribute(value=Name(id='endpoints', ctx=Load()), attr='get', ctx=Load()), args=[Name(id='instance', ctx=Load())])",
           "PRESENT"
         ],
         [
+          "Call(func=Attribute(value=Name(id='live', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='schema')])",
+          "golem.stable-connection-relay.v1"
+        ],
+        [
           "Call(func=Attribute(value=Name(id='live', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
           "READY"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='model', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='source')])",
+          "EXTERNAL_MODEL_DEFINITION_OBSERVATION"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='readiness', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='actual_execution')])",
+          "HOLD"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='readiness', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='same_chat_model_tools')])",
+          "EXTERNALLY_CORRELATED_FIXED_DEFINITIONS"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='readiness', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='schema')])",
+          "golem.stable-connection-readiness.v1"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='readiness', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='schema')])",
+          "golem.stable-definition-correlation.v1"
+        ],
+        [
+          "Call(func=Attribute(value=Name(id='readiness', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
+          "EXTERNAL_CORRELATION_ONLY"
         ],
         [
           "Call(func=Attribute(value=Name(id='readiness', ctx=Load()), attr='get', ctx=Load()), args=[Constant(value='state')])",
@@ -60201,6 +60236,14 @@
         [
           "Call(func=Attribute(value=Name(id='widget', ctx=Load()), attr='winfo_class', ctx=Load()))",
           "Treeview"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='target', ctx=Load())])",
+          "server_name"
+        ],
+        [
+          "Call(func=Name(id='set', ctx=Load()), args=[Name(id='target', ctx=Load())])",
+          "thread_id"
         ],
         [
           "Name(id='ch', ctx=Load())",
@@ -67133,7 +67176,7 @@
     },
     {
       "path": "tools/capability_m6_registry.py",
-      "sha256": "2a007ccc081f4994147e36311bfaffbebec90c7c8e7cf43ef193578a3e3dd870",
+      "sha256": "445584139b23ab5b63e95791a3f14d678061ff3eb256cca8240f54efcbccc4fc",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },
@@ -67277,7 +67320,7 @@
     },
     {
       "path": "tools/capability_surface_registry.py",
-      "sha256": "b4b1569626fad0085fb653479a4798e34724254260f6e0df61cdb944f131b442",
+      "sha256": "46f48589dab4ccc6f5c46dffca83bfe7dc2f1d1d842077575b0476763d8895d8",
       "shape_sha256": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
       "role": "M0_REVIEW_METADATA"
     },

@@ -45,7 +45,55 @@ def report(kind=None, client='codex'):
     return value
 
 
+def correlated_report(kind='refresh', client='codex'):
+    value=report(kind,client)
+    target={'thread_id':'fixture-chat','server_name':'fixture-server'}
+    value['model_observation'].update(source='EXTERNAL_MODEL_DEFINITION_OBSERVATION',
+                                     target=target,server_name=target['server_name'])
+    value['readiness'].update(schema='golem.stable-definition-correlation.v1',
+        state='EXTERNAL_CORRELATION_ONLY',correlated=True,frontend_bound=True,
+        same_chat_model_tools='EXTERNALLY_CORRELATED_FIXED_DEFINITIONS',target=copy.deepcopy(target),
+        observed_tools=['golem_projects_list'],automatic_retry_allowed=False,actual_execution='HOLD')
+    return value
+
+
 class Presentation(unittest.TestCase):
+    def test_observed_row_requires_explicit_native_correlation_result(self):
+        self.assertIsNone(ui.presentation(report('refresh'),'codex')['observed_instance'])
+        value=correlated_report();before=copy.deepcopy(value)
+        self.assertEqual(ui.presentation(value,'codex')['observed_instance'],INSTANCE)
+        self.assertEqual(value,before)
+        value['readiness'].update(schema='golem.stable-connection-readiness.v1',
+            state='PREPARATION_READY_NOT_AUTHORIZED',preparation_allowed=True,
+            stages={'same_chat_model_tools':'EXTERNALLY_CORRELATED_FIXED_DEFINITIONS'})
+        self.assertEqual(ui.presentation(value,'codex')['observed_instance'],INSTANCE)
+
+    def test_observed_row_rejects_missing_wrong_or_ambiguous_target(self):
+        changes=[('readiness','correlated',False),('readiness','frontend_bound',False),
+            ('readiness','target',{'thread_id':'other','server_name':'fixture-server'}),
+            ('readiness','observed_tools',['golem_other']),('readiness','actual_execution','RUN'),
+            ('readiness','automatic_retry_allowed',True),('readiness','execution_authorized',True),
+            ('model_observation','marker','wrong'),('model_observation','source','HOST_CATALOG'),
+            ('model_observation','server_name','other'),('live','client','claude-desktop'),
+            ('live','instance',OTHER),('live','definition_marker','wrong'),
+            ('live','state','CLOSED'),('live','busy',True),('live','pending',1),
+            ('live','server_pending',True),('live','failure','UNKNOWN')]
+        for part,key,bad in changes:
+            with self.subTest(part=part,key=key):
+                value=correlated_report();value[part][key]=bad
+                self.assertIsNone(ui.presentation(value,'codex')['observed_instance'])
+        for change in ('absent','other-client','duplicate','missing','truncated','catalog','blocked'):
+            with self.subTest(change=change):
+                value=correlated_report()
+                if change=='absent':value['connections'][0]['endpoint_state']='ABSENT'
+                if change=='other-client':value['connections'][0]['client']='claude-desktop'
+                if change=='duplicate':value['connections'].append(copy.deepcopy(value['connections'][0]))
+                if change=='missing':value['connections']=value['connections'][1:]
+                if change=='truncated':value['connections']+=[{}]*1023
+                if change=='catalog':value['selected']['catalog_sha256']='9'*64
+                if change=='blocked':value['state']='BLOCKED'
+                self.assertIsNone(ui.presentation(value,'codex')['observed_instance'])
+
     def test_exact_publication_review_and_live_selection_remain_distinct(self):
         value=report('publish');before=copy.deepcopy(value)
         shown=ui.presentation(value,'codex')
@@ -188,6 +236,7 @@ class ActualControllerPresentation(unittest.TestCase):
                 initial=fx.controller.observe(client,path,pin)
                 shown=ui.presentation(initial,client)
                 self.assertTrue(shown['preparation_allowed']);self.assertIsNone(shown['review'])
+                self.assertEqual(shown['observed_instance'],initial['live']['instance'])
                 candidate,candidate_pin=fx.proposal(client)
                 preview=fx.controller.review_selection(client,candidate,candidate_pin)
                 shown=ui.presentation(preview,client)
@@ -198,6 +247,7 @@ class ActualControllerPresentation(unittest.TestCase):
                 preview=fx.controller.review_refresh(client,path,pin)
                 shown=ui.presentation(preview,client)
                 self.assertEqual(shown['review']['kind'],'refresh')
+                self.assertEqual(shown['observed_instance'],preview['live']['instance'])
                 switched=fx.controller.refresh(client,shown['review']['token'],approve=True)
                 self.assertIsNone(ui.presentation(switched,client)['review'])
                 self.assertFalse(ui.presentation(switched,client)['preparation_allowed'])
@@ -222,7 +272,7 @@ class FixtureController:
         value=report('refresh',client);value['state']='SELECTED_NOT_LIVE_APPLIED';value['review']=None
         return value
     def review_refresh(self,client,path,pin):
-        self.calls.append(('review-refresh',client,path,pin));return report('refresh',client)
+        self.calls.append(('review-refresh',client,path,pin));return correlated_report('refresh',client)
     def refresh(self,client,token,approve=False):
         self.calls.append(('refresh',client,token,approve));self.refreshed=True
         value=report('refresh',client);value['state']='ACKNOWLEDGED';value['review']=None
@@ -241,6 +291,7 @@ class MemoryTree:
     def focus(self,key=None):
         if key is not None:self.focused=key
         return self.focused
+    def focus_set(self):self.widget_focused=True
     def see(self,key):self.visible=key
     def delete(self,*keys):
         for key in keys:
@@ -306,6 +357,41 @@ class KeyboardRows(unittest.TestCase):
         for direction in (-1,1):self.assertEqual(p.navigate(direction),'break')
         self.assertEqual(p.tree.selection(),());self.assertEqual(p.tree.focus(),'')
         p._enable.assert_not_called();self.assertEqual(p.controller.mock_calls,[])
+
+
+class ObservedRows(unittest.TestCase):
+    assert_selected = KeyboardRows.assert_selected
+
+    def setUp(self):
+        KeyboardRows.setUp(self);p=self.panel
+        p.request=SimpleNamespace(busy=False,closed=False)
+        p.client=Mock();p.client.get.return_value='codex';p.observation_dirty=False
+        p.report=ui.presentation(correlated_report(),'codex')
+        p._render_rows(p.report['rows']);p.refresh_consent.reset_mock()
+
+    def test_explicit_selection_targets_correlated_row_and_never_calls_backend(self):
+        p=self.panel
+        self.assertEqual(p.tree.selection(),())
+        p.navigate(-1);self.assert_selected(OTHER);p.refresh_consent.reset_mock()
+        p.select_observed();self.assert_selected(INSTANCE)
+        self.assertTrue(p.tree.widget_focused)
+        p.refresh_consent.set.assert_called_once_with(False)
+
+    def test_dirty_changed_client_busy_closed_or_missing_row_never_selects_fallback(self):
+        p=self.panel
+        for change in ('dirty','client','busy','closed','missing','uncorrelated'):
+            with self.subTest(change=change):
+                p.observation_dirty=False;p.client.get.return_value='codex'
+                p.request.busy=False;p.request.closed=False
+                p.report=ui.presentation(correlated_report(),'codex');p._render_rows(p.report['rows'])
+                if change=='dirty':p.observation_dirty=True
+                if change=='client':p.client.get.return_value='claude-desktop'
+                if change=='busy':p.request.busy=True
+                if change=='closed':p.request.closed=True
+                if change=='missing':p.tree.delete(INSTANCE)
+                if change=='uncorrelated':p.report['observed_instance']=None
+                self.assertIsNone(p._available_observed_instance());p.select_observed()
+                self.assertEqual(p.tree.selection(),());self.assertEqual(p.controller.mock_calls,[])
 
 
 class MemoryViewportWidget:
@@ -451,6 +537,58 @@ class NativePanel(unittest.TestCase):
         self.assertFalse(p.refresh_consent.get())
         self.assertEqual(str(p.refresh_button.cget('state')),'disabled')
         self.assertEqual(self.controller.calls,[('review-refresh','codex','','')])
+
+    def test_native_observed_button_selects_exact_hidden_row_only_on_explicit_click(self):
+        p=self.panel;self.root.geometry('700x400');self.root.focus_force();self.root.update()
+        self.assertEqual(str(p.select_observed_button.cget('state')),'disabled')
+        p.review_refresh_button.invoke();self.settle()
+        value=correlated_report()
+        value['connections']=[{'client':'codex','instance':f'{i:032x}','endpoint_state':'ABSENT'}
+                              for i in range(30)]+value['connections']
+        p._render(ui.presentation(value,'codex'));self.root.update()
+        expected_calls=list(self.controller.calls)
+        self.assertEqual(p.tree.selection(),());self.assertEqual(p.tree.bbox(INSTANCE),'')
+        self.assertEqual(str(p.select_observed_button.cget('state')),'normal')
+        p.select_observed_button.invoke();self.root.update()
+        self.assertEqual(p.tree.selection(),(INSTANCE,));self.assertEqual(p.tree.focus(),INSTANCE)
+        self.assertTrue(p.tree.bbox(INSTANCE));self.assertIs(self.root.focus_get(),p.tree)
+        self.assertFalse(p.refresh_consent.get())
+        self.assertEqual(str(p.refresh_button.cget('state')),'disabled')
+        self.assertEqual(self.controller.calls,expected_calls)
+
+    def test_native_observed_button_invalidates_without_choosing_another_row(self):
+        p=self.panel;p.review_refresh_button.invoke();self.settle()
+        expected_calls=list(self.controller.calls)
+        p.observation_sha.set('9'*64);self.root.update()
+        self.assertEqual(str(p.select_observed_button.cget('state')),'disabled')
+        p.select_observed();self.assertEqual(p.tree.selection(),())
+        p.observation_dirty=False
+        for change in ('ended','missing','uncorrelated'):
+            value=correlated_report()
+            if change=='ended':value['connections'][0]['endpoint_state']='ABSENT'
+            if change=='missing':value['connections']=value['connections'][1:]
+            if change=='uncorrelated':value['readiness']['correlated']=False
+            p._render(ui.presentation(value,'codex'));self.root.update()
+            self.assertEqual(str(p.select_observed_button.cget('state')),'disabled')
+            p.select_observed();self.assertEqual(p.tree.selection(),())
+        p._render(ui.presentation(correlated_report(),'codex'));p.tree.delete(INSTANCE);p._enable()
+        self.assertEqual(str(p.select_observed_button.cget('state')),'disabled')
+        p.select_observed();self.assertEqual(p.tree.selection(),())
+        p.client.set('claude-desktop');self.root.update()
+        self.assertEqual(str(p.select_observed_button.cget('state')),'disabled')
+        p.select_observed();self.assertEqual(p.tree.selection(),())
+        self.assertEqual(self.controller.calls,expected_calls)
+
+    def test_native_observed_button_is_display_only_and_disabled_during_request_or_close(self):
+        p=self.panel;p.review_refresh_button.invoke();self.settle()
+        expected_calls=list(self.controller.calls)
+        p.request.busy=True;p._enable()
+        self.assertEqual(str(p.select_observed_button.cget('state')),'disabled')
+        p.select_observed();self.assertEqual(p.tree.selection(),())
+        p.request.busy=False;p.request.close();p._enable()
+        self.assertEqual(str(p.select_observed_button.cget('state')),'disabled')
+        p.select_observed();self.assertEqual(p.tree.selection(),())
+        self.assertEqual(self.controller.calls,expected_calls)
 
     def test_publish_requires_matching_review_checkbox_and_one_attempt(self):
         p=self.panel;p.selection_path.set('/fixture/selection.json');p.selection_sha.set(NEW)

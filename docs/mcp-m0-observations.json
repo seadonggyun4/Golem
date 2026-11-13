@@ -2659,7 +2659,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "2a3b9f4f24ebd9b26bb16765889937923e3d605799be7a2affb64a92fd722a51"
+      "sha256": "e2373e7a1c41533bb51bc911412e70b27062fe5659eb98fa77af4dfa88be3f53"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -2667,7 +2667,7 @@
     },
     {
       "path": "tools/integration_stable_owner_ui.py",
-      "sha256": "e91fde44ca69c60c171bcf591096424455b1655c9c1ccbfd0cc063fa64a1c8e4"
+      "sha256": "4b8f3188b4213cafab173689544f42ff590aaa49f4e876cbc77a21a38be00f76"
     },
     {
       "path": "tools/test_integration_stable_owner.py",
@@ -2675,7 +2675,7 @@
     },
     {
       "path": "tools/test_integration_stable_owner_ui.py",
-      "sha256": "72aa34e9971f5e7980c0163b830b489dbe9a538213da2f60f46805070f205906"
+      "sha256": "fe81d6c8ec0040ce56e1bb9d0d81a284bc70e7ad80747b0bb48d699afbb44159"
     },
     {
       "path": "tools/integration_stable_observation.py",
