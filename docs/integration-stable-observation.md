@@ -25,6 +25,12 @@ text({schema:'golem.external-tool-metadata.v1',entries:selected.map(t => ({name:
 
 collector는 네트워크·MCP·모델·Owner·native를 호출하지 않는다. 현재 지원하는 입력은 **선택한 Codex 대화의 local rollout JSONL**뿐이다. `session_meta`, 완료된 target turn의 `task_started`·`turn_context`·`task_complete`, 정확한 `exec` 입력과 같은 `call_id`의 `custom_tool_call_output`을 연결한다. 첫 host-injected `create_thread`/`send_message_to_thread` 결과만 허용하며, 추가 실행·action 도구 호출이 있으면 차단한다. reasoning·모델 final·다른 turn의 내용은 출력에 넣지 않는다.
 
+관측한 rollout에는 `turn_context` 앞에 `developer`의 `additional_tools` 선언이
+들어올 수 있다. collector는 정확한 `functions` namespace의 `exec` custom 도구와
+Lark grammar 선언 1개만 비실행 기록으로 구분한다. 선언 내용은 실행하거나 증거로
+사용하지 않고 원본 행 SHA만 보존한다. 중복·늦은 선언·다른 형식·실제 action
+호출은 계속 거부하며, 선언이 있어도 별도의 실제 metadata receipt가 필수다.
+
 ```sh
 python3 tools/integration_stable_observation.py \
   --trace /absolute/reviewed-rollout.jsonl --trace-sha256 <exact-sha256> \
@@ -46,6 +52,19 @@ python3 tools/integration_stable_observation.py \
 정의 관측을 준비할 때 현재 목록의 정확한 이름과 설명을 사용하고, 검토한 검색 횟수·결과 개수 안에서 **반환된 상세 정의의 이름이 정확히 일치하는 항목만** 선택한다. 단일 최상위 결과가 정확한 이름 조회를 보장한다고 가정하지 않는다. 이름·marker·schema 중 필요한 정보가 없거나 다른 이름이면 `NOT_OBSERVED`로 기록한다. 실패 후 추가 검색은 자동 수행하지 않고 원래 검증 범위를 따른다.
 
 Anthropic의 [공식 tool search 설명](https://platform.claude.com/docs/en/agents-and-tools/tool-use/tool-search-tool)은 검색어/패턴과 반환된 tool reference를 구분한다. 이 API 설명만으로 Desktop의 내부 검색 알고리즘이나 정확한 이름 조회 지원을 확정하지 않는다. 실제 Desktop의 요청·응답 카드와 모델 답변을 따로 보존한다. 모델 답변의 `nop` 오타와 검색이 반환한 다른 `noop` 도구도 서로 다른 관측이다.
+
+2026-11-13 실제 같은 대화에서는 `limit: 5` 검색의 두 번째 결과로 정확한
+`Golem:golem_work_noop_run`을 확인했다. 첫 결과는 여전히
+`Golem:golem_adapter_noop_run`이었다. 다른 검색에는 Golem과 다른 서버의 후보가
+함께 반환됐다. 검색 결과 전체와 선택한 정확한 이름을 구분해 보존하며, 무관한
+후보를 실제 Golem 호출이나 이름 불일치로 판정하지 않는다.
+
+검색 카드의 이름·인자 요약과 모델 답변에 표시된 marker도 서로 다른 출처다.
+카드에 표시되지 않은 marker를 모델 답변에서 복사하여 카드의 직접 관측값으로
+기록하면 안 된다. 두 카드에서 marker를 직접 읽도록 고정한 검증 계약은 이
+UI 정보만으로 충족되지 않는다. 해당 검증은 차단 상태로 보존하고, 별도 검토된
+관측 계약 없이는 실행부 전환이나 추가 모델 요청으로 이어가지 않는다. 이름
+노출 확인과 같은 대화의 실행부 전환 성공은 별도 결과다.
 
 ## 검증 범위와 한계
 

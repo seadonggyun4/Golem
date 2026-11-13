@@ -70,6 +70,76 @@ class Receipt(unittest.TestCase):
         rows=copy.deepcopy(self.rows);rows[5]['payload']['output'][1]['text']=json.dumps(value)
         return rows
 
+    def exec_declaration(self):
+        # Synthetic shape of a pre-context declaration, not a copied rollout.
+        # Its text is deliberately unrelated to the accepted metadata receipt.
+        return {'timestamp':self.rows[1]['timestamp'],'type':'response_item','payload':{
+            'type':'additional_tools','id':'at_fixture','role':'developer','tools':[
+                {'type':'namespace','name':'functions','description':'DECLARATION_ONLY_SENTINEL',
+                 'tools':[{'type':'custom','name':'exec','description':'DECLARATION_ONLY_SENTINEL',
+                           'format':{'type':'grammar','syntax':'lark','definition':'start: /fixture/'}}]}]}}
+
+    def with_exec_declaration(self, declaration=None):
+        rows=copy.deepcopy(self.rows)
+        rows.insert(2,self.exec_declaration() if declaration is None else declaration)
+        return rows
+
+    def test_pre_context_exec_declaration_is_not_a_tool_call_or_receipt(self):
+        expected,_=self.collect()
+        result,proof=self.collect(self.with_exec_declaration())
+        self.assertEqual(result,expected)
+        self.assertEqual(proof['call_id'],'call_fixture')
+        self.assertFalse(proof['execution_authorized'])
+        self.assertEqual(proof['actual_execution'],'HOLD')
+        self.assertEqual([r['kind'] for r in proof['source_records']].count('additional_tools'),1)
+        self.assertNotIn(b'DECLARATION_ONLY_SENTINEL',observation.encoded(proof))
+
+    def test_exec_declaration_cannot_replace_actual_metadata_receipt(self):
+        rows=self.with_exec_declaration()
+        rows=[row for row in rows if row['payload'].get('type') not in
+              ('custom_tool_call','custom_tool_call_output','task_complete')]
+        self.blocked('MISSING_MACHINE_RECEIPT',rows)
+
+    def test_exec_declaration_does_not_exempt_an_actual_action_call(self):
+        rows=self.with_exec_declaration()
+        rows.insert(7,{'type':'response_item','timestamp':self.rows[5]['timestamp'],
+                      'payload':{'type':'function_call','name':PREFIX+'golem_noop'}})
+        self.blocked('NON_METADATA_TOOL_CALL',rows)
+
+    def test_unknown_or_action_shaped_additional_tools_envelope_is_rejected(self):
+        for change in ({'role':'assistant'},{'call_id':'call_disguised'},
+                       {'input':'await tools.golem_noop({});'},
+                       {'id':None},{'tools':[]},{'tools':'not declarations'}):
+            with self.subTest(change=change):
+                row=self.exec_declaration();row['payload'].update(change)
+                self.blocked('NON_METADATA_TOOL_CALL',self.with_exec_declaration(row))
+
+    def test_only_the_observed_functions_exec_declaration_shape_is_accepted(self):
+        changes=[('namespace',{'name':'other'}),('namespace',{'type':'function_call'}),
+                 ('namespace',{'arguments':{}}),('exec',{'type':'function_call'}),
+                 ('exec',{'name':'golem_noop'}),('exec',{'call_id':'call_disguised'}),
+                 ('exec',{'description':None}),('format',{'syntax':'javascript'}),
+                 ('format',{'type':'text'}),('format',{'definition':None})]
+        for target,change in changes:
+            with self.subTest(target=target,change=change):
+                row=self.exec_declaration();namespace=row['payload']['tools'][0]
+                entry=namespace['tools'][0]
+                {'namespace':namespace,'exec':entry,'format':entry['format']}[target].update(change)
+                self.blocked('NON_METADATA_TOOL_CALL',self.with_exec_declaration(row))
+        row=self.exec_declaration();row['payload']['tools'][0]['tools']*=2
+        self.blocked('NON_METADATA_TOOL_CALL',self.with_exec_declaration(row))
+        row=self.exec_declaration();row['payload']['tools']*=2
+        self.blocked('NON_METADATA_TOOL_CALL',self.with_exec_declaration(row))
+
+    def test_duplicate_or_late_exec_declaration_is_rejected(self):
+        rows=self.with_exec_declaration();rows.insert(3,self.exec_declaration())
+        self.blocked('NON_METADATA_TOOL_CALL',rows)
+        for index in (3,5,6):
+            with self.subTest(index=index):
+                rows=copy.deepcopy(self.rows);row=self.exec_declaration()
+                row['timestamp']=rows[index-1]['timestamp'];rows.insert(index,row)
+                self.blocked('NON_METADATA_TOOL_CALL',rows)
+
     def test_exact_receipt_preserves_original_timestamp_and_no_authority(self):
         result, proof=self.collect()
         self.assertEqual(result['tools'],NAMES)

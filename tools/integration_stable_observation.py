@@ -97,6 +97,34 @@ def _script(value):
     return '\n'.join(line.rstrip() for line in value.strip().splitlines())
 
 
+def _exec_declaration(payload):
+    """Recognize the observed developer declaration, never a call or evidence.
+
+    Keep this finite: unknown envelopes, tool kinds, namespaces and action
+    fields still fail closed. Descriptions and grammar are not interpreted.
+    """
+    if not (set(payload) == {'type','id','role','tools'} and
+            payload['type'] == 'additional_tools' and payload['role'] == 'developer' and
+            readiness._identifier(payload['id']) and type(payload['tools']) is list and
+            len(payload['tools']) == 1):
+        return False
+    namespace = payload['tools'][0]
+    if not (type(namespace) is dict and
+            set(namespace) == {'type','name','description','tools'} and
+            namespace['type'] == 'namespace' and namespace['name'] == 'functions' and
+            type(namespace['description']) is str and type(namespace['tools']) is list and
+            len(namespace['tools']) == 1):
+        return False
+    entry = namespace['tools'][0]
+    if not (type(entry) is dict and set(entry) == {'type','name','description','format'} and
+            entry['type'] == 'custom' and entry['name'] == 'exec' and
+            type(entry['description']) is str and type(entry['format']) is dict):
+        return False
+    grammar = entry['format']
+    return (set(grammar) == {'type','syntax','definition'} and grammar['type'] == 'grammar' and
+            grammar['syntax'] == 'lark' and type(grammar['definition']) is str)
+
+
 def _catalog(raw, expected):
     require(PIN.fullmatch(expected or '') and digest(raw) == expected, 'CATALOG_PIN_MISMATCH')
     value = _json(raw)
@@ -175,6 +203,7 @@ def collect(raw, catalog_raw, *, trace_sha256, catalog_sha256, thread_id, turn_i
     active = None
     began = ended = context = call = reply = None
     control_receipts = 0
+    tool_declarations = 0
     line_refs = []
     for number, line in enumerate(lines, 1):
         require(len(line) <= MAX_LINE_BYTES, 'TRACE_LINE_LIMIT')
@@ -216,6 +245,14 @@ def collect(raw, catalog_raw, *, trace_sha256, catalog_sha256, thread_id, turn_i
             line_refs.append({'line':number,'kind':'turn_context','sha256':digest(line)})
             continue
         if kind != 'response_item' or event in ('message','reasoning'):
+            continue
+        if event == 'additional_tools':
+            # A pre-context functions.exec definition is not a dispatched tool.
+            # It supplies no names, marker, script, receipt, timestamp or authority.
+            require(context is None and call is None and reply is None and
+                    tool_declarations == 0 and _exec_declaration(payload), 'NON_METADATA_TOOL_CALL')
+            tool_declarations += 1
+            line_refs.append({'line':number,'kind':event,'sha256':digest(line)})
             continue
         if event not in ('custom_tool_call','custom_tool_call_output','function_call_output'):
             # Unknown/action/function calls are not an observation-only turn.

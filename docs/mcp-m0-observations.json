@@ -2679,15 +2679,15 @@
     },
     {
       "path": "tools/integration_stable_observation.py",
-      "sha256": "b98ec34417498425306e2e42828ffa0db7162dd3080973b60d9ea0583371f85f"
+      "sha256": "516a9998bc892a4aadcb5c6a1450e213595aee21ea4d3952f2412f9a57314a83"
     },
     {
       "path": "tools/test_integration_stable_observation.py",
-      "sha256": "6625344c98b8c8a4e4f1f256006bbd1be3f9fb03f59b139208439b7445785137"
+      "sha256": "c6f8fa1c77d5ed6685ed9d2ab7a2f31e3eacf95859f3313cf556826850950ed1"
     },
     {
       "path": "docs/integration-stable-observation.md",
-      "sha256": "fed0e228083f82a28c4e662f81f85344e0b29be5cb9b78fa7086d18947b600bf"
+      "sha256": "16e406d0249072b9104b33c3adc7d368d04b70f617e3680325216a7a37b4b1bc"
     }
   ],
   "observations": [
