@@ -564,3 +564,13 @@ Linux/Windows/remote CI/Hosted, 실제 target merge, public distribution, 실제
 입력을 다시 보내지 않았으며 정상 닫기 후 앱 종료를 확인했다. **같은 대화의 전후 관측과 실행부 전환은 `NOT_RUN_PREFLIGHT_FAILED`**다. Golem 함수·Work·모델 호출, 선택 공개·실행부 전환은 모두 0회이며 강제 종료·재실행·자동 rollback은 하지 않았다.
 
 후속 보존 감사에서 승인한 Owner 실행 파일 교체 외 예상하지 않은 변경은 없었다. 대조한 설정·참조 276개와 보호 그룹 14개, 기존 정책·승인·Work·증거·COMMIT_UNKNOWN을 보존했고 각 client의 Golem 설치 한 개와 실행 HOLD를 유지했다. 실제 UI 결과와 보존 근거는 private 원장에 따로 남겼으며, 메뉴의 부분 성공을 입력 문제 해소나 양쪽 같은 대화 검증 완료로 승격하지 않는다.
+
+### 후속 합성 진단: 붙여넣기 단축키의 변환·매칭 경계
+
+각각 별도 승인한 합성 앱에서 메뉴로 첫 경로 입력칸을 선택한 뒤 고정 문자열을 한 번씩 붙여넣었다. 두 진단 모두 메뉴 dispatch·지연 포커스와 키 이벤트의 대상은 정확한 경로 입력칸이었다. 그러나 값은 비어 있어 추가 입력 없이 정상 종료했다. 첫 진단의 이벤트 종류만으로 가상 Paste binding 미실행을 단정하지 않고, 다음 진단에서 binding 이름과 Tcl 처리 진입·종료를 별도로 관찰했다. 관측 callback의 오류가 원래 결과·오류를 바꾸지 않는 순수 Tcl 검사 6개도 통과했다.
+
+두 번째 진단의 같은 native `Command`+keycode 9 이벤트는 `characters=v`, `charactersIgnoringModifiers=other`, 입력 소스 `Korean.2SetKorean`으로 기록됐다. 정확한 입력칸에 도착한 Tk 키심은 `other`였으며 `::ttk::entry::Paste`·`::tk::GetSelection` 진입과 필드 변경은 모두 0회였다. 관측 오류도 0회였다. 따라서 **이 한 번의 자동화 입력은 클립보드 조회·삽입 이전의 단축키 변환·매칭 경로에서 멈췄다.** 원문 키 값·클립보드 내용은 수집하지 않았다. [Tk 9.0.4 키보드 변환 소스](https://github.com/tcltk/tk/blob/core-9-0-4/macosx/tkMacOSXKeyboard.c)와 대조했지만, 모든 한글 입력·수동 키보드 입력의 결함이나 최초 두 번째 필드의 잘못된 입력 위치까지 입증한 것은 아니다.
+
+현재 Owner의 명시적 `Edit → Paste`는 실제 포커스와 입력칸 상태를 확인한 뒤 기존 Tk Paste 처리로 전달한다. 이 경로는 이미 구현돼 있으나 **실제 OS 메뉴로 두 입력칸을 채우는 검증은 아직 NOT_RUN**이다. 전역 물리 키 재매핑·입력기 강제 변경·accelerator 표시 추가를 검증된 해결책으로 적용하지 않았다. 내부 메뉴 호출 fixture는 외부 입력의 성공을 대신하지 않는다.
+
+두 번째 진단의 native/Tk trace SHA-256은 각각 `0ed39ef80ef9d318b8813fa59522ff3c01f01f5659c62aaab2955fe3029ae4c5`, `1e182d09bf1606f02a66af1a4f707784bdf70d9c37d75acf541d591f048e7528`다. 프로그램과 설치·권한은 변경하지 않았고, 보존 감사의 276개 제어 파일·14개 보호 그룹은 전후 동일했다. 참여 기록도 Codex 41개·Claude 8개로 증가하지 않았다. **실제 Work·모델·같은 대화 전환은 모두 0회이며 미검증 상태와 실행 HOLD를 유지한다.**
