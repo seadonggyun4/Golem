@@ -556,3 +556,11 @@ Linux/Windows/remote CI/Hosted, 실제 target merge, public distribution, 실제
 이 관측은 해당 macOS/Tk 입력 경로의 좌표 불일치 근거다. Core 결함이나 모든 사용자 입력 환경의 장애로 확대하지 않는다. [Tk 9.0.4의 대상 계산](https://github.com/tcltk/tk/blob/core-9-0-4/macosx/tkMacOSXMouseEvent.c)과 [동일 현상 보고](https://github.com/openai/codex/issues/47378)를 함께 대조했다. 원본 native/Tk trace는 private 자료로 보존하며 SHA-256은 각각 `e9980fadf938578a479178b53a98e9cb5cc19fa18012eb7349ffcab249243ad3`, `4fe7180c8eb835b1fab96289bc84102f479515f82a1bc43ca889a2ff3f238d7b`다.
 
 보완은 [고정 연결 메뉴](integration-stable-owner.md)를 통해 기존 UI 처리 함수와 차단 조건을 재사용한다. 내부 메뉴 호출 fixture는 실제 접근성 입력의 성공 증거가 아니다. 수정본 설치 앱의 입력과 Codex·Claude **같은 대화 전후 관측·실행부 전환은 이 진단에서 NOT_RUN**이다. 기존 설치·정책·승인·Work·증거·COMMIT_UNKNOWN과 실행 HOLD를 유지했다.
+
+### 같은 날 설치 앱의 후속 메뉴 검증
+
+별도 승인으로 Owner 실행 파일만 교체한 뒤 실제 설치 앱을 한 번 열었다. native 메뉴 노출, Codex→Claude Desktop→Codex 선택, 첫 관측 경로 입력은 PASS였다. 그러나 관측 SHA 입력 메뉴를 선택한 뒤 붙여넣은 합성 문자열은 앞선 경로 칸에 추가됐고 SHA 칸은 비어 있어 `FAIL_WRONG_DESTINATION`으로 중단했다. 이 실행에는 dispatch·focus trace가 없어 잘못된 메뉴 callback, focus 복원, 붙여넣기 도구의 focus 재선택 중 원인은 미확정이다. 화면 읽기 보조 코드의 별도 오류를 제품 원인으로 해석하지 않았다.
+
+입력을 다시 보내지 않았으며 정상 닫기 후 앱 종료를 확인했다. **같은 대화의 전후 관측과 실행부 전환은 `NOT_RUN_PREFLIGHT_FAILED`**다. Golem 함수·Work·모델 호출, 선택 공개·실행부 전환은 모두 0회이며 강제 종료·재실행·자동 rollback은 하지 않았다.
+
+후속 보존 감사에서 승인한 Owner 실행 파일 교체 외 예상하지 않은 변경은 없었다. 대조한 설정·참조 276개와 보호 그룹 14개, 기존 정책·승인·Work·증거·COMMIT_UNKNOWN을 보존했고 각 client의 Golem 설치 한 개와 실행 HOLD를 유지했다. 실제 UI 결과와 보존 근거는 private 원장에 따로 남겼으며, 메뉴의 부분 성공을 입력 문제 해소나 양쪽 같은 대화 검증 완료로 승격하지 않는다.
