@@ -571,6 +571,14 @@ Linux/Windows/remote CI/Hosted, 실제 target merge, public distribution, 실제
 
 두 번째 진단의 같은 native `Command`+keycode 9 이벤트는 `characters=v`, `charactersIgnoringModifiers=other`, 입력 소스 `Korean.2SetKorean`으로 기록됐다. 정확한 입력칸에 도착한 Tk 키심은 `other`였으며 `::ttk::entry::Paste`·`::tk::GetSelection` 진입과 필드 변경은 모두 0회였다. 관측 오류도 0회였다. 따라서 **이 한 번의 자동화 입력은 클립보드 조회·삽입 이전의 단축키 변환·매칭 경로에서 멈췄다.** 원문 키 값·클립보드 내용은 수집하지 않았다. [Tk 9.0.4 키보드 변환 소스](https://github.com/tcltk/tk/blob/core-9-0-4/macosx/tkMacOSXKeyboard.c)와 대조했지만, 모든 한글 입력·수동 키보드 입력의 결함이나 최초 두 번째 필드의 잘못된 입력 위치까지 입증한 것은 아니다.
 
-현재 Owner의 명시적 `Edit → Paste`는 실제 포커스와 입력칸 상태를 확인한 뒤 기존 Tk Paste 처리로 전달한다. 이 경로는 이미 구현돼 있으나 **실제 OS 메뉴로 두 입력칸을 채우는 검증은 아직 NOT_RUN**이다. 전역 물리 키 재매핑·입력기 강제 변경·accelerator 표시 추가를 검증된 해결책으로 적용하지 않았다. 내부 메뉴 호출 fixture는 외부 입력의 성공을 대신하지 않는다.
+Owner의 명시적 `Edit → Paste`는 실제 포커스와 입력칸 상태를 확인한 뒤 기존 Tk Paste 처리로 전달한다. 두 번째 진단 당시 이 경로는 이미 구현돼 있었으나 **실제 OS 메뉴로 두 입력칸을 채우는 검증은 NOT_RUN이었다.** 전역 물리 키 재매핑·입력기 강제 변경·accelerator 표시 추가를 검증된 해결책으로 적용하지 않았다. 내부 메뉴 호출 fixture는 외부 입력의 성공을 대신하지 않는다.
 
 두 번째 진단의 native/Tk trace SHA-256은 각각 `0ed39ef80ef9d318b8813fa59522ff3c01f01f5659c62aaab2955fe3029ae4c5`, `1e182d09bf1606f02a66af1a4f707784bdf70d9c37d75acf541d591f048e7528`다. 프로그램과 설치·권한은 변경하지 않았고, 보존 감사의 276개 제어 파일·14개 보호 그룹은 전후 동일했다. 참여 기록도 Codex 41개·Claude 8개로 증가하지 않았다. **실제 Work·모델·같은 대화 전환은 모두 0회이며 미검증 상태와 실행 HOLD를 유지한다.**
+
+### 명시적 Edit 메뉴의 두 입력칸 검증
+
+그 뒤 별도 승인한 합성 앱에서 제품 UI 코드를 그대로 사용해 명시적 메뉴 경로를 확인했다. readonly 합성 원본을 실제 Edit 메뉴의 SelectAll·Copy로 복사하고, 고정 연결 메뉴로 경로 또는 SHA 칸을 선택한 뒤 Edit의 Paste를 각각 한 번 실행했다. Command+V, 입력기 변경, 내부 위젯 직접 호출은 사용하지 않았다. Copy는 승인한 고정 문자열로 시스템 클립보드를 교체했으며 이전 내용은 읽거나 복구하지 않았다.
+
+**합성 경로와 SHA 64자가 각각 정확한 입력칸에 들어갔고, 두 번째 입력 뒤 첫 경로가 유지돼 PASS였다.** Tcl Paste·GetSelection은 각각 두 번 성공했으며 필드 변경은 두 건, 관측 오류는 0개였다. 실제 메뉴 callback이 표준 가상 이벤트로 이어진 것은 제품의 정상 편집 구현이며, 진단기가 숨은 입력을 주입한 것이 아니다. 앱은 정상 종료했다. native/Tk trace SHA-256은 각각 `b8a28dda46042c05fd3dc828b6b511b4c733e86d4d2e0665abc10adbc205dbcb`, `e1f4f3bd7911ca374ea9df5b99504b6da1ea629fb541f83e57dd9b037e3f98cf`다.
+
+이는 기존 명시적 편집 경로의 성공이다. 단축키 문제의 수정 완료나 최초 잘못된 두 번째 입력의 원인 확정으로 기록하지 않는다. 이 경로를 제공하기 위한 추가 제품 수정·재설치는 하지 않았다. 보존 감사의 276개 제어 파일·14개 보호 그룹과 참여 기록 41/8은 전후 동일했다. **실제 설치 Owner의 검토·연결 전환, Codex·Claude 같은 대화의 전후 대조는 여전히 NOT_RUN**이며 기존 자료와 실행 HOLD를 유지한다.

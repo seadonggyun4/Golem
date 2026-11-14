@@ -2659,7 +2659,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "1f0c64a55e9a6a73b8aa054d3a66648238d5d34dbaa7a633b206dcd8a8f52233"
+      "sha256": "9344be8309ed56a9cfcfc33f99c029c8914697e52d2e8d5f83ebd9814b58c6ee"
     },
     {
       "path": "tools/integration_stable_owner.py",

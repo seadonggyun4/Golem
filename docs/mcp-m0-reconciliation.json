@@ -1,5 +1,5 @@
 {
-  "inventory_sha256": "ade1c21bb549e477741be98c1cbeb8d860bc140743c236eefe1a9b3f9b84269c",
+  "inventory_sha256": "f4b74c6f857395f173444e6fd34ce76fa24bbff818cee8bcc65ace5ecf8d103a",
   "selected_source_count": 672,
   "selected_observation_count": 2525,
   "selected_capability_count": 1349,
@@ -6286,7 +6286,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "1f0c64a55e9a6a73b8aa054d3a66648238d5d34dbaa7a633b206dcd8a8f52233"
+      "sha256": "9344be8309ed56a9cfcfc33f99c029c8914697e52d2e8d5f83ebd9814b58c6ee"
     },
     {
       "path": "tools/integration_stable_owner.py",
