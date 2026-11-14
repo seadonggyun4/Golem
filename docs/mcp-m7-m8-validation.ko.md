@@ -548,3 +548,11 @@ Linux/Windows/remote CI/Hosted, 실제 target merge, public distribution, 실제
 | ui-hidden-no-selection.png | `dbf79b855fbca033383b06337d5dd2e12c93f235c886941cd7a7d391fd775e21` |
 | ui-selected.png | `ff85a20a3db9cad9ec143db2ac28fc21768f48f4246c88541513a4c4af427372` |
 | ui-sorted.png | `02c4066cb36e3e58e5e829ffb937b14a5022b7e432b56b4adff69b963ff237dd` |
+
+## Owner 입력 전달 진단 — 2026-11-14
+
+실제 연결·정책·Work에 접근하지 않는 합성 앱에서 외부 좌표 클릭 1회와 Tab/Space 입력 1묶음을 측정했다. Codex 버튼을 향한 native 이벤트 좌표와 전역 포인터 위치는 약 670 point 달랐고, Tk는 전역 포인터 위치의 다른 버튼을 처리했다. 파일 선택창은 취소했고 파일을 선택하지 않았다. 키보드 이벤트는 Tk까지 도달했다. 앱은 정상 종료했으며 제품 Work·모델·실행부 전환은 0회다.
+
+이 관측은 해당 macOS/Tk 입력 경로의 좌표 불일치 근거다. Core 결함이나 모든 사용자 입력 환경의 장애로 확대하지 않는다. [Tk 9.0.4의 대상 계산](https://github.com/tcltk/tk/blob/core-9-0-4/macosx/tkMacOSXMouseEvent.c)과 [동일 현상 보고](https://github.com/openai/codex/issues/47378)를 함께 대조했다. 원본 native/Tk trace는 private 자료로 보존하며 SHA-256은 각각 `e9980fadf938578a479178b53a98e9cb5cc19fa18012eb7349ffcab249243ad3`, `4fe7180c8eb835b1fab96289bc84102f479515f82a1bc43ca889a2ff3f238d7b`다.
+
+보완은 [고정 연결 메뉴](integration-stable-owner.md)를 통해 기존 UI 처리 함수와 차단 조건을 재사용한다. 내부 메뉴 호출 fixture는 실제 접근성 입력의 성공 증거가 아니다. 수정본 설치 앱의 입력과 Codex·Claude **같은 대화 전후 관측·실행부 전환은 이 진단에서 NOT_RUN**이다. 기존 설치·정책·승인·Work·증거·COMMIT_UNKNOWN과 실행 HOLD를 유지했다.

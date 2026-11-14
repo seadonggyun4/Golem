@@ -533,6 +533,67 @@ class ViewportAccess(unittest.TestCase):
         self.assertEqual(p.canvas.scrolls,[]);self.assertEqual(p.canvas.moves,[])
 
 
+class MenuDispatch(unittest.TestCase):
+    """No display: late callbacks cannot use an earlier enabled menu state."""
+    def setUp(self):
+        self.panel=SimpleNamespace(request=SimpleNamespace(busy=False,closed=False),
+            client=Mock(),clients=('codex',),input_revision=1,_enable=Mock())
+        self.panel.client.get.return_value='codex'
+        self.widget=Mock();self.widget.winfo_exists.return_value=True
+        self.widget.instate.return_value=False
+        self.menu=ui.StableOwnerMenu.__new__(ui.StableOwnerMenu)
+        self.menu.root=Mock();self.menu.panel=self.panel;self.menu.reveal=Mock()
+        self.menu.closed=False;self.menu.pending_focus=None;self.menu.sync=Mock()
+        self.menu.actions={'inspect':(self.widget,False),'observation_path':(self.widget,True),
+                           'client:codex':(self.widget,False)}
+
+    def test_direct_callback_rechecks_busy_closed_disabled_unknown_and_unconfigured(self):
+        m=self.menu;p=self.panel
+        for condition in ('busy','closed','menu_closed','disabled','missing','unconfigured','unknown'):
+            with self.subTest(condition=condition):
+                p.request.busy=condition=='busy';p.request.closed=condition=='closed'
+                m.closed=condition=='menu_closed';p.clients=() if condition=='unconfigured' else ('codex',)
+                self.widget.instate.return_value=condition=='disabled'
+                self.widget.winfo_exists.return_value=condition!='missing'
+                m.dispatch('unknown' if condition=='unknown' else 'inspect')
+                self.widget.invoke.assert_not_called();m.reveal.assert_not_called()
+                m.root.after_idle.assert_not_called()
+        p.clients=();m.dispatch('client:codex');self.widget.invoke.assert_not_called()
+
+    def test_recomputes_widget_guard_and_only_invokes_original_widget(self):
+        def invalidate():self.widget.instate.return_value=True
+        self.panel._enable.side_effect=invalidate
+        self.menu.dispatch('inspect');self.widget.invoke.assert_not_called()
+        self.panel._enable.side_effect=None;self.widget.instate.return_value=False
+        self.menu.dispatch('inspect');self.widget.invoke.assert_called_once_with()
+        self.menu.reveal.assert_called_once_with()
+
+    def test_explicit_entry_focus_waits_for_idle_and_rechecks_client_revision_and_state(self):
+        for change in ('none','client','revision','busy','closed','disabled'):
+            with self.subTest(change=change):
+                self.setUp();m=self.menu;p=self.panel
+                m.dispatch('observation_path')
+                m.reveal.assert_called_once_with();self.widget.focus_set.assert_not_called()
+                deferred=m.root.after_idle.call_args.args[0]
+                if change=='client':p.client.get.return_value='claude-desktop'
+                if change=='revision':p.input_revision+=1
+                if change=='busy':p.request.busy=True
+                if change=='closed':p.request.closed=True
+                if change=='disabled':self.widget.instate.return_value=True
+                deferred()
+                if change=='none':self.widget.focus_set.assert_called_once_with()
+                else:self.widget.focus_set.assert_not_called()
+                self.widget.invoke.assert_not_called()
+
+    def test_panel_destroy_cancels_deferred_focus_only(self):
+        self.panel.frame=object();self.menu.pending_focus='pending-id'
+        self.menu._destroyed(SimpleNamespace(widget=object()))
+        self.menu.root.after_cancel.assert_not_called()
+        self.menu._destroyed(SimpleNamespace(widget=self.panel.frame))
+        self.menu.root.after_cancel.assert_called_once_with('pending-id')
+        self.assertTrue(self.menu.closed);self.assertIsNone(self.menu.pending_focus)
+
+
 class NativePanel(unittest.TestCase):
     def setUp(self):
         if os.environ.get('GOLEM_TEST_TK')!='1':
@@ -552,6 +613,95 @@ class NativePanel(unittest.TestCase):
 
     def selection_input(self):
         self.panel.selection_path.set('/fixture/selection.json');self.panel.selection_sha.set(NEW)
+
+    def menu_fixture(self):
+        """Native Menu.invoke is fixture dispatch, NOT observed macOS/CUA input."""
+        reveal=Mock()
+        menu=ui.StableOwnerMenu(self.root,self.panel,reveal)
+        return menu,reveal
+
+    def test_native_menu_constructs_without_calls_focus_or_consent_and_preserves_existing_menu(self):
+        import tkinter as tk
+        bar=tk.Menu(self.root,tearoff=False);file_menu=tk.Menu(bar,tearoff=False)
+        existing=Mock();file_menu.add_command(label='Existing command',command=existing)
+        bar.add_cascade(label='Existing',menu=file_menu);self.root.configure(menu=bar)
+        m,reveal=self.menu_fixture();self.root.update()
+        self.assertIs(m.menubar,bar);self.assertEqual(bar.entrycget(0,'label'),'Existing')
+        file_menu.invoke(0);existing.assert_called_once_with()
+        for key in ('publish_consent','refresh_consent'):
+            m.menu.invoke(m.indices[key]);m.dispatch(key)
+        self.assertEqual(self.controller.calls,[]);reveal.assert_not_called()
+        self.assertFalse(self.panel.publish_consent.get());self.assertFalse(self.panel.refresh_consent.get())
+        self.assertIsNone(m.pending_focus)
+
+    def test_native_menu_clients_reuse_invalidation_and_do_not_expose_unconfigured_clients(self):
+        m,_=self.menu_fixture();p=self.panel
+        self.selection_input();p.review_selection();self.settle();m.sync()
+        m.menu.invoke(m.indices['publish_consent']);self.assertTrue(p.publish_consent.get())
+        m.menu.invoke(m.indices['client:claude-desktop'])
+        self.assertEqual(p.client.get(),'claude-desktop');self.assertIn('Claude Desktop',p.client_label.get())
+        self.assertIsNone(p.report);self.assertFalse(p.publish_consent.get())
+        self.assertEqual(self.controller.calls,[('review-publish','codex','/fixture/selection.json',NEW)])
+        p.clients=();m.sync()
+        for key in m.indices:self.assertEqual(m.menu.entrycget(m.indices[key],'state'),'disabled')
+        m.dispatch('client:codex');self.assertEqual(p.client.get(),'claude-desktop')
+
+    def test_native_menu_focus_is_explicit_and_delayed_until_after_reveal(self):
+        m,reveal=self.menu_fixture();entry=self.panel.observation_entries[0]
+        entry.focus_set=Mock()
+        m.menu.invoke(m.indices['observation_path'])
+        reveal.assert_called_once_with();entry.focus_set.assert_not_called()
+        self.root.update_idletasks();entry.focus_set.assert_called_once_with()
+        self.assertEqual(self.controller.calls,[])
+
+    def test_native_menu_guard_parity_and_stale_direct_callback(self):
+        m,_=self.menu_fixture();p=self.panel
+        self.observation_input();self.selection_input();m.sync()
+        for key,(widget,_) in m.actions.items():
+            self.assertEqual(m.menu.entrycget(m.indices[key],'state'),str(widget.cget('state')))
+        p.observation_sha.set('bad');m.dispatch('observe')
+        self.assertEqual(self.controller.calls,[])
+        for condition in ('busy','closed'):
+            setattr(p.request,condition,True)
+            for key in m.actions:m.dispatch(key)
+            m.sync()
+            for index in m.indices.values():self.assertEqual(m.menu.entrycget(index,'state'),'disabled')
+            self.assertEqual(self.controller.calls,[]);setattr(p.request,condition,False)
+
+    def test_native_menu_review_consent_effect_and_recheck_reuse_original_guards(self):
+        m,_=self.menu_fixture();p=self.panel
+        self.selection_input();m.sync();m.menu.invoke(m.indices['review_selection']);self.settle();m.sync()
+        m.dispatch('publish');self.assertFalse(self.controller.published)
+        m.menu.invoke(m.indices['publish_consent']);self.assertTrue(p.publish_consent.get())
+        m.menu.invoke(m.indices['publish']);self.settle();m.dispatch('publish')
+        self.assertEqual(sum(call[0]=='publish' for call in self.controller.calls),1)
+        self.observation_input();m.sync();m.menu.invoke(m.indices['review_refresh']);self.settle();m.sync()
+        m.menu.invoke(m.indices['select_observed']);self.assertEqual(p._selected_row(),INSTANCE)
+        m.menu.invoke(m.indices['refresh_consent']);self.assertTrue(p.refresh_consent.get())
+        # A new input invalidates both the original widget and a stale callback.
+        p.observation_sha.set('b'*64);m.dispatch('refresh');self.assertFalse(self.controller.refreshed)
+        m.menu.invoke(m.indices['review_refresh']);self.settle();m.sync()
+        m.menu.invoke(m.indices['refresh_consent']);m.menu.invoke(m.indices['refresh']);self.settle();m.sync()
+        m.menu.invoke(m.indices['recheck']);self.settle()
+        self.assertEqual(sum(call[0]=='refresh' for call in self.controller.calls),1)
+        self.assertEqual(self.controller.calls[-1][0],'observe')
+
+    def test_native_menu_first_bar_keeps_file_close_protocol_and_entry_edit_menu(self):
+        m,_=self.menu_fixture()
+        self.assertEqual([m.menubar.entrycget(i,'label') for i in range(m.menubar.index('end')+1)],
+                         ['File','Edit','Window','고정 연결'])
+        close=Mock();self.root.protocol('WM_DELETE_WINDOW',close)
+        file_menu=self.root.nametowidget(m.menubar.entrycget(0,'menu'))
+        file_menu.invoke(0);close.assert_called_once_with()
+        edit=self.root.nametowidget(m.menubar.entrycget(1,'menu'))
+        self.assertEqual([edit.entrycget(i,'label') for i in range(4)],['Cut','Copy','Paste','SelectAll'])
+        entry=self.panel.observation_entries[0];entry.event_generate=Mock()
+        self.root.focus_get=Mock(return_value=entry)
+        edit.invoke(2);entry.event_generate.assert_called_once_with('<<Paste>>')
+        entry.event_generate.reset_mock();entry.configure(state='readonly');edit.invoke(2)
+        entry.configure(state='disabled');edit.invoke(1)
+        self.root.focus_get.return_value=self.panel.details;edit.invoke(2)
+        entry.event_generate.assert_not_called();self.assertEqual(self.controller.calls,[])
 
     def test_native_client_buttons_support_tab_space_return_and_direction_keys(self):
         p=self.panel;self.root.update()

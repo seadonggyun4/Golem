@@ -734,17 +734,29 @@ def owner_app(argv):
             control=CodexControl(socket_path=args.codex_control_socket))
         connection_panel=ConnectionPanel(connection_tab,connection)
         if stable is not None:
-            from integration_stable_owner_ui import StableOwnerPanel
+            from integration_stable_owner_ui import StableOwnerPanel, StableOwnerMenu
             stable_tab=ttk.Frame(tabs)
             tabs.add(stable_tab,text='고정 연결·실행부 전환')
             stable_panel=StableOwnerPanel(stable_tab,stable)
+            stable_menu=StableOwnerMenu(root,stable_panel,lambda:tabs.select(stable_tab))
             tabs.select(stable_tab)
+        poll_after=None
+        def stop_poll(event):
+            nonlocal poll_after
+            # Child/tab destruction is not application shutdown. Cancel before
+            # Tk deletes the root's registered callback command, leaving neither
+            # a dangling Tcl timer nor a change to the separate MCP lifetime.
+            if event.widget is root and poll_after is not None:
+                root.after_cancel(poll_after);poll_after=None
         def poll():
+            nonlocal poll_after
+            poll_after=None
             try:
                 while True:instance.events.get_nowait();root.deiconify();root.lift()
             except queue.Empty:pass
-            root.after(100,poll)
-        root.after(100,poll);root.mainloop()
+            poll_after=root.after(100,poll)
+        root.bind('<Destroy>',stop_poll,add='+')
+        poll_after=root.after(100,poll);root.mainloop()
         return 0
     finally:instance.close()
 

@@ -343,7 +343,9 @@ jobs:
           GOLEM_TEST_TK=1 PYTHONPATH=tools xvfb-run -a /usr/bin/python3 - <<'PY'
           import unittest
           from test_integration_stable_owner_ui import NativePanel
-          suite = unittest.defaultTestLoader.loadTestsFromTestCase(NativePanel)
+          from test_integration_owner_desktop import NativeSeparatedApp
+          suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(case)
+                                     for case in (NativePanel, NativeSeparatedApp))
           expected = suite.countTestCases()
           result = unittest.TextTestRunner(verbosity=2).run(suite)
           if not expected or result.testsRun != expected or result.skipped or not result.wasSuccessful():

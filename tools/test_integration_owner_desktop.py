@@ -359,6 +359,16 @@ class NativeSeparatedApp(unittest.TestCase):
                     self.assertEqual([tabs.tab(tab,'text') for tab in tabs.tabs()],
                         ['Owner 후보','기존 연결 진단','고정 연결·실행부 전환'])
                     self.assertEqual(tabs.tab(tabs.select(),'text'),'고정 연결·실행부 전환')
+                    menu=root.nametowidget(root.cget('menu'))
+                    self.assertEqual(menu.entrycget(menu.index('end'),'label'),'고정 연결')
+                    stable_menu=root.nametowidget(menu.entrycget(menu.index('end'),'menu'))
+                    # Native menu construction/posting does not query a backend
+                    # or count as actual macOS accessibility input evidence.
+                    root.tk.call(stable_menu.cget('postcommand'))
+                    labels=[stable_menu.entrycget(i,'label') for i in range(stable_menu.index('end')+1)
+                            if stable_menu.type(i)=='command']
+                    self.assertIn('Codex 선택',labels);self.assertIn('Claude Desktop 선택',labels)
+                    self.assertIn('관측 SHA-256 입력',labels)
                     controller.inspect.assert_not_called();controller.observe.assert_not_called()
                     controller.publish.assert_not_called();controller.refresh.assert_not_called()
                     identity=c.decode((directory/'owner-app.json').read_bytes())['ui_config']
@@ -382,16 +392,33 @@ class NativeSeparatedApp(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir='/tmp') as tmp:
             directory=Path(tmp).resolve();directory.chmod(0o700)
             endpoint=desktop.LocalEndpoint(directory,lambda op,args:[]).start()
-            root=tk.Tk()
+            root=tk.Tk();errors=[];pending=[]
+            root.tk.eval('set ::owner_test_background_errors {}; '
+                         'proc bgerror {message} {lappend ::owner_test_background_errors $message}')
+            def poll_ids():
+                return tuple(timer for timer in root.tk.call('after','info')
+                             if str(root.tk.call('after','info',timer)[0]).endswith('poll'))
             def activate():
-                other=desktop.OwnerInstance(directory)
                 try:
-                    self.assertFalse(other.primary);other.activate()
-                finally:other.close()
+                    pending.extend(poll_ids());self.assertEqual(len(pending),1)
+                    child=tk.Frame(root);child.destroy()
+                    self.assertEqual(poll_ids(),tuple(pending))
+                    other=desktop.OwnerInstance(directory)
+                    try:
+                        self.assertFalse(other.primary);other.activate()
+                    finally:other.close()
+                except Exception as error:errors.append(error)
                 root.after(200,root.destroy)
             root.after(200,activate)
             try:
                 with patch.object(tk,'Tk',return_value=root):self.assertEqual(desktop.owner_app(['--review-directory',str(directory)]),0)
+                if errors:raise errors[0]
+                self.assertEqual(poll_ids(),())
+                # Tcl remains alive after root.destroy. Advance beyond the
+                # original timer deadline and fail on any background callback
+                # error, rather than merely hiding its stderr output.
+                root.tk.call('after',150);root.tk.call('update')
+                self.assertEqual(root.tk.call('set','::owner_test_background_errors'),'')
                 self.assertEqual(desktop.RemoteController(directory,endpoint.instance).drafts(),[])
                 self.assertEqual(desktop.connections(directory),[endpoint.instance])
             finally:endpoint.close()

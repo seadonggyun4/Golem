@@ -297,7 +297,7 @@ class StableOwnerPanel:
         ttk.Label(observation, text='실제 대화·turn·marker·도구 이름·원래 관측 시각을 담은 외부 JSON을 선택합니다.\n'
                   '이 UI는 관측값이나 시각을 생성하지 않으며 hash 일치를 진실성·권한 인증으로 해석하지 않습니다.',
                   wraplength=830).grid(row=0,column=0,columnspan=3,sticky='w')
-        self._file_inputs(observation, self.observation_path, self.observation_sha, 1)
+        self.observation_entries = self._file_inputs(observation, self.observation_path, self.observation_sha, 1)
         self.observe_button = ttk.Button(observation, text='관측·현재 실행부 대조', command=self.observe)
         self.observe_button.grid(row=3,column=1,sticky='w',pady=4)
         self.model = tk.StringVar(value='대화·turn·marker·도구: 미관찰')
@@ -307,7 +307,7 @@ class StableOwnerPanel:
         selection = ttk.LabelFrame(body, text='1. 검토된 실행부 선택 공개 — 실제 연결 전환과 별도', padding=8)
         selection.pack(fill='x', pady=5)
         self.selection_path = tk.StringVar(); self.selection_sha = tk.StringVar()
-        self._file_inputs(selection, self.selection_path, self.selection_sha, 0)
+        self.selection_entries = self._file_inputs(selection, self.selection_path, self.selection_sha, 0)
         self.review_selection_button = ttk.Button(selection, text='선택 후보·현재 head 대조', command=self.review_selection)
         self.review_selection_button.grid(row=2,column=1,sticky='w',pady=4)
         self.publish_consent = tk.BooleanVar(value=False)
@@ -418,6 +418,7 @@ class StableOwnerPanel:
 
     def _file_inputs(self, parent, path, pin, row):
         from tkinter import ttk, filedialog
+        entries = []
         def choose():
             if self.request.busy:
                 return
@@ -428,9 +429,10 @@ class StableOwnerPanel:
         for offset,label,var in ((0,'원본 JSON 경로',path),(1,'검토한 SHA-256',pin)):
             ttk.Label(parent,text=label).grid(row=row+offset,column=0,sticky='w',padx=(0,6))
             entry=ttk.Entry(parent,textvariable=var);entry.grid(row=row+offset,column=1,sticky='ew')
-            self.input_widgets.append(entry)
+            self.input_widgets.append(entry);entries.append(entry)
         browse=ttk.Button(parent,text='파일 선택',command=choose);browse.grid(row=row,column=2,padx=5)
         self.input_widgets.append(browse);parent.columnconfigure(1,weight=1)
+        return tuple(entries)
 
     def _selected_row(self):
         selected=self.tree.selection()
@@ -664,3 +666,147 @@ class StableOwnerPanel:
                 self.frame.unbind_class(self.viewport_tag, sequence)
         if self.after_id is not None:
             self.root.after_cancel(self.after_id);self.after_id=None
+
+
+class StableOwnerMenu:
+    """Native menu navigation to existing widgets, never a second controller.
+
+    macOS exposes its menu bar even when an embedded Tk canvas has no accessible
+    child controls. Posting this menu only mirrors the panel. Every dispatch
+    rechecks current widget guards; a previously enabled menu is not authority.
+    """
+    def __init__(self, root, panel, reveal):
+        import tkinter as tk
+        self.root, self.panel, self.reveal = root, panel, reveal
+        self.pending_focus = None
+        self.closed = False
+        existing = root.cget('menu')
+        self.menubar = root.nametowidget(existing) if existing else tk.Menu(root, tearoff=False)
+        if not existing:
+            self._standard_menus(tk)
+        self.menu = tk.Menu(self.menubar, tearoff=False, postcommand=self.sync)
+        self.menubar.add_cascade(label='고정 연결', menu=self.menu)
+        self.actions = {}
+        self.indices = {}
+        for client, widget in panel.client_buttons.items():
+            self._add('client:'+client, CLIENT_LABELS[client]+' 선택', widget)
+        self.menu.add_separator()
+        for key, label, widget in (
+                ('observation_path','관측 JSON 경로 입력',panel.observation_entries[0]),
+                ('observation_sha','관측 SHA-256 입력',panel.observation_entries[1]),
+                ('selection_path','선택 JSON 경로 입력',panel.selection_entries[0]),
+                ('selection_sha','선택 SHA-256 입력',panel.selection_entries[1])):
+            self._add(key,label,widget,focus=True)
+        self.menu.add_separator()
+        for key, label, widget in (
+                ('inspect','선택·연결 기록 조회',panel.inspect_button),
+                ('observe','관측·현재 실행부 대조',panel.observe_button),
+                ('select_observed','관측된 연결 행 선택',panel.select_observed_button),
+                ('review_selection','선택 후보·현재 head 대조',panel.review_selection_button),
+                ('publish_consent','선택 공개 검토 완료 표시',panel.publish_check),
+                ('publish','정확한 선택 공개 1회',panel.publish_button),
+                ('review_refresh','현재 대화의 old/new 전환 검토',panel.review_refresh_button),
+                ('refresh_consent','연결 전환 검토 완료 표시',panel.refresh_check),
+                ('refresh','선택한 연결 실행부 전환 1회',panel.refresh_button),
+                ('recheck','전환 후 원본 관측·현재 상태 재대조',panel.recheck_button)):
+            self._add(key,label,widget)
+        panel.frame.bind('<Destroy>',self._destroyed,add='+')
+        if not existing:
+            root.configure(menu=self.menubar)
+        self.sync()
+
+    def _add(self, key, label, widget, focus=False):
+        self.actions[key] = (widget, focus)
+        self.menu.add_command(label=label,command=lambda: self.dispatch(key))
+        self.indices[key] = self.menu.index('end')
+
+    def _enabled(self, key):
+        if (self.closed or key not in self.actions or self.panel.request.closed or
+                self.panel.request.busy):
+            return False
+        if key.startswith('client:'):
+            if key[7:] not in self.panel.clients:
+                return False
+        elif self.panel.client.get() not in self.panel.clients:
+            return False
+        # Recompute the same controls used by pointer/keyboard paths. This is
+        # display logic only; original handlers and native validation still run.
+        self.panel._enable()
+        widget, _ = self.actions[key]
+        return bool(widget.winfo_exists()) and not widget.instate(('disabled',))
+
+    def sync(self):
+        for key, index in self.indices.items():
+            self.menu.entryconfigure(index,state='normal' if self._enabled(key) else 'disabled')
+        for key, label, value in (
+                ('publish_consent','선택 공개 검토 완료 표시',self.panel.publish_consent),
+                ('refresh_consent','연결 전환 검토 완료 표시',self.panel.refresh_consent)):
+            self.menu.entryconfigure(self.indices[key],label=label+(' 해제' if value.get() else ''))
+
+    def dispatch(self, key):
+        # A native menu callback can outlive its posted enabled state.
+        if not self._enabled(key):
+            return
+        self.reveal()
+        widget, focus = self.actions[key]
+        if focus:
+            if self.pending_focus is not None:
+                self.root.after_cancel(self.pending_focus)
+            client, revision = self.panel.client.get(), self.panel.input_revision
+            def focus_entry():
+                self.pending_focus = None
+                if (self._enabled(key) and self.panel.client.get() == client and
+                        self.panel.input_revision == revision):
+                    widget.focus_set()
+            self.pending_focus = self.root.after_idle(focus_entry)
+        else:
+            # Includes the original checkbutton toggle: no menu variable can
+            # silently grant consent before its guarded callback is reached.
+            widget.invoke()
+        self.sync()
+
+    def _destroyed(self, event):
+        if event.widget is not self.panel.frame:
+            return
+        self.closed = True
+        if self.pending_focus is not None:
+            self.root.after_cancel(self.pending_focus);self.pending_focus = None
+
+    def _standard_menus(self, tk):
+        # Adding the first explicit menu replaces Tk's implicit macOS defaults.
+        # Keep normal close and focused-entry editing available. Do not replace
+        # an existing application's menu bar or its commands.
+        file_menu = tk.Menu(self.menubar,tearoff=False)
+        def close_window():
+            callback = self.root.protocol('WM_DELETE_WINDOW')
+            if callback:
+                self.root.tk.eval(callback)
+            else:
+                self.root.destroy()
+        file_menu.add_command(label='닫기',command=close_window)
+        self.menubar.add_cascade(label='File',menu=file_menu)
+        edit_menu = tk.Menu(self.menubar,tearoff=False)
+        def entry_for(kind):
+            from tkinter import ttk
+            widget = self.root.focus_get()
+            if not isinstance(widget,(tk.Entry,ttk.Entry)):
+                return None
+            state = str(widget.cget('state'))
+            if state == 'disabled' or (state == 'readonly' and kind in ('Cut','Paste')):
+                return None
+            return widget
+        def edit(kind):
+            widget = entry_for(kind)
+            if widget is not None:
+                # Standard Tk entry editing, explicitly chosen in this menu;
+                # never dispatch key events to another app or a backend action.
+                widget.event_generate('<<'+kind+'>>')
+        for kind in ('Cut','Copy','Paste','SelectAll'):
+            edit_menu.add_command(label=kind,command=lambda kind=kind: edit(kind))
+        edit_menu.configure(postcommand=lambda: [edit_menu.entryconfigure(index,
+            state='normal' if entry_for(kind) is not None else 'disabled')
+            for index,kind in enumerate(('Cut','Copy','Paste','SelectAll'))])
+        self.menubar.add_cascade(label='Edit',menu=edit_menu)
+        # The documented .window menu receives macOS's normal window entries.
+        window_menu = tk.Menu(self.menubar,name='window',tearoff=False)
+        self.menubar.add_cascade(label='Window',menu=window_menu)

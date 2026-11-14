@@ -1951,7 +1951,7 @@
     },
     {
       "path": ".github/workflows/c.yml",
-      "sha256": "69d3499ab6857751f315447f1cf64980a79272ad69f230e313787d154bb7db0b"
+      "sha256": "70538c3b198662bf0346d5590e3f14435b27ddde5ee9b14fcc1ea8481618e74a"
     },
     {
       "path": ".github/workflows/conan.yml",
@@ -2219,11 +2219,11 @@
     },
     {
       "path": "tools/integration_owner_desktop.py",
-      "sha256": "6ff15914ac6098a8c31f05cc59f3e90a67ad2ae585d3b3f808109fc3fabb6c80"
+      "sha256": "295bd50740bc2b470b8d50b92a783123c7063d8522d89c82621af91cae46df34"
     },
     {
       "path": "tools/test_integration_owner_desktop.py",
-      "sha256": "766e413fa44374efb926530f569b8ae47b475594bcea552f598b2ce36647d387"
+      "sha256": "77db6d355696204e3d4357e8c165dce4498679a3f0641bca720f2d8696b01971"
     },
     {
       "path": "include/golem/workpack.h",
@@ -2659,7 +2659,7 @@
     },
     {
       "path": "docs/integration-stable-owner.md",
-      "sha256": "4be410aa1d864fd551ccd4ef4b8fa2706b0a31cbb0558fc886aa46703e7fdee3"
+      "sha256": "6fea877bd4bab285c93b95556534fc38b61d832e18f42961e84b474486f8ee87"
     },
     {
       "path": "tools/integration_stable_owner.py",
@@ -2667,7 +2667,7 @@
     },
     {
       "path": "tools/integration_stable_owner_ui.py",
-      "sha256": "34e9cfb9db9b3e17b58dd891d322f3915f43ab485d95175deef4b4207786d944"
+      "sha256": "1b1f94374a071bd6f1657028056b909c6606dfdfdf5cc841f7d1b388f7c3a0b6"
     },
     {
       "path": "tools/test_integration_stable_owner.py",
@@ -2675,7 +2675,7 @@
     },
     {
       "path": "tools/test_integration_stable_owner_ui.py",
-      "sha256": "a07246024b9c0c9a54d311a0e6e731e4c6955d2ced6e2e21157a4081755ad1b8"
+      "sha256": "c7b7ba76e84c7e13218dc6e668d0534d0936860f1a5713e3f2bf88b0925836a0"
     },
     {
       "path": "tools/integration_stable_observation.py",
